@@ -1,0 +1,8 @@
+{
+  "name": "チャリ猫予想 Ver.4",
+  "short_name": "チャリ猫予想",
+  "start_url": "./index.html?v=40",
+  "display": "standalone",
+  "background_color": "#08111f",
+  "theme_color": "#08111f"
+}

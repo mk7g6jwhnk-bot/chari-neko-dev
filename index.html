@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#08111f">
+<title>チャリ猫予想 Ver.4</title>
+<link rel="manifest" href="manifest.json?v=40">
+<link rel="stylesheet" href="styles.css?v=40">
+</head>
+<body>
+<header>
+  <div>
+    <small>PERSONAL RACE MANAGER</small>
+    <h1>🐈‍⬛ チャリ猫予想 <em>Ver.4</em></h1>
+    <p>統合自動解析試作</p>
+  </div>
+  <button id="refreshBtn">⟳ 更新</button>
+</header>
+
+<main>
+<section id="home" class="screen active">
+  <section class="card hero">
+    <div>
+      <small>THREE TAP FLOW</small>
+      <h2>会場 → レース → 自動解析</h2>
+      <p>通常利用では、終端や確率の手入力は不要です。</p>
+    </div>
+  </section>
+
+  <nav class="sports">
+    <button class="active" data-sport="ボート">ボート</button>
+    <button data-sport="競輪">競輪</button>
+    <button data-sport="オート">オート</button>
+  </nav>
+
+  <section class="card">
+    <div class="head"><h3>開催中会場</h3><span class="badge">仮データ</span></div>
+    <div id="venueGrid" class="venueGrid"></div>
+  </section>
+</section>
+
+<section id="races" class="screen">
+  <div class="pageHead">
+    <button data-back="home">← 戻る</button>
+    <div><small>RACE LIST</small><h2 id="venueTitle">徳山</h2></div>
+    <span id="venueType" class="badge">モーニング</span>
+  </div>
+  <section class="card">
+    <div class="head"><h3>レース一覧</h3><span id="raceCountBadge" class="badge">12R</span></div>
+    <div id="raceGrid" class="raceGrid"></div>
+  </section>
+</section>
+
+<section id="analyzing" class="screen">
+  <div class="pageHead">
+    <button data-back="races">← 戻る</button>
+    <div><small>AUTO ANALYSIS</small><h2 id="analyzingTitle">徳山 7R</h2></div>
+    <span class="badge live">解析中</span>
+  </div>
+  <section class="card">
+    <div class="progressWrap">
+      <div class="spinner"></div>
+      <h3 id="progressTitle">出走情報を確認中</h3>
+      <p id="progressText">解析準備をしています。</p>
+      <div class="progressBar"><div id="progressFill"></div></div>
+    </div>
+    <div id="stepList" class="stepList"></div>
+  </section>
+</section>
+
+<section id="result" class="screen">
+  <div class="pageHead">
+    <button data-back="races">← 戻る</button>
+    <div><small>PREDICTION RESULT</small><h2 id="resultTitle">徳山 7R</h2></div>
+    <span id="recommendBadge" class="badge fire">本線高配当</span>
+  </div>
+
+  <section class="card">
+    <div class="head"><h3>解析結果</h3><span class="badge success">監査合格</span></div>
+    <div class="summaryGrid">
+      <div><span>信頼度</span><strong id="trust">★★★★☆</strong></div>
+      <div><span>展開集中度</span><strong id="focus">★★★☆☆</strong></div>
+      <div><span>コロがし</span><strong id="roll">△</strong></div>
+      <div><span>購入締切</span><strong id="purchaseDeadline">14:25</strong></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="head"><h3>買い目</h3><span class="badge">自動生成</span></div>
+    <div class="betBlock"><h4>本線</h4><p id="mainBets"></p></div>
+    <div class="betBlock"><h4>押さえ</h4><p id="backupBets"></p></div>
+    <div class="betBlock"><h4 id="valueTitle">買える万舟</h4><p id="valueBets"></p></div>
+    <div class="betBlock"><h4>厚め</h4><p id="strongBets"></p></div>
+  </section>
+
+  <section class="card">
+    <div class="head"><h3>丸乗り時の目安</h3><span class="badge">合成オッズ</span></div>
+    <div class="summaryGrid">
+      <div><span>本線のみ</span><strong id="mainComposite">6.2倍</strong></div>
+      <div><span>本線＋押さえ</span><strong id="mainBackupComposite">4.5倍</strong></div>
+      <div><span>全買い目</span><strong id="allComposite">3.1倍</strong></div>
+      <div><span>判定</span><strong id="rideDecision">丸乗り可</strong></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="head"><h3>資金配分</h3><span class="badge">3,000円例</span></div>
+    <div id="allocationTable"></div>
+  </section>
+
+  <section class="card">
+    <details>
+      <summary>開発・監査情報を表示</summary>
+      <div class="devInfo">
+        <div class="summaryGrid">
+          <div><span>全終端</span><strong id="terminalCount">0件</strong></div>
+          <div><span>未処理分岐</span><strong>0件</strong></div>
+          <div><span>未終端枝</span><strong>0件</strong></div>
+          <div><span>購入不採用</span><strong id="rejectedCount">0件</strong></div>
+        </div>
+        <div id="auditLog"></div>
+      </div>
+    </details>
+  </section>
+</section>
+</main>
+
+<nav class="bottom">
+  <button data-screen="home" class="active">🏠<span>ホーム</span></button>
+  <button data-screen="races">🗓️<span>レース</span></button>
+  <button data-screen="result">📊<span>解析</span></button>
+  <button>🔔<span>通知</span></button>
+  <button>📚<span>履歴</span></button>
+</nav>
+
+<script src="app.js?v=40"></script>
+</body>
+</html>
