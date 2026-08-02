@@ -1,0 +1,8 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>レース横断検索0.1</title><link rel="stylesheet" href="styles.css"></head><body>
+<header><div><small>MULTI VENUE SEARCH</small><h1>🐈‍⬛ レース横断検索</h1></div><button id="search">再選別</button></header>
+<main>
+<section class="card"><h2>競技</h2><div id="sports" class="checks"></div><h2>会場</h2><div id="venues" class="checks"></div></section>
+<section class="card grid"><label>開始<input id="startTime" type="time"></label><label>終了<input id="endTime" type="time"></label><label>信頼度<select id="confidence"><option value="0">指定なし</option><option value="3">★3以上</option><option value="4">★4以上</option><option value="5">★5</option></select></label><label>配当帯<select id="payout"><option value="">指定なし</option><option>固め</option><option>中穴</option><option>高配当</option></select></label></section>
+<section class="card checks"><label><input id="featured" type="checkbox">🔥本線高配当</label><label><input id="rollover" type="checkbox">コロがし</label><label><input id="favorite" type="checkbox">推し選手</label><label><input id="distrusted" type="checkbox">信用低下選手</label></section>
+<section class="card"><div class="head"><h2>検索結果</h2><span id="count">0件</span></div><div class="tabs"><button id="rankTab">横断ランキング</button><button id="venueTab">会場別</button></div><div id="results"></div></section>
+</main><script type="module" src="app.mjs"></script></body></html>

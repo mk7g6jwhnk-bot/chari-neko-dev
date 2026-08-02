@@ -1,0 +1,7 @@
+
+export function classifyAndPurchase(terminals,oddsByOrder){
+  return terminals.map((t,index)=>{const odds=oddsByOrder[t.order.join("-")]??null;let betClass="押さえ";if(index===0)betClass="厚め";else if(t.branchPriority==="main"&&t.probability>=.02)betClass="本線";else if(odds>=50&&t.probability>=.006)betClass="買える万舟";const adopted=t.probability>=.004&&Number.isFinite(odds)&&odds>1;return {...t,odds,betClass,purchaseStatus:adopted?"購入採用":"購入不採用",purchaseReason:adopted?`${betClass}の基準を満たす`:"終端保持・購入基準未満またはオッズなし"}});
+}
+export function compositeOdds(items){const v=items.filter(x=>x.purchaseStatus==="購入採用"&&x.odds>1);return v.length?1/v.reduce((s,x)=>s+1/x.odds,0):null}
+export function allocate(items,budget){const v=items.filter(x=>x.purchaseStatus==="購入採用").slice(0,12);if(!v.length)return[];const w=v.map(x=>Math.max(x.probability,.0001)),sum=w.reduce((a,b)=>a+b,0),stakes=w.map(x=>Math.floor((budget*x/sum)/100)*100);let rem=budget-stakes.reduce((a,b)=>a+b,0),i=0;while(rem>=100){stakes[i%stakes.length]+=100;rem-=100;i++}return v.map((x,n)=>({order:x.order,betClass:x.betClass,stake:stakes[n],odds:x.odds,expectedPayout:Math.floor(stakes[n]*x.odds)}))}
+export function recommendationLabel(items){const adopted=items.filter(x=>x.purchaseStatus==="購入採用"),main=adopted.filter(x=>["本線","厚め"].includes(x.betClass));if(main.some(x=>x.odds>=30&&x.probability>=.015))return"🔥 本線高配当";const comp=compositeOdds(main);if(comp!==null&&comp<10)return"🟢 固め";if(comp!==null&&comp<50)return"🟡 中穴";if(adopted.some(x=>x.betClass==="買える万舟"))return"🟠 買える万舟";return"見送り候補"}
