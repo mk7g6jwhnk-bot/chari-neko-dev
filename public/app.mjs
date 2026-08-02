@@ -169,11 +169,11 @@ function baseResult(cfg,title,x,warnings,summary,payload){
   $("warnings").textContent=warnings||"取得・解析完了";
 
   if(isSkip){
-    $("mainBets").textContent="購入なし";
-    $("backupBets").textContent="購入なし";
-    $("valueBets").textContent="なし";
-    $("strongBets").textContent="購入なし";
-    $("plan").innerHTML='<p class="empty">見送り判定のため購入案は生成しません。展開候補はデバッグ情報に保持しています。</p>';
+    $("mainBets").textContent=`参考：${join(x.recommendations?.main||[])}`;
+    $("backupBets").textContent=`参考：${join(x.recommendations?.backup||[])}`;
+    $("valueBets").textContent=`参考：${join(x.recommendations?.value||[])}`;
+    $("strongBets").textContent=`参考：${join(x.recommendations?.strong||[])}`;
+    $("plan").innerHTML='<p class="empty">購入推奨なし。参考買い目のみ表示し、資金配分は0円です。</p>';
   }else{
     $("mainBets").textContent=join(x.recommendations?.main||[]);
     $("backupBets").textContent=join(x.recommendations?.backup||[]);
