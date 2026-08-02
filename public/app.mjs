@@ -184,7 +184,7 @@ async function analyzeKeirin(r){
   try{
     const card=getKeirinCard(state.meeting),odds=getKeirinOdds(state.meeting);
     if(!card)throw new Error("出走表リンク未発見のため解析を停止しました");
-    const q=new URLSearchParams({date:compact(state.date),venueName:state.meeting.venueName,raceCardUrl:card.url,raceNo:String(r.raceNo),budget:"3000"});if(odds)q.set("oddsUrl",odds.url);
+    const q=new URLSearchParams({date:compact(state.date),venueCode:String(state.meeting.venueCode||""),venueName:state.meeting.venueName,raceNo:String(r.raceNo),budget:"3000"});
     const res=await fetch(`/.netlify/functions/keirin-predict?${q}`,{cache:"no-store"}),p=await res.json();if(!res.ok||!p.ok)throw new Error(p.error||"解析失敗");renderKeirinResult(p);show("result");
   }catch(e){loadingError(e)}
 }
@@ -254,7 +254,7 @@ function escapeHtml(value){
     .replaceAll('"',"&quot;")
     .replaceAll("'","&#039;");
 }
-function getKeirinCard(m){return m.discovery?.links?.raceCards?.[0]||null}
+function getKeirinCard(m){return m.discovery?.links?.raceCards?.[0]||m.discovery?.links?.other?.[0]}
 function getKeirinOdds(m){return m.discovery?.links?.odds?.[0]}
 function getAutoProgram(m){return m.discovery?.links?.program?.[0]||m.discovery?.links?.racePages?.[0]}
 function getAutoOdds(m){return m.discovery?.links?.odds?.[0]}

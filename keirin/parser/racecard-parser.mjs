@@ -4,14 +4,16 @@ import { normalizeText } from "./utils.mjs";
 
 export function parseRaceCardHtml(html, context={}) {
   const $=cheerio.load(html), races=[];
+  const expectedRaceNo=Number(context.expectedRaceNo||0);
 
   $("table").each((_,table)=>{
     const root=$(table), text=normalizeText(root.text());
     const raceNo=Number(text.match(/\b(1[0-2]|[1-9])R\b/)?.[1] || text.match(/第\s*(1[0-2]|[1-9])\s*レース/)?.[1]);
     if(!raceNo)return;
 
+    if(expectedRaceNo&&raceNo!==expectedRaceNo)return;
     const participants=parseParticipants($, root);
-    if(!participants.length)return;
+    if(!isValidParticipantSet(participants))return;
 
     races.push({
       raceNo,
@@ -22,15 +24,38 @@ export function parseRaceCardHtml(html, context={}) {
   });
 
   if(!races.length){
-    const participants=parseParticipants($, $("body")), body=normalizeText($("body").text()),
-      raceNo=Number(body.match(/\b(1[0-2]|[1-9])R\b/)?.[1]||0);
-    if(participants.length&&raceNo)races.push({
-      raceNo,deadline:body.match(/\b([0-2]?\d:[0-5]\d)\b/)?.[1]||null,
-      participants,lineSource:extractLineSource($, $("body"), body)
-    });
+    const body=normalizeText($("body").text());
+    const bodyRaceNo=Number(body.match(/\b(1[0-2]|[1-9])R\b/)?.[1]||0);
+    const raceNo=expectedRaceNo||bodyRaceNo;
+    const participants=parseParticipants($, $("body"));
+    if(
+      raceNo&&
+      (!expectedRaceNo||bodyRaceNo===expectedRaceNo)&&
+      isValidParticipantSet(participants)
+    ){
+      races.push({
+        raceNo,
+        deadline:body.match(/\b([0-2]?\d:[0-5]\d)\b/)?.[1]||null,
+        participants,
+        lineSource:extractLineSource($, $("body"), body)
+      });
+    }
   }
 
-  return {ok:races.length>0,races,diagnostics:{raceCount:races.length,title:normalizeText($("title").text()),context}};
+  return {ok:races.length>0,races,diagnostics:{
+    raceCount:races.length,
+    title:normalizeText($("title").text()),
+    expectedRaceNo:expectedRaceNo||null,
+    detectedRaceNos:races.map(x=>x.raceNo),
+    context
+  }};
+}
+
+function isValidParticipantSet(participants){
+  if(!Array.isArray(participants)||participants.length<5||participants.length>9)return false;
+  const numbers=participants.map(x=>x.number);
+  return new Set(numbers).size===numbers.length&&
+    numbers.every(n=>Number.isInteger(n)&&n>=1&&n<=9);
 }
 
 
