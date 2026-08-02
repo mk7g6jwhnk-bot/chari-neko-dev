@@ -73,8 +73,17 @@ async function loadMeetings(){
     }else if(state.sport==="keirin"){
       const r=await fetch(`/.netlify/functions/keirin-discover?date=${compact(state.date)}`,{cache:"no-store"}),p=await r.json();
       if(!r.ok||!p.ok)throw new Error(p.error||"開催取得失敗");
-      const items=p.meetings.map(m=>({name:m.venueName,sub:`出走表 ${getKeirinCard(m)?"発見":"未発見"} / オッズ ${getKeirinOdds(m)?"発見":"未発見"}`,raw:m})).filter(x=>getKeirinCard(x.raw));
-      if(!isCurrentRequest(token))return; renderItems(items,openKeirinVenue);
+      const items=p.meetings.map(m=>{
+        const card=getKeirinCard(m),odds=getKeirinOdds(m);
+        const discoveryState=card?"解析可能":"リンク診断待ち";
+        return {
+          name:m.venueName,
+          sub:`${discoveryState} / 出走表 ${card?"発見":"未発見"} / オッズ ${odds?"発見":"未発見"}`,
+          raw:m
+        };
+      });
+      if(!isCurrentRequest(token))return;
+      renderItems(items,openKeirinVenue);
     }else{
       const r=await fetch('/.netlify/functions/auto-discover',{cache:"no-store"}),p=await r.json();
       if(!r.ok||!p.ok)throw new Error(p.error||"開催取得失敗");
@@ -111,8 +120,43 @@ async function openBoatVenue(v){
 }
 
 function openKeirinVenue(m){
-  state.meeting=m;$("raceSportCode").textContent="KEIRIN";$("raceTitle").textContent=m.venueName;$("raceControls").innerHTML="<p>公式内部リンクから対象レースを取得します。</p>";show("races");
-  renderRaces(Array.from({length:12},(_,i)=>({raceNo:i+1,sub:"ライン・オッズを取得して解析",raw:{raceNo:i+1}})),analyzeKeirin);
+  state.meeting=m;
+  $("raceSportCode").textContent="KEIRIN";
+  $("raceTitle").textContent=m.venueName;
+  show("races");
+
+  const card=getKeirinCard(m);
+  const odds=getKeirinOdds(m);
+
+  if(!card){
+    const diagnostics=m.discovery?.diagnostics||{};
+    const links=m.discovery?.links||{};
+    $("raceControls").innerHTML="<p>開催場は取得済みですが、出走表リンクを発見できていません。</p>";
+    $("raceList").innerHTML=`
+      <div class="empty">
+        <strong>競輪リンク探索待ち</strong><br>
+        開催場：${escapeHtml(m.venueName||"-")}<br>
+        会場コード：${escapeHtml(m.venueCode||"-")}<br>
+        発見元：${escapeHtml(m.discoveredUrl||"-")}<br>
+        ページタイトル：${escapeHtml(diagnostics.title||"-")}<br>
+        出走表候補：${Number(diagnostics.raceCardLinks||0)}件<br>
+        オッズ候補：${Number(diagnostics.oddsLinks||0)}件<br>
+        その他リンク：${Array.isArray(links.other)?links.other.length:0}件<br><br>
+        誤ったリンクで解析しないため、この会場の自動解析は停止しています。
+      </div>`;
+    $("raceCount").textContent="0R";
+    return;
+  }
+
+  $("raceControls").innerHTML=`<p>公式内部リンクから対象レースを取得します。オッズ：${odds?"発見":"未発見"}</p>`;
+  renderRaces(
+    Array.from({length:12},(_,i)=>({
+      raceNo:i+1,
+      sub:"ライン・オッズを取得して解析",
+      raw:{raceNo:i+1}
+    })),
+    analyzeKeirin
+  );
 }
 
 function openAutoVenue(m){
@@ -139,6 +183,7 @@ async function analyzeKeirin(r){
   state.raceNo=r.raceNo;startLoading(`${state.meeting.venueName} ${r.raceNo}R`);
   try{
     const card=getKeirinCard(state.meeting),odds=getKeirinOdds(state.meeting);
+    if(!card)throw new Error("出走表リンク未発見のため解析を停止しました");
     const q=new URLSearchParams({date:compact(state.date),venueName:state.meeting.venueName,raceCardUrl:card.url,raceNo:String(r.raceNo),budget:"3000"});if(odds)q.set("oddsUrl",odds.url);
     const res=await fetch(`/.netlify/functions/keirin-predict?${q}`,{cache:"no-store"}),p=await res.json();if(!res.ok||!p.ok)throw new Error(p.error||"解析失敗");renderKeirinResult(p);show("result");
   }catch(e){loadingError(e)}
@@ -201,6 +246,14 @@ function join(items){
     .join(" / ")||"なし";
 }
 function table(rows){return rows?.length?`<table><thead><tr><th>買い目</th><th>分類</th><th>金額</th><th>オッズ</th><th>払戻見込</th></tr></thead><tbody>${rows.map(x=>`<tr><td>${x.order.join("-")}</td><td>${x.betClass}</td><td>${x.stake.toLocaleString()}円</td><td>${x.odds}</td><td>${x.expectedPayout.toLocaleString()}円</td></tr>`).join("")}</tbody></table>`:"購入案なし"}
+function escapeHtml(value){
+  return String(value??"")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
 function getKeirinCard(m){return m.discovery?.links?.raceCards?.[0]||m.discovery?.links?.other?.[0]}
 function getKeirinOdds(m){return m.discovery?.links?.odds?.[0]}
 function getAutoProgram(m){return m.discovery?.links?.program?.[0]||m.discovery?.links?.racePages?.[0]}
