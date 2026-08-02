@@ -254,7 +254,7 @@ function escapeHtml(value){
     .replaceAll('"',"&quot;")
     .replaceAll("'","&#039;");
 }
-function getKeirinCard(m){return m.discovery?.links?.raceCards?.[0]||m.discovery?.links?.other?.[0]}
+function getKeirinCard(m){return m.discovery?.links?.raceCards?.[0]||null}
 function getKeirinOdds(m){return m.discovery?.links?.odds?.[0]}
 function getAutoProgram(m){return m.discovery?.links?.program?.[0]||m.discovery?.links?.racePages?.[0]}
 function getAutoOdds(m){return m.discovery?.links?.odds?.[0]}
