@@ -26,7 +26,8 @@ export function parseScheduleHtml(html, baseUrl, targetDate) {
     scannedRows: 0,
     activeRows: 0,
     skippedVelo250: 0,
-    generatedDirectLinks: 0
+    generatedDirectLinks: 0,
+    colspanHits: 0
   };
 
   if (!Number.isInteger(day) || day < 1 || day > 31) {
@@ -34,8 +35,8 @@ export function parseScheduleHtml(html, baseUrl, targetDate) {
   }
 
   $("table tr").each((_, row) => {
-    const cells = $(row).find("th,td").toArray();
-    if (cells.length < day + 1) return;
+    const physicalCells = $(row).find("th,td").toArray();
+    if (!physicalCells.length) return;
 
     const rowText = normalizeText($(row).text());
     const venue = VENUES
@@ -51,13 +52,23 @@ export function parseScheduleHtml(html, baseUrl, targetDate) {
       return;
     }
 
-    const firstCellIndex = findVenueCellIndex($, cells, venue.name);
-    if (firstCellIndex < 0) return;
+    const venuePhysicalIndex = findVenueCellIndex($, physicalCells, venue.name);
+    if (venuePhysicalIndex < 0) return;
 
-    const targetCell = cells[firstCellIndex + day];
-    if (!targetCell) return;
+    // colspanを展開した論理列を作る。
+    // 例: 1日〜4日を跨ぐ開催セルなら、4日分すべて同じセルとして扱う。
+    const logicalCells = expandLogicalCells($, physicalCells);
+    const venueLogicalIndex = logicalCells.findIndex(
+      item => item.physicalIndex === venuePhysicalIndex
+    );
+    if (venueLogicalIndex < 0) return;
 
-    const cell = $(targetCell);
+    const targetItem = logicalCells[venueLogicalIndex + day];
+    if (!targetItem) return;
+
+    const cell = $(targetItem.node);
+    if (targetItem.span > 1) diagnostics.colspanHits =
+      (diagnostics.colspanHits || 0) + 1;
     const gradeImage = cell.find('img[src*="/grade/"],img[src*="ico_g"],img[src*="ico_f"]').first();
     const cellText = normalizeText(cell.text());
     const imgAlt = normalizeText(gradeImage.attr("alt") || "");
@@ -102,6 +113,23 @@ export function parseScheduleHtml(html, baseUrl, targetDate) {
       meetingCount: meetings.length
     }
   };
+}
+
+function expandLogicalCells($, cells) {
+  const logical = [];
+  cells.forEach((node, physicalIndex) => {
+    const raw = Number($(node).attr("colspan") || 1);
+    const span = Number.isInteger(raw) && raw > 0 ? raw : 1;
+    for (let offset = 0; offset < span; offset += 1) {
+      logical.push({
+        node,
+        physicalIndex,
+        span,
+        spanOffset: offset
+      });
+    }
+  });
+  return logical;
 }
 
 function findVenueCellIndex($, cells, venueName) {

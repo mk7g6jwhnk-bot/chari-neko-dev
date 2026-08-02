@@ -17,7 +17,7 @@ export function parseRaceCardHtml(html, context={}) {
       raceNo,
       deadline:text.match(/\b([0-2]?\d:[0-5]\d)\b/)?.[1]||null,
       participants,
-      lineSource:text.match(/(?:並び|ライン|周回予想)[：:\s]*([^|]{3,120})/)?.[1]||null
+      lineSource:extractLineSource($, root, text)
     });
   });
 
@@ -26,11 +26,55 @@ export function parseRaceCardHtml(html, context={}) {
       raceNo=Number(body.match(/\b(1[0-2]|[1-9])R\b/)?.[1]||0);
     if(participants.length&&raceNo)races.push({
       raceNo,deadline:body.match(/\b([0-2]?\d:[0-5]\d)\b/)?.[1]||null,
-      participants,lineSource:body.match(/(?:並び|ライン|周回予想)[：:\s]*([^|]{3,120})/)?.[1]||null
+      participants,lineSource:extractLineSource($, $("body"), body)
     });
   }
 
   return {ok:races.length>0,races,diagnostics:{raceCount:races.length,title:normalizeText($("title").text()),context}};
+}
+
+
+function extractLineSource($, scope, normalizedText) {
+  const root = scope?.cheerio ? scope : $(scope || "body");
+  const candidates = [];
+
+  // 明示ラベル周辺
+  root.find("th,td,div,span,p,li").each((_, node) => {
+    const text = normalizeText($(node).text());
+    if (!/(並び|ライン|周回予想|想定周回|周回中)/.test(text)) return;
+    if (text.length >= 3 && text.length <= 240) candidates.push(text);
+  });
+
+  // 画像alt/titleやdata属性
+  root.find("[alt],[title],[data-line],[data-narabi]").each((_, node) => {
+    const values = [
+      $(node).attr("alt"),
+      $(node).attr("title"),
+      $(node).attr("data-line"),
+      $(node).attr("data-narabi")
+    ].filter(Boolean).map(normalizeText);
+    candidates.push(...values);
+  });
+
+  // ページ全体からラベル後方を拾う
+  const direct = normalizedText.match(
+    /(?:並び|ライン|周回予想|想定周回|周回中)[：:\s]*([1-9](?:[\s\-→－―|｜、,]+[1-9]){1,8}(?:[\s\/／|｜、,]+[1-9](?:[\s\-→－―]+[1-9]){0,8})*)/
+  )?.[1];
+  if (direct) candidates.unshift(direct);
+
+  for (const raw of candidates) {
+    const cleaned = raw
+      .replace(/^(?:並び|ライン|周回予想|想定周回|周回中)[：:\s]*/,"")
+      .replace(/[→－―]/g,"-")
+      .replace(/[｜]/g,"|")
+      .replace(/\s+/g," ")
+      .trim();
+
+    const digits = [...cleaned.matchAll(/[1-9]/g)].map(m => Number(m[0]));
+    if (new Set(digits).size >= 3) return cleaned;
+  }
+
+  return null;
 }
 
 function parseParticipants($, scope){
