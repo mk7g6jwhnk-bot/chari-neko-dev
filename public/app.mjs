@@ -1,6 +1,25 @@
 
 const $=id=>document.getElementById(id);
-let state={sport:null,meeting:null,date:null,raceNo:null};
+let state={sport:null,meeting:null,date:null,raceNo:null,requestGeneration:0};
+
+function beginRequest(){
+  state.requestGeneration=(state.requestGeneration||0)+1;
+  return {generation:state.requestGeneration,sport:state.sport};
+}
+function isCurrentRequest(token){
+  return token &&
+    token.generation===state.requestGeneration &&
+    token.sport===state.sport;
+}
+function clearSportViews(){
+  $("list").innerHTML='<div class="empty">取得中...</div>';
+  $("listCount").textContent="0件";
+  $("raceList").innerHTML="";
+  $("raceCount").textContent="0R";
+  $("raceControls").innerHTML="";
+  state.meeting=null;
+  state.raceNo=null;
+}
 
 const SPORT={
  boat:{title:"ボート",code:"BOAT",valueTitle:"買える万舟"},
@@ -21,11 +40,14 @@ $("cancelLoading").onclick=() => show("races");
 $("backRaces").onclick=() => show("races");
 
 async function openSport(sport){
-  state={sport,meeting:null,date:today(),raceNo:null};
+  state.sport=sport;
+  state.date=today();
+  clearSportViews();
   const cfg=SPORT[sport];
-  $("sportCode").textContent=cfg.code;$("sportTitle").textContent=cfg.title;
-  $("list").innerHTML='<div class="empty">取得中...</div>';$("listCount").textContent="0件";
-  setupControls();show("sport");
+  $("sportCode").textContent=cfg.code;
+  $("sportTitle").textContent=cfg.title;
+  setupControls();
+  show("sport");
   await loadMeetings();
 }
 
@@ -40,26 +62,30 @@ function setupControls(){
 }
 
 async function loadMeetings(){
+  const token=beginRequest();
+  clearSportViews();
   setBadge("取得中","warn");
   try{
     if(state.sport==="boat"){
       const r=await fetch(`/.netlify/functions/boat-schedule?date=${compact(state.date)}`,{cache:"no-store"}),p=await r.json();
       if(!r.ok||!p.ok)throw new Error(p.error||"開催取得失敗");
-      renderItems(p.venues.map(v=>({name:v.name,sub:`場コード ${v.code}`,raw:v})),openBoatVenue);
+      if(!isCurrentRequest(token))return; renderItems(p.venues.map(v=>({name:v.name,sub:`場コード ${v.code}`,raw:v})),openBoatVenue);
     }else if(state.sport==="keirin"){
       const r=await fetch(`/.netlify/functions/keirin-discover?date=${compact(state.date)}`,{cache:"no-store"}),p=await r.json();
       if(!r.ok||!p.ok)throw new Error(p.error||"開催取得失敗");
       const items=p.meetings.map(m=>({name:m.venueName,sub:`出走表 ${getKeirinCard(m)?"発見":"未発見"} / オッズ ${getKeirinOdds(m)?"発見":"未発見"}`,raw:m})).filter(x=>getKeirinCard(x.raw));
-      renderItems(items,openKeirinVenue);
+      if(!isCurrentRequest(token))return; renderItems(items,openKeirinVenue);
     }else{
       const r=await fetch('/.netlify/functions/auto-discover',{cache:"no-store"}),p=await r.json();
       if(!r.ok||!p.ok)throw new Error(p.error||"開催取得失敗");
       const items=p.meetings.map(m=>({name:m.trackName,sub:`出走表 ${getAutoProgram(m)?"発見":"未発見"} / オッズ ${getAutoOdds(m)?"発見":"未発見"}`,raw:m})).filter(x=>getAutoProgram(x.raw));
-      renderItems(items,openAutoVenue);
+      if(!isCurrentRequest(token))return; renderItems(items,openAutoVenue);
     }
-    setBadge("実データ","ok");
+    if(!isCurrentRequest(token))return; setBadge("実データ","ok");
   }catch(e){
-    $("list").innerHTML=`<div class="empty">${e.message}</div>`;setBadge("失敗","error");
+    if(!isCurrentRequest(token))return;
+    $("list").innerHTML=`<div class="empty">${e.message}</div>`;
+    setBadge("失敗","error");
   }
 }
 
@@ -70,9 +96,17 @@ function renderItems(items,handler){
 }
 
 async function openBoatVenue(v){
+  const token=beginRequest();
   state.meeting=v;$("raceSportCode").textContent="BOAT";$("raceTitle").textContent=v.name;$("raceList").innerHTML='<div class="empty">レース一覧取得中...</div>';show("races");
   $("raceControls").innerHTML='<label>購入締切<select id="lead"><option value="10">公式10分前</option><option value="7">公式7分前</option><option value="5" selected>公式5分前</option><option value="3">公式3分前</option></select></label>';
-  const load=async()=>{const lead=$("lead").value,r=await fetch(`/.netlify/functions/boat-races?date=${compact(state.date)}&jcd=${v.code}&lead=${lead}`,{cache:"no-store"}),p=await r.json();if(!r.ok||!p.ok)throw new Error(p.error||"レース一覧取得失敗");renderRaces(p.races.map(x=>({raceNo:x.raceNo,sub:`購入 ${x.purchaseDeadline||"-"} / 公式 ${x.officialDeadline||"-"}`,raw:x})),analyzeBoat);};
+  const load=async()=>{
+    const lead=$("lead").value;
+    const r=await fetch(`/.netlify/functions/boat-races?date=${compact(state.date)}&jcd=${v.code}&lead=${lead}`,{cache:"no-store"});
+    const p=await r.json();
+    if(!r.ok||!p.ok)throw new Error(p.error||"レース一覧取得失敗");
+    if(!isCurrentRequest(token)||state.meeting!==v)return;
+    renderRaces(p.races.map(x=>({raceNo:x.raceNo,sub:`購入 ${x.purchaseDeadline||"-"} / 公式 ${x.officialDeadline||"-"}`,raw:x})),analyzeBoat);
+  };
   $("lead").onchange=()=>load().catch(showRaceError);try{await load()}catch(e){showRaceError(e)}
 }
 
@@ -123,19 +157,49 @@ function startLoading(title){$("loadingTitle").textContent=title;$("loadingStep"
 function loadingError(e){$("loadingStep").textContent=`失敗: ${e.message}`}
 
 function baseResult(cfg,title,x,warnings,summary,payload){
-  $("resultSport").textContent=cfg.code;$("resultTitle").textContent=title;$("valueTitle").textContent=cfg.valueTitle;
-  $("recommendation").textContent=x.recommendationLabel||"解析結果";$("warnings").textContent=warnings||"取得・解析完了";
-  $("mainBets").textContent=join(x.recommendations.main);$("backupBets").textContent=join(x.recommendations.backup);$("valueBets").textContent=join(x.recommendations.value);$("strongBets").textContent=join(x.recommendations.strong);
-  $("resultSummary").innerHTML=summary.map(([a,b])=>`<div><span>${a}</span><strong>${b}</strong></div>`).join("");
-  $("plan").innerHTML=table(x.purchasePlan);$("debug").textContent=JSON.stringify(payload,null,2);
-  $("resultBadge").textContent=x.audit.passed?"監査合格":"監査不合格";$("resultBadge").className=`badge ${x.audit.passed?"ok":"error"}`;
+  $("resultSport").textContent=cfg.code;
+  $("resultTitle").textContent=title;
+  $("valueTitle").textContent=cfg.valueTitle;
+
+  const label=x.recommendationLabel||"解析結果";
+  const purchasePlan=Array.isArray(x.purchasePlan)?x.purchasePlan:[];
+  const isSkip=/見送り/.test(label)||purchasePlan.length===0;
+
+  $("recommendation").textContent=label;
+  $("warnings").textContent=warnings||"取得・解析完了";
+
+  if(isSkip){
+    $("mainBets").textContent="購入なし";
+    $("backupBets").textContent="購入なし";
+    $("valueBets").textContent="なし";
+    $("strongBets").textContent="購入なし";
+    $("plan").innerHTML='<p class="empty">見送り判定のため購入案は生成しません。展開候補はデバッグ情報に保持しています。</p>';
+  }else{
+    $("mainBets").textContent=join(x.recommendations?.main||[]);
+    $("backupBets").textContent=join(x.recommendations?.backup||[]);
+    $("valueBets").textContent=join(x.recommendations?.value||[]);
+    $("strongBets").textContent=join(x.recommendations?.strong||[]);
+    $("plan").innerHTML=table(purchasePlan);
+  }
+
+  $("resultSummary").innerHTML=summary
+    .map(([a,b])=>`<div><span>${a}</span><strong>${b}</strong></div>`)
+    .join("");
+  $("debug").textContent=JSON.stringify(payload,null,2);
+  $("resultBadge").textContent=x.audit.passed?"監査合格":"監査不合格";
+  $("resultBadge").className=`badge ${x.audit.passed?"ok":"error"}`;
 }
 
 function renderBoatResult(p){const x=p.prediction,d=p.official.deadline||{};baseResult(SPORT.boat,`${state.meeting.name} ${p.rno}R`,x,p.warning.join(" / "),[["購入締切",d.purchaseDeadline||"未取得"],["公式締切",d.officialDeadline||"未取得"],["解析段階",x.analysisStage],["合成オッズ",x.compositeOdds?`${x.compositeOdds.toFixed(2)}倍`:"未計算"],["購入点数",`${x.purchasePlan.length}点`],["全終端",`${x.terminals.length}件`]],p)}
 function renderKeirinResult(p){const x=p.prediction;baseResult(SPORT.keirin,`${p.race.venue} ${p.race.raceNo}R`,x,p.warnings.join(" / "),[["ライン信頼度",p.dataQuality.lineConfidence],["締切",p.race.deadline||"未取得"],["合成オッズ",x.compositeOdds?`${x.compositeOdds.toFixed(2)}倍`:"未計算"],["購入点数",`${x.purchasePlan.length}点`],["全終端",`${x.terminals.length}件`],["監査",x.audit.passed?"合格":"不合格"]],p)}
 function renderAutoResult(p,requested){const x=p.prediction,r=p.adapted.race,s=r.surface==="wet"?"湿走路":r.surface==="dry"?"良走路":r.surface==="mixed"?"斑走路":"未確認";baseResult(SPORT.auto,`${r.venue} ${r.raceNo||requested}R`,x,p.warnings.join(" / "),[["走路",s],["締切",r.deadline||"未取得"],["試走",p.dataQuality.trialAvailable?"全車取得":"欠損あり"],["合成オッズ",x.compositeOdds?`${x.compositeOdds.toFixed(2)}倍`:"未計算"],["購入点数",`${x.purchasePlan.length}点`],["全終端",`${x.terminals.length}件`]],p)}
 
-function join(items){return items.slice(0,12).map(x=>`${x.order.join("-")}（${x.odds??"-"}倍）`).join(" / ")||"なし"}
+function join(items){
+  return (Array.isArray(items)?items:[])
+    .slice(0,12)
+    .map(x=>`${x.order.join("-")}（${x.odds??"-"}倍）`)
+    .join(" / ")||"なし";
+}
 function table(rows){return rows?.length?`<table><thead><tr><th>買い目</th><th>分類</th><th>金額</th><th>オッズ</th><th>払戻見込</th></tr></thead><tbody>${rows.map(x=>`<tr><td>${x.order.join("-")}</td><td>${x.betClass}</td><td>${x.stake.toLocaleString()}円</td><td>${x.odds}</td><td>${x.expectedPayout.toLocaleString()}円</td></tr>`).join("")}</tbody></table>`:"購入案なし"}
 function getKeirinCard(m){return m.discovery?.links?.raceCards?.[0]||m.discovery?.links?.other?.[0]}
 function getKeirinOdds(m){return m.discovery?.links?.odds?.[0]}
