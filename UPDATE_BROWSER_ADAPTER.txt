@@ -1,0 +1,21 @@
+チャリ猫予想 競輪ブラウザ取得連携 完成版1.0.1
+
+修正内容
+- Railwayの競輪ブラウザ取得サービスへ接続
+- officialData.basic.venueName を従来形式 race.venue へ変換
+- JSJ038の選手情報を競輪エンジン用データへ変換
+- 取得済みの会場・日付・R番号を再監査
+- 旧画面が必要とする race / prediction / dataQuality / warnings を返却
+- 競輪場コードは公式URLまたは会場名から自動判定
+- ブラウザサービスの候補エンドポイントを自動確認
+
+更新方法
+1. このZIPを展開
+2. 中身を既存の chari-neko-dev フォルダへすべてコピー
+3. 「ファイルを置き換える」を選ぶ
+4. GitHub DesktopでCommit
+5. Push origin
+6. Netlifyのデプロイ完了後、小田原1Rを再解析
+
+環境変数
+KEIRIN_BROWSER_SERVICE_URL は現在設定済みのRailway URLをそのまま使用します。
