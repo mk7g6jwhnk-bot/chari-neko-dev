@@ -38,7 +38,7 @@ export default async function handler(req) {
     const response = await fetch(`${serviceBase}/keirin/race?${query}`, {
       headers: {
         accept: "application/json",
-        "user-agent": "ChariNekoNetlifyAdapter/1.0.2"
+        "user-agent": "ChariNekoNetlifyAdapter/1.0.3"
       },
       cache: "no-store"
     });
@@ -65,7 +65,9 @@ export default async function handler(req) {
 
     const adapted = adaptOfficialData({
       officialData: official.officialData,
-      requested: { date, venueCode, venueName, raceNo }
+      requested: { date, venueCode, venueName, raceNo },
+      browserAudit: official.audit,
+      browserDiagnostics: official.diagnostics
     });
 
     if (!adapted.ok) {
@@ -115,12 +117,14 @@ export default async function handler(req) {
         lineConfidence: line.confidence,
         oddsAvailable: false,
         participantCount: race.participants.length,
-        identityPassed: official.audit?.identityPassed === true
+        identityPassed: true,
+        identityAudit: adapted.identityAudit
       },
       warnings: [
         ...line.warnings,
+        adapted.identityAudit?.warning,
         "オッズ未取得・購入判断保留"
-      ],
+      ].filter(Boolean),
       checkedAt: new Date().toISOString()
     });
   } catch (error) {
@@ -133,7 +137,12 @@ export default async function handler(req) {
   }
 }
 
-function adaptOfficialData({ officialData, requested }) {
+function adaptOfficialData({
+  officialData,
+  requested,
+  browserAudit,
+  browserDiagnostics
+}) {
   const basic = officialData?.basic || {};
   const sourceParticipants = Array.isArray(officialData?.participants)
     ? officialData.participants
@@ -146,11 +155,30 @@ function adaptOfficialData({ officialData, requested }) {
   const actualDate = String(basic.date || "").replace(/\D/g, "");
   const actualRaceNo = Number(basic.raceNo || 0);
 
-  if (
-    actualVenue !== requested.venueName ||
-    actualDate !== requested.date ||
-    actualRaceNo !== requested.raceNo
-  ) {
+  const verifiedSelection = findVerifiedSelection(browserDiagnostics);
+  const browserIdentityPassed = browserAudit?.identityPassed === true;
+  const selectionIdentityPassed = Boolean(
+    verifiedSelection?.verified === true &&
+    verifiedSelection?.actualRaceNo === requested.raceNo &&
+    (!verifiedSelection?.venueName ||
+      verifiedSelection.venueName === requested.venueName) &&
+    (!verifiedSelection?.date ||
+      normalizeDate(verifiedSelection.date) === requested.date)
+  );
+
+  const basicIdentityPassed = Boolean(
+    actualVenue === requested.venueName &&
+    actualDate === requested.date &&
+    actualRaceNo === requested.raceNo
+  );
+
+  const authoritativeIdentityPassed = Boolean(
+    basicIdentityPassed ||
+    browserIdentityPassed ||
+    selectionIdentityPassed
+  );
+
+  if (!authoritativeIdentityPassed) {
     return {
       ok: false,
       error: "公式データの会場・日付・R番号が選択内容と一致しません",
@@ -159,9 +187,15 @@ function adaptOfficialData({ officialData, requested }) {
         venueName: actualVenue,
         date: actualDate,
         raceNo: actualRaceNo
-      }
+      },
+      verifiedSelection,
+      browserIdentityPassed
     };
   }
+
+  const identityWarning = basicIdentityPassed
+    ? null
+    : "後段JSONの基本情報にズレがありましたが、選択直後の公式確認を正本として採用しました";
 
   const participants = sourceParticipants
     .map(adaptParticipant)
@@ -191,18 +225,56 @@ function adaptOfficialData({ officialData, requested }) {
     lineText: buildLineText(lines, numbers),
     race: {
       id: `${requested.date}-${requested.venueCode}-${requested.raceNo}`,
-      venue: actualVenue,
+      venue: requested.venueName,
       venueCode: requested.venueCode,
-      raceNo: actualRaceNo,
-      date: actualDate,
+      raceNo: requested.raceNo,
+      date: requested.date,
       deadline: String(basic.deadline || "") || null,
       startTime: String(basic.startTime || "") || null,
       raceName: String(basic.raceName || ""),
       grade: String(basic.grade || ""),
       className: String(basic.className || ""),
       participants
+    },
+    identityAudit: {
+      basicIdentityPassed,
+      browserIdentityPassed,
+      selectionIdentityPassed,
+      verifiedSelection,
+      warning: identityWarning,
+      basicActual: {
+        venueName: actualVenue,
+        date: actualDate,
+        raceNo: actualRaceNo
+      }
     }
   };
+}
+
+function findVerifiedSelection(diagnostics) {
+  const steps = Array.isArray(diagnostics?.steps)
+    ? diagnostics.steps
+    : [];
+
+  const selected = [...steps].reverse().find(step =>
+    step?.step === "select-race" &&
+    step?.verified === true &&
+    step?.verification?.ok === true
+  );
+
+  if (!selected) return null;
+
+  return {
+    verified: true,
+    actualRaceNo: Number(selected.verification?.actualRaceNo || 0),
+    venueName: String(selected.verification?.venueName || ""),
+    date: String(selected.verification?.date || ""),
+    mode: String(selected.verification?.mode || "")
+  };
+}
+
+function normalizeDate(value) {
+  return String(value || "").replace(/\D/g, "").slice(0, 8);
 }
 
 function adaptParticipant(item) {
