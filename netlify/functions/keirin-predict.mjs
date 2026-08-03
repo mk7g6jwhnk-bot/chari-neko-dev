@@ -4,6 +4,9 @@ import{parseKeirinTrifectaOddsHtml}from"../../keirin/parser/odds-parser.mjs";
 import{runKeirinEngine}from"../../keirin/engine/keirin-engine.mjs";
 import{jsonResponse}from"../../keirin/parser/utils.mjs";
 
+const BASE="https://keirin.jp";
+const RACE_URL=`${BASE}/sp/race`;
+
 export default async req=>{
   const u=new URL(req.url),
     venueCode=String(u.searchParams.get("venueCode")||"").padStart(2,"0"),
@@ -12,23 +15,94 @@ export default async req=>{
     budget=Number(u.searchParams.get("budget")||3000),
     target=Number(u.searchParams.get("raceNo")||0);
 
-  if(!/^\d{8}$/.test(date))return jsonResponse(400,{ok:false,error:"日付形式不正"});
-  if(!/^\d{2}$/.test(venueCode))return jsonResponse(400,{ok:false,error:"会場コード不正"});
-  if(!Number.isInteger(target)||target<1||target>12)return jsonResponse(400,{ok:false,error:"レース番号不正"});
+  if(!/^\d{8}$/.test(date))
+    return jsonResponse(400,{ok:false,error:"日付形式不正"});
+  if(!/^\d{2}$/.test(venueCode))
+    return jsonResponse(400,{ok:false,error:"会場コード不正"});
+  if(!Number.isInteger(target)||target<1||target>12)
+    return jsonResponse(400,{ok:false,error:"レース番号不正"});
 
-  const targetRaceCardUrl=buildRaceCardUrl(date,venueCode,target);
-  const targetOddsUrl=buildOddsUrl(date,venueCode,target);
   const jar=new Jar();
 
   try{
-    const rr=await fw(targetRaceCardUrl,jar,"https://keirin.jp/pc/raceschedule");
-    if(!rr.ok)return jsonResponse(502,{ok:false,error:`出走表HTTP ${rr.status}`,targetRaceCardUrl});
+    const bootstrap=await fw(`${BASE}/sp/`,jar);
+    const bootstrapHtml=await bootstrap.text();
+    const bootstrapEncp=extractEncp(bootstrapHtml);
 
-    const cards=parseRaceCardHtml(await rr.text(),{
-      sourceUrl:targetRaceCardUrl,
+    const form=new URLSearchParams({
+      encp:bootstrapEncp||"",
+      disp:"SJ0315",
+      skbn:"1",
+      bkcd:venueCode,
+      kday:date,
+      rnum:String(target),
+      kake:"",
+      mode:"",
+      searchOzz:"",
+      hoji:""
+    });
+
+    const rr=await fw(RACE_URL,jar,`${BASE}/sp/`,{
+      method:"POST",
+      headers:{
+        "content-type":"application/x-www-form-urlencoded",
+        "origin":BASE
+      },
+      body:form.toString()
+    });
+
+    const raceHtml=await rr.text();
+    const title=extractTitle(raceHtml);
+    const responseEncp=extractEncp(raceHtml);
+
+    const fetchAudit={
+      bootstrap:{
+        status:bootstrap.status,
+        finalUrl:bootstrap.url,
+        title:extractTitle(bootstrapHtml),
+        encpFound:Boolean(bootstrapEncp)
+      },
+      racePost:{
+        status:rr.status,
+        finalUrl:rr.url,
+        title,
+        contentType:rr.headers.get("content-type")||null,
+        encpFound:Boolean(responseEncp),
+        htmlLength:raceHtml.length
+      },
+      request:{
+        venueCode,
+        venueName,
+        date,
+        raceNo:target,
+        disp:"SJ0315",
+        skbn:"1"
+      }
+    };
+
+    if(!rr.ok){
+      return jsonResponse(502,{
+        ok:false,
+        error:`公式レース情報POST HTTP ${rr.status}`,
+        fetchAudit
+      });
+    }
+
+    if(!/レース情報|出走表|競輪/.test(title)){
+      return jsonResponse(422,{
+        ok:false,
+        error:"公式レース情報ページを取得できません",
+        fetchAudit,
+        responsePreview:safePreview(raceHtml)
+      });
+    }
+
+    const cards=parseRaceCardHtml(raceHtml,{
+      sourceUrl:RACE_URL,
       expectedRaceNo:target,
       expectedVenueCode:venueCode,
-      expectedVenueName:venueName
+      expectedVenueName:venueName,
+      transport:"POST /sp/race"
     });
 
     const exact=cards.races.filter(x=>x.raceNo===target);
@@ -36,19 +110,21 @@ export default async req=>{
       return jsonResponse(422,{
         ok:false,
         error:`${venueName} ${target}Rの出走表を一意に抽出できません`,
-        targetRaceCardUrl,
         expected:{venueCode,venueName,raceNo:target},
         diagnostics:cards.diagnostics,
         detectedRaces:cards.races.map(x=>({
           raceNo:x.raceNo,
           participantCount:x.participants.length,
           numbers:x.participants.map(p=>p.number)
-        }))
+        })),
+        fetchAudit,
+        responsePreview:safePreview(raceHtml)
       });
     }
 
     const card=exact[0];
     const numbers=card.participants.map(x=>x.number);
+
     if(
       card.participants.length<5||
       card.participants.length>9||
@@ -60,11 +136,15 @@ export default async req=>{
         expected:{venueCode,venueName,raceNo:target},
         participantCount:card.participants.length,
         numbers,
-        targetRaceCardUrl
+        fetchAudit
       });
     }
 
-    const line=inferLines({participants:card.participants,lineText:card.lineSource});
+    const line=inferLines({
+      participants:card.participants,
+      lineText:card.lineSource
+    });
+
     const race={
       id:`${date}-${venueCode}-${target}`,
       venue:venueName,
@@ -75,27 +155,29 @@ export default async req=>{
       participants:line.participants
     };
 
-    let odds={ok:false,odds:{},diagnostics:{}};
-    try{
-      const or=await fw(targetOddsUrl,jar,targetRaceCardUrl);
-      if(or.ok){
-        odds=parseKeirinTrifectaOddsHtml(
-          await or.text(),
-          {sourceUrl:targetOddsUrl,expectedRaceNo:target}
-        );
-      }
-    }catch{}
+    const odds=parseKeirinTrifectaOddsHtml(raceHtml,{
+      sourceUrl:RACE_URL,
+      expectedRaceNo:target,
+      transport:"POST /sp/race"
+    });
 
-    const prediction=runKeirinEngine({race,oddsByOrder:odds.odds,budget});
+    const prediction=runKeirinEngine({
+      race,
+      oddsByOrder:odds.odds,
+      budget
+    });
 
     return jsonResponse(200,{
       ok:prediction.audit.passed,
       race,
       odds,
       prediction,
-      sourceUrls:{raceCardUrl:targetRaceCardUrl,oddsUrl:targetOddsUrl},
       requestAudit:{date,venueCode,venueName,raceNo:target},
-      dataQuality:{lineConfidence:line.confidence,oddsAvailable:odds.ok},
+      fetchAudit,
+      dataQuality:{
+        lineConfidence:line.confidence,
+        oddsAvailable:odds.ok
+      },
       warnings:[
         ...line.warnings,
         !odds.ok?"オッズ未取得・購入判断保留":null
@@ -103,18 +185,44 @@ export default async req=>{
       checkedAt:new Date().toISOString()
     });
   }catch(e){
-    return jsonResponse(500,{ok:false,error:e.message});
+    return jsonResponse(500,{
+      ok:false,
+      error:e.message
+    });
   }
 };
 
-function buildRaceCardUrl(date,venueCode,raceNo){
-  const q=new URLSearchParams({KBI:date,KCD:venueCode,RNO:String(raceNo)});
-  return `https://keirin.jp/pc/dfw/dataplaza/guest/racemember?${q}`;
+function extractEncp(html){
+  const patterns=[
+    /"encp"\s*:\s*"([^"]+)"/,
+    /name=["']encp["'][^>]*value=["']([^"']+)["']/i,
+    /value=["']([^"']+)["'][^>]*name=["']encp["']/i
+  ];
+  for(const pattern of patterns){
+    const value=String(html||"").match(pattern)?.[1];
+    if(value)return value;
+  }
+  return null;
 }
-function buildOddsUrl(date,venueCode,raceNo){
-  const q=new URLSearchParams({BET:"5",KBI:date,KCD:venueCode,RNO:String(raceNo)});
-  return `https://keirin.jp/pc/dfw/dataplaza/guest/odds?${q}`;
+
+function extractTitle(html){
+  return String(html||"")
+    .match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]
+    ?.replace(/<[^>]+>/g,"")
+    .replace(/\s+/g," ")
+    .trim()||"";
 }
+
+function safePreview(html){
+  return String(html||"")
+    .replace(/<script[\s\S]*?<\/script>/gi,"")
+    .replace(/<style[\s\S]*?<\/style>/gi,"")
+    .replace(/<[^>]+>/g," ")
+    .replace(/\s+/g," ")
+    .trim()
+    .slice(0,500);
+}
+
 class Jar{
   constructor(){this.c=new Map()}
   ingest(r){
@@ -125,16 +233,28 @@ class Jar{
       if(i>0)this.c.set(q.slice(0,i).trim(),q.slice(i+1).trim());
     }
   }
-  header(){return[...this.c].map(([k,v])=>`${k}=${v}`).join("; ")}
+  header(){
+    return[...this.c].map(([k,v])=>`${k}=${v}`).join("; ");
+  }
 }
-async function fw(url,jar,referer=null){
-  const h={
+
+async function fw(url,jar,referer=null,options={}){
+  const headers={
     "user-agent":"Mozilla/5.0 (compatible; ChariNekoDev/0.6; personal-use)",
-    "accept-language":"ja"
+    "accept-language":"ja",
+    "accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    ...(options.headers||{})
   };
-  if(jar.header())h.cookie=jar.header();
-  if(referer)h.referer=referer;
-  const r=await fetch(url,{headers:h,redirect:"follow"});
+
+  if(jar.header())headers.cookie=jar.header();
+  if(referer)headers.referer=referer;
+
+  const r=await fetch(url,{
+    ...options,
+    headers,
+    redirect:"follow"
+  });
+
   jar.ingest(r);
   return r;
 }
