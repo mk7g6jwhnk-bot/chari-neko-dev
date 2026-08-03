@@ -1,6 +1,7 @@
 import{jsonResponse}from"../../keirin/parser/utils.mjs";
 
 const BASE="https://keirin.jp";
+const TYPES=["JSJ035","JSJ036","JSJ037"];
 
 export default async req=>{
   const u=new URL(req.url),
@@ -19,166 +20,203 @@ export default async req=>{
   const jar=new Jar();
 
   try{
-    const probe=await probeOfficialPages(jar);
-    const tokenSource=probe.pages.find(x=>x.tokens.hhEncSelR);
+    // Cookie取得
+    const bootstrap=await fetchText(`${BASE}/sp/`,jar);
 
-    if(!tokenSource){
+    // 公式レース一覧へ、確認できた項目名を中心に複数パターンで接続
+    const attempts=await probeRaceList({
+      jar,date,venueCode,target
+    });
+
+    const tokenAttempt=attempts.find(x=>x.tokens.hhEncSelR);
+
+    if(!tokenAttempt){
       return jsonResponse(422,{
         ok:false,
-        error:"公式一覧ページから暗号パラメータを取得できません",
+        error:"公式レース一覧は取得できましたがhhEncSelRを抽出できません",
         requestAudit:{date,venueCode,venueName,raceNo:target},
-        tokenProbe:probe
+        bootstrap:summarizePage(bootstrap),
+        raceListAttempts:attempts.map(summarizePage)
       });
     }
 
-    const encp=tokenSource.tokens.hhEncSelR;
-    const discoveredTypes=new Set([
-      "JSJ035",
-      ...tokenSource.jsonTypes,
-      ...probe.pages.flatMap(x=>x.jsonTypes)
-    ]);
-
+    const encp=tokenAttempt.tokens.hhEncSelR;
     const jsonResults=[];
-    for(const type of discoveredTypes){
-      const result=await fetchOfficialJson(encp,type,jar,tokenSource.url);
-      jsonResults.push(result);
+
+    for(const type of TYPES){
+      jsonResults.push(
+        await fetchJson(
+          `${BASE}/sp/json?encp=${encodeURIComponent(encp)}&type=${type}`,
+          jar,
+          tokenAttempt.url,
+          type
+        )
+      );
     }
 
-    const basic=jsonResults.find(x=>
-      x.ok&&
-      getPath(x.data,["CO201data","joName"])&&
-      Number(getPath(x.data,["CO201data","selRaceNo"]))>0
-    );
+    const j35=jsonResults.find(x=>x.type==="JSJ035"&&x.ok)?.data;
+    const j36=jsonResults.find(x=>x.type==="JSJ036"&&x.ok)?.data;
+    const j37=jsonResults.find(x=>x.type==="JSJ037"&&x.ok)?.data;
 
-    const participantCandidates=[];
-    for(const item of jsonResults){
-      if(!item.ok)continue;
-      const found=findParticipantObjects(item.data);
-      if(found.length){
-        participantCandidates.push({
-          type:item.type,
-          count:found.length,
-          sample:found.slice(0,9)
-        });
-      }
-    }
+    const basic=extractBasic(j35);
+    const lines=extractLines(j36);
+    const participants=extractParticipants(j37);
+
+    const actualDate=String(basic.date||"").replace(/\D/g,"");
+    const identityPassed=
+      basic.venueName===venueName&&
+      Number(basic.raceNo)===target&&
+      actualDate===date;
 
     const audit={
       requested:{date,venueCode,venueName,raceNo:target},
       tokenSource:{
-        url:tokenSource.url,
-        title:tokenSource.title,
-        tokenIds:Object.keys(tokenSource.tokens),
-        encpLength:encp.length
+        method:tokenAttempt.method,
+        url:tokenAttempt.url,
+        title:tokenAttempt.title,
+        encpLength:encp.length,
+        availableTokens:Object.keys(tokenAttempt.tokens)
       },
-      jsonTypes:[...discoveredTypes],
-      basicRaceInfo:basic?.data?.CO201data||null,
-      participantCandidates
+      basic,
+      lineCount:lines.length,
+      participantCount:participants.length,
+      participantNumbers:participants.map(x=>x.number),
+      identityPassed
     };
 
-    if(!basic){
-      return jsonResponse(422,{
-        ok:false,
-        error:"公式JSONには接続できましたが基本レース情報を確認できません",
-        audit,
-        jsonResults:jsonResults.map(summarizeJsonResult)
-      });
-    }
-
-    const info=basic.data.CO201data;
-    const actualName=String(info.joName||"");
-    const actualRace=Number(info.selRaceNo||0);
-    const actualDate=String(info.txtEventDate||"").replace(/\D/g,"");
-
-    if(
-      actualName!==venueName||
-      actualRace!==target||
-      actualDate!==date
-    ){
+    if(!identityPassed){
       return jsonResponse(422,{
         ok:false,
         error:"公式JSONの会場・日付・R番号が選択内容と一致しません",
         audit,
-        mismatch:{
-          expected:{venueName,date,raceNo:target},
-          actual:{venueName:actualName,date:actualDate,raceNo:actualRace}
-        }
+        jsonResults:jsonResults.map(summarizeJson)
       });
     }
 
-    if(!participantCandidates.length){
+    if(participants.length<5||participants.length>9){
       return jsonResponse(422,{
         ok:false,
-        error:"基本レース情報の取得成功。出走選手JSONの種類を探索中です",
+        error:"公式JSON接続成功。出走選手数の監査に合格しません",
         audit,
-        jsonResults:jsonResults.map(summarizeJsonResult)
+        participants,
+        lines,
+        jsonResults:jsonResults.map(summarizeJson)
       });
     }
 
-    return jsonResponse(422,{
+    const numbers=participants.map(x=>x.number);
+    if(new Set(numbers).size!==numbers.length){
+      return jsonResponse(422,{
+        ok:false,
+        error:"公式JSON接続成功。車番重複を検出しました",
+        audit,
+        participants,
+        lines
+      });
+    }
+
+    // この段階では既存エンジンへの変換前。
+    // 正しい公式データだけを表示し、誤予想は生成しない。
+    return jsonResponse(200,{
       ok:false,
-      error:"出走選手データ候補を発見しました。次のパッチで正式変換します",
+      error:"公式JSONから基本情報・ライン・出走選手を取得できました。次段階で予想エンジンへ接続します",
+      officialData:{
+        basic,
+        lines,
+        participants
+      },
       audit,
-      jsonResults:jsonResults.map(summarizeJsonResult)
+      jsonResults:jsonResults.map(summarizeJson),
+      checkedAt:new Date().toISOString()
     });
   }catch(e){
-    return jsonResponse(500,{
-      ok:false,
-      error:e.message
-    });
+    return jsonResponse(500,{ok:false,error:e.message});
   }
 };
 
-async function probeOfficialPages(jar){
-  const queue=[
-    `${BASE}/sp/`,
-    `${BASE}/sp/top`,
-    `${BASE}/sp/race`
-  ];
-  const seen=new Set();
-  const pages=[];
-
-  while(queue.length&&pages.length<12){
-    const url=queue.shift();
-    if(seen.has(url))continue;
-    seen.add(url);
-
-    try{
-      const res=await fw(url,jar);
-      const html=await res.text();
-      const page={
-        url:res.url,
-        status:res.status,
-        title:extractTitle(html),
-        htmlLength:html.length,
-        tokens:extractHiddenTokens(html),
-        jsonTypes:extractJsonTypes(html),
-        links:extractCandidateLinks(html,res.url)
-      };
-      pages.push(page);
-
-      for(const link of page.links){
-        if(!seen.has(link)&&queue.length<20)queue.push(link);
+async function probeRaceList({jar,date,venueCode,target}){
+  const url=`${BASE}/sp/racelist`;
+  const forms=[
+    {
+      name:"official-field-set",
+      body:{
+        disp:"SJ0305",
+        skbn:"1",
+        bkcd:venueCode,
+        kday:date,
+        rnum:String(target),
+        kake:"",
+        mode:"",
+        searchOzz:"",
+        hoji:""
       }
-    }catch(e){
-      pages.push({
-        url,
-        status:0,
-        title:"",
-        htmlLength:0,
-        tokens:{},
-        jsonTypes:[],
-        links:[],
-        error:e.message
-      });
+    },
+    {
+      name:"minimal",
+      body:{
+        bkcd:venueCode,
+        kday:date,
+        rnum:String(target)
+      }
+    },
+    {
+      name:"alternate",
+      body:{
+        jcd:venueCode,
+        date,
+        raceNo:String(target)
+      }
     }
+  ];
+
+  const out=[];
+
+  // GET候補
+  for(const query of [
+    {bkcd:venueCode,kday:date,rnum:String(target)},
+    {jcd:venueCode,date,raceNo:String(target)}
+  ]){
+    const q=new URLSearchParams(query);
+    out.push(await fetchText(`${url}?${q}`,jar,`${BASE}/sp/`,"GET"));
   }
 
-  return {pages};
+  // POST候補
+  for(const form of forms){
+    const body=new URLSearchParams(form.body).toString();
+    const page=await fetchText(url,jar,`${BASE}/sp/`,"POST",{
+      method:"POST",
+      headers:{
+        "content-type":"application/x-www-form-urlencoded",
+        "origin":BASE
+      },
+      body
+    });
+    page.formName=form.name;
+    out.push(page);
+  }
+
+  return out;
 }
 
-async function fetchOfficialJson(encp,type,jar,referer){
-  const url=`${BASE}/sp/json?encp=${encodeURIComponent(encp)}&type=${encodeURIComponent(type)}`;
+async function fetchText(url,jar,referer=null,method="GET",options={}){
+  const res=await fw(url,jar,referer,{
+    ...options,
+    method:options.method||method
+  });
+  const html=await res.text();
+  return {
+    method:options.method||method,
+    url:res.url,
+    status:res.status,
+    ok:res.ok,
+    title:extractTitle(html),
+    htmlLength:html.length,
+    tokens:extractHiddenTokens(html),
+    preview:safePreview(html)
+  };
+}
+
+async function fetchJson(url,jar,referer,type){
   try{
     const res=await fw(url,jar,referer,{
       headers:{accept:"application/json,text/plain,*/*"}
@@ -201,9 +239,77 @@ async function fetchOfficialJson(encp,type,jar,referer){
   }
 }
 
+function extractBasic(data){
+  const root=data?.CO201data||data?.co201data||data||{};
+  return {
+    venueName:String(root.joName||""),
+    date:String(root.txtEventDate||""),
+    raceNo:Number(root.selRaceNo||0),
+    raceName:String(root.raceName||""),
+    grade:String(root.imgGradeAlt||""),
+    className:String(root.syumoku||""),
+    deadline:String(root.aftBetTime||root.bfrBetTime||""),
+    startTime:String(root.aftStartTime||root.bfrStartTime||"")
+  };
+}
+
+function extractLines(data){
+  const root=data?.narabiyoso||data?.narabiYoso||data||{};
+  const raw=root.shaban;
+  const rows=Array.isArray(raw)?raw:[];
+  return rows.map((x,index)=>({
+    order:index+1,
+    position:Number(x.ichi||index+1),
+    number:Number(x.shaban||0),
+    className:String(x.classname||"")
+  })).filter(x=>x.number>=1&&x.number<=9);
+}
+
+function extractParticipants(data){
+  const candidates=findArrays(data);
+  const source=candidates
+    .filter(arr=>arr.length>=5&&arr.length<=9)
+    .find(arr=>arr.every(x=>x&&typeof x==="object"&&(
+      "sensyuRegistNo" in x||
+      "sensyuName" in x||
+      "syaban" in x
+    )))||[];
+
+  return source.map(x=>({
+    number:Number(x.syaban||x.shaban||0),
+    registration:String(x.sensyuRegistNo||""),
+    name:String(x.sensyuName||""),
+    prefecture:String(x.huken||""),
+    className:String(x.kyuhan||x.prevKyuhan||""),
+    style:String(x.kyakusitu||""),
+    score:toNumber(x.heikinTokuten),
+    escapeCount:toNumber(x.nigeCnt),
+    makuriCount:toNumber(x.makuriCnt),
+    differenceCount:toNumber(x.sasiCnt),
+    markCount:toNumber(x.markCnt),
+    backCount:toNumber(x.backCnt)
+  })).filter(x=>x.number>=1&&x.number<=9);
+}
+
+function findArrays(value,out=[]){
+  if(Array.isArray(value)){
+    out.push(value);
+    for(const item of value)findArrays(item,out);
+  }else if(value&&typeof value==="object"){
+    for(const item of Object.values(value))findArrays(item,out);
+  }
+  return out;
+}
+
 function extractHiddenTokens(html){
-  const ids=["hhEncSelR","hhEncSelK","hhEncPrmS","hhEncParaS"];
+  const ids=[
+    "hhEncSelR",
+    "hhEncSelK",
+    "hhEncPrmS",
+    "hhEncParaS"
+  ];
   const out={};
+
   for(const id of ids){
     const patterns=[
       new RegExp(`<input[^>]+id=["']${id}["'][^>]+value=["']([^"']+)["']`,"i"),
@@ -211,88 +317,22 @@ function extractHiddenTokens(html){
     ];
     for(const pattern of patterns){
       const value=String(html||"").match(pattern)?.[1];
-      if(value){out[id]=value;break}
+      if(value){
+        out[id]=decodeHtml(value);
+        break;
+      }
     }
   }
   return out;
 }
 
-function extractJsonTypes(html){
-  const out=new Set();
-  const text=String(html||"");
-  for(const m of text.matchAll(/type[=:]["']?(J[A-Z0-9]{4,12})/gi))
-    out.add(m[1]);
-  for(const m of text.matchAll(/[?&]type=(J[A-Z0-9]{4,12})/gi))
-    out.add(m[1]);
-  return [...out];
-}
-
-function extractCandidateLinks(html,baseUrl){
-  const out=new Set();
-  const text=String(html||"");
-  for(const m of text.matchAll(/(?:href|action)=["']([^"']+)["']/gi)){
-    try{
-      const url=new URL(m[1],baseUrl);
-      if(
-        url.hostname==="keirin.jp"&&
-        url.pathname.startsWith("/sp/")&&
-        /(race|top|kaisai|schedule|index)/i.test(url.pathname+url.search)
-      ){
-        out.add(url.href);
-      }
-    }catch{}
-  }
-  return [...out].slice(0,8);
-}
-
-function findParticipantObjects(value,path="$",out=[]){
-  if(out.length>=20)return out;
-  if(Array.isArray(value)){
-    value.forEach((v,i)=>findParticipantObjects(v,`${path}[${i}]`,out));
-    return out;
-  }
-  if(!value||typeof value!=="object")return out;
-
-  const keys=Object.keys(value);
-  const regKey=keys.find(k=>/sensyu.*regist|registration|registNo/i.test(k));
-  const nameKey=keys.find(k=>/sensyu.*name|player.*name|nameSensyu/i.test(k));
-
-  if(regKey&&nameKey){
-    const numberKey=keys.find(k=>/syaban|carNo|number|shaban|waku/i.test(k));
-    out.push({
-      path,
-      registration:String(value[regKey]??""),
-      name:String(value[nameKey]??""),
-      number:numberKey?Number(value[numberKey]||0):null,
-      keys:keys.slice(0,20)
-    });
-  }
-
-  for(const [k,v] of Object.entries(value))
-    findParticipantObjects(v,`${path}.${k}`,out);
-
-  return out;
-}
-
-function summarizeJsonResult(x){
-  return {
-    type:x.type,
-    status:x.status,
-    ok:x.ok,
-    contentType:x.contentType||null,
-    textLength:x.textLength||0,
-    topKeys:x.data&&typeof x.data==="object"?Object.keys(x.data).slice(0,20):[],
-    error:x.error||null
-  };
-}
-
-function getPath(value,path){
-  let current=value;
-  for(const key of path){
-    if(current==null)return null;
-    current=current[key];
-  }
-  return current;
+function decodeHtml(value){
+  return String(value)
+    .replace(/&amp;/g,"&")
+    .replace(/&quot;/g,'"')
+    .replace(/&#39;/g,"'")
+    .replace(/&lt;/g,"<")
+    .replace(/&gt;/g,">");
 }
 
 function extractTitle(html){
@@ -301,6 +341,48 @@ function extractTitle(html){
     ?.replace(/<[^>]+>/g,"")
     .replace(/\s+/g," ")
     .trim()||"";
+}
+
+function safePreview(html){
+  return String(html||"")
+    .replace(/<script[\s\S]*?<\/script>/gi,"")
+    .replace(/<style[\s\S]*?<\/style>/gi,"")
+    .replace(/<[^>]+>/g," ")
+    .replace(/\s+/g," ")
+    .trim()
+    .slice(0,300);
+}
+
+function summarizePage(x){
+  return {
+    method:x.method,
+    formName:x.formName||null,
+    url:x.url,
+    status:x.status,
+    ok:x.ok,
+    title:x.title,
+    htmlLength:x.htmlLength,
+    tokenIds:Object.keys(x.tokens||{}),
+    preview:x.preview
+  };
+}
+
+function summarizeJson(x){
+  return {
+    type:x.type,
+    status:x.status,
+    ok:x.ok,
+    contentType:x.contentType||null,
+    textLength:x.textLength||0,
+    topKeys:x.data&&typeof x.data==="object"
+      ?Object.keys(x.data).slice(0,20):[],
+    error:x.error||null
+  };
+}
+
+function toNumber(value){
+  const n=Number(String(value??"").replace(/[^\d.-]/g,""));
+  return Number.isFinite(n)?n:null;
 }
 
 class Jar{
@@ -325,6 +407,7 @@ async function fw(url,jar,referer=null,options={}){
     "accept":"text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8",
     ...(options.headers||{})
   };
+
   if(jar.header())headers.cookie=jar.header();
   if(referer)headers.referer=referer;
 
