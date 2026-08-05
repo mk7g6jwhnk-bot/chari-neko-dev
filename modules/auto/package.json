@@ -1,0 +1,12 @@
+{
+  "name": "chari-neko-auto-integrated",
+  "version": "0.3.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "cheerio": "^1.0.0"
+  },
+  "scripts": {
+    "test": "node tests/run-tests.mjs"
+  }
+}
