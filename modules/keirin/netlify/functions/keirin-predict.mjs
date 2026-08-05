@@ -1,6 +1,7 @@
-import { inferLines } from "../../keirin/parser/line-parser.mjs";
-import { runKeirinEngine } from "../../keirin/engine/keirin-engine.mjs";
-import { jsonResponse } from "../../keirin/parser/utils.mjs";
+import { parseKeirinTrifectaOddsHtml } from "../../parser/odds-parser.mjs";
+import { inferLines } from "../../parser/line-parser.mjs";
+import { runKeirinEngine } from "../../engine/keirin-engine.mjs";
+import { jsonResponse } from "../../parser/utils.mjs";
 
 const VENUE_CODE_BY_NAME = {
   函館: "11", 青森: "12", いわき平: "13", 弥彦: "21", 前橋: "22",
@@ -21,6 +22,7 @@ export default async function handler(req) {
   const raceNo = Number(url.searchParams.get("raceNo") || 0);
   const budget = Number(url.searchParams.get("budget") || 3000);
   const raceCardUrl = url.searchParams.get("raceCardUrl") || "";
+  const oddsUrl = url.searchParams.get("oddsUrl") || "";
   const venueCode =
     url.searchParams.get("venueCode") ||
     readVenueCode(raceCardUrl) ||
@@ -99,7 +101,13 @@ export default async function handler(req) {
       participants: line.participants
     };
 
-    const odds = { ok: false, odds: {}, diagnostics: { source: "未接続" } };
+    const browserOdds = normalizeBrowserOdds(officialData.odds);
+    const htmlOdds = browserOdds.ok
+      ? null
+      : await fetchOddsFromUrl(oddsUrl, { date, venueName, venueCode, raceNo });
+    const odds = browserOdds.ok
+      ? browserOdds
+      : htmlOdds || browserOdds;
     const prediction = runKeirinEngine({
       race,
       oddsByOrder: odds.odds,
@@ -115,13 +123,13 @@ export default async function handler(req) {
       browserAudit: browserResult.data.audit || null,
       dataQuality: {
         lineConfidence: line.confidence,
-        oddsAvailable: false,
+        oddsAvailable: odds.ok,
         participantCount: participants.length,
         browserVersion: browserResult.data.diagnostics?.version || null
       },
       warnings: [
         ...line.warnings,
-        "オッズ未取得・購入判断保留"
+        !odds.ok ? "オッズ未取得・購入判断保留" : null
       ].filter(Boolean),
       checkedAt: new Date().toISOString()
     });
@@ -190,6 +198,86 @@ async function requestBrowserService(base, params) {
       endpointAudit: attempts
     }
   };
+}
+
+function normalizeBrowserOdds(value) {
+  const raw = value && typeof value === "object" ? value : {};
+  const sourceOdds = raw.odds && typeof raw.odds === "object" ? raw.odds : {};
+  const odds = {};
+  for (const [key, oddValue] of Object.entries(sourceOdds)) {
+    const match = String(key).match(/^([1-9])-([1-9])-([1-9])$/);
+    const odd = Number(oddValue);
+    if (!match || new Set(match.slice(1)).size !== 3) continue;
+    if (!Number.isFinite(odd) || odd <= 1) continue;
+    odds[key] = odd;
+  }
+  return {
+    ok: Object.keys(odds).length > 0,
+    odds,
+    diagnostics: {
+      ...(raw.diagnostics || {}),
+      source: raw.diagnostics?.source || "browser-official-json",
+      parsedCount: Object.keys(odds).length
+    }
+  };
+}
+
+async function fetchOddsFromUrl(oddsUrl, context) {
+  if (!oddsUrl) {
+    return { ok: false, odds: {}, diagnostics: { source: "odds-url-missing" } };
+  }
+
+  let parsedUrl;
+  try {
+    parsedUrl = new URL(oddsUrl);
+  } catch {
+    return { ok: false, odds: {}, diagnostics: { source: "odds-url-invalid" } };
+  }
+
+  if (!/(^|\.)keirin\.jp$/i.test(parsedUrl.hostname)) {
+    return { ok: false, odds: {}, diagnostics: { source: "odds-url-domain-rejected" } };
+  }
+
+  try {
+    const response = await fetch(parsedUrl, {
+      redirect: "follow",
+      headers: {
+        accept: "text/html,application/xhtml+xml",
+        "accept-language": "ja",
+        "user-agent": "Mozilla/5.0 (compatible; ChariNekoDev/0.5; personal-use)"
+      },
+      signal: AbortSignal.timeout(30000)
+    });
+    const html = await response.text();
+    if (!response.ok) {
+      return {
+        ok: false,
+        odds: {},
+        diagnostics: { source: "odds-url-http", status: response.status }
+      };
+    }
+    const result = parseKeirinTrifectaOddsHtml(html, {
+      ...context,
+      sourceUrl: parsedUrl.toString()
+    });
+    return {
+      ...result,
+      diagnostics: {
+        ...result.diagnostics,
+        source: "discovered-odds-html",
+        status: response.status
+      }
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      odds: {},
+      diagnostics: {
+        source: "odds-url-fetch-error",
+        error: error instanceof Error ? error.message : String(error)
+      }
+    };
+  }
 }
 
 function adaptParticipant(item) {
