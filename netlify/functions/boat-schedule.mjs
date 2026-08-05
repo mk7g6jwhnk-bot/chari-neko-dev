@@ -1,4 +1,0 @@
-
-import{parseScheduleHtml}from"../../boat/parser/schedule-parser.mjs";import{validDate,jsonResponse}from"../../boat/parser/utils.mjs";
-export default async req=>{const u=new URL(req.url),date=u.searchParams.get("date")||"";if(!validDate(date))return jsonResponse(400,{ok:false,error:"日付形式不正"});const source=`https://www.boatrace.jp/owpc/pc/race/index?hd=${date}`;try{const r=await fetchOfficial(source);if(!r.ok)return jsonResponse(502,{ok:false,error:`HTTP ${r.status}`});const parsed=parseScheduleHtml(await r.text(),date);return jsonResponse(200,{ok:parsed.ok,date,...parsed,source,checkedAt:new Date().toISOString()})}catch(e){return jsonResponse(500,{ok:false,error:e.message,source})}};
-async function fetchOfficial(url){return fetch(url,{headers:{"user-agent":"Mozilla/5.0 (compatible; ChariNekoDev/0.6; personal-use)","accept-language":"ja"}})}
