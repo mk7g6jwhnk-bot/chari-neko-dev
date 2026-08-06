@@ -29,21 +29,21 @@ export function parseScheduleHtml(html, baseUrl, targetDate) {
 
   $("table").each((tableIndex, tableElement) => {
     const table = $(tableElement);
-    const header = findHeaderMap($, table);
-    if (!header || !header.dayToIndex.has(day)) return;
-    const targetIndex = header.dayToIndex.get(day);
+    const header = findHeaderMap($, table, day);
+    if (!header || !header.dayToColumn.has(day)) return;
+    const targetColumn = header.dayToColumn.get(day);
 
     table.find("tr").each((rowIndex, rowElement) => {
       const row = $(rowElement);
       const cells = row.children("th,td").toArray();
-      if (cells.length <= targetIndex) return;
-
       const venueCell = $(cells[header.venueIndex]);
       const venueCellText = normalizeText(venueCell.text());
       const venueName = [...VENUE_BY_NAME.keys()].find(name => venueCellText.includes(name));
       if (!venueName) return;
       const venueCode = VENUE_BY_NAME.get(venueName);
-      const targetCell = $(cells[targetIndex]);
+      const targetCellElement = findCellAtLogicalColumn($, cells, targetColumn);
+      if (!targetCellElement) return;
+      const targetCell = $(targetCellElement);
 
       const images = targetCell.find("img").toArray().map(image => ({
         src:String($(image).attr("src")||"").trim(),
@@ -67,7 +67,7 @@ export function parseScheduleHtml(html, baseUrl, targetDate) {
       const officialLinks=[...links,...onclickUrls];
       const included=(hasEventImage||hasGradeText||officialLinks.length>0);
 
-      auditedRows.push({tableIndex,rowIndex,venueCode,venueName,targetIndex,included,imageCount:images.length,officialLinkCount:officialLinks.length,evidence:images.map(x=>x.src||x.alt).filter(Boolean).slice(0,6)});
+      auditedRows.push({tableIndex,rowIndex,venueCode,venueName,targetColumn,included,imageCount:images.length,officialLinkCount:officialLinks.length,evidence:images.map(x=>x.src||x.alt).filter(Boolean).slice(0,6)});
       if(!included) return;
 
       meetings.push({
@@ -76,7 +76,7 @@ export function parseScheduleHtml(html, baseUrl, targetDate) {
         officialLinks,
         contextText:evidenceText.slice(0,240),
         source:"header-column-target-cell",
-        scheduleEvidence:{tableIndex,targetIndex,images,hasEventImage,hasGradeText}
+        scheduleEvidence:{tableIndex,targetColumn,images,hasEventImage,hasGradeText}
       });
     });
   });
@@ -84,23 +84,39 @@ export function parseScheduleHtml(html, baseUrl, targetDate) {
   const best = new Map();
   for(const m of meetings){ const key=`${m.date}|${m.venueCode}`; const prev=best.get(key); if(!prev || (!prev.discoveredUrl && m.discoveredUrl)) best.set(key,m); }
   const deduped=[...best.values()].sort((a,b)=>Number(a.venueCode)-Number(b.venueCode));
-  return { ok:true, meetings:deduped, diagnostics:{meetingCount:deduped.length,auditedVenueCount:auditedRows.length,title:normalizeText($("title").text()),targetDate:target,requestedDay:day,parserMode:"header-column-target-cell-v053",rows:auditedRows} };
+  return { ok:true, meetings:deduped, diagnostics:{meetingCount:deduped.length,auditedVenueCount:auditedRows.length,title:normalizeText($("title").text()),targetDate:target,requestedDay:day,parserMode:"target-day-cell-grade-evidence-v052",rows:auditedRows} };
 }
 
-function findHeaderMap($, table){
+function findHeaderMap($, table, day){
   let best=null;
   table.find("tr").each((_,tr)=>{
     const cells=$(tr).children("th,td").toArray();
-    const dayToIndex=new Map();
+    const dayToColumn=new Map();
     let venueIndex=0;
+    let logicalColumn=0;
     cells.forEach((cell,index)=>{
       const text=normalizeText($(cell).text());
       if(/競輪場/.test(text)) venueIndex=index;
       if(/^\d{1,2}$/.test(text)){
-        const n=Number(text); if(n>=1&&n<=31&&!dayToIndex.has(n)) dayToIndex.set(n,index);
+        const n=Number(text); if(n>=1&&n<=31&&!dayToColumn.has(n)) dayToColumn.set(n,logicalColumn);
       }
+      logicalColumn += readColspan($, cell);
     });
-    if(dayToIndex.size>=20 && (!best || dayToIndex.size>best.dayToIndex.size)) best={dayToIndex,venueIndex};
+    if(dayToColumn.has(day) && (!best || dayToColumn.size>best.dayToColumn.size)) best={dayToColumn,venueIndex};
   });
   return best;
+}
+
+function findCellAtLogicalColumn($, cells, targetColumn){
+  let logicalColumn=0;
+  for(const cell of cells){
+    const colspan=readColspan($,cell);
+    if(targetColumn>=logicalColumn && targetColumn<logicalColumn+colspan) return cell;
+    logicalColumn+=colspan;
+  }
+  return null;
+}
+
+function readColspan($,cell){
+  return Math.max(1,Number.parseInt($(cell).attr("colspan")||"1",10)||1);
 }

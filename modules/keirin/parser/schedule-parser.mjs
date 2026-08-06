@@ -10,115 +10,109 @@ const VENUES = [
 ["61","玉野"],["62","広島"],["63","防府"],["71","高松"],["73","小松島"],["74","高知"],
 ["75","松山"],["81","小倉"],["83","久留米"],["84","武雄"],["85","佐世保"],["86","別府"],["87","熊本"]
 ];
-
 const VENUE_BY_NAME = new Map(VENUES.map(([code, name]) => [name, code]));
 
 export function parseScheduleHtml(html, baseUrl, targetDate) {
   const $ = cheerio.load(html);
-  const candidates = [];
   const target = String(targetDate || "");
   const day = Number(target.slice(6, 8));
-  const month = Number(target.slice(4, 6));
-  const dateTokens = buildDateTokens(target, month, day);
+  const meetings = [];
+  const auditedRows = [];
 
-  $("a[href]").each((domIndex, link) => {
-    const href = String($(link).attr("href") || "").trim();
-    const absolute = absoluteUrl(href, baseUrl);
-    if (!absolute) return;
+  if (!/^\d{8}$/.test(target) || day < 1 || day > 31) {
+    return { ok:false, meetings:[], diagnostics:{ targetDate:target, requestedDay:day||0, error:"target-date-invalid", parserMode:"header-column-v053" } };
+  }
 
-    let parsed;
-    try { parsed = new URL(absolute); } catch { return; }
-    if (parsed.hostname !== "keirin.jp" && !parsed.hostname.endsWith(".keirin.jp")) return;
+  $("table").each((tableIndex, tableElement) => {
+    const table = $(tableElement);
+    const header = findHeaderMap($, table, day);
+    if (!header || !header.dayToColumn.has(day)) return;
+    const targetColumn = header.dayToColumn.get(day);
 
-    const linkText = normalizeText($(link).text()) || normalizeText($(link).find("img").attr("alt") || "");
-    const row = $(link).closest("tr");
-    const local = $(link).closest("td,th,li,div,section");
-    const rowText = normalizeText(row.text());
-    const localText = normalizeText(local.text());
-    const searchable = `${linkText} ${localText} ${rowText} ${href} ${absolute}`;
-
-    const venueName = [...VENUE_BY_NAME.keys()].find(name => searchable.includes(name));
-    if (!venueName) return;
-    const venueCode = VENUE_BY_NAME.get(venueName);
-
-    const raceLike = /race|kaisai|jocd|jcd|bkcd|sp\/top|出走|オッズ|開催/i.test(searchable);
-    if (!raceLike) return;
-
-    let score = 10;
-    const dateMatched = dateTokens.some(token => token && searchable.includes(token));
-    if (dateMatched) score += 100;
-    if (row.length) score += 20;
-    if (linkText.includes(venueName)) score += 20;
-    if (/jocd|jcd|bkcd/i.test(`${href} ${absolute}`)) score += 30;
-    if (/race|kaisai|sp\/top/i.test(`${href} ${absolute}`)) score += 20;
-
-    // 月間日程表の列構造を読める場合は対象日セルかどうかを加点する。
-    if (row.length && day >= 1) {
+    table.find("tr").each((rowIndex, rowElement) => {
+      const row = $(rowElement);
       const cells = row.children("th,td").toArray();
-      let logicalDay = 1;
-      for (let index = 1; index < cells.length; index += 1) {
-        const cell = cells[index];
-        const colspan = Math.max(1, Number.parseInt($(cell).attr("colspan") || "1", 10) || 1);
-        const end = logicalDay + colspan - 1;
-        if (day >= logicalDay && day <= end && $(cell).find(link).length) score += 150;
-        logicalDay = end + 1;
-      }
-    }
+      const venueCell = $(cells[header.venueIndex]);
+      const venueCellText = normalizeText(venueCell.text());
+      const venueName = [...VENUE_BY_NAME.keys()].find(name => venueCellText.includes(name));
+      if (!venueName) return;
+      const venueCode = VENUE_BY_NAME.get(venueName);
+      const targetCellElement = findCellAtLogicalColumn($, cells, targetColumn);
+      if (!targetCellElement) return;
+      const targetCell = $(targetCellElement);
 
-    candidates.push({
-      venueCode,
-      venueName,
-      date: target,
-      discoveredUrl: absolute,
-      linkText,
-      contextText: (localText || rowText).slice(0, 240),
-      source: dateMatched ? "date-text-match" : "internal-schedule-link",
-      score,
-      domIndex
+      const images = targetCell.find("img").toArray().map(image => ({
+        src:String($(image).attr("src")||"").trim(),
+        alt:normalizeText($(image).attr("alt")||""),
+        title:normalizeText($(image).attr("title")||"")
+      }));
+      const evidenceText = normalizeText(targetCell.text());
+      const evidence = images.map(x=>`${x.src} ${x.alt} ${x.title}`).join(" ");
+      const hasEventImage = images.some(x => !/kaisaihuka|開催不可|spacer|blank/i.test(`${x.src} ${x.alt} ${x.title}`));
+      const hasGradeText = /(?:GⅠ|G1|GⅡ|G2|GⅢ|G3|FⅠ|F1|FⅡ|F2|GP)/i.test(`${evidenceText} ${evidence}`);
+      const links = targetCell.find("a[href]").toArray().map(a => ({
+        href:String($(a).attr("href")||"").trim(),
+        text:normalizeText($(a).text()),
+        url:absoluteUrl(String($(a).attr("href")||""), baseUrl)
+      })).filter(x => x.url && /^https:\/\/(?:www\.)?keirin\.jp\//i.test(x.url));
+      const onclickUrls = targetCell.find("[onclick]").toArray().flatMap(el => {
+        const raw=String($(el).attr("onclick")||"");
+        const found=[...raw.matchAll(/["']([^"']+(?:race|kaisai|program|odds)[^"']*)["']/ig)].map(m=>absoluteUrl(m[1],baseUrl));
+        return found.filter(Boolean).map(url=>({href:url,text:"onclick",url}));
+      });
+      const officialLinks=[...links,...onclickUrls];
+      const included=(hasEventImage||hasGradeText||officialLinks.length>0);
+
+      auditedRows.push({tableIndex,rowIndex,venueCode,venueName,targetColumn,included,imageCount:images.length,officialLinkCount:officialLinks.length,evidence:images.map(x=>x.src||x.alt).filter(Boolean).slice(0,6)});
+      if(!included) return;
+
+      meetings.push({
+        venueCode, venueName, date:target,
+        discoveredUrl:officialLinks[0]?.url || "",
+        officialLinks,
+        contextText:evidenceText.slice(0,240),
+        source:"header-column-target-cell",
+        scheduleEvidence:{tableIndex,targetColumn,images,hasEventImage,hasGradeText}
+      });
     });
   });
 
-  // 同じ日付・会場は最も確からしい内部リンク1件だけに統合する。
-  const bestByVenue = new Map();
-  for (const candidate of candidates) {
-    const key = `${target}|${candidate.venueCode}`;
-    const previous = bestByVenue.get(key);
-    if (!previous || candidate.score > previous.score ||
-        (candidate.score === previous.score && candidate.domIndex < previous.domIndex)) {
-      bestByVenue.set(key, candidate);
-    }
-  }
-
-  const meetings = [...bestByVenue.values()]
-    .sort((a, b) => Number(a.venueCode) - Number(b.venueCode))
-    .map(({ score, domIndex, ...meeting }) => meeting);
-
-  return {
-    ok: true,
-    meetings,
-    diagnostics: {
-      meetingCount: meetings.length,
-      rawCandidateCount: candidates.length,
-      title: normalizeText($("title").text()),
-      targetDate: target,
-      requestedDay: day,
-      parserMode: "internal-link-ranked-dedup-v051",
-      excludedExternalVenues: ["32:千葉(VELO250)"]
-    }
-  };
+  const best = new Map();
+  for(const m of meetings){ const key=`${m.date}|${m.venueCode}`; const prev=best.get(key); if(!prev || (!prev.discoveredUrl && m.discoveredUrl)) best.set(key,m); }
+  const deduped=[...best.values()].sort((a,b)=>Number(a.venueCode)-Number(b.venueCode));
+  return { ok:true, meetings:deduped, diagnostics:{meetingCount:deduped.length,auditedVenueCount:auditedRows.length,title:normalizeText($("title").text()),targetDate:target,requestedDay:day,parserMode:"target-day-cell-grade-evidence-v052",rows:auditedRows} };
 }
 
-function buildDateTokens(targetDate, month, day) {
-  if (!/^\d{8}$/.test(targetDate) || !month || !day) return [];
-  const yyyy = targetDate.slice(0, 4);
-  const mm = String(month).padStart(2, "0");
-  const dd = String(day).padStart(2, "0");
-  return [
-    targetDate,
-    `${yyyy}/${mm}/${dd}`,
-    `${yyyy}-${mm}-${dd}`,
-    `${month}/${day}`,
-    `${month}月${day}日`,
-    `${day}日`
-  ];
+function findHeaderMap($, table, day){
+  let best=null;
+  table.find("tr").each((_,tr)=>{
+    const cells=$(tr).children("th,td").toArray();
+    const dayToColumn=new Map();
+    let venueIndex=0;
+    let logicalColumn=0;
+    cells.forEach((cell,index)=>{
+      const text=normalizeText($(cell).text());
+      if(/競輪場/.test(text)) venueIndex=index;
+      if(/^\d{1,2}$/.test(text)){
+        const n=Number(text); if(n>=1&&n<=31&&!dayToColumn.has(n)) dayToColumn.set(n,logicalColumn);
+      }
+      logicalColumn += readColspan($,cell);
+    });
+    if(dayToColumn.has(day) && (!best || dayToColumn.size>best.dayToColumn.size)) best={dayToColumn,venueIndex};
+  });
+  return best;
+}
+
+function findCellAtLogicalColumn($,cells,targetColumn){
+  let logicalColumn=0;
+  for(const cell of cells){
+    const colspan=readColspan($,cell);
+    if(targetColumn>=logicalColumn && targetColumn<logicalColumn+colspan) return cell;
+    logicalColumn+=colspan;
+  }
+  return null;
+}
+
+function readColspan($,cell){
+  return Math.max(1,Number.parseInt($(cell).attr("colspan")||"1",10)||1);
 }
