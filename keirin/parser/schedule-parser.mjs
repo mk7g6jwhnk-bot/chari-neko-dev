@@ -15,70 +15,110 @@ const VENUE_BY_NAME = new Map(VENUES.map(([code, name]) => [name, code]));
 
 export function parseScheduleHtml(html, baseUrl, targetDate) {
   const $ = cheerio.load(html);
-  const meetings = [];
-  const seen = new Set();
-  const day = Number(String(targetDate).slice(6, 8));
+  const candidates = [];
+  const target = String(targetDate || "");
+  const day = Number(target.slice(6, 8));
+  const month = Number(target.slice(4, 6));
+  const dateTokens = buildDateTokens(target, month, day);
 
-  $("tr").each((_, row) => {
-    const cells = $(row).children("th,td").toArray();
-    if (cells.length < 2) return;
+  $("a[href]").each((domIndex, link) => {
+    const href = String($(link).attr("href") || "").trim();
+    const absolute = absoluteUrl(href, baseUrl);
+    if (!absolute) return;
 
-    const venueText = normalizeText($(cells[0]).text());
-    const venueName = [...VENUE_BY_NAME.keys()].find(name => venueText.includes(name));
+    let parsed;
+    try { parsed = new URL(absolute); } catch { return; }
+    if (parsed.hostname !== "keirin.jp" && !parsed.hostname.endsWith(".keirin.jp")) return;
+
+    const linkText = normalizeText($(link).text()) || normalizeText($(link).find("img").attr("alt") || "");
+    const row = $(link).closest("tr");
+    const local = $(link).closest("td,th,li,div,section");
+    const rowText = normalizeText(row.text());
+    const localText = normalizeText(local.text());
+    const searchable = `${linkText} ${localText} ${rowText} ${href} ${absolute}`;
+
+    const venueName = [...VENUE_BY_NAME.keys()].find(name => searchable.includes(name));
     if (!venueName) return;
     const venueCode = VENUE_BY_NAME.get(venueName);
 
-    let logicalDay = 1;
-    let targetCell = null;
-    for (let index = 1; index < cells.length; index += 1) {
-      const cell = cells[index];
-      const colspan = Math.max(1, Number.parseInt($(cell).attr("colspan") || "1", 10) || 1);
-      const start = logicalDay;
-      const end = logicalDay + colspan - 1;
-      if (day >= start && day <= end) {
-        targetCell = cell;
-        break;
+    const raceLike = /race|kaisai|jocd|jcd|bkcd|sp\/top|出走|オッズ|開催/i.test(searchable);
+    if (!raceLike) return;
+
+    let score = 10;
+    const dateMatched = dateTokens.some(token => token && searchable.includes(token));
+    if (dateMatched) score += 100;
+    if (row.length) score += 20;
+    if (linkText.includes(venueName)) score += 20;
+    if (/jocd|jcd|bkcd/i.test(`${href} ${absolute}`)) score += 30;
+    if (/race|kaisai|sp\/top/i.test(`${href} ${absolute}`)) score += 20;
+
+    // 月間日程表の列構造を読める場合は対象日セルかどうかを加点する。
+    if (row.length && day >= 1) {
+      const cells = row.children("th,td").toArray();
+      let logicalDay = 1;
+      for (let index = 1; index < cells.length; index += 1) {
+        const cell = cells[index];
+        const colspan = Math.max(1, Number.parseInt($(cell).attr("colspan") || "1", 10) || 1);
+        const end = logicalDay + colspan - 1;
+        if (day >= logicalDay && day <= end && $(cell).find(link).length) score += 150;
+        logicalDay = end + 1;
       }
-      logicalDay += colspan;
     }
-    if (!targetCell) return;
 
-    const candidates = $(targetCell).find("a[href]").toArray();
-    for (const link of candidates) {
-      const href = $(link).attr("href") || "";
-      const absolute = absoluteUrl(href, baseUrl);
-      if (!absolute) continue;
-      const parsed = new URL(absolute);
-
-      // KEIRIN.JP外部サイト（例: VELO250）は通常競輪開催として扱わない。
-      if (parsed.hostname !== "keirin.jp" && !parsed.hostname.endsWith(".keirin.jp")) continue;
-      if (!/race|kaisai|開催|jocd|jcd|bkcd|sp\/top/i.test(`${href} ${absolute}`)) continue;
-
-      const key = `${targetDate}|${venueCode}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
-
-      meetings.push({
-        venueCode,
-        venueName,
-        date: targetDate,
-        discoveredUrl: absolute,
-        linkText: normalizeText($(link).text()) || normalizeText($(link).find("img").attr("alt") || ""),
-        contextText: normalizeText($(targetCell).text()).slice(0, 240),
-        source: "target-date-cell"
-      });
-    }
+    candidates.push({
+      venueCode,
+      venueName,
+      date: target,
+      discoveredUrl: absolute,
+      linkText,
+      contextText: (localText || rowText).slice(0, 240),
+      source: dateMatched ? "date-text-match" : "internal-schedule-link",
+      score,
+      domIndex
+    });
   });
+
+  // 同じ日付・会場は最も確からしい内部リンク1件だけに統合する。
+  const bestByVenue = new Map();
+  for (const candidate of candidates) {
+    const key = `${target}|${candidate.venueCode}`;
+    const previous = bestByVenue.get(key);
+    if (!previous || candidate.score > previous.score ||
+        (candidate.score === previous.score && candidate.domIndex < previous.domIndex)) {
+      bestByVenue.set(key, candidate);
+    }
+  }
+
+  const meetings = [...bestByVenue.values()]
+    .sort((a, b) => Number(a.venueCode) - Number(b.venueCode))
+    .map(({ score, domIndex, ...meeting }) => meeting);
 
   return {
     ok: true,
     meetings,
     diagnostics: {
       meetingCount: meetings.length,
+      rawCandidateCount: candidates.length,
       title: normalizeText($("title").text()),
-      targetDate,
+      targetDate: target,
       requestedDay: day,
+      parserMode: "internal-link-ranked-dedup-v051",
       excludedExternalVenues: ["32:千葉(VELO250)"]
     }
   };
+}
+
+function buildDateTokens(targetDate, month, day) {
+  if (!/^\d{8}$/.test(targetDate) || !month || !day) return [];
+  const yyyy = targetDate.slice(0, 4);
+  const mm = String(month).padStart(2, "0");
+  const dd = String(day).padStart(2, "0");
+  return [
+    targetDate,
+    `${yyyy}/${mm}/${dd}`,
+    `${yyyy}-${mm}-${dd}`,
+    `${month}/${day}`,
+    `${month}月${day}日`,
+    `${day}日`
+  ];
 }
