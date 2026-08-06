@@ -49,8 +49,21 @@ async function loadMeetings(){
     }else if(state.sport==="keirin"){
       const r=await fetch(`/.netlify/functions/keirin-discover?date=${compact(state.date)}`,{cache:"no-store"}),p=await r.json();
       if(!r.ok||!p.ok)throw new Error(p.error||"開催取得失敗");
-      const items=p.meetings.map(m=>({name:m.venueName,sub:`公式開催確認済み / 出走表リンク ${getKeirinCard(m)?"発見":"不要"} / オッズ ${getKeirinOdds(m)?"発見":"解析時取得"}`,raw:m}));
+      const meetings=Array.isArray(p.meetings)?p.meetings:[];
+      const items=meetings.map((m,index)=>{
+        const venueName=String(m?.venueName||m?.trackName||m?.name||`開催${index+1}`).trim();
+        const venueCode=String(m?.venueCode||m?.code||"").padStart(2,"0");
+        const normalized={...m,venueName,venueCode,date:m?.date||compact(state.date)};
+        return {
+          name:venueName,
+          sub:`場コード ${venueCode||"--"} / 公式開催確認済み / 出走表 ${getKeirinCard(normalized)?"発見":"解析時取得"} / オッズ ${getKeirinOdds(normalized)?"発見":"解析時取得"}`,
+          raw:normalized
+        };
+      }).filter(x=>x.name);
       renderItems(items,openKeirinVenue);
+      if(!items.length){
+        $("list").innerHTML=`<div class="empty">開催情報は取得できましたが表示対象が0件です。取得件数: ${meetings.length}</div>`;
+      }
     }else{
       const r=await fetch('/.netlify/functions/auto-discover',{cache:"no-store"}),p=await r.json();
       if(!r.ok||!p.ok)throw new Error(p.error||"開催取得失敗");
@@ -64,9 +77,26 @@ async function loadMeetings(){
 }
 
 function renderItems(items,handler){
+  const safeItems=Array.isArray(items)?items:[];
   $("list").innerHTML="";
-  items.forEach(x=>{const d=document.createElement("div");d.className="item";d.innerHTML=`<strong>${x.name}</strong><br><small>${x.sub}</small><button>レース一覧</button>`;d.querySelector("button").onclick=()=>handler(x.raw);$("list").appendChild(d)});
-  $("listCount").textContent=`${items.length}件`;
+  safeItems.forEach(x=>{
+    const d=document.createElement("div");
+    d.className="item";
+    const strong=document.createElement("strong");
+    strong.textContent=String(x?.name||"名称未取得");
+    const br=document.createElement("br");
+    const small=document.createElement("small");
+    small.textContent=String(x?.sub||"");
+    const button=document.createElement("button");
+    button.type="button";
+    button.textContent="レース一覧";
+    button.disabled=false;
+    button.onclick=()=>handler(x.raw);
+    d.append(strong,br,small,button);
+    $("list").appendChild(d);
+  });
+  if(!safeItems.length) $("list").innerHTML='<div class="empty">該当する開催がありません。</div>';
+  $("listCount").textContent=`${safeItems.length}件`;
 }
 
 async function openBoatVenue(v){
