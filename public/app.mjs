@@ -56,7 +56,7 @@ async function loadMeetings(){
         const normalized={...m,venueName,venueCode,date:m?.date||compact(state.date)};
         return {
           name:venueName,
-          sub:`場コード ${venueCode||"--"} / 公式開催確認済み / 出走表 ${getKeirinCard(normalized)?"発見":"解析時取得"} / オッズ ${getKeirinOdds(normalized)?"発見":"解析時取得"}`,
+          sub:`場コード ${venueCode||"--"} / 実在R確認済み ${Array.isArray(normalized.raceNumbers)?normalized.raceNumbers.length:0}R / 出走表 ${getKeirinCard(normalized)?"発見":"解析時取得"} / オッズ ${getKeirinOdds(normalized)?"発見":"解析時取得"}`,
           raw:normalized
         };
       }).filter(x=>x.name);
@@ -109,7 +109,9 @@ async function openBoatVenue(v){
 function openKeirinVenue(m){
   state.meeting=m;$("raceSportCode").textContent="KEIRIN";$("raceTitle").textContent=m.venueName;show("races");
   const discovered=[...(m.discovery?.links?.raceCards||[]),...(m.discovery?.links?.other||[])];
-  const numbers=[...new Set(discovered.map(x=>{const t=`${x.text||""} ${x.context||""} ${x.url||""}`;const hit=t.match(/(?:^|\D)(1[0-2]|[1-9])\s*[RＲ](?:\D|$)/i);return hit?Number(hit[1]):null}).filter(Number.isInteger))].sort((a,b)=>a-b);
+  const supplied=Array.isArray(m.raceNumbers)?m.raceNumbers.map(Number).filter(Number.isInteger):[];
+  const parsed=discovered.map(x=>{const t=`${x.text||""} ${x.context||""} ${x.url||""}`;const hit=t.match(/(?:^|\D)(1[0-2]|[1-9])\s*[RＲ](?:\D|$)/i);return hit?Number(hit[1]):null}).filter(Number.isInteger);
+  const numbers=[...new Set([...supplied,...parsed])].sort((a,b)=>a-b);
   if(!numbers.length){
     $("raceControls").innerHTML="<p>公式ページから実在レース番号を確認できませんでした。仮の1〜12Rは表示しません。</p>";
     $("raceList").innerHTML='<div class="empty">実在Rを確認できないため解析を停止しています。</div>';
