@@ -150,55 +150,66 @@ async function requestBrowserService(base, params) {
     raceNo: String(params.raceNo)
   });
 
-  const candidates = [
-    `${base}/keirin/race?${query}`,
-    `${base}/keirin?${query}`,
-    `${base}/api/keirin?${query}`,
-    `${base}/race?${query}`,
-    `${base}/fetch?${query}`
-  ];
+  const endpoint = `${base}/keirin/race?${query}`;
+  const startedAt = Date.now();
 
-  const attempts = [];
-  for (const endpoint of candidates) {
-    try {
-      const response = await fetch(endpoint, {
-        headers: { accept: "application/json" },
-        signal: AbortSignal.timeout(120000)
-      });
-      const text = await response.text();
-      let data = null;
-      try { data = JSON.parse(text); } catch {}
+  try {
+    const response = await fetch(endpoint, {
+      headers: { accept: "application/json" },
+      signal: AbortSignal.timeout(45000)
+    });
+    const text = await response.text();
+    let data = null;
+    try { data = text ? JSON.parse(text) : null; } catch {}
 
-      attempts.push({
-        endpoint: endpoint.replace(base, ""),
+    if (!text) {
+      return {
+        ok: false,
+        status: response.status || 502,
+        data: {
+          ok: false,
+          error: "競輪ブラウザサービスから空の応答が返りました",
+          endpointAudit: [{ endpoint: "/keirin/race", status: response.status, elapsedMs: Date.now() - startedAt }]
+        }
+      };
+    }
+
+    if (data) {
+      return {
+        ok: response.ok && data.ok !== false,
         status: response.status,
-        parsed: data !== null
-      });
-
-      if (data && (data.officialData || data.ok === false)) {
-        return {
-          ok: response.ok && data.ok !== false,
-          status: response.status,
-          data: { ...data, endpointAudit: attempts }
-        };
-      }
-    } catch (error) {
-      attempts.push({
-        endpoint: endpoint.replace(base, ""),
-        error: error instanceof Error ? error.message : String(error)
-      });
+        data: {
+          ...data,
+          endpointAudit: [{ endpoint: "/keirin/race", status: response.status, parsed: true, elapsedMs: Date.now() - startedAt }]
+        }
+      };
     }
-  }
 
-  return {
-    ok: false,
-    status: 502,
-    data: {
+    return {
       ok: false,
-      error: "競輪ブラウザサービスの取得エンドポイントを確認できません",
-      endpointAudit: attempts
-    }
-  };
+      status: response.status || 502,
+      data: {
+        ok: false,
+        error: "競輪ブラウザサービスの応答をJSONとして読み取れませんでした",
+        responsePreview: text.slice(0, 300),
+        endpointAudit: [{ endpoint: "/keirin/race", status: response.status, parsed: false, elapsedMs: Date.now() - startedAt }]
+      }
+    };
+  } catch (error) {
+    const timedOut = error instanceof Error && /timeout|abort/i.test(error.message);
+    return {
+      ok: false,
+      status: 504,
+      data: {
+        ok: false,
+        error: timedOut
+          ? "競輪公式データ取得が45秒以内に完了しませんでした"
+          : "競輪ブラウザサービスへの接続に失敗しました",
+        detail: error instanceof Error ? error.message : String(error),
+        endpointAudit: [{ endpoint: "/keirin/race", elapsedMs: Date.now() - startedAt }]
+      }
+    };
+  }
 }
 
 function normalizeBrowserOdds(value) {

@@ -136,7 +136,16 @@ async function analyzeKeirin(r){
   try{
     const card=getKeirinCard(state.meeting),odds=getKeirinOdds(state.meeting);
     const q=new URLSearchParams({date:compact(state.date),venueName:state.meeting.venueName,venueCode:String(state.meeting.venueCode||""),raceNo:String(r.raceNo),budget:"3000"});if(card?.url)q.set("raceCardUrl",card.url);if(odds?.url)q.set("oddsUrl",odds.url);
-    const res=await fetch(`/.netlify/functions/keirin-predict?${q}`,{cache:"no-store"}),p=await res.json();if(!res.ok||!p.ok)throw new Error(p.error||"解析失敗");renderKeirinResult(p);show("result");
+    const res=await fetch(`/.netlify/functions/keirin-predict?${q}`,{cache:"no-store"});
+    const text=await res.text();
+    let p=null;
+    try{p=text?JSON.parse(text):null;}catch{}
+    if(!p){
+      throw new Error(res.status===502||res.status===504
+        ?"競輪データ取得が時間切れになりました。少し待って再実行してください"
+        :`解析サーバーから読み取れる応答がありません（${res.status}）`);
+    }
+    if(!res.ok||!p.ok)throw new Error(p.error||"解析失敗");renderKeirinResult(p);show("result");
   }catch(e){loadingError(e)}
 }
 
