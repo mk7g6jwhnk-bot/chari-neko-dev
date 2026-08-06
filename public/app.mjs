@@ -107,8 +107,17 @@ async function openBoatVenue(v){
 }
 
 function openKeirinVenue(m){
-  state.meeting=m;$("raceSportCode").textContent="KEIRIN";$("raceTitle").textContent=m.venueName;$("raceControls").innerHTML="<p>公式内部リンクから対象レースを取得します。</p>";show("races");
-  renderRaces(Array.from({length:12},(_,i)=>({raceNo:i+1,sub:"ライン・オッズを取得して解析",raw:{raceNo:i+1}})),analyzeKeirin);
+  state.meeting=m;$("raceSportCode").textContent="KEIRIN";$("raceTitle").textContent=m.venueName;show("races");
+  const discovered=[...(m.discovery?.links?.raceCards||[]),...(m.discovery?.links?.other||[])];
+  const numbers=[...new Set(discovered.map(x=>{const t=`${x.text||""} ${x.context||""} ${x.url||""}`;const hit=t.match(/(?:^|\D)(1[0-2]|[1-9])\s*[RＲ](?:\D|$)/i);return hit?Number(hit[1]):null}).filter(Number.isInteger))].sort((a,b)=>a-b);
+  if(!numbers.length){
+    $("raceControls").innerHTML="<p>公式ページから実在レース番号を確認できませんでした。仮の1〜12Rは表示しません。</p>";
+    $("raceList").innerHTML='<div class="empty">実在Rを確認できないため解析を停止しています。</div>';
+    $("raceCount").textContent="0R";
+    return;
+  }
+  $("raceControls").innerHTML="<p>公式ページで確認できたレースだけ表示します。</p>";
+  renderRaces(numbers.map(raceNo=>({raceNo,sub:"公式確認済み",raw:{raceNo}})),analyzeKeirin);
 }
 
 function openAutoVenue(m){
