@@ -49,7 +49,7 @@ async function loadMeetings(){
     }else if(state.sport==="keirin"){
       const r=await fetch(`/.netlify/functions/keirin-discover?date=${compact(state.date)}`,{cache:"no-store"}),p=await r.json();
       if(!r.ok||!p.ok)throw new Error(p.error||"開催取得失敗");
-      const items=p.meetings.map(m=>({name:m.venueName,sub:`出走表 ${getKeirinCard(m)?"発見":"未発見"} / オッズ ${getKeirinOdds(m)?"発見":"未発見"}`,raw:m})).filter(x=>getKeirinCard(x.raw));
+      const items=p.meetings.map(m=>({name:m.venueName,sub:`公式開催確認済み / 出走表リンク ${getKeirinCard(m)?"発見":"不要"} / オッズ ${getKeirinOdds(m)?"発見":"解析時取得"}`,raw:m}));
       renderItems(items,openKeirinVenue);
     }else{
       const r=await fetch('/.netlify/functions/auto-discover',{cache:"no-store"}),p=await r.json();
@@ -105,7 +105,7 @@ async function analyzeKeirin(r){
   state.raceNo=r.raceNo;startLoading(`${state.meeting.venueName} ${r.raceNo}R`);
   try{
     const card=getKeirinCard(state.meeting),odds=getKeirinOdds(state.meeting);
-    const q=new URLSearchParams({date:compact(state.date),venueName:state.meeting.venueName,raceCardUrl:card.url,raceNo:String(r.raceNo),budget:"3000"});if(odds)q.set("oddsUrl",odds.url);
+    const q=new URLSearchParams({date:compact(state.date),venueName:state.meeting.venueName,venueCode:String(state.meeting.venueCode||""),raceNo:String(r.raceNo),budget:"3000"});if(card?.url)q.set("raceCardUrl",card.url);if(odds?.url)q.set("oddsUrl",odds.url);
     const res=await fetch(`/.netlify/functions/keirin-predict?${q}`,{cache:"no-store"}),p=await res.json();if(!res.ok||!p.ok)throw new Error(p.error||"解析失敗");renderKeirinResult(p);show("result");
   }catch(e){loadingError(e)}
 }
