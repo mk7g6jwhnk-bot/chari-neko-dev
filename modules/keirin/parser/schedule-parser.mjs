@@ -60,7 +60,16 @@ export function parseScheduleHtml(html, baseUrl, targetDate) {
         const found=[...raw.matchAll(/["']([^"']+(?:race|kaisai|program|odds)[^"']*)["']/ig)].map(m=>absoluteUrl(m[1],baseUrl));
         return found.filter(Boolean).map(url=>({href:url,text:"onclick",url}));
       });
-      const officialLinks=[...links,...onclickUrls];
+      const postLinks = targetCell.find("[data-pprm-href][data-pprm-encp][data-pprm-dkbn]").toArray().flatMap(el => {
+        const postPath=String($(el).attr("data-pprm-href")||"").trim();
+        const encp=String($(el).attr("data-pprm-encp")||"").trim();
+        const dkbn=String($(el).attr("data-pprm-dkbn")||"").trim();
+        const disp=dkbn==="1"?"PJ0301":dkbn==="2"?"PJ0302":"";
+        const url=absoluteUrl(postPath,baseUrl);
+        if(!url||!encp||!disp||!/^https:\/\/(?:www\.)?keirin\.jp\//i.test(url)) return [];
+        return [{href:postPath,text:"data-pprm",url,method:"POST",postPath,encp,dkbn,disp}];
+      });
+      const officialLinks=[...postLinks,...links,...onclickUrls];
       const included=(hasEventImage||hasGradeText||officialLinks.length>0);
 
       auditedRows.push({tableIndex,rowIndex,venueCode,venueName,targetColumn,included,imageCount:images.length,officialLinkCount:officialLinks.length,evidence:images.map(x=>x.src||x.alt).filter(Boolean).slice(0,6)});
@@ -69,6 +78,10 @@ export function parseScheduleHtml(html, baseUrl, targetDate) {
       meetings.push({
         venueCode, venueName, date:target,
         discoveredUrl:officialLinks[0]?.url || "",
+        officialRequest:postLinks[0] ? {
+          method:"POST", postPath:postLinks[0].postPath, url:postLinks[0].url,
+          encp:postLinks[0].encp, dkbn:postLinks[0].dkbn, disp:postLinks[0].disp
+        } : null,
         officialLinks,
         contextText:evidenceText.slice(0,240),
         source:"header-column-target-cell",
