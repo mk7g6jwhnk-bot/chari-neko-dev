@@ -4,9 +4,12 @@ import { fileURLToPath } from "node:url";
 
 const outputUrl = new URL("../netlify/generated/deploy-context.mjs", import.meta.url);
 const outputPath = fileURLToPath(outputUrl);
+const context = String(process.env.CONTEXT || "dev");
 const metadata = {
-  context: String(process.env.CONTEXT || "dev"),
-  branch: String(process.env.BRANCH || "")
+  context,
+  branch: String(context === "deploy-preview"
+    ? process.env.HEAD || process.env.BRANCH || ""
+    : process.env.BRANCH || "")
 };
 const source = `// Generated at build time from non-secret Netlify metadata.\n` +
   `export const NETLIFY_DEPLOY_CONTEXT = Object.freeze(${JSON.stringify(metadata)});\n`;
