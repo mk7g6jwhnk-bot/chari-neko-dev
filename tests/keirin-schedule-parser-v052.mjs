@@ -14,4 +14,4 @@ const result = parseScheduleHtml(html, "https://keirin.jp/pc/raceschedule", "202
 assert.equal(result.ok, true);
 assert.deepEqual(result.meetings.map(m => m.venueName), ["宇都宮", "岐阜"]);
 assert.equal(result.diagnostics.parserMode, "target-day-cell-grade-evidence-v052");
-console.log("keirin schedule parser v0.5.2: ok");
+console.log("keirin schedule parser colspan date detection: ok");
