@@ -2,6 +2,7 @@ import { parseKeirinTrifectaOddsHtml } from "../../parser/odds-parser.mjs";
 import { inferLines } from "../../parser/line-parser.mjs";
 import { runKeirinEngine } from "../../engine/keirin-engine.mjs";
 import { jsonResponse } from "../../parser/utils.mjs";
+import { createNetlifyOfficialLineStore, resolveOfficialLines } from "../lib/keirin-official-line-store.mjs";
 
 const VENUE_CODE_BY_NAME = {
   函館: "11", 青森: "12", いわき平: "13", 弥彦: "21", 前橋: "22",
@@ -16,6 +17,10 @@ const VENUE_CODE_BY_NAME = {
 };
 
 export default async function handler(req) {
+  return handleKeirinPredict(req);
+}
+
+export async function handleKeirinPredict(req, { officialLineStore } = {}) {
   const url = new URL(req.url);
   const date = url.searchParams.get("date") || "";
   const venueName = url.searchParams.get("venueName") || "競輪場";
@@ -70,7 +75,7 @@ export default async function handler(req) {
     const officialParticipants = Array.isArray(officialData.participants)
       ? officialData.participants
       : [];
-    const officialLines = Array.isArray(officialData.lines)
+    const currentOfficialLines = Array.isArray(officialData.lines)
       ? officialData.lines
       : [];
 
@@ -84,7 +89,22 @@ export default async function handler(req) {
       });
     }
 
-    const lineText = buildLineText(officialLines);
+    const browserAudit = browserResult.data.audit || {};
+    const lineResolution = await resolveOfficialLines({
+      request: { date, venueCode, raceNo },
+      identity: {
+        identityPassed: browserAudit.identityPassed === true,
+        date: normalizeDate(basic.date || browserAudit.actual?.date),
+        venueCode: browserAudit.expected?.venueCode || "",
+        raceNo: Number(basic.raceNo || browserAudit.actual?.raceNo || 0)
+      },
+      currentLines: currentOfficialLines,
+      venueName: basic.venueName || venueName,
+      buildLineText,
+      store: officialLineStore || createNetlifyOfficialLineStore()
+    });
+    const officialLines = lineResolution.lines;
+    const lineText = lineResolution.lineText;
     const line = inferLines({ participants, lineText });
     const race = {
       id: `${date}-${basic.venueName || venueName}-${basic.raceNo || raceNo}`,
@@ -120,15 +140,23 @@ export default async function handler(req) {
       odds,
       prediction,
       officialData,
+      lineText,
+      lineSource: lineResolution.lineSource,
+      lineFetchedAt: lineResolution.fetchedAt,
       browserAudit: browserResult.data.audit || null,
       dataQuality: {
         lineConfidence: line.confidence,
+        lineSource: lineResolution.lineSource,
+        lineFetchedAt: lineResolution.fetchedAt,
+        effectiveLineCount: officialLines.length,
         oddsAvailable: odds.ok,
         participantCount: participants.length,
         browserVersion: browserResult.data.diagnostics?.version || null
       },
       warnings: [
         ...line.warnings,
+        lineResolution.lineSource === "cached-official" ? "取得済み公式ラインを使用" : null,
+        lineResolution.storageWarning,
         !odds.ok ? "オッズ未取得・購入判断保留" : null
       ].filter(Boolean),
       checkedAt: new Date().toISOString()
