@@ -78,7 +78,7 @@ assert.deepEqual(
   Object.values(missing.legacyOfficialMetrics).slice(0, 6),
   [null, null, null, null, null, null]
 );
-for (const field of ["recentForm", "startPower", "sprintPower", "stamina", "attackTiming", "trackingSkill", "finishPower", "lineTrust"]) {
+for (const field of ["startPower", "sprintPower", "stamina", "attackTiming", "trackingSkill", "finishPower", "lineTrust"]) {
   assert.equal(missing[field], 5, field);
 }
 const emptyAndUndefined = adaptParticipant(rawParticipant(fixture.participants[0], {
@@ -97,7 +97,7 @@ assert.deepEqual(
   Object.values(zero.legacyOfficialMetrics).slice(0, 6),
   [0, 0, 0, 0, 0, 0]
 );
-assert.equal(zero.recentForm, 4.5);
+assert.equal(zero.recentForm, 5, "standalone adaptation stays neutral until race-relative evaluation");
 
 // C: verified profile is adopted with provenance and without legacy-field aliasing.
 assert.equal(missing.officialProfileStatus.adopted, true);

@@ -1,6 +1,7 @@
 import { inferLines } from "../../keirin/parser/line-parser.mjs";
 import { parseKeirinTrifectaOddsHtml } from "../../keirin/parser/odds-parser.mjs";
 import { runKeirinEngine } from "../../keirin/engine/keirin-engine.mjs";
+import { applyRecentFormEvidence } from "../../keirin/recent-form/recent-form.mjs";
 import { jsonResponse } from "../../keirin/parser/utils.mjs";
 import { createNetlifyOfficialLineStore, resolveOfficialLines } from "../lib/keirin-official-line-store.mjs";
 
@@ -85,9 +86,7 @@ export async function handleKeirinPredict(req, { officialLineStore } = {}) {
       raceStartTime: basic.startTime || "",
       raceCategory
     };
-    const participants = officialParticipants.map(item =>
-      adaptParticipant(item, participantContext)
-    );
+    const participants = adaptParticipantsForPrediction(officialParticipants, participantContext);
     if (participants.length < 5) {
       return jsonResponse(422, {
         ok: false,
@@ -364,6 +363,13 @@ export function adaptParticipant(item) {
   const difference = legacyOfficialMetrics.differenceCount;
   const mark = legacyOfficialMetrics.markCount;
   const back = legacyOfficialMetrics.backCount;
+  const officialTotalStarts = nullableNumber(
+    item.officialTotalStarts ?? item.officialProfile?.officialTotalStarts
+  );
+  const sparseSampleFlag = item.sparseSampleFlag === true ||
+    item.officialProfile?.sparseSampleFlag === true || officialTotalStarts === 0;
+  const officialForeignFlag = item.officialForeignFlag === true ||
+    item.officialProfile?.officialForeignFlag === true;
 
   return {
     id: String(number),
@@ -379,7 +385,17 @@ export function adaptParticipant(item) {
     officialProfileEvidence: profileResult.profile,
     officialProfileStatus: profileResult.status,
     officialRecentResults,
-    recentForm: score === null ? 5 : clamp(4.5 + score / 25),
+    officialTotalStarts,
+    sparseSampleFlag,
+    officialForeignFlag,
+    recentForm: 5,
+    recentFormEvidence: {
+      value: 5,
+      confidence: "low",
+      inputsUsed: [],
+      missingInputs: ["race-context"],
+      baselineVersion: null
+    },
     startPower: escape === null || back === null ? 5 : clamp(4 + escape * 0.45 + back * 0.08),
     sprintPower: makuri === null || score === null ? 5 : clamp(4 + makuri * 0.55 + score / 40),
     stamina: back === null || escape === null ? 5 : clamp(4 + back * 0.12 + escape * 0.25),
@@ -472,6 +488,11 @@ function normalizeOfficialProfile(profile, registration, context) {
     },
     status: { adopted: true, reason: null }
   };
+}
+
+export function adaptParticipantsForPrediction(items, context = {}) {
+  const adapted = (Array.isArray(items) ? items : []).map(item => adaptParticipant(item, context));
+  return applyRecentFormEvidence(adapted);
 }
 
 function normalizeOfficialRecentResults(item, context) {

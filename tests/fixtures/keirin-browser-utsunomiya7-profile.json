@@ -1,0 +1,13 @@
+{
+  "request": { "date": "20260807", "venueCode": "24", "venueName": "宇都宮", "raceNo": 7 },
+  "basic": { "date": "2026/08/07", "venueName": "宇都宮", "raceNo": 7, "raceName": "A級準決勝", "className": "A級準決勝", "startTime": "22:40" },
+  "participants": [
+    { "number": 1, "registration": "014298", "className": "A1", "currentScore": 96.33, "recent4MonthScore": 97.85 },
+    { "number": 2, "registration": "015083", "className": "A1", "currentScore": 91.22, "recent4MonthScore": 93.54 },
+    { "number": 3, "registration": "014452", "className": "A1", "currentScore": null, "recent4MonthScore": 93.5 },
+    { "number": 4, "registration": "014728", "className": "A1", "currentScore": 91.83, "recent4MonthScore": 90.06 },
+    { "number": 5, "registration": "014005", "className": "A1", "currentScore": 89.83, "recent4MonthScore": 89.83 },
+    { "number": 6, "registration": "015350", "className": "A2", "currentScore": 86.33, "recent4MonthScore": 87.66 },
+    { "number": 7, "registration": "015869", "className": "A2", "currentScore": 92, "recent4MonthScore": 82.25 }
+  ]
+}
