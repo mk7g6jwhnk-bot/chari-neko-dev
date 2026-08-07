@@ -1,4 +1,5 @@
 [build]
+  command = "node tools/write-netlify-deploy-context.mjs"
   publish = "public"
   functions = "netlify/functions"
 

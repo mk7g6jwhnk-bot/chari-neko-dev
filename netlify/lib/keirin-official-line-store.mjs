@@ -1,4 +1,5 @@
 import { getStore } from "@netlify/blobs";
+import { NETLIFY_DEPLOY_CONTEXT } from "../generated/deploy-context.mjs";
 
 const SCHEMA_VERSION = 1;
 const STORE_PREFIX = "keirin-official-lines-v1";
@@ -19,7 +20,7 @@ export function getOfficialLineStoreName(env = process.env) {
 }
 
 export function createNetlifyOfficialLineStore({
-  env = process.env,
+  env = runtimeDeployEnvironment(),
   getStoreImpl = getStore
 } = {}) {
   const name = getOfficialLineStoreName(env);
@@ -36,6 +37,14 @@ export function createNetlifyOfficialLineStore({
     async set(key, value) {
       return open().setJSON(key, value);
     }
+  };
+}
+
+export function runtimeDeployEnvironment(env = process.env, deployed = NETLIFY_DEPLOY_CONTEXT) {
+  return {
+    ...env,
+    CONTEXT: env.CONTEXT || deployed.context || "dev",
+    BRANCH: env.BRANCH || deployed.branch || ""
   };
 }
 

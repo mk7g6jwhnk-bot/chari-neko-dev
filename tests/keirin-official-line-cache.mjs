@@ -6,7 +6,8 @@ import {
   createNetlifyOfficialLineStore,
   getOfficialLineStoreName,
   officialLineKey,
-  resolveOfficialLines
+  resolveOfficialLines,
+  runtimeDeployEnvironment
 } from "../netlify/lib/keirin-official-line-store.mjs";
 import {
   buildLineText,
@@ -154,6 +155,10 @@ assert.equal(getOfficialLineStoreName({ CONTEXT: "deploy-preview" }), "keirin-of
 assert.equal(getOfficialLineStoreName({ CONTEXT: "branch-deploy", BRANCH: "Feature/Line Cache" }), "keirin-official-lines-v1-branch-feature-line-cache");
 assert.equal(getOfficialLineStoreName({ CONTEXT: "branch-deploy" }), "keirin-official-lines-v1-branch-unknown");
 assert.equal(getOfficialLineStoreName({ CONTEXT: "dev", BRANCH: "main" }), "keirin-official-lines-v1-dev");
+assert.deepEqual(
+  runtimeDeployEnvironment({}, { context: "deploy-preview", branch: "feature/keirin-official-line-cache" }),
+  { CONTEXT: "deploy-preview", BRANCH: "feature/keirin-official-line-cache" }
+);
 let openedWith = null;
 const netlifyStore = createNetlifyOfficialLineStore({
   env: { CONTEXT: "deploy-preview", BRANCH: "Feature/Line Cache" },
