@@ -79,7 +79,15 @@ export async function handleKeirinPredict(req, { officialLineStore } = {}) {
       ? officialData.lines
       : [];
 
-    const participants = officialParticipants.map(adaptParticipant);
+    const raceCategory = detectRaceCategory({ basic, participants: officialParticipants });
+    const participantContext = {
+      raceDate: normalizeDate(basic.date) || date,
+      raceStartTime: basic.startTime || "",
+      raceCategory
+    };
+    const participants = officialParticipants.map(item =>
+      adaptParticipant(item, participantContext)
+    );
     if (participants.length < 5) {
       return jsonResponse(422, {
         ok: false,
@@ -311,37 +319,103 @@ async function fetchOddsFromUrl(oddsUrl, context) {
 }
 
 export function adaptParticipant(item) {
+  const context = arguments[1] && typeof arguments[1] === "object"
+    ? arguments[1]
+    : {};
   const number = Number(item.number || 0);
-  const score = finite(item.score, 5);
-  const escape = finite(item.escapeCount, 0);
-  const makuri = finite(item.makuriCount, 0);
-  const difference = finite(item.differenceCount, 0);
-  const mark = finite(item.markCount, 0);
-  const back = finite(item.backCount, 0);
-  const activity = escape + makuri + difference + mark;
+  const registration = normalizeRegistration(item.registration);
+  const legacyOfficialMetrics = {
+    score: nullableNumber(item.score),
+    escapeCount: nullableNumber(item.escapeCount),
+    makuriCount: nullableNumber(item.makuriCount),
+    differenceCount: nullableNumber(item.differenceCount),
+    markCount: nullableNumber(item.markCount),
+    backCount: nullableNumber(item.backCount),
+    sourceType: item.sourceType || null,
+    sourcePath: item.sourcePath || null,
+    fieldSources: Object.fromEntries([
+      "score", "escapeCount", "makuriCount", "differenceCount", "markCount", "backCount"
+    ].map(field => [field, {
+      sourceType: item.sourceType || null,
+      sourcePath: item.sourcePath ? `${item.sourcePath}.${field}` : null
+    }]))
+  };
+  const profileResult = normalizeOfficialProfile(item.officialProfile, registration, context);
+  const officialRecentResults = normalizeOfficialRecentResults(item, context);
+  const score = legacyOfficialMetrics.score;
+  const escape = legacyOfficialMetrics.escapeCount;
+  const makuri = legacyOfficialMetrics.makuriCount;
+  const difference = legacyOfficialMetrics.differenceCount;
+  const mark = legacyOfficialMetrics.markCount;
+  const back = legacyOfficialMetrics.backCount;
 
   return {
     id: String(number),
     number,
     name: item.name || `${number}番車`,
-    registration: item.registration || "",
+    registration,
     prefecture: item.prefecture || "",
     className: item.className || "",
     style: item.style || "",
-    officialScore: item.score ?? null,
-    recentForm: clamp(4.5 + score / 25),
-    startPower: clamp(4 + escape * 0.45 + back * 0.08),
-    sprintPower: clamp(4 + makuri * 0.55 + score / 40),
-    stamina: clamp(4 + back * 0.12 + escape * 0.25),
-    attackTiming: clamp(4 + (escape + makuri) * 0.35),
-    trackingSkill: clamp(4 + (difference + mark) * 0.35),
-    finishPower: clamp(4 + difference * 0.5 + score / 35),
-    lineTrust: clamp(activity ? 5 + mark * 0.2 : 5),
+    raceCategory: context.raceCategory || detectRaceCategory({ participants: [item] }),
+    officialScore: score,
+    legacyOfficialMetrics,
+    officialProfileEvidence: profileResult.profile,
+    officialProfileStatus: profileResult.status,
+    officialRecentResults,
+    recentForm: score === null ? 5 : clamp(4.5 + score / 25),
+    startPower: escape === null || back === null ? 5 : clamp(4 + escape * 0.45 + back * 0.08),
+    sprintPower: makuri === null || score === null ? 5 : clamp(4 + makuri * 0.55 + score / 40),
+    stamina: back === null || escape === null ? 5 : clamp(4 + back * 0.12 + escape * 0.25),
+    attackTiming: escape === null || makuri === null ? 5 : clamp(4 + (escape + makuri) * 0.35),
+    trackingSkill: difference === null || mark === null ? 5 : clamp(4 + (difference + mark) * 0.35),
+    finishPower: difference === null || score === null ? 5 : clamp(4 + difference * 0.5 + score / 35),
+    lineTrust: [escape, makuri, difference, mark].some(value => value === null)
+      ? 5
+      : clamp(escape + makuri + difference + mark ? 5 + mark * 0.2 : 5),
     venueSuitability: 5,
     sourceType: item.sourceType || null,
     sourcePath: item.sourcePath || null
   };
 }
+
+export function detectRaceCategory({ basic = {}, participants = [] } = {}) {
+  const text = [basic.className, basic.raceName, basic.grade, ...participants.map(item => item.className)].filter(Boolean).join(" ");
+  if (/(ガールズ|女子|Ｌ級|L級|ガ予|ガ決)/i.test(text)) return "girls";
+  if (text.trim()) return "standard";
+  return "unknown";
+}
+
+function normalizeOfficialProfile(profile, registration, context) {
+  const reject = reason => ({ profile: null, status: { adopted: false, reason } });
+  if (!profile || typeof profile !== "object") return reject("profile-missing");
+  if (profile.identityPassed !== true) return reject("identity-failed");
+  if (!registration || normalizeRegistration(profile.registration) !== registration) return reject("registration-mismatch");
+  if (!profile.sourceType || !profile.sourcePath) return reject("source-missing");
+  if (!profile.fetchedAt) return reject("fetched-at-missing");
+  const temporal = validateProfileTime(profile, context);
+  if (!temporal.ok) return reject(temporal.reason);
+  const source = { sourceType: String(profile.sourceType), sourcePath: String(profile.sourcePath) };
+  const fields = ["currentScore", "recent4MonthScore", "backCount", "homeCount", "winRate", "quinellaRate", "trioRate"];
+  const normalized = Object.fromEntries(fields.map(field => [field, nullableNumber(profile[field])]));
+  const winningStyleRates = Object.fromEntries(["escape", "makuri", "difference", "mark"].map(field => [field, nullableNumber(profile.winningStyleRates?.[field])]));
+  const scoreHistory = Array.isArray(profile.scoreHistory) ? profile.scoreHistory.filter(entry => historyIsNotAfterRace(entry?.date, context.raceDate)&&normalizeRegistration(entry?.requestedRegistration)===registration).map((entry, index) => ({date:entry.date??null,venueName:entry.venueName??null,gradeName:entry.gradeName??null,recent4MonthScore:nullableNumber(entry.recent4MonthScore),currentTermScore:nullableNumber(entry.currentTermScore),sourceType:entry.sourceType||"JSJ067",sourcePath:entry.sourcePath||`scoreHistory[${index}]`,requestedRegistration:normalizeRegistration(entry.requestedRegistration)})) : [];
+  return {profile:{identityPassed:true,registration,fetchedAt:String(profile.fetchedAt),sourceUpdatedAt:profile.sourceUpdatedAt||null,ridingStyle:nullableText(profile.ridingStyle),...normalized,rateUnit:profile.rateUnit==="percent"?"percent":null,winningStyleRates,scoreHistory,...source,fieldSources:{...Object.fromEntries(fields.map(field=>[field,{...source,officialField:field}])),ridingStyle:{...source,officialField:"ridingStyle"},winningStyleRates:{...source,officialField:"winningStyleRates"},scoreHistory:{sourceType:"JSJ067",sourcePath:"scoreHistory"}}},status:{adopted:true,reason:null}};
+}
+
+function normalizeOfficialRecentResults(item, context) {
+  const sourceType=item.sourceType||null,sourcePath=item.sourcePath||null;
+  const currentMeetingResults=normalizeResultList(item.currentMeetingResults,`${sourcePath||"participant"}.currentMeetingResults`,sourceType);
+  const recentMeetingResults=Array.isArray(item.recentMeetingResults)?item.recentMeetingResults.map((meeting,index)=>{const meetingDate=normalizeHistoryDate(meeting?.meetingDate);const eligibleBeforeRace=Boolean(meetingDate&&context.raceDate&&meetingDate<=context.raceDate);return{meetingName:meeting?.meetingName??null,meetingDate:meeting?.meetingDate??null,eligibleBeforeRace,results:normalizeResultList(meeting?.results,meeting?.sourcePath||`${sourcePath||"participant"}.recentMeetingResults[${index}].results`,meeting?.sourceType||sourceType),sourceType:meeting?.sourceType||sourceType,sourcePath:meeting?.sourcePath||`${sourcePath||"participant"}.recentMeetingResults[${index}]`}}):[];
+  return{currentMeetingResults,recentMeetingResults,usableCurrentMeetingResults:sourceType==="JSJ038"&&context.raceDate?currentMeetingResults:[],usableRecentMeetingResults:recentMeetingResults.filter(item=>item.eligibleBeforeRace),sourceType,sourcePath};
+}
+
+function normalizeResultList(results,basePath,sourceType){if(!Array.isArray(results))return[];return results.map((result,index)=>{const rawFinish=result?.rawFinish??null,text=rawFinish===null?"":String(rawFinish).trim();return{rawFinish,specialStatus:result?.specialStatus??(text&&!/^\d+$/.test(text)?text:null),backToriRaw:result?.backToriRaw??null,sourceType:result?.sourceType||sourceType,sourcePath:result?.sourcePath||`${basePath}[${index}]`}})}
+function validateProfileTime(profile,context){const raceDate=normalizeDate(context.raceDate);if(!/^\d{8}$/.test(raceDate))return{ok:false,reason:"race-date-missing"};const sourceTime=Date.parse(profile.sourceUpdatedAt||profile.fetchedAt);if(!Number.isFinite(sourceTime))return{ok:false,reason:"source-time-invalid"};const time=String(context.raceStartTime||"").match(/(\d{1,2}):(\d{2})/),cutoff=Date.parse(`${raceDate.slice(0,4)}-${raceDate.slice(4,6)}-${raceDate.slice(6,8)}T${time?time[1].padStart(2,"0"):"23"}:${time?time[2]:"59"}:59+09:00`);return sourceTime<=cutoff?{ok:true,reason:null}:{ok:false,reason:"profile-from-future"}}
+function historyIsNotAfterRace(value,raceDate){const normalized=normalizeHistoryDate(value);return Boolean(normalized&&/^\d{8}$/.test(String(raceDate||""))&&normalized<=raceDate)}
+function normalizeHistoryDate(value){const text=String(value||""),short=text.match(/^(\d{2})\/(\d{2})\/(\d{2})$/);if(short)return`20${short[1]}${short[2]}${short[3]}`;const digits=text.replace(/\D/g,"");return digits.length===8?digits:""}
+function normalizeRegistration(value){const digits=String(value??"").replace(/\D/g,"");return digits?digits.padStart(6,"0"):""}
+function nullableText(value){const text=String(value??"").trim();return text&&text!=="-"?text:null}
 
 export function buildLineText(lines) {
   if (!lines.length) return null;
@@ -383,9 +457,12 @@ function normalizeDate(value) {
   return String(value || "").replace(/\D/g, "");
 }
 
-function finite(value, fallback) {
-  const number = Number(value);
-  return Number.isFinite(number) ? number : fallback;
+function nullableNumber(value) {
+  if (value === null || value === undefined) return null;
+  const text = String(value).trim();
+  if (!text) return null;
+  const number = Number(text);
+  return Number.isFinite(number) ? number : null;
 }
 
 function clamp(value, min = 0, max = 10) {

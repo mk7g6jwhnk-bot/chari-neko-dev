@@ -1,0 +1,22 @@
+{
+  "request": { "date": "20260807", "venueCode": "45", "venueName": "豊橋", "raceNo": 10 },
+  "basic": { "date": "2026/08/07", "venueName": "豊橋", "raceNo": 10, "raceName": "Ｌ級ガ決勝", "className": "Ｌ級", "startTime": "19:20" },
+  "participants": [
+    { "number": 1, "registration": "015313", "className": "Ｌ級１班", "style": "両", "currentScore": 50.33, "recent4MonthScore": 50.09, "backCount": 3, "homeCount": 6, "winRate": 0, "quinellaRate": 14.2, "trioRate": 42.8, "rates": [34, 33, 33, 0] },
+    { "number": 2, "registration": "015671", "className": "Ｌ級１班", "style": "追", "currentScore": 53.66, "recent4MonthScore": 52.22, "backCount": 0, "homeCount": 0, "winRate": 3.7, "quinellaRate": 37, "trioRate": 55.5, "rates": [0, 0, 40, 60] },
+    { "number": 3, "registration": "016027", "className": "Ｌ級１班", "style": "両", "currentScore": 45.33, "recent4MonthScore": 47.26, "backCount": 3, "homeCount": 2, "winRate": 6.6, "quinellaRate": 13.3, "trioRate": 20, "rates": [50, 0, 50, 0] },
+    { "number": 4, "registration": "015401", "className": "Ｌ級１班", "style": "両", "currentScore": 51.11, "recent4MonthScore": 50.59, "backCount": 5, "homeCount": 5, "winRate": 9, "quinellaRate": 22.7, "trioRate": 45.4, "rates": [20, 20, 40, 20] },
+    { "number": 5, "registration": "015319", "className": "Ｌ級１班", "style": "両", "currentScore": 54.55, "recent4MonthScore": 52.21, "backCount": 3, "homeCount": 7, "winRate": 3.5, "quinellaRate": 35.7, "trioRate": 60.7, "rates": [20, 10, 20, 50] },
+    { "number": 6, "registration": "015410", "className": "Ｌ級１班", "style": "両", "currentScore": 54.16, "recent4MonthScore": 54.25, "backCount": 3, "homeCount": 0, "winRate": 28.5, "quinellaRate": 50, "trioRate": 67.8, "rates": [0, 79, 14, 7] },
+    { "number": 7, "registration": "015853", "className": "Ｌ級１班", "style": "両", "currentScore": 57, "recent4MonthScore": 54.41, "backCount": 2, "homeCount": 3, "winRate": 29.1, "quinellaRate": 54.1, "trioRate": 75, "rates": [15, 39, 31, 15] }
+  ],
+  "lines": [
+    { "sourceType": "JSJ036", "sourcePath": "$.narabiyoso.shaban[0]", "order": 1, "position": 1, "number": 1 },
+    { "sourceType": "JSJ036", "sourcePath": "$.narabiyoso.shaban[1]", "order": 2, "position": 6, "number": 2 },
+    { "sourceType": "JSJ036", "sourcePath": "$.narabiyoso.shaban[2]", "order": 3, "position": 9, "number": 3 },
+    { "sourceType": "JSJ036", "sourcePath": "$.narabiyoso.shaban[3]", "order": 4, "position": 8, "number": 4 },
+    { "sourceType": "JSJ036", "sourcePath": "$.narabiyoso.shaban[4]", "order": 5, "position": 5, "number": 5 },
+    { "sourceType": "JSJ036", "sourcePath": "$.narabiyoso.shaban[5]", "order": 6, "position": 4, "number": 6 },
+    { "sourceType": "JSJ036", "sourcePath": "$.narabiyoso.shaban[6]", "order": 7, "position": 2, "number": 7 }
+  ]
+}
