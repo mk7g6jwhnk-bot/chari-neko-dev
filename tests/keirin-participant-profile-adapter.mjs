@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import {
   adaptParticipant,
+  adaptParticipantsForPrediction,
   buildLineText,
   detectRaceCategory
 } from "../netlify/functions/keirin-predict.mjs";
@@ -51,6 +52,7 @@ function rawParticipant(profile, overrides = {}) {
       ridingStyle: profile.style,
       currentScore: profile.currentScore,
       recent4MonthScore: profile.recent4MonthScore,
+      officialTotalStarts: profile.officialTotalStarts,
       backCount: profile.backCount,
       homeCount: profile.homeCount,
       winRate: profile.winRate,
@@ -103,9 +105,22 @@ assert.equal(zero.recentForm, 5, "standalone adaptation stays neutral until race
 assert.equal(missing.officialProfileStatus.adopted, true);
 assert.equal(missing.officialProfileEvidence.currentScore, 50.33);
 assert.equal(missing.officialProfileEvidence.backCount, 3);
+assert.equal(missing.officialProfileEvidence.officialTotalStarts, 21);
 assert.equal(missing.legacyOfficialMetrics.backCount, null);
 assert.equal(missing.officialProfileEvidence.fieldSources.currentScore.officialField, "currentScore");
+assert.equal(missing.officialProfileEvidence.fieldSources.officialTotalStarts.officialField, "officialTotalStarts");
 assert.equal(missing.officialProfileEvidence.scoreHistory.length, 1, "future score history must be removed");
+
+const zeroTotalStarts = adaptParticipant(rawParticipant(fixture.participants[0], {
+  officialProfile: { ...rawParticipant(fixture.participants[0]).officialProfile, officialTotalStarts: 0 }
+}), context);
+assert.equal(zeroTotalStarts.officialProfileEvidence.officialTotalStarts, 0);
+for (const value of [null, undefined, "", " ", "unknown", "1.5", -1]) {
+  const adaptedValue = adaptParticipant(rawParticipant(fixture.participants[0], {
+    officialProfile: { ...rawParticipant(fixture.participants[0]).officialProfile, officialTotalStarts: value }
+  }), context);
+  assert.equal(adaptedValue.officialProfileEvidence.officialTotalStarts, null);
+}
 
 // D/E/F: identity, registration and time failures are rejected.
 const mismatch = adaptParticipant(rawParticipant(fixture.participants[0], {
@@ -129,6 +144,10 @@ assert.equal(adapted.length, 7);
 assert.equal(adapted.filter(item => item.officialProfileStatus.adopted).length, 7);
 assert.ok(new Set(adapted.map(item => item.officialProfileEvidence.currentScore)).size > 1);
 assert.ok(new Set(adapted.map(item => item.officialProfileEvidence.trioRate)).size > 1);
+assert.deepEqual(
+  adapted.map(item => item.officialProfileEvidence.officialTotalStarts),
+  [21, 27, 15, 22, 28, 28, 24]
+);
 for (const participant of adapted) {
   assert.equal(participant.raceCategory, "girls");
   assert.equal(participant.officialRecentResults.currentMeetingResults.length, 2);
@@ -139,6 +158,27 @@ assert.equal(adapted[0].officialRecentResults.currentMeetingResults[1].rawFinish
 assert.equal(adapted[0].officialRecentResults.currentMeetingResults[1].specialStatus, "欠");
 assert.equal(adapted[0].officialRecentResults.recentMeetingResults[0].results[0].rawFinish, "3補");
 assert.equal(typeof adapted[0].officialRecentResults.recentMeetingResults[0].results[0].rawFinish, "string");
+
+const withStarts = adaptParticipantsForPrediction(
+  fixture.participants.map(profile => rawParticipant(profile)),
+  context
+);
+const withoutStarts = adaptParticipantsForPrediction(
+  fixture.participants.map(profile => rawParticipant({ ...profile, officialTotalStarts: undefined })),
+  context
+);
+for (let index = 0; index < withStarts.length; index += 1) {
+  assert.equal(withStarts[index].recentForm, withoutStarts[index].recentForm);
+  const { officialTotalStarts: withTotalStarts, ...withRecentFormEvidence } = withStarts[index].recentFormEvidence;
+  const { officialTotalStarts: withoutTotalStarts, ...withoutRecentFormEvidence } = withoutStarts[index].recentFormEvidence;
+  assert.equal(withTotalStarts, fixture.participants[index].officialTotalStarts);
+  assert.equal(withoutTotalStarts, null);
+  assert.deepEqual(withRecentFormEvidence, withoutRecentFormEvidence);
+  for (const field of [
+    "startPower", "sprintPower", "stamina", "attackTiming", "trackingSkill",
+    "finishPower", "lineTrust", "venueSuitability"
+  ]) assert.equal(withStarts[index][field], withoutStarts[index][field], field);
+}
 
 // K: official line formatting is unchanged.
 assert.equal(buildLineText(fixture.lines), "17 652 43");

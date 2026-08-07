@@ -419,9 +419,10 @@ function normalizeOfficialProfile(profile, registration, context) {
   const source = { sourceType: String(profile.sourceType), sourcePath: String(profile.sourcePath) };
   const fields = ["currentScore", "recent4MonthScore", "backCount", "homeCount", "winRate", "quinellaRate", "trioRate"];
   const normalized = Object.fromEntries(fields.map(field => [field, nullableNumber(profile[field])]));
+  const officialTotalStarts = nullableNonNegativeInteger(profile.officialTotalStarts);
   const winningStyleRates = Object.fromEntries(["escape", "makuri", "difference", "mark"].map(field => [field, nullableNumber(profile.winningStyleRates?.[field])]));
   const scoreHistory = Array.isArray(profile.scoreHistory) ? profile.scoreHistory.filter(entry => historyIsNotAfterRace(entry?.date, context.raceDate)&&normalizeRegistration(entry?.requestedRegistration)===registration).map((entry, index) => ({date:entry.date??null,venueName:entry.venueName??null,gradeName:entry.gradeName??null,recent4MonthScore:nullableNumber(entry.recent4MonthScore),currentTermScore:nullableNumber(entry.currentTermScore),sourceType:entry.sourceType||"JSJ067",sourcePath:entry.sourcePath||`scoreHistory[${index}]`,requestedRegistration:normalizeRegistration(entry.requestedRegistration)})) : [];
-  return {profile:{identityPassed:true,registration,fetchedAt:String(profile.fetchedAt),sourceUpdatedAt:profile.sourceUpdatedAt||null,ridingStyle:nullableText(profile.ridingStyle),...normalized,rateUnit:profile.rateUnit==="percent"?"percent":null,winningStyleRates,scoreHistory,...source,fieldSources:{...Object.fromEntries(fields.map(field=>[field,{...source,officialField:field}])),ridingStyle:{...source,officialField:"ridingStyle"},winningStyleRates:{...source,officialField:"winningStyleRates"},scoreHistory:{sourceType:"JSJ067",sourcePath:"scoreHistory"}}},status:{adopted:true,reason:null}};
+  return {profile:{identityPassed:true,registration,fetchedAt:String(profile.fetchedAt),sourceUpdatedAt:profile.sourceUpdatedAt||null,ridingStyle:nullableText(profile.ridingStyle),...normalized,officialTotalStarts,rateUnit:profile.rateUnit==="percent"?"percent":null,winningStyleRates,scoreHistory,...source,fieldSources:{...Object.fromEntries(fields.map(field=>[field,{...source,officialField:field}])),officialTotalStarts:{...source,officialField:"officialTotalStarts"},ridingStyle:{...source,officialField:"ridingStyle"},winningStyleRates:{...source,officialField:"winningStyleRates"},scoreHistory:{sourceType:"JSJ067",sourcePath:"scoreHistory"}}},status:{adopted:true,reason:null}};
 }
 
 function normalizeOfficialRecentResults(item, context) {
@@ -484,6 +485,14 @@ function nullableNumber(value) {
   if (!text) return null;
   const number = Number(text);
   return Number.isFinite(number) ? number : null;
+}
+
+function nullableNonNegativeInteger(value) {
+  if (value === null || value === undefined) return null;
+  const text = String(value).trim();
+  if (!text || !/^\d+$/.test(text)) return null;
+  const number = Number(text);
+  return Number.isSafeInteger(number) && number >= 0 ? number : null;
 }
 
 function clamp(value, min = 0, max = 10) {

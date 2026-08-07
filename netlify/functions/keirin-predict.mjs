@@ -444,6 +444,7 @@ function normalizeOfficialProfile(profile, registration, context) {
     "winRate", "quinellaRate", "trioRate"
   ];
   const normalized = Object.fromEntries(fields.map(field => [field, nullableNumber(profile[field])]));
+  const officialTotalStarts = nullableNonNegativeInteger(profile.officialTotalStarts);
   const winningStyleRates = Object.fromEntries(
     ["escape", "makuri", "difference", "mark"].map(field => [
       field,
@@ -475,12 +476,14 @@ function normalizeOfficialProfile(profile, registration, context) {
       sourceUpdatedAt: profile.sourceUpdatedAt || null,
       ridingStyle: nullableText(profile.ridingStyle),
       ...normalized,
+      officialTotalStarts,
       rateUnit: profile.rateUnit === "percent" ? "percent" : null,
       winningStyleRates,
       scoreHistory,
       ...source,
       fieldSources: {
         ...Object.fromEntries(fields.map(field => [field, { ...source, officialField: field }])),
+        officialTotalStarts: { ...source, officialField: "officialTotalStarts" },
         ridingStyle: { ...source, officialField: "ridingStyle" },
         winningStyleRates: { ...source, officialField: "winningStyleRates" },
         scoreHistory: { sourceType: "JSJ067", sourcePath: "scoreHistory" }
@@ -635,6 +638,14 @@ function nullableNumber(value) {
   if (!text) return null;
   const number = Number(text);
   return Number.isFinite(number) ? number : null;
+}
+
+function nullableNonNegativeInteger(value) {
+  if (value === null || value === undefined) return null;
+  const text = String(value).trim();
+  if (!text || !/^\d+$/.test(text)) return null;
+  const number = Number(text);
+  return Number.isSafeInteger(number) && number >= 0 ? number : null;
 }
 
 function clamp(value, min = 0, max = 10) {
