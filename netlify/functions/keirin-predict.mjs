@@ -292,7 +292,7 @@ async function fetchOddsFromUrl(oddsUrl, context) {
   }
 }
 
-function adaptParticipant(item) {
+export function adaptParticipant(item) {
   const number = Number(item.number || 0);
   const score = finite(item.score, 5);
   const escape = finite(item.escapeCount, 0);
@@ -303,6 +303,7 @@ function adaptParticipant(item) {
   const activity = escape + makuri + difference + mark;
 
   return {
+    id: String(number),
     number,
     name: item.name || `${number}番車`,
     registration: item.registration || "",
@@ -324,13 +325,28 @@ function adaptParticipant(item) {
   };
 }
 
-function buildLineText(lines) {
+export function buildLineText(lines) {
   if (!lines.length) return null;
-  return [...lines]
-    .sort((a, b) => Number(a.position || a.order) - Number(b.position || b.order))
-    .map(item => String(item.number || ""))
-    .filter(Boolean)
-    .join("");
+  const ordered = [...lines]
+    .map(item => ({
+      number: Number(item.number),
+      position: Number(item.position || item.order)
+    }))
+    .filter(item => item.number >= 1 && item.number <= 9 && Number.isFinite(item.position))
+    .sort((a, b) => a.position - b.position);
+  const groups = [];
+  let group = [];
+  let previousPosition = null;
+  for (const item of ordered) {
+    if (previousPosition !== null && item.position > previousPosition + 1) {
+      groups.push(group);
+      group = [];
+    }
+    group.push(String(item.number));
+    previousPosition = item.position;
+  }
+  if (group.length) groups.push(group);
+  return groups.map(items => items.join("")).join(" ") || null;
 }
 
 function readVenueCode(value) {
