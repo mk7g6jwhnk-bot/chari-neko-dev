@@ -148,6 +148,8 @@ assert.equal(readFailure.storageWarning, STORAGE_WARNING);
 // K: production, previews and branch deploys can never share a store.
 assert.equal(getOfficialLineStoreName({ CONTEXT: "production", BRANCH: "ignored" }), "keirin-official-lines-v1-production");
 assert.equal(getOfficialLineStoreName({ CONTEXT: "deploy-preview", BRANCH: "Feature/Line Cache" }), "keirin-official-lines-v1-preview-feature-line-cache");
+assert.equal(getOfficialLineStoreName({ CONTEXT: "deploy-preview", BRANCH: "feature/keirin-official-line-cache" }), "keirin-official-lines-v1-preview-feature-keirin-officia-a7064678");
+assert.equal(new TextEncoder().encode(getOfficialLineStoreName({ CONTEXT: "deploy-preview", BRANCH: "feature/keirin-official-line-cache" })).length, 64);
 assert.equal(getOfficialLineStoreName({ CONTEXT: "deploy-preview" }), "keirin-official-lines-v1-preview-unknown");
 assert.equal(getOfficialLineStoreName({ CONTEXT: "branch-deploy", BRANCH: "Feature/Line Cache" }), "keirin-official-lines-v1-branch-feature-line-cache");
 assert.equal(getOfficialLineStoreName({ CONTEXT: "branch-deploy" }), "keirin-official-lines-v1-branch-unknown");

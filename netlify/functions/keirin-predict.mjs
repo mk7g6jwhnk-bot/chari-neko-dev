@@ -149,6 +149,8 @@ export async function handleKeirinPredict(req, { officialLineStore } = {}) {
         lineSource: lineResolution.lineSource,
         lineFetchedAt: lineResolution.fetchedAt,
         effectiveLineCount: officialLines.length,
+        lineStore: lineResolution.storeName,
+        lineCacheKey: lineResolution.cacheKey,
         oddsAvailable: odds.ok,
         participantCount: participants.length,
         browserVersion: browserResult.data.diagnostics?.version || null

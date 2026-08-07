@@ -8,10 +8,12 @@ export function getOfficialLineStoreName(env = process.env) {
   const context = String(env.CONTEXT || "").trim().toLowerCase();
   if (context === "production") return `${STORE_PREFIX}-production`;
   if (context === "deploy-preview") {
-    return `${STORE_PREFIX}-preview-${sanitizeBranch(env.BRANCH)}`;
+    const prefix = `${STORE_PREFIX}-preview-`;
+    return `${prefix}${sanitizeBranch(env.BRANCH, 64 - prefix.length)}`;
   }
   if (context === "branch-deploy") {
-    return `${STORE_PREFIX}-branch-${sanitizeBranch(env.BRANCH)}`;
+    const prefix = `${STORE_PREFIX}-branch-`;
+    return `${prefix}${sanitizeBranch(env.BRANCH, 64 - prefix.length)}`;
   }
   return `${STORE_PREFIX}-dev`;
 }
@@ -87,28 +89,32 @@ export async function resolveOfficialLines({
       lineText: verifiedCurrent.lineText,
       lineSource: "official",
       fetchedAt: verifiedCurrent.fetchedAt,
-      storageWarning
+      storageWarning,
+      storeName: store.name || null,
+      cacheKey: key
     };
   }
 
   if (Array.isArray(currentLines) && currentLines.length > 0) {
-    return unavailable();
+    return unavailable(null, store.name, key);
   }
 
   let cached = null;
   try {
     cached = await store.get(key);
   } catch {
-    return unavailable(STORAGE_WARNING);
+    return unavailable(STORAGE_WARNING, store.name, key);
   }
   const verifiedCached = validateCachedOfficialLines(cached, request, buildLineText);
-  if (!verifiedCached) return unavailable();
+  if (!verifiedCached) return unavailable(null, store.name, key);
   return {
     lines: verifiedCached.lines,
     lineText: verifiedCached.lineText,
     lineSource: "cached-official",
     fetchedAt: verifiedCached.fetchedAt,
-    storageWarning: null
+    storageWarning: null,
+    storeName: store.name || null,
+    cacheKey: key
   };
 }
 
@@ -166,20 +172,31 @@ function identityMatchesRequest(identity, request) {
     Number(identity.raceNo) === Number(request.raceNo);
 }
 
-function sanitizeBranch(value) {
+function sanitizeBranch(value, maxLength) {
   const sanitized = String(value || "")
     .trim()
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 48);
-  return sanitized || "unknown";
+    .replace(/^-+|-+$/g, "");
+  if (!sanitized) return "unknown";
+  if (sanitized.length <= maxLength) return sanitized;
+  const hash = stableHash(sanitized);
+  return `${sanitized.slice(0, maxLength - hash.length - 1)}-${hash}`;
 }
 
 function isIsoDate(value) {
   return typeof value === "string" && Number.isFinite(Date.parse(value));
 }
 
-function unavailable(storageWarning = null) {
-  return { lines: [], lineText: null, lineSource: "unavailable", fetchedAt: null, storageWarning };
+function stableHash(value) {
+  let hash = 0x811c9dc5;
+  for (const char of value) {
+    hash ^= char.charCodeAt(0);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return (hash >>> 0).toString(16).padStart(8, "0");
+}
+
+function unavailable(storageWarning = null, storeName = null, cacheKey = null) {
+  return { lines: [], lineText: null, lineSource: "unavailable", fetchedAt: null, storageWarning, storeName, cacheKey };
 }
