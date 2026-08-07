@@ -1,0 +1,30 @@
+{
+  "utsunomiya7": {
+    "request": { "date": "20260807", "venueCode": "24", "raceNo": 7 },
+    "basic": { "startTime": "22:40", "className": "A級" },
+    "participants": [
+      { "number": 1, "registration": "014298", "className": "A1", "ridingStyle": "\u4e21", "currentScore": 96.33, "recent4MonthScore": 97.85, "officialTotalStarts": 22, "backCount": 1, "homeCount": 2, "escapeRate": 0 },
+      { "number": 2, "registration": "015083", "className": "A1", "ridingStyle": "\u4e21", "currentScore": 91.22, "recent4MonthScore": 93.54, "officialTotalStarts": 25, "backCount": 4, "homeCount": 4, "escapeRate": 25 },
+      { "number": 3, "registration": "014452", "className": "A1", "ridingStyle": "\u8ffd", "currentScore": null, "recent4MonthScore": 93.5, "officialTotalStarts": 7, "backCount": 0, "homeCount": 0, "escapeRate": 0 },
+      { "number": 4, "registration": "014728", "className": "A1", "ridingStyle": "\u4e21", "currentScore": 91.83, "recent4MonthScore": 90.06, "officialTotalStarts": 16, "backCount": 2, "homeCount": 2, "escapeRate": 14 },
+      { "number": 5, "registration": "014005", "className": "A1", "ridingStyle": "\u8ffd", "currentScore": 89.83, "recent4MonthScore": 89.83, "officialTotalStarts": 24, "backCount": 2, "homeCount": 0, "escapeRate": 8 },
+      { "number": 6, "registration": "015350", "className": "A2", "ridingStyle": "\u9003", "currentScore": 86.33, "recent4MonthScore": 87.66, "officialTotalStarts": 21, "backCount": 4, "homeCount": 7, "escapeRate": 0 },
+      { "number": 7, "registration": "015869", "className": "A2", "ridingStyle": "\u9003", "currentScore": 92, "recent4MonthScore": 82.25, "officialTotalStarts": 16, "backCount": 12, "homeCount": 10, "escapeRate": 72 }
+    ]
+  },
+  "wakayama12": {
+    "request": { "date": "20260808", "venueCode": "55", "raceNo": 12 },
+    "basic": { "startTime": "15:30", "className": "S級" },
+    "participants": [
+      { "number": 1, "registration": "014421", "className": "S1", "ridingStyle": "\u4e21", "officialTotalStarts": 26, "backCount": 0, "homeCount": 0, "escapeRate": 0 },
+      { "number": 2, "registration": "130132", "className": "S2", "ridingStyle": "\u4e21", "officialTotalStarts": 9, "backCount": 9, "homeCount": 7, "escapeRate": 78, "foreignFlag": true },
+      { "number": 3, "registration": "015598", "className": "S1", "ridingStyle": "\u9003", "officialTotalStarts": 23, "backCount": 14, "homeCount": 14, "escapeRate": 67 },
+      { "number": 4, "registration": "015373", "className": "S1", "ridingStyle": "\u9003", "officialTotalStarts": 25, "backCount": 2, "homeCount": 4, "escapeRate": 0 },
+      { "number": 5, "registration": "013291", "className": "S1", "ridingStyle": "\u8ffd", "officialTotalStarts": 28, "backCount": 0, "homeCount": 0, "escapeRate": 0 },
+      { "number": 6, "registration": "013628", "className": "S1", "ridingStyle": "\u8ffd", "officialTotalStarts": 22, "backCount": 1, "homeCount": 0, "escapeRate": 0 },
+      { "number": 7, "registration": "013982", "className": "S1", "ridingStyle": "\u8ffd", "officialTotalStarts": 22, "backCount": 1, "homeCount": 1, "escapeRate": 0 },
+      { "number": 8, "registration": "014427", "className": "S1", "ridingStyle": "\u8ffd", "officialTotalStarts": 19, "backCount": 0, "homeCount": 0, "escapeRate": 0 },
+      { "number": 9, "registration": "015129", "className": "S1", "ridingStyle": "\u9003", "officialTotalStarts": 14, "backCount": 6, "homeCount": 4, "escapeRate": 80 }
+    ]
+  }
+}

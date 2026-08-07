@@ -2,6 +2,7 @@ import { inferLines } from "../../keirin/parser/line-parser.mjs";
 import { parseKeirinTrifectaOddsHtml } from "../../keirin/parser/odds-parser.mjs";
 import { runKeirinEngine } from "../../keirin/engine/keirin-engine.mjs";
 import { applyRecentFormEvidence } from "../../keirin/recent-form/recent-form.mjs";
+import { applyStartPowerEvidence } from "../../keirin/start-power/start-power.mjs";
 import { jsonResponse } from "../../keirin/parser/utils.mjs";
 import { createNetlifyOfficialLineStore, resolveOfficialLines } from "../lib/keirin-official-line-store.mjs";
 
@@ -371,7 +372,7 @@ export function adaptParticipant(item) {
   const officialForeignFlag = item.officialForeignFlag === true ||
     item.officialProfile?.officialForeignFlag === true;
 
-  return {
+  const participant = {
     id: String(number),
     number,
     name: item.name || `${number}番車`,
@@ -396,7 +397,8 @@ export function adaptParticipant(item) {
       missingInputs: ["race-context"],
       baselineVersion: null
     },
-    startPower: escape === null || back === null ? 5 : clamp(4 + escape * 0.45 + back * 0.08),
+    startPower: 5,
+    startPowerEvidence: null,
     sprintPower: makuri === null || score === null ? 5 : clamp(4 + makuri * 0.55 + score / 40),
     stamina: back === null || escape === null ? 5 : clamp(4 + back * 0.12 + escape * 0.25),
     attackTiming: escape === null || makuri === null ? 5 : clamp(4 + (escape + makuri) * 0.35),
@@ -409,6 +411,7 @@ export function adaptParticipant(item) {
     sourceType: item.sourceType || null,
     sourcePath: item.sourcePath || null
   };
+  return applyStartPowerEvidence([participant])[0];
 }
 
 export function detectRaceCategory({ basic = {}, participants = [] } = {}) {

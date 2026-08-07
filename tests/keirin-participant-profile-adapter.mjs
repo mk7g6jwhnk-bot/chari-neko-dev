@@ -80,9 +80,11 @@ assert.deepEqual(
   Object.values(missing.legacyOfficialMetrics).slice(0, 6),
   [null, null, null, null, null, null]
 );
-for (const field of ["startPower", "sprintPower", "stamina", "attackTiming", "trackingSkill", "finishPower", "lineTrust"]) {
+for (const field of ["sprintPower", "stamina", "attackTiming", "trackingSkill", "finishPower", "lineTrust"]) {
   assert.equal(missing[field], 5, field);
 }
+assert.notEqual(missing.startPower, 5);
+assert.equal(missing.startPowerEvidence.officialTotalStarts, 21);
 const emptyAndUndefined = adaptParticipant(rawParticipant(fixture.participants[0], {
   score: " ", escapeCount: "", makuriCount: undefined
 }), context);
@@ -175,7 +177,7 @@ for (let index = 0; index < withStarts.length; index += 1) {
   assert.equal(withoutTotalStarts, null);
   assert.deepEqual(withRecentFormEvidence, withoutRecentFormEvidence);
   for (const field of [
-    "startPower", "sprintPower", "stamina", "attackTiming", "trackingSkill",
+    "sprintPower", "stamina", "attackTiming", "trackingSkill",
     "finishPower", "lineTrust", "venueSuitability"
   ]) assert.equal(withStarts[index][field], withoutStarts[index][field], field);
 }

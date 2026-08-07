@@ -190,12 +190,13 @@ for (const field of [
   "inputsUsed", "missingInputs", "baselineVersion", "baselineSchemaVersion"
 ]) assert.ok(Object.hasOwn(toyohashi521.recentFormEvidence, field), `missing evidence field: ${field}`);
 
-// Only recentForm changes; all other ability axes retain their existing neutral values.
+// Untargeted ability axes retain their existing neutral values; startPower has its own evidence test.
 for (const participant of toyohashiAdapted) {
   for (const field of [
-    "startPower", "sprintPower", "stamina", "attackTiming", "trackingSkill",
+    "sprintPower", "stamina", "attackTiming", "trackingSkill",
     "finishPower", "lineTrust", "venueSuitability"
   ]) assert.equal(participant[field], 5, `${field} must remain unchanged`);
+  assert.ok(Number.isFinite(participant.startPower));
 }
 
 // Integrated and modules paths produce identical participants and baseline data.
@@ -250,6 +251,7 @@ function rawParticipant(profile) {
       ridingStyle: profile.style || null,
       currentScore: profile.currentScore,
       recent4MonthScore: profile.recent4MonthScore,
+      officialTotalStarts: profile.officialTotalStarts ?? 20,
       backCount: profile.backCount ?? null,
       homeCount: profile.homeCount ?? null,
       winRate: profile.winRate ?? null,
