@@ -1,13 +1,15 @@
 {
-  "name": "chari-neko-all-sports-dev",
-  "version": "1.0.0",
+  "name": "chari-neko-keirin-browser-service",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node modules/keirin/tests/run-tests.mjs && node tests/prediction-flow.mjs && node tests/keirin-purchase-five-races.mjs && node tests/keirin-official-evidence-branching.mjs",
-    "check": "node --check public/app.mjs && node --check public/prediction-store.mjs && node --check netlify/functions/keirin-result.mjs && node --check netlify/functions/keirin-predict.mjs"
+    "start": "node src/server.mjs",
+    "check": "node --check src/server.mjs && node --check src/keirin-browser.mjs && node --check src/keirin-result.mjs && node --check src/keirin-discover.mjs",
+    "test": "node tests/keirin-result.test.mjs && node tests/keirin-discover.test.mjs"
   },
   "dependencies": {
-    "cheerio": "^1.0.0"
+    "express": "^4.21.2",
+    "playwright": "1.51.1"
   }
 }
