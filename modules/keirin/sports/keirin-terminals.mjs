@@ -8,6 +8,7 @@ export function generateKeirinTerminals({scored,branches}){
     const firstEntries=branch.firstCandidates
       .map(firstId=>byId.get(firstId))
       .filter(Boolean)
+      .filter(first=>branchFirstRoleCompatible(branch,first))
       .map(first=>({first,score:conditionedFirst(branch,first)}))
       .filter(item=>item.score>0);
     const bestFirst=Math.max(...firstEntries.map(item=>item.score),0);
@@ -28,6 +29,7 @@ export function generateKeirinTerminals({scored,branches}){
 
         for(const {third,score:thirdScore} of thirdEntries){
           const pathScore=firstScore*secondScore*thirdScore;
+          if(!branchPathCompatible(branch,first,second,third))continue;
           paths.push({
             order:[first.number,second.number,third.number],
             branchId:branch.id,
@@ -105,6 +107,33 @@ export function generateKeirinTerminals({scored,branches}){
     terminal.branchType=dominant?.branchType||terminal.branchType;
   }
   return terminals.sort((a,b)=>(b.probability-a.probability)||a.order.join("-").localeCompare(b.order.join("-"),"en"));
+}
+
+function branchFirstRoleCompatible(branch,participant){
+  if(!branch?.primaryLineId)return true;
+  const samePrimaryLine=participant.lineId===branch.primaryLineId;
+  switch(branch.branchType){
+    case"LEADER_HOLD":
+    case"MAKURI_SUCCESS":
+      return samePrimaryLine&&participant.role==="自力";
+    case"BANTE_SASHI":
+      return samePrimaryLine&&participant.role==="番手";
+    default:
+      return true;
+  }
+}
+
+function branchPathCompatible(branch,first,second,third){
+  if(!branchFirstRoleCompatible(branch,first))return false;
+  if(branch.branchType==="BANTE_SASHI"&&branch.primaryLineId){
+    // 番手差しの1着は必ず当該ラインの番手。2着は先行車を最優先するが、
+    // 先行車失速時の三番手/別線残りは確率評価で保持する。
+    if(first.role!=="番手"||first.lineId!==branch.primaryLineId)return false;
+  }
+  if((branch.branchType==="LEADER_HOLD"||branch.branchType==="MAKURI_SUCCESS")&&branch.primaryLineId){
+    if(first.role!=="自力"||first.lineId!==branch.primaryLineId)return false;
+  }
+  return Boolean(second&&third);
 }
 
 function conditionedFirst(branch,participant){
