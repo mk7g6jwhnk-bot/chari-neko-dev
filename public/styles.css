@@ -40,3 +40,25 @@
 .recommendationTags em{font-style:normal;font-size:.72rem;padding:4px 7px;border-radius:999px;background:rgba(93,201,189,.12);border:1px solid rgba(93,201,189,.32);color:#9ce3dc}
 .recommendationFootnote{margin:12px 0 0}
 @media(max-width:640px){.homeHero{align-items:stretch;flex-direction:column}.homeHero .primary{width:100%}.recommendationControls{align-items:stretch;flex-direction:column}.recommendationLimit{width:100%}.recommendationOpen{align-items:flex-start}.recommendationTags{max-width:42%}}
+
+/* v14 compact venue / race navigation */
+.venueGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.venueCard{position:relative;min-width:0;min-height:112px;border:1px solid var(--line);border-radius:15px;background:var(--card);color:var(--text);padding:12px 9px 10px;text-align:left;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:4px;overflow:hidden}
+.venueCard:active{border-color:var(--accent);transform:translateY(1px)}
+.venueCard strong{width:100%;font-size:1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.venueCard small{width:100%;color:var(--muted);font-size:.67rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.venueCode{position:absolute;top:8px;right:8px;color:#64748b;font-size:.62rem;font-weight:800}
+.venueState{margin-top:auto;display:inline-flex;align-items:center;gap:4px;font-size:.64rem;color:var(--muted)}
+.venueState::before{content:"";width:6px;height:6px;border-radius:50%;background:#64748b}
+.venueState.ready{color:var(--accent)}.venueState.ready::before{background:var(--accent)}
+.venueState.waiting{color:#fbbf24}.venueState.waiting::before{background:#f59e0b}
+.venueEmpty{grid-column:1/-1}
+.raceGrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.compactRace{min-height:108px;display:flex;flex-direction:column;justify-content:flex-start}
+.compactRace .raceTop{align-items:flex-start}
+.compactRace h2{font-size:1.3rem}
+.compactRace p{margin:7px 0 5px;font-size:.7rem;line-height:1.35}
+.compactRace .status{padding-top:2px;font-size:.64rem}
+.compactRace .status.warning{color:#fbbf24}.compactRace .status.danger{color:#f87171}
+.raceAction{margin-top:auto;color:var(--accent);font-size:.68rem;font-weight:800}
+@media(max-width:360px){.venueGrid,.raceGrid{gap:6px}.venueCard{min-height:105px;padding:10px 7px}.venueCard strong{font-size:.9rem}.compactRace{min-height:102px;padding:9px}.compactRace h2{font-size:1.15rem}}
