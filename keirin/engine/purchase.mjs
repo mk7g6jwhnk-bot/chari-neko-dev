@@ -38,26 +38,27 @@ export function classify(terminals,odds={}){
       const isAlternativeBranch=dominant.branchPriority!=="main";
       const highValue=hasOdds&&odd>=100&&credibleVariant&&probabilitySupported;
 
-      // MAIN is reserved for the single best terminal of each main-scenario branch.
-      // Keeping every representative terminal as MAIN recreates the old "everything is main" failure.
-      if(isMainBranch&&representative&&branchRank===1){
+      // Purchase selection must not use a fixed branch-rank cap.
+      // Every logically completed terminal stays in classified; adoption is decided by
+      // continuous branch-fit / position support / probability support, not "top N".
+      if(isMainBranch&&representative&&probabilitySupported){
         betClass="MAIN";
         adopted=true;
-        purchaseReason=`${dominant.branchLabel}の最上位代表終端`;
-      }else if(highValue&&isAlternativeBranch&&branchRank!=null&&branchRank<=2){
+        purchaseReason=`${dominant.branchLabel}の代表終端（順位上限なし）`;
+      }else if(highValue&&isAlternativeBranch){
         betClass="BUYABLE_HIGH";
         adopted=true;
-        purchaseReason=`${dominant.branchLabel}の独立展開から残る高配当候補`;
+        purchaseReason=`${dominant.branchLabel}の独立展開から残る高配当候補（順位上限なし）`;
       }else if(
-        (isMainBranch&&credibleVariant&&branchRank!=null&&branchRank<=3)||
-        (isAlternativeBranch&&representative&&probabilitySupported&&branchRank===1)||
-        (support>=2&&branchFit>=.90&&credibleVariant&&probabilitySupported&&branchRank!=null&&branchRank<=2)
+        (isMainBranch&&credibleVariant&&probabilitySupported)||
+        (isAlternativeBranch&&representative&&probabilitySupported)||
+        (support>=2&&branchFit>=.90&&credibleVariant&&probabilitySupported)
       ){
         betClass="COVER";
         adopted=true;
         purchaseReason=isMainBranch
-          ?`${dominant.branchLabel}の上位着順変化（枝内${branchRank}位）`
-          :`${dominant.branchLabel}由来の別展開カバー`;
+          ?`${dominant.branchLabel}の成立可能な着順変化（枝内${branchRank??"-"}位・順位上限なし）`
+          :`${dominant.branchLabel}由来の別展開カバー（順位上限なし）`;
       }
     }
 
@@ -161,6 +162,13 @@ export function purchaseDiagnostics(classified,plan,budget){
     purchaseCandidateCountBeforeCompression:natural.length,
     purchaseCandidateCountAfterCompression:natural.length,
     finalBetCount:natural.length,
+    fixedBranchRankCapApplied:false,
+    representativeTerminalCount:classified.filter(item=>item.representativeTerminal).length,
+    credibleVariantCount:classified.filter(item=>{
+      const r=item.decisionRatios||{};
+      return item.branchFit>=.87&&(r.first??0)>=.88&&(r.second??0)>=.85&&(r.third??0)>=.85;
+    }).length,
+    rejectedTerminalCount:classified.length-natural.length,
     classCounts:{
       main:natural.filter(item=>item.betClass==="MAIN").length,
       cover:natural.filter(item=>item.betClass==="COVER").length,

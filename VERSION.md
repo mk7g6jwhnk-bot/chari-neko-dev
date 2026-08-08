@@ -1,20 +1,5 @@
-# DEV本体 1.1
+UI v18 / KEIRIN-0.4.8-natural-purchase-no-rank-cap
 
-土台: 3競技統合DEV本体1.0
-
-追加:
-- レース横断検索0.1
-- 逆算展開木0.1
-- ホームから横断検索への導線
-- パソコン用アップロード手順
-
-注意:
-- 横断検索画面は現在デモデータでUI確認する開発機能。
-- 逆算展開木は研究モジュールで、本番予想ロジックへ自動反映しない。
-- 公式サイトの実HTMLに合わせた取得パーサー調整はデプロイ後に必要になる可能性がある。
-
-- UI v11: buy screen simplified; funding input, allocation preview, minimum budget and composite odds added. Prediction logic unchanged.
-
-UI v15: 今日のレース / 勝負レース / 会場一覧タブ、勝負レース★登録、横断レース一覧を追加。予想ロジック変更なし。
-
-UI v17: 今日のレース各Rに個別オッズ更新、3連単の簡易妙味ラベル、締切15分以内の強調を追加。予想スナップショットは変更せず、オッズは別キャッシュで保持。
+- Removed fixed branch-rank purchase caps (top 1/2/3).
+- Kept all completed terminals; purchase adoption now uses branch-fit, position support and probability support only.
+- Added purchase audit diagnostics for rank-cap status and rejection counts.
