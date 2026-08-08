@@ -25,7 +25,6 @@ export function classify(terminals,odds={}){
     const positionNear=(ratios.first??0)>=.88&&(ratios.second??0)>=.85&&(ratios.third??0)>=.85;
     const representative=branchFit>=.975&&positionConverged;
     const credibleVariant=branchFit>=.87&&positionNear;
-    const probabilitySupported=terminal.probability>=max*.42;
 
     let betClass="NONE";
     let adopted=false;
@@ -36,12 +35,12 @@ export function classify(terminals,odds={}){
     }else if(dominant){
       const isMainBranch=dominant.branchPriority==="main";
       const isAlternativeBranch=dominant.branchPriority!=="main";
-      const highValue=hasOdds&&odd>=100&&credibleVariant&&probabilitySupported;
+      const highValue=hasOdds&&odd>=100&&credibleVariant;
 
       // Purchase selection must not use a fixed branch-rank cap.
       // Every logically completed terminal stays in classified; adoption is decided by
       // continuous branch-fit / position support / probability support, not "top N".
-      if(isMainBranch&&representative&&probabilitySupported){
+      if(isMainBranch&&representative){
         betClass="MAIN";
         adopted=true;
         purchaseReason=`${dominant.branchLabel}の代表終端（順位上限なし）`;
@@ -50,9 +49,9 @@ export function classify(terminals,odds={}){
         adopted=true;
         purchaseReason=`${dominant.branchLabel}の独立展開から残る高配当候補（順位上限なし）`;
       }else if(
-        (isMainBranch&&credibleVariant&&probabilitySupported)||
-        (isAlternativeBranch&&representative&&probabilitySupported)||
-        (support>=2&&branchFit>=.90&&credibleVariant&&probabilitySupported)
+        (isMainBranch&&credibleVariant)||
+        (isAlternativeBranch&&representative)||
+        (support>=2&&branchFit>=.90&&credibleVariant)
       ){
         betClass="COVER";
         adopted=true;
@@ -68,11 +67,9 @@ export function classify(terminals,odds={}){
         ?"FLAT_DISTRIBUTION"
         :!dominant
           ?"NO_DOMINANT_BRANCH"
-          :!probabilitySupported
-            ?"PROBABILITY_SUPPORT"
-            :!(representative||credibleVariant)
-              ?"BRANCH_OR_POSITION_SUPPORT"
-              :"CLASS_RULE";
+          :!(representative||credibleVariant)
+            ?"BRANCH_OR_POSITION_SUPPORT"
+            :"CLASS_RULE";
 
     return{
       ...terminal,
