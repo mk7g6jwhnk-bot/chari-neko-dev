@@ -1,0 +1,881 @@
+diff -ruN chari-neko-dev-core-v3/keirin/engine/keirin-engine.mjs chari-neko-dev-core-v4/keirin/engine/keirin-engine.mjs
+--- chari-neko-dev-core-v3/keirin/engine/keirin-engine.mjs	2026-08-08 11:22:12.456214719 +0000
++++ chari-neko-dev-core-v4/keirin/engine/keirin-engine.mjs	2026-08-08 11:31:52.489379665 +0000
+@@ -21,7 +21,7 @@
+   if(lineBlocked){purchase.noBet=true;purchase.noBetReason="LINE_DATA_UNAVAILABLE";purchase.purchaseCandidateCountBeforeCompression=0;purchase.purchaseCandidateCountAfterCompression=0;purchase.finalBetCount=0;purchase.minimumRequired=0;}
+ 
+   return{
+-    engineVersion:"KEIRIN-0.4.3-main-scenario-separated",
++    engineVersion:"KEIRIN-0.4.4-evidence-traced",
+     raceId:race.id,
+     lineConfidence:race.lineConfidence,
+     scored,lines,branches,terminals:classified,
+diff -ruN chari-neko-dev-core-v3/keirin/engine/purchase.mjs chari-neko-dev-core-v4/keirin/engine/purchase.mjs
+--- chari-neko-dev-core-v3/keirin/engine/purchase.mjs	2026-08-08 11:21:32.609847161 +0000
++++ chari-neko-dev-core-v4/keirin/engine/purchase.mjs	2026-08-08 11:32:47.003192875 +0000
+@@ -75,6 +75,8 @@
+       representativeTerminal:representative,
+       decisionRatios:dominant?.decisionRatios||null,
+       positionScores:dominant?.positionScores||null,
++      positionEvidence:dominant?.positionEvidence||null,
++      evidenceSummary:summarizeEvidence(dominant?.positionEvidence),
+       concentrationRatio,
+       index
+     };
+@@ -115,7 +117,7 @@
+     return natural.map(item=>({
+       order:item.order,betClass:item.betClass,stake:null,odds:item.odds,expectedPayout:null,
+       probability:item.probability,branchSupport:item.branchSupport,purchaseReason:item.purchaseReason,
+-      dominantBranchId:item.dominantBranchId,dominantBranchLabel:item.dominantBranchLabel,decisionRatios:item.decisionRatios,
++      dominantBranchId:item.dominantBranchId,dominantBranchLabel:item.dominantBranchLabel,decisionRatios:item.decisionRatios,positionEvidence:item.positionEvidence||null,evidenceSummary:item.evidenceSummary||null,
+       fundingStatus:"予算不足",minimumRequired:minimum
+     }));
+   }
+@@ -129,7 +131,7 @@
+     order:item.order,betClass:item.betClass,stake:stakes[i],odds:item.odds,
+     expectedPayout:item.odds?Math.floor(stakes[i]*item.odds):null,
+     probability:item.probability,branchSupport:item.branchSupport,purchaseReason:item.purchaseReason,
+-    dominantBranchId:item.dominantBranchId,dominantBranchLabel:item.dominantBranchLabel,decisionRatios:item.decisionRatios,
++    dominantBranchId:item.dominantBranchId,dominantBranchLabel:item.dominantBranchLabel,decisionRatios:item.decisionRatios,positionEvidence:item.positionEvidence||null,evidenceSummary:item.evidenceSummary||null,
+     fundingStatus:"配分済み",minimumRequired:minimum
+   }));
+ }
+@@ -160,6 +162,14 @@
+   };
+ }
+ 
++function summarizeEvidence(evidence){
++  if(!evidence)return null;
++  return [evidence.first,evidence.second,evidence.third].filter(Boolean).map(item=>{
++    const top=(item.drivers||[]).filter(driver=>driver.key!=="roleScore").slice(0,2).map(driver=>`${driver.key} ${Number(driver.value).toFixed(2)}`).join("・");
++    return `${item.target==="first"?"1着":item.target==="second"?"2着":"3着"}${item.number}${top?`(${top})`:""}`;
++  }).join(" / ");
++}
++
+ function compareTerminal(a,b){return(b.probability-a.probability)||(b.branchContributions?.length||0)-(a.branchContributions?.length||0)||a.order.join("-").localeCompare(b.order.join("-"),"en")}
+ function comparePurchase(a,b){
+   const classRank={MAIN:0,COVER:1,BUYABLE_HIGH:2,NONE:3};
+diff -ruN chari-neko-dev-core-v3/keirin/sports/keirin-branches.mjs chari-neko-dev-core-v4/keirin/sports/keirin-branches.mjs
+--- chari-neko-dev-core-v3/keirin/sports/keirin-branches.mjs	2026-08-08 11:21:32.609223949 +0000
++++ chari-neko-dev-core-v4/keirin/sports/keirin-branches.mjs	2026-08-08 11:31:48.543310335 +0000
+@@ -6,96 +6,50 @@
+     const leader=line.leader,bante=line.bante;
+     if(leader){
+       branches.push(make({
+-        id:`LEAD-${line.id}`,
+-        label:`${line.id}先行押し切り`,
+-        scenario:"先行押し切り",
+-        branchType:"LEADER_HOLD",
+-        score:(leader.roleScores.first||0)*.44+(leader.evidence.stamina||0)*.24+(leader.evidence.start||0)*.18+(leader.evidence.timing||0)*.14,
+-        firstCandidateScores:{[leader.id]:leader.roleScores.first||0},
+-        primaryLineId:line.id,
+-        enabled:lineEnabled
++        id:`LEAD-${line.id}`,label:`${line.id}先行押し切り`,scenario:"先行押し切り",branchType:"LEADER_HOLD",primaryLineId:line.id,enabled:lineEnabled,
++        scoreParts:[part("first",leader.roleScores.first,.40),part("startPower",leader.evidence.start,.35),part("recentForm",leader.evidence.recent,.15),part("finishPower",leader.evidence.finish,.10)],
++        firstCandidateScores:{[leader.id]:leader.roleScores.first||0}
+       }));
+       branches.push(make({
+-        id:`MAKURI-${line.id}`,
+-        label:`${line.id}まくり`,
+-        scenario:"別線まくり",
+-        branchType:"MAKURI_SUCCESS",
+-        score:(leader.roleScores.first||0)*.34+(leader.evidence.sprint||0)*.32+(leader.evidence.timing||0)*.20+(leader.evidence.finish||0)*.14,
+-        firstCandidateScores:{[leader.id]:leader.roleScores.first||0},
+-        primaryLineId:line.id,
+-        enabled:lineEnabled
++        id:`MAKURI-${line.id}`,label:`${line.id}まくり`,scenario:"別線まくり",branchType:"MAKURI_SUCCESS",primaryLineId:line.id,enabled:lineEnabled,
++        scoreParts:[part("first",leader.roleScores.first,.32),part("sprintPower",leader.evidence.sprint,.42),part("finishPower",leader.evidence.finish,.16),part("recentForm",leader.evidence.recent,.10)],
++        firstCandidateScores:{[leader.id]:leader.roleScores.first||0}
+       }));
+     }
+     if(bante){
+       branches.push(make({
+-        id:`BANTE-${line.id}`,
+-        label:`${line.id}番手差し`,
+-        scenario:"番手差し",
+-        branchType:"BANTE_SASHI",
+-        score:(bante.roleScores.first||0)*.38+(bante.evidence.finish||0)*.28+(bante.evidence.tracking||0)*.20+(leader?.evidence.stamina||5)*.14,
+-        firstCandidateScores:{[bante.id]:bante.roleScores.first||0},
+-        primaryLineId:line.id,
+-        enabled:lineEnabled
++        id:`BANTE-${line.id}`,label:`${line.id}番手差し`,scenario:"番手差し",branchType:"BANTE_SASHI",primaryLineId:line.id,enabled:lineEnabled,
++        scoreParts:[part("first",bante.roleScores.first,.32),part("finishPower",bante.evidence.finish,.34),part("trackingSkill",bante.evidence.tracking,.24),part("recentForm",bante.evidence.recent,.10)],
++        firstCandidateScores:{[bante.id]:bante.roleScores.first||0}
+       }));
+     }
+   }
+ 
+-  const battleScores=Object.fromEntries(scored.map(p=>[
+-    p.id,
+-    (p.roleScores.first||0)*.35+(p.evidence.finish||0)*.25+(p.evidence.sprint||0)*.20+(p.evidence.tracking||0)*.20
+-  ]));
+-  branches.push(make({
+-    id:"BATTLE",label:"踏み合い消耗戦",scenario:"踏み合い",branchType:"LEAD_BATTLE",
+-    score:avg(Object.values(battleScores)),firstCandidateScores:battleScores,enabled:true
+-  }));
++  const battleScores=Object.fromEntries(scored.map(p=>[p.id,(p.roleScores.first||0)*.32+(p.evidence.finish||0)*.26+(p.evidence.tracking||0)*.22+(p.evidence.start||0)*.10+(p.evidence.recent||0)*.10]));
++  branches.push(make({id:"BATTLE",label:"踏み合い消耗戦",scenario:"踏み合い",branchType:"LEAD_BATTLE",scoreParts:[part("candidateMean",avg(Object.values(battleScores)),1)],firstCandidateScores:battleScores,enabled:true}));
+ 
+-  const soloScores=Object.fromEntries(scored.filter(p=>p.role==="単騎").map(p=>[
+-    p.id,(p.roleScores.first||0)*.45+(p.evidence.finish||0)*.30+(p.evidence.timing||0)*.25
+-  ]));
+-  branches.push(make({
+-    id:"SOLO",label:"単騎浮上",scenario:"単騎浮上",branchType:"SOLO_RISE",
+-    score:avg(Object.values(soloScores)),firstCandidateScores:soloScores,enabled:Object.keys(soloScores).length>0
+-  }));
++  const soloScores=Object.fromEntries(scored.filter(p=>p.role==="単騎").map(p=>[p.id,(p.roleScores.first||0)*.38+(p.evidence.finish||0)*.26+(p.evidence.sprint||0)*.22+(p.evidence.recent||0)*.14]));
++  branches.push(make({id:"SOLO",label:"単騎浮上",scenario:"単騎浮上",branchType:"SOLO_RISE",scoreParts:[part("candidateMean",avg(Object.values(soloScores)),1)],firstCandidateScores:soloScores,enabled:Object.keys(soloScores).length>0}));
+ 
+-  const separationScores=Object.fromEntries(scored.map(p=>[
+-    p.id,
+-    (p.roleScores.first||0)*.30+(p.evidence.finish||0)*.30+(p.evidence.tracking||0)*.25+(p.evidence.timing||0)*.15
+-  ]));
+-  branches.push(make({
+-    id:"SEPARATION",label:"番手離れ・繰り上がり",scenario:"番手離れ",branchType:"LINE_SEPARATION",
+-    score:lineEnabled?avg(Object.values(separationScores)):0,
+-    firstCandidateScores:separationScores,enabled:lineEnabled
+-  }));
++  const separationScores=Object.fromEntries(scored.map(p=>[p.id,(p.roleScores.first||0)*.28+(p.evidence.finish||0)*.28+(p.evidence.tracking||0)*.30+(p.evidence.recent||0)*.14]));
++  branches.push(make({id:"SEPARATION",label:"番手離れ・繰り上がり",scenario:"番手離れ",branchType:"LINE_SEPARATION",scoreParts:[part("candidateMean",lineEnabled?avg(Object.values(separationScores)):0,1)],firstCandidateScores:separationScores,enabled:lineEnabled}));
+ 
+   const enabled=branches.filter(branch=>branch.firstCandidates.length&&branch.enabled).sort(compareBranch);
+   const structured=enabled.filter(branch=>["LEADER_HOLD","BANTE_SASHI","MAKURI_SUCCESS"].includes(branch.branchType));
+   const bestStructured=structured[0]||null;
+   const mainLineId=bestStructured?.primaryLineId||null;
+-  const bestOnMainLine=mainLineId
+-    ? Math.max(...structured.filter(branch=>branch.primaryLineId===mainLineId).map(branch=>branch.score),0)
+-    : 0;
++  const bestOnMainLine=mainLineId?Math.max(...structured.filter(branch=>branch.primaryLineId===mainLineId).map(branch=>branch.score),0):0;
+   return enabled.map(branch=>({
+     ...branch,
+-    // MAIN is the strongest line/scenario family, not every near-tied line.
+-    // Other structured branches stay alive as SUB so their terminals can be COVER/value candidates.
+-    priority:structured.includes(branch)
+-      ? (mainLineId&&branch.primaryLineId===mainLineId&&branch.score>=bestOnMainLine*.90?"main":"sub")
+-      : "risk"
++    priority:structured.includes(branch)?(mainLineId&&branch.primaryLineId===mainLineId&&branch.score>=bestOnMainLine*.90?"main":"sub"):"risk"
+   }));
+ }
+ 
+-function make({id,label,scenario,branchType,score,firstCandidateScores={},primaryLineId=null,enabled}){
+-  const entries=Object.entries(firstCandidateScores)
+-    .filter(([id,value])=>id&&Number.isFinite(value)&&value>0)
+-    .sort((a,b)=>b[1]-a[1]||String(a[0]).localeCompare(String(b[0]),"en"));
+-  return{
+-    id,label,scenario,branchType,primaryLineId,
+-    score:Number.isFinite(score)?score:0,
+-    firstCandidates:entries.map(([id])=>id),
+-    firstCandidateScores:Object.fromEntries(entries),
+-    enabled:Boolean(enabled)&&(Number.isFinite(score)?score:0)>=2.2,
+-    priority:"risk"
+-  };
++function part(key,value,weight){return{key,value:Number(value)||0,weight,contribution:(Number(value)||0)*weight}}
++function make({id,label,scenario,branchType,scoreParts=[],firstCandidateScores={},primaryLineId=null,enabled}){
++  const score=scoreParts.reduce((sum,item)=>sum+item.contribution,0);
++  const entries=Object.entries(firstCandidateScores).filter(([id,value])=>id&&Number.isFinite(value)&&value>0).sort((a,b)=>b[1]-a[1]||String(a[0]).localeCompare(String(b[0]),"en"));
++  return{id,label,scenario,branchType,primaryLineId,score,scoreTrace:[...scoreParts].sort((a,b)=>b.contribution-a.contribution),firstCandidates:entries.map(([id])=>id),firstCandidateScores:Object.fromEntries(entries),enabled:Boolean(enabled)&&score>=2.2,priority:"risk"};
+ }
+ function compareBranch(a,b){return(b.score-a.score)||a.id.localeCompare(b.id,"en")}
+ function avg(values){const valid=values.filter(Number.isFinite);return valid.length?valid.reduce((sum,value)=>sum+value,0)/valid.length:0}
+diff -ruN chari-neko-dev-core-v3/keirin/sports/keirin-scoring.mjs chari-neko-dev-core-v4/keirin/sports/keirin-scoring.mjs
+--- chari-neko-dev-core-v3/keirin/sports/keirin-scoring.mjs	2026-08-08 10:24:54.001721269 +0000
++++ chari-neko-dev-core-v4/keirin/sports/keirin-scoring.mjs	2026-08-08 11:31:48.542709409 +0000
+@@ -1,13 +1,32 @@
+-
+ const clamp=(v,min=0,max=10)=>Math.min(max,Math.max(min,v));
++
++// Only axes that currently have race-time verified inputs are allowed to move the
++// positional scores. Research-pending axes stay in evidence for later use but do
++// not dilute the live prediction by contributing neutral 5s.
+ export function scoreKeirinParticipants({race,venueProfile={}}){
+   return race.participants.map(p=>{
+-    const recent=clamp(p.recentForm??5),start=clamp(p.startPower??5),sprint=clamp(p.sprintPower??5),stamina=clamp(p.stamina??5),timing=clamp(p.attackTiming??5),tracking=clamp(p.trackingSkill??5),finish=clamp(p.finishPower??5),lineTrust=clamp(p.lineTrust??5),venue=clamp(p.venueSuitability??5);
+-    const roleBonus={自力:{f:8.5,s:6,t:5.5},番手:{f:7.5,s:8.5,t:7.5},三番手:{f:4.5,s:6.5,t:8},単騎:{f:6,s:5.8,t:6.8}}[p.role]||{f:5,s:5,t:5};
+-    let first=.15*recent+.13*sprint+.12*stamina+.15*timing+.14*finish+.09*start+.08*lineTrust+.07*venue+.07*roleBonus.f;
+-    let second=.14*recent+.10*sprint+.10*stamina+.12*timing+.13*finish+.15*tracking+.13*lineTrust+.07*venue+.06*roleBonus.s;
+-    let third=.12*recent+.08*sprint+.12*stamina+.08*timing+.10*finish+.18*tracking+.12*lineTrust+.10*venue+.10*roleBonus.t;
+-    if(p.role==="自力")first+=venueProfile.selfPowerBias||0;if(p.role==="番手")second+=venueProfile.banteBias||0;
+-    return {...p,roleScores:{first:clamp(first),second:clamp(second),third:clamp(third),outside:clamp(10-Math.max(first,second,third))},evidence:{recent,start,sprint,stamina,timing,tracking,finish,lineTrust,venue}};
++    const recent=clamp(p.recentForm??5),start=clamp(p.startPower??5),sprint=clamp(p.sprintPower??5),tracking=clamp(p.trackingSkill??5),finish=clamp(p.finishPower??5);
++    const stamina=clamp(p.stamina??5),timing=clamp(p.attackTiming??5),lineTrust=clamp(p.lineTrust??5),venue=clamp(p.venueSuitability??5);
++    const roleBonus={自力:{f:8.5,s:5.8,t:5.0},番手:{f:7.2,s:8.6,t:7.4},三番手:{f:4.6,s:6.4,t:8.4},単騎:{f:6.0,s:5.8,t:6.8}}[p.role]||{f:5,s:5,t:5};
++
++    const first=.28*recent+.20*sprint+.15*finish+.14*start+.08*tracking+.15*roleBonus.f;
++    const second=.24*recent+.18*finish+.22*tracking+.10*sprint+.10*start+.16*roleBonus.s;
++    const third=.20*recent+.14*finish+.30*tracking+.08*sprint+.08*start+.20*roleBonus.t;
++
++    const roleScores={first:clamp(first),second:clamp(second),third:clamp(third),outside:clamp(10-Math.max(first,second,third))};
++    return {
++      ...p,
++      roleScores,
++      scoreTrace:{
++        first:trace([{key:"recentForm",value:recent,weight:.28},{key:"sprintPower",value:sprint,weight:.20},{key:"finishPower",value:finish,weight:.15},{key:"startPower",value:start,weight:.14},{key:"trackingSkill",value:tracking,weight:.08},{key:"role",value:roleBonus.f,weight:.15}]),
++        second:trace([{key:"recentForm",value:recent,weight:.24},{key:"finishPower",value:finish,weight:.18},{key:"trackingSkill",value:tracking,weight:.22},{key:"sprintPower",value:sprint,weight:.10},{key:"startPower",value:start,weight:.10},{key:"role",value:roleBonus.s,weight:.16}]),
++        third:trace([{key:"recentForm",value:recent,weight:.20},{key:"finishPower",value:finish,weight:.14},{key:"trackingSkill",value:tracking,weight:.30},{key:"sprintPower",value:sprint,weight:.08},{key:"startPower",value:start,weight:.08},{key:"role",value:roleBonus.t,weight:.20}])
++      },
++      evidence:{recent,start,sprint,stamina,timing,tracking,finish,lineTrust,venue}
++    };
+   });
+ }
++
++function trace(items){
++  return items.map(item=>({...item,contribution:item.value*item.weight})).sort((a,b)=>b.contribution-a.contribution||a.key.localeCompare(b.key,"en"));
++}
+diff -ruN chari-neko-dev-core-v3/keirin/sports/keirin-terminals.mjs chari-neko-dev-core-v4/keirin/sports/keirin-terminals.mjs
+--- chari-neko-dev-core-v3/keirin/sports/keirin-terminals.mjs	2026-08-08 11:09:02.947652362 +0000
++++ chari-neko-dev-core-v4/keirin/sports/keirin-terminals.mjs	2026-08-08 11:31:49.740573129 +0000
+@@ -42,6 +42,7 @@
+               third:bestThird>0?thirdScore/bestThird:0
+             },
+             positionScores:{first:firstScore,second:secondScore,third:thirdScore},
++            positionEvidence:{first:positionEvidence(branch,first,"first"),second:positionEvidence(branch,second,"second"),third:positionEvidence(branch,third,"third")},
+             holdReason:"branch条件ごとに1・2・3着を独立評価して終端まで生成"
+           });
+         }
+@@ -67,6 +68,7 @@
+       weightedScore:terminal.weightedScore,
+       pathScore:terminal.pathScore,
+       positionScores:terminal.positionScores,
++      positionEvidence:terminal.positionEvidence,
+       decisionRatios:terminal.decisionRatios
+     };
+     const existing=map.get(key);
+@@ -186,6 +188,23 @@
+   return positive(score)*factor;
+ }
+ 
++function positionEvidence(branch,participant,target){
++  const e=participant.evidence||{};
++  const values={recentForm:e.recent??5,startPower:e.start??5,sprintPower:e.sprint??5,finishPower:e.finish??5,trackingSkill:e.tracking??5,roleScore:participant.roleScores?.[target]??5};
++  const keys=branchKeys(branch.branchType,target);
++  return {number:participant.number,id:participant.id,role:participant.role,target,roleScore:values.roleScore,drivers:keys.map(key=>({key,value:values[key]})).sort((a,b)=>b.value-a.value||a.key.localeCompare(b.key,"en"))};
++}
++function branchKeys(type,target){
++  if(target==="first"){
++    if(type==="LEADER_HOLD")return["startPower","recentForm","finishPower","roleScore"];
++    if(type==="BANTE_SASHI")return["finishPower","trackingSkill","recentForm","roleScore"];
++    if(type==="MAKURI_SUCCESS")return["sprintPower","finishPower","recentForm","roleScore"];
++    return["finishPower","trackingSkill","recentForm","roleScore"];
++  }
++  if(target==="second")return["trackingSkill","finishPower","recentForm","roleScore"];
++  return["trackingSkill","finishPower","recentForm","roleScore"];
++}
++
+ function branchRoleFactor(branch,participant,target){
+   if(target!=="first")return 1;
+   if(branch.branchType==="LEAD_BATTLE"){
+diff -ruN chari-neko-dev-core-v3/modules/keirin/engine/keirin-engine.mjs chari-neko-dev-core-v4/modules/keirin/engine/keirin-engine.mjs
+--- chari-neko-dev-core-v3/modules/keirin/engine/keirin-engine.mjs	2026-08-08 11:22:12.456440326 +0000
++++ chari-neko-dev-core-v4/modules/keirin/engine/keirin-engine.mjs	2026-08-08 11:31:52.809330198 +0000
+@@ -21,7 +21,7 @@
+   if(lineBlocked){purchase.noBet=true;purchase.noBetReason="LINE_DATA_UNAVAILABLE";purchase.purchaseCandidateCountBeforeCompression=0;purchase.purchaseCandidateCountAfterCompression=0;purchase.finalBetCount=0;purchase.minimumRequired=0;}
+ 
+   return{
+-    engineVersion:"KEIRIN-0.4.3-main-scenario-separated",
++    engineVersion:"KEIRIN-0.4.4-evidence-traced",
+     raceId:race.id,
+     lineConfidence:race.lineConfidence,
+     scored,lines,branches,terminals:classified,
+diff -ruN chari-neko-dev-core-v3/modules/keirin/engine/purchase.mjs chari-neko-dev-core-v4/modules/keirin/engine/purchase.mjs
+--- chari-neko-dev-core-v3/modules/keirin/engine/purchase.mjs	2026-08-08 11:09:30.859310335 +0000
++++ chari-neko-dev-core-v4/modules/keirin/engine/purchase.mjs	2026-08-08 11:32:47.004257657 +0000
+@@ -1 +1,178 @@
+-export * from "../../../keirin/engine/purchase.mjs";
++const PURCHASED="購入採用";
++
++export function classify(terminals,odds={}){
++  const sorted=[...terminals].sort(compareTerminal);
++  if(!sorted.length)return[];
++
++  const max=sorted[0].probability||0;
++  const concentrationRatio=max*sorted.length;
++  const branchStats=buildBranchStats(sorted);
++
++  return sorted.map((terminal,index)=>{
++    const key=terminal.order.join("-");
++    const odd=Number(odds[key]);
++    const hasOdds=Number.isFinite(odd)&&odd>1;
++    const contributions=[...(terminal.branchContributions||[])].sort((a,b)=>b.probability-a.probability);
++    const dominant=contributions[0]||null;
++    const stats=dominant?branchStats.get(dominant.branchId):null;
++    const branchFit=stats?.best>0?(dominant?.probability||0)/stats.best:0;
++    const branchRank=stats?.rankByOrder.get(key)??null;
++    const support=contributions.length;
++    const ratios=dominant?.decisionRatios||{};
++    const positionConverged=(ratios.first??0)>=.93&&(ratios.second??0)>=.91&&(ratios.third??0)>=.91;
++    const positionNear=(ratios.first??0)>=.88&&(ratios.second??0)>=.85&&(ratios.third??0)>=.85;
++    const representative=branchFit>=.975&&positionConverged;
++    const credibleVariant=branchFit>=.87&&positionNear;
++    const probabilitySupported=terminal.probability>=max*.42;
++
++    let betClass="NONE";
++    let adopted=false;
++    let purchaseReason="展開代表性または着順別評価が不足";
++
++    if(concentrationRatio<1.04){
++      purchaseReason=`terminal分布が平坦（集中比${concentrationRatio.toFixed(3)}）`;
++    }else if(dominant){
++      const isMainBranch=dominant.branchPriority==="main";
++      const isAlternativeBranch=dominant.branchPriority!=="main";
++      const highValue=hasOdds&&odd>=100&&credibleVariant&&probabilitySupported;
++
++      // MAIN is reserved for the single best terminal of each main-scenario branch.
++      // Keeping every representative terminal as MAIN recreates the old "everything is main" failure.
++      if(isMainBranch&&representative&&branchRank===1){
++        betClass="MAIN";
++        adopted=true;
++        purchaseReason=`${dominant.branchLabel}の最上位代表終端`;
++      }else if(highValue&&isAlternativeBranch&&branchRank!=null&&branchRank<=2){
++        betClass="BUYABLE_HIGH";
++        adopted=true;
++        purchaseReason=`${dominant.branchLabel}の独立展開から残る高配当候補`;
++      }else if(
++        (isMainBranch&&credibleVariant&&branchRank!=null&&branchRank<=3)||
++        (isAlternativeBranch&&representative&&probabilitySupported&&branchRank===1)||
++        (support>=2&&branchFit>=.90&&credibleVariant&&probabilitySupported&&branchRank!=null&&branchRank<=2)
++      ){
++        betClass="COVER";
++        adopted=true;
++        purchaseReason=isMainBranch
++          ?`${dominant.branchLabel}の上位着順変化（枝内${branchRank}位）`
++          :`${dominant.branchLabel}由来の別展開カバー`;
++      }
++    }
++
++    return{
++      ...terminal,
++      odds:hasOdds?odd:null,
++      betClass,
++      purchaseStatus:adopted?PURCHASED:"購入不採用",
++      purchaseReason,
++      branchSupport:support,
++      dominantBranchId:dominant?.branchId||null,
++      dominantBranchLabel:dominant?.branchLabel||null,
++      dominantBranchPriority:dominant?.branchPriority||null,
++      dominantBranchContribution:dominant?.probability||0,
++      branchFit,
++      branchRank,
++      representativeTerminal:representative,
++      decisionRatios:dominant?.decisionRatios||null,
++      positionScores:dominant?.positionScores||null,
++      positionEvidence:dominant?.positionEvidence||null,
++      evidenceSummary:summarizeEvidence(dominant?.positionEvidence),
++      concentrationRatio,
++      index
++    };
++  });
++}
++
++function buildBranchStats(terminals){
++  const byBranch=new Map();
++  for(const terminal of terminals){
++    const order=terminal.order.join("-");
++    for(const contribution of terminal.branchContributions||[]){
++      if(!byBranch.has(contribution.branchId))byBranch.set(contribution.branchId,[]);
++      byBranch.get(contribution.branchId).push({order,probability:contribution.probability||0});
++    }
++  }
++  const result=new Map();
++  for(const [branchId,items] of byBranch){
++    items.sort((a,b)=>b.probability-a.probability||a.order.localeCompare(b.order,"en"));
++    result.set(branchId,{
++      best:items[0]?.probability||0,
++      rankByOrder:new Map(items.map((item,index)=>[item.order,index+1]))
++    });
++  }
++  return result;
++}
++
++export function composite(items){
++  const values=items.filter(item=>(item.purchaseStatus==null||item.purchaseStatus===PURCHASED)&&item.odds>1);
++  return values.length?1/values.reduce((sum,item)=>sum+1/item.odds,0):null;
++}
++
++export function allocate(items,budget){
++  const natural=items.filter(item=>item.purchaseStatus===PURCHASED).sort(comparePurchase);
++  if(!natural.length)return[];
++  const minimum=natural.length*100;
++  const numericBudget=Math.max(0,Number(budget||0));
++  if(numericBudget<minimum){
++    return natural.map(item=>({
++      order:item.order,betClass:item.betClass,stake:null,odds:item.odds,expectedPayout:null,
++      probability:item.probability,branchSupport:item.branchSupport,purchaseReason:item.purchaseReason,
++      dominantBranchId:item.dominantBranchId,dominantBranchLabel:item.dominantBranchLabel,decisionRatios:item.decisionRatios,positionEvidence:item.positionEvidence||null,evidenceSummary:item.evidenceSummary||null,
++      fundingStatus:"予算不足",minimumRequired:minimum
++    }));
++  }
++
++  const weights=natural.map(item=>Math.max(item.probability,.0001));
++  const sum=weights.reduce((a,b)=>a+b,0);
++  const stakes=weights.map(weight=>Math.floor((numericBudget*weight/sum)/100)*100);
++  let remaining=numericBudget-stakes.reduce((a,b)=>a+b,0),index=0;
++  while(remaining>=100){stakes[index%stakes.length]+=100;remaining-=100;index+=1;}
++  return natural.map((item,i)=>({
++    order:item.order,betClass:item.betClass,stake:stakes[i],odds:item.odds,
++    expectedPayout:item.odds?Math.floor(stakes[i]*item.odds):null,
++    probability:item.probability,branchSupport:item.branchSupport,purchaseReason:item.purchaseReason,
++    dominantBranchId:item.dominantBranchId,dominantBranchLabel:item.dominantBranchLabel,decisionRatios:item.decisionRatios,positionEvidence:item.positionEvidence||null,evidenceSummary:item.evidenceSummary||null,
++    fundingStatus:"配分済み",minimumRequired:minimum
++  }));
++}
++
++export function purchaseDiagnostics(classified,plan,budget){
++  const probabilities=classified.map(item=>item.probability).sort((a,b)=>b-a);
++  const natural=classified.filter(item=>item.purchaseStatus===PURCHASED);
++  const noBet=natural.length===0;
++  const noBetReason=!noBet?null:classified.length===0?"NO_TERMINALS":(classified[0]?.concentrationRatio||0)<1.04?"FLAT_DISTRIBUTION_NO_SUPPORTED_CANDIDATE":"NO_BRANCH_REPRESENTATIVE";
++  const minimumRequired=natural.length*100;
++  return{
++    terminalCount:classified.length,
++    terminalProbabilitySum:sum(probabilities),
++    maxTerminalProbability:probabilities[0]||0,
++    top3Mass:sum(probabilities.slice(0,3)),top5Mass:sum(probabilities.slice(0,5)),top10Mass:sum(probabilities.slice(0,10)),
++    purchaseCandidateCountBeforeCompression:natural.length,
++    purchaseCandidateCountAfterCompression:natural.length,
++    finalBetCount:natural.length,
++    classCounts:{
++      main:natural.filter(item=>item.betClass==="MAIN").length,
++      cover:natural.filter(item=>item.betClass==="COVER").length,
++      buyableHigh:natural.filter(item=>item.betClass==="BUYABLE_HIGH").length
++    },
++    minimumRequired,
++    budget:Number(budget||0),
++    budgetSufficient:Number(budget||0)>=minimumRequired,
++    noBet,noBetReason
++  };
++}
++
++function summarizeEvidence(evidence){
++  if(!evidence)return null;
++  return [evidence.first,evidence.second,evidence.third].filter(Boolean).map(item=>{
++    const top=(item.drivers||[]).filter(driver=>driver.key!=="roleScore").slice(0,2).map(driver=>`${driver.key} ${Number(driver.value).toFixed(2)}`).join("・");
++    return `${item.target==="first"?"1着":item.target==="second"?"2着":"3着"}${item.number}${top?`(${top})`:""}`;
++  }).join(" / ");
++}
++
++function compareTerminal(a,b){return(b.probability-a.probability)||(b.branchContributions?.length||0)-(a.branchContributions?.length||0)||a.order.join("-").localeCompare(b.order.join("-"),"en")}
++function comparePurchase(a,b){
++  const classRank={MAIN:0,COVER:1,BUYABLE_HIGH:2,NONE:3};
++  return(classRank[a.betClass]??9)-(classRank[b.betClass]??9)||(b.probability-a.probability)||a.order.join("-").localeCompare(b.order.join("-"),"en");
++}
++function sum(values){return values.reduce((total,value)=>total+value,0)}
+diff -ruN chari-neko-dev-core-v3/modules/keirin/sports/keirin-branches.mjs chari-neko-dev-core-v4/modules/keirin/sports/keirin-branches.mjs
+--- chari-neko-dev-core-v3/modules/keirin/sports/keirin-branches.mjs	2026-08-08 11:21:32.609521087 +0000
++++ chari-neko-dev-core-v4/modules/keirin/sports/keirin-branches.mjs	2026-08-08 11:31:52.785402872 +0000
+@@ -6,96 +6,50 @@
+     const leader=line.leader,bante=line.bante;
+     if(leader){
+       branches.push(make({
+-        id:`LEAD-${line.id}`,
+-        label:`${line.id}先行押し切り`,
+-        scenario:"先行押し切り",
+-        branchType:"LEADER_HOLD",
+-        score:(leader.roleScores.first||0)*.44+(leader.evidence.stamina||0)*.24+(leader.evidence.start||0)*.18+(leader.evidence.timing||0)*.14,
+-        firstCandidateScores:{[leader.id]:leader.roleScores.first||0},
+-        primaryLineId:line.id,
+-        enabled:lineEnabled
++        id:`LEAD-${line.id}`,label:`${line.id}先行押し切り`,scenario:"先行押し切り",branchType:"LEADER_HOLD",primaryLineId:line.id,enabled:lineEnabled,
++        scoreParts:[part("first",leader.roleScores.first,.40),part("startPower",leader.evidence.start,.35),part("recentForm",leader.evidence.recent,.15),part("finishPower",leader.evidence.finish,.10)],
++        firstCandidateScores:{[leader.id]:leader.roleScores.first||0}
+       }));
+       branches.push(make({
+-        id:`MAKURI-${line.id}`,
+-        label:`${line.id}まくり`,
+-        scenario:"別線まくり",
+-        branchType:"MAKURI_SUCCESS",
+-        score:(leader.roleScores.first||0)*.34+(leader.evidence.sprint||0)*.32+(leader.evidence.timing||0)*.20+(leader.evidence.finish||0)*.14,
+-        firstCandidateScores:{[leader.id]:leader.roleScores.first||0},
+-        primaryLineId:line.id,
+-        enabled:lineEnabled
++        id:`MAKURI-${line.id}`,label:`${line.id}まくり`,scenario:"別線まくり",branchType:"MAKURI_SUCCESS",primaryLineId:line.id,enabled:lineEnabled,
++        scoreParts:[part("first",leader.roleScores.first,.32),part("sprintPower",leader.evidence.sprint,.42),part("finishPower",leader.evidence.finish,.16),part("recentForm",leader.evidence.recent,.10)],
++        firstCandidateScores:{[leader.id]:leader.roleScores.first||0}
+       }));
+     }
+     if(bante){
+       branches.push(make({
+-        id:`BANTE-${line.id}`,
+-        label:`${line.id}番手差し`,
+-        scenario:"番手差し",
+-        branchType:"BANTE_SASHI",
+-        score:(bante.roleScores.first||0)*.38+(bante.evidence.finish||0)*.28+(bante.evidence.tracking||0)*.20+(leader?.evidence.stamina||5)*.14,
+-        firstCandidateScores:{[bante.id]:bante.roleScores.first||0},
+-        primaryLineId:line.id,
+-        enabled:lineEnabled
++        id:`BANTE-${line.id}`,label:`${line.id}番手差し`,scenario:"番手差し",branchType:"BANTE_SASHI",primaryLineId:line.id,enabled:lineEnabled,
++        scoreParts:[part("first",bante.roleScores.first,.32),part("finishPower",bante.evidence.finish,.34),part("trackingSkill",bante.evidence.tracking,.24),part("recentForm",bante.evidence.recent,.10)],
++        firstCandidateScores:{[bante.id]:bante.roleScores.first||0}
+       }));
+     }
+   }
+ 
+-  const battleScores=Object.fromEntries(scored.map(p=>[
+-    p.id,
+-    (p.roleScores.first||0)*.35+(p.evidence.finish||0)*.25+(p.evidence.sprint||0)*.20+(p.evidence.tracking||0)*.20
+-  ]));
+-  branches.push(make({
+-    id:"BATTLE",label:"踏み合い消耗戦",scenario:"踏み合い",branchType:"LEAD_BATTLE",
+-    score:avg(Object.values(battleScores)),firstCandidateScores:battleScores,enabled:true
+-  }));
++  const battleScores=Object.fromEntries(scored.map(p=>[p.id,(p.roleScores.first||0)*.32+(p.evidence.finish||0)*.26+(p.evidence.tracking||0)*.22+(p.evidence.start||0)*.10+(p.evidence.recent||0)*.10]));
++  branches.push(make({id:"BATTLE",label:"踏み合い消耗戦",scenario:"踏み合い",branchType:"LEAD_BATTLE",scoreParts:[part("candidateMean",avg(Object.values(battleScores)),1)],firstCandidateScores:battleScores,enabled:true}));
+ 
+-  const soloScores=Object.fromEntries(scored.filter(p=>p.role==="単騎").map(p=>[
+-    p.id,(p.roleScores.first||0)*.45+(p.evidence.finish||0)*.30+(p.evidence.timing||0)*.25
+-  ]));
+-  branches.push(make({
+-    id:"SOLO",label:"単騎浮上",scenario:"単騎浮上",branchType:"SOLO_RISE",
+-    score:avg(Object.values(soloScores)),firstCandidateScores:soloScores,enabled:Object.keys(soloScores).length>0
+-  }));
++  const soloScores=Object.fromEntries(scored.filter(p=>p.role==="単騎").map(p=>[p.id,(p.roleScores.first||0)*.38+(p.evidence.finish||0)*.26+(p.evidence.sprint||0)*.22+(p.evidence.recent||0)*.14]));
++  branches.push(make({id:"SOLO",label:"単騎浮上",scenario:"単騎浮上",branchType:"SOLO_RISE",scoreParts:[part("candidateMean",avg(Object.values(soloScores)),1)],firstCandidateScores:soloScores,enabled:Object.keys(soloScores).length>0}));
+ 
+-  const separationScores=Object.fromEntries(scored.map(p=>[
+-    p.id,
+-    (p.roleScores.first||0)*.30+(p.evidence.finish||0)*.30+(p.evidence.tracking||0)*.25+(p.evidence.timing||0)*.15
+-  ]));
+-  branches.push(make({
+-    id:"SEPARATION",label:"番手離れ・繰り上がり",scenario:"番手離れ",branchType:"LINE_SEPARATION",
+-    score:lineEnabled?avg(Object.values(separationScores)):0,
+-    firstCandidateScores:separationScores,enabled:lineEnabled
+-  }));
++  const separationScores=Object.fromEntries(scored.map(p=>[p.id,(p.roleScores.first||0)*.28+(p.evidence.finish||0)*.28+(p.evidence.tracking||0)*.30+(p.evidence.recent||0)*.14]));
++  branches.push(make({id:"SEPARATION",label:"番手離れ・繰り上がり",scenario:"番手離れ",branchType:"LINE_SEPARATION",scoreParts:[part("candidateMean",lineEnabled?avg(Object.values(separationScores)):0,1)],firstCandidateScores:separationScores,enabled:lineEnabled}));
+ 
+   const enabled=branches.filter(branch=>branch.firstCandidates.length&&branch.enabled).sort(compareBranch);
+   const structured=enabled.filter(branch=>["LEADER_HOLD","BANTE_SASHI","MAKURI_SUCCESS"].includes(branch.branchType));
+   const bestStructured=structured[0]||null;
+   const mainLineId=bestStructured?.primaryLineId||null;
+-  const bestOnMainLine=mainLineId
+-    ? Math.max(...structured.filter(branch=>branch.primaryLineId===mainLineId).map(branch=>branch.score),0)
+-    : 0;
++  const bestOnMainLine=mainLineId?Math.max(...structured.filter(branch=>branch.primaryLineId===mainLineId).map(branch=>branch.score),0):0;
+   return enabled.map(branch=>({
+     ...branch,
+-    // MAIN is the strongest line/scenario family, not every near-tied line.
+-    // Other structured branches stay alive as SUB so their terminals can be COVER/value candidates.
+-    priority:structured.includes(branch)
+-      ? (mainLineId&&branch.primaryLineId===mainLineId&&branch.score>=bestOnMainLine*.90?"main":"sub")
+-      : "risk"
++    priority:structured.includes(branch)?(mainLineId&&branch.primaryLineId===mainLineId&&branch.score>=bestOnMainLine*.90?"main":"sub"):"risk"
+   }));
+ }
+ 
+-function make({id,label,scenario,branchType,score,firstCandidateScores={},primaryLineId=null,enabled}){
+-  const entries=Object.entries(firstCandidateScores)
+-    .filter(([id,value])=>id&&Number.isFinite(value)&&value>0)
+-    .sort((a,b)=>b[1]-a[1]||String(a[0]).localeCompare(String(b[0]),"en"));
+-  return{
+-    id,label,scenario,branchType,primaryLineId,
+-    score:Number.isFinite(score)?score:0,
+-    firstCandidates:entries.map(([id])=>id),
+-    firstCandidateScores:Object.fromEntries(entries),
+-    enabled:Boolean(enabled)&&(Number.isFinite(score)?score:0)>=2.2,
+-    priority:"risk"
+-  };
++function part(key,value,weight){return{key,value:Number(value)||0,weight,contribution:(Number(value)||0)*weight}}
++function make({id,label,scenario,branchType,scoreParts=[],firstCandidateScores={},primaryLineId=null,enabled}){
++  const score=scoreParts.reduce((sum,item)=>sum+item.contribution,0);
++  const entries=Object.entries(firstCandidateScores).filter(([id,value])=>id&&Number.isFinite(value)&&value>0).sort((a,b)=>b[1]-a[1]||String(a[0]).localeCompare(String(b[0]),"en"));
++  return{id,label,scenario,branchType,primaryLineId,score,scoreTrace:[...scoreParts].sort((a,b)=>b.contribution-a.contribution),firstCandidates:entries.map(([id])=>id),firstCandidateScores:Object.fromEntries(entries),enabled:Boolean(enabled)&&score>=2.2,priority:"risk"};
+ }
+ function compareBranch(a,b){return(b.score-a.score)||a.id.localeCompare(b.id,"en")}
+ function avg(values){const valid=values.filter(Number.isFinite);return valid.length?valid.reduce((sum,value)=>sum+value,0)/valid.length:0}
+diff -ruN chari-neko-dev-core-v3/modules/keirin/sports/keirin-scoring.mjs chari-neko-dev-core-v4/modules/keirin/sports/keirin-scoring.mjs
+--- chari-neko-dev-core-v3/modules/keirin/sports/keirin-scoring.mjs	2026-08-08 10:24:54.005008630 +0000
++++ chari-neko-dev-core-v4/modules/keirin/sports/keirin-scoring.mjs	2026-08-08 11:31:52.778249901 +0000
+@@ -1,13 +1,32 @@
+-
+ const clamp=(v,min=0,max=10)=>Math.min(max,Math.max(min,v));
++
++// Only axes that currently have race-time verified inputs are allowed to move the
++// positional scores. Research-pending axes stay in evidence for later use but do
++// not dilute the live prediction by contributing neutral 5s.
+ export function scoreKeirinParticipants({race,venueProfile={}}){
+   return race.participants.map(p=>{
+-    const recent=clamp(p.recentForm??5),start=clamp(p.startPower??5),sprint=clamp(p.sprintPower??5),stamina=clamp(p.stamina??5),timing=clamp(p.attackTiming??5),tracking=clamp(p.trackingSkill??5),finish=clamp(p.finishPower??5),lineTrust=clamp(p.lineTrust??5),venue=clamp(p.venueSuitability??5);
+-    const roleBonus={自力:{f:8.5,s:6,t:5.5},番手:{f:7.5,s:8.5,t:7.5},三番手:{f:4.5,s:6.5,t:8},単騎:{f:6,s:5.8,t:6.8}}[p.role]||{f:5,s:5,t:5};
+-    let first=.15*recent+.13*sprint+.12*stamina+.15*timing+.14*finish+.09*start+.08*lineTrust+.07*venue+.07*roleBonus.f;
+-    let second=.14*recent+.10*sprint+.10*stamina+.12*timing+.13*finish+.15*tracking+.13*lineTrust+.07*venue+.06*roleBonus.s;
+-    let third=.12*recent+.08*sprint+.12*stamina+.08*timing+.10*finish+.18*tracking+.12*lineTrust+.10*venue+.10*roleBonus.t;
+-    if(p.role==="自力")first+=venueProfile.selfPowerBias||0;if(p.role==="番手")second+=venueProfile.banteBias||0;
+-    return {...p,roleScores:{first:clamp(first),second:clamp(second),third:clamp(third),outside:clamp(10-Math.max(first,second,third))},evidence:{recent,start,sprint,stamina,timing,tracking,finish,lineTrust,venue}};
++    const recent=clamp(p.recentForm??5),start=clamp(p.startPower??5),sprint=clamp(p.sprintPower??5),tracking=clamp(p.trackingSkill??5),finish=clamp(p.finishPower??5);
++    const stamina=clamp(p.stamina??5),timing=clamp(p.attackTiming??5),lineTrust=clamp(p.lineTrust??5),venue=clamp(p.venueSuitability??5);
++    const roleBonus={自力:{f:8.5,s:5.8,t:5.0},番手:{f:7.2,s:8.6,t:7.4},三番手:{f:4.6,s:6.4,t:8.4},単騎:{f:6.0,s:5.8,t:6.8}}[p.role]||{f:5,s:5,t:5};
++
++    const first=.28*recent+.20*sprint+.15*finish+.14*start+.08*tracking+.15*roleBonus.f;
++    const second=.24*recent+.18*finish+.22*tracking+.10*sprint+.10*start+.16*roleBonus.s;
++    const third=.20*recent+.14*finish+.30*tracking+.08*sprint+.08*start+.20*roleBonus.t;
++
++    const roleScores={first:clamp(first),second:clamp(second),third:clamp(third),outside:clamp(10-Math.max(first,second,third))};
++    return {
++      ...p,
++      roleScores,
++      scoreTrace:{
++        first:trace([{key:"recentForm",value:recent,weight:.28},{key:"sprintPower",value:sprint,weight:.20},{key:"finishPower",value:finish,weight:.15},{key:"startPower",value:start,weight:.14},{key:"trackingSkill",value:tracking,weight:.08},{key:"role",value:roleBonus.f,weight:.15}]),
++        second:trace([{key:"recentForm",value:recent,weight:.24},{key:"finishPower",value:finish,weight:.18},{key:"trackingSkill",value:tracking,weight:.22},{key:"sprintPower",value:sprint,weight:.10},{key:"startPower",value:start,weight:.10},{key:"role",value:roleBonus.s,weight:.16}]),
++        third:trace([{key:"recentForm",value:recent,weight:.20},{key:"finishPower",value:finish,weight:.14},{key:"trackingSkill",value:tracking,weight:.30},{key:"sprintPower",value:sprint,weight:.08},{key:"startPower",value:start,weight:.08},{key:"role",value:roleBonus.t,weight:.20}])
++      },
++      evidence:{recent,start,sprint,stamina,timing,tracking,finish,lineTrust,venue}
++    };
+   });
+ }
++
++function trace(items){
++  return items.map(item=>({...item,contribution:item.value*item.weight})).sort((a,b)=>b.contribution-a.contribution||a.key.localeCompare(b.key,"en"));
++}
+diff -ruN chari-neko-dev-core-v3/modules/keirin/sports/keirin-terminals.mjs chari-neko-dev-core-v4/modules/keirin/sports/keirin-terminals.mjs
+--- chari-neko-dev-core-v3/modules/keirin/sports/keirin-terminals.mjs	2026-08-08 11:09:02.947868600 +0000
++++ chari-neko-dev-core-v4/modules/keirin/sports/keirin-terminals.mjs	2026-08-08 11:31:52.794003592 +0000
+@@ -1 +1,218 @@
+-export * from "../../../keirin/sports/keirin-terminals.mjs";
++export function generateKeirinTerminals({scored,branches}){
++  const byId=new Map(scored.map(item=>[item.id,item]));
++  const lineById=new Map(scored.map(item=>[item.id,item.lineId]));
++  const raw=[];
++
++  for(const branch of branches){
++    const paths=[];
++    const firstEntries=branch.firstCandidates
++      .map(firstId=>byId.get(firstId))
++      .filter(Boolean)
++      .map(first=>({first,score:conditionedFirst(branch,first)}))
++      .filter(item=>item.score>0);
++    const bestFirst=Math.max(...firstEntries.map(item=>item.score),0);
++
++    for(const {first,score:firstScore} of firstEntries){
++      const secondEntries=scored
++        .filter(second=>second.id!==first.id)
++        .map(second=>({second,score:conditionedSecond(branch,first,second,lineById)}))
++        .filter(item=>item.score>0);
++      const bestSecond=Math.max(...secondEntries.map(item=>item.score),0);
++
++      for(const {second,score:secondScore} of secondEntries){
++        const thirdEntries=scored
++          .filter(third=>third.id!==first.id&&third.id!==second.id)
++          .map(third=>({third,score:conditionedThird(branch,first,second,third,lineById)}))
++          .filter(item=>item.score>0);
++        const bestThird=Math.max(...thirdEntries.map(item=>item.score),0);
++
++        for(const {third,score:thirdScore} of thirdEntries){
++          const pathScore=firstScore*secondScore*thirdScore;
++          paths.push({
++            order:[first.number,second.number,third.number],
++            branchId:branch.id,
++            branchLabel:branch.label,
++            branchPriority:branch.priority,
++            branchType:branch.branchType,
++            branchScore:branch.score,
++            pathScore,
++            decisionRatios:{
++              first:bestFirst>0?firstScore/bestFirst:0,
++              second:bestSecond>0?secondScore/bestSecond:0,
++              third:bestThird>0?thirdScore/bestThird:0
++            },
++            positionScores:{first:firstScore,second:secondScore,third:thirdScore},
++            positionEvidence:{first:positionEvidence(branch,first,"first"),second:positionEvidence(branch,second,"second"),third:positionEvidence(branch,third,"third")},
++            holdReason:"branch条件ごとに1・2・3着を独立評価して終端まで生成"
++          });
++        }
++      }
++    }
++
++    const branchPathTotal=paths.reduce((sum,path)=>sum+path.pathScore,0);
++    if(!(branchPathTotal>0))continue;
++    for(const path of paths){
++      raw.push({...path,weightedScore:branch.score*(path.pathScore/branchPathTotal)});
++    }
++  }
++
++  const map=new Map();
++  for(const terminal of raw){
++    const key=terminal.order.join("-");
++    const contribution={
++      branchId:terminal.branchId,
++      branchLabel:terminal.branchLabel,
++      branchPriority:terminal.branchPriority,
++      branchType:terminal.branchType,
++      branchScore:terminal.branchScore,
++      weightedScore:terminal.weightedScore,
++      pathScore:terminal.pathScore,
++      positionScores:terminal.positionScores,
++      positionEvidence:terminal.positionEvidence,
++      decisionRatios:terminal.decisionRatios
++    };
++    const existing=map.get(key);
++    if(!existing){
++      map.set(key,{
++        order:terminal.order,
++        score:terminal.weightedScore,
++        branchId:terminal.branchId,
++        branchLabel:terminal.branchLabel,
++        branchPriority:terminal.branchPriority,
++        branchType:terminal.branchType,
++        holdReason:terminal.holdReason,
++        contributingBranches:[terminal.branchId],
++        branchContributions:[contribution]
++      });
++    }else{
++      existing.score+=terminal.weightedScore;
++      existing.contributingBranches=[...new Set([...existing.contributingBranches,terminal.branchId])];
++      existing.branchContributions.push(contribution);
++    }
++  }
++
++  const terminals=[...map.values()];
++  const total=terminals.reduce((sum,item)=>sum+item.score,0)||1;
++  for(const terminal of terminals){
++    terminal.probability=terminal.score/total;
++    terminal.branchContributions=terminal.branchContributions
++      .map(item=>({...item,probability:item.weightedScore/total}))
++      .sort((a,b)=>b.probability-a.probability||a.branchId.localeCompare(b.branchId,"en"));
++    const dominant=terminal.branchContributions[0];
++    terminal.branchId=dominant?.branchId||terminal.branchId;
++    terminal.branchLabel=dominant?.branchLabel||terminal.branchLabel;
++    terminal.branchPriority=dominant?.branchPriority||terminal.branchPriority;
++    terminal.branchType=dominant?.branchType||terminal.branchType;
++  }
++  return terminals.sort((a,b)=>(b.probability-a.probability)||a.order.join("-").localeCompare(b.order.join("-"),"en"));
++}
++
++function conditionedFirst(branch,participant){
++  const candidate=branch.firstCandidateScores?.[participant.id]??participant.roleScores.first;
++  const e=participant.evidence||{};
++  let branchAbility=participant.roleScores.first||5;
++  switch(branch.branchType){
++    case"LEADER_HOLD": branchAbility=.30*(participant.roleScores.first||5)+.28*(e.start||5)+.22*(e.stamina||5)+.12*(e.recent||5)+.08*(e.finish||5); break;
++    case"BANTE_SASHI": branchAbility=.28*(participant.roleScores.first||5)+.30*(e.finish||5)+.22*(e.tracking||5)+.12*(e.recent||5)+.08*(e.lineTrust||5); break;
++    case"MAKURI_SUCCESS": branchAbility=.28*(participant.roleScores.first||5)+.34*(e.sprint||5)+.18*(e.finish||5)+.12*(e.recent||5)+.08*(e.start||5); break;
++    case"LEAD_BATTLE": branchAbility=.24*(participant.roleScores.first||5)+.28*(e.finish||5)+.20*(e.tracking||5)+.16*(e.recent||5)+.12*(e.stamina||5); break;
++    case"LINE_SEPARATION": branchAbility=.24*(participant.roleScores.first||5)+.30*(e.finish||5)+.26*(e.tracking||5)+.12*(e.recent||5)+.08*(e.lineTrust||5); break;
++    case"SOLO_RISE": branchAbility=.30*(participant.roleScores.first||5)+.28*(e.finish||5)+.22*(e.sprint||5)+.12*(e.recent||5)+.08*(e.tracking||5); break;
++  }
++  return positive(.45*candidate+.55*branchAbility)*branchRoleFactor(branch,participant,"first");
++}
++
++function conditionedSecond(branch,first,second,lineById){
++  const same=sameLine(first,second,lineById),role=second.role,e=second.evidence||{};
++  let score=second.roleScores.second||5;
++  let factor=1;
++  switch(branch.branchType){
++    case"LEADER_HOLD":
++      score=.28*score+.30*(e.tracking||5)+.18*(e.finish||5)+.14*(e.lineTrust||5)+.10*(e.recent||5);
++      if(same&&role==="番手")factor=1.55; else if(same&&role==="三番手")factor=1.18; else if(role==="番手")factor=1.04; else if(role==="自力")factor=.78;
++      break;
++    case"BANTE_SASHI":
++      score=.30*score+.24*(e.stamina||5)+.18*(e.recent||5)+.16*(e.tracking||5)+.12*(e.finish||5);
++      if(same&&role==="自力")factor=1.48; else if(same&&role==="三番手")factor=1.16; else if(role==="自力")factor=.98;
++      break;
++    case"MAKURI_SUCCESS":
++      score=.26*score+.28*(e.tracking||5)+.18*(e.sprint||5)+.16*(e.finish||5)+.12*(e.recent||5);
++      if(same&&role==="番手")factor=1.42; else if(same&&role==="三番手")factor=1.16; else if(!same&&role==="番手")factor=1.08; else if(role==="自力")factor=.82;
++      break;
++    case"LEAD_BATTLE":
++      score=.24*score+.28*(e.finish||5)+.24*(e.tracking||5)+.14*(e.recent||5)+.10*(e.stamina||5);
++      if(role==="番手")factor=1.30; else if(role==="三番手")factor=1.14; else if(role==="自力")factor=.72;
++      break;
++    case"LINE_SEPARATION":
++      score=.22*score+.32*(e.tracking||5)+.24*(e.finish||5)+.14*(e.recent||5)+.08*(e.lineTrust||5);
++      if(!same&&role==="番手")factor=1.30; else if(role==="単騎")factor=1.14; else if(same)factor=.72;
++      break;
++    case"SOLO_RISE":
++      score=.28*score+.26*(e.finish||5)+.22*(e.tracking||5)+.14*(e.recent||5)+.10*(e.sprint||5);
++      if(role==="番手")factor=1.12; else if(role==="自力")factor=.88;
++      break;
++  }
++  return positive(score)*factor;
++}
++
++function conditionedThird(branch,first,second,third,lineById){
++  const sameFirst=sameLine(first,third,lineById),sameSecond=sameLine(second,third,lineById),role=third.role,e=third.evidence||{};
++  let score=third.roleScores.third||5;
++  let factor=1;
++  switch(branch.branchType){
++    case"LEADER_HOLD":
++      score=.26*score+.34*(e.tracking||5)+.16*(e.stamina||5)+.14*(e.recent||5)+.10*(e.finish||5);
++      if(sameFirst&&role==="三番手")factor=1.42; else if(sameFirst&&role==="番手")factor=1.18; else if(!sameFirst&&(role==="番手"||role==="三番手"))factor=1.08; else if(role==="自力")factor=.84;
++      break;
++    case"BANTE_SASHI":
++      score=.26*score+.32*(e.tracking||5)+.18*(e.stamina||5)+.14*(e.recent||5)+.10*(e.finish||5);
++      if(sameFirst&&role==="三番手")factor=1.38; else if(sameFirst&&role==="自力")factor=1.22; else if(role==="番手"||role==="三番手")factor=1.06;
++      break;
++    case"MAKURI_SUCCESS":
++      score=.24*score+.30*(e.tracking||5)+.20*(e.finish||5)+.14*(e.recent||5)+.12*(e.stamina||5);
++      if(sameFirst&&role==="三番手")factor=1.32; else if(sameFirst&&role==="番手")factor=1.26; else if(!sameFirst&&role==="番手")factor=1.12; else if(role==="自力")factor=.86;
++      break;
++    case"LEAD_BATTLE":
++      score=.22*score+.34*(e.tracking||5)+.22*(e.finish||5)+.12*(e.recent||5)+.10*(e.stamina||5);
++      if(role==="三番手")factor=1.28; else if(role==="番手")factor=1.20; else if(role==="自力")factor=.72;
++      break;
++    case"LINE_SEPARATION":
++      score=.22*score+.36*(e.tracking||5)+.22*(e.finish||5)+.12*(e.recent||5)+.08*(e.lineTrust||5);
++      if(!sameFirst&&!sameSecond&&(role==="番手"||role==="単騎"))factor=1.24; else if(sameFirst)factor=.74;
++      break;
++    case"SOLO_RISE":
++      score=.26*score+.34*(e.tracking||5)+.18*(e.finish||5)+.14*(e.recent||5)+.08*(e.stamina||5);
++      if(role==="番手"||role==="三番手")factor=1.12; else if(role==="自力")factor=.88;
++      break;
++  }
++  return positive(score)*factor;
++}
++
++function positionEvidence(branch,participant,target){
++  const e=participant.evidence||{};
++  const values={recentForm:e.recent??5,startPower:e.start??5,sprintPower:e.sprint??5,finishPower:e.finish??5,trackingSkill:e.tracking??5,roleScore:participant.roleScores?.[target]??5};
++  const keys=branchKeys(branch.branchType,target);
++  return {number:participant.number,id:participant.id,role:participant.role,target,roleScore:values.roleScore,drivers:keys.map(key=>({key,value:values[key]})).sort((a,b)=>b.value-a.value||a.key.localeCompare(b.key,"en"))};
++}
++function branchKeys(type,target){
++  if(target==="first"){
++    if(type==="LEADER_HOLD")return["startPower","recentForm","finishPower","roleScore"];
++    if(type==="BANTE_SASHI")return["finishPower","trackingSkill","recentForm","roleScore"];
++    if(type==="MAKURI_SUCCESS")return["sprintPower","finishPower","recentForm","roleScore"];
++    return["finishPower","trackingSkill","recentForm","roleScore"];
++  }
++  if(target==="second")return["trackingSkill","finishPower","recentForm","roleScore"];
++  return["trackingSkill","finishPower","recentForm","roleScore"];
++}
++
++function branchRoleFactor(branch,participant,target){
++  if(target!=="first")return 1;
++  if(branch.branchType==="LEAD_BATTLE"){
++    if(participant.role==="番手")return 1.08;
++    if(participant.role==="自力")return .90;
++  }
++  if(branch.branchType==="LINE_SEPARATION"&&participant.role==="番手")return 1.12;
++  return 1;
++}
++function sameLine(a,b,lineById){const la=lineById.get(a.id),lb=lineById.get(b.id);return Boolean(la&&lb&&la===lb&&!String(la).startsWith("unknown-"))}
++function positive(value){return Math.max(.05,Number(value)||0)}
+diff -ruN chari-neko-dev-core-v3/public/app.mjs chari-neko-dev-core-v4/public/app.mjs
+--- chari-neko-dev-core-v3/public/app.mjs	2026-08-08 10:31:11.823889680 +0000
++++ chari-neko-dev-core-v4/public/app.mjs	2026-08-08 11:32:47.003861673 +0000
+@@ -23,7 +23,7 @@
+ function renderOfficial(p){const race=p?.race;if(race){state.race={...state.race,scheduledStart:race.startTime||race.deadline||""};$("participantCount").textContent=`${race.participants.length}名`;$("participants").innerHTML=race.participants.map(x=>`<div class="rider"><span class="riderNo">${x.number}</span><span><strong>${esc(x.name)}</strong><small>ID ${esc(x.registration||x.sourcePath||"公式車番")}</small></span><small>${esc(x.className||x.prefecture||"")}</small></div>`).join("");$("officialLine").textContent=lineText(race.participants);$("oddsStatus").textContent=p.odds?.ok?`3連単 ${Object.keys(p.odds.odds||{}).length}件`:"オッズ取得失敗";$("oddsStatus").className=`pill ${p.odds?.ok?"success":"warning"}`;$("detailNotice").innerHTML=p.warnings?.length?`<div class="notice">${p.warnings.map(esc).join(" / ")}</div>`:""}else{$("participantCount").textContent="未取得";$("participants").innerHTML='<p class="muted">予想実行時に公式情報を取得します。</p>';$("officialLine").textContent="予想実行時に取得します";$("oddsStatus").textContent="オッズ未取得"}}
+ 
+ async function predict(){if(state.busy)return;const fixed={...state.race,key:raceKey(state.race)};state.busy=true;$("predictBtn").disabled=true;setLoading("予想を作成中","出走選手・公式ライン・3連単オッズを取得しています。");try{const q=new URLSearchParams({date:fixed.date,venueName:fixed.venueName,venueCode:fixed.venueCode,raceCardUrl:fixed.raceCardUrl,raceNo:String(fixed.raceNo),budget:"3000"});if(fixed.oddsUrl)q.set("oddsUrl",fixed.oddsUrl);const p=await jsonFetch(`/.netlify/functions/keirin-predict?${q}`);if(raceKey(p.race)!==fixed.key)throw new Error("取得したレースが選択内容と一致しません");state.payload=p;state.race={...fixed,...p.race,venueName:p.race.venue};const snapshot=saveSnapshot(localStorage,createSnapshot(p));state.snapshot=snapshot;renderOfficial(p);renderPrediction(snapshot)}catch(e){fail("予想の取得・保存に失敗",e,predict)}finally{state.busy=false;$("predictBtn").disabled=false}}
+-function renderPrediction(snapshot){state.snapshot=snapshot;const r=snapshot.targetRace;$("predictionTitle").textContent=`${r.venueName} ${r.raceNo}R`;$("recommendation").textContent=snapshot.noBet?"見送り":snapshot.recommendation||"予想結果";$("predictionUpdated").textContent=formatTime(snapshot.createdAt);$("predictionSummary").innerHTML=metas([["予想バージョン",snapshot.predictionVersion],["買い目",`${snapshot.betSelections.length}点`],["発走/締切",r.scheduledStart||"未取得"],["保存ID",snapshot.predictionSnapshotId.slice(-12)]]);const groups=[["本線","MAIN"],["押さえ","COVER"],["買える高配当","BUYABLE_HIGH"]];$("betGroups").innerHTML=groups.map(([label,key])=>{const bets=snapshot.betSelections.filter(b=>b.category===key);return bets.length?`<section class="betCard"><h3>${label}</h3><div class="betRows">${bets.map(b=>`<div class="betRow"><div><strong>${b.order.join("-")}</strong>${b.branchLabel?`<small>${esc(b.branchLabel)}${b.reason?` / ${esc(b.reason)}`:""}</small>`:""}</div><span>${b.odds?`${b.odds}倍`:"オッズ確認待ち"}${b.stake?` / ${Number(b.stake).toLocaleString()}円`:""}</span></div>`).join("")}</div></section>`:""}).join("")||(snapshot.noBet?`<section class="card empty"><strong>見送り</strong><p>${esc(noBetReasonText(snapshot.noBetReason))}</p></section>`:'<section class="card empty">購入対象の買い目はありません。</section>');renderResult(snapshot.result);show("prediction")}
++function renderPrediction(snapshot){state.snapshot=snapshot;const r=snapshot.targetRace;$("predictionTitle").textContent=`${r.venueName} ${r.raceNo}R`;$("recommendation").textContent=snapshot.noBet?"見送り":snapshot.recommendation||"予想結果";$("predictionUpdated").textContent=formatTime(snapshot.createdAt);$("predictionSummary").innerHTML=metas([["予想バージョン",snapshot.predictionVersion],["買い目",`${snapshot.betSelections.length}点`],["発走/締切",r.scheduledStart||"未取得"],["保存ID",snapshot.predictionSnapshotId.slice(-12)]]);const groups=[["本線","MAIN"],["押さえ","COVER"],["買える高配当","BUYABLE_HIGH"]];$("betGroups").innerHTML=groups.map(([label,key])=>{const bets=snapshot.betSelections.filter(b=>b.category===key);return bets.length?`<section class="betCard"><h3>${label}</h3><div class="betRows">${bets.map(b=>`<div class="betRow"><div><strong>${b.order.join("-")}</strong>${b.branchLabel?`<small>${esc(b.branchLabel)}${b.reason?` / ${esc(b.reason)}`:""}</small>`:""}${b.evidenceSummary?`<small class="evidenceTrace">${esc(b.evidenceSummary)}</small>`:""}</div><span>${b.odds?`${b.odds}倍`:"オッズ確認待ち"}${b.stake?` / ${Number(b.stake).toLocaleString()}円`:""}</span></div>`).join("")}</div></section>`:""}).join("")||(snapshot.noBet?`<section class="card empty"><strong>見送り</strong><p>${esc(noBetReasonText(snapshot.noBetReason))}</p></section>`:'<section class="card empty">購入対象の買い目はありません。</section>');renderResult(snapshot.result);show("prediction")}
+ function noBetReasonText(code){return({NO_TERMINALS:"展開候補を生成できませんでした。",FLAT_DISTRIBUTION_NO_SUPPORTED_CANDIDATE:"確率分布が平坦で、独立した展開根拠を持つ購入候補がありません。",BUDGET_BELOW_MINIMUM:"予算が最低購入単位を下回っています。",QUALITY_GATE:"データ品質基準を満たさないため購入を見送ります。",LINE_DATA_UNAVAILABLE:"公式ラインを確認できないため、通常の競輪予想としては購入判定を保留します。"})[code]||"購入価値を確認できないため見送ります。"}
+ async function checkResult(){if(state.busy)return;state.busy=true;setLoading("公式結果を確認中","レースIDを固定して確定着順と払戻を取得しています。");try{const r=state.snapshot.targetRace,q=new URLSearchParams({date:r.date,venueCode:r.venueCode,venueName:r.venueName,raceNo:String(r.raceNo)}),p=await jsonFetch(`/.netlify/functions/keirin-result?${q}`);if(raceKey(p.race)!==raceKey(r))throw new Error("公式結果のレースが保存済み予想と一致しません");if(isResultPending(p.result)){renderPrediction(state.snapshot);renderPendingResult();return}state.snapshot=attachResult(localStorage,state.snapshot.predictionSnapshotId,p.result);renderPrediction(state.snapshot)}catch(e){fail("公式結果の取得・保存に失敗",e,checkResult)}finally{state.busy=false}}
+ function renderPendingResult(){$("resultPanel").className="card";$("resultPanel").innerHTML='<div class="resultMark">結果はまだ確定していません</div><p class="muted">公式結果の確定後にもう一度確認してください。</p><button id="retryPendingResult" class="secondary">再試行</button>';$('retryPendingResult').onclick=()=>checkResult()}
+diff -ruN chari-neko-dev-core-v3/public/prediction-store.mjs chari-neko-dev-core-v4/public/prediction-store.mjs
+--- chari-neko-dev-core-v3/public/prediction-store.mjs	2026-08-08 10:31:11.823490269 +0000
++++ chari-neko-dev-core-v4/public/prediction-store.mjs	2026-08-08 11:32:47.003431595 +0000
+@@ -4,7 +4,7 @@
+ export function createSnapshot(payload,now=new Date()){
+   const race=payload.race||{},prediction=payload.prediction||{};
+   const createdAt=now.toISOString(),key=raceKey(race);
+-  return {predictionSnapshotId:`${key}:${createdAt}`,createdAt,targetRace:{date:normalizeDate(race.date),venueCode:String(race.venueCode||""),venueName:race.venue||race.venueName||"",raceNo:Number(race.raceNo),scheduledStart:race.startTime||race.deadline||""},participants:(race.participants||[]).map(p=>({number:Number(p.number),name:p.name||"",registration:p.registration||"",sourceType:p.sourceType||null,sourcePath:p.sourcePath||null})),predictionVersion:prediction.engineVersion||"STABLE",abilitiesUsed:(prediction.scored||[]).map(p=>({number:p.number,score:p.score??p.totalScore??null})),predictionOutput:{recommendationLabel:prediction.recommendationLabel||"",audit:prediction.audit||null,noBet:Boolean(prediction.noBet),noBetReason:prediction.noBetReason||null},branches:prediction.branches||[],betSelections:(prediction.purchasePlan||[]).map(b=>({order:b.order.map(Number),category:b.betClass,stake:b.stake??null,odds:b.odds??null,recommendation:b.purchaseStatus||"購入採用",branchLabel:b.dominantBranchLabel||null,reason:b.purchaseReason||null,probability:b.probability??null,decisionRatios:b.decisionRatios||null})),category:prediction.recommendationLabel||"",recommendation:prediction.noBet?"見送り":prediction.recommendationLabel||"",noBet:Boolean(prediction.noBet),noBetReason:prediction.noBetReason||null,oddsSnapshot:payload.odds||null,result:null};
++  return {predictionSnapshotId:`${key}:${createdAt}`,createdAt,targetRace:{date:normalizeDate(race.date),venueCode:String(race.venueCode||""),venueName:race.venue||race.venueName||"",raceNo:Number(race.raceNo),scheduledStart:race.startTime||race.deadline||""},participants:(race.participants||[]).map(p=>({number:Number(p.number),name:p.name||"",registration:p.registration||"",sourceType:p.sourceType||null,sourcePath:p.sourcePath||null})),predictionVersion:prediction.engineVersion||"STABLE",abilitiesUsed:(prediction.scored||[]).map(p=>({number:p.number,recentForm:p.recentForm??null,startPower:p.startPower??null,sprintPower:p.sprintPower??null,finishPower:p.finishPower??null,trackingSkill:p.trackingSkill??null,roleScores:p.roleScores||null,scoreTrace:p.scoreTrace||null})),predictionOutput:{recommendationLabel:prediction.recommendationLabel||"",audit:prediction.audit||null,noBet:Boolean(prediction.noBet),noBetReason:prediction.noBetReason||null},branches:prediction.branches||[],betSelections:(prediction.purchasePlan||[]).map(b=>({order:b.order.map(Number),category:b.betClass,stake:b.stake??null,odds:b.odds??null,recommendation:b.purchaseStatus||"購入採用",branchLabel:b.dominantBranchLabel||null,reason:b.purchaseReason||null,probability:b.probability??null,decisionRatios:b.decisionRatios||null,evidenceSummary:b.evidenceSummary||null,positionEvidence:b.positionEvidence||null})),category:prediction.recommendationLabel||"",recommendation:prediction.noBet?"見送り":prediction.recommendationLabel||"",noBet:Boolean(prediction.noBet),noBetReason:prediction.noBetReason||null,oddsSnapshot:payload.odds||null,result:null};
+ }
+ export function saveSnapshot(storage,snapshot){const all=loadSnapshots(storage);const duplicate=all.find(x=>raceKey(x.targetRace)===raceKey(snapshot.targetRace)&&x.predictionVersion===snapshot.predictionVersion&&JSON.stringify(x.betSelections)===JSON.stringify(snapshot.betSelections)&&!x.result);if(duplicate)return duplicate;all.unshift(snapshot);storage.setItem(STORAGE_KEY,JSON.stringify(all.slice(0,100)));return snapshot}
+ export function loadSnapshots(storage){try{const value=JSON.parse(storage.getItem(STORAGE_KEY)||"[]");return Array.isArray(value)?value:[]}catch{return[]}}
+diff -ruN chari-neko-dev-core-v3/public/styles.css chari-neko-dev-core-v4/public/styles.css
+--- chari-neko-dev-core-v3/public/styles.css	2026-08-08 10:24:54.005773393 +0000
++++ chari-neko-dev-core-v4/public/styles.css	2026-08-08 11:32:47.004005765 +0000
+@@ -1 +1,3 @@
+ :root{color-scheme:dark;--bg:#08111f;--card:#132039;--inset:#0a1425;--line:#2a3b58;--text:#f8fafc;--muted:#94a3b8;--accent:#5bc0b4;--warning:#f59e0b;--danger:#f87171}*{box-sizing:border-box}html,body{margin:0;min-width:320px;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input{font:inherit}button{min-height:44px;cursor:pointer}.hidden{display:none!important}.appHeader{position:sticky;top:0;z-index:20;height:calc(64px + env(safe-area-inset-top));padding:env(safe-area-inset-top) 12px 0;display:grid;grid-template-columns:48px 1fr 48px;align-items:center;background:#08111ff2;border-bottom:1px solid var(--line);backdrop-filter:blur(12px)}.brand,.iconBtn{border:0;background:transparent;color:var(--text)}.brand{display:flex;justify-content:center;align-items:center;gap:8px}.brand>span{display:grid;text-align:left}.brand strong{font-size:1.05rem}.brand small{color:var(--accent);font-size:.68rem}.brand>span:first-child{font-size:1.5rem}.iconBtn{font-size:1.4rem;border-radius:12px}.iconBtn:active{background:var(--card)}main{width:min(100%,760px);margin:auto;padding:16px 14px calc(92px + env(safe-area-inset-bottom))}.screen{display:none}.screen.active{display:block}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px}.card.compact{padding:14px}.hero{background:linear-gradient(145deg,#17304b,#132039)}.hero small,.pageTitle small,.sectionHead small{color:var(--accent);font-weight:700;letter-spacing:.08em}.hero h1,.pageTitle h1{font-size:1.45rem;margin:6px 0}.hero p,.muted{color:var(--muted)}.primary,.secondary{width:100%;border-radius:12px;padding:12px 14px;font-weight:800}.primary{border:0;background:var(--accent);color:#05201c}.primary:disabled{opacity:.55;cursor:wait}.secondary{border:1px solid var(--line);background:#17243a;color:var(--text);margin-top:8px}.pageTitle,.sectionHead,.meetingTop,.raceTop{display:flex;justify-content:space-between;align-items:center;gap:10px}.pageTitle{margin:4px 2px 14px}.pageTitle h1,.sectionHead h2{margin:0}.sectionHead h2{font-size:1rem}.pill{display:inline-flex;align-items:center;white-space:nowrap;border:1px solid var(--line);border-radius:999px;padding:5px 9px;font-size:.72rem}.pill.success{background:#083c36}.pill.warning{background:#713f12}.pill.danger{background:#7f1d1d}.filters{display:flex;gap:7px;overflow:auto;padding:10px 0 2px}.filter{border:1px solid var(--line);border-radius:999px;background:var(--inset);color:var(--muted);padding:7px 14px}.filter.active{background:#0f5048;color:#fff}.filter:disabled{opacity:.45}.stack{display:grid;gap:10px}.meeting,.savedItem,.betCard{border:1px solid var(--line);border-radius:16px;background:var(--card);padding:14px}.meeting h2,.raceCard h2,.savedItem h3,.betCard h3{margin:0}.meeting p,.raceCard p,.savedItem p{margin:7px 0;color:var(--muted)}.meeting button,.savedItem button{width:100%;border:1px solid var(--line);border-radius:11px;background:#17243a;color:#fff}.raceGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.raceCard{min-width:0;border:1px solid var(--line);border-radius:16px;background:var(--card);padding:13px;text-align:left;color:#fff}.raceCard:active{border-color:var(--accent)}.raceCard h2{font-size:1.2rem}.raceCard p{font-size:.78rem;overflow-wrap:anywhere}.status{display:inline-block;font-size:.7rem;color:var(--accent)}label{display:grid;gap:6px;color:var(--muted);font-size:.8rem}input{min-height:44px;border:1px solid var(--line);border-radius:11px;background:var(--inset);color:#fff;padding:9px}.metaGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.meta{min-width:0;background:var(--inset);border:1px solid var(--line);border-radius:12px;padding:10px}.meta span,.meta strong{display:block;overflow-wrap:anywhere}.meta span{font-size:.68rem;color:var(--muted)}.participants{display:grid;gap:7px;margin-top:10px}.rider{display:grid;grid-template-columns:38px 1fr auto;align-items:center;gap:9px;background:var(--inset);border-radius:11px;padding:9px}.riderNo{display:grid;place-items:center;width:34px;height:34px;background:#fff;color:#111;border-radius:8px;font-weight:900}.rider strong,.rider small{display:block}.rider small{color:var(--muted);font-size:.7rem}.lineBox{margin-top:10px;background:var(--inset);border-radius:12px;padding:12px;overflow-wrap:anywhere}.actionBar{position:fixed;z-index:15;bottom:0;left:0;right:0;display:flex;gap:8px;padding:10px max(14px,calc((100vw - 760px)/2 + 14px)) calc(10px + env(safe-area-inset-bottom));background:#08111ff2;border-top:1px solid var(--line);backdrop-filter:blur(12px)}.actionBar .secondary{margin:0}.betCard p{font-size:1.06rem;font-weight:800;line-height:1.65;margin:8px 0 0}.betRows{display:grid;gap:7px;margin-top:10px}.betRow{display:grid;grid-template-columns:1fr auto;gap:10px;background:var(--inset);border-radius:10px;padding:10px}.resultHit{border-color:#22c55e}.resultMiss{border-color:#ef4444}.resultMark{font-size:2.2rem;font-weight:900}.loadingCard,.errorCard{text-align:center;margin-top:14vh}.spinner{width:48px;height:48px;border:5px solid #334155;border-top-color:var(--accent);border-radius:50%;margin:5px auto 18px;animation:spin 1s linear infinite}.errorIcon{display:grid;place-items:center;width:48px;height:48px;margin:auto;border-radius:50%;background:#7f1d1d;font-size:1.6rem;font-weight:900}.empty{text-align:center;color:var(--muted);padding:20px}.notice{margin-top:10px;border-radius:10px;padding:10px;background:#713f12;color:#fef3c7;font-size:.8rem}@keyframes spin{to{transform:rotate(360deg)}}@media(min-width:600px){.raceGrid{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:390px){main{padding-left:10px;padding-right:10px}.card{padding:13px}.metaGrid{grid-template-columns:1fr}.pageTitle h1{font-size:1.28rem}.raceGrid{gap:8px}.raceCard{padding:11px}.actionBar{padding-left:10px;padding-right:10px}}
++
++.evidenceTrace{display:block;margin-top:4px;opacity:.78;font-size:.76rem;line-height:1.35}
