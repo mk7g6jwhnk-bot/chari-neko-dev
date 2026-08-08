@@ -1,0 +1,257 @@
+diff -ruN '--exclude=.git' /mnt/data/v8clean/chari-neko-dev-core-v6/keirin/engine/keirin-engine.mjs /mnt/data/v8work/chari-neko-dev-core-v6/keirin/engine/keirin-engine.mjs
+--- /mnt/data/v8clean/chari-neko-dev-core-v6/keirin/engine/keirin-engine.mjs	2026-08-08 13:06:45.000000000 +0000
++++ /mnt/data/v8work/chari-neko-dev-core-v6/keirin/engine/keirin-engine.mjs	2026-08-08 13:17:20.808946687 +0000
+@@ -21,7 +21,7 @@
+   if(lineBlocked){purchase.noBet=true;purchase.noBetReason="LINE_DATA_UNAVAILABLE";purchase.purchaseCandidateCountBeforeCompression=0;purchase.purchaseCandidateCountAfterCompression=0;purchase.finalBetCount=0;purchase.minimumRequired=0;}
+ 
+   return{
+-    engineVersion:"KEIRIN-0.4.6-official-line-order-consistent",
++    engineVersion:"KEIRIN-0.4.7-provenance-consistent",
+     raceId:race.id,
+     lineConfidence:race.lineConfidence,
+     scored,lines,branches,terminals:classified,
+diff -ruN '--exclude=.git' /mnt/data/v8clean/chari-neko-dev-core-v6/keirin/engine/purchase.mjs /mnt/data/v8work/chari-neko-dev-core-v6/keirin/engine/purchase.mjs
+--- /mnt/data/v8clean/chari-neko-dev-core-v6/keirin/engine/purchase.mjs	2026-08-08 11:32:47.000000000 +0000
++++ /mnt/data/v8work/chari-neko-dev-core-v6/keirin/engine/purchase.mjs	2026-08-08 13:17:44.807830589 +0000
+@@ -12,7 +12,9 @@
+     const key=terminal.order.join("-");
+     const odd=Number(odds[key]);
+     const hasOdds=Number.isFinite(odd)&&odd>1;
+-    const contributions=[...(terminal.branchContributions||[])].sort((a,b)=>b.probability-a.probability);
++    const contributions=[...(terminal.branchContributions||[])]
++      .filter(contribution=>contributionMatchesTerminal(contribution,terminal.order))
++      .sort((a,b)=>b.probability-a.probability||String(a.branchId).localeCompare(String(b.branchId),"en"));
+     const dominant=contributions[0]||null;
+     const stats=dominant?branchStats.get(dominant.branchId):null;
+     const branchFit=stats?.best>0?(dominant?.probability||0)/stats.best:0;
+@@ -83,11 +85,20 @@
+   });
+ }
+ 
++function contributionMatchesTerminal(contribution,order){
++  if(!contribution)return false;
++  const first=Number(order?.[0]);
++  const required=Number(contribution.requiredFirstNumber);
++  if(Number.isFinite(required)&&required>0&&first!==required)return false;
++  return true;
++}
++
+ function buildBranchStats(terminals){
+   const byBranch=new Map();
+   for(const terminal of terminals){
+     const order=terminal.order.join("-");
+     for(const contribution of terminal.branchContributions||[]){
++      if(!contributionMatchesTerminal(contribution,terminal.order))continue;
+       if(!byBranch.has(contribution.branchId))byBranch.set(contribution.branchId,[]);
+       byBranch.get(contribution.branchId).push({order,probability:contribution.probability||0});
+     }
+diff -ruN '--exclude=.git' /mnt/data/v8clean/chari-neko-dev-core-v6/keirin/sports/keirin-branches.mjs /mnt/data/v8work/chari-neko-dev-core-v6/keirin/sports/keirin-branches.mjs
+--- /mnt/data/v8clean/chari-neko-dev-core-v6/keirin/sports/keirin-branches.mjs	2026-08-08 11:31:48.000000000 +0000
++++ /mnt/data/v8work/chari-neko-dev-core-v6/keirin/sports/keirin-branches.mjs	2026-08-08 13:17:20.807537991 +0000
+@@ -6,19 +6,19 @@
+     const leader=line.leader,bante=line.bante;
+     if(leader){
+       branches.push(make({
+-        id:`LEAD-${line.id}`,label:`${line.id}先行押し切り`,scenario:"先行押し切り",branchType:"LEADER_HOLD",primaryLineId:line.id,enabled:lineEnabled,
++        id:`LEAD-${line.id}`,label:`${line.id}先行押し切り`,scenario:"先行押し切り",branchType:"LEADER_HOLD",primaryLineId:line.id,requiredFirstNumber:leader.number,enabled:lineEnabled,
+         scoreParts:[part("first",leader.roleScores.first,.40),part("startPower",leader.evidence.start,.35),part("recentForm",leader.evidence.recent,.15),part("finishPower",leader.evidence.finish,.10)],
+         firstCandidateScores:{[leader.id]:leader.roleScores.first||0}
+       }));
+       branches.push(make({
+-        id:`MAKURI-${line.id}`,label:`${line.id}まくり`,scenario:"別線まくり",branchType:"MAKURI_SUCCESS",primaryLineId:line.id,enabled:lineEnabled,
++        id:`MAKURI-${line.id}`,label:`${line.id}まくり`,scenario:"別線まくり",branchType:"MAKURI_SUCCESS",primaryLineId:line.id,requiredFirstNumber:leader.number,enabled:lineEnabled,
+         scoreParts:[part("first",leader.roleScores.first,.32),part("sprintPower",leader.evidence.sprint,.42),part("finishPower",leader.evidence.finish,.16),part("recentForm",leader.evidence.recent,.10)],
+         firstCandidateScores:{[leader.id]:leader.roleScores.first||0}
+       }));
+     }
+     if(bante){
+       branches.push(make({
+-        id:`BANTE-${line.id}`,label:`${line.id}番手差し`,scenario:"番手差し",branchType:"BANTE_SASHI",primaryLineId:line.id,enabled:lineEnabled,
++        id:`BANTE-${line.id}`,label:`${line.id}番手差し`,scenario:"番手差し",branchType:"BANTE_SASHI",primaryLineId:line.id,requiredFirstNumber:bante.number,enabled:lineEnabled,
+         scoreParts:[part("first",bante.roleScores.first,.32),part("finishPower",bante.evidence.finish,.34),part("trackingSkill",bante.evidence.tracking,.24),part("recentForm",bante.evidence.recent,.10)],
+         firstCandidateScores:{[bante.id]:bante.roleScores.first||0}
+       }));
+@@ -46,10 +46,10 @@
+ }
+ 
+ function part(key,value,weight){return{key,value:Number(value)||0,weight,contribution:(Number(value)||0)*weight}}
+-function make({id,label,scenario,branchType,scoreParts=[],firstCandidateScores={},primaryLineId=null,enabled}){
++function make({id,label,scenario,branchType,scoreParts=[],firstCandidateScores={},primaryLineId=null,requiredFirstNumber=null,enabled}){
+   const score=scoreParts.reduce((sum,item)=>sum+item.contribution,0);
+   const entries=Object.entries(firstCandidateScores).filter(([id,value])=>id&&Number.isFinite(value)&&value>0).sort((a,b)=>b[1]-a[1]||String(a[0]).localeCompare(String(b[0]),"en"));
+-  return{id,label,scenario,branchType,primaryLineId,score,scoreTrace:[...scoreParts].sort((a,b)=>b.contribution-a.contribution),firstCandidates:entries.map(([id])=>id),firstCandidateScores:Object.fromEntries(entries),enabled:Boolean(enabled)&&score>=2.2,priority:"risk"};
++  return{id,label,scenario,branchType,primaryLineId,requiredFirstNumber,score,scoreTrace:[...scoreParts].sort((a,b)=>b.contribution-a.contribution),firstCandidates:entries.map(([id])=>id),firstCandidateScores:Object.fromEntries(entries),enabled:Boolean(enabled)&&score>=2.2,priority:"risk"};
+ }
+ function compareBranch(a,b){return(b.score-a.score)||a.id.localeCompare(b.id,"en")}
+ function avg(values){const valid=values.filter(Number.isFinite);return valid.length?valid.reduce((sum,value)=>sum+value,0)/valid.length:0}
+diff -ruN '--exclude=.git' /mnt/data/v8clean/chari-neko-dev-core-v6/keirin/sports/keirin-terminals.mjs /mnt/data/v8work/chari-neko-dev-core-v6/keirin/sports/keirin-terminals.mjs
+--- /mnt/data/v8clean/chari-neko-dev-core-v6/keirin/sports/keirin-terminals.mjs	2026-08-08 12:56:56.000000000 +0000
++++ /mnt/data/v8work/chari-neko-dev-core-v6/keirin/sports/keirin-terminals.mjs	2026-08-08 13:17:20.808169714 +0000
+@@ -36,6 +36,8 @@
+             branchLabel:branch.label,
+             branchPriority:branch.priority,
+             branchType:branch.branchType,
++            primaryLineId:branch.primaryLineId||null,
++            requiredFirstNumber:branch.requiredFirstNumber??null,
+             branchScore:branch.score,
+             pathScore,
+             decisionRatios:{
+@@ -66,6 +68,8 @@
+       branchLabel:terminal.branchLabel,
+       branchPriority:terminal.branchPriority,
+       branchType:terminal.branchType,
++      primaryLineId:terminal.primaryLineId||null,
++      requiredFirstNumber:terminal.requiredFirstNumber??null,
+       branchScore:terminal.branchScore,
+       weightedScore:terminal.weightedScore,
+       pathScore:terminal.pathScore,
+diff -ruN '--exclude=.git' /mnt/data/v8clean/chari-neko-dev-core-v6/modules/keirin/engine/keirin-engine.mjs /mnt/data/v8work/chari-neko-dev-core-v6/modules/keirin/engine/keirin-engine.mjs
+--- /mnt/data/v8clean/chari-neko-dev-core-v6/modules/keirin/engine/keirin-engine.mjs	2026-08-08 13:06:45.000000000 +0000
++++ /mnt/data/v8work/chari-neko-dev-core-v6/modules/keirin/engine/keirin-engine.mjs	2026-08-08 13:17:20.809039318 +0000
+@@ -21,7 +21,7 @@
+   if(lineBlocked){purchase.noBet=true;purchase.noBetReason="LINE_DATA_UNAVAILABLE";purchase.purchaseCandidateCountBeforeCompression=0;purchase.purchaseCandidateCountAfterCompression=0;purchase.finalBetCount=0;purchase.minimumRequired=0;}
+ 
+   return{
+-    engineVersion:"KEIRIN-0.4.6-official-line-order-consistent",
++    engineVersion:"KEIRIN-0.4.7-provenance-consistent",
+     raceId:race.id,
+     lineConfidence:race.lineConfidence,
+     scored,lines,branches,terminals:classified,
+diff -ruN '--exclude=.git' /mnt/data/v8clean/chari-neko-dev-core-v6/modules/keirin/engine/purchase.mjs /mnt/data/v8work/chari-neko-dev-core-v6/modules/keirin/engine/purchase.mjs
+--- /mnt/data/v8clean/chari-neko-dev-core-v6/modules/keirin/engine/purchase.mjs	2026-08-08 11:32:47.000000000 +0000
++++ /mnt/data/v8work/chari-neko-dev-core-v6/modules/keirin/engine/purchase.mjs	2026-08-08 13:17:44.808119431 +0000
+@@ -12,7 +12,9 @@
+     const key=terminal.order.join("-");
+     const odd=Number(odds[key]);
+     const hasOdds=Number.isFinite(odd)&&odd>1;
+-    const contributions=[...(terminal.branchContributions||[])].sort((a,b)=>b.probability-a.probability);
++    const contributions=[...(terminal.branchContributions||[])]
++      .filter(contribution=>contributionMatchesTerminal(contribution,terminal.order))
++      .sort((a,b)=>b.probability-a.probability||String(a.branchId).localeCompare(String(b.branchId),"en"));
+     const dominant=contributions[0]||null;
+     const stats=dominant?branchStats.get(dominant.branchId):null;
+     const branchFit=stats?.best>0?(dominant?.probability||0)/stats.best:0;
+@@ -83,11 +85,20 @@
+   });
+ }
+ 
++function contributionMatchesTerminal(contribution,order){
++  if(!contribution)return false;
++  const first=Number(order?.[0]);
++  const required=Number(contribution.requiredFirstNumber);
++  if(Number.isFinite(required)&&required>0&&first!==required)return false;
++  return true;
++}
++
+ function buildBranchStats(terminals){
+   const byBranch=new Map();
+   for(const terminal of terminals){
+     const order=terminal.order.join("-");
+     for(const contribution of terminal.branchContributions||[]){
++      if(!contributionMatchesTerminal(contribution,terminal.order))continue;
+       if(!byBranch.has(contribution.branchId))byBranch.set(contribution.branchId,[]);
+       byBranch.get(contribution.branchId).push({order,probability:contribution.probability||0});
+     }
+diff -ruN '--exclude=.git' /mnt/data/v8clean/chari-neko-dev-core-v6/modules/keirin/sports/keirin-branches.mjs /mnt/data/v8work/chari-neko-dev-core-v6/modules/keirin/sports/keirin-branches.mjs
+--- /mnt/data/v8clean/chari-neko-dev-core-v6/modules/keirin/sports/keirin-branches.mjs	2026-08-08 11:31:52.000000000 +0000
++++ /mnt/data/v8work/chari-neko-dev-core-v6/modules/keirin/sports/keirin-branches.mjs	2026-08-08 13:17:20.807768155 +0000
+@@ -6,19 +6,19 @@
+     const leader=line.leader,bante=line.bante;
+     if(leader){
+       branches.push(make({
+-        id:`LEAD-${line.id}`,label:`${line.id}先行押し切り`,scenario:"先行押し切り",branchType:"LEADER_HOLD",primaryLineId:line.id,enabled:lineEnabled,
++        id:`LEAD-${line.id}`,label:`${line.id}先行押し切り`,scenario:"先行押し切り",branchType:"LEADER_HOLD",primaryLineId:line.id,requiredFirstNumber:leader.number,enabled:lineEnabled,
+         scoreParts:[part("first",leader.roleScores.first,.40),part("startPower",leader.evidence.start,.35),part("recentForm",leader.evidence.recent,.15),part("finishPower",leader.evidence.finish,.10)],
+         firstCandidateScores:{[leader.id]:leader.roleScores.first||0}
+       }));
+       branches.push(make({
+-        id:`MAKURI-${line.id}`,label:`${line.id}まくり`,scenario:"別線まくり",branchType:"MAKURI_SUCCESS",primaryLineId:line.id,enabled:lineEnabled,
++        id:`MAKURI-${line.id}`,label:`${line.id}まくり`,scenario:"別線まくり",branchType:"MAKURI_SUCCESS",primaryLineId:line.id,requiredFirstNumber:leader.number,enabled:lineEnabled,
+         scoreParts:[part("first",leader.roleScores.first,.32),part("sprintPower",leader.evidence.sprint,.42),part("finishPower",leader.evidence.finish,.16),part("recentForm",leader.evidence.recent,.10)],
+         firstCandidateScores:{[leader.id]:leader.roleScores.first||0}
+       }));
+     }
+     if(bante){
+       branches.push(make({
+-        id:`BANTE-${line.id}`,label:`${line.id}番手差し`,scenario:"番手差し",branchType:"BANTE_SASHI",primaryLineId:line.id,enabled:lineEnabled,
++        id:`BANTE-${line.id}`,label:`${line.id}番手差し`,scenario:"番手差し",branchType:"BANTE_SASHI",primaryLineId:line.id,requiredFirstNumber:bante.number,enabled:lineEnabled,
+         scoreParts:[part("first",bante.roleScores.first,.32),part("finishPower",bante.evidence.finish,.34),part("trackingSkill",bante.evidence.tracking,.24),part("recentForm",bante.evidence.recent,.10)],
+         firstCandidateScores:{[bante.id]:bante.roleScores.first||0}
+       }));
+@@ -46,10 +46,10 @@
+ }
+ 
+ function part(key,value,weight){return{key,value:Number(value)||0,weight,contribution:(Number(value)||0)*weight}}
+-function make({id,label,scenario,branchType,scoreParts=[],firstCandidateScores={},primaryLineId=null,enabled}){
++function make({id,label,scenario,branchType,scoreParts=[],firstCandidateScores={},primaryLineId=null,requiredFirstNumber=null,enabled}){
+   const score=scoreParts.reduce((sum,item)=>sum+item.contribution,0);
+   const entries=Object.entries(firstCandidateScores).filter(([id,value])=>id&&Number.isFinite(value)&&value>0).sort((a,b)=>b[1]-a[1]||String(a[0]).localeCompare(String(b[0]),"en"));
+-  return{id,label,scenario,branchType,primaryLineId,score,scoreTrace:[...scoreParts].sort((a,b)=>b.contribution-a.contribution),firstCandidates:entries.map(([id])=>id),firstCandidateScores:Object.fromEntries(entries),enabled:Boolean(enabled)&&score>=2.2,priority:"risk"};
++  return{id,label,scenario,branchType,primaryLineId,requiredFirstNumber,score,scoreTrace:[...scoreParts].sort((a,b)=>b.contribution-a.contribution),firstCandidates:entries.map(([id])=>id),firstCandidateScores:Object.fromEntries(entries),enabled:Boolean(enabled)&&score>=2.2,priority:"risk"};
+ }
+ function compareBranch(a,b){return(b.score-a.score)||a.id.localeCompare(b.id,"en")}
+ function avg(values){const valid=values.filter(Number.isFinite);return valid.length?valid.reduce((sum,value)=>sum+value,0)/valid.length:0}
+diff -ruN '--exclude=.git' /mnt/data/v8clean/chari-neko-dev-core-v6/modules/keirin/sports/keirin-terminals.mjs /mnt/data/v8work/chari-neko-dev-core-v6/modules/keirin/sports/keirin-terminals.mjs
+--- /mnt/data/v8clean/chari-neko-dev-core-v6/modules/keirin/sports/keirin-terminals.mjs	2026-08-08 12:56:56.000000000 +0000
++++ /mnt/data/v8work/chari-neko-dev-core-v6/modules/keirin/sports/keirin-terminals.mjs	2026-08-08 13:17:20.808473050 +0000
+@@ -36,6 +36,8 @@
+             branchLabel:branch.label,
+             branchPriority:branch.priority,
+             branchType:branch.branchType,
++            primaryLineId:branch.primaryLineId||null,
++            requiredFirstNumber:branch.requiredFirstNumber??null,
+             branchScore:branch.score,
+             pathScore,
+             decisionRatios:{
+@@ -66,6 +68,8 @@
+       branchLabel:terminal.branchLabel,
+       branchPriority:terminal.branchPriority,
+       branchType:terminal.branchType,
++      primaryLineId:terminal.primaryLineId||null,
++      requiredFirstNumber:terminal.requiredFirstNumber??null,
+       branchScore:terminal.branchScore,
+       weightedScore:terminal.weightedScore,
+       pathScore:terminal.pathScore,
+diff -ruN '--exclude=.git' /mnt/data/v8clean/chari-neko-dev-core-v6/package.json /mnt/data/v8work/chari-neko-dev-core-v6/package.json
+--- /mnt/data/v8clean/chari-neko-dev-core-v6/package.json	2026-08-08 12:56:58.000000000 +0000
++++ /mnt/data/v8work/chari-neko-dev-core-v6/package.json	2026-08-08 13:17:44.808381234 +0000
+@@ -4,7 +4,7 @@
+   "private": true,
+   "type": "module",
+   "scripts": {
+-    "test": "node modules/keirin/tests/run-tests.mjs && node tests/prediction-flow.mjs && node tests/keirin-purchase-five-races.mjs && node tests/keirin-official-evidence-branching.mjs && node tests/keirin-branch-role-semantics.mjs",
++    "test": "node modules/keirin/tests/run-tests.mjs && node tests/prediction-flow.mjs && node tests/keirin-purchase-five-races.mjs && node tests/keirin-official-evidence-branching.mjs && node tests/keirin-branch-role-semantics.mjs && node tests/keirin-provenance-consistency.mjs",
+     "check": "node --check public/app.mjs && node --check public/prediction-store.mjs && node --check netlify/functions/keirin-result.mjs && node --check netlify/functions/keirin-predict.mjs"
+   },
+   "dependencies": {
+diff -ruN '--exclude=.git' /mnt/data/v8clean/chari-neko-dev-core-v6/tests/keirin-provenance-consistency.mjs /mnt/data/v8work/chari-neko-dev-core-v6/tests/keirin-provenance-consistency.mjs
+--- /mnt/data/v8clean/chari-neko-dev-core-v6/tests/keirin-provenance-consistency.mjs	1970-01-01 00:00:00.000000000 +0000
++++ /mnt/data/v8work/chari-neko-dev-core-v6/tests/keirin-provenance-consistency.mjs	2026-08-08 13:17:44.808221457 +0000
+@@ -0,0 +1,27 @@
++import assert from "node:assert/strict";
++import {classify} from "../keirin/engine/purchase.mjs";
++
++const goodRatios={first:1,second:1,third:1};
++const terminals=[
++  {
++    order:[1,5,3],probability:.60,
++    branchContributions:[
++      {branchId:"MAKURI-B",branchLabel:"Bまくり",branchPriority:"main",branchType:"MAKURI_SUCCESS",requiredFirstNumber:2,probability:.40,decisionRatios:goodRatios,positionEvidence:null},
++      {branchId:"MAKURI-A",branchLabel:"Aまくり",branchPriority:"sub",branchType:"MAKURI_SUCCESS",requiredFirstNumber:1,probability:.20,decisionRatios:goodRatios,positionEvidence:null}
++    ]
++  },
++  {
++    order:[4,6,7],probability:.40,
++    branchContributions:[
++      {branchId:"LEAD-C",branchLabel:"C先行押し切り",branchPriority:"main",branchType:"LEADER_HOLD",requiredFirstNumber:4,probability:.40,decisionRatios:goodRatios,positionEvidence:null}
++    ]
++  }
++];
++const classified=classify(terminals,{});
++const target=classified.find(item=>item.order.join("-")==="1-5-3");
++assert.ok(target);
++assert.equal(target.dominantBranchId,"MAKURI-A","incompatible B provenance must never become dominant");
++assert.equal(target.dominantBranchLabel,"Aまくり");
++assert.notEqual(target.purchaseReason.includes("Bまくり"),true);
++assert.equal(target.branchSupport,1,"incompatible provenance must not count as branch support");
++console.log("Branch provenance consistency tests passed.");
