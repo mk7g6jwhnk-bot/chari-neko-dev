@@ -1,5 +1,8 @@
 import { inferLines } from "../../keirin/parser/line-parser.mjs";
 import { runKeirinEngine } from "../../keirin/engine/keirin-engine.mjs";
+import { applyRecentFormEvidence } from "../../keirin/recent-form/recent-form.mjs";
+import { applyStartPowerEvidence } from "../../keirin/start-power/start-power.mjs";
+import { applyKimariteAbilities } from "../../keirin/kimarite/kimarite-abilities.mjs";
 import { jsonResponse } from "../../keirin/parser/utils.mjs";
 
 const VENUE_CODE_BY_NAME = {
@@ -72,7 +75,15 @@ export default async function handler(req) {
       ? officialData.lines
       : [];
 
-    const participants = officialParticipants.map(adaptParticipant);
+    const raceCategory = detectRaceCategory({ basic, participants: officialParticipants });
+    const participantContext = {
+      raceDate: normalizeDate(basic.date) || date,
+      raceStartTime: basic.startTime || "",
+      venueCode: String(venueCode).padStart(2, "0"),
+      raceNo: Number(basic.raceNo || raceNo),
+      raceCategory
+    };
+    const participants = adaptParticipantsForPrediction(officialParticipants, participantContext);
     if (participants.length < 5) {
       return jsonResponse(422, {
         ok: false,
@@ -189,38 +200,135 @@ async function requestBrowserService(base, params) {
   };
 }
 
-function adaptParticipant(item) {
-  const number = Number(item.number || 0);
-  const score = finite(item.score, 5);
-  const escape = finite(item.escapeCount, 0);
-  const makuri = finite(item.makuriCount, 0);
-  const difference = finite(item.differenceCount, 0);
-  const mark = finite(item.markCount, 0);
-  const back = finite(item.backCount, 0);
-  const activity = escape + makuri + difference + mark;
+export function adaptParticipantsForPrediction(items, context = {}) {
+  const adapted = (Array.isArray(items) ? items : []).map(item => adaptParticipant(item, context));
+  const withRecent = applyRecentFormEvidence(adapted);
+  return withRecent.map(applyKimariteAbilities);
+}
 
-  return {
-    id: item.registration || `K${number}`,
+export function adaptParticipant(item, context = {}) {
+  const number = Number(item.number || 0);
+  const registration = normalizeRegistration(item.registration);
+  const officialProfileEvidence = normalizeOfficialProfileEvidence(item.officialProfile, registration, context);
+  const officialKimariteEvidence = normalizeOfficialKimariteEvidence(item.officialKimariteCounts, registration, context);
+  const participant = {
+    id: String(number),
     number,
     name: item.name || `${number}番車`,
-    registration: item.registration || "",
+    registration,
     prefecture: item.prefecture || "",
     className: item.className || "",
     style: item.style || "",
-    officialScore: item.score ?? null,
-    recentForm: clamp(4.5 + score / 25),
-    startPower: clamp(4 + escape * 0.45 + back * 0.08),
-    sprintPower: clamp(4 + makuri * 0.55 + score / 40),
-    stamina: clamp(4 + back * 0.12 + escape * 0.25),
-    attackTiming: clamp(4 + (escape + makuri) * 0.35),
-    trackingSkill: clamp(4 + (difference + mark) * 0.35),
-    finishPower: clamp(4 + difference * 0.5 + score / 35),
-    lineTrust: clamp(activity ? 5 + mark * 0.2 : 5),
+    raceCategory: context.raceCategory || "unknown",
+    officialScore: nullableNumber(item.score),
+    officialProfileEvidence,
+    officialKimariteEvidence,
+    officialTotalStarts: nullableNumber(item.officialTotalStarts ?? item.officialProfile?.officialTotalStarts),
+    sparseSampleFlag: Number(item.officialTotalStarts ?? item.officialProfile?.officialTotalStarts) <= 10,
+    officialForeignFlag: item.officialForeignFlag === true || item.officialProfile?.officialForeignFlag === true,
+    recentForm: 5,
+    recentFormEvidence: { value: 5, confidence: "low", inputsUsed: [], missingInputs: ["official-profile"] },
+    startPower: 5,
+    startPowerEvidence: null,
+    sprintPower: 5,
+    stamina: 5,
+    attackTiming: 5,
+    trackingSkill: 5,
+    finishPower: 5,
+    lineTrust: 5,
     venueSuitability: 5,
     sourceType: item.sourceType || null,
     sourcePath: item.sourcePath || null
   };
+  return applyStartPowerEvidence([participant])[0];
 }
+
+export function detectRaceCategory({ basic = {}, participants = [] } = {}) {
+  const text = [
+    basic.className, basic.raceName, basic.grade,
+    ...participants.map(item => item.className)
+  ].filter(Boolean).join(" ");
+  if (/(ガールズ|女子|Ｌ級|L級|ガ予|ガ決)/i.test(text)) return "girls";
+  return text.trim() ? "standard" : "unknown";
+}
+
+function normalizeOfficialProfileEvidence(profile, registration, context) {
+  if (!profile || typeof profile !== "object") return null;
+  if (profile.identityPassed !== true) return null;
+  if (registration && normalizeRegistration(profile.registration) !== registration) return null;
+  if (!notAfterTarget(profile.fetchedAt, context)) return null;
+  return {
+    identityPassed: true,
+    registration,
+    fetchedAt: profile.fetchedAt || null,
+    sourceType: profile.sourceType || "official-profile",
+    sourcePath: profile.sourcePath || null,
+    ridingStyle: profile.ridingStyle ?? null,
+    currentScore: nullableNumber(profile.currentScore),
+    recent4MonthScore: nullableNumber(profile.recent4MonthScore),
+    officialTotalStarts: nullableNonNegativeInteger(profile.officialTotalStarts ?? context.officialTotalStarts),
+    backCount: nullableNumber(profile.backCount),
+    homeCount: nullableNumber(profile.homeCount),
+    winRate: nullableNumber(profile.winRate),
+    quinellaRate: nullableNumber(profile.quinellaRate),
+    trioRate: nullableNumber(profile.trioRate),
+    rateUnit: profile.rateUnit || null,
+    winningStyleRates: {
+      escape: nullableNumber(profile.winningStyleRates?.escape),
+      makuri: nullableNumber(profile.winningStyleRates?.makuri),
+      difference: nullableNumber(profile.winningStyleRates?.difference),
+      mark: nullableNumber(profile.winningStyleRates?.mark)
+    },
+    scoreHistory: Array.isArray(profile.scoreHistory) ? profile.scoreHistory : []
+  };
+}
+
+function normalizeOfficialKimariteEvidence(evidence, registration, context) {
+  if (!evidence || typeof evidence !== "object") return null;
+  if (evidence.identityPassed !== true || evidence.targetIdentityPassed !== true) return null;
+  if (registration && normalizeRegistration(evidence.registration ?? evidence.requestedRegistration) !== registration) return null;
+  const target = evidence.target || {};
+  if (target.date && normalizeDate(target.date) !== normalizeDate(context.raceDate)) return null;
+  if (target.venueCode && String(target.venueCode).padStart(2, "0") !== String(context.venueCode).padStart(2, "0")) return null;
+  if (target.raceNo && Number(target.raceNo) !== Number(context.raceNo)) return null;
+  if (!notAfterTarget(evidence.fetchedAt, context)) return null;
+  const result = {
+    status: "verified",
+    identityPassed: true,
+    targetIdentityPassed: true,
+    registration,
+    sourceType: evidence.sourceType || "JSJ068",
+    sourcePath: evidence.sourcePath || null,
+    fetchedAt: evidence.fetchedAt || null,
+    totalQuinellaCount: nullableNonNegativeInteger(evidence.totalQuinellaCount)
+  };
+  for (const key of ["nige", "makuri", "sasi", "mark"]) {
+    const row = evidence[key];
+    if (!row || typeof row !== "object") { result[key] = null; continue; }
+    const F_Cnt = nullableNonNegativeInteger(row.F_Cnt ?? row.first);
+    const S_Cnt = nullableNonNegativeInteger(row.S_Cnt ?? row.second);
+    const Sum_Cnt = nullableNonNegativeInteger(row.Sum_Cnt ?? row.sum ?? row.total);
+    result[key] = F_Cnt !== null && S_Cnt !== null && Sum_Cnt !== null && F_Cnt + S_Cnt === Sum_Cnt
+      ? { F_Cnt, S_Cnt, Sum_Cnt } : null;
+  }
+  return result;
+}
+
+function notAfterTarget(fetchedAt, context) {
+  if (!fetchedAt) return true;
+  const fetched = Date.parse(fetchedAt);
+  if (!Number.isFinite(fetched)) return false;
+  const date = normalizeDate(context.raceDate);
+  if (!/^\d{8}$/.test(date)) return true;
+  const time = String(context.raceStartTime || "23:59").match(/(\d{1,2}):(\d{2})/);
+  const hh = time ? Number(time[1]) : 23, mm = time ? Number(time[2]) : 59;
+  const target = Date.parse(`${date.slice(0,4)}-${date.slice(4,6)}-${date.slice(6,8)}T${String(hh).padStart(2,"0")}:${String(mm).padStart(2,"0")}:00+09:00`);
+  return !Number.isFinite(target) || fetched <= target;
+}
+
+function normalizeRegistration(value) { return String(value ?? "").replace(/\D/g, "").padStart(6, "0").slice(-6); }
+function nullableNumber(value) { if (value === null || value === undefined || value === "") return null; const n = Number(value); return Number.isFinite(n) ? n : null; }
+function nullableNonNegativeInteger(value) { const n = nullableNumber(value); return n !== null && Number.isSafeInteger(n) && n >= 0 ? n : null; }
 
 function buildLineText(lines) {
   if (!lines.length) return null;
