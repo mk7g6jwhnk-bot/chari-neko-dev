@@ -85,6 +85,8 @@ export async function handleKeirinPredict(req, { officialLineStore } = {}) {
     const participantContext = {
       raceDate: normalizeDate(basic.date) || date,
       raceStartTime: basic.startTime || "",
+      venueCode: String(venueCode).padStart(2, "0"),
+      raceNo: Number(basic.raceNo || raceNo),
       raceCategory
     };
     const participants = adaptParticipantsForPrediction(officialParticipants, participantContext);
@@ -341,6 +343,7 @@ export function adaptParticipant(item) {
     }]))
   };
   const profileResult = normalizeOfficialProfile(item.officialProfile, registration, context);
+  const officialKimariteEvidence = normalizeOfficialKimariteEvidence(item.officialKimariteCounts, registration, context);
   const officialRecentResults = normalizeOfficialRecentResults(item, context);
   const score = legacyOfficialMetrics.score;
   const escape = legacyOfficialMetrics.escapeCount;
@@ -369,6 +372,7 @@ export function adaptParticipant(item) {
     legacyOfficialMetrics,
     officialProfileEvidence: profileResult.profile,
     officialProfileStatus: profileResult.status,
+    officialKimariteEvidence,
     officialRecentResults,
     officialTotalStarts,
     sparseSampleFlag,
@@ -401,6 +405,23 @@ export function adaptParticipant(item) {
 export function adaptParticipantsForPrediction(items, context = {}) {
   const adapted = (Array.isArray(items) ? items : []).map(item => adaptParticipant(item, context));
   return applyRecentFormEvidence(adapted);
+}
+
+function normalizeOfficialKimariteEvidence(evidence, registration, context) {
+  const rejected = (status, reason, source = {}) => ({status,reason,identityPassed:evidence?.identityPassed===true,targetIdentityPassed:evidence?.targetIdentityPassed===true,registration:registration||null,target:{date:normalizeDate(context.raceDate)||null,venueCode:normalizeVenueCode(context.venueCode)||null,raceNo:normalizeRaceNo(context.raceNo)||null},fetchedAt:evidence?.fetchedAt||null,sourceType:evidence?.sourceType||null,sourcePath:evidence?.sourcePath||null,nige:null,makuri:null,sasi:null,mark:null,totalQuinellaCount:null,fieldSources:{},...source});
+  if(!evidence||typeof evidence!=="object")return rejected("missing","official-kimarite-counts-missing");
+  if(evidence.identityPassed!==true)return rejected("identity_mismatch","identity-failed");
+  if(evidence.targetIdentityPassed!==true)return rejected("target_mismatch","target-identity-failed");
+  const requestedRegistration=normalizeRegistration(evidence.requestedRegistration),responseRegistration=normalizeRegistration(evidence.registration);
+  if(!registration||requestedRegistration!==registration||responseRegistration!==registration)return rejected("identity_mismatch","registration-mismatch");
+  const target={date:normalizeDate(evidence.date),venueCode:normalizeVenueCode(evidence.venueCode),raceNo:normalizeRaceNo(evidence.raceNo)},expectedTarget={date:normalizeDate(context.raceDate),venueCode:normalizeVenueCode(context.venueCode),raceNo:normalizeRaceNo(context.raceNo)};
+  if(!target.date||!target.venueCode||!target.raceNo||target.date!==expectedTarget.date||target.venueCode!==expectedTarget.venueCode||target.raceNo!==expectedTarget.raceNo)return rejected("target_mismatch","race-target-mismatch",{target});
+  if(evidence.sourceType!=="JSJ068"||!evidence.sourcePath)return rejected("unavailable","source-invalid",{target});
+  if(!evidence.fetchedAt||!Number.isFinite(Date.parse(evidence.fetchedAt)))return rejected("unavailable","fetched-at-invalid",{target});
+  const temporal=validateEvidenceTime(evidence.fetchedAt,context);if(!temporal.ok)return rejected("future_source",temporal.reason,{target});
+  const groups={};for(const key of ["nige","makuri","sasi","mark"]){const group=evidence[key],firstCount=nullableNonNegativeInteger(group?.firstCount),secondCount=nullableNonNegativeInteger(group?.secondCount),totalCount=nullableNonNegativeInteger(group?.totalCount);if(firstCount===null||secondCount===null||totalCount===null||firstCount+secondCount!==totalCount)return rejected("invalid_counts",`${key}-counts-invalid`,{target});groups[key]={firstCount,secondCount,totalCount}}
+  const totalQuinellaCount=nullableNonNegativeInteger(evidence.totalQuinellaCount),calculatedTotal=Object.values(groups).reduce((sum,group)=>sum+group.totalCount,0);if(totalQuinellaCount===null||totalQuinellaCount!==calculatedTotal)return rejected("invalid_counts","total-quinella-count-invalid",{target});
+  const source={sourceType:"JSJ068",sourcePath:String(evidence.sourcePath)};return{status:"adopted",reason:null,identityPassed:true,targetIdentityPassed:true,registration,target,fetchedAt:String(evidence.fetchedAt),...source,...groups,totalQuinellaCount,fieldSources:{nige:{...source,officialField:"nige"},makuri:{...source,officialField:"makuri"},sasi:{...source,officialField:"sasi"},mark:{...source,officialField:"mark"},totalQuinellaCount:{...source,officialField:"totalQuinellaCount"}}};
 }
 
 export function detectRaceCategory({ basic = {}, participants = [] } = {}) {
@@ -437,6 +458,7 @@ function normalizeOfficialRecentResults(item, context) {
 
 function normalizeResultList(results,basePath,sourceType){if(!Array.isArray(results))return[];return results.map((result,index)=>{const rawFinish=result?.rawFinish??null,text=rawFinish===null?"":String(rawFinish).trim();return{rawFinish,specialStatus:result?.specialStatus??(text&&!/^\d+$/.test(text)?text:null),backToriRaw:result?.backToriRaw??null,sourceType:result?.sourceType||sourceType,sourcePath:result?.sourcePath||`${basePath}[${index}]`}})}
 function validateProfileTime(profile,context){const raceDate=normalizeDate(context.raceDate);if(!/^\d{8}$/.test(raceDate))return{ok:false,reason:"race-date-missing"};const sourceTime=Date.parse(profile.sourceUpdatedAt||profile.fetchedAt);if(!Number.isFinite(sourceTime))return{ok:false,reason:"source-time-invalid"};const time=String(context.raceStartTime||"").match(/(\d{1,2}):(\d{2})/),cutoff=Date.parse(`${raceDate.slice(0,4)}-${raceDate.slice(4,6)}-${raceDate.slice(6,8)}T${time?time[1].padStart(2,"0"):"23"}:${time?time[2]:"59"}:59+09:00`);return sourceTime<=cutoff?{ok:true,reason:null}:{ok:false,reason:"profile-from-future"}}
+function validateEvidenceTime(fetchedAt,context){const raceDate=normalizeDate(context.raceDate);if(!/^\d{8}$/.test(raceDate))return{ok:false,reason:"race-date-missing"};const sourceTime=Date.parse(fetchedAt);if(!Number.isFinite(sourceTime))return{ok:false,reason:"source-time-invalid"};const time=String(context.raceStartTime||"").match(/(\d{1,2}):(\d{2})/),cutoff=Date.parse(`${raceDate.slice(0,4)}-${raceDate.slice(4,6)}-${raceDate.slice(6,8)}T${time?time[1].padStart(2,"0"):"23"}:${time?time[2]:"59"}:59+09:00`);return sourceTime<=cutoff?{ok:true,reason:null}:{ok:false,reason:"source-from-future"}}
 function historyIsNotAfterRace(value,raceDate){const normalized=normalizeHistoryDate(value);return Boolean(normalized&&/^\d{8}$/.test(String(raceDate||""))&&normalized<=raceDate)}
 function normalizeHistoryDate(value){const text=String(value||""),short=text.match(/^(\d{2})\/(\d{2})\/(\d{2})$/);if(short)return`20${short[1]}${short[2]}${short[3]}`;const digits=text.replace(/\D/g,"");return digits.length===8?digits:""}
 function normalizeRegistration(value){const digits=String(value??"").replace(/\D/g,"");return digits?digits.padStart(6,"0"):""}
@@ -480,6 +502,16 @@ function readVenueCode(value) {
 
 function normalizeDate(value) {
   return String(value || "").replace(/\D/g, "");
+}
+
+function normalizeVenueCode(value) {
+  const digits = String(value ?? "").replace(/\D/g, "");
+  return digits ? digits.padStart(2, "0").slice(-2) : "";
+}
+
+function normalizeRaceNo(value) {
+  const number = Number(value);
+  return Number.isInteger(number) && number > 0 ? number : 0;
 }
 
 function nullableNumber(value) {

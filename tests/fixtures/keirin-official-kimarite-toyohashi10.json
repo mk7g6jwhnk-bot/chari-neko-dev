@@ -1,0 +1,17 @@
+{
+  "target": {
+    "date": "20260807",
+    "venueCode": "45",
+    "raceNo": 10,
+    "fetchedAt": "2026-08-07T05:00:00.000Z"
+  },
+  "participants": [
+    { "number": 1, "registration": "015313", "nige": [0, 1, 1], "makuri": [0, 1, 1], "sasi": [0, 1, 1], "mark": [0, 0, 0], "total": 3 },
+    { "number": 2, "registration": "015671", "nige": [0, 0, 0], "makuri": [0, 0, 0], "sasi": [1, 3, 4], "mark": [0, 6, 6], "total": 10 },
+    { "number": 3, "registration": "016027", "nige": [0, 1, 1], "makuri": [0, 0, 0], "sasi": [1, 0, 1], "mark": [0, 0, 0], "total": 2 },
+    { "number": 4, "registration": "015401", "nige": [1, 0, 1], "makuri": [1, 0, 1], "sasi": [0, 2, 2], "mark": [0, 1, 1], "total": 5 },
+    { "number": 5, "registration": "015319", "nige": [0, 2, 2], "makuri": [0, 1, 1], "sasi": [1, 1, 2], "mark": [0, 5, 5], "total": 10 },
+    { "number": 6, "registration": "015410", "nige": [0, 0, 0], "makuri": [8, 3, 11], "sasi": [0, 2, 2], "mark": [0, 1, 1], "total": 14 },
+    { "number": 7, "registration": "015853", "nige": [2, 0, 2], "makuri": [3, 2, 5], "sasi": [2, 2, 4], "mark": [0, 2, 2], "total": 13 }
+  ]
+}
