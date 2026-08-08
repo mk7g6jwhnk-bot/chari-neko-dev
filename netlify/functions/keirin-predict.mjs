@@ -68,9 +68,14 @@ export default async function handler(req) {
 
     const officialData = browserResult.data.officialData || {};
     const basic = officialData.basic || {};
-    const officialParticipants = Array.isArray(officialData.participants)
+    const rawOfficialParticipants = Array.isArray(officialData.participants)
       ? officialData.participants
       : [];
+    const officialParticipants = hydrateParticipantEvidence(
+      rawOfficialParticipants,
+      officialData,
+      browserResult.data
+    );
     const officialLines = Array.isArray(officialData.lines)
       ? officialData.lines
       : [];
@@ -128,7 +133,14 @@ export default async function handler(req) {
         lineConfidence: line.confidence,
         oddsAvailable: Object.keys(odds.odds).length > 0,
         participantCount: participants.length,
-        browserVersion: browserResult.data.diagnostics?.version || null
+        browserVersion: browserResult.data.diagnostics?.version || null,
+        officialProfileEvidenceCount: participants.filter(item => item.officialProfileEvidence?.identityPassed === true).length,
+        officialKimariteEvidenceCount: participants.filter(item => item.officialKimariteEvidence?.identityPassed === true).length,
+        nonNeutralRecentFormCount: participants.filter(item => Math.abs(Number(item.recentForm) - 5) > 0.000001).length,
+        nonNeutralStartPowerCount: participants.filter(item => Math.abs(Number(item.startPower) - 5) > 0.000001).length,
+        nonNeutralKimariteAbilityCount: participants.filter(item =>
+          [item.sprintPower, item.finishPower, item.trackingSkill].some(value => Math.abs(Number(value) - 5) > 0.000001)
+        ).length
       },
       warnings: [
         ...line.warnings,
@@ -197,6 +209,107 @@ async function requestBrowserService(base, params) {
       error: "競輪ブラウザサービスの取得エンドポイントを確認できません",
       endpointAudit: attempts
     }
+  };
+}
+
+
+export function hydrateParticipantEvidence(items, officialData = {}, browserData = {}) {
+  const profileIndex = buildEvidenceIndex([
+    officialData.officialProfiles, officialData.profiles, officialData.participantProfiles,
+    browserData.officialProfiles, browserData.profiles, browserData.participantProfiles
+  ]);
+  const kimariteIndex = buildEvidenceIndex([
+    officialData.officialKimariteCounts, officialData.kimariteCounts, officialData.participantKimariteCounts,
+    browserData.officialKimariteCounts, browserData.kimariteCounts, browserData.participantKimariteCounts
+  ]);
+
+  return (Array.isArray(items) ? items : []).map(item => {
+    const registration = normalizeRegistration(item.registration);
+    const profile = firstEvidence([
+      item.officialProfile, item.profile, item.profileEvidence, item.racerProfile,
+      profileIndex.get(registration)
+    ]);
+    const kimarite = firstEvidence([
+      item.officialKimariteCounts, item.kimariteCounts, item.kimariteEvidence, item.jsj068,
+      kimariteIndex.get(registration)
+    ]);
+    return {
+      ...item,
+      officialProfile: canonicalProfileEnvelope(profile, item, registration),
+      officialKimariteCounts: canonicalKimariteEnvelope(kimarite, item, registration),
+      officialTotalStarts: item.officialTotalStarts ?? profile?.officialTotalStarts ?? profile?.data?.officialTotalStarts ?? null
+    };
+  });
+}
+
+function buildEvidenceIndex(containers) {
+  const index = new Map();
+  for (const container of containers) {
+    if (!container) continue;
+    const values = Array.isArray(container)
+      ? container
+      : typeof container === "object"
+        ? Object.entries(container).map(([key, value]) => ({ key, value }))
+        : [];
+    for (const entry of values) {
+      const value = entry?.value ?? entry;
+      if (!value || typeof value !== "object") continue;
+      const registration = normalizeRegistration(
+        value.registration ?? value.requestedRegistration ?? value.snum ?? value.data?.registration ?? entry?.key
+      );
+      if (registration && registration !== "000000") index.set(registration, value);
+    }
+  }
+  return index;
+}
+
+function firstEvidence(candidates) {
+  for (const candidate of candidates) {
+    if (!candidate || typeof candidate !== "object") continue;
+    if (candidate.data && typeof candidate.data === "object") return { ...candidate, ...candidate.data, ...pickEnvelope(candidate) };
+    if (candidate.profile && typeof candidate.profile === "object") return { ...candidate, ...candidate.profile, ...pickEnvelope(candidate) };
+    if (candidate.counts && typeof candidate.counts === "object") return { ...candidate, ...candidate.counts, ...pickEnvelope(candidate) };
+    return candidate;
+  }
+  return null;
+}
+
+function pickEnvelope(value) {
+  return {
+    identityPassed: value.identityPassed,
+    targetIdentityPassed: value.targetIdentityPassed,
+    registration: value.registration ?? value.requestedRegistration,
+    requestedRegistration: value.requestedRegistration,
+    fetchedAt: value.fetchedAt,
+    sourceType: value.sourceType,
+    sourcePath: value.sourcePath,
+    target: value.target
+  };
+}
+
+function canonicalProfileEnvelope(profile, participant, registration) {
+  if (!profile || typeof profile !== "object") return null;
+  const returnedRegistration = normalizeRegistration(profile.registration ?? profile.requestedRegistration ?? profile.snum ?? registration);
+  if (registration && returnedRegistration !== registration) return null;
+  const participantIdentityPassed = participant.identityPassed === true || participant.profileIdentityPassed === true;
+  return {
+    ...profile,
+    registration: returnedRegistration,
+    identityPassed: profile.identityPassed === true || (profile.identityPassed == null && participantIdentityPassed)
+  };
+}
+
+function canonicalKimariteEnvelope(evidence, participant, registration) {
+  if (!evidence || typeof evidence !== "object") return null;
+  const returnedRegistration = normalizeRegistration(evidence.registration ?? evidence.requestedRegistration ?? evidence.snum ?? registration);
+  if (registration && returnedRegistration !== registration) return null;
+  const participantIdentityPassed = participant.identityPassed === true || participant.kimariteIdentityPassed === true;
+  const targetIdentityPassed = evidence.targetIdentityPassed === true || (evidence.targetIdentityPassed == null && participant.targetIdentityPassed === true);
+  return {
+    ...evidence,
+    registration: returnedRegistration,
+    identityPassed: evidence.identityPassed === true || (evidence.identityPassed == null && participantIdentityPassed),
+    targetIdentityPassed
   };
 }
 
