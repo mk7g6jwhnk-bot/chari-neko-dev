@@ -1,0 +1,169 @@
+diff -ruN v19orig/VERSION.md v19work/VERSION.md
+--- v19orig/VERSION.md	2026-08-08 16:52:18.000000000 +0000
++++ v19work/VERSION.md	2026-08-08 17:06:06.346886289 +0000
+@@ -1,4 +1,4 @@
+ # Current development version
+ 
+-- KEIRIN engine: `KEIRIN-0.4.9-purchase-audit`
++- KEIRIN engine: `KEIRIN-0.5.0-no-probability-cutoff`
+ - Adds purchase-funnel diagnostics only; purchase thresholds are unchanged from v18.
+diff -ruN v19orig/keirin/engine/keirin-engine.mjs v19work/keirin/engine/keirin-engine.mjs
+--- v19orig/keirin/engine/keirin-engine.mjs	2026-08-08 16:52:18.000000000 +0000
++++ v19work/keirin/engine/keirin-engine.mjs	2026-08-08 17:06:06.346720404 +0000
+@@ -21,7 +21,7 @@
+   if(lineBlocked){purchase.noBet=true;purchase.noBetReason="LINE_DATA_UNAVAILABLE";purchase.purchaseCandidateCountBeforeCompression=0;purchase.purchaseCandidateCountAfterCompression=0;purchase.finalBetCount=0;purchase.minimumRequired=0;}
+ 
+   return{
+-    engineVersion:"KEIRIN-0.4.9-purchase-audit",
++    engineVersion:"KEIRIN-0.5.0-no-probability-cutoff",
+     raceId:race.id,
+     lineConfidence:race.lineConfidence,
+     scored,lines,branches,terminals:classified,
+diff -ruN v19orig/keirin/engine/purchase.mjs v19work/keirin/engine/purchase.mjs
+--- v19orig/keirin/engine/purchase.mjs	2026-08-08 16:51:26.000000000 +0000
++++ v19work/keirin/engine/purchase.mjs	2026-08-08 17:06:06.346473679 +0000
+@@ -25,7 +25,6 @@
+     const positionNear=(ratios.first??0)>=.88&&(ratios.second??0)>=.85&&(ratios.third??0)>=.85;
+     const representative=branchFit>=.975&&positionConverged;
+     const credibleVariant=branchFit>=.87&&positionNear;
+-    const probabilitySupported=terminal.probability>=max*.42;
+ 
+     let betClass="NONE";
+     let adopted=false;
+@@ -36,12 +35,12 @@
+     }else if(dominant){
+       const isMainBranch=dominant.branchPriority==="main";
+       const isAlternativeBranch=dominant.branchPriority!=="main";
+-      const highValue=hasOdds&&odd>=100&&credibleVariant&&probabilitySupported;
++      const highValue=hasOdds&&odd>=100&&credibleVariant;
+ 
+       // Purchase selection must not use a fixed branch-rank cap.
+       // Every logically completed terminal stays in classified; adoption is decided by
+       // continuous branch-fit / position support / probability support, not "top N".
+-      if(isMainBranch&&representative&&probabilitySupported){
++      if(isMainBranch&&representative){
+         betClass="MAIN";
+         adopted=true;
+         purchaseReason=`${dominant.branchLabel}の代表終端（順位上限なし）`;
+@@ -50,9 +49,9 @@
+         adopted=true;
+         purchaseReason=`${dominant.branchLabel}の独立展開から残る高配当候補（順位上限なし）`;
+       }else if(
+-        (isMainBranch&&credibleVariant&&probabilitySupported)||
+-        (isAlternativeBranch&&representative&&probabilitySupported)||
+-        (support>=2&&branchFit>=.90&&credibleVariant&&probabilitySupported)
++        (isMainBranch&&credibleVariant)||
++        (isAlternativeBranch&&representative)||
++        (support>=2&&branchFit>=.90&&credibleVariant)
+       ){
+         betClass="COVER";
+         adopted=true;
+@@ -68,11 +67,9 @@
+         ?"FLAT_DISTRIBUTION"
+         :!dominant
+           ?"NO_DOMINANT_BRANCH"
+-          :!probabilitySupported
+-            ?"PROBABILITY_SUPPORT"
+-            :!(representative||credibleVariant)
+-              ?"BRANCH_OR_POSITION_SUPPORT"
+-              :"CLASS_RULE";
++          :!(representative||credibleVariant)
++            ?"BRANCH_OR_POSITION_SUPPORT"
++            :"CLASS_RULE";
+ 
+     return{
+       ...terminal,
+diff -ruN v19orig/modules/keirin/engine/keirin-engine.mjs v19work/modules/keirin/engine/keirin-engine.mjs
+--- v19orig/modules/keirin/engine/keirin-engine.mjs	2026-08-08 16:52:18.000000000 +0000
++++ v19work/modules/keirin/engine/keirin-engine.mjs	2026-08-08 17:06:06.346819230 +0000
+@@ -21,7 +21,7 @@
+   if(lineBlocked){purchase.noBet=true;purchase.noBetReason="LINE_DATA_UNAVAILABLE";purchase.purchaseCandidateCountBeforeCompression=0;purchase.purchaseCandidateCountAfterCompression=0;purchase.finalBetCount=0;purchase.minimumRequired=0;}
+ 
+   return{
+-    engineVersion:"KEIRIN-0.4.7-provenance-consistent",
++    engineVersion:"KEIRIN-0.5.0-no-probability-cutoff",
+     raceId:race.id,
+     lineConfidence:race.lineConfidence,
+     scored,lines,branches,terminals:classified,
+diff -ruN v19orig/modules/keirin/engine/purchase.mjs v19work/modules/keirin/engine/purchase.mjs
+--- v19orig/modules/keirin/engine/purchase.mjs	2026-08-08 16:52:18.000000000 +0000
++++ v19work/modules/keirin/engine/purchase.mjs	2026-08-08 17:06:06.346653445 +0000
+@@ -25,7 +25,6 @@
+     const positionNear=(ratios.first??0)>=.88&&(ratios.second??0)>=.85&&(ratios.third??0)>=.85;
+     const representative=branchFit>=.975&&positionConverged;
+     const credibleVariant=branchFit>=.87&&positionNear;
+-    const probabilitySupported=terminal.probability>=max*.42;
+ 
+     let betClass="NONE";
+     let adopted=false;
+@@ -36,12 +35,12 @@
+     }else if(dominant){
+       const isMainBranch=dominant.branchPriority==="main";
+       const isAlternativeBranch=dominant.branchPriority!=="main";
+-      const highValue=hasOdds&&odd>=100&&credibleVariant&&probabilitySupported;
++      const highValue=hasOdds&&odd>=100&&credibleVariant;
+ 
+       // Purchase selection must not use a fixed branch-rank cap.
+       // Every logically completed terminal stays in classified; adoption is decided by
+       // continuous branch-fit / position support / probability support, not "top N".
+-      if(isMainBranch&&representative&&probabilitySupported){
++      if(isMainBranch&&representative){
+         betClass="MAIN";
+         adopted=true;
+         purchaseReason=`${dominant.branchLabel}の代表終端（順位上限なし）`;
+@@ -50,9 +49,9 @@
+         adopted=true;
+         purchaseReason=`${dominant.branchLabel}の独立展開から残る高配当候補（順位上限なし）`;
+       }else if(
+-        (isMainBranch&&credibleVariant&&probabilitySupported)||
+-        (isAlternativeBranch&&representative&&probabilitySupported)||
+-        (support>=2&&branchFit>=.90&&credibleVariant&&probabilitySupported)
++        (isMainBranch&&credibleVariant)||
++        (isAlternativeBranch&&representative)||
++        (support>=2&&branchFit>=.90&&credibleVariant)
+       ){
+         betClass="COVER";
+         adopted=true;
+@@ -68,11 +67,9 @@
+         ?"FLAT_DISTRIBUTION"
+         :!dominant
+           ?"NO_DOMINANT_BRANCH"
+-          :!probabilitySupported
+-            ?"PROBABILITY_SUPPORT"
+-            :!(representative||credibleVariant)
+-              ?"BRANCH_OR_POSITION_SUPPORT"
+-              :"CLASS_RULE";
++          :!(representative||credibleVariant)
++            ?"BRANCH_OR_POSITION_SUPPORT"
++            :"CLASS_RULE";
+ 
+     return{
+       ...terminal,
+diff -ruN v19orig/package.json v19work/package.json
+--- v19orig/package.json	2026-08-08 16:52:18.000000000 +0000
++++ v19work/package.json	2026-08-08 17:06:06.347005806 +0000
+@@ -4,7 +4,7 @@
+   "private": true,
+   "type": "module",
+   "scripts": {
+-    "test": "node modules/keirin/tests/run-tests.mjs && node tests/prediction-flow.mjs && node tests/keirin-purchase-five-races.mjs && node tests/keirin-purchase-no-rank-cap.mjs && node tests/keirin-purchase-audit.mjs && node tests/keirin-official-evidence-branching.mjs && node tests/keirin-branch-role-semantics.mjs && node tests/keirin-provenance-consistency.mjs",
++    "test": "node modules/keirin/tests/run-tests.mjs && node tests/prediction-flow.mjs && node tests/keirin-purchase-five-races.mjs && node tests/keirin-purchase-no-rank-cap.mjs && node tests/keirin-purchase-audit.mjs && node tests/keirin-purchase-no-probability-cutoff.mjs && node tests/keirin-official-evidence-branching.mjs && node tests/keirin-branch-role-semantics.mjs && node tests/keirin-provenance-consistency.mjs",
+     "check": "node --check public/app.mjs && node --check public/prediction-store.mjs && node --check netlify/functions/keirin-result.mjs && node --check netlify/functions/keirin-predict.mjs && node --check netlify/functions/keirin-odds.mjs"
+   },
+   "dependencies": {
+diff -ruN v19orig/tests/keirin-purchase-no-probability-cutoff.mjs v19work/tests/keirin-purchase-no-probability-cutoff.mjs
+--- v19orig/tests/keirin-purchase-no-probability-cutoff.mjs	1970-01-01 00:00:00.000000000 +0000
++++ v19work/tests/keirin-purchase-no-probability-cutoff.mjs	2026-08-08 17:06:24.785218852 +0000
+@@ -0,0 +1,12 @@
++import assert from "node:assert/strict";
++import {classify} from "../keirin/engine/purchase.mjs";
++
++const terminals=[
++ {order:[1,2,3],probability:.50,branchContributions:[{branchId:"A",branchLabel:"A先行",branchPriority:"main",probability:.50,requiredFirstNumber:1,decisionRatios:{first:.95,second:.93,third:.92}}]},
++ {order:[1,3,4],probability:.15,branchContributions:[{branchId:"A",branchLabel:"A先行",branchPriority:"main",probability:.15,requiredFirstNumber:1,decisionRatios:{first:.95,second:.90,third:.88}}]},
++ {order:[4,5,6],probability:.05,branchContributions:[{branchId:"B",branchLabel:"Bまくり",branchPriority:"alternative",probability:.05,requiredFirstNumber:4,decisionRatios:{first:.70,second:.70,third:.70}}]}
++];
++const classified=classify(terminals,{});
++const low=classified.find(item=>item.order.join("-")==="1-3-4");
++assert.notEqual(low.purchaseRejectCode,"PROBABILITY_SUPPORT","42%未満の固定確率足切りが残っている");
++console.log("Keirin no probability cutoff passed:",low.purchaseStatus,low.purchaseRejectCode);
