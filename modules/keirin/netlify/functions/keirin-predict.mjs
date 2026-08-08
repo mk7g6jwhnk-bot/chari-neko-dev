@@ -99,7 +99,7 @@ export default async function handler(req) {
       participants: line.participants
     };
 
-    const odds = { ok: false, odds: {}, diagnostics: { source: "未接続" } };
+    const odds = normalizeOfficialOdds(officialData.odds);
     const prediction = runKeirinEngine({
       race,
       oddsByOrder: odds.odds,
@@ -115,13 +115,13 @@ export default async function handler(req) {
       browserAudit: browserResult.data.audit || null,
       dataQuality: {
         lineConfidence: line.confidence,
-        oddsAvailable: false,
+        oddsAvailable: Object.keys(odds.odds).length > 0,
         participantCount: participants.length,
         browserVersion: browserResult.data.diagnostics?.version || null
       },
       warnings: [
         ...line.warnings,
-        "オッズ未取得・購入判断保留"
+        Object.keys(odds.odds).length ? null : "オッズ未取得・高配当判定保留"
       ].filter(Boolean),
       checkedAt: new Date().toISOString()
     });
@@ -224,11 +224,59 @@ function adaptParticipant(item) {
 
 function buildLineText(lines) {
   if (!lines.length) return null;
-  return [...lines]
-    .sort((a, b) => Number(a.position || a.order) - Number(b.position || b.order))
-    .map(item => String(item.number || ""))
+
+  const withLineId = lines.filter(item => item.lineId != null && String(item.lineId).trim());
+  if (withLineId.length === lines.length) {
+    const groups = new Map();
+    for (const item of lines) {
+      const key = String(item.lineId);
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(item);
+    }
+    return [...groups.values()]
+      .map(group => group
+        .sort((a, b) => Number(a.position || a.order || 99) - Number(b.position || b.order || 99))
+        .map(item => String(item.number || ""))
+        .filter(Boolean)
+        .join(""))
+      .filter(Boolean)
+      .join(" ") || null;
+  }
+
+  const positioned = lines
+    .filter(item => Number.isFinite(Number(item.position || item.order)))
+    .sort((a, b) => Number(a.position || a.order) - Number(b.position || b.order));
+  if (!positioned.length) return null;
+
+  const groups = [];
+  let current = [];
+  let previous = null;
+  for (const item of positioned) {
+    const position = Number(item.position || item.order);
+    if (previous != null && position - previous > 1 && current.length) {
+      groups.push(current);
+      current = [];
+    }
+    current.push(item);
+    previous = position;
+  }
+  if (current.length) groups.push(current);
+  return groups
+    .map(group => group.map(item => String(item.number || "")).filter(Boolean).join(""))
     .filter(Boolean)
-    .join("");
+    .join(" ") || null;
+}
+
+function normalizeOfficialOdds(raw) {
+  if (!raw || typeof raw !== "object") return { ok: false, odds: {}, diagnostics: { source: "未取得" } };
+  const source = raw.odds && typeof raw.odds === "object" ? raw.odds : raw.oddsByOrder && typeof raw.oddsByOrder === "object" ? raw.oddsByOrder : {};
+  const odds = {};
+  for (const [key, value] of Object.entries(source)) {
+    const normalizedKey = String(key).replace(/[^1-9]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+    const numeric = Number(value);
+    if (/^[1-9]-[1-9]-[1-9]$/.test(normalizedKey) && Number.isFinite(numeric) && numeric > 1) odds[normalizedKey] = numeric;
+  }
+  return { ok: Object.keys(odds).length > 0, odds, diagnostics: raw.diagnostics || { source: raw.sourceType || "officialData.odds" } };
 }
 
 function readVenueCode(value) {

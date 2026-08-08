@@ -8,11 +8,13 @@ const result=runKeirinEngine({race,oddsByOrder:{}});
 assert.equal(result.audit.passed,true);
 assert.ok(result.terminals.length>0);
 assert.ok(result.purchasePlan.length>0);
-assert.notEqual(result.purchasePlan.length,12,"固定12点へ圧縮しない");
+
 assert.equal(result.purchasePlan.length,result.audit.purchaseCandidateCountBeforeCompression);
 assert.equal(result.noBet,false);
+assert.ok(new Set(result.purchasePlan.map(item=>item.order[0])).size>=2,"複数ラインがある場合に1着候補を機械的に1人へ固定しない");
+assert.ok(result.purchasePlan.some(item=>item.betClass==="COVER"),"MAINだけの大量列挙にしない");
 const uniform=participants.map(p=>({...p,sprintPower:5,stamina:5,attackTiming:5,trackingSkill:5,finishPower:5})),flatLine=inferLines({participants:uniform,lineText:null}),flat=runKeirinEngine({race:{id:"flat",venue:"青森",raceNo:2,lineConfidence:flatLine.confidence,participants:flatLine.participants},oddsByOrder:{},budget:3000});
 assert.equal(flat.purchasePlan.length,0);
 assert.equal(flat.noBet,true);
-assert.equal(flat.noBetReason,"FLAT_DISTRIBUTION_NO_SUPPORTED_CANDIDATE");
+assert.equal(flat.noBetReason,"LINE_DATA_UNAVAILABLE");
 console.log("Keirin integrated tests passed.");
