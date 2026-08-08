@@ -16,3 +16,5 @@
 - UI v11: buy screen simplified; funding input, allocation preview, minimum budget and composite odds added. Prediction logic unchanged.
 
 UI v15: 今日のレース / 勝負レース / 会場一覧タブ、勝負レース★登録、横断レース一覧を追加。予想ロジック変更なし。
+
+UI v17: 今日のレース各Rに個別オッズ更新、3連単の簡易妙味ラベル、締切15分以内の強調を追加。予想スナップショットは変更せず、オッズは別キャッシュで保持。

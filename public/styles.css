@@ -83,3 +83,19 @@
 .raceBattle{position:absolute;right:7px;bottom:7px;width:30px;height:30px;min-height:30px;padding:0;border-radius:9px;font-size:1rem}
 @media(max-width:520px){.meetingTools{grid-template-columns:1fr}.raceTab{font-size:.72rem;padding:6px 4px}.timelineRace{grid-template-columns:1fr 42px}}
 .raceSectionHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 2px 8px;color:var(--muted);font-size:.78rem}.raceSectionHead strong{color:var(--text);font-size:.9rem}.finishedRaces{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}.finishedRaces summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-weight:700;padding:8px 4px}.finishedRaces summary::-webkit-details-marker{display:none}.finishedRaceList{display:grid;gap:7px;margin-top:7px}.finishedRaces .timelineRace{opacity:.72}.compactEmpty{margin-bottom:8px}
+
+/* v17: compact per-race odds refresh + value label */
+.timelineBody{min-width:0;display:grid;gap:6px}
+.timelineOdds{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 2px}
+.oddsRefresh{min-height:32px;padding:6px 10px;border:1px solid var(--line);border-radius:9px;background:var(--inset);color:var(--text);font-weight:800;font-size:.7rem;white-space:nowrap}
+.oddsRefresh:disabled{opacity:.45}
+.oddsEvaluation{display:inline-flex;align-items:center;min-height:25px;padding:4px 8px;border-radius:999px;border:1px solid var(--line);font-size:.68rem;font-weight:800;white-space:nowrap}
+.oddsEvaluation.ready{color:#9ce3dc;border-color:rgba(93,201,189,.35);background:rgba(93,201,189,.10)}
+.oddsEvaluation.waiting{color:#fbbf24;border-color:rgba(245,158,11,.36);background:rgba(245,158,11,.09)}
+.oddsEvaluation.high{color:#fda4af;border-color:rgba(244,63,94,.38);background:rgba(244,63,94,.10)}
+.oddsEvaluation.value{color:#c4b5fd;border-color:rgba(139,92,246,.38);background:rgba(139,92,246,.11)}
+.oddsEvaluation.mid{color:#fdba74;border-color:rgba(249,115,22,.38);background:rgba(249,115,22,.10)}
+.oddsEvaluation.popular{color:#93c5fd;border-color:rgba(59,130,246,.35);background:rgba(59,130,246,.10)}
+.oddsEvaluation.muted{color:var(--muted);background:rgba(100,116,139,.08)}
+.timelineRace.race-warning .timelineMain{border-color:rgba(245,158,11,.7);box-shadow:0 0 0 1px rgba(245,158,11,.12) inset}
+@media(max-width:520px){.timelineRace{grid-template-columns:1fr 40px}.timelineMain{padding:10px 11px}.timelineOdds{gap:6px}.oddsRefresh{padding:6px 8px}.oddsEvaluation{font-size:.64rem}}

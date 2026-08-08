@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "node modules/keirin/tests/run-tests.mjs && node tests/prediction-flow.mjs && node tests/keirin-purchase-five-races.mjs && node tests/keirin-official-evidence-branching.mjs && node tests/keirin-branch-role-semantics.mjs && node tests/keirin-provenance-consistency.mjs",
-    "check": "node --check public/app.mjs && node --check public/prediction-store.mjs && node --check netlify/functions/keirin-result.mjs && node --check netlify/functions/keirin-predict.mjs"
+    "check": "node --check public/app.mjs && node --check public/prediction-store.mjs && node --check netlify/functions/keirin-result.mjs && node --check netlify/functions/keirin-predict.mjs && node --check netlify/functions/keirin-odds.mjs"
   },
   "dependencies": {
     "cheerio": "^1.0.0"
