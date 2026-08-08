@@ -1,0 +1,136 @@
+diff -ruN /mnt/data/audit_v17/VERSION.md /mnt/data/chari-neko-dev-ui-v18-src/VERSION.md
+--- /mnt/data/audit_v17/VERSION.md	2026-08-08 16:27:49.000000000 +0000
++++ /mnt/data/chari-neko-dev-ui-v18-src/VERSION.md	2026-08-08 16:40:40.153020559 +0000
+@@ -1,20 +1,5 @@
+-# DEV本体 1.1
++UI v18 / KEIRIN-0.4.8-natural-purchase-no-rank-cap
+ 
+-土台: 3競技統合DEV本体1.0
+-
+-追加:
+-- レース横断検索0.1
+-- 逆算展開木0.1
+-- ホームから横断検索への導線
+-- パソコン用アップロード手順
+-
+-注意:
+-- 横断検索画面は現在デモデータでUI確認する開発機能。
+-- 逆算展開木は研究モジュールで、本番予想ロジックへ自動反映しない。
+-- 公式サイトの実HTMLに合わせた取得パーサー調整はデプロイ後に必要になる可能性がある。
+-
+-- UI v11: buy screen simplified; funding input, allocation preview, minimum budget and composite odds added. Prediction logic unchanged.
+-
+-UI v15: 今日のレース / 勝負レース / 会場一覧タブ、勝負レース★登録、横断レース一覧を追加。予想ロジック変更なし。
+-
+-UI v17: 今日のレース各Rに個別オッズ更新、3連単の簡易妙味ラベル、締切15分以内の強調を追加。予想スナップショットは変更せず、オッズは別キャッシュで保持。
++- Removed fixed branch-rank purchase caps (top 1/2/3).
++- Kept all completed terminals; purchase adoption now uses branch-fit, position support and probability support only.
++- Added purchase audit diagnostics for rank-cap status and rejection counts.
+diff -ruN /mnt/data/audit_v17/keirin/engine/keirin-engine.mjs /mnt/data/chari-neko-dev-ui-v18-src/keirin/engine/keirin-engine.mjs
+--- /mnt/data/audit_v17/keirin/engine/keirin-engine.mjs	2026-08-08 13:17:20.000000000 +0000
++++ /mnt/data/chari-neko-dev-ui-v18-src/keirin/engine/keirin-engine.mjs	2026-08-08 16:40:40.152864798 +0000
+@@ -21,7 +21,7 @@
+   if(lineBlocked){purchase.noBet=true;purchase.noBetReason="LINE_DATA_UNAVAILABLE";purchase.purchaseCandidateCountBeforeCompression=0;purchase.purchaseCandidateCountAfterCompression=0;purchase.finalBetCount=0;purchase.minimumRequired=0;}
+ 
+   return{
+-    engineVersion:"KEIRIN-0.4.7-provenance-consistent",
++    engineVersion:"KEIRIN-0.4.8-natural-purchase-no-rank-cap",
+     raceId:race.id,
+     lineConfidence:race.lineConfidence,
+     scored,lines,branches,terminals:classified,
+diff -ruN /mnt/data/audit_v17/keirin/engine/purchase.mjs /mnt/data/chari-neko-dev-ui-v18-src/keirin/engine/purchase.mjs
+--- /mnt/data/audit_v17/keirin/engine/purchase.mjs	2026-08-08 13:17:44.000000000 +0000
++++ /mnt/data/chari-neko-dev-ui-v18-src/keirin/engine/purchase.mjs	2026-08-08 16:40:40.152576521 +0000
+@@ -38,26 +38,27 @@
+       const isAlternativeBranch=dominant.branchPriority!=="main";
+       const highValue=hasOdds&&odd>=100&&credibleVariant&&probabilitySupported;
+ 
+-      // MAIN is reserved for the single best terminal of each main-scenario branch.
+-      // Keeping every representative terminal as MAIN recreates the old "everything is main" failure.
+-      if(isMainBranch&&representative&&branchRank===1){
++      // Purchase selection must not use a fixed branch-rank cap.
++      // Every logically completed terminal stays in classified; adoption is decided by
++      // continuous branch-fit / position support / probability support, not "top N".
++      if(isMainBranch&&representative&&probabilitySupported){
+         betClass="MAIN";
+         adopted=true;
+-        purchaseReason=`${dominant.branchLabel}の最上位代表終端`;
+-      }else if(highValue&&isAlternativeBranch&&branchRank!=null&&branchRank<=2){
++        purchaseReason=`${dominant.branchLabel}の代表終端（順位上限なし）`;
++      }else if(highValue&&isAlternativeBranch){
+         betClass="BUYABLE_HIGH";
+         adopted=true;
+-        purchaseReason=`${dominant.branchLabel}の独立展開から残る高配当候補`;
++        purchaseReason=`${dominant.branchLabel}の独立展開から残る高配当候補（順位上限なし）`;
+       }else if(
+-        (isMainBranch&&credibleVariant&&branchRank!=null&&branchRank<=3)||
+-        (isAlternativeBranch&&representative&&probabilitySupported&&branchRank===1)||
+-        (support>=2&&branchFit>=.90&&credibleVariant&&probabilitySupported&&branchRank!=null&&branchRank<=2)
++        (isMainBranch&&credibleVariant&&probabilitySupported)||
++        (isAlternativeBranch&&representative&&probabilitySupported)||
++        (support>=2&&branchFit>=.90&&credibleVariant&&probabilitySupported)
+       ){
+         betClass="COVER";
+         adopted=true;
+         purchaseReason=isMainBranch
+-          ?`${dominant.branchLabel}の上位着順変化（枝内${branchRank}位）`
+-          :`${dominant.branchLabel}由来の別展開カバー`;
++          ?`${dominant.branchLabel}の成立可能な着順変化（枝内${branchRank??"-"}位・順位上限なし）`
++          :`${dominant.branchLabel}由来の別展開カバー（順位上限なし）`;
+       }
+     }
+ 
+@@ -161,6 +162,13 @@
+     purchaseCandidateCountBeforeCompression:natural.length,
+     purchaseCandidateCountAfterCompression:natural.length,
+     finalBetCount:natural.length,
++    fixedBranchRankCapApplied:false,
++    representativeTerminalCount:classified.filter(item=>item.representativeTerminal).length,
++    credibleVariantCount:classified.filter(item=>{
++      const r=item.decisionRatios||{};
++      return item.branchFit>=.87&&(r.first??0)>=.88&&(r.second??0)>=.85&&(r.third??0)>=.85;
++    }).length,
++    rejectedTerminalCount:classified.length-natural.length,
+     classCounts:{
+       main:natural.filter(item=>item.betClass==="MAIN").length,
+       cover:natural.filter(item=>item.betClass==="COVER").length,
+diff -ruN /mnt/data/audit_v17/package.json /mnt/data/chari-neko-dev-ui-v18-src/package.json
+--- /mnt/data/audit_v17/package.json	2026-08-08 16:27:49.000000000 +0000
++++ /mnt/data/chari-neko-dev-ui-v18-src/package.json	2026-08-08 16:40:50.399612318 +0000
+@@ -4,7 +4,7 @@
+   "private": true,
+   "type": "module",
+   "scripts": {
+-    "test": "node modules/keirin/tests/run-tests.mjs && node tests/prediction-flow.mjs && node tests/keirin-purchase-five-races.mjs && node tests/keirin-official-evidence-branching.mjs && node tests/keirin-branch-role-semantics.mjs && node tests/keirin-provenance-consistency.mjs",
++    "test": "node modules/keirin/tests/run-tests.mjs && node tests/prediction-flow.mjs && node tests/keirin-purchase-five-races.mjs && node tests/keirin-purchase-no-rank-cap.mjs && node tests/keirin-official-evidence-branching.mjs && node tests/keirin-branch-role-semantics.mjs && node tests/keirin-provenance-consistency.mjs",
+     "check": "node --check public/app.mjs && node --check public/prediction-store.mjs && node --check netlify/functions/keirin-result.mjs && node --check netlify/functions/keirin-predict.mjs && node --check netlify/functions/keirin-odds.mjs"
+   },
+   "dependencies": {
+diff -ruN /mnt/data/audit_v17/tests/keirin-purchase-no-rank-cap.mjs /mnt/data/chari-neko-dev-ui-v18-src/tests/keirin-purchase-no-rank-cap.mjs
+--- /mnt/data/audit_v17/tests/keirin-purchase-no-rank-cap.mjs	1970-01-01 00:00:00.000000000 +0000
++++ /mnt/data/chari-neko-dev-ui-v18-src/tests/keirin-purchase-no-rank-cap.mjs	2026-08-08 16:40:49.973185288 +0000
+@@ -0,0 +1,24 @@
++import assert from "node:assert/strict";
++import {classify} from "../keirin/engine/purchase.mjs";
++
++const probabilities=[0.20,0.195,0.19,0.185,0.18,0.175];
++const terminals=probabilities.map((probability,index)=>({
++  order:[1,index+2,index+8],
++  probability,
++  branchContributions:[{
++    branchId:"B1",
++    branchLabel:"A先行押し切り",
++    branchPriority:"main",
++    probability,
++    requiredFirstNumber:1,
++    decisionRatios:{first:.95,second:.93,third:.92},
++    positionScores:{},
++    positionEvidence:{}
++  }]
++}));
++
++const classified=classify(terminals,{});
++const adopted=classified.filter(item=>item.purchaseStatus==="購入採用");
++assert.ok(adopted.length>=4,"枝内4位以下が固定順位上限で落とされている");
++assert.ok(adopted.some(item=>item.branchRank>=4),"枝内4位以下の自然候補が採用されていない");
++console.log(`Keirin no fixed branch-rank cap passed: ${adopted.length} adopted`);
