@@ -13,5 +13,5 @@ export function generateKeirinTerminals({scored,branches}){
   const map=new Map();
   for(const t of raw){const k=t.order.join("-"),e=map.get(k);if(!e)map.set(k,{...t,contributingBranches:[t.branchId]});else{e.score+=t.score;e.contributingBranches=[...new Set([...e.contributingBranches,t.branchId])]}}
   const arr=[...map.values()],total=arr.reduce((s,x)=>s+x.score,0)||1;
-  return arr.map(x=>({...x,probability:x.score/total})).sort((a,b)=>b.probability-a.probability);
+  return arr.map(x=>({...x,probability:x.score/total})).sort((a,b)=>(b.probability-a.probability)||a.order.join("-").localeCompare(b.order.join("-"),"en"));
 }

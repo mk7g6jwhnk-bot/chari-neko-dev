@@ -143,11 +143,7 @@ async function requestBrowserService(base, params) {
   });
 
   const candidates = [
-    `${base}/keirin/race?${query}`,
-    `${base}/keirin?${query}`,
-    `${base}/api/keirin?${query}`,
-    `${base}/race?${query}`,
-    `${base}/fetch?${query}`
+    `${base}/keirin/race?${query}`
   ];
 
   const attempts = [];
@@ -204,6 +200,7 @@ function adaptParticipant(item) {
   const activity = escape + makuri + difference + mark;
 
   return {
+    id: item.registration || `K${number}`,
     number,
     name: item.name || `${number}番車`,
     registration: item.registration || "",

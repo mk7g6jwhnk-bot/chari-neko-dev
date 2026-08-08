@@ -7,4 +7,12 @@ const race={id:"demo",venue:"青森",raceNo:1,lineConfidence:line.confidence,par
 const result=runKeirinEngine({race,oddsByOrder:{}});
 assert.equal(result.audit.passed,true);
 assert.ok(result.terminals.length>0);
+assert.ok(result.purchasePlan.length>0);
+assert.notEqual(result.purchasePlan.length,12,"固定12点へ圧縮しない");
+assert.equal(result.purchasePlan.length,result.audit.purchaseCandidateCountBeforeCompression);
+assert.equal(result.noBet,false);
+const uniform=participants.map(p=>({...p,sprintPower:5,stamina:5,attackTiming:5,trackingSkill:5,finishPower:5})),flatLine=inferLines({participants:uniform,lineText:null}),flat=runKeirinEngine({race:{id:"flat",venue:"青森",raceNo:2,lineConfidence:flatLine.confidence,participants:flatLine.participants},oddsByOrder:{},budget:3000});
+assert.equal(flat.purchasePlan.length,0);
+assert.equal(flat.noBet,true);
+assert.equal(flat.noBetReason,"FLAT_DISTRIBUTION_NO_SUPPORTED_CANDIDATE");
 console.log("Keirin integrated tests passed.");
