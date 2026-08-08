@@ -447,6 +447,21 @@ function nullableNumber(value) { if (value === null || value === undefined || va
 function nullableNonNegativeInteger(value) { const n = nullableNumber(value); return n !== null && Number.isSafeInteger(n) && n >= 0 ? n : null; }
 
 function resolveOfficialLines({ participants, officialLines, lineText }) {
+  // The official line text is the canonical front-to-back order.
+  // JSJ036 `position` is useful for grouping/identity checks, but treating its numeric
+  // position as race-order can reverse leader/bante roles on some cards.
+  // Prefer the verified text representation whenever it covers the race sufficiently.
+  if (lineText) {
+    const parsed = inferLines({ participants, lineText });
+    if (parsed?.confidence === "高") {
+      return {
+        ...parsed,
+        source: "公式JSJ036並び表記",
+        warnings: []
+      };
+    }
+  }
+
   const validNumbers = new Set(participants.map(item => Number(item.number)).filter(number => number >= 1 && number <= 9));
   const uniqueItems = [];
   const seen = new Set();
