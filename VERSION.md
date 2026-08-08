@@ -12,3 +12,5 @@
 - 横断検索画面は現在デモデータでUI確認する開発機能。
 - 逆算展開木は研究モジュールで、本番予想ロジックへ自動反映しない。
 - 公式サイトの実HTMLに合わせた取得パーサー調整はデプロイ後に必要になる可能性がある。
+
+- UI v11: buy screen simplified; funding input, allocation preview, minimum budget and composite odds added. Prediction logic unchanged.
