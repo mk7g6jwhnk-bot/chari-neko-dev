@@ -42,6 +42,7 @@ export function generateKeirinTerminals({scored,branches}){
               third:bestThird>0?thirdScore/bestThird:0
             },
             positionScores:{first:firstScore,second:secondScore,third:thirdScore},
+            positionEvidence:{first:positionEvidence(branch,first,"first"),second:positionEvidence(branch,second,"second"),third:positionEvidence(branch,third,"third")},
             holdReason:"branch条件ごとに1・2・3着を独立評価して終端まで生成"
           });
         }
@@ -67,6 +68,7 @@ export function generateKeirinTerminals({scored,branches}){
       weightedScore:terminal.weightedScore,
       pathScore:terminal.pathScore,
       positionScores:terminal.positionScores,
+      positionEvidence:terminal.positionEvidence,
       decisionRatios:terminal.decisionRatios
     };
     const existing=map.get(key);
@@ -184,6 +186,23 @@ function conditionedThird(branch,first,second,third,lineById){
       break;
   }
   return positive(score)*factor;
+}
+
+function positionEvidence(branch,participant,target){
+  const e=participant.evidence||{};
+  const values={recentForm:e.recent??5,startPower:e.start??5,sprintPower:e.sprint??5,finishPower:e.finish??5,trackingSkill:e.tracking??5,roleScore:participant.roleScores?.[target]??5};
+  const keys=branchKeys(branch.branchType,target);
+  return {number:participant.number,id:participant.id,role:participant.role,target,roleScore:values.roleScore,drivers:keys.map(key=>({key,value:values[key]})).sort((a,b)=>b.value-a.value||a.key.localeCompare(b.key,"en"))};
+}
+function branchKeys(type,target){
+  if(target==="first"){
+    if(type==="LEADER_HOLD")return["startPower","recentForm","finishPower","roleScore"];
+    if(type==="BANTE_SASHI")return["finishPower","trackingSkill","recentForm","roleScore"];
+    if(type==="MAKURI_SUCCESS")return["sprintPower","finishPower","recentForm","roleScore"];
+    return["finishPower","trackingSkill","recentForm","roleScore"];
+  }
+  if(target==="second")return["trackingSkill","finishPower","recentForm","roleScore"];
+  return["trackingSkill","finishPower","recentForm","roleScore"];
 }
 
 function branchRoleFactor(branch,participant,target){

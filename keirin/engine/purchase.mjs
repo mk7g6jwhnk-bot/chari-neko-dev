@@ -75,6 +75,8 @@ export function classify(terminals,odds={}){
       representativeTerminal:representative,
       decisionRatios:dominant?.decisionRatios||null,
       positionScores:dominant?.positionScores||null,
+      positionEvidence:dominant?.positionEvidence||null,
+      evidenceSummary:summarizeEvidence(dominant?.positionEvidence),
       concentrationRatio,
       index
     };
@@ -115,7 +117,7 @@ export function allocate(items,budget){
     return natural.map(item=>({
       order:item.order,betClass:item.betClass,stake:null,odds:item.odds,expectedPayout:null,
       probability:item.probability,branchSupport:item.branchSupport,purchaseReason:item.purchaseReason,
-      dominantBranchId:item.dominantBranchId,dominantBranchLabel:item.dominantBranchLabel,decisionRatios:item.decisionRatios,
+      dominantBranchId:item.dominantBranchId,dominantBranchLabel:item.dominantBranchLabel,decisionRatios:item.decisionRatios,positionEvidence:item.positionEvidence||null,evidenceSummary:item.evidenceSummary||null,
       fundingStatus:"予算不足",minimumRequired:minimum
     }));
   }
@@ -129,7 +131,7 @@ export function allocate(items,budget){
     order:item.order,betClass:item.betClass,stake:stakes[i],odds:item.odds,
     expectedPayout:item.odds?Math.floor(stakes[i]*item.odds):null,
     probability:item.probability,branchSupport:item.branchSupport,purchaseReason:item.purchaseReason,
-    dominantBranchId:item.dominantBranchId,dominantBranchLabel:item.dominantBranchLabel,decisionRatios:item.decisionRatios,
+    dominantBranchId:item.dominantBranchId,dominantBranchLabel:item.dominantBranchLabel,decisionRatios:item.decisionRatios,positionEvidence:item.positionEvidence||null,evidenceSummary:item.evidenceSummary||null,
     fundingStatus:"配分済み",minimumRequired:minimum
   }));
 }
@@ -158,6 +160,14 @@ export function purchaseDiagnostics(classified,plan,budget){
     budgetSufficient:Number(budget||0)>=minimumRequired,
     noBet,noBetReason
   };
+}
+
+function summarizeEvidence(evidence){
+  if(!evidence)return null;
+  return [evidence.first,evidence.second,evidence.third].filter(Boolean).map(item=>{
+    const top=(item.drivers||[]).filter(driver=>driver.key!=="roleScore").slice(0,2).map(driver=>`${driver.key} ${Number(driver.value).toFixed(2)}`).join("・");
+    return `${item.target==="first"?"1着":item.target==="second"?"2着":"3着"}${item.number}${top?`(${top})`:""}`;
+  }).join(" / ");
 }
 
 function compareTerminal(a,b){return(b.probability-a.probability)||(b.branchContributions?.length||0)-(a.branchContributions?.length||0)||a.order.join("-").localeCompare(b.order.join("-"),"en")}
