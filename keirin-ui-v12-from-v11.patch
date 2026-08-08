@@ -1,0 +1,52 @@
+--- /mnt/data/v11clean/chari-neko-dev-core-v9/public/index.html	2026-08-08 15:39:57.000000000 +0000
++++ public/index.html	2026-08-08 15:46:50.484623430 +0000
+@@ -5,8 +5,8 @@
+   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+   <meta name="theme-color" content="#08111f">
+   <title>チャリ猫</title>
+-  <link rel="manifest" href="manifest.json?v=12">
+-  <link rel="stylesheet" href="styles.css?v=12">
++  <link rel="manifest" href="manifest.json?v=13">
++  <link rel="stylesheet" href="styles.css?v=13">
+ </head>
+ <body>
+ <header class="appHeader">
+@@ -54,5 +54,5 @@
+   <section id="loading" class="screen"><section class="card loadingCard"><div class="spinner"></div><h1 id="loadingTitle">取得中</h1><p id="loadingMessage">公式データを確認しています。</p></section></section>
+   <section id="error" class="screen"><section class="card errorCard"><div class="errorIcon">!</div><h1 id="errorTitle">取得失敗</h1><p id="errorMessage"></p><button id="retryBtn" class="primary">再試行</button><button id="errorHome" class="secondary">ホームへ</button></section></section>
+ </main>
+-<script type="module" src="app.mjs?v=12"></script>
++<script type="module" src="app.mjs?v=13"></script>
+ </body></html>
+--- /mnt/data/v11clean/chari-neko-dev-core-v9/public/styles.css	2026-08-08 15:39:57.000000000 +0000
++++ public/styles.css	2026-08-08 15:46:50.484550232 +0000
+@@ -4,3 +4,18 @@
+ 
+ .betRowSimple{align-items:center}.betRowSimple strong{font-size:1.02rem}.detailGroup{margin-top:12px}.detailGroup h3{margin:0 0 8px;font-size:.92rem}.detailBet{background:var(--inset);border-radius:10px;padding:10px;margin-bottom:7px}.detailBet p{margin:5px 0 0;font-size:.78rem;line-height:1.45}.abilityDetails{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}.abilityDetails summary{cursor:pointer;font-weight:800}.abilityList{display:grid;gap:7px;margin-top:10px}.abilityRow{display:grid;grid-template-columns:48px 1fr;gap:8px;background:var(--inset);border-radius:10px;padding:9px}.abilityRow span{color:var(--muted);font-size:.76rem;line-height:1.45}
+ .fundingRow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}.fundingRow select{min-height:44px;border:1px solid var(--line);border-radius:11px;background:var(--inset);color:#fff;padding:9px}.quickBudget{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:10px}.quickBudget button{min-height:38px;border:1px solid var(--line);border-radius:10px;background:var(--inset);color:var(--text);font-weight:700}.purchaseStats{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:11px;color:var(--muted);font-size:.8rem}.purchaseStats strong{color:var(--text)}.betRowSimple strong{font-size:1.05rem;letter-spacing:.02em}.betRowSimple span{text-align:right;font-variant-numeric:tabular-nums}@media(max-width:520px){.fundingRow{grid-template-columns:1fr}.quickBudget{grid-template-columns:repeat(2,1fr)}}
++
++/* v12: keep the buy screen compact and put reasoning in detail accordions */
++.predictionAccordion{border:1px solid var(--line,#263a57);border-radius:14px;background:rgba(7,18,34,.34);margin-top:12px;overflow:hidden}
++.predictionAccordion>summary{cursor:pointer;list-style:none;font-weight:800;padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
++.predictionAccordion>summary::-webkit-details-marker{display:none}
++.predictionAccordion>summary::after{content:"＋";font-size:18px;opacity:.75}
++.predictionAccordion[open]>summary::after{content:"−"}
++.accordionBody{padding:0 14px 14px}
++.predictionAccordion .detailGroup{margin-top:10px}
++.predictionAccordion .detailGroup:first-child{margin-top:0}
++.predictionAccordion .detailBet{padding:10px 0;border-bottom:1px solid rgba(255,255,255,.07)}
++.predictionAccordion .detailBet:last-child{border-bottom:0}
++.predictionAccordion .detailBet p{margin:4px 0 0}
++.predictionAccordion .abilityRow{display:grid;grid-template-columns:48px 1fr;gap:8px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.07)}
++.predictionAccordion .abilityRow:last-child{border-bottom:0}
+--- /mnt/data/v11clean/chari-neko-dev-core-v9/public/app.mjs	2026-08-08 15:39:57.000000000 +0000
++++ public/app.mjs	2026-08-08 15:46:50.484404176 +0000
+@@ -29,7 +29,7 @@
+ function allocatePreviewStakes(bets,budget,mode){const n=bets.length,min=n*100;if(!n||budget<min)return null;const base=bets.map(b=>Math.max(1,Number(b.stake)||100));const mul=bets.map(b=>mode==="main"?(b.category==="MAIN"?1.6:b.category==="BUYABLE_HIGH"?.8:1):mode==="high"?(b.category==="BUYABLE_HIGH"?1.6:b.category==="MAIN"?1:.9):1);const weights=base.map((v,i)=>v*mul[i]),extra=budget-min,total=weights.reduce((a,b)=>a+b,0)||n;let out=weights.map(w=>100+Math.floor((extra*w/total)/100)*100),used=out.reduce((a,b)=>a+b,0),remain=Math.floor((budget-used)/100);const order=weights.map((w,i)=>({w,i})).sort((a,b)=>b.w-a.w||a.i-b.i);for(let k=0;k<remain;k++)out[order[k%order.length].i]+=100;return out}
+ function calcCompositeOdds(bets){const valid=bets.map(b=>Number(b.odds)).filter(v=>Number.isFinite(v)&&v>0);if(!valid.length||valid.length!==bets.length)return null;const inv=valid.reduce((s,v)=>s+1/v,0);return inv>0?1/inv:null}
+ 
+-function renderPredictionDetail(snapshot){const panel=$("predictionDetail");if(!panel)return;if(!snapshot){panel.classList.add("hidden");panel.innerHTML="";return}const groups=[["本線","MAIN"],["押さえ","COVER"],["買える高配当","BUYABLE_HIGH"]];const betDetail=groups.map(([label,key])=>{const bets=(snapshot.betSelections||[]).filter(b=>b.category===key);if(!bets.length)return"";return `<div class="detailGroup"><h3>${label}</h3>${bets.map(b=>`<div class="detailBet"><strong>${b.order.join("-")}</strong>${b.branchLabel?`<p>${esc(b.branchLabel)}${b.reason?` / ${esc(b.reason)}`:""}</p>`:""}${b.evidenceSummary?`<p class="muted">${esc(b.evidenceSummary)}</p>`:""}</div>`).join("")}</div>`}).join("");const abilities=(snapshot.abilitiesUsed||[]).map(a=>`<div class="abilityRow"><strong>${a.number}番</strong><span>近況 ${fmtAbility(a.recentForm)} / 主導権 ${fmtAbility(a.startPower)} / まくり ${fmtAbility(a.sprintPower)} / 差し ${fmtAbility(a.finishPower)} / 追走 ${fmtAbility(a.trackingSkill)}</span></div>`).join("");panel.innerHTML=`<div class="sectionHead"><h2>予想詳細</h2><span class="pill">根拠</span></div>${betDetail||'<p class="muted">購入候補はありません。</p>'}${abilities?`<details class="abilityDetails"><summary>選手別能力を見る</summary><div class="abilityList">${abilities}</div></details>`:""}`;panel.classList.remove("hidden")}
++function renderPredictionDetail(snapshot){const panel=$("predictionDetail");if(!panel)return;if(!snapshot){panel.classList.add("hidden");panel.innerHTML="";return}const groups=[["本線","MAIN"],["押さえ","COVER"],["買える高配当","BUYABLE_HIGH"]];const betDetail=groups.map(([label,key])=>{const bets=(snapshot.betSelections||[]).filter(b=>b.category===key);if(!bets.length)return"";return `<div class="detailGroup"><h3>${label}</h3>${bets.map(b=>`<div class="detailBet"><strong>${b.order.join("-")}</strong>${b.branchLabel?`<p>${esc(b.branchLabel)}${b.reason?` / ${esc(b.reason)}`:""}</p>`:""}${b.evidenceSummary?`<p class="muted">${esc(b.evidenceSummary)}</p>`:""}</div>`).join("")}</div>`}).join("");const abilities=(snapshot.abilitiesUsed||[]).map(a=>`<div class="abilityRow"><strong>${a.number}番</strong><span>近況 ${fmtAbility(a.recentForm)} / 主導権 ${fmtAbility(a.startPower)} / まくり ${fmtAbility(a.sprintPower)} / 差し ${fmtAbility(a.finishPower)} / 追走 ${fmtAbility(a.trackingSkill)}</span></div>`).join("");panel.innerHTML=`<div class="sectionHead"><div><small>保存済み予想の根拠</small><h2>予想詳細</h2></div><span class="pill">詳細</span></div><details class="predictionAccordion" open><summary>展開・買い目の根拠を見る</summary><div class="accordionBody">${betDetail||'<p class="muted">購入候補はありません。</p>'}</div></details>${abilities?`<details class="predictionAccordion"><summary>選手別能力を見る</summary><div class="abilityList accordionBody">${abilities}</div></details>`:""}`;panel.classList.remove("hidden")}
+ function fmtAbility(v){return Number.isFinite(Number(v))?Number(v).toFixed(2):"-"}
+ function noBetReasonText(code){return({NO_TERMINALS:"展開候補を生成できませんでした。",FLAT_DISTRIBUTION_NO_SUPPORTED_CANDIDATE:"確率分布が平坦で、独立した展開根拠を持つ購入候補がありません。",BUDGET_BELOW_MINIMUM:"予算が最低購入単位を下回っています。",QUALITY_GATE:"データ品質基準を満たさないため購入を見送ります。",LINE_DATA_UNAVAILABLE:"公式ラインを確認できないため、通常の競輪予想としては購入判定を保留します。"})[code]||"購入価値を確認できないため見送ります。"}
+ async function checkResult(){if(state.busy)return;state.busy=true;setLoading("公式結果を確認中","レースIDを固定して確定着順と払戻を取得しています。");try{const r=state.snapshot.targetRace,q=new URLSearchParams({date:r.date,venueCode:r.venueCode,venueName:r.venueName,raceNo:String(r.raceNo)}),p=await jsonFetch(`/.netlify/functions/keirin-result?${q}`);if(raceKey(p.race)!==raceKey(r))throw new Error("公式結果のレースが保存済み予想と一致しません");if(isResultPending(p.result)){renderPrediction(state.snapshot);renderPendingResult();return}state.snapshot=attachResult(localStorage,state.snapshot.predictionSnapshotId,p.result);renderPrediction(state.snapshot)}catch(e){fail("公式結果の取得・保存に失敗",e,checkResult)}finally{state.busy=false}}
