@@ -62,3 +62,23 @@
 .compactRace .status.warning{color:#fbbf24}.compactRace .status.danger{color:#f87171}
 .raceAction{margin-top:auto;color:var(--accent);font-size:.68rem;font-weight:800}
 @media(max-width:360px){.venueGrid,.raceGrid{gap:6px}.venueCard{min-height:105px;padding:10px 7px}.venueCard strong{font-size:.9rem}.compactRace{min-height:102px;padding:9px}.compactRace h2{font-size:1.15rem}}
+
+/* v15: today / battle / venues navigation */
+.raceTabs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:0 0 12px}
+.raceTab{min-height:42px;border:1px solid var(--line);border-radius:11px;background:var(--inset);color:var(--muted);font-weight:800;font-size:.78rem}
+.raceTab.active{background:#0f5048;border-color:#2a8f84;color:#fff}
+.meetingTools{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end}
+.meetingTools .secondary{margin:0}
+.todayRaceList{display:grid;gap:8px}
+.timelineRace{position:relative;display:grid;grid-template-columns:1fr 46px;gap:7px;align-items:stretch}
+.timelineMain{width:100%;min-width:0;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--text);padding:11px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left}
+.timelineMain:active{border-color:var(--accent)}
+.timelineVenue{min-width:0;display:grid;gap:3px}
+.timelineVenue strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.timelineVenue small{color:var(--muted);font-size:.72rem}
+.battleToggle,.raceBattle{border:1px solid var(--line);background:var(--inset);color:#94a3b8;border-radius:12px;font-size:1.25rem;line-height:1}
+.battleToggle.active,.raceBattle.active{color:#facc15;border-color:#8a6d15;background:#332a0b}
+.raceCardWrap{position:relative;min-width:0}
+.raceCardWrap>.raceCard{width:100%;height:100%;padding-right:34px}
+.raceBattle{position:absolute;right:7px;bottom:7px;width:30px;height:30px;min-height:30px;padding:0;border-radius:9px;font-size:1rem}
+@media(max-width:520px){.meetingTools{grid-template-columns:1fr}.raceTab{font-size:.72rem;padding:6px 4px}.timelineRace{grid-template-columns:1fr 42px}}

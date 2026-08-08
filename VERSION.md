@@ -14,3 +14,5 @@
 - 公式サイトの実HTMLに合わせた取得パーサー調整はデプロイ後に必要になる可能性がある。
 
 - UI v11: buy screen simplified; funding input, allocation preview, minimum budget and composite odds added. Prediction logic unchanged.
+
+UI v15: 今日のレース / 勝負レース / 会場一覧タブ、勝負レース★登録、横断レース一覧を追加。予想ロジック変更なし。
