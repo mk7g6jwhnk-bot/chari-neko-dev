@@ -4,3 +4,18 @@
 
 .betRowSimple{align-items:center}.betRowSimple strong{font-size:1.02rem}.detailGroup{margin-top:12px}.detailGroup h3{margin:0 0 8px;font-size:.92rem}.detailBet{background:var(--inset);border-radius:10px;padding:10px;margin-bottom:7px}.detailBet p{margin:5px 0 0;font-size:.78rem;line-height:1.45}.abilityDetails{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}.abilityDetails summary{cursor:pointer;font-weight:800}.abilityList{display:grid;gap:7px;margin-top:10px}.abilityRow{display:grid;grid-template-columns:48px 1fr;gap:8px;background:var(--inset);border-radius:10px;padding:9px}.abilityRow span{color:var(--muted);font-size:.76rem;line-height:1.45}
 .fundingRow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}.fundingRow select{min-height:44px;border:1px solid var(--line);border-radius:11px;background:var(--inset);color:#fff;padding:9px}.quickBudget{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:10px}.quickBudget button{min-height:38px;border:1px solid var(--line);border-radius:10px;background:var(--inset);color:var(--text);font-weight:700}.purchaseStats{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:11px;color:var(--muted);font-size:.8rem}.purchaseStats strong{color:var(--text)}.betRowSimple strong{font-size:1.05rem;letter-spacing:.02em}.betRowSimple span{text-align:right;font-variant-numeric:tabular-nums}@media(max-width:520px){.fundingRow{grid-template-columns:1fr}.quickBudget{grid-template-columns:repeat(2,1fr)}}
+
+/* v12: keep the buy screen compact and put reasoning in detail accordions */
+.predictionAccordion{border:1px solid var(--line,#263a57);border-radius:14px;background:rgba(7,18,34,.34);margin-top:12px;overflow:hidden}
+.predictionAccordion>summary{cursor:pointer;list-style:none;font-weight:800;padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
+.predictionAccordion>summary::-webkit-details-marker{display:none}
+.predictionAccordion>summary::after{content:"＋";font-size:18px;opacity:.75}
+.predictionAccordion[open]>summary::after{content:"−"}
+.accordionBody{padding:0 14px 14px}
+.predictionAccordion .detailGroup{margin-top:10px}
+.predictionAccordion .detailGroup:first-child{margin-top:0}
+.predictionAccordion .detailBet{padding:10px 0;border-bottom:1px solid rgba(255,255,255,.07)}
+.predictionAccordion .detailBet:last-child{border-bottom:0}
+.predictionAccordion .detailBet p{margin:4px 0 0}
+.predictionAccordion .abilityRow{display:grid;grid-template-columns:48px 1fr;gap:8px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.07)}
+.predictionAccordion .abilityRow:last-child{border-bottom:0}
