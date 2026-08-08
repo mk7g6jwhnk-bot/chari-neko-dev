@@ -1,0 +1,74 @@
+diff -ruN /mnt/data/v7work/chari-neko-dev-core-v6/keirin/engine/keirin-engine.mjs /mnt/data/v8work/chari-neko-dev-core-v6/keirin/engine/keirin-engine.mjs
+--- /mnt/data/v7work/chari-neko-dev-core-v6/keirin/engine/keirin-engine.mjs	2026-08-08 12:57:27.470679077 +0000
++++ /mnt/data/v8work/chari-neko-dev-core-v6/keirin/engine/keirin-engine.mjs	2026-08-08 13:06:45.580982036 +0000
+@@ -21,7 +21,7 @@
+   if(lineBlocked){purchase.noBet=true;purchase.noBetReason="LINE_DATA_UNAVAILABLE";purchase.purchaseCandidateCountBeforeCompression=0;purchase.purchaseCandidateCountAfterCompression=0;purchase.finalBetCount=0;purchase.minimumRequired=0;}
+ 
+   return{
+-    engineVersion:"KEIRIN-0.4.5-branch-role-consistent",
++    engineVersion:"KEIRIN-0.4.6-official-line-order-consistent",
+     raceId:race.id,
+     lineConfidence:race.lineConfidence,
+     scored,lines,branches,terminals:classified,
+diff -ruN /mnt/data/v7work/chari-neko-dev-core-v6/modules/keirin/engine/keirin-engine.mjs /mnt/data/v8work/chari-neko-dev-core-v6/modules/keirin/engine/keirin-engine.mjs
+--- /mnt/data/v7work/chari-neko-dev-core-v6/modules/keirin/engine/keirin-engine.mjs	2026-08-08 12:57:27.470938531 +0000
++++ /mnt/data/v8work/chari-neko-dev-core-v6/modules/keirin/engine/keirin-engine.mjs	2026-08-08 13:06:45.581145273 +0000
+@@ -21,7 +21,7 @@
+   if(lineBlocked){purchase.noBet=true;purchase.noBetReason="LINE_DATA_UNAVAILABLE";purchase.purchaseCandidateCountBeforeCompression=0;purchase.purchaseCandidateCountAfterCompression=0;purchase.finalBetCount=0;purchase.minimumRequired=0;}
+ 
+   return{
+-    engineVersion:"KEIRIN-0.4.5-branch-role-consistent",
++    engineVersion:"KEIRIN-0.4.6-official-line-order-consistent",
+     raceId:race.id,
+     lineConfidence:race.lineConfidence,
+     scored,lines,branches,terminals:classified,
+diff -ruN /mnt/data/v7work/chari-neko-dev-core-v6/modules/keirin/netlify/functions/keirin-predict.mjs /mnt/data/v8work/chari-neko-dev-core-v6/modules/keirin/netlify/functions/keirin-predict.mjs
+--- /mnt/data/v7work/chari-neko-dev-core-v6/modules/keirin/netlify/functions/keirin-predict.mjs	2026-08-08 12:38:25.000000000 +0000
++++ /mnt/data/v8work/chari-neko-dev-core-v6/modules/keirin/netlify/functions/keirin-predict.mjs	2026-08-08 13:06:45.580746903 +0000
+@@ -447,6 +447,21 @@
+ function nullableNonNegativeInteger(value) { const n = nullableNumber(value); return n !== null && Number.isSafeInteger(n) && n >= 0 ? n : null; }
+ 
+ function resolveOfficialLines({ participants, officialLines, lineText }) {
++  // The official line text is the canonical front-to-back order.
++  // JSJ036 `position` is useful for grouping/identity checks, but treating its numeric
++  // position as race-order can reverse leader/bante roles on some cards.
++  // Prefer the verified text representation whenever it covers the race sufficiently.
++  if (lineText) {
++    const parsed = inferLines({ participants, lineText });
++    if (parsed?.confidence === "高") {
++      return {
++        ...parsed,
++        source: "公式JSJ036並び表記",
++        warnings: []
++      };
++    }
++  }
++
+   const validNumbers = new Set(participants.map(item => Number(item.number)).filter(number => number >= 1 && number <= 9));
+   const uniqueItems = [];
+   const seen = new Set();
+diff -ruN /mnt/data/v7work/chari-neko-dev-core-v6/netlify/functions/keirin-predict.mjs /mnt/data/v8work/chari-neko-dev-core-v6/netlify/functions/keirin-predict.mjs
+--- /mnt/data/v7work/chari-neko-dev-core-v6/netlify/functions/keirin-predict.mjs	2026-08-08 12:38:25.000000000 +0000
++++ /mnt/data/v8work/chari-neko-dev-core-v6/netlify/functions/keirin-predict.mjs	2026-08-08 13:06:45.580334038 +0000
+@@ -447,6 +447,21 @@
+ function nullableNonNegativeInteger(value) { const n = nullableNumber(value); return n !== null && Number.isSafeInteger(n) && n >= 0 ? n : null; }
+ 
+ function resolveOfficialLines({ participants, officialLines, lineText }) {
++  // The official line text is the canonical front-to-back order.
++  // JSJ036 `position` is useful for grouping/identity checks, but treating its numeric
++  // position as race-order can reverse leader/bante roles on some cards.
++  // Prefer the verified text representation whenever it covers the race sufficiently.
++  if (lineText) {
++    const parsed = inferLines({ participants, lineText });
++    if (parsed?.confidence === "高") {
++      return {
++        ...parsed,
++        source: "公式JSJ036並び表記",
++        warnings: []
++      };
++    }
++  }
++
+   const validNumbers = new Set(participants.map(item => Number(item.number)).filter(number => number >= 1 && number <= 9));
+   const uniqueItems = [];
+   const seen = new Set();
