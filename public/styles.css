@@ -19,3 +19,24 @@
 .predictionAccordion .detailBet p{margin:4px 0 0}
 .predictionAccordion .abilityRow{display:grid;grid-template-columns:48px 1fr;gap:8px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.07)}
 .predictionAccordion .abilityRow:last-child{border-bottom:0}
+
+/* v13 home recommendations */
+.homeHero{display:flex;align-items:flex-end;justify-content:space-between;gap:18px}
+.homeHero .primary{width:auto;min-width:150px}
+.recommendationControls{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin:12px 0 14px}
+.sportChecks{display:flex;flex-wrap:wrap;gap:8px}
+.sportChecks label{display:inline-flex;align-items:center;gap:7px;padding:8px 11px;border:1px solid var(--line);border-radius:999px;background:rgba(8,17,31,.48);font-size:.9rem;font-weight:700}
+.sportChecks label.disabled{opacity:.42}
+.sportChecks input{accent-color:#5dc9bd}
+.recommendationLimit{display:grid;gap:5px;min-width:108px;color:var(--muted);font-size:.78rem}
+.recommendationLimit select{min-height:38px;padding:7px 10px;border-radius:10px}
+.recommendationList{display:grid;gap:8px}
+.recommendationItem{margin:0}
+.recommendationOpen{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:left;padding:12px 13px;border-radius:12px;background:rgba(8,17,31,.58);border:1px solid var(--line);color:inherit}
+.recommendationMain{display:grid;gap:3px}
+.recommendationMain strong{font-size:1rem}
+.recommendationMain small{color:var(--muted)}
+.recommendationTags{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.recommendationTags em{font-style:normal;font-size:.72rem;padding:4px 7px;border-radius:999px;background:rgba(93,201,189,.12);border:1px solid rgba(93,201,189,.32);color:#9ce3dc}
+.recommendationFootnote{margin:12px 0 0}
+@media(max-width:640px){.homeHero{align-items:stretch;flex-direction:column}.homeHero .primary{width:100%}.recommendationControls{align-items:stretch;flex-direction:column}.recommendationLimit{width:100%}.recommendationOpen{align-items:flex-start}.recommendationTags{max-width:42%}}

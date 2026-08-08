@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#08111f">
   <title>チャリ猫</title>
-  <link rel="manifest" href="manifest.json?v=13">
-  <link rel="stylesheet" href="styles.css?v=13">
+  <link rel="manifest" href="manifest.json?v=14">
+  <link rel="stylesheet" href="styles.css?v=14">
 </head>
 <body>
 <header class="appHeader">
@@ -16,8 +16,21 @@
 </header>
 <main id="app" aria-live="polite">
   <section id="home" class="screen active">
-    <section class="hero card"><small>TODAY'S RACES</small><h1>今日のレースを見よう</h1><p>出走表と公式ラインを確認して、予想を保存できます。</p><button id="todayKeirin" class="primary">今日の競輪へ</button></section>
-    <section class="card compact"><div class="sectionHead"><div><small>今日のおすすめ</small><h2>競技フィルタ</h2></div><span class="pill">競輪のみ接続済み</span></div><div class="filters"><button class="filter active">競輪</button><button class="filter" disabled>ボート</button><button class="filter" disabled>オート</button><button class="filter" disabled>競馬</button></div><p class="muted">未接続競技の仮データは表示しません。</p></section>
+    <section class="hero card homeHero"><div><small>TODAY'S RACES</small><h1>今日のレース</h1><p>開催確認から予想・保存まで、ここから進めます。</p></div><button id="todayKeirin" class="primary">競輪を開く</button></section>
+    <section class="card compact recommendationPanel">
+      <div class="sectionHead"><div><small>今日のおすすめ</small><h2>おすすめレース</h2></div><span id="recommendationCount" class="pill">0件</span></div>
+      <div class="recommendationControls">
+        <div class="sportChecks" aria-label="競技フィルタ">
+          <label><input id="sportKeirin" type="checkbox" checked>競輪</label>
+          <label class="disabled"><input type="checkbox" disabled>ボート</label>
+          <label class="disabled"><input type="checkbox" disabled>オート</label>
+          <label class="disabled"><input type="checkbox" disabled>競馬</label>
+        </div>
+        <label class="recommendationLimit">表示件数<select id="recommendationLimit"><option value="3">3件</option><option value="5" selected>5件</option><option value="10">10件</option></select></label>
+      </div>
+      <div id="todayRecommendations" class="recommendationList"></div>
+      <p class="muted recommendationFootnote">現在は競輪のみ接続済み。今後、同じ欄で競技を横断して絞り込めます。</p>
+    </section>
     <section class="card compact"><div class="sectionHead"><h2>保存済み予想</h2><span id="savedCount" class="pill">0件</span></div><div id="savedList" class="stack"></div></section>
   </section>
 
@@ -54,5 +67,5 @@
   <section id="loading" class="screen"><section class="card loadingCard"><div class="spinner"></div><h1 id="loadingTitle">取得中</h1><p id="loadingMessage">公式データを確認しています。</p></section></section>
   <section id="error" class="screen"><section class="card errorCard"><div class="errorIcon">!</div><h1 id="errorTitle">取得失敗</h1><p id="errorMessage"></p><button id="retryBtn" class="primary">再試行</button><button id="errorHome" class="secondary">ホームへ</button></section></section>
 </main>
-<script type="module" src="app.mjs?v=13"></script>
+<script type="module" src="app.mjs?v=14"></script>
 </body></html>
