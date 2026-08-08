@@ -1,0 +1,1963 @@
+diff --git a/keirin/config/recent-form-baseline-v1.mjs b/keirin/config/recent-form-baseline-v1.mjs
+new file mode 100644
+index 0000000..21ea5cb
+--- /dev/null
++++ b/keirin/config/recent-form-baseline-v1.mjs
+@@ -0,0 +1,32 @@
++export const KEIRIN_RECENT_FORM_BASELINE = Object.freeze({
++  schemaVersion: 1,
++  baselineVersion: "keirin-active-racers-20260807-v1",
++  generatedAt: "2026-08-07T16:16:14+09:00",
++  effectiveAt: "2026-08-08T00:00:00+09:00",
++  source: "KEIRIN.JP active racer census",
++  classes: Object.freeze({
++    L1: baseline("girls", 227,
++      distribution(201, 0.11454, 0, 44, 46.33, 48.16, 50.66, 53.77, 57, 58.33),
++      distribution(227, 0, 0.0793, 0, 44.662, 47.21, 49.95, 53.16, 55.568, 60.83)),
++    A1: baseline("standard", 504,
++      distribution(487, 0.03373, 0, 76.66, 83.14, 86, 89, 91.83, 94.22, 98.83),
++      distribution(504, 0, 0.00794, 0, 83.879, 86.0225, 89.065, 92.6675, 95.081, 102)),
++    A2: baseline("standard", 515,
++      distribution(488, 0.05243, 0, 75.33, 78.22, 80.11, 82, 85.33, 88.426, 96.33),
++      distribution(515, 0, 0.02136, 0, 75.97, 79.695, 82, 84.445, 87.19, 95.06)),
++    S1: baseline("standard", 209,
++      distribution(200, 0.04306, 0, 93.9, 102.317, 104, 107.235, 109.94, 112.025, 119.57),
++      distribution(209, 0, 0, 93.9, 102.236, 104.46, 107.47, 110.73, 112.796, 117.57)),
++    S2: baseline("standard", 459,
++      distribution(438, 0.04575, 0, 89, 93.97, 96.23, 99, 102, 104.661, 112.9),
++      distribution(459, 0, 0.01525, 0, 92.692, 95.25, 98.78, 101.775, 104.74, 111.91))
++  })
++});
++
++function baseline(category, n, currentScore, recent4MonthScore) {
++  return Object.freeze({ category, n, currentScore, recent4MonthScore });
++}
++
++function distribution(n, missingRate, zeroRate, min, p10, p25, median, p75, p90, max) {
++  return Object.freeze({ n, missingRate, zeroRate, min, p10, p25, median, p75, p90, max });
++}
+diff --git a/keirin/config/start-power-baseline-v1.mjs b/keirin/config/start-power-baseline-v1.mjs
+new file mode 100644
+index 0000000..9495222
+--- /dev/null
++++ b/keirin/config/start-power-baseline-v1.mjs
+@@ -0,0 +1,52 @@
++export const KEIRIN_START_POWER_BASELINE = Object.freeze({
++  schemaVersion: 1,
++  baselineVersion: "keirin-active-racers-start-power-20260807-v1",
++  generatedAt: "2026-08-07T18:17:03+09:00",
++  effectiveAt: "2026-08-07T18:17:03+09:00",
++  source: "KEIRIN.JP active racer census",
++  priorStrength: 15,
++  categories: Object.freeze({
++    girls: categoryBaseline({
++      population: 227,
++      validCount: 209,
++      correlation: 0.664931,
++      bFrequency: distribution(209, 0.146116, 0, 0, 0, 0.066667, 0.230769, 0.401818, 0.888889, 0.230769),
++      hFrequency: distribution(209, 0.138869, 0, 0, 0, 0.095238, 0.227273, 0.333333, 0.8, 0.227273),
++      shrunkBFrequency: distribution(209, 0.146078, 0.042975, 0.060553, 0.073058, 0.104369, 0.187629, 0.28763, 0.551265, 0.11457),
++      shrunkHFrequency: distribution(209, 0.139944, 0.040844, 0.057862, 0.077149, 0.113418, 0.191433, 0.252122, 0.489309, 0.114284)
++    }),
++    standard: categoryBaseline({
++      population: 1687,
++      validCount: 1668,
++      correlation: 0.95578,
++      bFrequency: distribution(1668, 0.14725, 0, 0, 0, 0, 0.259259, 0.5, 1, 0.259259),
++      hFrequency: distribution(1668, 0.14442, 0, 0, 0, 0, 0.259259, 0.479227, 0.904762, 0.259259),
++      shrunkBFrequency: distribution(1668, 0.147736, 0.042476, 0.052589, 0.056635, 0.078573, 0.210481, 0.362113, 0.624018, 0.153846),
++      shrunkHFrequency: distribution(1668, 0.14516, 0.04166, 0.051579, 0.055546, 0.077368, 0.209392, 0.345519, 0.587953, 0.153846)
++    })
++  })
++});
++
++function categoryBaseline({
++  population,
++  validCount,
++  correlation,
++  bFrequency,
++  hFrequency,
++  shrunkBFrequency,
++  shrunkHFrequency
++}) {
++  return Object.freeze({
++    population,
++    validCount,
++    correlation,
++    bFrequency,
++    hFrequency,
++    shrunkBFrequency,
++    shrunkHFrequency
++  });
++}
++
++function distribution(n, mean, min, p10, p25, median, p75, p90, max, iqr) {
++  return Object.freeze({ n, mean, min, p10, p25, median, p75, p90, max, iqr });
++}
+diff --git a/keirin/engine/purchase.mjs b/keirin/engine/purchase.mjs
+index b319ee2..953be12 100644
+--- a/keirin/engine/purchase.mjs
++++ b/keirin/engine/purchase.mjs
+@@ -6,13 +6,7 @@ export function classify(terminals,odds={}){
+ 
+   const max=sorted[0].probability||0;
+   const concentrationRatio=max*sorted.length;
+-  const branchBest=new Map();
+-  for(const terminal of sorted){
+-    for(const contribution of terminal.branchContributions||[]){
+-      const current=branchBest.get(contribution.branchId)||0;
+-      if(contribution.probability>current)branchBest.set(contribution.branchId,contribution.probability);
+-    }
+-  }
++  const branchStats=buildBranchStats(sorted);
+ 
+   return sorted.map((terminal,index)=>{
+     const key=terminal.order.join("-");
+@@ -20,28 +14,43 @@ export function classify(terminals,odds={}){
+     const hasOdds=Number.isFinite(odd)&&odd>1;
+     const contributions=[...(terminal.branchContributions||[])].sort((a,b)=>b.probability-a.probability);
+     const dominant=contributions[0]||null;
+-    const best=dominant?branchBest.get(dominant.branchId)||dominant.probability:0;
+-    const branchFit=best>0?(dominant?.probability||0)/best:0;
++    const stats=dominant?branchStats.get(dominant.branchId):null;
++    const branchFit=stats?.best>0?(dominant?.probability||0)/stats.best:0;
++    const branchRank=stats?.rankByOrder.get(key)??null;
+     const support=contributions.length;
++    const ratios=dominant?.decisionRatios||{};
++    const positionConverged=(ratios.first??0)>=.93&&(ratios.second??0)>=.91&&(ratios.third??0)>=.91;
++    const positionNear=(ratios.first??0)>=.88&&(ratios.second??0)>=.85&&(ratios.third??0)>=.85;
++    const representative=branchFit>=.975&&positionConverged;
++    const credibleVariant=branchFit>=.87&&positionNear;
++    const probabilitySupported=terminal.probability>=max*.42;
+ 
+     let betClass="NONE";
+     let adopted=false;
+-    let purchaseReason="branch代表終端基準外";
++    let purchaseReason="展開代表性または着順別評価が不足";
+ 
+-    if(concentrationRatio>=1.08&&dominant){
+-      const ratios=dominant.decisionRatios||{};
+-      const converged=(ratios.first??0)>=.95&&(ratios.second??0)>=.95&&(ratios.third??0)>=.95;
+-      const nearConverged=(ratios.first??0)>=.90&&(ratios.second??0)>=.92&&(ratios.third??0)>=.92;
+-      const credibleMain=dominant.branchPriority==="main"&&converged&&branchFit>=.82;
+-      const credibleCover=dominant.branchPriority!=="main"&&converged&&branchFit>=.86;
+-      const mainVariant=dominant.branchPriority==="main"&&nearConverged&&branchFit>=.78;
+-      const highValue=hasOdds&&odd>=100&&nearConverged&&branchFit>=.72&&terminal.probability>=max*.35;
+-
+-      if(highValue){betClass="BUYABLE_HIGH";adopted=true;purchaseReason=`${dominant.branchLabel}由来の高配当候補`;}
+-      else if(credibleMain){betClass="MAIN";adopted=true;purchaseReason=`${dominant.branchLabel}で1・2・3着評価が自然収束`;}
+-      else if(credibleCover||mainVariant){betClass="COVER";adopted=true;purchaseReason=`${dominant.branchLabel}の着順別評価から残る変化終端`;}
+-    }else if(concentrationRatio<1.08){
++    if(concentrationRatio<1.04){
+       purchaseReason=`terminal分布が平坦（集中比${concentrationRatio.toFixed(3)}）`;
++    }else if(dominant){
++      const isMainBranch=dominant.branchPriority==="main";
++      const isAlternativeBranch=dominant.branchPriority!=="main";
++      const highValue=hasOdds&&odd>=100&&credibleVariant&&probabilitySupported;
++
++      if(isMainBranch&&representative){
++        betClass="MAIN";
++        adopted=true;
++        purchaseReason=`${dominant.branchLabel}の代表終端`;
++      }else if(highValue&&isAlternativeBranch){
++        betClass="BUYABLE_HIGH";
++        adopted=true;
++        purchaseReason=`${dominant.branchLabel}の独立展開から残る高配当候補`;
++      }else if((isMainBranch&&credibleVariant)||(isAlternativeBranch&&representative&&probabilitySupported)||(support>=2&&branchFit>=.90&&credibleVariant&&probabilitySupported)){
++        betClass="COVER";
++        adopted=true;
++        purchaseReason=isMainBranch
++          ?`${dominant.branchLabel}の代表終端に近い着順変化`
++          :`${dominant.branchLabel}由来の別展開カバー`;
++      }
+     }
+ 
+     return{
+@@ -56,13 +65,36 @@ export function classify(terminals,odds={}){
+       dominantBranchPriority:dominant?.branchPriority||null,
+       dominantBranchContribution:dominant?.probability||0,
+       branchFit,
++      branchRank,
++      representativeTerminal:representative,
+       decisionRatios:dominant?.decisionRatios||null,
++      positionScores:dominant?.positionScores||null,
+       concentrationRatio,
+       index
+     };
+   });
+ }
+ 
++function buildBranchStats(terminals){
++  const byBranch=new Map();
++  for(const terminal of terminals){
++    const order=terminal.order.join("-");
++    for(const contribution of terminal.branchContributions||[]){
++      if(!byBranch.has(contribution.branchId))byBranch.set(contribution.branchId,[]);
++      byBranch.get(contribution.branchId).push({order,probability:contribution.probability||0});
++    }
++  }
++  const result=new Map();
++  for(const [branchId,items] of byBranch){
++    items.sort((a,b)=>b.probability-a.probability||a.order.localeCompare(b.order,"en"));
++    result.set(branchId,{
++      best:items[0]?.probability||0,
++      rankByOrder:new Map(items.map((item,index)=>[item.order,index+1]))
++    });
++  }
++  return result;
++}
++
+ export function composite(items){
+   const values=items.filter(item=>(item.purchaseStatus==null||item.purchaseStatus===PURCHASED)&&item.odds>1);
+   return values.length?1/values.reduce((sum,item)=>sum+1/item.odds,0):null;
+@@ -100,7 +132,7 @@ export function purchaseDiagnostics(classified,plan,budget){
+   const probabilities=classified.map(item=>item.probability).sort((a,b)=>b-a);
+   const natural=classified.filter(item=>item.purchaseStatus===PURCHASED);
+   const noBet=natural.length===0;
+-  const noBetReason=!noBet?null:classified.length===0?"NO_TERMINALS":(classified[0]?.concentrationRatio||0)<1.08?"FLAT_DISTRIBUTION_NO_SUPPORTED_CANDIDATE":"QUALITY_GATE";
++  const noBetReason=!noBet?null:classified.length===0?"NO_TERMINALS":(classified[0]?.concentrationRatio||0)<1.04?"FLAT_DISTRIBUTION_NO_SUPPORTED_CANDIDATE":"NO_BRANCH_REPRESENTATIVE";
+   const minimumRequired=natural.length*100;
+   return{
+     terminalCount:classified.length,
+@@ -110,6 +142,11 @@ export function purchaseDiagnostics(classified,plan,budget){
+     purchaseCandidateCountBeforeCompression:natural.length,
+     purchaseCandidateCountAfterCompression:natural.length,
+     finalBetCount:natural.length,
++    classCounts:{
++      main:natural.filter(item=>item.betClass==="MAIN").length,
++      cover:natural.filter(item=>item.betClass==="COVER").length,
++      buyableHigh:natural.filter(item=>item.betClass==="BUYABLE_HIGH").length
++    },
+     minimumRequired,
+     budget:Number(budget||0),
+     budgetSufficient:Number(budget||0)>=minimumRequired,
+diff --git a/keirin/kimarite/kimarite-abilities.mjs b/keirin/kimarite/kimarite-abilities.mjs
+new file mode 100644
+index 0000000..264ed4f
+--- /dev/null
++++ b/keirin/kimarite/kimarite-abilities.mjs
+@@ -0,0 +1,111 @@
++const PRIOR_STRENGTH = 7;
++const QUALITY_SHRINK = 3;
++const IQR_TO_SIGMA = 1.349;
++const MIN_SCALE = 0.01;
++
++const CONFIG = {
++  girls: {
++    sprintPower: { key: "makuri", baseline: 0.251, median: 0.250502, iqr: 0.191615 },
++    finishPower: { key: "sasi", baseline: 0.224, median: 0.196769, iqr: 0.131557 },
++    trackingSkill: { key: "mark", baseline: 0.370, median: 0.294211, iqr: 0.236789 }
++  },
++  standard: {
++    sprintPower: { key: "makuri", baseline: 0.230, median: 0.178889, iqr: 0.111494 },
++    finishPower: { key: "sasi", baseline: 0.360, median: 0.376667, iqr: 0.208571 },
++    trackingSkill: { key: "mark", baseline: 0.185, median: 0.163929, iqr: 0.166667 }
++  }
++};
++
++export function applyKimariteAbilities(participant) {
++  const category = participant?.raceCategory === "girls" ? "girls" : participant?.raceCategory === "standard" ? "standard" : null;
++  const evidence = participant?.officialKimariteEvidence;
++  const neutral = {
++    sprintPower: 5,
++    finishPower: 5,
++    trackingSkill: 5,
++    kimariteAbilityEvidence: {
++      adopted: false,
++      reason: !category ? "category-unavailable" : "kimarite-evidence-unavailable"
++    }
++  };
++  if (!category || !isUsableEvidence(evidence)) return { ...participant, ...neutral };
++
++  const n = integer(evidence.totalQuinellaCount);
++  if (n === null || n <= 0) {
++    return {
++      ...participant,
++      ...neutral,
++      kimariteAbilityEvidence: { adopted: false, reason: n === 0 ? "quinella-count-zero" : "quinella-count-missing", n }
++    };
++  }
++
++  const result = {};
++  const details = {};
++  for (const [ability, cfg] of Object.entries(CONFIG[category])) {
++    const count = integer(evidence?.[cfg.key]?.Sum_Cnt ?? evidence?.[cfg.key]?.sum ?? evidence?.[cfg.key]?.total);
++    if (count === null || count < 0 || count > n) {
++      result[ability] = 5;
++      details[ability] = { value: 5, adopted: false, reason: `${cfg.key}-count-invalid`, count, n };
++      continue;
++    }
++    const posterior = (count + PRIOR_STRENGTH * cfg.baseline) / (n + PRIOR_STRENGTH);
++    const scale = Math.max(cfg.iqr / IQR_TO_SIGMA, MIN_SCALE);
++    const z = (posterior - cfg.median) / scale;
++    const latent = clamp(normalCdf(z) * 10, 0.25, 9.75);
++    const quality = n / (n + QUALITY_SHRINK);
++    const value = round(clamp(5 + quality * (latent - 5), 0.5, 9.5));
++    result[ability] = value;
++    details[ability] = {
++      adopted: true,
++      value,
++      sourceKey: cfg.key,
++      count,
++      n,
++      share: round(count / n),
++      posterior: round(posterior),
++      latent: round(latent),
++      quality: round(quality),
++      confidence: confidence(n),
++      baseline: cfg.baseline,
++      posteriorMedian: cfg.median,
++      posteriorIqr: cfg.iqr,
++      priorStrength: PRIOR_STRENGTH,
++      qualityShrink: QUALITY_SHRINK
++    };
++  }
++  return {
++    ...participant,
++    ...result,
++    kimariteAbilityEvidence: {
++      adopted: Object.values(details).some(item => item.adopted),
++      category,
++      n,
++      confidence: confidence(n),
++      sourceType: evidence.sourceType || "JSJ068",
++      details
++    }
++  };
++}
++
++function isUsableEvidence(evidence) {
++  if (!evidence || typeof evidence !== "object") return false;
++  if (evidence.identityPassed === false || evidence.targetIdentityPassed === false) return false;
++  if (evidence.status && !["ok", "available", "verified"].includes(String(evidence.status).toLowerCase())) return false;
++  return true;
++}
++function integer(value) {
++  if (value === null || value === undefined || value === "") return null;
++  const number = Number(value);
++  return Number.isSafeInteger(number) && number >= 0 ? number : null;
++}
++function confidence(n) { if (n <= 5) return "low"; if (n <= 10) return "medium-low"; if (n <= 20) return "medium"; return "high"; }
++function normalCdf(x) { return 0.5 * (1 + erf(x / Math.SQRT2)); }
++function erf(x) {
++  const sign = x < 0 ? -1 : 1;
++  const a = Math.abs(x);
++  const t = 1 / (1 + 0.3275911 * a);
++  const y = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-a * a);
++  return sign * y;
++}
++function clamp(value, min, max) { return Math.min(max, Math.max(min, value)); }
++function round(value) { return Math.round(value * 1e6) / 1e6; }
+diff --git a/keirin/recent-form/recent-form.mjs b/keirin/recent-form/recent-form.mjs
+new file mode 100644
+index 0000000..105c8a4
+--- /dev/null
++++ b/keirin/recent-form/recent-form.mjs
+@@ -0,0 +1,351 @@
++import { KEIRIN_RECENT_FORM_BASELINE } from "../config/recent-form-baseline-v1.mjs";
++
++const CONTINUOUS_WEIGHT = 0.9;
++const RANK_WEIGHT = 0.1;
++const MIN_ROBUST_SCALE = 1;
++const CLASS_GAP_CAP = 20;
++const CLASS_ADJUSTMENT_RATE = 0.01;
++
++export function applyRecentFormEvidence(participants, {
++  baseline = KEIRIN_RECENT_FORM_BASELINE
++} = {}) {
++  const items = Array.isArray(participants) ? participants : [];
++  const metricStats = {
++    currentScore: raceStats(validValues(items, "currentScore"), items.length),
++    recent4MonthScore: raceStats(validValues(items, "recent4MonthScore"), items.length)
++  };
++
++  const prepared = items.map((participant, index) => prepareParticipant({
++    participant,
++    index,
++    metricStats,
++    baseline
++  }));
++  applyOrderSafeClassAdjustments(prepared);
++
++  return prepared.map(entry => ({
++    ...entry.participant,
++    recentForm: entry.value,
++    recentFormEvidence: buildEvidence(entry, baseline)
++  }));
++}
++
++function prepareParticipant({ participant, index, metricStats, baseline }) {
++  const profile = participant.officialProfileEvidence;
++  const currentScore = nullableNumber(profile?.currentScore);
++  const recentScore = nullableNumber(profile?.recent4MonthScore);
++  const selectedMetric = recentScore !== null
++    ? "recent4MonthScore"
++    : currentScore !== null ? "currentScore" : null;
++  const selectedScore = selectedMetric === "recent4MonthScore" ? recentScore : currentScore;
++  const stats = selectedMetric ? metricStats[selectedMetric] : emptyStats(metricStats.currentScore.totalCount);
++  const classKey = resolveBaselineClass(participant);
++  const classBaseline = classKey ? baseline.classes?.[classKey] : null;
++  const classDistribution = selectedMetric ? classBaseline?.[selectedMetric] : null;
++  const classPercentileValue = classPercentile(classDistribution, selectedScore);
++  const sparseSampleFlag = participant.sparseSampleFlag === true;
++  const foreignFlag = participant.officialForeignFlag === true;
++  const profileIdentityPassed = profile?.identityPassed === true;
++
++  if (!profileIdentityPassed || selectedMetric === null || stats.validCount <= 1) {
++    return {
++      participant, index, selectedMetric, selectedScore, stats, metricStats, classKey,
++      classPercentile: classPercentileValue,
++      racePercentile: selectedScore === null ? null : racePercentile(stats.values, selectedScore),
++      continuousScore: selectedScore === null ? null : 5,
++      baseValue: 5,
++      rawClassAdjustment: 0,
++      classAdjustment: 0,
++      value: 5,
++      confidence: "low",
++      sparseSampleFlag,
++      foreignFlag,
++      profileIdentityPassed,
++      currentScore,
++      recentScore
++    };
++  }
++
++  const racePercentileValue = racePercentile(stats.values, selectedScore);
++  const continuousScore = robustContinuousScore(selectedScore, stats.median, stats.iqr);
++  const rankScore = racePercentileValue / 10;
++  const rawScore = continuousScore * CONTINUOUS_WEIGHT + rankScore * RANK_WEIGHT;
++  const baseValue = clamp(5 + stats.qualityFactor * (rawScore - 5), 0.5, 9.5);
++  const classGap = classPercentileValue === null
++    ? 0
++    : clamp(classPercentileValue - continuousScore * 10, -CLASS_GAP_CAP, CLASS_GAP_CAP);
++  const rawClassAdjustment = classGap * CLASS_ADJUSTMENT_RATE * stats.qualityFactor;
++
++  return {
++    participant, index, selectedMetric, selectedScore, stats, metricStats, classKey,
++    classPercentile: classPercentileValue,
++    racePercentile: racePercentileValue,
++    continuousScore,
++    baseValue,
++    rawClassAdjustment,
++    classAdjustment: 0,
++    value: round(baseValue),
++    confidence: confidenceFor({
++      participant,
++      profileIdentityPassed,
++      selectedMetric,
++      stats,
++      sparseSampleFlag,
++      foreignFlag
++    }),
++    sparseSampleFlag,
++    foreignFlag,
++    profileIdentityPassed,
++    currentScore,
++    recentScore
++  };
++}
++
++function applyOrderSafeClassAdjustments(entries) {
++  for (const metric of ["recent4MonthScore", "currentScore"]) {
++    const metricEntries = entries.filter(entry => entry.selectedMetric === metric && entry.selectedScore !== null);
++    const grouped = new Map();
++    for (const entry of metricEntries) {
++      const members = grouped.get(entry.selectedScore) || [];
++      members.push(entry);
++      grouped.set(entry.selectedScore, members);
++    }
++    const scoreGroups = [...grouped.entries()]
++      .sort(([left], [right]) => left - right)
++      .map(([score, members]) => {
++        const baseValue = average(members.map(member => member.baseValue));
++        const adjustment = average(members.map(member => member.rawClassAdjustment));
++        return {
++          score,
++          members,
++          baseValue,
++          weight: members.length,
++          proposed: clamp(baseValue + adjustment, 0.5, 9.5)
++        };
++      });
++
++    const fitted = isotonicNondecreasing(scoreGroups.map(group => ({
++      value: group.proposed,
++      weight: group.weight
++    })));
++    scoreGroups.forEach((group, groupIndex) => {
++      const value = round(fitted[groupIndex]);
++      const classAdjustment = round(value - group.baseValue);
++      for (const entry of group.members) {
++        entry.value = value;
++        entry.classAdjustment = classAdjustment;
++      }
++    });
++  }
++}
++
++function buildEvidence(entry, baseline) {
++  const {
++    participant, selectedMetric, selectedScore, stats, metricStats, classKey,
++    classPercentile: selectedClassPercentile, racePercentile: selectedRacePercentile,
++    continuousScore, classAdjustment, value, confidence, sparseSampleFlag,
++    foreignFlag, profileIdentityPassed, currentScore, recentScore
++  } = entry;
++  const inputsUsed = [];
++  if (selectedMetric) {
++    inputsUsed.push(
++      `${selectedMetric}.raceMedianIqrContinuous`,
++      `${selectedMetric}.raceMidRankAuxiliary`,
++      "raceQualityShrinkage"
++    );
++    if (selectedClassPercentile !== null) inputsUsed.push(`${selectedMetric}.classPercentileCappedAdjustment`);
++  }
++
++  return {
++    value,
++    confidence,
++    selectedMetric,
++    selectedScore,
++    raceMedian: stats.median,
++    raceIqr: stats.iqr,
++    validCount: stats.validCount,
++    validRate: stats.validRate,
++    uniqueCount: stats.uniqueCount,
++    continuousScore,
++    qualityFactor: stats.qualityFactor,
++    classPercentile: selectedClassPercentile,
++    classAdjustment,
++    racePercentile: selectedRacePercentile,
++    raceCurrentPercentile: currentScore === null ? null : racePercentile(metricStats.currentScore.values, currentScore),
++    raceRecentPercentile: recentScore === null ? null : racePercentile(metricStats.recent4MonthScore.values, recentScore),
++    classCurrentPercentile: classPercentileForMetric(participant, baseline, "currentScore", currentScore),
++    classRecentPercentile: classPercentileForMetric(participant, baseline, "recent4MonthScore", recentScore),
++    inputsUsed,
++    missingInputs: [
++      currentScore === null ? "currentScore" : null,
++      recentScore === null ? "recent4MonthScore" : null
++    ].filter(Boolean),
++    currentScoreMissing: currentScore === null,
++    recentScoreIsActualZero: recentScore === 0,
++    profileIdentityPassed,
++    officialTotalStarts: nullableNumber(participant.officialTotalStarts),
++    sparseSampleFlag,
++    foreignFlag,
++    classKey,
++    baselineVersion: baseline.baselineVersion,
++    baselineSchemaVersion: baseline.schemaVersion
++  };
++}
++
++function raceStats(values, totalCount) {
++  const sorted = [...values].sort((left, right) => left - right);
++  const validCount = sorted.length;
++  const validRate = totalCount > 0 ? validCount / totalCount : 0;
++  const median = validCount ? quantile(sorted, 0.5) : null;
++  const iqr = validCount ? quantile(sorted, 0.75) - quantile(sorted, 0.25) : null;
++  const uniqueCount = new Set(sorted).size;
++  const countFactor = validCount <= 1 ? 0
++    : validCount === 2 ? 0.25
++      : validCount === 3 ? 0.4
++        : validCount === 4 ? 0.6
++          : validCount === 5 ? 0.8
++            : validCount === 6 ? 0.9 : 1;
++  const coverageFactor = Math.min(1, validRate / 0.7);
++  const iqrFactor = validCount <= 1 ? 0 : 0.25 + 0.75 * Math.min(1, Math.max(0, iqr) / 1);
++  const uniqueFactor = uniqueCount <= 1 ? 0.25
++    : uniqueCount === 2 ? 0.4
++      : uniqueCount === 3 ? 0.7 : 1;
++  return {
++    values: sorted,
++    totalCount,
++    validCount,
++    validRate: round(validRate),
++    median: median === null ? null : round(median),
++    iqr: iqr === null ? null : round(iqr),
++    uniqueCount,
++    qualityFactor: round(countFactor * coverageFactor * iqrFactor * uniqueFactor)
++  };
++}
++
++function emptyStats(totalCount = 0) {
++  return raceStats([], totalCount);
++}
++
++function robustContinuousScore(value, median, iqr) {
++  if (value === null || median === null || iqr === null) return null;
++  const scale = Math.max(iqr / 1.349, MIN_ROBUST_SCALE);
++  return round(normalCdf((value - median) / scale) * 10);
++}
++
++function confidenceFor({ selectedMetric, stats, sparseSampleFlag, foreignFlag, profileIdentityPassed }) {
++  if (!profileIdentityPassed || sparseSampleFlag || stats.validCount <= 3 || stats.iqr < 0.5 || stats.uniqueCount <= 2) {
++    return "low";
++  }
++  const high = selectedMetric === "recent4MonthScore" &&
++    stats.validCount >= 5 && stats.validRate >= 0.7 && stats.iqr >= 1 && stats.uniqueCount >= 4;
++  if (high) return foreignFlag ? "medium" : "high";
++  const medium = stats.validCount >= 4 && stats.validRate >= 0.5 && stats.iqr >= 0.5 && stats.uniqueCount >= 3;
++  return medium ? "medium" : "low";
++}
++
++function isotonicNondecreasing(points) {
++  const blocks = [];
++  points.forEach((point, index) => {
++    blocks.push({ start: index, end: index, weight: point.weight, value: point.value });
++    while (blocks.length >= 2 && blocks.at(-2).value > blocks.at(-1).value) {
++      const right = blocks.pop();
++      const left = blocks.pop();
++      const weight = left.weight + right.weight;
++      blocks.push({
++        start: left.start,
++        end: right.end,
++        weight,
++        value: (left.value * left.weight + right.value * right.weight) / weight
++      });
++    }
++  });
++  const result = Array(points.length);
++  for (const block of blocks) {
++    for (let index = block.start; index <= block.end; index += 1) result[index] = block.value;
++  }
++  return result;
++}
++
++function validValues(participants, field) {
++  return participants
++    .filter(item => item.officialProfileEvidence?.identityPassed === true)
++    .map(item => nullableNumber(item.officialProfileEvidence?.[field]))
++    .filter(value => value !== null);
++}
++
++function racePercentile(values, value) {
++  if (value === null || values.length === 0) return null;
++  const below = values.filter(candidate => candidate < value).length;
++  const equal = values.filter(candidate => candidate === value).length;
++  return round((below + equal / 2) / values.length * 100);
++}
++
++function classPercentileForMetric(participant, baseline, metric, value) {
++  const classKey = resolveBaselineClass(participant);
++  return classPercentile(classKey ? baseline.classes?.[classKey]?.[metric] : null, value);
++}
++
++function classPercentile(distribution, value) {
++  if (!distribution || value === null) return null;
++  if (value === 0 && distribution.min === 0 && distribution.zeroRate > 0) return round(distribution.zeroRate * 50);
++  const points = [
++    [distribution.min, 0], [distribution.p10, 10], [distribution.p25, 25],
++    [distribution.median, 50], [distribution.p75, 75], [distribution.p90, 90],
++    [distribution.max, 100]
++  ];
++  if (value <= points[0][0]) return 0;
++  if (value >= points.at(-1)[0]) return 100;
++  for (let index = 1; index < points.length; index += 1) {
++    const [upperValue, upperPercentile] = points[index];
++    if (value > upperValue) continue;
++    const [lowerValue, lowerPercentile] = points[index - 1];
++    if (upperValue === lowerValue) return round((lowerPercentile + upperPercentile) / 2);
++    const ratio = (value - lowerValue) / (upperValue - lowerValue);
++    return round(lowerPercentile + ratio * (upperPercentile - lowerPercentile));
++  }
++  return null;
++}
++
++function resolveBaselineClass(participant) {
++  if (participant.raceCategory === "girls") return "L1";
++  const text = String(participant.className || "").normalize("NFKC").toUpperCase().replace(/\s+/g, "");
++  return ["S1", "S2", "A1", "A2", "L1"].find(key => text.includes(key)) || null;
++}
++
++function quantile(sorted, percentile) {
++  if (!sorted.length) return null;
++  const position = (sorted.length - 1) * percentile;
++  const lower = Math.floor(position);
++  const upper = Math.ceil(position);
++  return sorted[lower] + (sorted[upper] - sorted[lower]) * (position - lower);
++}
++
++function normalCdf(value) {
++  return 0.5 * (1 + erf(value / Math.sqrt(2)));
++}
++
++function erf(value) {
++  const sign = value < 0 ? -1 : 1;
++  const absolute = Math.abs(value);
++  const t = 1 / (1 + 0.3275911 * absolute);
++  const approximation = 1 - (((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t) * Math.exp(-absolute * absolute);
++  return sign * approximation;
++}
++
++function nullableNumber(value) {
++  if (value === null || value === undefined || (typeof value === "string" && value.trim() === "")) return null;
++  const number = Number(value);
++  return Number.isFinite(number) ? number : null;
++}
++
++function average(values) {
++  return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
++}
++
++function clamp(value, min, max) {
++  return Math.max(min, Math.min(max, value));
++}
++
++function round(value) {
++  return value === null ? null : Math.round(value * 1000) / 1000;
++}
+diff --git a/keirin/sports/keirin-terminals.mjs b/keirin/sports/keirin-terminals.mjs
+index 9411054..0f81628 100644
+--- a/keirin/sports/keirin-terminals.mjs
++++ b/keirin/sports/keirin-terminals.mjs
+@@ -107,68 +107,92 @@ export function generateKeirinTerminals({scored,branches}){
+ 
+ function conditionedFirst(branch,participant){
+   const candidate=branch.firstCandidateScores?.[participant.id]??participant.roleScores.first;
+-  return positive(candidate)*branchRoleFactor(branch,participant,"first");
++  const e=participant.evidence||{};
++  let branchAbility=participant.roleScores.first||5;
++  switch(branch.branchType){
++    case"LEADER_HOLD": branchAbility=.30*(participant.roleScores.first||5)+.28*(e.start||5)+.22*(e.stamina||5)+.12*(e.recent||5)+.08*(e.finish||5); break;
++    case"BANTE_SASHI": branchAbility=.28*(participant.roleScores.first||5)+.30*(e.finish||5)+.22*(e.tracking||5)+.12*(e.recent||5)+.08*(e.lineTrust||5); break;
++    case"MAKURI_SUCCESS": branchAbility=.28*(participant.roleScores.first||5)+.34*(e.sprint||5)+.18*(e.finish||5)+.12*(e.recent||5)+.08*(e.start||5); break;
++    case"LEAD_BATTLE": branchAbility=.24*(participant.roleScores.first||5)+.28*(e.finish||5)+.20*(e.tracking||5)+.16*(e.recent||5)+.12*(e.stamina||5); break;
++    case"LINE_SEPARATION": branchAbility=.24*(participant.roleScores.first||5)+.30*(e.finish||5)+.26*(e.tracking||5)+.12*(e.recent||5)+.08*(e.lineTrust||5); break;
++    case"SOLO_RISE": branchAbility=.30*(participant.roleScores.first||5)+.28*(e.finish||5)+.22*(e.sprint||5)+.12*(e.recent||5)+.08*(e.tracking||5); break;
++  }
++  return positive(.45*candidate+.55*branchAbility)*branchRoleFactor(branch,participant,"first");
+ }
+ 
+ function conditionedSecond(branch,first,second,lineById){
+-  const same=sameLine(first,second,lineById),role=second.role;
++  const same=sameLine(first,second,lineById),role=second.role,e=second.evidence||{};
++  let score=second.roleScores.second||5;
+   let factor=1;
+   switch(branch.branchType){
+     case"LEADER_HOLD":
+-      if(same&&role==="番手")factor=1.45;else if(same&&role==="三番手")factor=1.20;else if(role==="番手")factor=1.08;else if(role==="自力")factor=.92;
++      score=.28*score+.30*(e.tracking||5)+.18*(e.finish||5)+.14*(e.lineTrust||5)+.10*(e.recent||5);
++      if(same&&role==="番手")factor=1.55; else if(same&&role==="三番手")factor=1.18; else if(role==="番手")factor=1.04; else if(role==="自力")factor=.78;
+       break;
+     case"BANTE_SASHI":
+-      if(same&&role==="自力")factor=1.30;else if(same&&role==="三番手")factor=1.16;else if(role==="自力")factor=1.04;
++      score=.30*score+.24*(e.stamina||5)+.18*(e.recent||5)+.16*(e.tracking||5)+.12*(e.finish||5);
++      if(same&&role==="自力")factor=1.48; else if(same&&role==="三番手")factor=1.16; else if(role==="自力")factor=.98;
+       break;
+     case"MAKURI_SUCCESS":
+-      if(same&&role==="番手")factor=1.28;else if(same&&role==="三番手")factor=1.10;else if(role==="番手")factor=1.14;else if(role==="自力")factor=.96;
++      score=.26*score+.28*(e.tracking||5)+.18*(e.sprint||5)+.16*(e.finish||5)+.12*(e.recent||5);
++      if(same&&role==="番手")factor=1.42; else if(same&&role==="三番手")factor=1.16; else if(!same&&role==="番手")factor=1.08; else if(role==="自力")factor=.82;
+       break;
+     case"LEAD_BATTLE":
+-      if(role==="番手")factor=1.24;else if(role==="三番手")factor=1.12;else if(role==="自力")factor=.84;
++      score=.24*score+.28*(e.finish||5)+.24*(e.tracking||5)+.14*(e.recent||5)+.10*(e.stamina||5);
++      if(role==="番手")factor=1.30; else if(role==="三番手")factor=1.14; else if(role==="自力")factor=.72;
+       break;
+     case"LINE_SEPARATION":
+-      if(!same&&role==="番手")factor=1.20;else if(role==="単騎")factor=1.12;else if(same)factor=.88;
++      score=.22*score+.32*(e.tracking||5)+.24*(e.finish||5)+.14*(e.recent||5)+.08*(e.lineTrust||5);
++      if(!same&&role==="番手")factor=1.30; else if(role==="単騎")factor=1.14; else if(same)factor=.72;
+       break;
+     case"SOLO_RISE":
+-      if(role==="番手")factor=1.10;else if(role==="自力")factor=.96;
++      score=.28*score+.26*(e.finish||5)+.22*(e.tracking||5)+.14*(e.recent||5)+.10*(e.sprint||5);
++      if(role==="番手")factor=1.12; else if(role==="自力")factor=.88;
+       break;
+   }
+-  return positive(second.roleScores.second)*factor;
++  return positive(score)*factor;
+ }
+ 
+ function conditionedThird(branch,first,second,third,lineById){
+-  const sameFirst=sameLine(first,third,lineById),sameSecond=sameLine(second,third,lineById),role=third.role;
++  const sameFirst=sameLine(first,third,lineById),sameSecond=sameLine(second,third,lineById),role=third.role,e=third.evidence||{};
++  let score=third.roleScores.third||5;
+   let factor=1;
+   switch(branch.branchType){
+     case"LEADER_HOLD":
+-      if(sameFirst&&role==="三番手")factor=1.30;else if(sameFirst&&role==="番手")factor=1.18;else if(role==="番手"||role==="三番手")factor=1.10;
++      score=.26*score+.34*(e.tracking||5)+.16*(e.stamina||5)+.14*(e.recent||5)+.10*(e.finish||5);
++      if(sameFirst&&role==="三番手")factor=1.42; else if(sameFirst&&role==="番手")factor=1.18; else if(!sameFirst&&(role==="番手"||role==="三番手"))factor=1.08; else if(role==="自力")factor=.84;
+       break;
+     case"BANTE_SASHI":
+-      if(sameFirst&&role==="三番手")factor=1.28;else if(sameFirst&&role==="自力")factor=1.18;else if(role==="番手"||role==="三番手")factor=1.08;
++      score=.26*score+.32*(e.tracking||5)+.18*(e.stamina||5)+.14*(e.recent||5)+.10*(e.finish||5);
++      if(sameFirst&&role==="三番手")factor=1.38; else if(sameFirst&&role==="自力")factor=1.22; else if(role==="番手"||role==="三番手")factor=1.06;
+       break;
+     case"MAKURI_SUCCESS":
+-      if(sameFirst&&role==="三番手")factor=1.22;else if(sameFirst&&role==="番手")factor=1.16;else if(!sameFirst&&role==="番手")factor=1.12;
++      score=.24*score+.30*(e.tracking||5)+.20*(e.finish||5)+.14*(e.recent||5)+.12*(e.stamina||5);
++      if(sameFirst&&role==="三番手")factor=1.32; else if(sameFirst&&role==="番手")factor=1.26; else if(!sameFirst&&role==="番手")factor=1.12; else if(role==="自力")factor=.86;
+       break;
+     case"LEAD_BATTLE":
+-      if(role==="三番手")factor=1.22;else if(role==="番手")factor=1.16;else if(role==="自力")factor=.88;
++      score=.22*score+.34*(e.tracking||5)+.22*(e.finish||5)+.12*(e.recent||5)+.10*(e.stamina||5);
++      if(role==="三番手")factor=1.28; else if(role==="番手")factor=1.20; else if(role==="自力")factor=.72;
+       break;
+     case"LINE_SEPARATION":
+-      if(!sameFirst&&!sameSecond&&(role==="番手"||role==="単騎"))factor=1.18;else if(sameFirst)factor=.90;
++      score=.22*score+.36*(e.tracking||5)+.22*(e.finish||5)+.12*(e.recent||5)+.08*(e.lineTrust||5);
++      if(!sameFirst&&!sameSecond&&(role==="番手"||role==="単騎"))factor=1.24; else if(sameFirst)factor=.74;
+       break;
+     case"SOLO_RISE":
+-      if(role==="番手"||role==="三番手")factor=1.10;
++      score=.26*score+.34*(e.tracking||5)+.18*(e.finish||5)+.14*(e.recent||5)+.08*(e.stamina||5);
++      if(role==="番手"||role==="三番手")factor=1.12; else if(role==="自力")factor=.88;
+       break;
+   }
+-  return positive(third.roleScores.third)*factor;
++  return positive(score)*factor;
+ }
+ 
+ function branchRoleFactor(branch,participant,target){
+   if(target!=="first")return 1;
+   if(branch.branchType==="LEAD_BATTLE"){
+     if(participant.role==="番手")return 1.08;
+-    if(participant.role==="自力")return .96;
++    if(participant.role==="自力")return .90;
+   }
+-  if(branch.branchType==="LINE_SEPARATION"&&participant.role==="番手")return 1.10;
++  if(branch.branchType==="LINE_SEPARATION"&&participant.role==="番手")return 1.12;
+   return 1;
+ }
+ function sameLine(a,b,lineById){const la=lineById.get(a.id),lb=lineById.get(b.id);return Boolean(la&&lb&&la===lb&&!String(la).startsWith("unknown-"))}
+diff --git a/keirin/start-power/start-power.mjs b/keirin/start-power/start-power.mjs
+new file mode 100644
+index 0000000..108ff00
+--- /dev/null
++++ b/keirin/start-power/start-power.mjs
+@@ -0,0 +1,202 @@
++import { KEIRIN_START_POWER_BASELINE } from "../config/start-power-baseline-v1.mjs";
++
++const ROBUST_IQR_TO_SIGMA = 1.349;
++const MIN_ROBUST_SCALE = 0.01;
++const INPUT_Z_CAP = 2.5;
++
++export function applyStartPowerEvidence(participants, {
++  baseline = KEIRIN_START_POWER_BASELINE
++} = {}) {
++  return (Array.isArray(participants) ? participants : []).map(participant => {
++    const evidence = buildStartPowerEvidence(participant, baseline);
++    return {
++      ...participant,
++      startPower: evidence.value,
++      startPowerEvidence: evidence
++    };
++  });
++}
++
++export function buildStartPowerEvidence(participant, baseline = KEIRIN_START_POWER_BASELINE) {
++  const profile = participant?.officialProfileEvidence;
++  const raceCategory = resolveCategory(participant?.raceCategory);
++  const categoryBaseline = raceCategory ? baseline.categories?.[raceCategory] : null;
++  const profileIdentityPassed = profile?.identityPassed === true;
++  const officialTotalStarts = nullableNonNegativeInteger(profile?.officialTotalStarts);
++  const rawBackCount = nullableNonNegativeNumber(profile?.backCount);
++  const rawHomeCount = nullableNonNegativeNumber(profile?.homeCount);
++  const ridingStyle = nullableText(profile?.ridingStyle);
++  const escapeRate = nullableNonNegativeNumber(profile?.winningStyleRates?.escape);
++  const foreignFlag = participant?.officialForeignFlag === true;
++  const sparseSampleFlag = officialTotalStarts !== null && officialTotalStarts <= 10;
++  const missingInputs = [
++    !profileIdentityPassed ? "verifiedOfficialProfile" : null,
++    officialTotalStarts === null ? "officialTotalStarts" : null,
++    rawBackCount === null ? "backCount" : null,
++    rawHomeCount === null ? "homeCount" : null,
++    !categoryBaseline ? "raceCategoryBaseline" : null
++  ].filter(Boolean);
++
++  const neutral = overrides => ({
++    value: 5,
++    confidence: "low",
++    officialTotalStarts,
++    rawBackCount,
++    rawHomeCount,
++    bFrequency: null,
++    hFrequency: null,
++    shrunkBFrequency: null,
++    shrunkHFrequency: null,
++    latentScore: 5,
++    startsQuality: 0,
++    sparseSampleFlag: officialTotalStarts === 0 ? true : sparseSampleFlag,
++    raceCategory,
++    ridingStyle,
++    ridingStyleConsistency: null,
++    escapeRate,
++    foreignFlag,
++    profileIdentityPassed,
++    priorStrength: baseline.priorStrength,
++    baselineVersion: baseline.baselineVersion,
++    baselineSchemaVersion: baseline.schemaVersion,
++    inputsUsed: [],
++    missingInputs,
++    ...overrides
++  });
++
++  if (missingInputs.length > 0) return neutral();
++  if (officialTotalStarts === 0) {
++    return neutral({
++      inputsUsed: ["officialTotalStarts.actualZero"],
++      missingInputs: []
++    });
++  }
++
++  const bFrequency = rawBackCount / officialTotalStarts;
++  const hFrequency = rawHomeCount / officialTotalStarts;
++  const priorStrength = baseline.priorStrength;
++  const shrunkBFrequency = shrinkFrequency(
++    rawBackCount,
++    officialTotalStarts,
++    priorStrength,
++    categoryBaseline.bFrequency.mean
++  );
++  const shrunkHFrequency = shrinkFrequency(
++    rawHomeCount,
++    officialTotalStarts,
++    priorStrength,
++    categoryBaseline.hFrequency.mean
++  );
++  const bZ = clamp(robustZ(shrunkBFrequency, categoryBaseline.shrunkBFrequency), -INPUT_Z_CAP, INPUT_Z_CAP);
++  const hZ = clamp(robustZ(shrunkHFrequency, categoryBaseline.shrunkHFrequency), -INPUT_Z_CAP, INPUT_Z_CAP);
++  const sharedZ = (bZ + hZ) / 2;
++  const latentScore = clamp(normalCdf(sharedZ) * 10, 0.25, 9.75);
++  const startsQuality = officialTotalStarts / (officialTotalStarts + priorStrength);
++  const value = clamp(5 + startsQuality * (latentScore - 5), 0.5, 9.5);
++
++  return {
++    value: round(value),
++    confidence: confidenceFor({ officialTotalStarts, foreignFlag }),
++    officialTotalStarts,
++    rawBackCount,
++    rawHomeCount,
++    bFrequency: round(bFrequency),
++    hFrequency: round(hFrequency),
++    shrunkBFrequency: round(shrunkBFrequency),
++    shrunkHFrequency: round(shrunkHFrequency),
++    latentScore: round(latentScore),
++    startsQuality: round(startsQuality),
++    sparseSampleFlag,
++    raceCategory,
++    ridingStyle,
++    ridingStyleConsistency: ridingStyleConsistency({
++      ridingStyle,
++      bFrequency,
++      hFrequency,
++      categoryBaseline
++    }),
++    escapeRate,
++    foreignFlag,
++    profileIdentityPassed,
++    priorStrength,
++    baselineVersion: baseline.baselineVersion,
++    baselineSchemaVersion: baseline.schemaVersion,
++    inputsUsed: [
++      "officialProfileEvidence.officialTotalStarts",
++      "officialProfileEvidence.backCount",
++      "officialProfileEvidence.homeCount",
++      `${raceCategory}.bFrequencyPriorMean`,
++      `${raceCategory}.hFrequencyPriorMean`,
++      `${raceCategory}.shrunkFrequencyRobustScale`,
++      `${raceCategory}.bhSharedLatent`,
++      "startsQualityNeutralShrinkage"
++    ],
++    missingInputs: []
++  };
++}
++
++function shrinkFrequency(count, starts, priorStrength, priorMean) {
++  return (count + priorStrength * priorMean) / (starts + priorStrength);
++}
++
++function robustZ(value, distribution) {
++  const scale = Math.max(distribution.iqr / ROBUST_IQR_TO_SIGMA, MIN_ROBUST_SCALE);
++  return (value - distribution.median) / scale;
++}
++
++function confidenceFor({ officialTotalStarts, foreignFlag }) {
++  if (officialTotalStarts <= 10) return "low";
++  if (officialTotalStarts <= 20 || foreignFlag) return "medium";
++  return "high";
++}
++
++function ridingStyleConsistency({ ridingStyle, bFrequency, hFrequency, categoryBaseline }) {
++  const normalized = String(ridingStyle || "").normalize("NFKC");
++  const observed = (bFrequency + hFrequency) / 2;
++  const categoryMean = (categoryBaseline.bFrequency.mean + categoryBaseline.hFrequency.mean) / 2;
++  if (normalized === "逃") return observed >= categoryMean ? "consistent" : "not-aligned";
++  if (normalized === "追") return observed <= categoryMean ? "consistent" : "not-aligned";
++  if (normalized === "両") return "mixed-style";
++  return null;
++}
++
++function resolveCategory(value) {
++  return value === "girls" || value === "standard" ? value : null;
++}
++
++function nullableNonNegativeInteger(value) {
++  if (value === null || value === undefined || (typeof value === "string" && value.trim() === "")) return null;
++  const number = Number(value);
++  return Number.isSafeInteger(number) && number >= 0 ? number : null;
++}
++
++function nullableNonNegativeNumber(value) {
++  if (value === null || value === undefined || (typeof value === "string" && value.trim() === "")) return null;
++  const number = Number(value);
++  return Number.isFinite(number) && number >= 0 ? number : null;
++}
++
++function nullableText(value) {
++  const text = String(value ?? "").trim();
++  return text && text !== "-" ? text : null;
++}
++
++function normalCdf(value) {
++  return 0.5 * (1 + erf(value / Math.sqrt(2)));
++}
++
++function erf(value) {
++  const sign = value < 0 ? -1 : 1;
++  const absolute = Math.abs(value);
++  const t = 1 / (1 + 0.3275911 * absolute);
++  const approximation = 1 - (((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t) * Math.exp(-absolute * absolute);
++  return sign * approximation;
++}
++
++function clamp(value, min, max) {
++  return Math.max(min, Math.min(max, value));
++}
++
++function round(value) {
++  return Math.round(value * 1000) / 1000;
++}
+diff --git a/modules/keirin/config/recent-form-baseline-v1.mjs b/modules/keirin/config/recent-form-baseline-v1.mjs
+new file mode 100644
+index 0000000..3488e73
+--- /dev/null
++++ b/modules/keirin/config/recent-form-baseline-v1.mjs
+@@ -0,0 +1 @@
++export { KEIRIN_RECENT_FORM_BASELINE } from "../../../keirin/config/recent-form-baseline-v1.mjs";
+diff --git a/modules/keirin/config/start-power-baseline-v1.mjs b/modules/keirin/config/start-power-baseline-v1.mjs
+new file mode 100644
+index 0000000..f05cb6c
+--- /dev/null
++++ b/modules/keirin/config/start-power-baseline-v1.mjs
+@@ -0,0 +1 @@
++export { KEIRIN_START_POWER_BASELINE } from "../../../keirin/config/start-power-baseline-v1.mjs";
+diff --git a/modules/keirin/engine/purchase.mjs b/modules/keirin/engine/purchase.mjs
+index b319ee2..995114d 100644
+--- a/modules/keirin/engine/purchase.mjs
++++ b/modules/keirin/engine/purchase.mjs
+@@ -1,125 +1 @@
+-const PURCHASED="購入採用";
+-
+-export function classify(terminals,odds={}){
+-  const sorted=[...terminals].sort(compareTerminal);
+-  if(!sorted.length)return[];
+-
+-  const max=sorted[0].probability||0;
+-  const concentrationRatio=max*sorted.length;
+-  const branchBest=new Map();
+-  for(const terminal of sorted){
+-    for(const contribution of terminal.branchContributions||[]){
+-      const current=branchBest.get(contribution.branchId)||0;
+-      if(contribution.probability>current)branchBest.set(contribution.branchId,contribution.probability);
+-    }
+-  }
+-
+-  return sorted.map((terminal,index)=>{
+-    const key=terminal.order.join("-");
+-    const odd=Number(odds[key]);
+-    const hasOdds=Number.isFinite(odd)&&odd>1;
+-    const contributions=[...(terminal.branchContributions||[])].sort((a,b)=>b.probability-a.probability);
+-    const dominant=contributions[0]||null;
+-    const best=dominant?branchBest.get(dominant.branchId)||dominant.probability:0;
+-    const branchFit=best>0?(dominant?.probability||0)/best:0;
+-    const support=contributions.length;
+-
+-    let betClass="NONE";
+-    let adopted=false;
+-    let purchaseReason="branch代表終端基準外";
+-
+-    if(concentrationRatio>=1.08&&dominant){
+-      const ratios=dominant.decisionRatios||{};
+-      const converged=(ratios.first??0)>=.95&&(ratios.second??0)>=.95&&(ratios.third??0)>=.95;
+-      const nearConverged=(ratios.first??0)>=.90&&(ratios.second??0)>=.92&&(ratios.third??0)>=.92;
+-      const credibleMain=dominant.branchPriority==="main"&&converged&&branchFit>=.82;
+-      const credibleCover=dominant.branchPriority!=="main"&&converged&&branchFit>=.86;
+-      const mainVariant=dominant.branchPriority==="main"&&nearConverged&&branchFit>=.78;
+-      const highValue=hasOdds&&odd>=100&&nearConverged&&branchFit>=.72&&terminal.probability>=max*.35;
+-
+-      if(highValue){betClass="BUYABLE_HIGH";adopted=true;purchaseReason=`${dominant.branchLabel}由来の高配当候補`;}
+-      else if(credibleMain){betClass="MAIN";adopted=true;purchaseReason=`${dominant.branchLabel}で1・2・3着評価が自然収束`;}
+-      else if(credibleCover||mainVariant){betClass="COVER";adopted=true;purchaseReason=`${dominant.branchLabel}の着順別評価から残る変化終端`;}
+-    }else if(concentrationRatio<1.08){
+-      purchaseReason=`terminal分布が平坦（集中比${concentrationRatio.toFixed(3)}）`;
+-    }
+-
+-    return{
+-      ...terminal,
+-      odds:hasOdds?odd:null,
+-      betClass,
+-      purchaseStatus:adopted?PURCHASED:"購入不採用",
+-      purchaseReason,
+-      branchSupport:support,
+-      dominantBranchId:dominant?.branchId||null,
+-      dominantBranchLabel:dominant?.branchLabel||null,
+-      dominantBranchPriority:dominant?.branchPriority||null,
+-      dominantBranchContribution:dominant?.probability||0,
+-      branchFit,
+-      decisionRatios:dominant?.decisionRatios||null,
+-      concentrationRatio,
+-      index
+-    };
+-  });
+-}
+-
+-export function composite(items){
+-  const values=items.filter(item=>(item.purchaseStatus==null||item.purchaseStatus===PURCHASED)&&item.odds>1);
+-  return values.length?1/values.reduce((sum,item)=>sum+1/item.odds,0):null;
+-}
+-
+-export function allocate(items,budget){
+-  const natural=items.filter(item=>item.purchaseStatus===PURCHASED).sort(comparePurchase);
+-  if(!natural.length)return[];
+-  const minimum=natural.length*100;
+-  const numericBudget=Math.max(0,Number(budget||0));
+-  if(numericBudget<minimum){
+-    return natural.map(item=>({
+-      order:item.order,betClass:item.betClass,stake:null,odds:item.odds,expectedPayout:null,
+-      probability:item.probability,branchSupport:item.branchSupport,purchaseReason:item.purchaseReason,
+-      dominantBranchId:item.dominantBranchId,dominantBranchLabel:item.dominantBranchLabel,decisionRatios:item.decisionRatios,
+-      fundingStatus:"予算不足",minimumRequired:minimum
+-    }));
+-  }
+-
+-  const weights=natural.map(item=>Math.max(item.probability,.0001));
+-  const sum=weights.reduce((a,b)=>a+b,0);
+-  const stakes=weights.map(weight=>Math.floor((numericBudget*weight/sum)/100)*100);
+-  let remaining=numericBudget-stakes.reduce((a,b)=>a+b,0),index=0;
+-  while(remaining>=100){stakes[index%stakes.length]+=100;remaining-=100;index+=1;}
+-  return natural.map((item,i)=>({
+-    order:item.order,betClass:item.betClass,stake:stakes[i],odds:item.odds,
+-    expectedPayout:item.odds?Math.floor(stakes[i]*item.odds):null,
+-    probability:item.probability,branchSupport:item.branchSupport,purchaseReason:item.purchaseReason,
+-    dominantBranchId:item.dominantBranchId,dominantBranchLabel:item.dominantBranchLabel,decisionRatios:item.decisionRatios,
+-    fundingStatus:"配分済み",minimumRequired:minimum
+-  }));
+-}
+-
+-export function purchaseDiagnostics(classified,plan,budget){
+-  const probabilities=classified.map(item=>item.probability).sort((a,b)=>b-a);
+-  const natural=classified.filter(item=>item.purchaseStatus===PURCHASED);
+-  const noBet=natural.length===0;
+-  const noBetReason=!noBet?null:classified.length===0?"NO_TERMINALS":(classified[0]?.concentrationRatio||0)<1.08?"FLAT_DISTRIBUTION_NO_SUPPORTED_CANDIDATE":"QUALITY_GATE";
+-  const minimumRequired=natural.length*100;
+-  return{
+-    terminalCount:classified.length,
+-    terminalProbabilitySum:sum(probabilities),
+-    maxTerminalProbability:probabilities[0]||0,
+-    top3Mass:sum(probabilities.slice(0,3)),top5Mass:sum(probabilities.slice(0,5)),top10Mass:sum(probabilities.slice(0,10)),
+-    purchaseCandidateCountBeforeCompression:natural.length,
+-    purchaseCandidateCountAfterCompression:natural.length,
+-    finalBetCount:natural.length,
+-    minimumRequired,
+-    budget:Number(budget||0),
+-    budgetSufficient:Number(budget||0)>=minimumRequired,
+-    noBet,noBetReason
+-  };
+-}
+-
+-function compareTerminal(a,b){return(b.probability-a.probability)||(b.branchContributions?.length||0)-(a.branchContributions?.length||0)||a.order.join("-").localeCompare(b.order.join("-"),"en")}
+-function comparePurchase(a,b){
+-  const classRank={MAIN:0,COVER:1,BUYABLE_HIGH:2,NONE:3};
+-  return(classRank[a.betClass]??9)-(classRank[b.betClass]??9)||(b.probability-a.probability)||a.order.join("-").localeCompare(b.order.join("-"),"en");
+-}
+-function sum(values){return values.reduce((total,value)=>total+value,0)}
++export * from "../../../keirin/engine/purchase.mjs";
+diff --git a/modules/keirin/kimarite/kimarite-abilities.mjs b/modules/keirin/kimarite/kimarite-abilities.mjs
+new file mode 100644
+index 0000000..f390a13
+--- /dev/null
++++ b/modules/keirin/kimarite/kimarite-abilities.mjs
+@@ -0,0 +1 @@
++export * from "../../../keirin/kimarite/kimarite-abilities.mjs";
+diff --git a/modules/keirin/netlify/functions/keirin-predict.mjs b/modules/keirin/netlify/functions/keirin-predict.mjs
+index 6f07670..c4dbcf8 100644
+--- a/modules/keirin/netlify/functions/keirin-predict.mjs
++++ b/modules/keirin/netlify/functions/keirin-predict.mjs
+@@ -1,305 +1,2 @@
+-import { inferLines } from "../../keirin/parser/line-parser.mjs";
+-import { runKeirinEngine } from "../../keirin/engine/keirin-engine.mjs";
+-import { jsonResponse } from "../../keirin/parser/utils.mjs";
+-
+-const VENUE_CODE_BY_NAME = {
+-  函館: "11", 青森: "12", いわき平: "13", 弥彦: "21", 前橋: "22",
+-  取手: "23", 宇都宮: "24", 大宮: "25", 西武園: "26", 京王閣: "27",
+-  立川: "28", 松戸: "31", 千葉: "32", 川崎: "34", 平塚: "35",
+-  小田原: "36", 伊東: "37", 静岡: "38", 名古屋: "42", 岐阜: "43",
+-  大垣: "44", 豊橋: "45", 富山: "46", 松阪: "47", 四日市: "48",
+-  福井: "51", 奈良: "53", 向日町: "54", 和歌山: "55", 岸和田: "56",
+-  玉野: "61", 広島: "62", 防府: "63", 高松: "71", 小松島: "73",
+-  高知: "74", 松山: "75", 小倉: "81", 久留米: "83", 武雄: "84",
+-  佐世保: "85", 別府: "86", 熊本: "87"
+-};
+-
+-export default async function handler(req) {
+-  const url = new URL(req.url);
+-  const date = url.searchParams.get("date") || "";
+-  const venueName = url.searchParams.get("venueName") || "競輪場";
+-  const raceNo = Number(url.searchParams.get("raceNo") || 0);
+-  const budget = Number(url.searchParams.get("budget") || 3000);
+-  const raceCardUrl = url.searchParams.get("raceCardUrl") || "";
+-  const venueCode =
+-    url.searchParams.get("venueCode") ||
+-    readVenueCode(raceCardUrl) ||
+-    VENUE_CODE_BY_NAME[venueName] ||
+-    "";
+-
+-  if (!/^\d{8}$/.test(date) || !raceNo || !venueCode) {
+-    return jsonResponse(400, {
+-      ok: false,
+-      error: "競輪ブラウザ取得に必要な日付・会場コード・R番号が不足しています",
+-      requestAudit: { date, venueName, venueCode, raceNo }
+-    });
+-  }
+-
+-  const serviceBase = String(process.env.KEIRIN_BROWSER_SERVICE_URL || "")
+-    .trim()
+-    .replace(/\/$/, "");
+-
+-  if (!serviceBase) {
+-    return jsonResponse(500, {
+-      ok: false,
+-      error: "KEIRIN_BROWSER_SERVICE_URLが設定されていません"
+-    });
+-  }
+-
+-  try {
+-    const browserResult = await requestBrowserService(serviceBase, {
+-      date,
+-      venueCode,
+-      venueName,
+-      raceNo
+-    });
+-
+-    if (!browserResult.ok) {
+-      return jsonResponse(browserResult.status || 502, {
+-        ok: false,
+-        error: browserResult.data?.error || "競輪公式データ取得失敗",
+-        browserService: browserResult.data,
+-        requestAudit: { date, venueName, venueCode, raceNo }
+-      });
+-    }
+-
+-    const officialData = browserResult.data.officialData || {};
+-    const basic = officialData.basic || {};
+-    const officialParticipants = Array.isArray(officialData.participants)
+-      ? officialData.participants
+-      : [];
+-    const officialLines = Array.isArray(officialData.lines)
+-      ? officialData.lines
+-      : [];
+-
+-    const participants = officialParticipants.map(adaptParticipant);
+-    if (participants.length < 5) {
+-      return jsonResponse(422, {
+-        ok: false,
+-        error: "出走選手変換後の人数が不足しています",
+-        officialData,
+-        participantCount: participants.length
+-      });
+-    }
+-
+-    const lineText = buildLineText(officialLines);
+-    const line = inferLines({ participants, lineText });
+-    const race = {
+-      id: `${date}-${basic.venueName || venueName}-${basic.raceNo || raceNo}`,
+-      venue: basic.venueName || venueName,
+-      venueCode,
+-      date: normalizeDate(basic.date) || date,
+-      raceNo: Number(basic.raceNo || raceNo),
+-      raceName: basic.raceName || "",
+-      grade: basic.grade || "",
+-      className: basic.className || "",
+-      deadline: basic.deadline || "",
+-      startTime: basic.startTime || "",
+-      lineConfidence: line.confidence,
+-      participants: line.participants
+-    };
+-
+-    const odds = normalizeOfficialOdds(officialData.odds);
+-    const prediction = runKeirinEngine({
+-      race,
+-      oddsByOrder: odds.odds,
+-      budget
+-    });
+-
+-    return jsonResponse(200, {
+-      ok: prediction.audit.passed,
+-      race,
+-      odds,
+-      prediction,
+-      officialData,
+-      browserAudit: browserResult.data.audit || null,
+-      dataQuality: {
+-        lineConfidence: line.confidence,
+-        oddsAvailable: Object.keys(odds.odds).length > 0,
+-        participantCount: participants.length,
+-        browserVersion: browserResult.data.diagnostics?.version || null
+-      },
+-      warnings: [
+-        ...line.warnings,
+-        Object.keys(odds.odds).length ? null : "オッズ未取得・高配当判定保留"
+-      ].filter(Boolean),
+-      checkedAt: new Date().toISOString()
+-    });
+-  } catch (error) {
+-    return jsonResponse(500, {
+-      ok: false,
+-      error: error instanceof Error ? error.message : String(error),
+-      requestAudit: { date, venueName, venueCode, raceNo }
+-    });
+-  }
+-}
+-
+-async function requestBrowserService(base, params) {
+-  const query = new URLSearchParams({
+-    date: params.date,
+-    venueCode: params.venueCode,
+-    venueName: params.venueName,
+-    raceNo: String(params.raceNo)
+-  });
+-
+-  const candidates = [
+-    `${base}/keirin/race?${query}`
+-  ];
+-
+-  const attempts = [];
+-  for (const endpoint of candidates) {
+-    try {
+-      const response = await fetch(endpoint, {
+-        headers: { accept: "application/json" },
+-        signal: AbortSignal.timeout(120000)
+-      });
+-      const text = await response.text();
+-      let data = null;
+-      try { data = JSON.parse(text); } catch {}
+-
+-      attempts.push({
+-        endpoint: endpoint.replace(base, ""),
+-        status: response.status,
+-        parsed: data !== null
+-      });
+-
+-      if (data && (data.officialData || data.ok === false)) {
+-        return {
+-          ok: response.ok && data.ok !== false,
+-          status: response.status,
+-          data: { ...data, endpointAudit: attempts }
+-        };
+-      }
+-    } catch (error) {
+-      attempts.push({
+-        endpoint: endpoint.replace(base, ""),
+-        error: error instanceof Error ? error.message : String(error)
+-      });
+-    }
+-  }
+-
+-  return {
+-    ok: false,
+-    status: 502,
+-    data: {
+-      ok: false,
+-      error: "競輪ブラウザサービスの取得エンドポイントを確認できません",
+-      endpointAudit: attempts
+-    }
+-  };
+-}
+-
+-function adaptParticipant(item) {
+-  const number = Number(item.number || 0);
+-  const score = finite(item.score, 5);
+-  const escape = finite(item.escapeCount, 0);
+-  const makuri = finite(item.makuriCount, 0);
+-  const difference = finite(item.differenceCount, 0);
+-  const mark = finite(item.markCount, 0);
+-  const back = finite(item.backCount, 0);
+-  const activity = escape + makuri + difference + mark;
+-
+-  return {
+-    id: item.registration || `K${number}`,
+-    number,
+-    name: item.name || `${number}番車`,
+-    registration: item.registration || "",
+-    prefecture: item.prefecture || "",
+-    className: item.className || "",
+-    style: item.style || "",
+-    officialScore: item.score ?? null,
+-    recentForm: clamp(4.5 + score / 25),
+-    startPower: clamp(4 + escape * 0.45 + back * 0.08),
+-    sprintPower: clamp(4 + makuri * 0.55 + score / 40),
+-    stamina: clamp(4 + back * 0.12 + escape * 0.25),
+-    attackTiming: clamp(4 + (escape + makuri) * 0.35),
+-    trackingSkill: clamp(4 + (difference + mark) * 0.35),
+-    finishPower: clamp(4 + difference * 0.5 + score / 35),
+-    lineTrust: clamp(activity ? 5 + mark * 0.2 : 5),
+-    venueSuitability: 5,
+-    sourceType: item.sourceType || null,
+-    sourcePath: item.sourcePath || null
+-  };
+-}
+-
+-function buildLineText(lines) {
+-  if (!lines.length) return null;
+-
+-  const withLineId = lines.filter(item => item.lineId != null && String(item.lineId).trim());
+-  if (withLineId.length === lines.length) {
+-    const groups = new Map();
+-    for (const item of lines) {
+-      const key = String(item.lineId);
+-      if (!groups.has(key)) groups.set(key, []);
+-      groups.get(key).push(item);
+-    }
+-    return [...groups.values()]
+-      .map(group => group
+-        .sort((a, b) => Number(a.position || a.order || 99) - Number(b.position || b.order || 99))
+-        .map(item => String(item.number || ""))
+-        .filter(Boolean)
+-        .join(""))
+-      .filter(Boolean)
+-      .join(" ") || null;
+-  }
+-
+-  const positioned = lines
+-    .filter(item => Number.isFinite(Number(item.position || item.order)))
+-    .sort((a, b) => Number(a.position || a.order) - Number(b.position || b.order));
+-  if (!positioned.length) return null;
+-
+-  const groups = [];
+-  let current = [];
+-  let previous = null;
+-  for (const item of positioned) {
+-    const position = Number(item.position || item.order);
+-    if (previous != null && position - previous > 1 && current.length) {
+-      groups.push(current);
+-      current = [];
+-    }
+-    current.push(item);
+-    previous = position;
+-  }
+-  if (current.length) groups.push(current);
+-  return groups
+-    .map(group => group.map(item => String(item.number || "")).filter(Boolean).join(""))
+-    .filter(Boolean)
+-    .join(" ") || null;
+-}
+-
+-function normalizeOfficialOdds(raw) {
+-  if (!raw || typeof raw !== "object") return { ok: false, odds: {}, diagnostics: { source: "未取得" } };
+-  const source = raw.odds && typeof raw.odds === "object" ? raw.odds : raw.oddsByOrder && typeof raw.oddsByOrder === "object" ? raw.oddsByOrder : {};
+-  const odds = {};
+-  for (const [key, value] of Object.entries(source)) {
+-    const normalizedKey = String(key).replace(/[^1-9]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+-    const numeric = Number(value);
+-    if (/^[1-9]-[1-9]-[1-9]$/.test(normalizedKey) && Number.isFinite(numeric) && numeric > 1) odds[normalizedKey] = numeric;
+-  }
+-  return { ok: Object.keys(odds).length > 0, odds, diagnostics: raw.diagnostics || { source: raw.sourceType || "officialData.odds" } };
+-}
+-
+-function readVenueCode(value) {
+-  if (!value) return "";
+-  try {
+-    const parsed = new URL(value);
+-    for (const key of ["jocd", "jcd", "bkcd", "venueCode"]) {
+-      const code = parsed.searchParams.get(key);
+-      if (code) return code.padStart(2, "0");
+-    }
+-  } catch {}
+-  return "";
+-}
+-
+-function normalizeDate(value) {
+-  return String(value || "").replace(/\D/g, "");
+-}
+-
+-function finite(value, fallback) {
+-  const number = Number(value);
+-  return Number.isFinite(number) ? number : fallback;
+-}
+-
+-function clamp(value, min = 0, max = 10) {
+-  return Math.min(max, Math.max(min, value));
+-}
++export { default } from "../../../../netlify/functions/keirin-predict.mjs";
++export * from "../../../../netlify/functions/keirin-predict.mjs";
+diff --git a/modules/keirin/recent-form/recent-form.mjs b/modules/keirin/recent-form/recent-form.mjs
+new file mode 100644
+index 0000000..864abfe
+--- /dev/null
++++ b/modules/keirin/recent-form/recent-form.mjs
+@@ -0,0 +1 @@
++export { applyRecentFormEvidence } from "../../../keirin/recent-form/recent-form.mjs";
+diff --git a/modules/keirin/sports/keirin-terminals.mjs b/modules/keirin/sports/keirin-terminals.mjs
+index 9411054..9164ea0 100644
+--- a/modules/keirin/sports/keirin-terminals.mjs
++++ b/modules/keirin/sports/keirin-terminals.mjs
+@@ -1,175 +1 @@
+-export function generateKeirinTerminals({scored,branches}){
+-  const byId=new Map(scored.map(item=>[item.id,item]));
+-  const lineById=new Map(scored.map(item=>[item.id,item.lineId]));
+-  const raw=[];
+-
+-  for(const branch of branches){
+-    const paths=[];
+-    const firstEntries=branch.firstCandidates
+-      .map(firstId=>byId.get(firstId))
+-      .filter(Boolean)
+-      .map(first=>({first,score:conditionedFirst(branch,first)}))
+-      .filter(item=>item.score>0);
+-    const bestFirst=Math.max(...firstEntries.map(item=>item.score),0);
+-
+-    for(const {first,score:firstScore} of firstEntries){
+-      const secondEntries=scored
+-        .filter(second=>second.id!==first.id)
+-        .map(second=>({second,score:conditionedSecond(branch,first,second,lineById)}))
+-        .filter(item=>item.score>0);
+-      const bestSecond=Math.max(...secondEntries.map(item=>item.score),0);
+-
+-      for(const {second,score:secondScore} of secondEntries){
+-        const thirdEntries=scored
+-          .filter(third=>third.id!==first.id&&third.id!==second.id)
+-          .map(third=>({third,score:conditionedThird(branch,first,second,third,lineById)}))
+-          .filter(item=>item.score>0);
+-        const bestThird=Math.max(...thirdEntries.map(item=>item.score),0);
+-
+-        for(const {third,score:thirdScore} of thirdEntries){
+-          const pathScore=firstScore*secondScore*thirdScore;
+-          paths.push({
+-            order:[first.number,second.number,third.number],
+-            branchId:branch.id,
+-            branchLabel:branch.label,
+-            branchPriority:branch.priority,
+-            branchType:branch.branchType,
+-            branchScore:branch.score,
+-            pathScore,
+-            decisionRatios:{
+-              first:bestFirst>0?firstScore/bestFirst:0,
+-              second:bestSecond>0?secondScore/bestSecond:0,
+-              third:bestThird>0?thirdScore/bestThird:0
+-            },
+-            positionScores:{first:firstScore,second:secondScore,third:thirdScore},
+-            holdReason:"branch条件ごとに1・2・3着を独立評価して終端まで生成"
+-          });
+-        }
+-      }
+-    }
+-
+-    const branchPathTotal=paths.reduce((sum,path)=>sum+path.pathScore,0);
+-    if(!(branchPathTotal>0))continue;
+-    for(const path of paths){
+-      raw.push({...path,weightedScore:branch.score*(path.pathScore/branchPathTotal)});
+-    }
+-  }
+-
+-  const map=new Map();
+-  for(const terminal of raw){
+-    const key=terminal.order.join("-");
+-    const contribution={
+-      branchId:terminal.branchId,
+-      branchLabel:terminal.branchLabel,
+-      branchPriority:terminal.branchPriority,
+-      branchType:terminal.branchType,
+-      branchScore:terminal.branchScore,
+-      weightedScore:terminal.weightedScore,
+-      pathScore:terminal.pathScore,
+-      positionScores:terminal.positionScores,
+-      decisionRatios:terminal.decisionRatios
+-    };
+-    const existing=map.get(key);
+-    if(!existing){
+-      map.set(key,{
+-        order:terminal.order,
+-        score:terminal.weightedScore,
+-        branchId:terminal.branchId,
+-        branchLabel:terminal.branchLabel,
+-        branchPriority:terminal.branchPriority,
+-        branchType:terminal.branchType,
+-        holdReason:terminal.holdReason,
+-        contributingBranches:[terminal.branchId],
+-        branchContributions:[contribution]
+-      });
+-    }else{
+-      existing.score+=terminal.weightedScore;
+-      existing.contributingBranches=[...new Set([...existing.contributingBranches,terminal.branchId])];
+-      existing.branchContributions.push(contribution);
+-    }
+-  }
+-
+-  const terminals=[...map.values()];
+-  const total=terminals.reduce((sum,item)=>sum+item.score,0)||1;
+-  for(const terminal of terminals){
+-    terminal.probability=terminal.score/total;
+-    terminal.branchContributions=terminal.branchContributions
+-      .map(item=>({...item,probability:item.weightedScore/total}))
+-      .sort((a,b)=>b.probability-a.probability||a.branchId.localeCompare(b.branchId,"en"));
+-    const dominant=terminal.branchContributions[0];
+-    terminal.branchId=dominant?.branchId||terminal.branchId;
+-    terminal.branchLabel=dominant?.branchLabel||terminal.branchLabel;
+-    terminal.branchPriority=dominant?.branchPriority||terminal.branchPriority;
+-    terminal.branchType=dominant?.branchType||terminal.branchType;
+-  }
+-  return terminals.sort((a,b)=>(b.probability-a.probability)||a.order.join("-").localeCompare(b.order.join("-"),"en"));
+-}
+-
+-function conditionedFirst(branch,participant){
+-  const candidate=branch.firstCandidateScores?.[participant.id]??participant.roleScores.first;
+-  return positive(candidate)*branchRoleFactor(branch,participant,"first");
+-}
+-
+-function conditionedSecond(branch,first,second,lineById){
+-  const same=sameLine(first,second,lineById),role=second.role;
+-  let factor=1;
+-  switch(branch.branchType){
+-    case"LEADER_HOLD":
+-      if(same&&role==="番手")factor=1.45;else if(same&&role==="三番手")factor=1.20;else if(role==="番手")factor=1.08;else if(role==="自力")factor=.92;
+-      break;
+-    case"BANTE_SASHI":
+-      if(same&&role==="自力")factor=1.30;else if(same&&role==="三番手")factor=1.16;else if(role==="自力")factor=1.04;
+-      break;
+-    case"MAKURI_SUCCESS":
+-      if(same&&role==="番手")factor=1.28;else if(same&&role==="三番手")factor=1.10;else if(role==="番手")factor=1.14;else if(role==="自力")factor=.96;
+-      break;
+-    case"LEAD_BATTLE":
+-      if(role==="番手")factor=1.24;else if(role==="三番手")factor=1.12;else if(role==="自力")factor=.84;
+-      break;
+-    case"LINE_SEPARATION":
+-      if(!same&&role==="番手")factor=1.20;else if(role==="単騎")factor=1.12;else if(same)factor=.88;
+-      break;
+-    case"SOLO_RISE":
+-      if(role==="番手")factor=1.10;else if(role==="自力")factor=.96;
+-      break;
+-  }
+-  return positive(second.roleScores.second)*factor;
+-}
+-
+-function conditionedThird(branch,first,second,third,lineById){
+-  const sameFirst=sameLine(first,third,lineById),sameSecond=sameLine(second,third,lineById),role=third.role;
+-  let factor=1;
+-  switch(branch.branchType){
+-    case"LEADER_HOLD":
+-      if(sameFirst&&role==="三番手")factor=1.30;else if(sameFirst&&role==="番手")factor=1.18;else if(role==="番手"||role==="三番手")factor=1.10;
+-      break;
+-    case"BANTE_SASHI":
+-      if(sameFirst&&role==="三番手")factor=1.28;else if(sameFirst&&role==="自力")factor=1.18;else if(role==="番手"||role==="三番手")factor=1.08;
+-      break;
+-    case"MAKURI_SUCCESS":
+-      if(sameFirst&&role==="三番手")factor=1.22;else if(sameFirst&&role==="番手")factor=1.16;else if(!sameFirst&&role==="番手")factor=1.12;
+-      break;
+-    case"LEAD_BATTLE":
+-      if(role==="三番手")factor=1.22;else if(role==="番手")factor=1.16;else if(role==="自力")factor=.88;
+-      break;
+-    case"LINE_SEPARATION":
+-      if(!sameFirst&&!sameSecond&&(role==="番手"||role==="単騎"))factor=1.18;else if(sameFirst)factor=.90;
+-      break;
+-    case"SOLO_RISE":
+-      if(role==="番手"||role==="三番手")factor=1.10;
+-      break;
+-  }
+-  return positive(third.roleScores.third)*factor;
+-}
+-
+-function branchRoleFactor(branch,participant,target){
+-  if(target!=="first")return 1;
+-  if(branch.branchType==="LEAD_BATTLE"){
+-    if(participant.role==="番手")return 1.08;
+-    if(participant.role==="自力")return .96;
+-  }
+-  if(branch.branchType==="LINE_SEPARATION"&&participant.role==="番手")return 1.10;
+-  return 1;
+-}
+-function sameLine(a,b,lineById){const la=lineById.get(a.id),lb=lineById.get(b.id);return Boolean(la&&lb&&la===lb&&!String(la).startsWith("unknown-"))}
+-function positive(value){return Math.max(.05,Number(value)||0)}
++export * from "../../../keirin/sports/keirin-terminals.mjs";
+diff --git a/modules/keirin/start-power/start-power.mjs b/modules/keirin/start-power/start-power.mjs
+new file mode 100644
+index 0000000..eb3b688
+--- /dev/null
++++ b/modules/keirin/start-power/start-power.mjs
+@@ -0,0 +1 @@
++export { applyStartPowerEvidence, buildStartPowerEvidence } from "../../../keirin/start-power/start-power.mjs";
+diff --git a/netlify/functions/keirin-predict.mjs b/netlify/functions/keirin-predict.mjs
+index 6f07670..da181f9 100644
+--- a/netlify/functions/keirin-predict.mjs
++++ b/netlify/functions/keirin-predict.mjs
+@@ -1,5 +1,8 @@
+ import { inferLines } from "../../keirin/parser/line-parser.mjs";
+ import { runKeirinEngine } from "../../keirin/engine/keirin-engine.mjs";
++import { applyRecentFormEvidence } from "../../keirin/recent-form/recent-form.mjs";
++import { applyStartPowerEvidence } from "../../keirin/start-power/start-power.mjs";
++import { applyKimariteAbilities } from "../../keirin/kimarite/kimarite-abilities.mjs";
+ import { jsonResponse } from "../../keirin/parser/utils.mjs";
+ 
+ const VENUE_CODE_BY_NAME = {
+@@ -72,7 +75,15 @@ export default async function handler(req) {
+       ? officialData.lines
+       : [];
+ 
+-    const participants = officialParticipants.map(adaptParticipant);
++    const raceCategory = detectRaceCategory({ basic, participants: officialParticipants });
++    const participantContext = {
++      raceDate: normalizeDate(basic.date) || date,
++      raceStartTime: basic.startTime || "",
++      venueCode: String(venueCode).padStart(2, "0"),
++      raceNo: Number(basic.raceNo || raceNo),
++      raceCategory
++    };
++    const participants = adaptParticipantsForPrediction(officialParticipants, participantContext);
+     if (participants.length < 5) {
+       return jsonResponse(422, {
+         ok: false,
+@@ -189,39 +200,136 @@ async function requestBrowserService(base, params) {
+   };
+ }
+ 
+-function adaptParticipant(item) {
+-  const number = Number(item.number || 0);
+-  const score = finite(item.score, 5);
+-  const escape = finite(item.escapeCount, 0);
+-  const makuri = finite(item.makuriCount, 0);
+-  const difference = finite(item.differenceCount, 0);
+-  const mark = finite(item.markCount, 0);
+-  const back = finite(item.backCount, 0);
+-  const activity = escape + makuri + difference + mark;
++export function adaptParticipantsForPrediction(items, context = {}) {
++  const adapted = (Array.isArray(items) ? items : []).map(item => adaptParticipant(item, context));
++  const withRecent = applyRecentFormEvidence(adapted);
++  return withRecent.map(applyKimariteAbilities);
++}
+ 
+-  return {
+-    id: item.registration || `K${number}`,
++export function adaptParticipant(item, context = {}) {
++  const number = Number(item.number || 0);
++  const registration = normalizeRegistration(item.registration);
++  const officialProfileEvidence = normalizeOfficialProfileEvidence(item.officialProfile, registration, context);
++  const officialKimariteEvidence = normalizeOfficialKimariteEvidence(item.officialKimariteCounts, registration, context);
++  const participant = {
++    id: String(number),
+     number,
+     name: item.name || `${number}番車`,
+-    registration: item.registration || "",
++    registration,
+     prefecture: item.prefecture || "",
+     className: item.className || "",
+     style: item.style || "",
+-    officialScore: item.score ?? null,
+-    recentForm: clamp(4.5 + score / 25),
+-    startPower: clamp(4 + escape * 0.45 + back * 0.08),
+-    sprintPower: clamp(4 + makuri * 0.55 + score / 40),
+-    stamina: clamp(4 + back * 0.12 + escape * 0.25),
+-    attackTiming: clamp(4 + (escape + makuri) * 0.35),
+-    trackingSkill: clamp(4 + (difference + mark) * 0.35),
+-    finishPower: clamp(4 + difference * 0.5 + score / 35),
+-    lineTrust: clamp(activity ? 5 + mark * 0.2 : 5),
++    raceCategory: context.raceCategory || "unknown",
++    officialScore: nullableNumber(item.score),
++    officialProfileEvidence,
++    officialKimariteEvidence,
++    officialTotalStarts: nullableNumber(item.officialTotalStarts ?? item.officialProfile?.officialTotalStarts),
++    sparseSampleFlag: Number(item.officialTotalStarts ?? item.officialProfile?.officialTotalStarts) <= 10,
++    officialForeignFlag: item.officialForeignFlag === true || item.officialProfile?.officialForeignFlag === true,
++    recentForm: 5,
++    recentFormEvidence: { value: 5, confidence: "low", inputsUsed: [], missingInputs: ["official-profile"] },
++    startPower: 5,
++    startPowerEvidence: null,
++    sprintPower: 5,
++    stamina: 5,
++    attackTiming: 5,
++    trackingSkill: 5,
++    finishPower: 5,
++    lineTrust: 5,
+     venueSuitability: 5,
+     sourceType: item.sourceType || null,
+     sourcePath: item.sourcePath || null
+   };
++  return applyStartPowerEvidence([participant])[0];
++}
++
++export function detectRaceCategory({ basic = {}, participants = [] } = {}) {
++  const text = [
++    basic.className, basic.raceName, basic.grade,
++    ...participants.map(item => item.className)
++  ].filter(Boolean).join(" ");
++  if (/(ガールズ|女子|Ｌ級|L級|ガ予|ガ決)/i.test(text)) return "girls";
++  return text.trim() ? "standard" : "unknown";
+ }
+ 
++function normalizeOfficialProfileEvidence(profile, registration, context) {
++  if (!profile || typeof profile !== "object") return null;
++  if (profile.identityPassed !== true) return null;
++  if (registration && normalizeRegistration(profile.registration) !== registration) return null;
++  if (!notAfterTarget(profile.fetchedAt, context)) return null;
++  return {
++    identityPassed: true,
++    registration,
++    fetchedAt: profile.fetchedAt || null,
++    sourceType: profile.sourceType || "official-profile",
++    sourcePath: profile.sourcePath || null,
++    ridingStyle: profile.ridingStyle ?? null,
++    currentScore: nullableNumber(profile.currentScore),
++    recent4MonthScore: nullableNumber(profile.recent4MonthScore),
++    officialTotalStarts: nullableNonNegativeInteger(profile.officialTotalStarts ?? context.officialTotalStarts),
++    backCount: nullableNumber(profile.backCount),
++    homeCount: nullableNumber(profile.homeCount),
++    winRate: nullableNumber(profile.winRate),
++    quinellaRate: nullableNumber(profile.quinellaRate),
++    trioRate: nullableNumber(profile.trioRate),
++    rateUnit: profile.rateUnit || null,
++    winningStyleRates: {
++      escape: nullableNumber(profile.winningStyleRates?.escape),
++      makuri: nullableNumber(profile.winningStyleRates?.makuri),
++      difference: nullableNumber(profile.winningStyleRates?.difference),
++      mark: nullableNumber(profile.winningStyleRates?.mark)
++    },
++    scoreHistory: Array.isArray(profile.scoreHistory) ? profile.scoreHistory : []
++  };
++}
++
++function normalizeOfficialKimariteEvidence(evidence, registration, context) {
++  if (!evidence || typeof evidence !== "object") return null;
++  if (evidence.identityPassed !== true || evidence.targetIdentityPassed !== true) return null;
++  if (registration && normalizeRegistration(evidence.registration ?? evidence.requestedRegistration) !== registration) return null;
++  const target = evidence.target || {};
++  if (target.date && normalizeDate(target.date) !== normalizeDate(context.raceDate)) return null;
++  if (target.venueCode && String(target.venueCode).padStart(2, "0") !== String(context.venueCode).padStart(2, "0")) return null;
++  if (target.raceNo && Number(target.raceNo) !== Number(context.raceNo)) return null;
++  if (!notAfterTarget(evidence.fetchedAt, context)) return null;
++  const result = {
++    status: "verified",
++    identityPassed: true,
++    targetIdentityPassed: true,
++    registration,
++    sourceType: evidence.sourceType || "JSJ068",
++    sourcePath: evidence.sourcePath || null,
++    fetchedAt: evidence.fetchedAt || null,
++    totalQuinellaCount: nullableNonNegativeInteger(evidence.totalQuinellaCount)
++  };
++  for (const key of ["nige", "makuri", "sasi", "mark"]) {
++    const row = evidence[key];
++    if (!row || typeof row !== "object") { result[key] = null; continue; }
++    const F_Cnt = nullableNonNegativeInteger(row.F_Cnt ?? row.first);
++    const S_Cnt = nullableNonNegativeInteger(row.S_Cnt ?? row.second);
++    const Sum_Cnt = nullableNonNegativeInteger(row.Sum_Cnt ?? row.sum ?? row.total);
++    result[key] = F_Cnt !== null && S_Cnt !== null && Sum_Cnt !== null && F_Cnt + S_Cnt === Sum_Cnt
++      ? { F_Cnt, S_Cnt, Sum_Cnt } : null;
++  }
++  return result;
++}
++
++function notAfterTarget(fetchedAt, context) {
++  if (!fetchedAt) return true;
++  const fetched = Date.parse(fetchedAt);
++  if (!Number.isFinite(fetched)) return false;
++  const date = normalizeDate(context.raceDate);
++  if (!/^\d{8}$/.test(date)) return true;
++  const time = String(context.raceStartTime || "23:59").match(/(\d{1,2}):(\d{2})/);
++  const hh = time ? Number(time[1]) : 23, mm = time ? Number(time[2]) : 59;
++  const target = Date.parse(`${date.slice(0,4)}-${date.slice(4,6)}-${date.slice(6,8)}T${String(hh).padStart(2,"0")}:${String(mm).padStart(2,"0")}:00+09:00`);
++  return !Number.isFinite(target) || fetched <= target;
++}
++
++function normalizeRegistration(value) { return String(value ?? "").replace(/\D/g, "").padStart(6, "0").slice(-6); }
++function nullableNumber(value) { if (value === null || value === undefined || value === "") return null; const n = Number(value); return Number.isFinite(n) ? n : null; }
++function nullableNonNegativeInteger(value) { const n = nullableNumber(value); return n !== null && Number.isSafeInteger(n) && n >= 0 ? n : null; }
++
+ function buildLineText(lines) {
+   if (!lines.length) return null;
+ 
+diff --git a/package.json b/package.json
+index 0432416..0f2c0ab 100644
+--- a/package.json
++++ b/package.json
+@@ -4,7 +4,7 @@
+   "private": true,
+   "type": "module",
+   "scripts": {
+-    "test": "node modules/keirin/tests/run-tests.mjs && node tests/prediction-flow.mjs && node tests/keirin-purchase-five-races.mjs",
++    "test": "node modules/keirin/tests/run-tests.mjs && node tests/prediction-flow.mjs && node tests/keirin-purchase-five-races.mjs && node tests/keirin-official-evidence-branching.mjs",
+     "check": "node --check public/app.mjs && node --check public/prediction-store.mjs && node --check netlify/functions/keirin-result.mjs && node --check netlify/functions/keirin-predict.mjs"
+   },
+   "dependencies": {
+diff --git a/tests/keirin-official-evidence-branching.mjs b/tests/keirin-official-evidence-branching.mjs
+new file mode 100644
+index 0000000..4434251
+--- /dev/null
++++ b/tests/keirin-official-evidence-branching.mjs
+@@ -0,0 +1,66 @@
++import assert from "node:assert/strict";
++import handler,{adaptParticipantsForPrediction} from "../netlify/functions/keirin-predict.mjs";
++
++const context={raceDate:"20260808",raceStartTime:"21:00",venueCode:"24",raceNo:2,raceCategory:"standard"};
++const raw=Array.from({length:7},(_,index)=>participant(index+1));
++const adapted=adaptParticipantsForPrediction(raw,context);
++assert.deepEqual(adapted.map(item=>item.id),["1","2","3","4","5","6","7"]);
++assert.ok(adapted.some(item=>Math.abs(item.recentForm-5)>.05),"official profile must affect recentForm");
++assert.ok(adapted.some(item=>Math.abs(item.startPower-5)>.05),"official profile must affect startPower");
++assert.ok(adapted.some(item=>Math.abs(item.sprintPower-5)>.05),"JSJ068 must affect sprintPower");
++assert.ok(adapted.some(item=>Math.abs(item.finishPower-5)>.05),"JSJ068 must affect finishPower");
++assert.ok(adapted.some(item=>Math.abs(item.trackingSkill-5)>.05),"JSJ068 must affect trackingSkill");
++assert.ok(adapted.every(item=>item.stamina===5),"stamina remains neutral until overlap design is validated");
++
++const originalFetch=globalThis.fetch;
++process.env.KEIRIN_BROWSER_SERVICE_URL="https://railway.test";
++globalThis.fetch=async()=>new Response(JSON.stringify({
++  ok:true,
++  officialData:{
++    basic:{venueName:"宇都宮",date:"2026/08/08",raceNo:2,startTime:"21:00",className:"S級"},
++    participants:raw,
++    lines:[
++      {number:1,lineId:"A",position:1},{number:2,lineId:"A",position:2},
++      {number:3,lineId:"B",position:1},{number:4,lineId:"B",position:2},{number:5,lineId:"B",position:3},
++      {number:6,lineId:"C",position:1},{number:7,lineId:"C",position:2}
++    ],
++    odds:{ok:false,odds:{}}
++  },
++  audit:{identityPassed:true}
++}),{status:200,headers:{"content-type":"application/json"}});
++try{
++  const response=await handler(new Request("https://test/.netlify/functions/keirin-predict?date=20260808&venueCode=24&venueName=%E5%AE%87%E9%83%BD%E5%AE%AE&raceNo=2&budget=3000"));
++  const payload=await response.json();
++  assert.equal(response.status,200);
++  assert.equal(payload.ok,true);
++  const plan=payload.prediction.purchasePlan;
++  assert.ok(plan.length>0,"natural purchase plan must exist for structured fixture");
++  assert.ok(new Set(plan.map(item=>item.order[0])).size>1,"first place must not be mechanically fixed to one rider");
++  assert.ok(plan.some(item=>item.betClass==="MAIN"));
++  assert.ok(plan.some(item=>item.betClass==="COVER"),"same/alternate branch variants must not all be MAIN");
++  assert.ok(plan.filter(item=>item.betClass==="MAIN").length<plan.length,"not all purchased terminals may be MAIN");
++  assert.ok(plan.every(item=>item.dominantBranchId&&item.dominantBranchLabel));
++}finally{globalThis.fetch=originalFetch;}
++console.log("Official evidence + branch-conditioned purchase tests passed.");
++
++function participant(number){
++  const registration=`24${String(number).padStart(4,"0")}`;
++  const makuri=number%3, sasi=(number+1)%4, mark=number%4;
++  return{
++    number,registration,name:`選手${number}`,className:"S級",
++    officialProfile:{
++      identityPassed:true,registration,fetchedAt:"2026-08-08T08:00:00Z",sourceType:"profile",sourcePath:"fixture",
++      currentScore:94+number,recent4MonthScore:93+number*1.3,officialTotalStarts:18+number,
++      backCount:1+(number%4),homeCount:2+(number%3),winningStyleRates:{escape:20,makuri:30,difference:30,mark:20}
++    },
++    officialKimariteCounts:{
++      identityPassed:true,targetIdentityPassed:true,registration,fetchedAt:"2026-08-08T08:00:00Z",sourceType:"JSJ068",sourcePath:"fixture",
++      target:{date:"20260808",venueCode:"24",raceNo:2},
++      nige:{F_Cnt:0,S_Cnt:0,Sum_Cnt:0},
++      makuri:{F_Cnt:makuri,S_Cnt:number%2,Sum_Cnt:makuri+(number%2)},
++      sasi:{F_Cnt:sasi,S_Cnt:number%3,Sum_Cnt:sasi+(number%3)},
++      mark:{F_Cnt:0,S_Cnt:mark,Sum_Cnt:mark},
++      totalQuinellaCount:12
++    }
++  };
++}
