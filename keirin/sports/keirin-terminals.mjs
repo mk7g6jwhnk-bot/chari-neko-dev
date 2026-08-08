@@ -36,6 +36,8 @@ export function generateKeirinTerminals({scored,branches}){
             branchLabel:branch.label,
             branchPriority:branch.priority,
             branchType:branch.branchType,
+            primaryLineId:branch.primaryLineId||null,
+            requiredFirstNumber:branch.requiredFirstNumber??null,
             branchScore:branch.score,
             pathScore,
             decisionRatios:{
@@ -66,6 +68,8 @@ export function generateKeirinTerminals({scored,branches}){
       branchLabel:terminal.branchLabel,
       branchPriority:terminal.branchPriority,
       branchType:terminal.branchType,
+      primaryLineId:terminal.primaryLineId||null,
+      requiredFirstNumber:terminal.requiredFirstNumber??null,
       branchScore:terminal.branchScore,
       weightedScore:terminal.weightedScore,
       pathScore:terminal.pathScore,

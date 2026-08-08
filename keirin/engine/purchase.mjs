@@ -12,7 +12,9 @@ export function classify(terminals,odds={}){
     const key=terminal.order.join("-");
     const odd=Number(odds[key]);
     const hasOdds=Number.isFinite(odd)&&odd>1;
-    const contributions=[...(terminal.branchContributions||[])].sort((a,b)=>b.probability-a.probability);
+    const contributions=[...(terminal.branchContributions||[])]
+      .filter(contribution=>contributionMatchesTerminal(contribution,terminal.order))
+      .sort((a,b)=>b.probability-a.probability||String(a.branchId).localeCompare(String(b.branchId),"en"));
     const dominant=contributions[0]||null;
     const stats=dominant?branchStats.get(dominant.branchId):null;
     const branchFit=stats?.best>0?(dominant?.probability||0)/stats.best:0;
@@ -83,11 +85,20 @@ export function classify(terminals,odds={}){
   });
 }
 
+function contributionMatchesTerminal(contribution,order){
+  if(!contribution)return false;
+  const first=Number(order?.[0]);
+  const required=Number(contribution.requiredFirstNumber);
+  if(Number.isFinite(required)&&required>0&&first!==required)return false;
+  return true;
+}
+
 function buildBranchStats(terminals){
   const byBranch=new Map();
   for(const terminal of terminals){
     const order=terminal.order.join("-");
     for(const contribution of terminal.branchContributions||[]){
+      if(!contributionMatchesTerminal(contribution,terminal.order))continue;
       if(!byBranch.has(contribution.branchId))byBranch.set(contribution.branchId,[]);
       byBranch.get(contribution.branchId).push({order,probability:contribution.probability||0});
     }
