@@ -62,12 +62,25 @@ export function classify(terminals,odds={}){
       }
     }
 
+    const purchaseRejectCode=adopted
+      ?"ADOPTED"
+      :concentrationRatio<1.04
+        ?"FLAT_DISTRIBUTION"
+        :!dominant
+          ?"NO_DOMINANT_BRANCH"
+          :!probabilitySupported
+            ?"PROBABILITY_SUPPORT"
+            :!(representative||credibleVariant)
+              ?"BRANCH_OR_POSITION_SUPPORT"
+              :"CLASS_RULE";
+
     return{
       ...terminal,
       odds:hasOdds?odd:null,
       betClass,
       purchaseStatus:adopted?PURCHASED:"購入不採用",
       purchaseReason,
+      purchaseRejectCode,
       branchSupport:support,
       dominantBranchId:dominant?.branchId||null,
       dominantBranchLabel:dominant?.branchLabel||null,
@@ -154,7 +167,15 @@ export function purchaseDiagnostics(classified,plan,budget){
   const noBet=natural.length===0;
   const noBetReason=!noBet?null:classified.length===0?"NO_TERMINALS":(classified[0]?.concentrationRatio||0)<1.04?"FLAT_DISTRIBUTION_NO_SUPPORTED_CANDIDATE":"NO_BRANCH_REPRESENTATIVE";
   const minimumRequired=natural.length*100;
+  const rejected=classified.filter(item=>item.purchaseStatus!==PURCHASED);
+  const rejectCodeCounts=rejected.reduce((counts,item)=>{
+    const code=item.purchaseRejectCode||"UNKNOWN";
+    counts[code]=(counts[code]||0)+1;
+    return counts;
+  },{});
   return{
+    generatedTerminalCount:classified.length,
+    probabilityEvaluatedTerminalCount:classified.length,
     terminalCount:classified.length,
     terminalProbabilitySum:sum(probabilities),
     maxTerminalProbability:probabilities[0]||0,
@@ -168,7 +189,17 @@ export function purchaseDiagnostics(classified,plan,budget){
       const r=item.decisionRatios||{};
       return item.branchFit>=.87&&(r.first??0)>=.88&&(r.second??0)>=.85&&(r.third??0)>=.85;
     }).length,
+    adoptedTerminalCount:natural.length,
     rejectedTerminalCount:classified.length-natural.length,
+    rejectCodeCounts,
+    purchaseThresholds:{
+      concentrationRatioMin:1.04,
+      representativeBranchFitMin:.975,
+      credibleVariantBranchFitMin:.87,
+      probabilitySupportVsMaxMin:.42,
+      representativePositionRatios:{first:.93,second:.91,third:.91},
+      credibleVariantPositionRatios:{first:.88,second:.85,third:.85}
+    },
     classCounts:{
       main:natural.filter(item=>item.betClass==="MAIN").length,
       cover:natural.filter(item=>item.betClass==="COVER").length,
