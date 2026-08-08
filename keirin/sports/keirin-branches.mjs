@@ -69,11 +69,17 @@ export function generateKeirinBranches({scored,lines,lineConfidence}){
 
   const enabled=branches.filter(branch=>branch.firstCandidates.length&&branch.enabled).sort(compareBranch);
   const structured=enabled.filter(branch=>["LEADER_HOLD","BANTE_SASHI","MAKURI_SUCCESS"].includes(branch.branchType));
-  const bestStructured=structured[0]?.score||0;
+  const bestStructured=structured[0]||null;
+  const mainLineId=bestStructured?.primaryLineId||null;
+  const bestOnMainLine=mainLineId
+    ? Math.max(...structured.filter(branch=>branch.primaryLineId===mainLineId).map(branch=>branch.score),0)
+    : 0;
   return enabled.map(branch=>({
     ...branch,
+    // MAIN is the strongest line/scenario family, not every near-tied line.
+    // Other structured branches stay alive as SUB so their terminals can be COVER/value candidates.
     priority:structured.includes(branch)
-      ? (branch.score>=bestStructured*.92?"main":"sub")
+      ? (mainLineId&&branch.primaryLineId===mainLineId&&branch.score>=bestOnMainLine*.90?"main":"sub")
       : "risk"
   }));
 }

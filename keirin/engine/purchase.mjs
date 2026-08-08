@@ -36,19 +36,25 @@ export function classify(terminals,odds={}){
       const isAlternativeBranch=dominant.branchPriority!=="main";
       const highValue=hasOdds&&odd>=100&&credibleVariant&&probabilitySupported;
 
-      if(isMainBranch&&representative){
+      // MAIN is reserved for the single best terminal of each main-scenario branch.
+      // Keeping every representative terminal as MAIN recreates the old "everything is main" failure.
+      if(isMainBranch&&representative&&branchRank===1){
         betClass="MAIN";
         adopted=true;
-        purchaseReason=`${dominant.branchLabel}の代表終端`;
-      }else if(highValue&&isAlternativeBranch){
+        purchaseReason=`${dominant.branchLabel}の最上位代表終端`;
+      }else if(highValue&&isAlternativeBranch&&branchRank!=null&&branchRank<=2){
         betClass="BUYABLE_HIGH";
         adopted=true;
         purchaseReason=`${dominant.branchLabel}の独立展開から残る高配当候補`;
-      }else if((isMainBranch&&credibleVariant)||(isAlternativeBranch&&representative&&probabilitySupported)||(support>=2&&branchFit>=.90&&credibleVariant&&probabilitySupported)){
+      }else if(
+        (isMainBranch&&credibleVariant&&branchRank!=null&&branchRank<=3)||
+        (isAlternativeBranch&&representative&&probabilitySupported&&branchRank===1)||
+        (support>=2&&branchFit>=.90&&credibleVariant&&probabilitySupported&&branchRank!=null&&branchRank<=2)
+      ){
         betClass="COVER";
         adopted=true;
         purchaseReason=isMainBranch
-          ?`${dominant.branchLabel}の代表終端に近い着順変化`
+          ?`${dominant.branchLabel}の上位着順変化（枝内${branchRank}位）`
           :`${dominant.branchLabel}由来の別展開カバー`;
       }
     }
