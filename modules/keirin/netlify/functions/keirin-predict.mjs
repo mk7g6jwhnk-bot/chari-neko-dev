@@ -99,7 +99,7 @@ export default async function handler(req) {
     }
 
     const lineText = buildLineText(officialLines);
-    const line = inferLines({ participants, lineText });
+    const line = resolveOfficialLines({ participants, officialLines, lineText });
     const race = {
       id: `${date}-${basic.venueName || venueName}-${basic.raceNo || raceNo}`,
       venue: basic.venueName || venueName,
@@ -131,6 +131,9 @@ export default async function handler(req) {
       browserAudit: browserResult.data.audit || null,
       dataQuality: {
         lineConfidence: line.confidence,
+        lineSource: line.source || null,
+        officialLineItemCount: officialLines.length,
+        officialLineText: lineText,
         oddsAvailable: Object.keys(odds.odds).length > 0,
         participantCount: participants.length,
         browserVersion: browserResult.data.diagnostics?.version || null,
@@ -442,6 +445,76 @@ function notAfterTarget(fetchedAt, context) {
 function normalizeRegistration(value) { return String(value ?? "").replace(/\D/g, "").padStart(6, "0").slice(-6); }
 function nullableNumber(value) { if (value === null || value === undefined || value === "") return null; const n = Number(value); return Number.isFinite(n) ? n : null; }
 function nullableNonNegativeInteger(value) { const n = nullableNumber(value); return n !== null && Number.isSafeInteger(n) && n >= 0 ? n : null; }
+
+function resolveOfficialLines({ participants, officialLines, lineText }) {
+  const validNumbers = new Set(participants.map(item => Number(item.number)).filter(number => number >= 1 && number <= 9));
+  const uniqueItems = [];
+  const seen = new Set();
+  for (const item of Array.isArray(officialLines) ? officialLines : []) {
+    const number = Number(item?.number);
+    if (!validNumbers.has(number) || seen.has(number)) continue;
+    const positionRaw = item?.position ?? item?.order;
+    const position = Number(positionRaw);
+    if (!Number.isFinite(position)) continue;
+    seen.add(number);
+    uniqueItems.push({ ...item, number, position });
+  }
+
+  if (uniqueItems.length >= Math.max(3, participants.length - 2)) {
+    const grouped = groupOfficialLineItems(uniqueItems);
+    const assignments = new Map();
+    grouped.forEach((group, index) => {
+      const lineId = String.fromCharCode(65 + index);
+      group.forEach((item, lineIndex) => assignments.set(item.number, {
+        lineId,
+        lineOrder: lineIndex + 1,
+        role: lineIndex === 0 ? "自力" : lineIndex === 1 ? "番手" : "三番手",
+        lineStatus: "公式並び"
+      }));
+    });
+    if (assignments.size >= Math.max(3, participants.length - 2)) {
+      return {
+        participants: participants.map(item => ({
+          ...item,
+          ...(assignments.get(Number(item.number)) || { lineId: "solo", lineOrder: 1, role: "単騎", lineStatus: "公式並び外" })
+        })),
+        source: "公式JSJ036位置",
+        confidence: "高",
+        warnings: []
+      };
+    }
+  }
+
+  return inferLines({ participants, lineText });
+}
+
+function groupOfficialLineItems(items) {
+  const withLineId = items.filter(item => item.lineId != null && String(item.lineId).trim());
+  if (withLineId.length === items.length) {
+    const groups = new Map();
+    for (const item of items) {
+      const key = String(item.lineId);
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(item);
+    }
+    return [...groups.values()].map(group => group.sort((a, b) => a.position - b.position));
+  }
+
+  const sorted = [...items].sort((a, b) => a.position - b.position);
+  const groups = [];
+  let current = [];
+  let previous = null;
+  for (const item of sorted) {
+    if (previous != null && item.position - previous > 1 && current.length) {
+      groups.push(current);
+      current = [];
+    }
+    current.push(item);
+    previous = item.position;
+  }
+  if (current.length) groups.push(current);
+  return groups;
+}
 
 function buildLineText(lines) {
   if (!lines.length) return null;
