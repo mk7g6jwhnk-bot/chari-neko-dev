@@ -1,0 +1,195 @@
+diff -ruN '--exclude=node_modules' /mnt/data/v6base/chari-neko-dev-core-v6/keirin/engine/keirin-engine.mjs /mnt/data/v7work/chari-neko-dev-core-v6/keirin/engine/keirin-engine.mjs
+--- /mnt/data/v6base/chari-neko-dev-core-v6/keirin/engine/keirin-engine.mjs	2026-08-08 11:31:52.000000000 +0000
++++ /mnt/data/v7work/chari-neko-dev-core-v6/keirin/engine/keirin-engine.mjs	2026-08-08 12:57:27.470679077 +0000
+@@ -21,7 +21,7 @@
+   if(lineBlocked){purchase.noBet=true;purchase.noBetReason="LINE_DATA_UNAVAILABLE";purchase.purchaseCandidateCountBeforeCompression=0;purchase.purchaseCandidateCountAfterCompression=0;purchase.finalBetCount=0;purchase.minimumRequired=0;}
+ 
+   return{
+-    engineVersion:"KEIRIN-0.4.4-evidence-traced",
++    engineVersion:"KEIRIN-0.4.5-branch-role-consistent",
+     raceId:race.id,
+     lineConfidence:race.lineConfidence,
+     scored,lines,branches,terminals:classified,
+diff -ruN '--exclude=node_modules' /mnt/data/v6base/chari-neko-dev-core-v6/keirin/sports/keirin-terminals.mjs /mnt/data/v7work/chari-neko-dev-core-v6/keirin/sports/keirin-terminals.mjs
+--- /mnt/data/v6base/chari-neko-dev-core-v6/keirin/sports/keirin-terminals.mjs	2026-08-08 11:31:49.000000000 +0000
++++ /mnt/data/v7work/chari-neko-dev-core-v6/keirin/sports/keirin-terminals.mjs	2026-08-08 12:56:56.645387991 +0000
+@@ -8,6 +8,7 @@
+     const firstEntries=branch.firstCandidates
+       .map(firstId=>byId.get(firstId))
+       .filter(Boolean)
++      .filter(first=>branchFirstRoleCompatible(branch,first))
+       .map(first=>({first,score:conditionedFirst(branch,first)}))
+       .filter(item=>item.score>0);
+     const bestFirst=Math.max(...firstEntries.map(item=>item.score),0);
+@@ -28,6 +29,7 @@
+ 
+         for(const {third,score:thirdScore} of thirdEntries){
+           const pathScore=firstScore*secondScore*thirdScore;
++          if(!branchPathCompatible(branch,first,second,third))continue;
+           paths.push({
+             order:[first.number,second.number,third.number],
+             branchId:branch.id,
+@@ -107,6 +109,33 @@
+   return terminals.sort((a,b)=>(b.probability-a.probability)||a.order.join("-").localeCompare(b.order.join("-"),"en"));
+ }
+ 
++function branchFirstRoleCompatible(branch,participant){
++  if(!branch?.primaryLineId)return true;
++  const samePrimaryLine=participant.lineId===branch.primaryLineId;
++  switch(branch.branchType){
++    case"LEADER_HOLD":
++    case"MAKURI_SUCCESS":
++      return samePrimaryLine&&participant.role==="自力";
++    case"BANTE_SASHI":
++      return samePrimaryLine&&participant.role==="番手";
++    default:
++      return true;
++  }
++}
++
++function branchPathCompatible(branch,first,second,third){
++  if(!branchFirstRoleCompatible(branch,first))return false;
++  if(branch.branchType==="BANTE_SASHI"&&branch.primaryLineId){
++    // 番手差しの1着は必ず当該ラインの番手。2着は先行車を最優先するが、
++    // 先行車失速時の三番手/別線残りは確率評価で保持する。
++    if(first.role!=="番手"||first.lineId!==branch.primaryLineId)return false;
++  }
++  if((branch.branchType==="LEADER_HOLD"||branch.branchType==="MAKURI_SUCCESS")&&branch.primaryLineId){
++    if(first.role!=="自力"||first.lineId!==branch.primaryLineId)return false;
++  }
++  return Boolean(second&&third);
++}
++
+ function conditionedFirst(branch,participant){
+   const candidate=branch.firstCandidateScores?.[participant.id]??participant.roleScores.first;
+   const e=participant.evidence||{};
+diff -ruN '--exclude=node_modules' /mnt/data/v6base/chari-neko-dev-core-v6/modules/keirin/engine/keirin-engine.mjs /mnt/data/v7work/chari-neko-dev-core-v6/modules/keirin/engine/keirin-engine.mjs
+--- /mnt/data/v6base/chari-neko-dev-core-v6/modules/keirin/engine/keirin-engine.mjs	2026-08-08 11:31:52.000000000 +0000
++++ /mnt/data/v7work/chari-neko-dev-core-v6/modules/keirin/engine/keirin-engine.mjs	2026-08-08 12:57:27.470938531 +0000
+@@ -21,7 +21,7 @@
+   if(lineBlocked){purchase.noBet=true;purchase.noBetReason="LINE_DATA_UNAVAILABLE";purchase.purchaseCandidateCountBeforeCompression=0;purchase.purchaseCandidateCountAfterCompression=0;purchase.finalBetCount=0;purchase.minimumRequired=0;}
+ 
+   return{
+-    engineVersion:"KEIRIN-0.4.4-evidence-traced",
++    engineVersion:"KEIRIN-0.4.5-branch-role-consistent",
+     raceId:race.id,
+     lineConfidence:race.lineConfidence,
+     scored,lines,branches,terminals:classified,
+diff -ruN '--exclude=node_modules' /mnt/data/v6base/chari-neko-dev-core-v6/modules/keirin/sports/keirin-terminals.mjs /mnt/data/v7work/chari-neko-dev-core-v6/modules/keirin/sports/keirin-terminals.mjs
+--- /mnt/data/v6base/chari-neko-dev-core-v6/modules/keirin/sports/keirin-terminals.mjs	2026-08-08 11:31:52.000000000 +0000
++++ /mnt/data/v7work/chari-neko-dev-core-v6/modules/keirin/sports/keirin-terminals.mjs	2026-08-08 12:56:56.645782754 +0000
+@@ -8,6 +8,7 @@
+     const firstEntries=branch.firstCandidates
+       .map(firstId=>byId.get(firstId))
+       .filter(Boolean)
++      .filter(first=>branchFirstRoleCompatible(branch,first))
+       .map(first=>({first,score:conditionedFirst(branch,first)}))
+       .filter(item=>item.score>0);
+     const bestFirst=Math.max(...firstEntries.map(item=>item.score),0);
+@@ -28,6 +29,7 @@
+ 
+         for(const {third,score:thirdScore} of thirdEntries){
+           const pathScore=firstScore*secondScore*thirdScore;
++          if(!branchPathCompatible(branch,first,second,third))continue;
+           paths.push({
+             order:[first.number,second.number,third.number],
+             branchId:branch.id,
+@@ -107,6 +109,33 @@
+   return terminals.sort((a,b)=>(b.probability-a.probability)||a.order.join("-").localeCompare(b.order.join("-"),"en"));
+ }
+ 
++function branchFirstRoleCompatible(branch,participant){
++  if(!branch?.primaryLineId)return true;
++  const samePrimaryLine=participant.lineId===branch.primaryLineId;
++  switch(branch.branchType){
++    case"LEADER_HOLD":
++    case"MAKURI_SUCCESS":
++      return samePrimaryLine&&participant.role==="自力";
++    case"BANTE_SASHI":
++      return samePrimaryLine&&participant.role==="番手";
++    default:
++      return true;
++  }
++}
++
++function branchPathCompatible(branch,first,second,third){
++  if(!branchFirstRoleCompatible(branch,first))return false;
++  if(branch.branchType==="BANTE_SASHI"&&branch.primaryLineId){
++    // 番手差しの1着は必ず当該ラインの番手。2着は先行車を最優先するが、
++    // 先行車失速時の三番手/別線残りは確率評価で保持する。
++    if(first.role!=="番手"||first.lineId!==branch.primaryLineId)return false;
++  }
++  if((branch.branchType==="LEADER_HOLD"||branch.branchType==="MAKURI_SUCCESS")&&branch.primaryLineId){
++    if(first.role!=="自力"||first.lineId!==branch.primaryLineId)return false;
++  }
++  return Boolean(second&&third);
++}
++
+ function conditionedFirst(branch,participant){
+   const candidate=branch.firstCandidateScores?.[participant.id]??participant.roleScores.first;
+   const e=participant.evidence||{};
+diff -ruN '--exclude=node_modules' /mnt/data/v6base/chari-neko-dev-core-v6/package.json /mnt/data/v7work/chari-neko-dev-core-v6/package.json
+--- /mnt/data/v6base/chari-neko-dev-core-v6/package.json	2026-08-08 11:11:23.000000000 +0000
++++ /mnt/data/v7work/chari-neko-dev-core-v6/package.json	2026-08-08 12:56:58.087933581 +0000
+@@ -4,7 +4,7 @@
+   "private": true,
+   "type": "module",
+   "scripts": {
+-    "test": "node modules/keirin/tests/run-tests.mjs && node tests/prediction-flow.mjs && node tests/keirin-purchase-five-races.mjs && node tests/keirin-official-evidence-branching.mjs",
++    "test": "node modules/keirin/tests/run-tests.mjs && node tests/prediction-flow.mjs && node tests/keirin-purchase-five-races.mjs && node tests/keirin-official-evidence-branching.mjs && node tests/keirin-branch-role-semantics.mjs",
+     "check": "node --check public/app.mjs && node --check public/prediction-store.mjs && node --check netlify/functions/keirin-result.mjs && node --check netlify/functions/keirin-predict.mjs"
+   },
+   "dependencies": {
+diff -ruN '--exclude=node_modules' /mnt/data/v6base/chari-neko-dev-core-v6/tests/keirin-branch-role-semantics.mjs /mnt/data/v7work/chari-neko-dev-core-v6/tests/keirin-branch-role-semantics.mjs
+--- /mnt/data/v6base/chari-neko-dev-core-v6/tests/keirin-branch-role-semantics.mjs	1970-01-01 00:00:00.000000000 +0000
++++ /mnt/data/v7work/chari-neko-dev-core-v6/tests/keirin-branch-role-semantics.mjs	2026-08-08 12:56:56.907310335 +0000
+@@ -0,0 +1,49 @@
++import assert from "node:assert/strict";
++import {generateKeirinBranches} from "../keirin/sports/keirin-branches.mjs";
++import {generateKeirinTerminals} from "../keirin/sports/keirin-terminals.mjs";
++
++const scored=[
++  rider(1,"A","自力",8.1),rider(2,"A","番手",7.4),rider(7,"A","三番手",6.8),
++  rider(3,"B","自力",7.7),rider(4,"B","番手",8.8),
++  rider(5,"C","自力",7.0),rider(6,"C","番手",7.6)
++];
++const lines=[
++  line("A",[1,2,7]),line("B",[3,4]),line("C",[5,6])
++];
++const branches=generateKeirinBranches({scored,lines,lineConfidence:"高"});
++const terminals=generateKeirinTerminals({scored,branches});
++
++const banteB=branches.find(branch=>branch.id==="BANTE-B");
++assert.ok(banteB,"B番手差し branch must exist");
++assert.deepEqual(banteB.firstCandidates,["4"],"B番手差し first candidate must be B-line bante #4");
++
++const banteBContributions=terminals.flatMap(terminal=>(terminal.branchContributions||[])
++  .filter(c=>c.branchId==="BANTE-B")
++  .map(c=>({order:terminal.order,contribution:c})));
++assert.ok(banteBContributions.length>0,"B番手差し must create terminals");
++assert.ok(banteBContributions.every(item=>item.order[0]===4),"Every B番手差し terminal must have #4 first");
++assert.equal(banteBContributions.some(item=>item.order.join("-")==="3-4-6"),false,"3-4-6 must never be labeled/generated by B番手差し");
++
++for(const branch of branches.filter(branch=>branch.branchType==="LEADER_HOLD"||branch.branchType==="MAKURI_SUCCESS")){
++  const lineObj=lines.find(item=>item.id===branch.primaryLineId);
++  assert.ok(lineObj);
++  const expected=lineObj.leader.number;
++  const contributions=terminals.flatMap(terminal=>(terminal.branchContributions||[])
++    .filter(c=>c.branchId===branch.id)
++    .map(c=>terminal.order));
++  assert.ok(contributions.every(order=>order[0]===expected),`${branch.id} must keep its line leader first`);
++}
++
++console.log("Branch role semantic integrity tests passed.");
++
++function rider(number,lineId,role,base){
++  return {
++    id:String(number),number,lineId,role,
++    roleScores:{first:base,second:base-.2,third:base-.4},
++    evidence:{recent:base,start:base-.1,sprint:base+.1,finish:base+.2,tracking:base+.15,stamina:5,lineTrust:5}
++  };
++}
++function line(id,numbers){
++  const members=numbers.map(number=>scored.find(item=>item.number===number));
++  return {id,type:"ライン",members,leader:members.find(x=>x.role==="自力"),bante:members.find(x=>x.role==="番手"),third:members.find(x=>x.role==="三番手")||null};
++}
