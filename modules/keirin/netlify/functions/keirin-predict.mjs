@@ -143,6 +143,7 @@ async function requestBrowserService(base, params) {
   });
 
   const candidates = [
+    `${base}/keirin/race?${query}`,
     `${base}/keirin?${query}`,
     `${base}/api/keirin?${query}`,
     `${base}/race?${query}`,
