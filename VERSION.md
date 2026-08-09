@@ -1,8 +1,11 @@
 # Version
 
-KEIRIN-0.5.2-weighted-branch-support
+KEIRIN-0.5.2-weighted-branch-support / UI-v24-quick-navigation-deadlines
 
-- Purchase support no longer treats every connected branch as one equal vote.
-- The multi-branch COVER rule now uses weighted equivalent support from branch strength and within-branch fit.
-- All branch provenance remains stored and visible for audit.
-- MAIN and representative alternative-branch rules are unchanged in this version.
+- Prediction logic is unchanged from KEIRIN-0.5.2.
+- Added 会場選択 / レース選択 quick buttons beside the back button.
+- Venue cards show the nearest upcoming cutoff time when discover data provides official race times.
+- Race cards and timeline rows show cutoff time explicitly.
+- Venue cards are color-coded by モーニング / デイ / ナイター / ミッド.
+- Saved race snapshots preserve the official deadline separately when available.
+- Netlify discover adapter accepts Railway v0.5.6 per-race deadline/startTime metadata.

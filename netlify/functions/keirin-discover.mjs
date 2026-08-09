@@ -16,7 +16,7 @@ export default async function handler(req){
 function adaptMeeting(base,date,meeting){
   const venueCode=String(meeting.venueCode||"").padStart(2,"0"),venueName=String(meeting.venueName||"");
   const raceUrl=`${base}/keirin/race?${new URLSearchParams({date,venueCode,venueName,raceNo:"1"})}`;
-  return {date,venueCode,venueName,raceNumbers:meeting.raceNumbers.map(Number).filter(Number.isInteger),identityPassed:true,verifiedMeeting:true,discoveredUrl:raceUrl,discovery:{ok:true,links:{raceCards:[],odds:[],results:[],other:[{text:"公式出走表",context:`${venueName} ${date}`,url:raceUrl}]},diagnostics:{source:"railway-adapter"}}};
+  return {date,venueCode,venueName,raceNumbers:meeting.raceNumbers.map(Number).filter(Number.isInteger),races:Array.isArray(meeting.races)?meeting.races.map(r=>({raceNo:Number(r.raceNo),deadline:String(r.deadline||""),startTime:String(r.startTime||"")})).filter(r=>Number.isInteger(r.raceNo)):[],identityPassed:true,verifiedMeeting:true,discoveredUrl:raceUrl,discovery:{ok:true,links:{raceCards:[],odds:[],results:[],other:[{text:"公式出走表",context:`${venueName} ${date}`,url:raceUrl}]},diagnostics:{source:"railway-adapter"}}};
 }
 
 function jsonResponse(status,body){return new Response(JSON.stringify(body),{status,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store"}});}
