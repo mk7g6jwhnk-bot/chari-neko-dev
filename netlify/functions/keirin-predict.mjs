@@ -99,7 +99,9 @@ export default async function handler(req) {
     }
 
     const lineText = buildLineText(officialLines);
-    const line = resolveOfficialLines({ participants, officialLines, lineText });
+    const line = raceCategory === "girls"
+      ? resolveGirlsDynamicPositions({ participants })
+      : resolveOfficialLines({ participants, officialLines, lineText });
     const race = {
       id: `${date}-${basic.venueName || venueName}-${basic.raceNo || raceNo}`,
       venue: basic.venueName || venueName,
@@ -109,6 +111,8 @@ export default async function handler(req) {
       raceName: basic.raceName || "",
       grade: basic.grade || "",
       className: basic.className || "",
+      raceCategory,
+      lineMode: raceCategory === "girls" ? "girls_dynamic" : "official_line",
       deadline: basic.deadline || "",
       startTime: basic.startTime || "",
       lineConfidence: line.confidence,
@@ -131,6 +135,7 @@ export default async function handler(req) {
       browserAudit: browserResult.data.audit || null,
       dataQuality: {
         lineConfidence: line.confidence,
+        lineMode: raceCategory === "girls" ? "girls_dynamic" : "official_line",
         lineSource: line.source || null,
         officialLineItemCount: officialLines.length,
         officialLineText: lineText,
@@ -446,7 +451,7 @@ function normalizeRegistration(value) { return String(value ?? "").replace(/\D/g
 function nullableNumber(value) { if (value === null || value === undefined || value === "") return null; const n = Number(value); return Number.isFinite(n) ? n : null; }
 function nullableNonNegativeInteger(value) { const n = nullableNumber(value); return n !== null && Number.isSafeInteger(n) && n >= 0 ? n : null; }
 
-function resolveOfficialLines({ participants, officialLines, lineText }) {
+export function resolveOfficialLines({ participants, officialLines, lineText }) {
   // The official line text is the canonical front-to-back order.
   // JSJ036 `position` is useful for grouping/identity checks, but treating its numeric
   // position as race-order can reverse leader/bante roles on some cards.
@@ -456,7 +461,7 @@ function resolveOfficialLines({ participants, officialLines, lineText }) {
     if (parsed?.confidence === "高") {
       return {
         ...parsed,
-        source: "公式JSJ036並び表記",
+        source: "公式JSJ036並び表記・順序監査",
         warnings: []
       };
     }
@@ -493,7 +498,7 @@ function resolveOfficialLines({ participants, officialLines, lineText }) {
           ...item,
           ...(assignments.get(Number(item.number)) || { lineId: "solo", lineOrder: 1, role: "単騎", lineStatus: "公式並び外" })
         })),
-        source: "公式JSJ036位置",
+        source: "公式JSJ036位置・順序監査",
         confidence: "高",
         warnings: []
       };
@@ -504,11 +509,11 @@ function resolveOfficialLines({ participants, officialLines, lineText }) {
 }
 
 function groupOfficialLineItems(items) {
-  const withLineId = items.filter(item => item.lineId != null && String(item.lineId).trim());
+  const withLineId = items.filter(item => lineIdentity(item));
   if (withLineId.length === items.length) {
     const groups = new Map();
     for (const item of items) {
-      const key = String(item.lineId);
+      const key = lineIdentity(item);
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key).push(item);
     }
@@ -531,14 +536,37 @@ function groupOfficialLineItems(items) {
   return groups;
 }
 
-function buildLineText(lines) {
+function lineIdentity(item) {
+  const raw = String(item?.lineId || item?.groupId || item?.className || "").trim();
+  if (!raw) return null;
+  if (/^(?:line|group)[-_ ]?\d+$/i.test(raw)) return raw.toLowerCase().replace(/[ _]+/g, "-");
+  if (/^\d+$/.test(raw)) return `line-${raw}`;
+  return null;
+}
+
+function resolveGirlsDynamicPositions({ participants }) {
+  return {
+    participants: participants.map(item => ({
+      ...item,
+      lineId: `girls-${item.number}`,
+      lineOrder: 1,
+      role: "単騎",
+      lineStatus: "ガールズ・固定ラインなし"
+    })),
+    source: "ガールズ専用・固定ライン不使用",
+    confidence: "高",
+    warnings: []
+  };
+}
+
+export function buildLineText(lines) {
   if (!lines.length) return null;
 
-  const withLineId = lines.filter(item => item.lineId != null && String(item.lineId).trim());
+  const withLineId = lines.filter(item => lineIdentity(item));
   if (withLineId.length === lines.length) {
     const groups = new Map();
     for (const item of lines) {
-      const key = String(item.lineId);
+      const key = lineIdentity(item);
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key).push(item);
     }

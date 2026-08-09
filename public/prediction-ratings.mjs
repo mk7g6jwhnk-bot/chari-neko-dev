@@ -20,14 +20,15 @@ export function derivePredictionRatings(snapshot={}){
   const betCount=bets.length;
   const pointFactor=betCount<=3?1:betCount<=6?.90:betCount<=10?.75:betCount<=15?.55:betCount<=25?.30:.10;
   const lineConfidence=String(snapshot?.predictionOutput?.lineConfidence||snapshot?.lineConfidence||"");
-  const lineQuality=lineConfidence==="高"?1:lineConfidence==="中"?.65:lineConfidence==="低"?.35:.70;
+  const isGirls=snapshot?.targetRace?.raceCategory==="girls"||snapshot?.predictionOutput?.lineMode==="girls_dynamic";
   const evidenceQuality=startPowerEvidenceQuality(snapshot?.abilitiesUsed||[]);
+  const lineQuality=isGirls?evidenceQuality:(lineConfidence==="高"?1:lineConfidence==="中"?.65:lineConfidence==="低"?.35:.70);
   const dataQuality=.55*lineQuality+.45*evidenceQuality;
   const concentrationNorm=concentration/5;
   let confidence=starsFrom(.45*concentrationNorm+.30*dataQuality+.25*pointFactor,[.30,.48,.64,.80]);
   if(concentration<5)confidence=Math.min(confidence,4);
   if(concentration<=1)confidence=Math.min(confidence,2);
-  if(lineConfidence&&lineConfidence!=="高")confidence=Math.min(confidence,2);
+  if(!isGirls&&lineConfidence&&lineConfidence!=="高")confidence=Math.min(confidence,2);
   if(snapshot?.noBet)confidence=1;
 
   let provisionalVerdict;
@@ -51,7 +52,7 @@ export function derivePredictionRatings(snapshot={}){
   if(topShare>0)reasonParts.push(`展開1位 ${formatPct(topShare)}`);
   if(generated!=null)reasonParts.push(`採用 ${adopted} / ${generated}終端`);
   else reasonParts.push(`採用 ${betCount}点`);
-  if(lineConfidence)reasonParts.push(`ライン確認 ${lineConfidence}`);
+  if(isGirls)reasonParts.push("ガールズ専用・主導権予測");else if(lineConfidence)reasonParts.push(`ライン順序監査 ${lineConfidence}`);
 
   return{
     confidence,

@@ -1,4 +1,5 @@
-export function generateKeirinBranches({scored,lines,lineConfidence}){
+export function generateKeirinBranches({scored,lines,lineConfidence,raceCategory="standard"}){
+  if(raceCategory==="girls")return generateGirlsBranches(scored);
   const branches=[];
   const lineEnabled=lineConfidence==="高";
 
@@ -114,6 +115,32 @@ export function selectNaturalBranchTiers(structuredBranches=[]){
 // the core branch tier; use selectNaturalBranchTiers for full classification.
 export function selectAdaptiveMainCluster(structuredBranches=[]){
   return selectNaturalBranchTiers(structuredBranches).main;
+}
+
+function generateGirlsBranches(scored=[]){
+  const branches=[];
+  for(const rider of scored){
+    const id=rider.id;
+    branches.push(make({
+      id:`GIRLS-LEAD-${rider.number}`,label:`${rider.number}主導権先行`,scenario:"主導権先行",branchType:"LEADER_HOLD",primaryLineId:null,requiredFirstNumber:rider.number,enabled:true,
+      scoreParts:[part("startPower",rider.evidence.start,.45),part("first",rider.roleScores.first,.25),part("stamina",rider.evidence.stamina,.15),part("recentForm",rider.evidence.recent,.15)],
+      firstCandidateScores:{[id]:rider.roleScores.first||0}
+    }));
+    branches.push(make({
+      id:`GIRLS-MAKURI-${rider.number}`,label:`${rider.number}まくり`,scenario:"まくり",branchType:"MAKURI_SUCCESS",primaryLineId:null,requiredFirstNumber:rider.number,enabled:true,
+      scoreParts:[part("sprintPower",rider.evidence.sprint,.42),part("first",rider.roleScores.first,.24),part("finishPower",rider.evidence.finish,.20),part("recentForm",rider.evidence.recent,.14)],
+      firstCandidateScores:{[id]:rider.roleScores.first||0}
+    }));
+  }
+  const battleScores=Object.fromEntries(scored.map(p=>[p.id,(p.roleScores.first||0)*.28+(p.evidence.start||0)*.24+(p.evidence.finish||0)*.20+(p.evidence.tracking||0)*.16+(p.evidence.recent||0)*.12]));
+  branches.push(make({id:"GIRLS-POSITION",label:"位置取り・仕掛け競合",scenario:"位置取り競合",branchType:"LEAD_BATTLE",scoreParts:[part("candidateMean",avg(Object.values(battleScores)),1)],firstCandidateScores:battleScores,enabled:true}));
+  const structured=branches.filter(branch=>["LEADER_HOLD","MAKURI_SUCCESS"].includes(branch.branchType)).sort(compareBranch);
+  const tiers=selectNaturalBranchTiers(structured);
+  const mainIds=new Set(tiers.main.map(branch=>branch.id)),contenderIds=new Set(tiers.contender.map(branch=>branch.id));
+  return branches.filter(branch=>branch.firstCandidates.length&&branch.enabled).sort(compareBranch).map(branch=>({
+    ...branch,
+    priority:structured.includes(branch)?mainIds.has(branch.id)?"main":contenderIds.has(branch.id)?"contender":"sub":"risk"
+  }));
 }
 
 function emptyTierResult(){return{main:[],contender:[],sub:[],diagnostics:{mode:"EMPTY",topScore:null,topTieCount:0,tailMedianGap:null,tailMadGap:null,contenderCutGap:null,contenderCutDetected:false}}}

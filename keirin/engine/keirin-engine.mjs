@@ -8,11 +8,11 @@ import{classify,composite,allocate,purchaseDiagnostics}from"./purchase.mjs";
 export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000}){
   const scored=scoreKeirinParticipants({race,venueProfile});
   const lines=buildLines(scored);
-  const branches=generateKeirinBranches({scored,lines,lineConfidence:race.lineConfidence});
+  const branches=generateKeirinBranches({scored,lines,lineConfidence:race.lineConfidence,raceCategory:race.raceCategory||"standard"});
   const terminals=generateKeirinTerminals({scored,branches});
   const a=audit({race,branches,terminals});
   const rawClassified=a.passed?classify(terminals,oddsByOrder):terminals;
-  const lineBlocked=a.passed&&race.lineConfidence!=="高";
+  const lineBlocked=a.passed&&race.raceCategory!=="girls"&&race.lineConfidence!=="高";
   const classified=lineBlocked
     ? rawClassified.map(item=>({...item,betClass:"NONE",purchaseStatus:"購入不採用",purchaseReason:"公式ライン未取得のため購入判定を保留"}))
     : rawClassified;
@@ -21,7 +21,7 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
   if(lineBlocked){purchase.noBet=true;purchase.noBetReason="LINE_DATA_UNAVAILABLE";purchase.purchaseCandidateCountBeforeCompression=0;purchase.purchaseCandidateCountAfterCompression=0;purchase.finalBetCount=0;purchase.minimumRequired=0;}
 
   return{
-    engineVersion:"KEIRIN-0.5.12-tier-consistent-payout-class",
+    engineVersion:"KEIRIN-0.5.19-line-order-girls-dynamic",
     raceId:race.id,
     lineConfidence:race.lineConfidence,
     scored,lines,branches,terminals:classified,
