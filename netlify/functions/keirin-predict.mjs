@@ -178,10 +178,10 @@ async function requestBrowserService(base, params) {
   try {
     const response = await fetch(endpoint, {
       headers: { accept: "application/json" },
-      // Netlifyのゲートウェイ502になる前にこちらで打ち切り、JSONエラーとして返す。
-      // Railway側は同一Rのin-flightを共有し、完了後90秒キャッシュするため、
-      // ユーザーが再試行した時は二重Chromium起動にならない。
-      signal: AbortSignal.timeout(12000)
+      // Netlify同期Functionの実行上限(60秒)より十分手前で打ち切る。
+      // Chromiumの会場→R遷移と公式プロフィール取得を含むため12秒では短すぎた。
+      // Railway側は同一Rのin-flightを共有し、完了後90秒キャッシュする。
+      signal: AbortSignal.timeout(50000)
     });
     const text = await response.text();
     let data = null;
