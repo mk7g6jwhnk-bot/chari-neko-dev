@@ -480,7 +480,8 @@ export function purchaseDiagnostics(classified,plan,budget){
   for(const item of rejected){const code=item.purchaseRejectCode||"UNKNOWN";rejectCodeCounts[code]=(rejectCodeCounts[code]||0)+1;}
   const diagnosticBranchStats=buildBranchStats(classified);
   const diagnosticMaxBranchTotal=Math.max(...[...diagnosticBranchStats.values()].map(stats=>stats.total),0);
-  const familyRows=buildFamilyAuditRows(classified);
+  const terminalProbabilitySum=sum(probabilities)||1;
+  const familyRows=buildFamilyAuditRows(classified,terminalProbabilitySum);
   return{
     generatedTerminalCount:classified.length,probabilityEvaluatedTerminalCount:classified.length,terminalCount:classified.length,
     terminalProbabilitySum:sum(probabilities),maxTerminalProbability:probabilities[0]||0,
@@ -520,16 +521,41 @@ export function purchaseDiagnostics(classified,plan,budget){
   };
 }
 
-function buildFamilyAuditRows(classified){
+function buildFamilyAuditRows(classified,totalProbability=1){
   const map=new Map();
   for(const item of classified){
     const first=Number(item.firstFamilyNumber)||Number(item.order?.[0])||0;
-    if(!map.has(first))map.set(first,{first,tier:item.firstFamilyTier||"risk",probability:item.firstFamilyProbability||0,generated:item.firstFamilyGeneratedCount||0,priorityMass:item.firstFamilyPriorityMass||{},naturalCandidateCount:0,adopted:0,main:0,cover:0,buyableHigh:0,rejected:0});
-    const row=map.get(first);
-    if(item.familyNaturalPositionEligible)row.naturalCandidateCount+=1;
-    if(item.purchaseStatus===PURCHASED){row.adopted+=1;if(item.betClass==="MAIN")row.main+=1;else if(item.betClass==="COVER")row.cover+=1;else if(item.betClass==="BUYABLE_HIGH")row.buyableHigh+=1;}else row.rejected+=1;
+    if(!map.has(first))map.set(first,{first,tier:item.firstFamilyTier||"risk",probability:0,generated:0,priorityMass:item.firstFamilyPriorityMass||{},naturalCandidateCount:0,naturalCandidateProbability:0,adopted:0,adoptedProbability:0,main:0,mainProbability:0,cover:0,coverProbability:0,buyableHigh:0,buyableHighProbability:0,rejected:0,rejectedProbability:0});
+    const row=map.get(first),probability=Math.max(0,Number(item.probability)||0);
+    row.probability+=probability;
+    row.generated+=1;
+    if(item.familyNaturalPositionEligible){row.naturalCandidateCount+=1;row.naturalCandidateProbability+=probability;}
+    if(item.purchaseStatus===PURCHASED){
+      row.adopted+=1;row.adoptedProbability+=probability;
+      if(item.betClass==="MAIN"){row.main+=1;row.mainProbability+=probability;}
+      else if(item.betClass==="COVER"){row.cover+=1;row.coverProbability+=probability;}
+      else if(item.betClass==="BUYABLE_HIGH"){row.buyableHigh+=1;row.buyableHighProbability+=probability;}
+    }else{row.rejected+=1;row.rejectedProbability+=probability;}
   }
-  return[...map.values()].sort((a,b)=>familyTierRank(a.tier)-familyTierRank(b.tier)||b.probability-a.probability||a.first-b.first);
+  const denominator=Number(totalProbability)>0?Number(totalProbability):1;
+  return[...map.values()].map(row=>{
+    const familyProbability=row.probability>0?row.probability:1;
+    const adoptedCoverage=row.probability>0?row.adoptedProbability/row.probability:0;
+    const naturalCandidateCoverage=row.probability>0?row.naturalCandidateProbability/row.probability:0;
+    const coverageStatus=adoptedCoverage>=.70?"OK":adoptedCoverage>=.50?"CAUTION":"ALERT";
+    return{
+      ...row,
+      probabilityShare:row.probability/denominator,
+      adoptedProbabilityShare:row.adoptedProbability/denominator,
+      rejectedProbabilityShare:row.rejectedProbability/denominator,
+      naturalCandidateProbabilityShare:row.naturalCandidateProbability/denominator,
+      adoptedCoverage,
+      rejectedCoverage:row.rejectedProbability/familyProbability,
+      naturalCandidateCoverage,
+      coverageStatus,
+      coverageLabel:coverageStatus==="OK"?"カバー良好":coverageStatus==="CAUTION"?"カバー注意":"カバー要監査"
+    };
+  }).sort((a,b)=>familyTierRank(a.tier)-familyTierRank(b.tier)||b.probability-a.probability||a.first-b.first);
 }
 function buildAdoptedAudit(item,diagnosticBranchStats,diagnosticMaxBranchTotal){
   const supportBranches=[...(item.branchContributions||[])].filter(contribution=>contributionMatchesTerminal(contribution,item.order)).sort((a,b)=>(b.probability||0)-(a.probability||0)||String(a.branchId).localeCompare(String(b.branchId),"en")).map(contribution=>{

@@ -23,6 +23,12 @@ export function derivePredictionRatings(snapshot={}){
     .sort((a,b)=>b-a);
   const topFamilyShare=familyShares[0]||0;
   const top2FamilyShare=(familyShares[0]||0)+(familyShares[1]||0);
+  const topFamilyRow=[...familyRows].sort((a,b)=>{
+    const ap=probabilitySum?Math.max(0,Number(a?.probability)||0)/probabilitySum:0;
+    const bp=probabilitySum?Math.max(0,Number(b?.probability)||0)/probabilitySum:0;
+    return bp-ap;
+  })[0]||null;
+  const topFamilyCoverage=topFamilyRow?(Number.isFinite(Number(topFamilyRow?.adoptedCoverage))?Number(topFamilyRow.adoptedCoverage):(Number(topFamilyRow?.probability)>0?(Number(topFamilyRow?.adoptedProbability)||0)/Number(topFamilyRow.probability):null)):null;
 
   const branchConcentrationRaw=
     .34*scale(topShare,.07,.22)+
@@ -139,6 +145,8 @@ export function derivePredictionRatings(snapshot={}){
   if(betCount>=11)auditFlags.push(`採用${betCount}点で買い目が広い`);
   if(confidence>=3&&concentration<=2)auditFlags.push("信頼度より展開集中度が低い");
   if(isGirls&&evidenceQuality<.70)auditFlags.push("ガールズ主導権入力の信頼度を要監査");
+  if(topFamilyShare>=.20&&topFamilyCoverage!=null&&topFamilyCoverage<.50)auditFlags.push(`1着最上位ファミリーの購入カバー率が低い（${formatPct(topFamilyCoverage)}）`);
+  else if(topFamilyShare>=.20&&topFamilyCoverage!=null&&topFamilyCoverage<.70)auditFlags.push(`1着最上位ファミリーの購入カバー率に注意（${formatPct(topFamilyCoverage)}）`);
   if(consistencyAdjustments.length)auditFlags.push("評価整合性の上限補正あり");
   if(failedInvariants.length)auditFlags.push("評価整合性ルール違反");
 
@@ -147,6 +155,7 @@ export function derivePredictionRatings(snapshot={}){
   const reasonParts=[];
   if(topShare>0)reasonParts.push(`展開1位 ${formatPct(topShare)}`);
   if(topFamilyShare>0)reasonParts.push(`1着集中 ${formatPct(topFamilyShare)}`);
+  if(topFamilyCoverage!=null)reasonParts.push(`最上位頭カバー ${formatPct(topFamilyCoverage)}`);
   if(generated!=null)reasonParts.push(`採用 ${adopted} / ${generated}終端`);
   else reasonParts.push(`採用 ${betCount}点`);
   if(isGirls)reasonParts.push("ガールズ専用・主導権予測");else if(lineConfidence)reasonParts.push(`ライン順序監査 ${lineConfidence}`);
@@ -172,7 +181,7 @@ export function derivePredictionRatings(snapshot={}){
     diagnostics:{
       topShare,top3Share,topGapRatio,cutGapRatio,betCount,dataQuality,pointFactor,
       branchConcentrationRaw,terminalConcentrationRaw,concentrationRaw,rawConcentration,
-      terminalTop3Share,terminalTop5Share,topFamilyShare,top2FamilyShare,
+      terminalTop3Share,terminalTop5Share,topFamilyShare,top2FamilyShare,topFamilyCoverage,
       confidenceRaw,rawConfidence,effectiveConfidence,rolloverRaw:rolloverRaw??.10,evaluationIndex,
       maxExpectedValue,allOddsEvaluated
     }

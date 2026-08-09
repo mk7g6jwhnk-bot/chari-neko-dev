@@ -34,4 +34,14 @@ assert.equal(broadButRawStrong.verdict,"見送り寄り");
 assert.ok(broadButRawStrong.consistencyAudit.adjustments.length>0,"評価整合の補正履歴がない");
 assert.ok(broadButRawStrong.consistencyAudit.invariantChecks.every(x=>x.passed),"評価整合 invariant が破れている");
 
-console.log("prediction-ratings: ok",{diffuse:d,focused:f,blocked,broadButRawStrong});
+const lowHeadCoverageSnapshot=snapshot({shares:[.18,.15,.12,.10],scores:[8,7,6,5],bets:4,generated:210,cutGap:1.2});
+lowHeadCoverageSnapshot.predictionOutput.audit.terminalProbabilitySum=1;
+lowHeadCoverageSnapshot.predictionOutput.audit.purchaseFamilyAudit={rows:[
+  {first:1,tier:"main",probability:.25,probabilityShare:.25,adoptedProbability:.10,adoptedCoverage:.40},
+  {first:2,tier:"contender",probability:.20,probabilityShare:.20,adoptedProbability:.15,adoptedCoverage:.75}
+]};
+const lowHeadCoverage=derivePredictionRatings(lowHeadCoverageSnapshot);
+assert.equal(Number(lowHeadCoverage.diagnostics.topFamilyCoverage.toFixed(2)),.40,"最上位1着ファミリーの購入カバー率を評価監査へ引き継げていない");
+assert.ok(lowHeadCoverage.auditFlags.some(x=>x.includes("購入カバー率が低い")),"低い本命頭カバー率を監査フラグにできていない");
+
+console.log("prediction-ratings: ok",{diffuse:d,focused:f,blocked,broadButRawStrong,lowHeadCoverage});

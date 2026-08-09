@@ -31,6 +31,9 @@ assert.equal(by["7-6-1"].purchaseStatus,"購入不採用","別展開でも2着�
 const diag=purchaseDiagnostics(classified,[],3000);
 const head2=diag.purchaseFamilyAudit.rows.find(x=>x.first===2),head7=diag.purchaseFamilyAudit.rows.find(x=>x.first===7);
 assert.ok(head2&&head2.main>=3,"本命頭ファミリーの生成→自然候補→購入の監査が不足");
+assert.ok(head2.adoptedProbability>0,"本命頭ファミリーの購入確率質量が保存されていない");
+assert.ok(head2.adoptedCoverage>.9,"本命頭ファミリーの購入カバー率計算が不正");
+assert.ok(head2.rejectedProbability>=0,"本命頭ファミリーの未採用確率質量が保存されていない");
 assert.ok(head7&&head7.buyableHigh>=1,"別頭高配当ファミリー監査が不足");
 const adopted246=diag.adoptedTerminalAudit.find(x=>x.order==="2-4-6");
 assert.equal(adopted246.globalRank,1,"採用終端監査に全体順位がない");
@@ -47,4 +50,16 @@ const mainSameProb=[
 ];
 const valuePlan=allocate(mainSameProb,1000);
 assert.ok(valuePlan.find(x=>x.order[2]===4).stake>valuePlan.find(x=>x.order[2]===3).stake,"資金配分に確率×オッズ妙味が反映されていない");
+
+const lowCoverageClassified=[
+  {order:[1,2,3],probability:.10,firstFamilyNumber:1,firstFamilyTier:"main",familyNaturalPositionEligible:true,purchaseStatus:"購入採用",betClass:"MAIN",branchContributions:[],concentrationRatio:2},
+  {order:[1,2,4],probability:.10,firstFamilyNumber:1,firstFamilyTier:"main",familyNaturalPositionEligible:true,purchaseStatus:"購入採用",betClass:"MAIN",branchContributions:[],concentrationRatio:2},
+  {order:[1,3,2],probability:.30,firstFamilyNumber:1,firstFamilyTier:"main",familyNaturalPositionEligible:true,purchaseStatus:"購入不採用",betClass:"NONE",purchaseRejectCode:"SECOND_POSITION_SUPPORT",branchContributions:[],concentrationRatio:2}
+];
+const lowCoverageDiag=purchaseDiagnostics(lowCoverageClassified,[],3000);
+const lowHead=lowCoverageDiag.purchaseFamilyAudit.rows.find(x=>x.first===1);
+assert.equal(Number(lowHead.adoptedProbability.toFixed(3)),.2,"採用終端の確率質量が合わない");
+assert.equal(Number(lowHead.adoptedCoverage.toFixed(3)),.4,"頭内購入カバー率が合わない");
+assert.equal(lowHead.coverageStatus,"ALERT","低カバーを要監査にできていない");
+
 console.log("Keirin first-family purchase hierarchy passed",JSON.stringify(diag.purchaseFamilyAudit.rows));

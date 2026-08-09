@@ -1,3 +1,3 @@
-KEIRIN-0.5.38-detail-lazy-audit-fix
+KEIRIN-0.5.39-first-family-coverage-audit
 
-Detail navigation lazy audit and legacy snapshot compatibility fix.
+First-family probability-mass coverage audit for purchase selection.
