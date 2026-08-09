@@ -11,7 +11,7 @@ export default async function handler(req){
   try{
     const response=await fetch(`${base}/keirin/preview-batch?${q}`,{headers:{accept:"application/json"},signal:AbortSignal.timeout(58000)});
     let payload;try{payload=await response.json()}catch{payload=null}
-    if(!response.ok||payload?.ok===false){return jsonResponse(response.status||502,{ok:false,error:payload?.error||"会場一括一次選別の取得に失敗しました",busy:response.status===503,diagnostics:payload?.diagnostics||null})}
+    if(!response.ok||payload?.ok===false){const failures=Array.isArray(payload?.failures)?payload.failures:[];if(failures.length)return jsonResponse(200,{ok:true,items:[],failures,partialFailure:true,diagnostics:payload?.diagnostics||null,checkedAt:new Date().toISOString()});return jsonResponse(response.status||502,{ok:false,error:payload?.error||"会場一括一次選別の取得に失敗しました",busy:response.status===503,diagnostics:payload?.diagnostics||null})}
     const rows=(payload.items||[]).map(item=>normalizeItem(item,{date,venueCode,venueName})).filter(Boolean);
     return jsonResponse(200,{ok:true,items:rows,failures:payload.failures||[],diagnostics:payload.diagnostics||null,checkedAt:new Date().toISOString()});
   }catch(error){return jsonResponse(502,{ok:false,error:"一次選別データの一括取得が時間内に完了しませんでした",detail:error instanceof Error?error.message:String(error)})}

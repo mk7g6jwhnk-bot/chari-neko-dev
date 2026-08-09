@@ -1,0 +1,13 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+const source=fs.readFileSync(new URL("../public/app.mjs",import.meta.url),"utf8");
+assert.match(source,/primary-screening:v5/);
+assert.match(source,/SCREENING_CANDIDATE_SCAN_LIMIT=24/);
+assert.match(source,/screeningDeadlineCandidates/);
+assert.match(source,/candidateSource="deadline"/);
+assert.match(source,/candidatePool.length<SCREENING_MIN_ROWS/);
+assert.match(source,/failureDetails/);
+assert.match(source,/取得できなかったR/);
+assert.match(source,/FALLBACK_DEEP_DIVE_SCAN_LIMIT=6/);
+assert.match(source,/if\(done>=limit\)break/);
+console.log("PASS screening deadline-first supplementation");
