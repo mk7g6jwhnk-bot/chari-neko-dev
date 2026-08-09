@@ -24,5 +24,8 @@ assert.ok(cMakuri&&aBante&&bMakuri);
 assert.equal(cMakuri.priority,"main");
 assert.equal(aBante.priority,"main","a near-top branch on another line must remain a main-scenario candidate");
 assert.notEqual(cMakuri.primaryLineId,aBante.primaryLineId);
+const cLead=branches.find(branch=>branch.id==="LEAD-C");
+assert.ok(cLead);
+assert.equal(cLead.priority,"main","a branch can remain main below 90% of the top when it belongs to the adaptive upper score cluster");
 assert.equal(bMakuri.priority,"sub");
 console.log("Keirin global main branches passed:",cMakuri.label,cMakuri.score.toFixed(3),aBante.label,aBante.score.toFixed(3));

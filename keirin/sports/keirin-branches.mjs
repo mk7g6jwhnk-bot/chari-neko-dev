@@ -36,14 +36,35 @@ export function generateKeirinBranches({scored,lines,lineConfidence}){
 
   const enabled=branches.filter(branch=>branch.firstCandidates.length&&branch.enabled).sort(compareBranch);
   const structured=enabled.filter(branch=>["LEADER_HOLD","BANTE_SASHI","MAKURI_SUCCESS"].includes(branch.branchType));
-  const bestStructuredScore=structured[0]?.score||0;
-  const mainScoreFloor=bestStructuredScore*.90;
+  const mainStructuredIds=new Set(selectAdaptiveMainCluster(structured).map(branch=>branch.id));
   return enabled.map(branch=>({
     ...branch,
-    // Main-scenario candidates are compared across every official line.
-    // Do not lock the race to the line that happens to own the top branch.
-    priority:structured.includes(branch)&&(bestStructuredScore>0&&branch.score>=mainScoreFloor)?"main":structured.includes(branch)?"sub":"risk"
+    // Compare structural scenarios across every official line, then separate the
+    // upper score cluster from the lower cluster using the score distribution itself.
+    // No fixed percentage-to-top cutoff is used.
+    priority:structured.includes(branch)?(mainStructuredIds.has(branch.id)?"main":"sub"):"risk"
   }));
+}
+
+export function selectAdaptiveMainCluster(structuredBranches=[]){
+  const sorted=[...structuredBranches].sort(compareBranch);
+  if(sorted.length<=1)return sorted;
+  const scores=sorted.map(branch=>Number(branch.score)||0);
+  const range=scores[0]-scores[scores.length-1];
+  if(range<=1e-9)return sorted;
+
+  let bestSplit=1;
+  let bestLoss=Infinity;
+  for(let split=1;split<sorted.length;split+=1){
+    const high=scores.slice(0,split);
+    const low=scores.slice(split);
+    const loss=sse(high)+sse(low);
+    if(loss<bestLoss-1e-12){
+      bestLoss=loss;
+      bestSplit=split;
+    }
+  }
+  return sorted.slice(0,bestSplit);
 }
 
 function part(key,value,weight){return{key,value:Number(value)||0,weight,contribution:(Number(value)||0)*weight}}
@@ -54,3 +75,4 @@ function make({id,label,scenario,branchType,scoreParts=[],firstCandidateScores={
 }
 function compareBranch(a,b){return(b.score-a.score)||a.id.localeCompare(b.id,"en")}
 function avg(values){const valid=values.filter(Number.isFinite);return valid.length?valid.reduce((sum,value)=>sum+value,0)/valid.length:0}
+function sse(values){if(!values.length)return 0;const mean=avg(values);return values.reduce((sum,value)=>sum+(value-mean)**2,0)}

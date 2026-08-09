@@ -1,12 +1,7 @@
-# v26 global-main-branches
+# チャリ猫 Branch Deploy
 
-- Removes the single-main-line lock from Keirin branch selection.
-- Structured branches (先行押し切り / 番手差し / まくり) are compared across all official lines.
-- Any structured branch scoring at least 90% of the top structured branch is retained as a main-scenario candidate, regardless of line.
-- MAIN/COVER purchase logic is otherwise unchanged from v23; this isolates the line-lock correction for audit.
-- Branch audit now shows all main-scenario candidate branch labels and line ids.
-- Engine version: KEIRIN-0.5.4-global-main-branches.
-
-# UI
-
-- UI remains v24 quick-navigation/deadlines plus v25 branch-prior audit.
+- UI bundle: v27
+- Keirin engine: `KEIRIN-0.5.5-adaptive-main-cluster`
+- Main-branch selection: all official lines are compared together; a two-cluster natural-break split of structured branch scores chooses the upper main-scenario cluster.
+- Removed from main-branch selection: fixed `top score × 90%` cutoff.
+- Prediction terminal generation, weighted support, purchase classification thresholds, odds handling, and UI v24 navigation/deadline features are otherwise unchanged from v26.

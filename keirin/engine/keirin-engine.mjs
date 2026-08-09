@@ -21,7 +21,7 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
   if(lineBlocked){purchase.noBet=true;purchase.noBetReason="LINE_DATA_UNAVAILABLE";purchase.purchaseCandidateCountBeforeCompression=0;purchase.purchaseCandidateCountAfterCompression=0;purchase.finalBetCount=0;purchase.minimumRequired=0;}
 
   return{
-    engineVersion:"KEIRIN-0.5.4-global-main-branches",
+    engineVersion:"KEIRIN-0.5.5-adaptive-main-cluster",
     raceId:race.id,
     lineConfidence:race.lineConfidence,
     scored,lines,branches,terminals:classified,
@@ -53,7 +53,12 @@ function buildBranchSelectionAudit(branches){
   const topStructured=structured[0]||null;
   const topStructuredScore=Number(topStructured?.score)||0;
   const mainBranches=structured.filter(branch=>branch.priority==="main");
+  const subBranches=structured.filter(branch=>branch.priority==="sub");
   const topScore=Number(sorted[0]?.score)||0;
+  const mainScores=mainBranches.map(branch=>Number(branch.score)||0);
+  const subScores=subBranches.map(branch=>Number(branch.score)||0);
+  const mainMinScore=mainScores.length?Math.min(...mainScores):null;
+  const nextSubScore=subScores.length?Math.max(...subScores):null;
   return{
     totalBranchScore:totalScore,
     topBranchId:sorted[0]?.id||null,
@@ -62,12 +67,21 @@ function buildBranchSelectionAudit(branches){
     topStructuredBranchId:topStructured?.id||null,
     topStructuredBranchLabel:topStructured?.label||null,
     topStructuredScore,
-    mainSelectionMode:"GLOBAL_STRUCTURED_SCORE_BAND",
+    mainSelectionMode:"ADAPTIVE_SCORE_CLUSTER",
     mainLineId:null,
     mainLineIds:[...new Set(mainBranches.map(branch=>branch.primaryLineId).filter(Boolean))],
     mainBranchIds:mainBranches.map(branch=>branch.id),
     mainBranchLabels:mainBranches.map(branch=>branch.label),
-    mainPriorityRatio:.90,
+    mainPriorityRatio:null,
+    adaptiveSplit:{
+      mainCount:mainBranches.length,
+      subCount:subBranches.length,
+      mainMinScore,
+      nextSubScore,
+      cutGap:mainMinScore!=null&&nextSubScore!=null?mainMinScore-nextSubScore:null,
+      mainMean:mean(mainScores),
+      subMean:mean(subScores)
+    },
     rows:sorted.map(branch=>({
       id:branch.id,
       label:branch.label,
@@ -82,3 +96,4 @@ function buildBranchSelectionAudit(branches){
     }))
   };
 }
+function mean(values){return values.length?values.reduce((sum,value)=>sum+value,0)/values.length:null}
