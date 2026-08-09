@@ -1,135 +1,50 @@
+
 import * as cheerio from "cheerio";
 import { normalizeText, absoluteUrl } from "./utils.mjs";
 
 const VENUES = [
 ["11","函館"],["12","青森"],["13","いわき平"],["21","弥彦"],["22","前橋"],["23","取手"],
 ["24","宇都宮"],["25","大宮"],["26","西武園"],["27","京王閣"],["28","立川"],["31","松戸"],
-["34","川崎"],["35","平塚"],["36","小田原"],["37","伊東"],["38","静岡"],
+["32","千葉"],["34","川崎"],["35","平塚"],["36","小田原"],["37","伊東"],["38","静岡"],
 ["42","名古屋"],["43","岐阜"],["44","大垣"],["45","豊橋"],["46","富山"],["47","松阪"],
 ["48","四日市"],["51","福井"],["53","奈良"],["54","向日町"],["55","和歌山"],["56","岸和田"],
 ["61","玉野"],["62","広島"],["63","防府"],["71","高松"],["73","小松島"],["74","高知"],
 ["75","松山"],["81","小倉"],["83","久留米"],["84","武雄"],["85","佐世保"],["86","別府"],["87","熊本"]
 ];
-const VENUE_BY_NAME = new Map(VENUES.map(([code, name]) => [name, code]));
 
-/**
- * 月間日程表の「ヘッダー上の実際の列番号」を基準に対象日を特定する。
- * 以前のように先頭セルの次を1日と仮定しない。
- */
 export function parseScheduleHtml(html, baseUrl, targetDate) {
-  const $ = cheerio.load(html);
-  const target = String(targetDate || "");
-  const day = Number(target.slice(6, 8));
-  const meetings = [];
-  const auditedRows = [];
+  const $ = cheerio.load(html), meetings = [], seen = new Set();
 
-  if (!/^\d{8}$/.test(target) || day < 1 || day > 31) {
-    return { ok:false, meetings:[], diagnostics:{ targetDate:target, requestedDay:day||0, error:"target-date-invalid", parserMode:"header-column-v053" } };
-  }
+  $("a[href]").each((_, el) => {
+    const href = $(el).attr("href") || "";
+    const text = normalizeText($(el).text());
+    const context = normalizeText($(el).closest("tr,li,div,section").text());
+    const absolute = absoluteUrl(href, baseUrl);
+    if (!absolute) return;
 
-  $("table").each((tableIndex, tableElement) => {
-    const table = $(tableElement);
-    const header = findHeaderMap($, table, day);
-    if (!header || !header.dayToColumn.has(day)) return;
-    const targetColumn = header.dayToColumn.get(day);
+    const venue = VENUES.map(([code,name])=>({code,name}))
+      .find(v => `${text} ${context}`.includes(v.name));
+    if (!venue) return;
 
-    table.find("tr").each((rowIndex, rowElement) => {
-      const row = $(rowElement);
-      const cells = row.children("th,td").toArray();
-      const venueCell = $(cells[header.venueIndex]);
-      const venueCellText = normalizeText(venueCell.text());
-      const venueName = [...VENUE_BY_NAME.keys()].find(name => venueCellText.includes(name));
-      if (!venueName) return;
-      const venueCode = VENUE_BY_NAME.get(venueName);
-      const targetCellElement = findCellAtLogicalColumn($, cells, targetColumn);
-      if (!targetCellElement) return;
-      const targetCell = $(targetCellElement);
+    if (!/race|kaisai|開催|出走|program|card/i.test(`${href} ${text} ${context}`)) return;
 
-      const images = targetCell.find("img").toArray().map(image => ({
-        src:String($(image).attr("src")||"").trim(),
-        alt:normalizeText($(image).attr("alt")||""),
-        title:normalizeText($(image).attr("title")||"")
-      }));
-      const evidenceText = normalizeText(targetCell.text());
-      const evidence = images.map(x=>`${x.src} ${x.alt} ${x.title}`).join(" ");
-      const hasEventImage = images.some(x => !/kaisaihuka|開催不可|spacer|blank/i.test(`${x.src} ${x.alt} ${x.title}`));
-      const hasGradeText = /(?:GⅠ|G1|GⅡ|G2|GⅢ|G3|FⅠ|F1|FⅡ|F2|GP)/i.test(`${evidenceText} ${evidence}`);
-      const links = targetCell.find("a[href]").toArray().map(a => ({
-        href:String($(a).attr("href")||"").trim(),
-        text:normalizeText($(a).text()),
-        url:absoluteUrl(String($(a).attr("href")||""), baseUrl)
-      })).filter(x => x.url && /^https:\/\/(?:www\.)?keirin\.jp\//i.test(x.url));
-      const onclickUrls = targetCell.find("[onclick]").toArray().flatMap(el => {
-        const raw=String($(el).attr("onclick")||"");
-        const found=[...raw.matchAll(/["']([^"']+(?:race|kaisai|program|odds)[^"']*)["']/ig)].map(m=>absoluteUrl(m[1],baseUrl));
-        return found.filter(Boolean).map(url=>({href:url,text:"onclick",url}));
-      });
-      const postLinks = targetCell.find("[data-pprm-href][data-pprm-encp][data-pprm-dkbn]").toArray().flatMap(el => {
-        const postPath=String($(el).attr("data-pprm-href")||"").trim();
-        const encp=String($(el).attr("data-pprm-encp")||"").trim();
-        const dkbn=String($(el).attr("data-pprm-dkbn")||"").trim();
-        const disp=dkbn==="1"?"PJ0301":dkbn==="2"?"PJ0302":"";
-        const url=absoluteUrl(postPath,baseUrl);
-        if(!url||!encp||!disp||!/^https:\/\/(?:www\.)?keirin\.jp\//i.test(url)) return [];
-        return [{href:postPath,text:"data-pprm",url,method:"POST",postPath,encp,dkbn,disp}];
-      });
-      const officialLinks=[...postLinks,...links,...onclickUrls];
-      const included=(hasEventImage||hasGradeText||officialLinks.length>0);
+    const key = `${venue.code}|${absolute}`;
+    if (seen.has(key)) return;
+    seen.add(key);
 
-      auditedRows.push({tableIndex,rowIndex,venueCode,venueName,targetColumn,included,imageCount:images.length,officialLinkCount:officialLinks.length,evidence:images.map(x=>x.src||x.alt).filter(Boolean).slice(0,6)});
-      if(!included) return;
-
-      meetings.push({
-        venueCode, venueName, date:target,
-        discoveredUrl:officialLinks[0]?.url || "",
-        officialRequest:postLinks[0] ? {
-          method:"POST", postPath:postLinks[0].postPath, url:postLinks[0].url,
-          encp:postLinks[0].encp, dkbn:postLinks[0].dkbn, disp:postLinks[0].disp
-        } : null,
-        officialLinks,
-        contextText:evidenceText.slice(0,240),
-        source:"header-column-target-cell",
-        scheduleEvidence:{tableIndex,targetColumn,images,hasEventImage,hasGradeText}
-      });
+    meetings.push({
+      venueCode:venue.code,
+      venueName:venue.name,
+      date:targetDate,
+      discoveredUrl:absolute,
+      linkText:text,
+      contextText:context.slice(0,240)
     });
   });
 
-  const best = new Map();
-  for(const m of meetings){ const key=`${m.date}|${m.venueCode}`; const prev=best.get(key); if(!prev || (!prev.discoveredUrl && m.discoveredUrl)) best.set(key,m); }
-  const deduped=[...best.values()].sort((a,b)=>Number(a.venueCode)-Number(b.venueCode));
-  return { ok:true, meetings:deduped, diagnostics:{meetingCount:deduped.length,auditedVenueCount:auditedRows.length,title:normalizeText($("title").text()),targetDate:target,requestedDay:day,parserMode:"target-day-cell-grade-evidence-v052",rows:auditedRows} };
-}
-
-function findHeaderMap($, table, day){
-  let best=null;
-  table.find("tr").each((_,tr)=>{
-    const cells=$(tr).children("th,td").toArray();
-    const dayToColumn=new Map();
-    let venueIndex=0;
-    let logicalColumn=0;
-    cells.forEach((cell,index)=>{
-      const text=normalizeText($(cell).text());
-      if(/競輪場/.test(text)) venueIndex=index;
-      if(/^\d{1,2}$/.test(text)){
-        const n=Number(text); if(n>=1&&n<=31&&!dayToColumn.has(n)) dayToColumn.set(n,logicalColumn);
-      }
-      logicalColumn += readColspan($, cell);
-    });
-    if(dayToColumn.has(day) && (!best || dayToColumn.size>best.dayToColumn.size)) best={dayToColumn,venueIndex};
-  });
-  return best;
-}
-
-function findCellAtLogicalColumn($, cells, targetColumn){
-  let logicalColumn=0;
-  for(const cell of cells){
-    const colspan=readColspan($,cell);
-    if(targetColumn>=logicalColumn && targetColumn<logicalColumn+colspan) return cell;
-    logicalColumn+=colspan;
-  }
-  return null;
-}
-
-function readColspan($,cell){
-  return Math.max(1,Number.parseInt($(cell).attr("colspan")||"1",10)||1);
+  return {
+    ok:meetings.length>0,
+    meetings,
+    diagnostics:{meetingCount:meetings.length,title:normalizeText($("title").text())}
+  };
 }

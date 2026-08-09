@@ -1,0 +1,10 @@
+import assert from "node:assert/strict";
+import {generateKeirinBranches} from "../keirin/sports/keirin-branches.mjs";
+const scored=[1,2,3,4,5,6,7].map((number,i)=>({id:String(number),number,role:"単騎",roleScores:{first:5+i*.2},evidence:{start:4+i*.5,sprint:5+(6-i)*.2,finish:5,tracking:5,recent:5,stamina:5}}));
+const branches=generateKeirinBranches({scored,lines:[],lineConfidence:"高",raceCategory:"girls"});
+assert.ok(branches.some(b=>b.label.includes("主導権先行")));
+assert.ok(branches.some(b=>b.label.includes("まくり")));
+const lead7=branches.find(b=>b.id==="GIRLS-LEAD-7");
+assert.deepEqual(lead7.firstCandidates,["7"]);
+assert.equal(lead7.primaryLineId,null);
+console.log("PASS girls dynamic lead/makuri branching");

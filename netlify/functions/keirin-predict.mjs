@@ -1,8 +1,9 @@
 import { inferLines } from "../../keirin/parser/line-parser.mjs";
-import { parseKeirinTrifectaOddsHtml } from "../../keirin/parser/odds-parser.mjs";
 import { runKeirinEngine } from "../../keirin/engine/keirin-engine.mjs";
+import { applyRecentFormEvidence } from "../../keirin/recent-form/recent-form.mjs";
+import { applyStartPowerEvidence } from "../../keirin/start-power/start-power.mjs";
+import { applyKimariteAbilities } from "../../keirin/kimarite/kimarite-abilities.mjs";
 import { jsonResponse } from "../../keirin/parser/utils.mjs";
-import { createNetlifyOfficialLineStore, resolveOfficialLines } from "../lib/keirin-official-line-store.mjs";
 
 const VENUE_CODE_BY_NAME = {
   函館: "11", 青森: "12", いわき平: "13", 弥彦: "21", 前橋: "22",
@@ -17,17 +18,12 @@ const VENUE_CODE_BY_NAME = {
 };
 
 export default async function handler(req) {
-  return handleKeirinPredict(req);
-}
-
-export async function handleKeirinPredict(req, { officialLineStore } = {}) {
   const url = new URL(req.url);
   const date = url.searchParams.get("date") || "";
   const venueName = url.searchParams.get("venueName") || "競輪場";
   const raceNo = Number(url.searchParams.get("raceNo") || 0);
   const budget = Number(url.searchParams.get("budget") || 3000);
   const raceCardUrl = url.searchParams.get("raceCardUrl") || "";
-  const oddsUrl = url.searchParams.get("oddsUrl") || "";
   const venueCode =
     url.searchParams.get("venueCode") ||
     readVenueCode(raceCardUrl) ||
@@ -72,14 +68,27 @@ export async function handleKeirinPredict(req, { officialLineStore } = {}) {
 
     const officialData = browserResult.data.officialData || {};
     const basic = officialData.basic || {};
-    const officialParticipants = Array.isArray(officialData.participants)
+    const rawOfficialParticipants = Array.isArray(officialData.participants)
       ? officialData.participants
       : [];
-    const currentOfficialLines = Array.isArray(officialData.lines)
+    const officialParticipants = hydrateParticipantEvidence(
+      rawOfficialParticipants,
+      officialData,
+      browserResult.data
+    );
+    const officialLines = Array.isArray(officialData.lines)
       ? officialData.lines
       : [];
 
-    const participants = officialParticipants.map(adaptParticipant);
+    const raceCategory = detectRaceCategory({ basic, participants: officialParticipants });
+    const participantContext = {
+      raceDate: normalizeDate(basic.date) || date,
+      raceStartTime: basic.startTime || "",
+      venueCode: String(venueCode).padStart(2, "0"),
+      raceNo: Number(basic.raceNo || raceNo),
+      raceCategory
+    };
+    const participants = adaptParticipantsForPrediction(officialParticipants, participantContext);
     if (participants.length < 5) {
       return jsonResponse(422, {
         ok: false,
@@ -89,23 +98,10 @@ export async function handleKeirinPredict(req, { officialLineStore } = {}) {
       });
     }
 
-    const browserAudit = browserResult.data.audit || {};
-    const lineResolution = await resolveOfficialLines({
-      request: { date, venueCode, raceNo },
-      identity: {
-        identityPassed: browserAudit.identityPassed === true,
-        date: normalizeDate(basic.date || browserAudit.actual?.date),
-        venueCode: browserAudit.expected?.venueCode || "",
-        raceNo: Number(basic.raceNo || browserAudit.actual?.raceNo || 0)
-      },
-      currentLines: currentOfficialLines,
-      venueName: basic.venueName || venueName,
-      buildLineText,
-      store: officialLineStore || createNetlifyOfficialLineStore()
-    });
-    const officialLines = lineResolution.lines;
-    const lineText = lineResolution.lineText;
-    const line = inferLines({ participants, lineText });
+    const lineText = buildLineText(officialLines);
+    const line = raceCategory === "girls"
+      ? resolveGirlsDynamicPositions({ participants })
+      : resolveOfficialLines({ participants, officialLines, lineText });
     const race = {
       id: `${date}-${basic.venueName || venueName}-${basic.raceNo || raceNo}`,
       venue: basic.venueName || venueName,
@@ -115,19 +111,15 @@ export async function handleKeirinPredict(req, { officialLineStore } = {}) {
       raceName: basic.raceName || "",
       grade: basic.grade || "",
       className: basic.className || "",
+      raceCategory,
+      lineMode: raceCategory === "girls" ? "girls_dynamic" : "official_line",
       deadline: basic.deadline || "",
       startTime: basic.startTime || "",
       lineConfidence: line.confidence,
       participants: line.participants
     };
 
-    const browserOdds = normalizeBrowserOdds(officialData.odds);
-    const htmlOdds = browserOdds.ok
-      ? null
-      : await fetchOddsFromUrl(oddsUrl, { date, venueName, venueCode, raceNo });
-    const odds = browserOdds.ok
-      ? browserOdds
-      : htmlOdds || browserOdds;
+    const odds = normalizeOfficialOdds(officialData.odds);
     const prediction = runKeirinEngine({
       race,
       oddsByOrder: odds.odds,
@@ -140,26 +132,27 @@ export async function handleKeirinPredict(req, { officialLineStore } = {}) {
       odds,
       prediction,
       officialData,
-      lineText,
-      lineSource: lineResolution.lineSource,
-      lineFetchedAt: lineResolution.fetchedAt,
       browserAudit: browserResult.data.audit || null,
       dataQuality: {
         lineConfidence: line.confidence,
-        lineSource: lineResolution.lineSource,
-        lineFetchedAt: lineResolution.fetchedAt,
-        effectiveLineCount: officialLines.length,
-        lineStore: lineResolution.storeName,
-        lineCacheKey: lineResolution.cacheKey,
-        oddsAvailable: odds.ok,
+        lineMode: raceCategory === "girls" ? "girls_dynamic" : "official_line",
+        lineSource: line.source || null,
+        officialLineItemCount: officialLines.length,
+        officialLineText: lineText,
+        oddsAvailable: Object.keys(odds.odds).length > 0,
         participantCount: participants.length,
-        browserVersion: browserResult.data.diagnostics?.version || null
+        browserVersion: browserResult.data.diagnostics?.version || null,
+        officialProfileEvidenceCount: participants.filter(item => item.officialProfileEvidence?.identityPassed === true).length,
+        officialKimariteEvidenceCount: participants.filter(item => item.officialKimariteEvidence?.identityPassed === true).length,
+        nonNeutralRecentFormCount: participants.filter(item => Math.abs(Number(item.recentForm) - 5) > 0.000001).length,
+        nonNeutralStartPowerCount: participants.filter(item => Math.abs(Number(item.startPower) - 5) > 0.000001).length,
+        nonNeutralKimariteAbilityCount: participants.filter(item =>
+          [item.sprintPower, item.finishPower, item.trackingSkill].some(value => Math.abs(Number(value) - 5) > 0.000001)
+        ).length
       },
       warnings: [
         ...line.warnings,
-        lineResolution.lineSource === "cached-official" ? "取得済み公式ラインを使用" : null,
-        lineResolution.storageWarning,
-        !odds.ok ? "オッズ未取得・購入判断保留" : null
+        Object.keys(odds.odds).length ? null : "オッズ未取得・高配当判定保留"
       ].filter(Boolean),
       checkedAt: new Date().toISOString()
     });
@@ -181,202 +174,487 @@ async function requestBrowserService(base, params) {
   });
 
   const endpoint = `${base}/keirin/race?${query}`;
+  const attempts = [];
   const startedAt = Date.now();
+  const totalBudgetMs = 54000;
 
-  try {
-    const response = await fetch(endpoint, {
-      headers: { accept: "application/json" },
-      signal: AbortSignal.timeout(45000)
-    });
-    const text = await response.text();
-    let data = null;
-    try { data = text ? JSON.parse(text) : null; } catch {}
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    const elapsed = Date.now() - startedAt;
+    const remaining = totalBudgetMs - elapsed;
+    if (remaining < 5000) break;
+    const timeoutMs = attempt === 1
+      ? Math.min(42000, remaining - 1000)
+      : Math.min(34000, remaining - 1000);
 
-    if (!text) {
+    try {
+      const response = await fetch(endpoint, {
+        headers: { accept: "application/json" },
+        signal: AbortSignal.timeout(Math.max(4000, timeoutMs))
+      });
+      const text = await response.text();
+      let data = null;
+      try { data = JSON.parse(text); } catch {}
+
+      attempts.push({
+        endpoint: endpoint.replace(base, ""),
+        attempt,
+        status: response.status,
+        parsed: data !== null,
+        error: data?.error || null
+      });
+
+      if (data && (data.officialData || data.ok === false)) {
+        const ok = response.ok && data.ok !== false;
+        if (ok) {
+          return { ok: true, status: response.status, data: { ...data, endpointAudit: attempts } };
+        }
+        const retryable = response.status >= 500 || /page crashed|target closed|browser|navigation|timeout|timed out|execution context/i.test(String(data?.error || ""));
+        if (attempt < 2 && retryable && Date.now() - startedAt < 15000) {
+          await sleep(1200);
+          continue;
+        }
+        return { ok: false, status: response.status, data: { ...data, endpointAudit: attempts } };
+      }
+
+      const retryableStatus = response.status >= 500;
+      if (attempt < 2 && retryableStatus && Date.now() - startedAt < 15000) {
+        await sleep(1200);
+        continue;
+      }
       return {
         ok: false,
         status: response.status || 502,
         data: {
           ok: false,
-          error: "競輪ブラウザサービスから空の応答が返りました",
-          endpointAudit: [{ endpoint: "/keirin/race", status: response.status, elapsedMs: Date.now() - startedAt }]
+          error: `競輪ブラウザサービスの応答をJSONとして確認できません（HTTP ${response.status}）`,
+          endpointAudit: attempts
         }
       };
-    }
-
-    if (data) {
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      attempts.push({ endpoint: endpoint.replace(base, ""), attempt, error: message });
+      const timedOut = /timeout|timed out|abort/i.test(message);
+      if (attempt < 2 && !timedOut && Date.now() - startedAt < 15000) {
+        await sleep(1200);
+        continue;
+      }
       return {
-        ok: response.ok && data.ok !== false,
-        status: response.status,
+        ok: false,
+        status: 502,
         data: {
-          ...data,
-          endpointAudit: [{ endpoint: "/keirin/race", status: response.status, parsed: true, elapsedMs: Date.now() - startedAt }]
+          ok: false,
+          error: timedOut
+            ? "公式予想データ取得が時間内に完了しませんでした。数秒後に再試行してください。"
+            : "競輪ブラウザサービスへ接続できません",
+          endpointAudit: attempts
         }
       };
     }
-
-    return {
-      ok: false,
-      status: response.status || 502,
-      data: {
-        ok: false,
-        error: "競輪ブラウザサービスの応答をJSONとして読み取れませんでした",
-        responsePreview: text.slice(0, 300),
-        endpointAudit: [{ endpoint: "/keirin/race", status: response.status, parsed: false, elapsedMs: Date.now() - startedAt }]
-      }
-    };
-  } catch (error) {
-    const timedOut = error instanceof Error && /timeout|abort/i.test(error.message);
-    return {
-      ok: false,
-      status: 504,
-      data: {
-        ok: false,
-        error: timedOut
-          ? "競輪公式データ取得が45秒以内に完了しませんでした"
-          : "競輪ブラウザサービスへの接続に失敗しました",
-        detail: error instanceof Error ? error.message : String(error),
-        endpointAudit: [{ endpoint: "/keirin/race", elapsedMs: Date.now() - startedAt }]
-      }
-    };
   }
-}
 
-function normalizeBrowserOdds(value) {
-  const raw = value && typeof value === "object" ? value : {};
-  const sourceOdds = raw.odds && typeof raw.odds === "object" ? raw.odds : {};
-  const odds = {};
-  for (const [key, oddValue] of Object.entries(sourceOdds)) {
-    const match = String(key).match(/^([1-9])-([1-9])-([1-9])$/);
-    const odd = Number(oddValue);
-    if (!match || new Set(match.slice(1)).size !== 3) continue;
-    if (!Number.isFinite(odd) || odd <= 1) continue;
-    odds[key] = odd;
-  }
   return {
-    ok: Object.keys(odds).length > 0,
-    odds,
-    diagnostics: {
-      ...(raw.diagnostics || {}),
-      source: raw.diagnostics?.source || "browser-official-json",
-      parsedCount: Object.keys(odds).length
-    }
+    ok: false,
+    status: 502,
+    data: { ok: false, error: "競輪ブラウザサービスの再試行でも取得できませんでした", endpointAudit: attempts }
   };
 }
 
-async function fetchOddsFromUrl(oddsUrl, context) {
-  if (!oddsUrl) {
-    return { ok: false, odds: {}, diagnostics: { source: "odds-url-missing" } };
-  }
+function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 
-  let parsedUrl;
-  try {
-    parsedUrl = new URL(oddsUrl);
-  } catch {
-    return { ok: false, odds: {}, diagnostics: { source: "odds-url-invalid" } };
-  }
 
-  if (!/(^|\.)keirin\.jp$/i.test(parsedUrl.hostname)) {
-    return { ok: false, odds: {}, diagnostics: { source: "odds-url-domain-rejected" } };
-  }
+export function hydrateParticipantEvidence(items, officialData = {}, browserData = {}) {
+  const profileIndex = buildEvidenceIndex([
+    officialData.officialProfiles, officialData.profiles, officialData.participantProfiles,
+    browserData.officialProfiles, browserData.profiles, browserData.participantProfiles
+  ]);
+  const kimariteIndex = buildEvidenceIndex([
+    officialData.officialKimariteCounts, officialData.kimariteCounts, officialData.participantKimariteCounts,
+    browserData.officialKimariteCounts, browserData.kimariteCounts, browserData.participantKimariteCounts
+  ]);
 
-  try {
-    const response = await fetch(parsedUrl, {
-      redirect: "follow",
-      headers: {
-        accept: "text/html,application/xhtml+xml",
-        "accept-language": "ja",
-        "user-agent": "Mozilla/5.0 (compatible; ChariNekoDev/0.5; personal-use)"
-      },
-      signal: AbortSignal.timeout(30000)
-    });
-    const html = await response.text();
-    if (!response.ok) {
-      return {
-        ok: false,
-        odds: {},
-        diagnostics: { source: "odds-url-http", status: response.status }
-      };
-    }
-    const result = parseKeirinTrifectaOddsHtml(html, {
-      ...context,
-      sourceUrl: parsedUrl.toString()
-    });
+  return (Array.isArray(items) ? items : []).map(item => {
+    const registration = normalizeRegistration(item.registration);
+    const profile = firstEvidence([
+      item.officialProfile, item.profile, item.profileEvidence, item.racerProfile,
+      profileIndex.get(registration)
+    ]);
+    const kimarite = firstEvidence([
+      item.officialKimariteCounts, item.kimariteCounts, item.kimariteEvidence, item.jsj068,
+      kimariteIndex.get(registration)
+    ]);
     return {
-      ...result,
-      diagnostics: {
-        ...result.diagnostics,
-        source: "discovered-odds-html",
-        status: response.status
-      }
+      ...item,
+      officialProfile: canonicalProfileEnvelope(profile, item, registration),
+      officialKimariteCounts: canonicalKimariteEnvelope(kimarite, item, registration),
+      officialTotalStarts: item.officialTotalStarts ?? profile?.officialTotalStarts ?? profile?.data?.officialTotalStarts ?? null
     };
-  } catch (error) {
-    return {
-      ok: false,
-      odds: {},
-      diagnostics: {
-        source: "odds-url-fetch-error",
-        error: error instanceof Error ? error.message : String(error)
-      }
-    };
-  }
+  });
 }
 
-export function adaptParticipant(item) {
-  const number = Number(item.number || 0);
-  const score = finite(item.score, 5);
-  const escape = finite(item.escapeCount, 0);
-  const makuri = finite(item.makuriCount, 0);
-  const difference = finite(item.differenceCount, 0);
-  const mark = finite(item.markCount, 0);
-  const back = finite(item.backCount, 0);
-  const activity = escape + makuri + difference + mark;
+function buildEvidenceIndex(containers) {
+  const index = new Map();
+  for (const container of containers) {
+    if (!container) continue;
+    const values = Array.isArray(container)
+      ? container
+      : typeof container === "object"
+        ? Object.entries(container).map(([key, value]) => ({ key, value }))
+        : [];
+    for (const entry of values) {
+      const value = entry?.value ?? entry;
+      if (!value || typeof value !== "object") continue;
+      const registration = normalizeRegistration(
+        value.registration ?? value.requestedRegistration ?? value.snum ?? value.data?.registration ?? entry?.key
+      );
+      if (registration && registration !== "000000") index.set(registration, value);
+    }
+  }
+  return index;
+}
 
+function firstEvidence(candidates) {
+  for (const candidate of candidates) {
+    if (!candidate || typeof candidate !== "object") continue;
+    if (candidate.data && typeof candidate.data === "object") return { ...candidate, ...candidate.data, ...pickEnvelope(candidate) };
+    if (candidate.profile && typeof candidate.profile === "object") return { ...candidate, ...candidate.profile, ...pickEnvelope(candidate) };
+    if (candidate.counts && typeof candidate.counts === "object") return { ...candidate, ...candidate.counts, ...pickEnvelope(candidate) };
+    return candidate;
+  }
+  return null;
+}
+
+function pickEnvelope(value) {
   return {
+    identityPassed: value.identityPassed,
+    targetIdentityPassed: value.targetIdentityPassed,
+    registration: value.registration ?? value.requestedRegistration,
+    requestedRegistration: value.requestedRegistration,
+    fetchedAt: value.fetchedAt,
+    sourceType: value.sourceType,
+    sourcePath: value.sourcePath,
+    target: value.target
+  };
+}
+
+function canonicalProfileEnvelope(profile, participant, registration) {
+  if (!profile || typeof profile !== "object") return null;
+  const returnedRegistration = normalizeRegistration(profile.registration ?? profile.requestedRegistration ?? profile.snum ?? registration);
+  if (registration && returnedRegistration !== registration) return null;
+  const participantIdentityPassed = participant.identityPassed === true || participant.profileIdentityPassed === true;
+  return {
+    ...profile,
+    registration: returnedRegistration,
+    identityPassed: profile.identityPassed === true || (profile.identityPassed == null && participantIdentityPassed)
+  };
+}
+
+function canonicalKimariteEnvelope(evidence, participant, registration) {
+  if (!evidence || typeof evidence !== "object") return null;
+  const returnedRegistration = normalizeRegistration(evidence.registration ?? evidence.requestedRegistration ?? evidence.snum ?? registration);
+  if (registration && returnedRegistration !== registration) return null;
+  const participantIdentityPassed = participant.identityPassed === true || participant.kimariteIdentityPassed === true;
+  const targetIdentityPassed = evidence.targetIdentityPassed === true || (evidence.targetIdentityPassed == null && participant.targetIdentityPassed === true);
+  return {
+    ...evidence,
+    registration: returnedRegistration,
+    identityPassed: evidence.identityPassed === true || (evidence.identityPassed == null && participantIdentityPassed),
+    targetIdentityPassed
+  };
+}
+
+export function adaptParticipantsForPrediction(items, context = {}) {
+  const adapted = (Array.isArray(items) ? items : []).map(item => adaptParticipant(item, context));
+  const withRecent = applyRecentFormEvidence(adapted);
+  return withRecent.map(applyKimariteAbilities);
+}
+
+export function adaptParticipant(item, context = {}) {
+  const number = Number(item.number || 0);
+  const registration = normalizeRegistration(item.registration);
+  const officialProfileEvidence = normalizeOfficialProfileEvidence(item.officialProfile, registration, context);
+  const officialKimariteEvidence = normalizeOfficialKimariteEvidence(item.officialKimariteCounts, registration, context);
+  const participant = {
     id: String(number),
     number,
     name: item.name || `${number}番車`,
-    registration: item.registration || "",
+    registration,
     prefecture: item.prefecture || "",
     className: item.className || "",
     style: item.style || "",
-    officialScore: item.score ?? null,
-    recentForm: clamp(4.5 + score / 25),
-    startPower: clamp(4 + escape * 0.45 + back * 0.08),
-    sprintPower: clamp(4 + makuri * 0.55 + score / 40),
-    stamina: clamp(4 + back * 0.12 + escape * 0.25),
-    attackTiming: clamp(4 + (escape + makuri) * 0.35),
-    trackingSkill: clamp(4 + (difference + mark) * 0.35),
-    finishPower: clamp(4 + difference * 0.5 + score / 35),
-    lineTrust: clamp(activity ? 5 + mark * 0.2 : 5),
+    raceCategory: context.raceCategory || "unknown",
+    officialScore: nullableNumber(item.score),
+    officialProfileEvidence,
+    officialKimariteEvidence,
+    officialTotalStarts: nullableNumber(item.officialTotalStarts ?? item.officialProfile?.officialTotalStarts),
+    sparseSampleFlag: Number(item.officialTotalStarts ?? item.officialProfile?.officialTotalStarts) <= 10,
+    officialForeignFlag: item.officialForeignFlag === true || item.officialProfile?.officialForeignFlag === true,
+    recentForm: 5,
+    recentFormEvidence: { value: 5, confidence: "low", inputsUsed: [], missingInputs: ["official-profile"] },
+    startPower: 5,
+    startPowerEvidence: null,
+    sprintPower: 5,
+    stamina: 5,
+    attackTiming: 5,
+    trackingSkill: 5,
+    finishPower: 5,
+    lineTrust: 5,
     venueSuitability: 5,
     sourceType: item.sourceType || null,
     sourcePath: item.sourcePath || null
+  };
+  return applyStartPowerEvidence([participant])[0];
+}
+
+export function detectRaceCategory({ basic = {}, participants = [] } = {}) {
+  const text = [
+    basic.className, basic.raceName, basic.grade,
+    ...participants.map(item => item.className)
+  ].filter(Boolean).join(" ");
+  if (/(ガールズ|女子|Ｌ級|L級|ガ予|ガ決)/i.test(text)) return "girls";
+  return text.trim() ? "standard" : "unknown";
+}
+
+function normalizeOfficialProfileEvidence(profile, registration, context) {
+  if (!profile || typeof profile !== "object") return null;
+  if (profile.identityPassed !== true) return null;
+  if (registration && normalizeRegistration(profile.registration) !== registration) return null;
+  if (!notAfterTarget(profile.fetchedAt, context)) return null;
+  return {
+    identityPassed: true,
+    registration,
+    fetchedAt: profile.fetchedAt || null,
+    sourceType: profile.sourceType || "official-profile",
+    sourcePath: profile.sourcePath || null,
+    ridingStyle: profile.ridingStyle ?? null,
+    currentScore: nullableNumber(profile.currentScore),
+    recent4MonthScore: nullableNumber(profile.recent4MonthScore),
+    officialTotalStarts: nullableNonNegativeInteger(profile.officialTotalStarts ?? context.officialTotalStarts),
+    backCount: nullableNumber(profile.backCount),
+    homeCount: nullableNumber(profile.homeCount),
+    winRate: nullableNumber(profile.winRate),
+    quinellaRate: nullableNumber(profile.quinellaRate),
+    trioRate: nullableNumber(profile.trioRate),
+    rateUnit: profile.rateUnit || null,
+    winningStyleRates: {
+      escape: nullableNumber(profile.winningStyleRates?.escape),
+      makuri: nullableNumber(profile.winningStyleRates?.makuri),
+      difference: nullableNumber(profile.winningStyleRates?.difference),
+      mark: nullableNumber(profile.winningStyleRates?.mark)
+    },
+    scoreHistory: Array.isArray(profile.scoreHistory) ? profile.scoreHistory : []
+  };
+}
+
+function normalizeOfficialKimariteEvidence(evidence, registration, context) {
+  if (!evidence || typeof evidence !== "object") return null;
+  if (evidence.identityPassed !== true || evidence.targetIdentityPassed !== true) return null;
+  if (registration && normalizeRegistration(evidence.registration ?? evidence.requestedRegistration) !== registration) return null;
+  const target = evidence.target || {};
+  if (target.date && normalizeDate(target.date) !== normalizeDate(context.raceDate)) return null;
+  if (target.venueCode && String(target.venueCode).padStart(2, "0") !== String(context.venueCode).padStart(2, "0")) return null;
+  if (target.raceNo && Number(target.raceNo) !== Number(context.raceNo)) return null;
+  if (!notAfterTarget(evidence.fetchedAt, context)) return null;
+  const result = {
+    status: "verified",
+    identityPassed: true,
+    targetIdentityPassed: true,
+    registration,
+    sourceType: evidence.sourceType || "JSJ068",
+    sourcePath: evidence.sourcePath || null,
+    fetchedAt: evidence.fetchedAt || null,
+    totalQuinellaCount: nullableNonNegativeInteger(evidence.totalQuinellaCount)
+  };
+  for (const key of ["nige", "makuri", "sasi", "mark"]) {
+    const row = evidence[key];
+    if (!row || typeof row !== "object") { result[key] = null; continue; }
+    const F_Cnt = nullableNonNegativeInteger(row.F_Cnt ?? row.first);
+    const S_Cnt = nullableNonNegativeInteger(row.S_Cnt ?? row.second);
+    const Sum_Cnt = nullableNonNegativeInteger(row.Sum_Cnt ?? row.sum ?? row.total);
+    result[key] = F_Cnt !== null && S_Cnt !== null && Sum_Cnt !== null && F_Cnt + S_Cnt === Sum_Cnt
+      ? { F_Cnt, S_Cnt, Sum_Cnt } : null;
+  }
+  return result;
+}
+
+function notAfterTarget(fetchedAt, context) {
+  if (!fetchedAt) return true;
+  const fetched = Date.parse(fetchedAt);
+  if (!Number.isFinite(fetched)) return false;
+  const date = normalizeDate(context.raceDate);
+  if (!/^\d{8}$/.test(date)) return true;
+  const time = String(context.raceStartTime || "23:59").match(/(\d{1,2}):(\d{2})/);
+  const hh = time ? Number(time[1]) : 23, mm = time ? Number(time[2]) : 59;
+  const target = Date.parse(`${date.slice(0,4)}-${date.slice(4,6)}-${date.slice(6,8)}T${String(hh).padStart(2,"0")}:${String(mm).padStart(2,"0")}:00+09:00`);
+  return !Number.isFinite(target) || fetched <= target;
+}
+
+function normalizeRegistration(value) { return String(value ?? "").replace(/\D/g, "").padStart(6, "0").slice(-6); }
+function nullableNumber(value) { if (value === null || value === undefined || value === "") return null; const n = Number(value); return Number.isFinite(n) ? n : null; }
+function nullableNonNegativeInteger(value) { const n = nullableNumber(value); return n !== null && Number.isSafeInteger(n) && n >= 0 ? n : null; }
+
+export function resolveOfficialLines({ participants, officialLines, lineText }) {
+  // The official line text is the canonical front-to-back order.
+  // JSJ036 `position` is useful for grouping/identity checks, but treating its numeric
+  // position as race-order can reverse leader/bante roles on some cards.
+  // Prefer the verified text representation whenever it covers the race sufficiently.
+  if (lineText) {
+    const parsed = inferLines({ participants, lineText });
+    if (parsed?.confidence === "高") {
+      return {
+        ...parsed,
+        source: "公式JSJ036並び表記・順序監査",
+        warnings: []
+      };
+    }
+  }
+
+  const validNumbers = new Set(participants.map(item => Number(item.number)).filter(number => number >= 1 && number <= 9));
+  const uniqueItems = [];
+  const seen = new Set();
+  for (const item of Array.isArray(officialLines) ? officialLines : []) {
+    const number = Number(item?.number);
+    if (!validNumbers.has(number) || seen.has(number)) continue;
+    const positionRaw = item?.position ?? item?.order;
+    const position = Number(positionRaw);
+    if (!Number.isFinite(position)) continue;
+    seen.add(number);
+    uniqueItems.push({ ...item, number, position });
+  }
+
+  if (uniqueItems.length >= Math.max(3, participants.length - 2)) {
+    const grouped = groupOfficialLineItems(uniqueItems);
+    const assignments = new Map();
+    grouped.forEach((group, index) => {
+      const lineId = String.fromCharCode(65 + index);
+      group.forEach((item, lineIndex) => assignments.set(item.number, {
+        lineId,
+        lineOrder: lineIndex + 1,
+        role: lineIndex === 0 ? "自力" : lineIndex === 1 ? "番手" : "三番手",
+        lineStatus: "公式並び"
+      }));
+    });
+    if (assignments.size >= Math.max(3, participants.length - 2)) {
+      return {
+        participants: participants.map(item => ({
+          ...item,
+          ...(assignments.get(Number(item.number)) || { lineId: "solo", lineOrder: 1, role: "単騎", lineStatus: "公式並び外" })
+        })),
+        source: "公式JSJ036位置・順序監査",
+        confidence: "高",
+        warnings: []
+      };
+    }
+  }
+
+  return inferLines({ participants, lineText });
+}
+
+function groupOfficialLineItems(items) {
+  const withLineId = items.filter(item => lineIdentity(item));
+  if (withLineId.length === items.length) {
+    const groups = new Map();
+    for (const item of items) {
+      const key = lineIdentity(item);
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(item);
+    }
+    return [...groups.values()].map(group => group.sort((a, b) => a.position - b.position));
+  }
+
+  const sorted = [...items].sort((a, b) => a.position - b.position);
+  const groups = [];
+  let current = [];
+  let previous = null;
+  for (const item of sorted) {
+    if (previous != null && item.position - previous > 1 && current.length) {
+      groups.push(current);
+      current = [];
+    }
+    current.push(item);
+    previous = item.position;
+  }
+  if (current.length) groups.push(current);
+  return groups;
+}
+
+function lineIdentity(item) {
+  const raw = String(item?.lineId || item?.groupId || item?.className || "").trim();
+  if (!raw) return null;
+  if (/^(?:line|group)[-_ ]?\d+$/i.test(raw)) return raw.toLowerCase().replace(/[ _]+/g, "-");
+  if (/^\d+$/.test(raw)) return `line-${raw}`;
+  return null;
+}
+
+function resolveGirlsDynamicPositions({ participants }) {
+  return {
+    participants: participants.map(item => ({
+      ...item,
+      lineId: `girls-${item.number}`,
+      lineOrder: 1,
+      role: "単騎",
+      lineStatus: "ガールズ・固定ラインなし"
+    })),
+    source: "ガールズ専用・固定ライン不使用",
+    confidence: "高",
+    warnings: []
   };
 }
 
 export function buildLineText(lines) {
   if (!lines.length) return null;
-  const ordered = [...lines]
-    .map(item => ({
-      number: Number(item.number),
-      position: Number(item.position || item.order)
-    }))
-    .filter(item => item.number >= 1 && item.number <= 9 && Number.isFinite(item.position))
-    .sort((a, b) => a.position - b.position);
-  const groups = [];
-  let group = [];
-  let previousPosition = null;
-  for (const item of ordered) {
-    if (previousPosition !== null && item.position > previousPosition + 1) {
-      groups.push(group);
-      group = [];
+
+  const withLineId = lines.filter(item => lineIdentity(item));
+  if (withLineId.length === lines.length) {
+    const groups = new Map();
+    for (const item of lines) {
+      const key = lineIdentity(item);
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(item);
     }
-    group.push(String(item.number));
-    previousPosition = item.position;
+    return [...groups.values()]
+      .map(group => group
+        .sort((a, b) => Number(a.position || a.order || 99) - Number(b.position || b.order || 99))
+        .map(item => String(item.number || ""))
+        .filter(Boolean)
+        .join(""))
+      .filter(Boolean)
+      .join(" ") || null;
   }
-  if (group.length) groups.push(group);
-  return groups.map(items => items.join("")).join(" ") || null;
+
+  const positioned = lines
+    .filter(item => Number.isFinite(Number(item.position || item.order)))
+    .sort((a, b) => Number(a.position || a.order) - Number(b.position || b.order));
+  if (!positioned.length) return null;
+
+  const groups = [];
+  let current = [];
+  let previous = null;
+  for (const item of positioned) {
+    const position = Number(item.position || item.order);
+    if (previous != null && position - previous > 1 && current.length) {
+      groups.push(current);
+      current = [];
+    }
+    current.push(item);
+    previous = position;
+  }
+  if (current.length) groups.push(current);
+  return groups
+    .map(group => group.map(item => String(item.number || "")).filter(Boolean).join(""))
+    .filter(Boolean)
+    .join(" ") || null;
+}
+
+function normalizeOfficialOdds(raw) {
+  if (!raw || typeof raw !== "object") return { ok: false, odds: {}, diagnostics: { source: "未取得" } };
+  const source = raw.odds && typeof raw.odds === "object" ? raw.odds : raw.oddsByOrder && typeof raw.oddsByOrder === "object" ? raw.oddsByOrder : {};
+  const odds = {};
+  for (const [key, value] of Object.entries(source)) {
+    const normalizedKey = String(key).replace(/[^1-9]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+    const numeric = Number(value);
+    if (/^[1-9]-[1-9]-[1-9]$/.test(normalizedKey) && Number.isFinite(numeric) && numeric > 1) odds[normalizedKey] = numeric;
+  }
+  return { ok: Object.keys(odds).length > 0, odds, diagnostics: raw.diagnostics || { source: raw.sourceType || "officialData.odds" } };
 }
 
 function readVenueCode(value) {

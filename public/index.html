@@ -1,92 +1,87 @@
 <!doctype html>
 <html lang="ja">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#08111f">
-<title>チャリ猫予想 DEV 1.0</title>
-<link rel="manifest" href="manifest.json?v=10">
-<link rel="stylesheet" href="styles.css?v=10">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#08111f">
+  <title>チャリ猫</title>
+  <link rel="manifest" href="manifest.json?v=42">
+  <link rel="stylesheet" href="styles.css?v=42">
 </head>
 <body>
-<header>
-  <div>
-    <small>BOAT / KEIRIN / AUTO</small>
-    <h1>🐈‍⬛ チャリ猫予想 <em>DEV 1.0</em></h1>
-    <p id="headerStatus">3競技統合開発版</p>
+<header class="appHeader">
+  <div class="headerLeft">
+    <button id="headerBack" class="iconBtn hidden" aria-label="前の画面へ">←</button>
+    <button id="venueSelectBtn" class="headerQuick hidden" type="button">会場選択</button>
+    <button id="raceSelectBtn" class="headerQuick hidden" type="button">レース選択</button>
   </div>
-  <button id="homeBtn">ホーム</button>
+  <button id="brand" class="brand" aria-label="ホームへ"><span>🐈‍⬛</span><span><strong>チャリ猫</strong><small id="headerStatus">今日の競輪</small></span></button>
+  <button id="homeBtn" class="iconBtn" aria-label="ホームへ">⌂</button>
 </header>
-
-<main>
-<section id="home" class="screen active">
-  <section class="hero card">
-    <small>SELECT SPORT</small>
-    <h2>競技を選択</h2>
-    <p>新機能は開発版で確認し、監査合格後に安定版へ反映します。</p>
-  </section>
-  <div class="sportGrid">
-    <button class="sport boat" data-sport="boat"><span>🚤</span><strong>ボート</strong><small>開催・展示・オッズ・予想</small></button>
-    <button class="sport keirin" data-sport="keirin"><span>🚴</span><strong>競輪</strong><small>開催・ライン・オッズ・予想</small></button>
-    <button class="sport auto" data-sport="auto"><span>🏍️</span><strong>オート</strong><small>開催・試走・走路・予想</small></button>
-    <button class="sport search" id="raceSearchBtn"><span>🔍</span><strong>横断検索</strong><small>会場・時間・配当帯で再選別</small></button>
-  </div>
-  <section class="card">
-    <h3>共通安全装置</h3>
-    <div class="safety">
-      <span>終端削除禁止</span><span>未終端枝監査</span><span>購入採否分離</span>
-      <span>実データ欠損表示</span><span>本番自動反映なし</span><span>履歴復元前提</span>
-    </div>
-  </section>
-</section>
-
-<section id="sport" class="screen">
-  <div class="pageHead">
-    <button id="backHome">← 戻る</button>
-    <div><small id="sportCode">SPORT</small><h2 id="sportTitle">競技</h2></div>
-    <span id="sportBadge" class="badge">準備中</span>
-  </div>
-
-  <section class="card">
-    <div id="sportControls"></div>
+<main id="app" aria-live="polite">
+  <section id="home" class="screen active">
+    <section class="hero card homeHero"><div><small>TODAY'S RACES</small><h1>今日のレース</h1><p>開催確認から予想・保存まで、ここから進めます。</p></div><button id="todayKeirin" class="primary">競輪を開く</button></section>
+    <section class="card compact recommendationPanel">
+      <div class="sectionHead"><div><small>今日のおすすめ</small><h2>おすすめレース</h2></div><span id="recommendationCount" class="pill">0件</span></div>
+      <div class="recommendationControls">
+        <div class="sportChecks" aria-label="競技フィルタ">
+          <label><input id="sportKeirin" type="checkbox" checked>競輪</label>
+          <label class="disabled"><input type="checkbox" disabled>ボート</label>
+          <label class="disabled"><input type="checkbox" disabled>オート</label>
+          <label class="disabled"><input type="checkbox" disabled>競馬</label>
+        </div>
+        <label class="recommendationLimit">表示件数<select id="recommendationLimit"><option value="3">3件</option><option value="5" selected>5件</option><option value="10">10件</option></select></label>
+      </div>
+      <div id="todayRecommendations" class="recommendationList"></div>
+      <p class="muted recommendationFootnote">現在は競輪のみ接続済み。今後、同じ欄で競技を横断して絞り込めます。</p>
+    </section>
+    <section class="card compact"><div class="sectionHead"><h2>保存済み予想</h2><span id="savedCount" class="pill">0件</span></div><div id="savedList" class="stack"></div></section>
   </section>
 
-  <section class="card">
-    <div class="head"><h3 id="listTitle">開催一覧</h3><span id="listCount" class="badge">0件</span></div>
-    <div id="list"></div>
+  <section id="meetings" class="screen">
+    <div class="pageTitle"><div><small>KEIRIN</small><h1>今日の競輪</h1></div><span id="meetingCount" class="pill">0会場</span></div>
+    <nav class="raceTabs" aria-label="競輪表示切替">
+      <button id="tabToday" class="raceTab active" type="button">今日のレース</button>
+      <button id="tabScreening" class="raceTab" type="button">一次選別</button>
+      <button id="tabBattle" class="raceTab" type="button">勝負レース</button>
+      <button id="tabVenues" class="raceTab" type="button">会場一覧</button>
+    </nav>
+    <section class="card compact meetingTools"><label>開催日<input id="raceDate" type="date"></label><div class="meetingToolButtons"><button id="bulkRefresh" class="primary" type="button">一括更新</button><button id="runScreening" class="secondary" type="button">一次選別</button><button id="reloadMeetings" class="secondary" type="button">開催情報を再取得</button></div><small id="bulkRefreshStatus" class="bulkRefreshStatus">締切時間・オッズをまとめて更新します。</small></section>
+    <div id="todayRaceList" class="todayRaceList"></div>
+    <div id="screeningRaceList" class="todayRaceList hidden"></div>
+    <div id="battleRaceList" class="todayRaceList hidden"></div>
+    <div id="meetingList" class="stack hidden"></div>
   </section>
-</section>
 
-<section id="races" class="screen">
-  <div class="pageHead">
-    <button id="backSport">← 戻る</button>
-    <div><small id="raceSportCode">SPORT</small><h2 id="raceTitle">レース一覧</h2></div>
-    <span id="raceCount" class="badge">0R</span>
-  </div>
-  <section class="card"><div id="raceControls"></div><div id="raceList"></div></section>
-</section>
-
-<section id="loading" class="screen">
-  <div class="pageHead"><button id="cancelLoading">← 戻る</button><h2 id="loadingTitle">解析中</h2></div>
-  <section class="card center"><div class="spinner"></div><h3 id="loadingStep">公式データを取得中</h3><p>取得・変換・展開生成・終端監査を実行しています。</p></section>
-</section>
-
-<section id="result" class="screen">
-  <div class="pageHead"><button id="backRaces">← 戻る</button><div><small id="resultSport">SPORT</small><h2 id="resultTitle">解析結果</h2></div><span id="resultBadge" class="badge ok">監査</span></div>
-  <section class="card">
-    <h2 id="recommendation">-</h2>
-    <p id="warnings"></p>
-    <div class="summary" id="resultSummary"></div>
+  <section id="races" class="screen">
+    <div class="pageTitle"><div><small id="raceDateLabel">KEIRIN</small><h1 id="venueTitle">レース一覧</h1></div><span id="raceCount" class="pill">0R</span></div>
+    <div id="raceList" class="raceGrid"></div>
   </section>
-  <section class="card">
-    <div class="bet"><h3>本線</h3><p id="mainBets">-</p></div>
-    <div class="bet"><h3>押さえ</h3><p id="backupBets">-</p></div>
-    <div class="bet"><h3 id="valueTitle">買える高配当</h3><p id="valueBets">-</p></div>
-    <div class="bet"><h3>厚め</h3><p id="strongBets">-</p></div>
+
+  <section id="detail" class="screen">
+    <div class="pageTitle"><div><small id="detailDate">-</small><h1 id="detailTitle">レース詳細</h1></div><span id="raceStatus" class="pill">状態確認中</span></div>
+    <section class="card compact"><div id="raceMeta" class="metaGrid"></div><div id="detailNotice"></div></section>
+    <section class="card compact"><div class="sectionHead"><h2>出走選手</h2><span id="participantCount" class="pill">未取得</span></div><div id="participants" class="participants"><p class="muted">予想実行時に公式情報を取得します。</p></div></section>
+    <section class="card compact"><div class="sectionHead"><h2>公式ライン</h2><span id="oddsStatus" class="pill">オッズ未取得</span></div><div id="officialLine" class="lineBox">予想実行時に取得します</div></section>
+    <section id="detailRatings" class="card compact hidden"></section>
+    <section id="predictionDetail" class="card compact hidden"></section>
+    <section id="savedPrediction" class="card compact hidden"></section>
+    <section id="detailResultPanel" class="card hidden"></section>
+    <div class="actionBar"><button id="predictBtn" class="primary">このレースを予想</button><button id="retryDetail" class="secondary hidden">再試行</button></div>
   </section>
-  <section class="card"><div id="plan"></div></section>
-  <section class="card"><details><summary>取得診断・監査情報</summary><pre id="debug"></pre></details></section>
-</section>
+
+  <section id="prediction" class="screen">
+    <div class="pageTitle"><div><small>保存済み予想</small><h1 id="predictionTitle">予想結果</h1></div><span id="savedBadge" class="pill success">保存済み</span></div>
+    <section class="card"><div class="sectionHead"><h2 id="recommendation">-</h2><span id="predictionUpdated" class="muted"></span></div><div id="predictionSummary" class="metaGrid"></div></section>
+    <section id="predictionRatings" class="card compact hidden"></section>
+    <section id="purchaseControls" class="card compact hidden"></section>
+    <section id="betGroups" class="stack"></section>
+    <section id="resultPanel" class="card hidden"></section>
+    <div class="actionBar"><button id="checkResult" class="primary">公式結果を確認</button><button id="backToDetail" class="secondary">レース詳細へ</button></div>
+  </section>
+
+  <section id="loading" class="screen"><section class="card loadingCard"><div class="spinner"></div><h1 id="loadingTitle">取得中</h1><p id="loadingMessage">公式データを確認しています。</p></section></section>
+  <section id="error" class="screen"><section class="card errorCard"><div class="errorIcon">!</div><h1 id="errorTitle">取得失敗</h1><p id="errorMessage"></p><button id="retryBtn" class="primary">再試行</button><button id="errorHome" class="secondary">ホームへ</button></section></section>
 </main>
-<script type="module" src="app.mjs?v=10"></script>
+<script type="module" src="app.mjs?v=42"></script>
 </body></html>
