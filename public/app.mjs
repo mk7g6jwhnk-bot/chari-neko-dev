@@ -5,12 +5,19 @@ const ODDS_CACHE_KEY="chari-neko:keirin-odds-cache:v1";
 const RACE_META_CACHE_KEY="chari-neko:keirin-race-meta-cache:v1";
 const RESULT_CACHE_KEY="chari-neko:keirin-result-cache:v1";
 const MEETING_CACHE_KEY="chari-neko:keirin-meeting-cache:v1";
+const APP_RELEASE="KEIRIN-0.5.17-auto-update";
+const APP_UPDATE_CHECK_INTERVAL_MS=5*60*1000;
+let lastAppUpdateCheckAt=0,appUpdateCheckBusy=false;
 const VENUE_CODES={函館:"11",青森:"12",いわき平:"13",弥彦:"21",前橋:"22",取手:"23",宇都宮:"24",大宮:"25",西武園:"26",京王閣:"27",立川:"28",松戸:"31",千葉:"32",川崎:"34",平塚:"35",小田原:"36",伊東:"37",静岡:"38",名古屋:"42",岐阜:"43",大垣:"44",豊橋:"45",富山:"46",松阪:"47",四日市:"48",福井:"51",奈良:"53",向日町:"54",和歌山:"55",岸和田:"56",玉野:"61",広島:"62",防府:"63",高松:"71",小松島:"73",高知:"74",松山:"75",小倉:"81",久留米:"83",武雄:"84",佐世保:"85",別府:"86",熊本:"87"};
 
 $("todayKeirin").onclick=()=>openMeetings();$("homeBtn").onclick=$("brand").onclick=()=>goHome();$("headerBack").onclick=()=>goBack();$("venueSelectBtn").onclick=()=>openVenueSelection();$("raceSelectBtn").onclick=()=>openRaceSelection();$("reloadMeetings").onclick=()=>loadMeetings();$("bulkRefresh").onclick=()=>bulkRefreshRaceInfo();$("raceDate").onchange=e=>{state.date=e.target.value;loadMeetings()};$("tabToday").onclick=()=>setMeetingTab("today");$("tabBattle").onclick=()=>setMeetingTab("battle");$("tabVenues").onclick=()=>setMeetingTab("venues");$("predictBtn").onclick=()=>handleDetailPrimary();$("retryDetail").onclick=()=>handleDetailSecondary();$("backToDetail").onclick=()=>{renderDetail();show("detail")};$("checkResult").onclick=()=>checkResult();$("retryBtn").onclick=()=>state.retry?.();$("errorHome").onclick=()=>goHome();
 window.addEventListener("popstate",()=>{if(state.history.length){state.history.pop();show(state.history.pop()||"home",false)}});
 $("recommendationLimit").onchange=()=>renderHomeRecommendations();$("sportKeirin").onchange=()=>renderHomeRecommendations();
 renderSaved();renderHomeRecommendations();
+setupAutoUpdate();
+
+function setupAutoUpdate(){checkForAppUpdate();document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")checkForAppUpdate()});window.addEventListener("online",()=>checkForAppUpdate(true))}
+async function checkForAppUpdate(force=false){if(appUpdateCheckBusy||state.busy)return;const now=Date.now();if(!force&&now-lastAppUpdateCheckAt<APP_UPDATE_CHECK_INTERVAL_MS)return;lastAppUpdateCheckAt=now;appUpdateCheckBusy=true;try{const response=await fetch(`/version.json?t=${now}`,{cache:"no-store",headers:{accept:"application/json"}});if(!response.ok)return;const remote=await response.json();const remoteVersion=String(remote?.version||"").trim();if(remoteVersion&&remoteVersion!==APP_RELEASE){const url=new URL(location.href);url.searchParams.set("appv",remoteVersion);location.replace(url.toString())}}catch{}finally{appUpdateCheckBusy=false}}
 
 function show(id,push=true){if(push&&state.screen!==id){state.history.push(state.screen);history.pushState({screen:id},"")}state.screen=id;screens.forEach(x=>x.classList.toggle("active",x.id===id));updateHeaderNav(id);window.scrollTo(0,0)}
 function updateHeaderNav(id){const simple=id==="home"||id==="loading"||id==="error";$("headerBack").classList.toggle("hidden",id==="home"||id==="loading");$("venueSelectBtn").classList.toggle("hidden",simple);const canPickRace=!simple&&Boolean(resolveCurrentMeeting());$("raceSelectBtn").classList.toggle("hidden",!canPickRace)}
