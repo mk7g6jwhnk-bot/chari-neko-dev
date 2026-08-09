@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#08111f">
   <title>チャリ猫</title>
-  <link rel="manifest" href="manifest.json?v=40">
-  <link rel="stylesheet" href="styles.css?v=40">
+  <link rel="manifest" href="manifest.json?v=41">
+  <link rel="stylesheet" href="styles.css?v=41">
 </head>
 <body>
 <header class="appHeader">
@@ -61,6 +61,7 @@
     <section class="card compact"><div id="raceMeta" class="metaGrid"></div><div id="detailNotice"></div></section>
     <section class="card compact"><div class="sectionHead"><h2>出走選手</h2><span id="participantCount" class="pill">未取得</span></div><div id="participants" class="participants"><p class="muted">予想実行時に公式情報を取得します。</p></div></section>
     <section class="card compact"><div class="sectionHead"><h2>公式ライン</h2><span id="oddsStatus" class="pill">オッズ未取得</span></div><div id="officialLine" class="lineBox">予想実行時に取得します</div></section>
+    <section id="detailRatings" class="card compact hidden"></section>
     <section id="predictionDetail" class="card compact hidden"></section>
     <section id="savedPrediction" class="card compact hidden"></section>
     <section id="detailResultPanel" class="card hidden"></section>
@@ -70,6 +71,7 @@
   <section id="prediction" class="screen">
     <div class="pageTitle"><div><small>保存済み予想</small><h1 id="predictionTitle">予想結果</h1></div><span id="savedBadge" class="pill success">保存済み</span></div>
     <section class="card"><div class="sectionHead"><h2 id="recommendation">-</h2><span id="predictionUpdated" class="muted"></span></div><div id="predictionSummary" class="metaGrid"></div></section>
+    <section id="predictionRatings" class="card compact hidden"></section>
     <section id="purchaseControls" class="card compact hidden"></section>
     <section id="betGroups" class="stack"></section>
     <section id="resultPanel" class="card hidden"></section>
@@ -79,5 +81,5 @@
   <section id="loading" class="screen"><section class="card loadingCard"><div class="spinner"></div><h1 id="loadingTitle">取得中</h1><p id="loadingMessage">公式データを確認しています。</p></section></section>
   <section id="error" class="screen"><section class="card errorCard"><div class="errorIcon">!</div><h1 id="errorTitle">取得失敗</h1><p id="errorMessage"></p><button id="retryBtn" class="primary">再試行</button><button id="errorHome" class="secondary">ホームへ</button></section></section>
 </main>
-<script type="module" src="app.mjs?v=40"></script>
+<script type="module" src="app.mjs?v=41"></script>
 </body></html>
