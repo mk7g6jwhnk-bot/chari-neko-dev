@@ -28,7 +28,7 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
   purchase.girlsStartEvidenceRequired=race.raceCategory==="girls"?girlsEvidenceRequired:null;
 
   return{
-    engineVersion:"KEIRIN-0.5.20-girls-evidence-gate",
+    engineVersion:"KEIRIN-0.5.21-main-head-sibling-purchase",
     raceId:race.id,
     lineConfidence:race.lineConfidence,
     scored,lines,branches,terminals:classified,

@@ -10,7 +10,7 @@ export function classify(terminals,odds={}){
   const thirdVariantStats=buildThirdVariantStats(sorted);
   const maxBranchTotal=Math.max(...[...branchStats.values()].map(stats=>stats.total),0);
 
-  return sorted.map((terminal,index)=>{
+  const classified=sorted.map((terminal,index)=>{
     const key=terminal.order.join("-");
     const odd=Number(odds[key]);
     const hasOdds=Number.isFinite(odd)&&odd>1;
@@ -134,6 +134,142 @@ export function classify(terminals,odds={}){
       index
     };
   });
+  return applyMainHeadSiblingCoverage(classified);
+}
+
+function applyMainHeadSiblingCoverage(classified){
+  const anchors=classified.filter(item=>
+    item.purchaseStatus===PURCHASED&&item.betClass==="MAIN"&&item.dominantBranchId&&Array.isArray(item.order)&&item.order.length===3
+  );
+  const anchorOrders=new Set(anchors.map(item=>item.order.join("-")));
+  const anchorKeys=new Set(anchors.map(item=>`${item.dominantBranchId}|${Number(item.order[0])||0}`));
+  const secondStats=buildIndependentPositionVariantStats(classified,"second");
+  const thirdStats=buildIndependentPositionVariantStats(classified,"third");
+
+  return classified.map(item=>{
+    const order=Array.isArray(item.order)?item.order:[];
+    const first=Number(order[0])||0,second=Number(order[1])||0,third=Number(order[2])||0;
+    const isAnchor=anchorOrders.has(order.join("-"));
+    const supports=[...(item.branchContributions||[])]
+      .filter(contribution=>
+        contributionMatchesTerminal(contribution,order)&&
+        contribution.branchPriority==="main"&&
+        anchorKeys.has(`${contribution.branchId}|${first}`)
+      )
+      .map(contribution=>{
+        const secondKey=independentPositionGroupKey(contribution.branchId,order,"second");
+        const thirdKey=independentPositionGroupKey(contribution.branchId,order,"third");
+        const secondGroup=secondStats.get(secondKey)||null;
+        const thirdGroup=thirdStats.get(thirdKey)||null;
+        const secondRelative=secondGroup?.relativeByCandidate.get(second)??0;
+        const thirdRelative=thirdGroup?.relativeByCandidate.get(third)??0;
+        const firstRelative=Number(contribution.decisionRatios?.first)||0;
+        const secondNaturalEligible=secondGroup?secondGroup.supportedCandidates.has(second):false;
+        const thirdNaturalEligible=thirdGroup?thirdGroup.supportedCandidates.has(third):false;
+        // Reuse the existing positionNear support floor, but remove the global branchFit gate.
+        // This allows a same-head sibling to survive when 2nd/3rd are independently strong,
+        // while preventing a lone weak 0.70-style alternative from being promoted merely because
+        // a 2-candidate group has no robust natural-gap estimate.
+        const positionFloorEligible=firstRelative>=.88&&secondRelative>=.85&&thirdRelative>=.85;
+        const secondEligible=secondNaturalEligible&&secondRelative>=.85;
+        const thirdEligible=thirdNaturalEligible&&thirdRelative>=.85;
+        return{
+          contribution,secondKey,thirdKey,secondGroup,thirdGroup,secondEligible,thirdEligible,positionFloorEligible,
+          firstRelative,secondRelative,thirdRelative,supportScore:firstRelative*secondRelative*thirdRelative
+        };
+      })
+      .sort((a,b)=>
+        Number(b.secondEligible&&b.thirdEligible)-Number(a.secondEligible&&a.thirdEligible)||
+        b.supportScore-a.supportScore||
+        (b.contribution.probability||0)-(a.contribution.probability||0)||
+        String(a.contribution.branchId).localeCompare(String(b.contribution.branchId),"en")
+      );
+    const best=supports[0]||null;
+    const candidate=!isAnchor&&supports.length>0;
+    const eligible=Boolean(candidate&&best?.positionFloorEligible&&best?.secondEligible&&best?.thirdEligible);
+    const annotations={
+      mainHeadSiblingCandidate:candidate,
+      mainHeadSiblingEligible:eligible,
+      mainHeadSiblingAnchorFirst:candidate?first:null,
+      mainHeadSiblingBranchId:best?.contribution?.branchId||null,
+      mainHeadSiblingBranchLabel:best?.contribution?.branchLabel||null,
+      mainHeadSiblingSecondEligible:best?.secondEligible??null,
+      mainHeadSiblingThirdEligible:best?.thirdEligible??null,
+      mainHeadSiblingFirstRelativeToBest:best?.firstRelative??null,
+      mainHeadSiblingSecondRelativeToBest:best?.secondRelative??null,
+      mainHeadSiblingThirdRelativeToBest:best?.thirdRelative??null,
+      mainHeadSiblingSecondNaturalCutDetected:best?.secondGroup?.naturalCutDetected||false,
+      mainHeadSiblingThirdNaturalCutDetected:best?.thirdGroup?.naturalCutDetected||false,
+      mainHeadSiblingSecondCutGap:best?.secondGroup?.cutGap??null,
+      mainHeadSiblingThirdCutGap:best?.thirdGroup?.cutGap??null
+    };
+
+    if(eligible&&item.purchaseStatus!==PURCHASED){
+      return{
+        ...item,...annotations,
+        betClass:"COVER",
+        purchaseStatus:PURCHASED,
+        purchaseRejectCode:"ADOPTED",
+        adoptionMode:"MAIN_HEAD_SIBLING",
+        purchaseReason:`本線${first}頭を維持し、${best.contribution.branchLabel}内で2着${second}・3着${third}を独立再評価した自然兄弟終端`
+      };
+    }
+    return{...item,...annotations,adoptionMode:item.adoptionMode||(item.purchaseStatus===PURCHASED?"BASE_RULE":null)};
+  });
+}
+
+function buildIndependentPositionVariantStats(terminals,target){
+  const candidateIndex=target==="second"?1:2;
+  const groups=new Map();
+  for(const terminal of terminals){
+    const order=terminal.order||[];
+    const candidate=Number(order[candidateIndex]);
+    if(!Number.isFinite(candidate)||candidate<=0)continue;
+    for(const contribution of terminal.branchContributions||[]){
+      if(!contributionMatchesTerminal(contribution,order)||contribution.branchPriority!=="main")continue;
+      const score=Number(contribution.decisionRatios?.[target])||0;
+      if(!(score>0))continue;
+      const key=independentPositionGroupKey(contribution.branchId,order,target);
+      if(!groups.has(key))groups.set(key,new Map());
+      const byCandidate=groups.get(key);
+      const previous=byCandidate.get(candidate)||0;
+      if(score>previous)byCandidate.set(candidate,score);
+    }
+  }
+  const result=new Map();
+  for(const [key,byCandidate] of groups){
+    const rows=[...byCandidate.entries()].map(([candidate,score])=>({candidate,score}));
+    result.set(key,deriveNaturalPositionSupport(rows));
+  }
+  return result;
+}
+
+function deriveNaturalPositionSupport(rows){
+  const items=[...rows].sort((a,b)=>b.score-a.score||a.candidate-b.candidate);
+  const best=items[0]?.score||0;
+  const ratios=items.map(item=>best>0?item.score/best:0);
+  const gaps=[];
+  for(let i=0;i<ratios.length-1;i+=1)gaps.push({index:i,gap:Math.max(0,ratios[i]-ratios[i+1])});
+  const sortedGaps=[...gaps].sort((a,b)=>b.gap-a.gap||a.index-b.index);
+  const largest=sortedGaps[0]||null;
+  const totalRange=ratios.length>1?Math.max(0,ratios[0]-ratios[ratios.length-1]):0;
+  const otherGapSum=largest?Math.max(0,totalRange-largest.gap):0;
+  const tiedLargest=largest?sortedGaps.filter(item=>Math.abs(item.gap-largest.gap)<1e-12).length>1:false;
+  const naturalCutDetected=items.length>=3&&Boolean(largest)&&!tiedLargest&&largest.gap>otherGapSum;
+  const cutIndex=naturalCutDetected?largest.index:items.length-1;
+  return{
+    groupSize:items.length,
+    naturalCutDetected,
+    cutGap:naturalCutDetected?largest.gap:null,
+    supportedCandidates:new Set(items.slice(0,cutIndex+1).map(item=>item.candidate)),
+    relativeByCandidate:new Map(items.map((item,index)=>[item.candidate,ratios[index]]))
+  };
+}
+
+function independentPositionGroupKey(branchId,order,target){
+  const first=Number(order?.[0])||0;
+  if(target==="second")return `${branchId||"-"}|${first}`;
+  return `${branchId||"-"}|${first}-${Number(order?.[1])||0}`;
 }
 
 function contributionMatchesTerminal(contribution,order){
@@ -285,6 +421,9 @@ export function purchaseDiagnostics(classified,plan,budget){
       rawBranchCountUsedForAdoption:false,
       weightedMultiBranchSupportEquivalentMin:2,
       thirdVariantSelectionMode:"ADAPTIVE_NATURAL_GAP_WITHIN_BRANCH_FIRST_SECOND",
+      mainHeadSiblingSelectionMode:"MAIN_ANCHOR_THEN_INDEPENDENT_SECOND_THIRD_NATURAL_GROUP",
+      mainHeadSiblingFixedRankCapApplied:false,
+      mainHeadSiblingPositionRatios:{first:.88,second:.85,third:.85},
       representativePositionRatios:{first:.93,second:.91,third:.91},
       credibleVariantPositionRatios:{first:.88,second:.85,third:.85}
     },
@@ -351,6 +490,28 @@ export function purchaseDiagnostics(classified,plan,budget){
         purchaseReason:item.purchaseReason
       };
     }),
+    mainHeadSiblingAudit:{
+      anchorMainOrders:classified.filter(item=>item.betClass==="MAIN"&&item.purchaseStatus===PURCHASED).map(item=>item.order.join("-")),
+      candidateCount:classified.filter(item=>item.mainHeadSiblingCandidate).length,
+      eligibleCount:classified.filter(item=>item.mainHeadSiblingEligible).length,
+      adoptedCount:classified.filter(item=>item.mainHeadSiblingEligible&&item.purchaseStatus===PURCHASED).length,
+      promotedCount:classified.filter(item=>item.adoptionMode==="MAIN_HEAD_SIBLING").length,
+      rejectedCount:classified.filter(item=>item.mainHeadSiblingCandidate&&item.purchaseStatus!==PURCHASED).length,
+      rows:classified.filter(item=>item.mainHeadSiblingCandidate).map(item=>({
+        order:item.order.join("-"),
+        eligible:Boolean(item.mainHeadSiblingEligible),
+        adopted:item.purchaseStatus===PURCHASED,
+        adoptionMode:item.adoptionMode||null,
+        branchId:item.mainHeadSiblingBranchId||null,
+        branchLabel:item.mainHeadSiblingBranchLabel||null,
+        secondEligible:item.mainHeadSiblingSecondEligible,
+        thirdEligible:item.mainHeadSiblingThirdEligible,
+        firstRelativeToBest:item.mainHeadSiblingFirstRelativeToBest,
+        secondRelativeToBest:item.mainHeadSiblingSecondRelativeToBest,
+        thirdRelativeToBest:item.mainHeadSiblingThirdRelativeToBest,
+        purchaseReason:item.purchaseReason
+      }))
+    },
     adoptedBranchCounts:natural.reduce((counts,item)=>{
       const label=item.dominantBranchLabel||"不明";
       counts[label]=(counts[label]||0)+1;
