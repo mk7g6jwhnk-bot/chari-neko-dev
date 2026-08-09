@@ -1,0 +1,188 @@
+diff -ruN v26orig/VERSION.md v26work/VERSION.md
+--- v26orig/VERSION.md	2026-08-09 02:39:11.000000000 +0000
++++ v26work/VERSION.md	2026-08-09 02:50:11.914350945 +0000
+@@ -1,12 +1,7 @@
+-# v26 global-main-branches
++# チャリ猫 Branch Deploy
+ 
+-- Removes the single-main-line lock from Keirin branch selection.
+-- Structured branches (先行押し切り / 番手差し / まくり) are compared across all official lines.
+-- Any structured branch scoring at least 90% of the top structured branch is retained as a main-scenario candidate, regardless of line.
+-- MAIN/COVER purchase logic is otherwise unchanged from v23; this isolates the line-lock correction for audit.
+-- Branch audit now shows all main-scenario candidate branch labels and line ids.
+-- Engine version: KEIRIN-0.5.4-global-main-branches.
+-
+-# UI
+-
+-- UI remains v24 quick-navigation/deadlines plus v25 branch-prior audit.
++- UI bundle: v27
++- Keirin engine: `KEIRIN-0.5.5-adaptive-main-cluster`
++- Main-branch selection: all official lines are compared together; a two-cluster natural-break split of structured branch scores chooses the upper main-scenario cluster.
++- Removed from main-branch selection: fixed `top score × 90%` cutoff.
++- Prediction terminal generation, weighted support, purchase classification thresholds, odds handling, and UI v24 navigation/deadline features are otherwise unchanged from v26.
+diff -ruN v26orig/keirin/engine/keirin-engine.mjs v26work/keirin/engine/keirin-engine.mjs
+--- v26orig/keirin/engine/keirin-engine.mjs	2026-08-09 02:39:11.000000000 +0000
++++ v26work/keirin/engine/keirin-engine.mjs	2026-08-09 02:50:09.881027013 +0000
+@@ -21,7 +21,7 @@
+   if(lineBlocked){purchase.noBet=true;purchase.noBetReason="LINE_DATA_UNAVAILABLE";purchase.purchaseCandidateCountBeforeCompression=0;purchase.purchaseCandidateCountAfterCompression=0;purchase.finalBetCount=0;purchase.minimumRequired=0;}
+ 
+   return{
+-    engineVersion:"KEIRIN-0.5.4-global-main-branches",
++    engineVersion:"KEIRIN-0.5.5-adaptive-main-cluster",
+     raceId:race.id,
+     lineConfidence:race.lineConfidence,
+     scored,lines,branches,terminals:classified,
+@@ -53,7 +53,12 @@
+   const topStructured=structured[0]||null;
+   const topStructuredScore=Number(topStructured?.score)||0;
+   const mainBranches=structured.filter(branch=>branch.priority==="main");
++  const subBranches=structured.filter(branch=>branch.priority==="sub");
+   const topScore=Number(sorted[0]?.score)||0;
++  const mainScores=mainBranches.map(branch=>Number(branch.score)||0);
++  const subScores=subBranches.map(branch=>Number(branch.score)||0);
++  const mainMinScore=mainScores.length?Math.min(...mainScores):null;
++  const nextSubScore=subScores.length?Math.max(...subScores):null;
+   return{
+     totalBranchScore:totalScore,
+     topBranchId:sorted[0]?.id||null,
+@@ -62,12 +67,21 @@
+     topStructuredBranchId:topStructured?.id||null,
+     topStructuredBranchLabel:topStructured?.label||null,
+     topStructuredScore,
+-    mainSelectionMode:"GLOBAL_STRUCTURED_SCORE_BAND",
++    mainSelectionMode:"ADAPTIVE_SCORE_CLUSTER",
+     mainLineId:null,
+     mainLineIds:[...new Set(mainBranches.map(branch=>branch.primaryLineId).filter(Boolean))],
+     mainBranchIds:mainBranches.map(branch=>branch.id),
+     mainBranchLabels:mainBranches.map(branch=>branch.label),
+-    mainPriorityRatio:.90,
++    mainPriorityRatio:null,
++    adaptiveSplit:{
++      mainCount:mainBranches.length,
++      subCount:subBranches.length,
++      mainMinScore,
++      nextSubScore,
++      cutGap:mainMinScore!=null&&nextSubScore!=null?mainMinScore-nextSubScore:null,
++      mainMean:mean(mainScores),
++      subMean:mean(subScores)
++    },
+     rows:sorted.map(branch=>({
+       id:branch.id,
+       label:branch.label,
+@@ -82,3 +96,4 @@
+     }))
+   };
+ }
++function mean(values){return values.length?values.reduce((sum,value)=>sum+value,0)/values.length:null}
+diff -ruN v26orig/keirin/sports/keirin-branches.mjs v26work/keirin/sports/keirin-branches.mjs
+--- v26orig/keirin/sports/keirin-branches.mjs	2026-08-09 02:39:11.000000000 +0000
++++ v26work/keirin/sports/keirin-branches.mjs	2026-08-09 02:50:09.279563765 +0000
+@@ -36,16 +36,37 @@
+ 
+   const enabled=branches.filter(branch=>branch.firstCandidates.length&&branch.enabled).sort(compareBranch);
+   const structured=enabled.filter(branch=>["LEADER_HOLD","BANTE_SASHI","MAKURI_SUCCESS"].includes(branch.branchType));
+-  const bestStructuredScore=structured[0]?.score||0;
+-  const mainScoreFloor=bestStructuredScore*.90;
++  const mainStructuredIds=new Set(selectAdaptiveMainCluster(structured).map(branch=>branch.id));
+   return enabled.map(branch=>({
+     ...branch,
+-    // Main-scenario candidates are compared across every official line.
+-    // Do not lock the race to the line that happens to own the top branch.
+-    priority:structured.includes(branch)&&(bestStructuredScore>0&&branch.score>=mainScoreFloor)?"main":structured.includes(branch)?"sub":"risk"
++    // Compare structural scenarios across every official line, then separate the
++    // upper score cluster from the lower cluster using the score distribution itself.
++    // No fixed percentage-to-top cutoff is used.
++    priority:structured.includes(branch)?(mainStructuredIds.has(branch.id)?"main":"sub"):"risk"
+   }));
+ }
+ 
++export function selectAdaptiveMainCluster(structuredBranches=[]){
++  const sorted=[...structuredBranches].sort(compareBranch);
++  if(sorted.length<=1)return sorted;
++  const scores=sorted.map(branch=>Number(branch.score)||0);
++  const range=scores[0]-scores[scores.length-1];
++  if(range<=1e-9)return sorted;
++
++  let bestSplit=1;
++  let bestLoss=Infinity;
++  for(let split=1;split<sorted.length;split+=1){
++    const high=scores.slice(0,split);
++    const low=scores.slice(split);
++    const loss=sse(high)+sse(low);
++    if(loss<bestLoss-1e-12){
++      bestLoss=loss;
++      bestSplit=split;
++    }
++  }
++  return sorted.slice(0,bestSplit);
++}
++
+ function part(key,value,weight){return{key,value:Number(value)||0,weight,contribution:(Number(value)||0)*weight}}
+ function make({id,label,scenario,branchType,scoreParts=[],firstCandidateScores={},primaryLineId=null,requiredFirstNumber=null,enabled}){
+   const score=scoreParts.reduce((sum,item)=>sum+item.contribution,0);
+@@ -54,3 +75,4 @@
+ }
+ function compareBranch(a,b){return(b.score-a.score)||a.id.localeCompare(b.id,"en")}
+ function avg(values){const valid=values.filter(Number.isFinite);return valid.length?valid.reduce((sum,value)=>sum+value,0)/valid.length:0}
++function sse(values){if(!values.length)return 0;const mean=avg(values);return values.reduce((sum,value)=>sum+(value-mean)**2,0)}
+diff -ruN v26orig/package.json v26work/package.json
+--- v26orig/package.json	2026-08-09 02:39:11.000000000 +0000
++++ v26work/package.json	2026-08-09 02:50:11.775835722 +0000
+@@ -4,7 +4,7 @@
+   "private": true,
+   "type": "module",
+   "scripts": {
+-    "test": "node modules/keirin/tests/run-tests.mjs && node tests/prediction-flow.mjs && node tests/keirin-purchase-five-races.mjs && node tests/keirin-purchase-no-rank-cap.mjs && node tests/keirin-purchase-audit.mjs && node tests/keirin-purchase-no-probability-cutoff.mjs && node tests/keirin-official-evidence-branching.mjs && node tests/keirin-branch-role-semantics.mjs && node tests/keirin-provenance-consistency.mjs && node tests/keirin-support-branch-audit.mjs && node tests/keirin-weighted-branch-support.mjs && node tests/keirin-branch-prior-audit.mjs && node tests/keirin-global-main-branches.mjs",
++    "test": "node modules/keirin/tests/run-tests.mjs && node tests/prediction-flow.mjs && node tests/keirin-purchase-five-races.mjs && node tests/keirin-purchase-no-rank-cap.mjs && node tests/keirin-purchase-audit.mjs && node tests/keirin-purchase-no-probability-cutoff.mjs && node tests/keirin-official-evidence-branching.mjs && node tests/keirin-branch-role-semantics.mjs && node tests/keirin-provenance-consistency.mjs && node tests/keirin-support-branch-audit.mjs && node tests/keirin-weighted-branch-support.mjs && node tests/keirin-branch-prior-audit.mjs && node tests/keirin-global-main-branches.mjs && node tests/keirin-adaptive-main-cluster.mjs",
+     "check": "node --check public/app.mjs && node --check public/prediction-store.mjs && node --check netlify/functions/keirin-result.mjs && node --check netlify/functions/keirin-predict.mjs && node --check netlify/functions/keirin-odds.mjs"
+   },
+   "dependencies": {
+diff -ruN v26orig/public/app.mjs v26work/public/app.mjs
+--- v26orig/public/app.mjs	2026-08-09 02:39:11.000000000 +0000
++++ v26work/public/app.mjs	2026-08-09 02:50:10.513003266 +0000
+@@ -53,7 +53,7 @@
+ function allocatePreviewStakes(bets,budget,mode){const n=bets.length,min=n*100;if(!n||budget<min)return null;const base=bets.map(b=>Math.max(1,Number(b.stake)||100));const mul=bets.map(b=>mode==="main"?(b.category==="MAIN"?1.6:b.category==="BUYABLE_HIGH"?.8:1):mode==="high"?(b.category==="BUYABLE_HIGH"?1.6:b.category==="MAIN"?1:.9):1);const weights=base.map((v,i)=>v*mul[i]),extra=budget-min,total=weights.reduce((a,b)=>a+b,0)||n;let out=weights.map(w=>100+Math.floor((extra*w/total)/100)*100),used=out.reduce((a,b)=>a+b,0),remain=Math.floor((budget-used)/100);const order=weights.map((w,i)=>({w,i})).sort((a,b)=>b.w-a.w||a.i-b.i);for(let k=0;k<remain;k++)out[order[k%order.length].i]+=100;return out}
+ function calcCompositeOdds(bets){const valid=bets.map(b=>Number(b.odds)).filter(v=>Number.isFinite(v)&&v>0);if(!valid.length||valid.length!==bets.length)return null;const inv=valid.reduce((s,v)=>s+1/v,0);return inv>0?1/inv:null}
+ 
+-function renderBranchSelectionAudit(audit){const data=audit?.branchSelectionAudit;if(!data||!Array.isArray(data.rows)||!data.rows.length)return"";const priorityLabel={main:"主展開",sub:"別展開",risk:"リスク枝"};const rows=data.rows.map((branch,index)=>{const trace=Array.isArray(branch.scoreTrace)?branch.scoreTrace:[];const traceText=trace.slice(0,5).map(item=>`${esc(item.key)} ${fmtRatio(item.value)}×${fmtRatio(item.weight)}=${fmtRatio(item.contribution)}`).join(" / ");return `<div class="detailBet"><strong>${index+1}. ${esc(branch.label||branch.id||"不明")}　${esc(priorityLabel[branch.priority]||branch.priority||"-")}</strong><p>枝スコア ${fmtRatio(branch.score)} / 全枝比 ${fmtPct(branch.share)} / 首位比 ${fmtPct(branch.relativeToTop)}${branch.primaryLineId?` / ライン ${esc(branch.primaryLineId)}`:""}</p>${traceText?`<p class="muted">内訳: ${traceText}</p>`:""}</div>`}).join("");const basis=data.topStructuredBranchLabel?`構造枝を全ライン横断で比較。首位「${esc(data.topStructuredBranchLabel)}」の枝スコアに対して90%以上の枝を、ラインを固定せず主展開候補として保持。主展開候補: ${(data.mainBranchLabels||[]).map(esc).join(" / ")||"なし"}。`:"構造枝の主展開候補なし。";return `<h3>展開枝の事前評価</h3><div class="auditCallout"><strong>主展開選択の基準</strong><p>${basis}</p></div><div class="detailGroup">${rows}</div>`}
++function renderBranchSelectionAudit(audit){const data=audit?.branchSelectionAudit;if(!data||!Array.isArray(data.rows)||!data.rows.length)return"";const priorityLabel={main:"主展開",sub:"別展開",risk:"リスク枝"};const rows=data.rows.map((branch,index)=>{const trace=Array.isArray(branch.scoreTrace)?branch.scoreTrace:[];const traceText=trace.slice(0,5).map(item=>`${esc(item.key)} ${fmtRatio(item.value)}×${fmtRatio(item.weight)}=${fmtRatio(item.contribution)}`).join(" / ");return `<div class="detailBet"><strong>${index+1}. ${esc(branch.label||branch.id||"不明")}　${esc(priorityLabel[branch.priority]||branch.priority||"-")}</strong><p>枝スコア ${fmtRatio(branch.score)} / 全枝比 ${fmtPct(branch.share)} / 首位比 ${fmtPct(branch.relativeToTop)}${branch.primaryLineId?` / ライン ${esc(branch.primaryLineId)}`:""}</p>${traceText?`<p class="muted">内訳: ${traceText}</p>`:""}</div>`}).join("");const split=data.adaptiveSplit||{};const gap=Number.isFinite(split.cutGap)?` / 境界差 ${fmtRatio(split.cutGap)}`:"";const basis=data.topStructuredBranchLabel?`構造枝を全ライン横断で比較し、固定90%ではなく枝スコア分布の自然な2群分割で上位群を主展開候補として保持。主展開候補: ${(data.mainBranchLabels||[]).map(esc).join(" / ")||"なし"}${gap}。`:"構造枝の主展開候補なし。";return `<h3>展開枝の事前評価</h3><div class="auditCallout"><strong>主展開選択の基準</strong><p>${basis}</p></div><div class="detailGroup">${rows}</div>`}
+ function renderAdoptedTerminalAudit(audit){const rows=Array.isArray(audit?.adoptedTerminalAudit)?audit.adoptedTerminalAudit:[];if(!rows.length)return"";const branchRows=Object.entries(audit.adoptedBranchCounts||{}).sort((a,b)=>b[1]-a[1]).map(([label,count])=>`<div class="abilityRow"><strong>${esc(label)}</strong><span>${count}件</span></div>`).join("");const terminalRows=rows.map(item=>{const r=item.decisionRatios||{};const ratios=`1着 ${fmtRatio(r.first)} / 2着 ${fmtRatio(r.second)} / 3着 ${fmtRatio(r.third)}`;const supportBranches=Array.isArray(item.supportBranches)?item.supportBranches:[];const supportRows=supportBranches.map((branch,index)=>`<div class="abilityRow"><strong>${index+1}. ${esc(branch.branchLabel||branch.branchId||"不明")}</strong><span>${esc(branch.branchPriority||"-")} / 寄与 ${fmtRatio(branch.probability)} / 枝内適合 ${fmtRatio(branch.withinBranchFit)} / 枝強度 ${fmtRatio(branch.branchStrengthRatio)} / 加重 ${fmtRatio(branch.weightedSupport)}</span></div>`).join("");const dup=Array.isArray(item.duplicateSupportLabels)&&item.duplicateSupportLabels.length?`<p class="auditWarn">重複ラベル: ${item.duplicateSupportLabels.map(x=>`${esc(x.label)}×${x.count}`).join(" / ")}</p>`:"";return `<div class="detailBet"><strong>${esc(item.order)}　${esc(item.betClass||"")}</strong><p>${esc(item.dominantBranchLabel||"由来枝不明")} / 枝適合 ${fmtRatio(item.branchFit)} / 枝内${item.branchRank??"-"}位 / 由来枝${item.branchSupport??0}（固有${item.uniqueSupportBranchCount??item.branchSupport??0}） / 加重支持 ${fmtRatio(item.weightedBranchSupport)}</p><p class="muted">${ratios}</p>${supportRows?`<details class="supportBranchAudit"><summary>支持枝を全部見る（${supportBranches.length}本）</summary><div class="abilityList">${supportRows}</div>${dup}</details>`:""}</div>`}).join("");return `<h3>採用終端の由来</h3>${branchRows?`<div class="abilityList">${branchRows}</div>`:""}<div class="detailGroup">${terminalRows}</div>`}
+ function fmtRatio(value){const n=Number(value);return Number.isFinite(n)?n.toFixed(3):"-"}
+ function fmtPct(v){const n=Number(v);return Number.isFinite(n)?`${(n*100).toFixed(1)}%`:"-"}
+diff -ruN v26orig/tests/keirin-adaptive-main-cluster.mjs v26work/tests/keirin-adaptive-main-cluster.mjs
+--- v26orig/tests/keirin-adaptive-main-cluster.mjs	1970-01-01 00:00:00.000000000 +0000
++++ v26work/tests/keirin-adaptive-main-cluster.mjs	2026-08-09 02:50:11.252637210 +0000
+@@ -0,0 +1,12 @@
++import assert from "node:assert/strict";
++import {selectAdaptiveMainCluster} from "../keirin/sports/keirin-branches.mjs";
++const branches=[
++  {id:"a",score:8.58},{id:"b",score:8.00},{id:"c",score:7.50},
++  {id:"d",score:5.57},{id:"e",score:5.39},{id:"f",score:5.28},{id:"g",score:5.20}
++];
++const main=selectAdaptiveMainCluster(branches);
++assert.deepEqual(main.map(branch=>branch.id),["a","b","c"]);
++assert.ok(main.at(-1).score/branches[0].score<.90,"adaptive cluster must be able to cross the old fixed 90% boundary");
++const flat=selectAdaptiveMainCluster([{id:"x",score:5},{id:"y",score:5},{id:"z",score:5}]);
++assert.equal(flat.length,3,"when the score distribution has no separation, do not invent a cutoff");
++console.log("Keirin adaptive main cluster passed:",main.map(branch=>branch.id).join(","));
+diff -ruN v26orig/tests/keirin-branch-prior-audit.mjs v26work/tests/keirin-branch-prior-audit.mjs
+--- v26orig/tests/keirin-branch-prior-audit.mjs	2026-08-09 02:39:11.000000000 +0000
++++ v26work/tests/keirin-branch-prior-audit.mjs	2026-08-09 02:50:11.141470175 +0000
+@@ -2,4 +2,4 @@
+ import handler from "../netlify/functions/keirin-predict.mjs";
+ const originalFetch=globalThis.fetch;process.env.KEIRIN_BROWSER_SERVICE_URL="https://railway.test";
+ globalThis.fetch=async()=>new Response(JSON.stringify({ok:true,officialData:{basic:{venueName:"立川",date:"2026/08/09",raceNo:3,startTime:"11:30"},participants:Array.from({length:7},(_,i)=>({number:i+1,registration:`28${String(i+1).padStart(4,"0")}`,name:`選手${i+1}`,score:90+i,escapeCount:i%3,makuriCount:(i+1)%4,differenceCount:i%2,markCount:(i+2)%3,backCount:(i*2)%5})),lines:[{number:1,lineId:"A",position:1},{number:2,lineId:"A",position:2},{number:3,lineId:"B",position:1},{number:4,lineId:"B",position:2},{number:5,lineId:"C",position:1},{number:6,lineId:"C",position:2},{number:7,lineId:"C",position:3}],odds:{ok:false,odds:{}}},audit:{identityPassed:true}}),{status:200,headers:{"content-type":"application/json"}});
+-try{const r=await handler(new Request("https://test/.netlify/functions/keirin-predict?date=20260809&venueCode=28&venueName=%E7%AB%8B%E5%B7%9D&raceNo=3&budget=3000"));const p=await r.json();assert.equal(p.ok,true);const a=p.prediction.audit.branchSelectionAudit;assert.ok(a);assert.ok(a.rows.length>=3);assert.ok(a.topStructuredBranchLabel);assert.equal(a.mainSelectionMode,"GLOBAL_STRUCTURED_SCORE_BAND");assert.ok(Array.isArray(a.mainLineIds));assert.ok(Array.isArray(a.mainBranchIds));assert.ok(a.mainBranchIds.length>=1);assert.ok(Math.abs(a.rows.reduce((sum,row)=>sum+row.share,0)-1)<1e-9);assert.ok(a.rows.every(row=>Number.isFinite(row.score)&&Number.isFinite(row.relativeToTop)&&Array.isArray(row.scoreTrace)));console.log("Keirin branch prior audit passed:",a.topStructuredBranchLabel,a.mainLineIds.join(","),a.rows.length);}finally{globalThis.fetch=originalFetch}
++try{const r=await handler(new Request("https://test/.netlify/functions/keirin-predict?date=20260809&venueCode=28&venueName=%E7%AB%8B%E5%B7%9D&raceNo=3&budget=3000"));const p=await r.json();assert.equal(p.ok,true);const a=p.prediction.audit.branchSelectionAudit;assert.ok(a);assert.ok(a.rows.length>=3);assert.ok(a.topStructuredBranchLabel);assert.equal(a.mainSelectionMode,"ADAPTIVE_SCORE_CLUSTER");assert.ok(a.adaptiveSplit);assert.ok(a.adaptiveSplit.mainCount>=1);assert.ok(Array.isArray(a.mainLineIds));assert.ok(Array.isArray(a.mainBranchIds));assert.ok(a.mainBranchIds.length>=1);assert.ok(Math.abs(a.rows.reduce((sum,row)=>sum+row.share,0)-1)<1e-9);assert.ok(a.rows.every(row=>Number.isFinite(row.score)&&Number.isFinite(row.relativeToTop)&&Array.isArray(row.scoreTrace)));console.log("Keirin branch prior audit passed:",a.topStructuredBranchLabel,a.mainLineIds.join(","),a.rows.length);}finally{globalThis.fetch=originalFetch}
+diff -ruN v26orig/tests/keirin-global-main-branches.mjs v26work/tests/keirin-global-main-branches.mjs
+--- v26orig/tests/keirin-global-main-branches.mjs	2026-08-09 02:39:11.000000000 +0000
++++ v26work/tests/keirin-global-main-branches.mjs	2026-08-09 02:50:11.141621315 +0000
+@@ -24,5 +24,8 @@
+ assert.equal(cMakuri.priority,"main");
+ assert.equal(aBante.priority,"main","a near-top branch on another line must remain a main-scenario candidate");
+ assert.notEqual(cMakuri.primaryLineId,aBante.primaryLineId);
++const cLead=branches.find(branch=>branch.id==="LEAD-C");
++assert.ok(cLead);
++assert.equal(cLead.priority,"main","a branch can remain main below 90% of the top when it belongs to the adaptive upper score cluster");
+ assert.equal(bMakuri.priority,"sub");
+ console.log("Keirin global main branches passed:",cMakuri.label,cMakuri.score.toFixed(3),aBante.label,aBante.score.toFixed(3));
