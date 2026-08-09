@@ -1,3 +1,3 @@
-KEIRIN-0.5.37-detail-navigation-audit-fix
+KEIRIN-0.5.38-detail-lazy-audit-fix
 
-Detail navigation audit fix.
+Detail navigation lazy audit and legacy snapshot compatibility fix.
