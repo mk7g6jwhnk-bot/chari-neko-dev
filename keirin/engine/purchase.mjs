@@ -7,6 +7,7 @@ export function classify(terminals,odds={}){
   const max=sorted[0].probability||0;
   const concentrationRatio=max*sorted.length;
   const branchStats=buildBranchStats(sorted);
+  const thirdVariantStats=buildThirdVariantStats(sorted);
   const maxBranchTotal=Math.max(...[...branchStats.values()].map(stats=>stats.total),0);
 
   return sorted.map((terminal,index)=>{
@@ -33,6 +34,12 @@ export function classify(terminals,odds={}){
     const positionNear=(ratios.first??0)>=.88&&(ratios.second??0)>=.85&&(ratios.third??0)>=.85;
     const representative=branchFit>=.975&&positionConverged;
     const credibleVariant=branchFit>=.87&&positionNear;
+    const thirdGroupKey=dominant?thirdVariantGroupKey(dominant.branchId,terminal.order):null;
+    const thirdStats=thirdGroupKey?thirdVariantStats.get(thirdGroupKey):null;
+    const thirdVariantEligible=thirdStats?thirdStats.supportedOrders.has(key):true;
+    const thirdVariantRelativeToBest=thirdStats?.relativeToBestByOrder.get(key)??null;
+    const thirdVariantConditionalShare=thirdStats?.conditionalShareByOrder.get(key)??null;
+    const highPayoutCandidate=Boolean(dominant&&dominant.branchPriority!=="main"&&credibleVariant&&thirdVariantEligible);
 
     let betClass="NONE";
     let adopted=false;
@@ -43,19 +50,21 @@ export function classify(terminals,odds={}){
     }else if(dominant){
       const isMainBranch=dominant.branchPriority==="main";
       const isAlternativeBranch=dominant.branchPriority!=="main";
-      const highValue=hasOdds&&odd>=100&&credibleVariant;
+      const highValue=hasOdds&&odd>=100&&highPayoutCandidate;
 
       // Purchase selection must not use a fixed branch-rank cap.
       // Every logically completed terminal stays in classified; adoption is decided by
       // continuous branch-fit / position support / probability support, not "top N".
-      if(isMainBranch&&representative){
+      if(!thirdVariantEligible){
+        purchaseReason=`${dominant.branchLabel}の同一1-2着内で3着支持が自然境界の下位群`;
+      }else if(isMainBranch&&representative){
         betClass="MAIN";
         adopted=true;
-        purchaseReason=`${dominant.branchLabel}の代表終端（順位上限なし）`;
+        purchaseReason=`${dominant.branchLabel}の代表終端（3着独立支持を確認）`;
       }else if(highValue&&isAlternativeBranch){
         betClass="BUYABLE_HIGH";
         adopted=true;
-        purchaseReason=`${dominant.branchLabel}の独立展開から残る高配当候補（順位上限なし）`;
+        purchaseReason=`${dominant.branchLabel}の独立展開＋実オッズ${odd.toFixed(1)}倍で買える高配当`;
       }else if(
         (isMainBranch&&credibleVariant)||
         (isAlternativeBranch&&representative)||
@@ -64,8 +73,8 @@ export function classify(terminals,odds={}){
         betClass="COVER";
         adopted=true;
         purchaseReason=isMainBranch
-          ?`${dominant.branchLabel}の成立可能な着順変化（枝内${branchRank??"-"}位・順位上限なし）`
-          :`${dominant.branchLabel}由来の別展開カバー（順位上限なし）`;
+          ?`${dominant.branchLabel}の成立可能な着順変化（3着独立支持を確認）`
+          :`${dominant.branchLabel}由来の別展開カバー（3着独立支持を確認）`;
       }
     }
 
@@ -75,9 +84,11 @@ export function classify(terminals,odds={}){
         ?"FLAT_DISTRIBUTION"
         :!dominant
           ?"NO_DOMINANT_BRANCH"
-          :!(representative||credibleVariant)
-            ?"BRANCH_OR_POSITION_SUPPORT"
-            :"CLASS_RULE";
+          :!thirdVariantEligible
+            ?"THIRD_VARIANT_SUPPORT"
+            :!(representative||credibleVariant)
+              ?"BRANCH_OR_POSITION_SUPPORT"
+              :"CLASS_RULE";
 
     return{
       ...terminal,
@@ -97,6 +108,15 @@ export function classify(terminals,odds={}){
       branchFit,
       branchRank,
       representativeTerminal:representative,
+      thirdVariantEligible,
+      thirdVariantGroupKey:thirdGroupKey,
+      thirdVariantRelativeToBest,
+      thirdVariantConditionalShare,
+      thirdVariantNaturalCutDetected:thirdStats?.naturalCutDetected||false,
+      thirdVariantCutGap:thirdStats?.cutGap??null,
+      thirdVariantGroupSize:thirdStats?.groupSize??null,
+      highPayoutCandidate,
+      oddsEvaluationStatus:hasOdds?"ODDS_AVAILABLE":(highPayoutCandidate?"ODDS_PENDING":"NOT_VALUE_CANDIDATE"),
       decisionRatios:dominant?.decisionRatios||null,
       positionScores:dominant?.positionScores||null,
       positionEvidence:dominant?.positionEvidence||null,
@@ -135,6 +155,51 @@ function buildBranchStats(terminals){
     });
   }
   return result;
+}
+
+function buildThirdVariantStats(terminals){
+  const groups=new Map();
+  for(const terminal of terminals){
+    const contributions=[...(terminal.branchContributions||[])]
+      .filter(contribution=>contributionMatchesTerminal(contribution,terminal.order))
+      .sort((a,b)=>(b.probability||0)-(a.probability||0)||String(a.branchId).localeCompare(String(b.branchId),"en"));
+    const dominant=contributions[0];
+    if(!dominant)continue;
+    const key=thirdVariantGroupKey(dominant.branchId,terminal.order);
+    if(!groups.has(key))groups.set(key,[]);
+    groups.get(key).push({order:terminal.order.join("-"),probability:dominant.probability||0});
+  }
+  const result=new Map();
+  for(const [key,items] of groups){
+    items.sort((a,b)=>b.probability-a.probability||a.order.localeCompare(b.order,"en"));
+    const best=items[0]?.probability||0;
+    const total=sum(items.map(item=>item.probability));
+    const ratios=items.map(item=>best>0?item.probability/best:0);
+    const gaps=[];
+    for(let i=0;i<ratios.length-1;i+=1)gaps.push({index:i,gap:Math.max(0,ratios[i]-ratios[i+1])});
+    const sortedGaps=[...gaps].sort((a,b)=>b.gap-a.gap||a.index-b.index);
+    const largest=sortedGaps[0]||null;
+    const totalRange=ratios.length>1?Math.max(0,ratios[0]-ratios[ratios.length-1]):0;
+    const otherGapSum=largest?Math.max(0,totalRange-largest.gap):0;
+    const tiedLargest=largest?sortedGaps.filter(item=>Math.abs(item.gap-largest.gap)<1e-12).length>1:false;
+    const naturalCutDetected=items.length>=3&&Boolean(largest)&&!tiedLargest&&largest.gap>otherGapSum;
+    const cutIndex=naturalCutDetected?largest.index:items.length-1;
+    const supportedOrders=new Set(items.slice(0,cutIndex+1).map(item=>item.order));
+    result.set(key,{
+      groupSize:items.length,
+      best,total,
+      naturalCutDetected,
+      cutGap:naturalCutDetected?largest.gap:null,
+      supportedOrders,
+      relativeToBestByOrder:new Map(items.map((item,index)=>[item.order,ratios[index]])),
+      conditionalShareByOrder:new Map(items.map(item=>[item.order,total>0?item.probability/total:0]))
+    });
+  }
+  return result;
+}
+
+function thirdVariantGroupKey(branchId,order){
+  return `${branchId||"-"}|${Number(order?.[0])||0}-${Number(order?.[1])||0}`;
 }
 
 export function composite(items){
@@ -208,6 +273,7 @@ export function purchaseDiagnostics(classified,plan,budget){
       probabilitySupportVsMaxMin:null,
       rawBranchCountUsedForAdoption:false,
       weightedMultiBranchSupportEquivalentMin:2,
+      thirdVariantSelectionMode:"ADAPTIVE_NATURAL_GAP_WITHIN_BRANCH_FIRST_SECOND",
       representativePositionRatios:{first:.93,second:.91,third:.91},
       credibleVariantPositionRatios:{first:.88,second:.85,third:.85}
     },
@@ -252,6 +318,15 @@ export function purchaseDiagnostics(classified,plan,budget){
         branchRank:item.branchRank,
         branchSupport:item.branchSupport,
         weightedBranchSupport:item.weightedBranchSupport??sum(supportBranches.map(branch=>branch.weightedSupport||0)),
+        thirdVariantEligible:item.thirdVariantEligible??true,
+        thirdVariantGroupKey:item.thirdVariantGroupKey||null,
+        thirdVariantRelativeToBest:item.thirdVariantRelativeToBest??null,
+        thirdVariantConditionalShare:item.thirdVariantConditionalShare??null,
+        thirdVariantNaturalCutDetected:item.thirdVariantNaturalCutDetected||false,
+        thirdVariantCutGap:item.thirdVariantCutGap??null,
+        thirdVariantGroupSize:item.thirdVariantGroupSize??null,
+        highPayoutCandidate:Boolean(item.highPayoutCandidate),
+        oddsEvaluationStatus:item.oddsEvaluationStatus||null,
         rawBranchCountUsedForAdoption:false,
         dominantBranchStrengthRatio:item.dominantBranchStrengthRatio??null,
         uniqueSupportBranchCount:uniqueSupportBranchIds.length,
@@ -270,7 +345,8 @@ export function purchaseDiagnostics(classified,plan,budget){
     classCounts:{
       main:natural.filter(item=>item.betClass==="MAIN").length,
       cover:natural.filter(item=>item.betClass==="COVER").length,
-      buyableHigh:natural.filter(item=>item.betClass==="BUYABLE_HIGH").length
+      buyableHigh:natural.filter(item=>item.betClass==="BUYABLE_HIGH").length,
+      highPayoutCandidateOddsPending:classified.filter(item=>item.highPayoutCandidate&&item.oddsEvaluationStatus==="ODDS_PENDING").length
     },
     minimumRequired,
     budget:Number(budget||0),
