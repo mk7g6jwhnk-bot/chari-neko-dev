@@ -49,7 +49,10 @@ export function generateKeirinBranches({scored,lines,lineConfidence,raceCategory
     // lower tail contains a robust natural gap; otherwise no artificial lower cutoff is invented.
     priority:structured.includes(branch)
       ?mainIds.has(branch.id)?"main":contenderIds.has(branch.id)?"contender":"sub"
-      :"risk"
+      :"risk",
+    forecastRole:structured.includes(branch)
+      ?mainIds.has(branch.id)?"CENTER":contenderIds.has(branch.id)?"SECONDARY":"POSSIBLE"
+      :"RISK"
   }));
 }
 
@@ -62,12 +65,13 @@ export function selectNaturalBranchTiers(structuredBranches=[]){
   const bottomScore=scores[scores.length-1];
   const eps=Math.max(1e-9,Math.abs(topScore)*1e-12);
 
-  // If every structural branch has the same score, there is no evidence for a core
-  // scenario. Keep them all as contenders instead of inventing a winner.
+  // If every structural branch has the same score, there is no evidence for a
+  // central forecast. Keep all branches as POSSIBLE only; do not promote mere
+  // logical possibility into a forecast contender.
   if(Math.abs(topScore-bottomScore)<=eps){
     return{
-      main:[],contender:sorted,sub:[],
-      diagnostics:{mode:"NO_SEPARATION",topScore,topTieCount:sorted.length,tailMedianGap:0,tailMadGap:0,contenderCutGap:null,contenderCutDetected:false}
+      main:[],contender:[],sub:sorted,
+      diagnostics:{mode:"NO_CENTRAL_SEPARATION",topScore,topTieCount:sorted.length,tailMedianGap:0,tailMadGap:0,contenderCutGap:null,contenderCutDetected:false}
     };
   }
 
@@ -79,7 +83,7 @@ export function selectNaturalBranchTiers(structuredBranches=[]){
     return{main,contender:[],sub:[],diagnostics:{mode:"TOP_ONLY",topScore,topTieCount,tailMedianGap:null,tailMadGap:null,contenderCutGap:null,contenderCutDetected:false}};
   }
   if(tail.length===1){
-    return{main,contender:tail,sub:[],diagnostics:{mode:"NO_LOWER_CUT",topScore,topTieCount,tailMedianGap:null,tailMadGap:null,contenderCutGap:null,contenderCutDetected:false}};
+    return{main,contender:[],sub:tail,diagnostics:{mode:"CORE_ONLY_SINGLE_TAIL_POSSIBLE",topScore,topTieCount,tailMedianGap:null,tailMadGap:null,contenderCutGap:null,contenderCutDetected:false}};
   }
 
   const tailScores=tail.map(branch=>Number(branch.score)||0);
@@ -97,13 +101,17 @@ export function selectNaturalBranchTiers(structuredBranches=[]){
   // fixed percentage of the top score and does not require two groups to exist.
   const naturalGapFloor=tailMedianGap+tailMadGap;
   const contenderCutDetected=maxGapIndex>=0&&maxGap>naturalGapFloor+eps&&maxGap>eps;
-  const contender=contenderCutDetected?tail.slice(0,maxGapIndex+1):tail;
-  const sub=contenderCutDetected?tail.slice(maxGapIndex+1):[];
+  // Only call a non-core branch a forecast contender when the score distribution
+  // itself supplies a clear boundary separating an upper secondary group from
+  // weaker possibilities. If no such boundary exists, all non-core branches stay
+  // POSSIBLE (sub) rather than being treated as predictions to cover.
+  const contender=contenderCutDetected?tail.slice(0,maxGapIndex+1):[];
+  const sub=contenderCutDetected?tail.slice(maxGapIndex+1):tail;
 
   return{
     main,contender,sub,
     diagnostics:{
-      mode:contenderCutDetected?"CORE_PLUS_NATURAL_LOWER_BREAK":"CORE_WITHOUT_FORCED_LOWER_BREAK",
+      mode:contenderCutDetected?"CORE_PLUS_NATURAL_SECONDARY_GROUP":"CORE_ONLY_TAIL_POSSIBLE",
       topScore,topTieCount,tailMedianGap,tailMadGap,
       contenderCutGap:contenderCutDetected?maxGap:null,
       contenderCutDetected
@@ -139,7 +147,8 @@ function generateGirlsBranches(scored=[]){
   const mainIds=new Set(tiers.main.map(branch=>branch.id)),contenderIds=new Set(tiers.contender.map(branch=>branch.id));
   return branches.filter(branch=>branch.firstCandidates.length&&branch.enabled).sort(compareBranch).map(branch=>({
     ...branch,
-    priority:structured.includes(branch)?mainIds.has(branch.id)?"main":contenderIds.has(branch.id)?"contender":"sub":"risk"
+    priority:structured.includes(branch)?mainIds.has(branch.id)?"main":contenderIds.has(branch.id)?"contender":"sub":"risk",
+    forecastRole:structured.includes(branch)?mainIds.has(branch.id)?"CENTER":contenderIds.has(branch.id)?"SECONDARY":"POSSIBLE":"RISK"
   }));
 }
 

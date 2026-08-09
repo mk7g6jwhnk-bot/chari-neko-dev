@@ -309,7 +309,15 @@ function isFamilyCoverageCandidate(item,isPrimary){
   const contenderEligible=Boolean(item.familyPriorityEligibility?.contender);
   if(mainEligible||contenderEligible)return true;
   if(!isPrimary)return false;
-  // 明確な自然境界が検出されている場合、その境界を越えてカバー率だけを理由に復活させない。
+  // The primary-family supplement may relax position floors, but only when the
+  // terminal is already supported by a CENTER/SECONDARY forecast branch. A
+  // POSSIBLE-only (sub) branch is never promoted merely because its family has a
+  // large probability mass.
+  const hasForecastBranch=(item.branchContributions||[]).some(c=>{
+    const p=normalizePriority(c.normalizedPriority||c.branchPriority);
+    return p==="main"||p==="contender";
+  });
+  if(!hasForecastBranch)return false;
   if(item.secondFamilyNaturalCutDetected&&!item.secondFamilyNaturalEligible)return false;
   if(item.thirdFamilyNaturalCutDetected&&!item.thirdFamilyNaturalEligible)return false;
   if(item.thirdVariantNaturalCutDetected&&!item.thirdVariantEligible)return false;
