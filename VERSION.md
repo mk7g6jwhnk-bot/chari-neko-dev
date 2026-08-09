@@ -1,3 +1,9 @@
+# v25 branch-prior-audit
+
+- Prediction logic unchanged from v23 weighted branch support.
+- Adds audit-only visibility for pre-terminal branch scores, normalized branch share, top-relative score, priority, line id, and score trace.
+- Engine version: KEIRIN-0.5.3-branch-prior-audit.
+
 # Version
 
 KEIRIN-0.5.2-weighted-branch-support / UI-v24-quick-navigation-deadlines
