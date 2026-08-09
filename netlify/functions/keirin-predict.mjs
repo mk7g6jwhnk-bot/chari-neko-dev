@@ -173,69 +173,64 @@ async function requestBrowserService(base, params) {
     raceNo: String(params.raceNo)
   });
 
-  const candidates = [
-    `${base}/keirin/race?${query}`
-  ];
-
+  const endpoint = `${base}/keirin/race?${query}`;
   const attempts = [];
-  for (const endpoint of candidates) {
-    for (let attempt = 1; attempt <= 2; attempt += 1) {
-      try {
-        const response = await fetch(endpoint, {
-          headers: { accept: "application/json" },
-          signal: AbortSignal.timeout(65000)
-        });
-        const text = await response.text();
-        let data = null;
-        try { data = JSON.parse(text); } catch {}
+  try {
+    const response = await fetch(endpoint, {
+      headers: { accept: "application/json" },
+      // Netlifyのゲートウェイ502になる前にこちらで打ち切り、JSONエラーとして返す。
+      // Railway側は同一Rのin-flightを共有し、完了後90秒キャッシュするため、
+      // ユーザーが再試行した時は二重Chromium起動にならない。
+      signal: AbortSignal.timeout(12000)
+    });
+    const text = await response.text();
+    let data = null;
+    try { data = JSON.parse(text); } catch {}
 
-        attempts.push({
-          endpoint: endpoint.replace(base, ""),
-          attempt,
-          status: response.status,
-          parsed: data !== null,
-          error: data?.error || null
-        });
+    attempts.push({
+      endpoint: endpoint.replace(base, ""),
+      attempt: 1,
+      status: response.status,
+      parsed: data !== null,
+      error: data?.error || null
+    });
 
-        if (data && (data.officialData || data.ok === false)) {
-          const retryable = !response.ok && (response.status >= 500 || /page crashed|target closed|browser|navigation|timeout|timed out|socket|fetch failed/i.test(String(data?.error || "")));
-          if (retryable && attempt < 2) {
-            await new Promise(resolve => setTimeout(resolve, 500));
-            continue;
-          }
-          return {
-            ok: response.ok && data.ok !== false,
-            status: response.status,
-            data: { ...data, endpointAudit: attempts }
-          };
-        }
-        if (!response.ok && attempt < 2) {
-          await new Promise(resolve => setTimeout(resolve, 500));
-          continue;
-        }
-      } catch (error) {
-        attempts.push({
-          endpoint: endpoint.replace(base, ""),
-          attempt,
-          error: error instanceof Error ? error.message : String(error)
-        });
-        if (attempt < 2) {
-          await new Promise(resolve => setTimeout(resolve, 500));
-          continue;
-        }
-      }
+    if (data && (data.officialData || data.ok === false)) {
+      return {
+        ok: response.ok && data.ok !== false,
+        status: response.status,
+        data: { ...data, endpointAudit: attempts }
+      };
     }
-  }
 
-  return {
-    ok: false,
-    status: 502,
-    data: {
+    return {
       ok: false,
-      error: "競輪ブラウザサービスの取得エンドポイントを確認できません",
-      endpointAudit: attempts
-    }
-  };
+      status: response.status || 502,
+      data: {
+        ok: false,
+        error: "競輪ブラウザサービスの応答をJSONとして確認できません",
+        endpointAudit: attempts
+      }
+    };
+  } catch (error) {
+    attempts.push({
+      endpoint: endpoint.replace(base, ""),
+      attempt: 1,
+      error: error instanceof Error ? error.message : String(error)
+    });
+    const timedOut = /timeout|timed out|abort/i.test(String(error?.message || error || ""));
+    return {
+      ok: false,
+      status: 502,
+      data: {
+        ok: false,
+        error: timedOut
+          ? "公式予想データ取得が時間内に完了しませんでした。数秒後に再試行してください。"
+          : "競輪ブラウザサービスへ接続できません",
+        endpointAudit: attempts
+      }
+    };
+  }
 }
 
 
