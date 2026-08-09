@@ -1,7 +1,8 @@
 # Version
 
-KEIRIN-0.5.1-support-branch-audit
+KEIRIN-0.5.2-weighted-branch-support
 
-- Displays every supporting branch for each adopted terminal.
-- Separately counts unique branch IDs and flags duplicate branch labels.
-- Prediction selection logic is unchanged from v21.
+- Purchase support no longer treats every connected branch as one equal vote.
+- The multi-branch COVER rule now uses weighted equivalent support from branch strength and within-branch fit.
+- All branch provenance remains stored and visible for audit.
+- MAIN and representative alternative-branch rules are unchanged in this version.

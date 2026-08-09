@@ -7,6 +7,7 @@ export function classify(terminals,odds={}){
   const max=sorted[0].probability||0;
   const concentrationRatio=max*sorted.length;
   const branchStats=buildBranchStats(sorted);
+  const maxBranchTotal=Math.max(...[...branchStats.values()].map(stats=>stats.total),0);
 
   return sorted.map((terminal,index)=>{
     const key=terminal.order.join("-");
@@ -20,6 +21,13 @@ export function classify(terminals,odds={}){
     const branchFit=stats?.best>0?(dominant?.probability||0)/stats.best:0;
     const branchRank=stats?.rankByOrder.get(key)??null;
     const support=contributions.length;
+    const supportDetails=contributions.map(contribution=>{
+      const contributionStats=branchStats.get(contribution.branchId);
+      const withinBranchFit=contributionStats?.best>0?(contribution.probability||0)/contributionStats.best:0;
+      const branchStrengthRatio=maxBranchTotal>0?(contributionStats?.total||0)/maxBranchTotal:0;
+      return{contribution,withinBranchFit,branchStrengthRatio,weightedSupport:withinBranchFit*branchStrengthRatio};
+    });
+    const weightedBranchSupport=sum(supportDetails.map(item=>item.weightedSupport));
     const ratios=dominant?.decisionRatios||{};
     const positionConverged=(ratios.first??0)>=.93&&(ratios.second??0)>=.91&&(ratios.third??0)>=.91;
     const positionNear=(ratios.first??0)>=.88&&(ratios.second??0)>=.85&&(ratios.third??0)>=.85;
@@ -51,7 +59,7 @@ export function classify(terminals,odds={}){
       }else if(
         (isMainBranch&&credibleVariant)||
         (isAlternativeBranch&&representative)||
-        (support>=2&&branchFit>=.90&&credibleVariant)
+        (weightedBranchSupport>=2&&branchFit>=.90&&credibleVariant)
       ){
         betClass="COVER";
         adopted=true;
@@ -79,10 +87,13 @@ export function classify(terminals,odds={}){
       purchaseReason,
       purchaseRejectCode,
       branchSupport:support,
+      weightedBranchSupport,
+      rawBranchCountUsedForAdoption:false,
       dominantBranchId:dominant?.branchId||null,
       dominantBranchLabel:dominant?.branchLabel||null,
       dominantBranchPriority:dominant?.branchPriority||null,
       dominantBranchContribution:dominant?.probability||0,
+      dominantBranchStrengthRatio:dominant?((maxBranchTotal>0?(stats?.total||0)/maxBranchTotal:0)):0,
       branchFit,
       branchRank,
       representativeTerminal:representative,
@@ -119,6 +130,7 @@ function buildBranchStats(terminals){
     items.sort((a,b)=>b.probability-a.probability||a.order.localeCompare(b.order,"en"));
     result.set(branchId,{
       best:items[0]?.probability||0,
+      total:sum(items.map(item=>item.probability)),
       rankByOrder:new Map(items.map((item,index)=>[item.order,index+1]))
     });
   }
@@ -194,20 +206,32 @@ export function purchaseDiagnostics(classified,plan,budget){
       representativeBranchFitMin:.975,
       credibleVariantBranchFitMin:.87,
       probabilitySupportVsMaxMin:null,
+      rawBranchCountUsedForAdoption:false,
+      weightedMultiBranchSupportEquivalentMin:2,
       representativePositionRatios:{first:.93,second:.91,third:.91},
       credibleVariantPositionRatios:{first:.88,second:.85,third:.85}
     },
     adoptedTerminalAudit:natural.map(item=>{
+      const diagnosticBranchStats=buildBranchStats(classified);
+      const diagnosticMaxBranchTotal=Math.max(...[...diagnosticBranchStats.values()].map(stats=>stats.total),0);
       const supportBranches=[...(item.branchContributions||[])]
         .filter(contribution=>contributionMatchesTerminal(contribution,item.order))
         .sort((a,b)=>(b.probability||0)-(a.probability||0)||String(a.branchId).localeCompare(String(b.branchId),"en"))
-        .map(contribution=>({
-          branchId:contribution.branchId||null,
-          branchLabel:contribution.branchLabel||null,
-          branchPriority:contribution.branchPriority||null,
-          probability:contribution.probability||0,
-          requiredFirstNumber:contribution.requiredFirstNumber??null
-        }));
+        .map(contribution=>{
+          const supportStats=diagnosticBranchStats.get(contribution.branchId);
+          const withinBranchFit=supportStats?.best>0?(contribution.probability||0)/supportStats.best:0;
+          const branchStrengthRatio=diagnosticMaxBranchTotal>0?(supportStats?.total||0)/diagnosticMaxBranchTotal:0;
+          return{
+            branchId:contribution.branchId||null,
+            branchLabel:contribution.branchLabel||null,
+            branchPriority:contribution.branchPriority||null,
+            probability:contribution.probability||0,
+            requiredFirstNumber:contribution.requiredFirstNumber??null,
+            withinBranchFit,
+            branchStrengthRatio,
+            weightedSupport:withinBranchFit*branchStrengthRatio
+          };
+        });
       const uniqueSupportBranchIds=[...new Set(supportBranches.map(branch=>branch.branchId).filter(Boolean))];
       const supportLabelCounts=supportBranches.reduce((counts,branch)=>{
         const label=branch.branchLabel||"不明";
@@ -227,6 +251,9 @@ export function purchaseDiagnostics(classified,plan,budget){
         branchFit:item.branchFit,
         branchRank:item.branchRank,
         branchSupport:item.branchSupport,
+        weightedBranchSupport:item.weightedBranchSupport??sum(supportBranches.map(branch=>branch.weightedSupport||0)),
+        rawBranchCountUsedForAdoption:false,
+        dominantBranchStrengthRatio:item.dominantBranchStrengthRatio??null,
         uniqueSupportBranchCount:uniqueSupportBranchIds.length,
         supportBranches,
         duplicateSupportLabels,

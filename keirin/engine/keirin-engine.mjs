@@ -21,7 +21,7 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
   if(lineBlocked){purchase.noBet=true;purchase.noBetReason="LINE_DATA_UNAVAILABLE";purchase.purchaseCandidateCountBeforeCompression=0;purchase.purchaseCandidateCountAfterCompression=0;purchase.finalBetCount=0;purchase.minimumRequired=0;}
 
   return{
-    engineVersion:"KEIRIN-0.5.1-terminal-provenance-audit",
+    engineVersion:"KEIRIN-0.5.2-weighted-branch-support",
     raceId:race.id,
     lineConfidence:race.lineConfidence,
     scored,lines,branches,terminals:classified,
