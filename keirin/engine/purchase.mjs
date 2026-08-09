@@ -314,6 +314,7 @@ export function purchaseDiagnostics(classified,plan,budget){
         dominantBranchId:item.dominantBranchId,
         dominantBranchLabel:item.dominantBranchLabel,
         dominantBranchPriority:item.dominantBranchPriority,
+        dominantBranchTierLabel:branchPriorityLabel(item.dominantBranchPriority),
         branchFit:item.branchFit,
         branchRank:item.branchRank,
         branchSupport:item.branchSupport,
@@ -342,6 +343,11 @@ export function purchaseDiagnostics(classified,plan,budget){
       counts[label]=(counts[label]||0)+1;
       return counts;
     },{}),
+    adoptedBranchTierCounts:natural.reduce((counts,item)=>{
+      const priority=item.dominantBranchPriority||"unknown";
+      counts[priority]=(counts[priority]||0)+1;
+      return counts;
+    },{}),
     classCounts:{
       main:natural.filter(item=>item.betClass==="MAIN").length,
       cover:natural.filter(item=>item.betClass==="COVER").length,
@@ -353,6 +359,11 @@ export function purchaseDiagnostics(classified,plan,budget){
     budgetSufficient:Number(budget||0)>=minimumRequired,
     noBet,noBetReason
   };
+}
+
+
+function branchPriorityLabel(priority){
+  return ({main:"本命展開",contender:"有力展開",sub:"別展開",risk:"リスク枝"})[priority]||"不明";
 }
 
 function summarizeEvidence(evidence){
