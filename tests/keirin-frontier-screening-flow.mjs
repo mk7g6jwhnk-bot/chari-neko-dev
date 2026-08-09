@@ -1,0 +1,11 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+const source=fs.readFileSync(new URL("../public/app.mjs",import.meta.url),"utf8");
+assert.match(source,/primary-screening:v3/);
+assert.match(source,/keirin-active-races/);
+assert.match(source,/preparePrimaryScreening\(\{advance:false\}\)/);
+const bulk=source.match(/async function bulkRefreshRaceInfo\(\)\{[^\n]+/s)?.[0]||"";
+assert.ok(bulk.includes("preparePrimaryScreening"));
+assert.ok(!bulk.includes("groupRacesByVenue(allMeetingRaces())"));
+assert.ok(source.includes("全96Rは走査せず"));
+console.log("PASS frontier screening flow");
