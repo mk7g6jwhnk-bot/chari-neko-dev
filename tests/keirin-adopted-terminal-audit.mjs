@@ -19,6 +19,12 @@ for(const item of out.audit.adoptedTerminalAudit){
   assert.ok(item.dominantBranchLabel);
   assert.ok(Number.isFinite(item.branchFit));
   assert.ok(item.decisionRatios);
+  assert.ok(Array.isArray(item.supportBranches));
+  assert.equal(item.supportBranches.length,item.branchSupport);
+  assert.ok(Number.isInteger(item.uniqueSupportBranchCount));
+  assert.ok(item.uniqueSupportBranchCount<=item.branchSupport);
+  assert.ok(Array.isArray(item.duplicateSupportLabels));
 }
+
 assert.equal(out.audit.purchaseThresholds.probabilitySupportVsMaxMin,null);
 console.log('Keirin adopted terminal provenance audit passed:', out.audit.adoptedTerminalAudit.length);

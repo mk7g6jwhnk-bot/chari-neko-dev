@@ -197,20 +197,44 @@ export function purchaseDiagnostics(classified,plan,budget){
       representativePositionRatios:{first:.93,second:.91,third:.91},
       credibleVariantPositionRatios:{first:.88,second:.85,third:.85}
     },
-    adoptedTerminalAudit:natural.map(item=>({
-      order:item.order.join("-"),
-      betClass:item.betClass,
-      probability:item.probability,
-      dominantBranchId:item.dominantBranchId,
-      dominantBranchLabel:item.dominantBranchLabel,
-      dominantBranchPriority:item.dominantBranchPriority,
-      branchFit:item.branchFit,
-      branchRank:item.branchRank,
-      branchSupport:item.branchSupport,
-      representativeTerminal:item.representativeTerminal,
-      decisionRatios:item.decisionRatios||null,
-      purchaseReason:item.purchaseReason
-    })),
+    adoptedTerminalAudit:natural.map(item=>{
+      const supportBranches=[...(item.branchContributions||[])]
+        .filter(contribution=>contributionMatchesTerminal(contribution,item.order))
+        .sort((a,b)=>(b.probability||0)-(a.probability||0)||String(a.branchId).localeCompare(String(b.branchId),"en"))
+        .map(contribution=>({
+          branchId:contribution.branchId||null,
+          branchLabel:contribution.branchLabel||null,
+          branchPriority:contribution.branchPriority||null,
+          probability:contribution.probability||0,
+          requiredFirstNumber:contribution.requiredFirstNumber??null
+        }));
+      const uniqueSupportBranchIds=[...new Set(supportBranches.map(branch=>branch.branchId).filter(Boolean))];
+      const supportLabelCounts=supportBranches.reduce((counts,branch)=>{
+        const label=branch.branchLabel||"不明";
+        counts[label]=(counts[label]||0)+1;
+        return counts;
+      },{});
+      const duplicateSupportLabels=Object.entries(supportLabelCounts)
+        .filter(([,count])=>count>1)
+        .map(([label,count])=>({label,count}));
+      return{
+        order:item.order.join("-"),
+        betClass:item.betClass,
+        probability:item.probability,
+        dominantBranchId:item.dominantBranchId,
+        dominantBranchLabel:item.dominantBranchLabel,
+        dominantBranchPriority:item.dominantBranchPriority,
+        branchFit:item.branchFit,
+        branchRank:item.branchRank,
+        branchSupport:item.branchSupport,
+        uniqueSupportBranchCount:uniqueSupportBranchIds.length,
+        supportBranches,
+        duplicateSupportLabels,
+        representativeTerminal:item.representativeTerminal,
+        decisionRatios:item.decisionRatios||null,
+        purchaseReason:item.purchaseReason
+      };
+    }),
     adoptedBranchCounts:natural.reduce((counts,item)=>{
       const label=item.dominantBranchLabel||"不明";
       counts[label]=(counts[label]||0)+1;
