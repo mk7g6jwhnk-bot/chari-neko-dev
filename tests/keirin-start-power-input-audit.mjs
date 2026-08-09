@@ -11,7 +11,7 @@ const evidence={
 };
 const snapshot=createSnapshot({
   race:{date:"20260809",venueCode:"28",venue:"立川",raceNo:3,participants:[{number:1,name:"A"}]},
-  prediction:{engineVersion:"KEIRIN-0.5.8-start-power-input-audit",scored:[{number:1,startPower:9.3,startPowerEvidence:evidence}],purchasePlan:[]}
+  prediction:{engineVersion:"KEIRIN-0.5.9-start-power-empirical-quantile",scored:[{number:1,startPower:9.3,startPowerEvidence:evidence}],purchasePlan:[]}
 },new Date("2026-08-09T03:00:00Z"));
 assert.deepEqual(snapshot.abilitiesUsed[0].startPowerEvidence,evidence);
 assert.equal(snapshot.abilitiesUsed[0].startPower,9.3);

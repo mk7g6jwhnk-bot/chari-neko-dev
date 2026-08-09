@@ -1,8 +1,5 @@
 import { KEIRIN_START_POWER_BASELINE } from "../config/start-power-baseline-v1.mjs";
 
-const ROBUST_IQR_TO_SIGMA = 1.349;
-const MIN_ROBUST_SCALE = 0.01;
-const INPUT_Z_CAP = 2.5;
 
 export function applyStartPowerEvidence(participants, {
   baseline = KEIRIN_START_POWER_BASELINE
@@ -48,6 +45,8 @@ export function buildStartPowerEvidence(participant, baseline = KEIRIN_START_POW
     shrunkBFrequency: null,
     shrunkHFrequency: null,
     latentScore: 5,
+    bPercentileScore: null,
+    hPercentileScore: null,
     startsQuality: 0,
     sparseSampleFlag: officialTotalStarts === 0 ? true : sparseSampleFlag,
     raceCategory,
@@ -87,10 +86,21 @@ export function buildStartPowerEvidence(participant, baseline = KEIRIN_START_POW
     priorStrength,
     categoryBaseline.hFrequency.mean
   );
-  const bZ = clamp(robustZ(shrunkBFrequency, categoryBaseline.shrunkBFrequency), -INPUT_Z_CAP, INPUT_Z_CAP);
-  const hZ = clamp(robustZ(shrunkHFrequency, categoryBaseline.shrunkHFrequency), -INPUT_Z_CAP, INPUT_Z_CAP);
-  const sharedZ = (bZ + hZ) / 2;
-  const latentScore = clamp(normalCdf(sharedZ) * 10, 0.25, 9.75);
+  // Convert each shrunk B/H frequency against the actual active-racer census
+  // rather than assuming the distribution is normal.  The previous robust-Z
+  // + normal-CDF mapping saturated too quickly: a rider only a little above
+  // the empirical p75 could jump into the 9.x range.  Piecewise empirical
+  // quantile mapping keeps the score interpretable (roughly population
+  // percentile / 10) and preserves the observed skew of B/H frequencies.
+  const bPercentileScore = empiricalQuantileScore(
+    shrunkBFrequency,
+    categoryBaseline.shrunkBFrequency
+  );
+  const hPercentileScore = empiricalQuantileScore(
+    shrunkHFrequency,
+    categoryBaseline.shrunkHFrequency
+  );
+  const latentScore = clamp((bPercentileScore + hPercentileScore) / 2, 0.5, 9.5);
   const startsQuality = officialTotalStarts / (officialTotalStarts + priorStrength);
   // Sample-size uncertainty is already handled once by the empirical-Bayes
   // shrinkFrequency() step above. Do not pull the resulting latent ability
@@ -110,6 +120,8 @@ export function buildStartPowerEvidence(participant, baseline = KEIRIN_START_POW
     shrunkBFrequency: round(shrunkBFrequency),
     shrunkHFrequency: round(shrunkHFrequency),
     latentScore: round(latentScore),
+    bPercentileScore: round(bPercentileScore),
+    hPercentileScore: round(hPercentileScore),
     startsQuality: round(startsQuality),
     sparseSampleFlag,
     raceCategory,
@@ -132,8 +144,8 @@ export function buildStartPowerEvidence(participant, baseline = KEIRIN_START_POW
       "officialProfileEvidence.homeCount",
       `${raceCategory}.bFrequencyPriorMean`,
       `${raceCategory}.hFrequencyPriorMean`,
-      `${raceCategory}.shrunkFrequencyRobustScale`,
-      `${raceCategory}.bhSharedLatent`,
+      `${raceCategory}.shrunkFrequencyEmpiricalQuantiles`,
+      `${raceCategory}.bhEmpiricalPercentileLatent`,
       "startsQualityConfidenceDiagnostic"
     ],
     missingInputs: []
@@ -144,9 +156,30 @@ function shrinkFrequency(count, starts, priorStrength, priorMean) {
   return (count + priorStrength * priorMean) / (starts + priorStrength);
 }
 
-function robustZ(value, distribution) {
-  const scale = Math.max(distribution.iqr / ROBUST_IQR_TO_SIGMA, MIN_ROBUST_SCALE);
-  return (value - distribution.median) / scale;
+function empiricalQuantileScore(value, distribution) {
+  const anchors = [
+    [distribution.min, 0],
+    [distribution.p10, 1],
+    [distribution.p25, 2.5],
+    [distribution.median, 5],
+    [distribution.p75, 7.5],
+    [distribution.p90, 9],
+    [distribution.max, 10]
+  ];
+
+  if (value <= anchors[0][0]) return 0;
+  if (value >= anchors[anchors.length - 1][0]) return 10;
+
+  for (let index = 1; index < anchors.length; index += 1) {
+    const [upperValue, upperScore] = anchors[index];
+    if (value > upperValue) continue;
+    const [lowerValue, lowerScore] = anchors[index - 1];
+    if (upperValue <= lowerValue) return upperScore;
+    const ratio = (value - lowerValue) / (upperValue - lowerValue);
+    return lowerScore + ratio * (upperScore - lowerScore);
+  }
+
+  return 10;
 }
 
 function confidenceFor({ officialTotalStarts, foreignFlag }) {
@@ -184,18 +217,6 @@ function nullableNonNegativeNumber(value) {
 function nullableText(value) {
   const text = String(value ?? "").trim();
   return text && text !== "-" ? text : null;
-}
-
-function normalCdf(value) {
-  return 0.5 * (1 + erf(value / Math.sqrt(2)));
-}
-
-function erf(value) {
-  const sign = value < 0 ? -1 : 1;
-  const absolute = Math.abs(value);
-  const t = 1 / (1 + 0.3275911 * absolute);
-  const approximation = 1 - (((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t) * Math.exp(-absolute * absolute);
-  return sign * approximation;
 }
 
 function clamp(value, min, max) {
