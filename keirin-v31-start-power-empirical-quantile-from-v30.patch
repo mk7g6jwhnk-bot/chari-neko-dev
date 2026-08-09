@@ -1,0 +1,212 @@
+diff -ruN /mnt/data/v30repo/VERSION.md /mnt/data/v31repo/VERSION.md
+--- /mnt/data/v30repo/VERSION.md	2026-08-09 03:25:54.000000000 +0000
++++ /mnt/data/v31repo/VERSION.md	2026-08-09 03:56:35.153591839 +0000
+@@ -1,13 +1 @@
+-# KEIRIN-0.5.8-start-power-input-audit
+-
+-- 予想ロジックは0.5.7から変更なし。
+-- 保存済み予想に startPowerEvidence を保持。
+-- レース詳細に主導権入力監査（B/H/出走数/生頻度/縮小後頻度/latentScore/最終値/confidence）を追加。
+-
+-# チャリ猫 Branch Deploy
+-
+-- UI bundle: v29
+-- Keirin engine: `KEIRIN-0.5.7-start-power-single-shrink`
+-- Start power: B/H frequency keeps the existing empirical-Bayes prior shrinkage, but the second `startsQuality` pull toward neutral 5 is removed. `startsQuality` remains diagnostic/confidence metadata only.
+-- Purpose: restore meaningful separation between riders while retaining the original small-sample protection in the B/H frequency estimate.
+-- Branch tiers, terminal generation, weighted branch support, purchase logic, odds handling, and UI navigation/deadline features are unchanged from v28.
++# KEIRIN-0.5.9-start-power-empirical-quantile
+diff -ruN /mnt/data/v30repo/keirin/engine/keirin-engine.mjs /mnt/data/v31repo/keirin/engine/keirin-engine.mjs
+--- /mnt/data/v30repo/keirin/engine/keirin-engine.mjs	2026-08-09 03:25:54.000000000 +0000
++++ /mnt/data/v31repo/keirin/engine/keirin-engine.mjs	2026-08-09 03:56:35.153552353 +0000
+@@ -21,7 +21,7 @@
+   if(lineBlocked){purchase.noBet=true;purchase.noBetReason="LINE_DATA_UNAVAILABLE";purchase.purchaseCandidateCountBeforeCompression=0;purchase.purchaseCandidateCountAfterCompression=0;purchase.finalBetCount=0;purchase.minimumRequired=0;}
+ 
+   return{
+-    engineVersion:"KEIRIN-0.5.8-start-power-input-audit",
++    engineVersion:"KEIRIN-0.5.9-start-power-empirical-quantile",
+     raceId:race.id,
+     lineConfidence:race.lineConfidence,
+     scored,lines,branches,terminals:classified,
+diff -ruN /mnt/data/v30repo/keirin/start-power/start-power.mjs /mnt/data/v31repo/keirin/start-power/start-power.mjs
+--- /mnt/data/v30repo/keirin/start-power/start-power.mjs	2026-08-09 03:15:40.000000000 +0000
++++ /mnt/data/v31repo/keirin/start-power/start-power.mjs	2026-08-09 03:56:35.153386353 +0000
+@@ -1,8 +1,5 @@
+ import { KEIRIN_START_POWER_BASELINE } from "../config/start-power-baseline-v1.mjs";
+ 
+-const ROBUST_IQR_TO_SIGMA = 1.349;
+-const MIN_ROBUST_SCALE = 0.01;
+-const INPUT_Z_CAP = 2.5;
+ 
+ export function applyStartPowerEvidence(participants, {
+   baseline = KEIRIN_START_POWER_BASELINE
+@@ -48,6 +45,8 @@
+     shrunkBFrequency: null,
+     shrunkHFrequency: null,
+     latentScore: 5,
++    bPercentileScore: null,
++    hPercentileScore: null,
+     startsQuality: 0,
+     sparseSampleFlag: officialTotalStarts === 0 ? true : sparseSampleFlag,
+     raceCategory,
+@@ -87,10 +86,21 @@
+     priorStrength,
+     categoryBaseline.hFrequency.mean
+   );
+-  const bZ = clamp(robustZ(shrunkBFrequency, categoryBaseline.shrunkBFrequency), -INPUT_Z_CAP, INPUT_Z_CAP);
+-  const hZ = clamp(robustZ(shrunkHFrequency, categoryBaseline.shrunkHFrequency), -INPUT_Z_CAP, INPUT_Z_CAP);
+-  const sharedZ = (bZ + hZ) / 2;
+-  const latentScore = clamp(normalCdf(sharedZ) * 10, 0.25, 9.75);
++  // Convert each shrunk B/H frequency against the actual active-racer census
++  // rather than assuming the distribution is normal.  The previous robust-Z
++  // + normal-CDF mapping saturated too quickly: a rider only a little above
++  // the empirical p75 could jump into the 9.x range.  Piecewise empirical
++  // quantile mapping keeps the score interpretable (roughly population
++  // percentile / 10) and preserves the observed skew of B/H frequencies.
++  const bPercentileScore = empiricalQuantileScore(
++    shrunkBFrequency,
++    categoryBaseline.shrunkBFrequency
++  );
++  const hPercentileScore = empiricalQuantileScore(
++    shrunkHFrequency,
++    categoryBaseline.shrunkHFrequency
++  );
++  const latentScore = clamp((bPercentileScore + hPercentileScore) / 2, 0.5, 9.5);
+   const startsQuality = officialTotalStarts / (officialTotalStarts + priorStrength);
+   // Sample-size uncertainty is already handled once by the empirical-Bayes
+   // shrinkFrequency() step above. Do not pull the resulting latent ability
+@@ -110,6 +120,8 @@
+     shrunkBFrequency: round(shrunkBFrequency),
+     shrunkHFrequency: round(shrunkHFrequency),
+     latentScore: round(latentScore),
++    bPercentileScore: round(bPercentileScore),
++    hPercentileScore: round(hPercentileScore),
+     startsQuality: round(startsQuality),
+     sparseSampleFlag,
+     raceCategory,
+@@ -132,8 +144,8 @@
+       "officialProfileEvidence.homeCount",
+       `${raceCategory}.bFrequencyPriorMean`,
+       `${raceCategory}.hFrequencyPriorMean`,
+-      `${raceCategory}.shrunkFrequencyRobustScale`,
+-      `${raceCategory}.bhSharedLatent`,
++      `${raceCategory}.shrunkFrequencyEmpiricalQuantiles`,
++      `${raceCategory}.bhEmpiricalPercentileLatent`,
+       "startsQualityConfidenceDiagnostic"
+     ],
+     missingInputs: []
+@@ -144,9 +156,30 @@
+   return (count + priorStrength * priorMean) / (starts + priorStrength);
+ }
+ 
+-function robustZ(value, distribution) {
+-  const scale = Math.max(distribution.iqr / ROBUST_IQR_TO_SIGMA, MIN_ROBUST_SCALE);
+-  return (value - distribution.median) / scale;
++function empiricalQuantileScore(value, distribution) {
++  const anchors = [
++    [distribution.min, 0],
++    [distribution.p10, 1],
++    [distribution.p25, 2.5],
++    [distribution.median, 5],
++    [distribution.p75, 7.5],
++    [distribution.p90, 9],
++    [distribution.max, 10]
++  ];
++
++  if (value <= anchors[0][0]) return 0;
++  if (value >= anchors[anchors.length - 1][0]) return 10;
++
++  for (let index = 1; index < anchors.length; index += 1) {
++    const [upperValue, upperScore] = anchors[index];
++    if (value > upperValue) continue;
++    const [lowerValue, lowerScore] = anchors[index - 1];
++    if (upperValue <= lowerValue) return upperScore;
++    const ratio = (value - lowerValue) / (upperValue - lowerValue);
++    return lowerScore + ratio * (upperScore - lowerScore);
++  }
++
++  return 10;
+ }
+ 
+ function confidenceFor({ officialTotalStarts, foreignFlag }) {
+@@ -186,18 +219,6 @@
+   return text && text !== "-" ? text : null;
+ }
+ 
+-function normalCdf(value) {
+-  return 0.5 * (1 + erf(value / Math.sqrt(2)));
+-}
+-
+-function erf(value) {
+-  const sign = value < 0 ? -1 : 1;
+-  const absolute = Math.abs(value);
+-  const t = 1 / (1 + 0.3275911 * absolute);
+-  const approximation = 1 - (((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t) * Math.exp(-absolute * absolute);
+-  return sign * approximation;
+-}
+-
+ function clamp(value, min, max) {
+   return Math.max(min, Math.min(max, value));
+ }
+diff -ruN /mnt/data/v30repo/public/app.mjs /mnt/data/v31repo/public/app.mjs
+--- /mnt/data/v30repo/public/app.mjs	2026-08-09 03:25:54.000000000 +0000
++++ /mnt/data/v31repo/public/app.mjs	2026-08-09 03:56:55.529434388 +0000
+@@ -58,7 +58,7 @@
+ function fmtRatio(value){const n=Number(value);return Number.isFinite(n)?n.toFixed(3):"-"}
+ function fmtPct(v){const n=Number(v);return Number.isFinite(n)?`${(n*100).toFixed(1)}%`:"-"}
+ function renderPredictionDetail(snapshot){const panel=$("predictionDetail");if(!panel)return;if(!snapshot){panel.classList.add("hidden");panel.innerHTML="";return}const groups=[["本線","MAIN"],["押さえ","COVER"],["買える高配当","BUYABLE_HIGH"]];const betDetail=groups.map(([label,key])=>{const bets=(snapshot.betSelections||[]).filter(b=>b.category===key);if(!bets.length)return"";return `<div class="detailGroup"><h3>${label}</h3>${bets.map(b=>`<div class="detailBet"><strong>${b.order.join("-")}</strong>${b.branchLabel?`<p>${esc(b.branchLabel)}${b.reason?` / ${esc(b.reason)}`:""}</p>`:""}${b.evidenceSummary?`<p class="muted">${esc(b.evidenceSummary)}</p>`:""}</div>`).join("")}</div>`}).join("");const abilities=(snapshot.abilitiesUsed||[]).map(a=>`<div class="abilityRow"><strong>${a.number}番</strong><span>近況 ${fmtAbility(a.recentForm)} / 主導権 ${fmtAbility(a.startPower)} / まくり ${fmtAbility(a.sprintPower)} / 差し ${fmtAbility(a.finishPower)} / 追走 ${fmtAbility(a.trackingSkill)}</span></div>`).join("");const audit=snapshot.predictionOutput?.audit||{};const rejectLabels={FLAT_DISTRIBUTION:"分布が平坦",NO_DOMINANT_BRANCH:"支配展開なし",PROBABILITY_SUPPORT:"確率支持不足",BRANCH_OR_POSITION_SUPPORT:"枝適合/着順支持不足",CLASS_RULE:"分類条件不成立",UNKNOWN:"その他"};const rejectRows=Object.entries(audit.rejectCodeCounts||{}).sort((a,b)=>b[1]-a[1]).map(([code,count])=>`<div class="abilityRow"><strong>${esc(rejectLabels[code]||code)}</strong><span>${count}件</span></div>`).join("");const auditDetail=Number.isFinite(audit.generatedTerminalCount)?`<details class="predictionAccordion" open><summary>購入採用監査を見る</summary><div class="accordionBody"><div class="abilityList"><div class="abilityRow"><strong>生成終端</strong><span>${audit.generatedTerminalCount}件</span></div><div class="abilityRow"><strong>確率評価済み</strong><span>${audit.probabilityEvaluatedTerminalCount??audit.terminalCount??0}件</span></div><div class="abilityRow"><strong>購入採用</strong><span>${audit.adoptedTerminalCount??audit.finalBetCount??0}件</span></div><div class="abilityRow"><strong>購入不採用</strong><span>${audit.rejectedTerminalCount??0}件</span></div></div>${rejectRows?`<h3>不採用理由</h3><div class="abilityList">${rejectRows}</div>`:""}${renderBranchSelectionAudit(audit)}${renderAdoptedTerminalAudit(audit)}<p class="muted">固定点数・枝内順位上限・確率比の一律足切りは使用していません。枝数そのものは購入支持に使わず、枝強度×枝内適合の加重支持で監査します。</p></div></details>`:"";panel.innerHTML=`<div class="sectionHead"><div><small>保存済み予想の根拠</small><h2>予想詳細</h2></div><span class="pill">詳細</span></div>${auditDetail}<details class="predictionAccordion"><summary>展開・買い目の根拠を見る</summary><div class="accordionBody">${betDetail||'<p class="muted">購入候補はありません。</p>'}</div></details>${abilities?`<details class="predictionAccordion"><summary>選手別能力を見る</summary><div class="abilityList accordionBody">${abilities}</div></details>`:""}${renderStartPowerInputAudit(snapshot)}`;panel.classList.remove("hidden")}
+-function renderStartPowerInputAudit(snapshot){const rows=(snapshot.abilitiesUsed||[]).filter(a=>a.startPowerEvidence).map(a=>{const e=a.startPowerEvidence||{};const rawB=e.rawBackCount,rawH=e.rawHomeCount,starts=e.officialTotalStarts;const bRate=e.bFrequency,hRate=e.hFrequency,sb=e.shrunkBFrequency,sh=e.shrunkHFrequency;const confidence=({low:"低",medium:"中",high:"高"})[e.confidence]||e.confidence||"-";const status=e.missingInputs?.length?`欠損 ${e.missingInputs.join("/")}`:`信頼度 ${confidence}`;return `<div class="detailBet"><strong>${a.number}番　主導権 ${fmtAbility(a.startPower)}</strong><p>B ${fmtAuditNumber(rawB)} / H ${fmtAuditNumber(rawH)} / 出走 ${fmtAuditNumber(starts)}　${esc(status)}</p><p class="muted">B率 ${fmtAuditRate(bRate)} / H率 ${fmtAuditRate(hRate)} → 縮小後B ${fmtAuditRate(sb)} / 縮小後H ${fmtAuditRate(sh)} / latent ${fmtAbility(e.latentScore)}</p><p class="muted">カテゴリ ${esc(e.raceCategory||"-")} / prior ${fmtAuditNumber(e.priorStrength)} / startsQuality ${fmtRatio(e.startsQuality)}</p></div>`}).join("");return rows?`<details class="predictionAccordion"><summary>主導権の入力監査を見る</summary><div class="accordionBody"><p class="muted">数値を補正する画面ではなく、B/H入力から最終startPowerまでを確認する監査表示です。</p><div class="detailGroup">${rows}</div></div></details>`:""}
++function renderStartPowerInputAudit(snapshot){const rows=(snapshot.abilitiesUsed||[]).filter(a=>a.startPowerEvidence).map(a=>{const e=a.startPowerEvidence||{};const rawB=e.rawBackCount,rawH=e.rawHomeCount,starts=e.officialTotalStarts;const bRate=e.bFrequency,hRate=e.hFrequency,sb=e.shrunkBFrequency,sh=e.shrunkHFrequency;const confidence=({low:"低",medium:"中",high:"高"})[e.confidence]||e.confidence||"-";const status=e.missingInputs?.length?`欠損 ${e.missingInputs.join("/")}`:`信頼度 ${confidence}`;return `<div class="detailBet"><strong>${a.number}番　主導権 ${fmtAbility(a.startPower)}</strong><p>B ${fmtAuditNumber(rawB)} / H ${fmtAuditNumber(rawH)} / 出走 ${fmtAuditNumber(starts)}　${esc(status)}</p><p class="muted">B率 ${fmtAuditRate(bRate)} / H率 ${fmtAuditRate(hRate)} → 縮小後B ${fmtAuditRate(sb)} / 縮小後H ${fmtAuditRate(sh)} / B分位 ${fmtAbility(e.bPercentileScore)} / H分位 ${fmtAbility(e.hPercentileScore)} / latent ${fmtAbility(e.latentScore)}</p><p class="muted">カテゴリ ${esc(e.raceCategory||"-")} / prior ${fmtAuditNumber(e.priorStrength)} / startsQuality ${fmtRatio(e.startsQuality)}</p></div>`}).join("");return rows?`<details class="predictionAccordion"><summary>主導権の入力監査を見る</summary><div class="accordionBody"><p class="muted">数値を補正する画面ではなく、B/H入力から最終startPowerまでを確認する監査表示です。</p><div class="detailGroup">${rows}</div></div></details>`:""}
+ function fmtAuditNumber(v){const n=Number(v);return Number.isFinite(n)?String(Math.round(n*1000)/1000):"-"}
+ function fmtAuditRate(v){const n=Number(v);return Number.isFinite(n)?`${(n*100).toFixed(1)}%`:"-"}
+ function fmtAbility(v){return Number.isFinite(Number(v))?Number(v).toFixed(2):"-"}
+diff -ruN /mnt/data/v30repo/tests/keirin-start-power-input-audit.mjs /mnt/data/v31repo/tests/keirin-start-power-input-audit.mjs
+--- /mnt/data/v30repo/tests/keirin-start-power-input-audit.mjs	2026-08-09 03:25:54.000000000 +0000
++++ /mnt/data/v31repo/tests/keirin-start-power-input-audit.mjs	2026-08-09 03:56:35.153840795 +0000
+@@ -11,7 +11,7 @@
+ };
+ const snapshot=createSnapshot({
+   race:{date:"20260809",venueCode:"28",venue:"立川",raceNo:3,participants:[{number:1,name:"A"}]},
+-  prediction:{engineVersion:"KEIRIN-0.5.8-start-power-input-audit",scored:[{number:1,startPower:9.3,startPowerEvidence:evidence}],purchasePlan:[]}
++  prediction:{engineVersion:"KEIRIN-0.5.9-start-power-empirical-quantile",scored:[{number:1,startPower:9.3,startPowerEvidence:evidence}],purchasePlan:[]}
+ },new Date("2026-08-09T03:00:00Z"));
+ assert.deepEqual(snapshot.abilitiesUsed[0].startPowerEvidence,evidence);
+ assert.equal(snapshot.abilitiesUsed[0].startPower,9.3);
+diff -ruN /mnt/data/v30repo/tests/keirin-start-power-single-shrink.mjs /mnt/data/v31repo/tests/keirin-start-power-single-shrink.mjs
+--- /mnt/data/v30repo/tests/keirin-start-power-single-shrink.mjs	2026-08-09 03:15:40.000000000 +0000
++++ /mnt/data/v31repo/tests/keirin-start-power-single-shrink.mjs	2026-08-09 03:56:35.153657339 +0000
+@@ -19,16 +19,28 @@
+ const mid = buildStartPowerEvidence(participant(28, 2, 2));
+ const high = buildStartPowerEvidence(participant(28, 8, 8));
+ const sparse = buildStartPowerEvidence(participant(8, 4, 4));
++const screenshotZero = buildStartPowerEvidence(participant(18, 0, 0));
++const screenshotFront = buildStartPowerEvidence(participant(22, 11, 11));
++const screenshotActive = buildStartPowerEvidence(participant(18, 5, 6));
+ 
+-assert.equal(low.value, Math.max(0.5, Math.min(9.5, low.latentScore)));
+-assert.equal(mid.value, Math.max(0.5, Math.min(9.5, mid.latentScore)));
+-assert.equal(high.value, Math.max(0.5, Math.min(9.5, high.latentScore)));
+-assert.ok(high.value - low.value > 4, "startPower should no longer collapse riders into a narrow 5.x band");
+ assert.ok(high.value > mid.value && mid.value > low.value, "B/H evidence ordering must remain monotonic");
++assert.ok(high.value - low.value > 5, "empirical mapping should preserve meaningful rider separation");
+ assert.equal(sparse.confidence, "low", "small-sample uncertainty must remain visible as confidence");
+ assert.ok(sparse.inputsUsed.includes("startsQualityConfidenceDiagnostic"));
++assert.ok(sparse.inputsUsed.includes("standard.shrunkFrequencyEmpiricalQuantiles"));
+ assert.ok(!sparse.inputsUsed.includes("startsQualityNeutralShrinkage"));
+ 
+-console.log("keirin startPower single-shrink test passed", {
+-  low: low.value, mid: mid.value, high: high.value, sparse: sparse.value, sparseConfidence: sparse.confidence
++// Regression cases from the live audit after officialTotalStarts was fixed.
++// They must no longer bunch at 9.1-9.5 merely because the skewed B/H
++// distribution was forced through a normal CDF.
++assert.ok(screenshotZero.value >= 3 && screenshotZero.value <= 4.5, `0/18 should remain low but not pathological: ${screenshotZero.value}`);
++assert.ok(screenshotActive.value >= 7 && screenshotActive.value <= 8.5, `5B/6H over 18 starts should be strong but not saturated: ${screenshotActive.value}`);
++assert.ok(screenshotFront.value >= 8.5 && screenshotFront.value < 9.5, `11B/11H over 22 starts should be elite but below hard saturation: ${screenshotFront.value}`);
++assert.ok(screenshotFront.value > screenshotActive.value && screenshotActive.value > screenshotZero.value);
++assert.ok(Number.isFinite(screenshotActive.bPercentileScore));
++assert.ok(Number.isFinite(screenshotActive.hPercentileScore));
++
++console.log("keirin startPower empirical-quantile test passed", {
++  low: low.value, mid: mid.value, high: high.value, sparse: sparse.value,
++  zero18: screenshotZero.value, active18: screenshotActive.value, front22: screenshotFront.value
+ });
