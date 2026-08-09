@@ -25,7 +25,8 @@ export function derivePredictionRatings(snapshot={}){
   const lineQuality=isGirls?evidenceQuality:(lineConfidence==="高"?1:lineConfidence==="中"?.65:lineConfidence==="低"?.35:.70);
   const dataQuality=.55*lineQuality+.45*evidenceQuality;
   const concentrationNorm=concentration/5;
-  let confidence=starsFrom(.45*concentrationNorm+.30*dataQuality+.25*pointFactor,[.30,.48,.64,.80]);
+  const confidenceRaw=.45*concentrationNorm+.30*dataQuality+.25*pointFactor;
+  let confidence=starsFrom(confidenceRaw,[.30,.48,.64,.80]);
   if(concentration<5)confidence=Math.min(confidence,4);
   if(concentration<=1)confidence=Math.min(confidence,2);
   if(!isGirls&&lineConfidence&&lineConfidence!=="高")confidence=Math.min(confidence,2);
@@ -37,14 +38,27 @@ export function derivePredictionRatings(snapshot={}){
   else if(betCount>12||concentration<=2||confidence<=2)provisionalVerdict={label:"見送り寄り",tone:"caution"};
   else provisionalVerdict={label:"購入可",tone:"go"};
 
-  let rollover;
-  if(provisionalVerdict.tone==="stop")rollover=1;
+  let rollover,rolloverRaw;
+  if(provisionalVerdict.tone==="stop"){rollover=1;rolloverRaw=.10;}
   else{
-    rollover=starsFrom(.45*(confidence/5)+.35*(concentration/5)+.20*pointFactor,[.40,.58,.72,.88]);
+    rolloverRaw=.45*confidenceRaw+.35*concentrationRaw+.20*pointFactor;
+    rollover=starsFrom(rolloverRaw,[.40,.58,.72,.88]);
     if(betCount>10)rollover=Math.min(rollover,2);
     else if(betCount>6)rollover=Math.min(rollover,3);
     if(confidence<5||concentration<5)rollover=Math.min(rollover,4);
   }
+
+  const confidenceContinuousCap=confidence<=1?.29:confidence===2?.47:confidence===3?.63:confidence===4?.79:1;
+  const effectiveConfidence=Math.min(confidenceRaw,confidenceContinuousCap);
+  let evaluationIndex=Math.max(0,Math.min(100,100*(.40*effectiveConfidence+.35*concentrationRaw+.25*(rolloverRaw??.10))));
+  if(provisionalVerdict.tone==="stop")evaluationIndex=Math.min(evaluationIndex,35);
+  else if(provisionalVerdict.tone==="caution")evaluationIndex=Math.min(evaluationIndex,65);
+  const auditFlags=[];
+  if(topShare>0&&topShare<.10)auditFlags.push("展開1位の占有率が10%未満");
+  if(dataQuality<.65)auditFlags.push("入力証拠の品質が十分でない");
+  if(betCount>12)auditFlags.push("採用点数が多く評価が広がっている");
+  if(confidence>=3&&concentration<=2)auditFlags.push("信頼度と展開集中度の整合を要監査");
+  if(isGirls&&evidenceQuality<.70)auditFlags.push("ガールズ主導権入力の信頼度を要監査");
 
   const generated=finiteOrNull(audit.generatedTerminalCount);
   const adopted=finiteOrNull(audit.adoptedTerminalCount??audit.finalBetCount)??betCount;
@@ -55,13 +69,17 @@ export function derivePredictionRatings(snapshot={}){
   if(isGirls)reasonParts.push("ガールズ専用・主導権予測");else if(lineConfidence)reasonParts.push(`ライン順序監査 ${lineConfidence}`);
 
   return{
+    ratingAlgorithmVersion:"DISPLAY-RATING-0.2-AUDIT",
     confidence,
     concentration,
     rollover,
     verdict:provisionalVerdict.label,
     verdictTone:provisionalVerdict.tone,
     reason:reasonParts.join(" ・ "),
-    diagnostics:{topShare,top3Share,topGapRatio,cutGapRatio,betCount,dataQuality,pointFactor,concentrationRaw}
+    calibrationStatus:"UNVALIDATED",
+    calibrationLabel:"未校正・検証対象",
+    auditFlags,
+    diagnostics:{topShare,top3Share,topGapRatio,cutGapRatio,betCount,dataQuality,pointFactor,concentrationRaw,confidenceRaw,effectiveConfidence,rolloverRaw:rolloverRaw??.10,evaluationIndex}
   };
 }
 

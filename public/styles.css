@@ -149,3 +149,15 @@
 .screeningScore b{font-size:1.05rem}.screeningScore small{font-size:.62rem;color:var(--muted)}.screeningScore em{font-style:normal;font-size:.56rem;color:var(--muted)}
 .screening-solid .screeningScore{border-color:rgba(91,192,180,.55)}.screening-high .screeningScore{border-color:rgba(245,158,11,.55)}
 @media(max-width:520px){.raceTabs{grid-template-columns:repeat(4,1fr)}.meetingToolButtons{grid-template-columns:1fr 1fr}.meetingToolButtons #reloadMeetings{grid-column:1/-1}.screeningIntro{align-items:flex-start;flex-direction:column}.screeningIntro span{text-align:left}.screeningRace .timelineMain{grid-template-columns:1fr 50px}}
+
+/* v51: fast 6R primary screening + evaluation audit */
+.meetingToolButtons{grid-template-columns:repeat(2,minmax(0,1fr))}
+.meetingToolButtons #reloadMeetings{grid-column:1/-1}
+.auditWarning{border-color:rgba(245,158,11,.55);background:rgba(113,63,18,.24)}
+.auditWarning strong{color:#fbbf24}.auditWarning p{margin:.35rem 0 0;color:var(--muted);font-size:.78rem;line-height:1.55}
+.screeningDeepBtn{min-height:38px;border:1px solid var(--line);border-radius:10px;background:#17243a;color:#fff;font-weight:800;padding:7px 12px;margin-top:6px}
+.screeningRace .timelineBody{display:block}.screeningRace .screeningDeepBtn{width:100%}
+.auditFlagText{color:#fbbf24!important}.evaluationAudit{margin-top:10px;padding:10px;border:1px dashed rgba(245,158,11,.55);border-radius:10px;background:rgba(113,63,18,.18)}
+.evaluationAudit strong{color:#fbbf24}.evaluationAudit p{margin:5px 0 0;color:var(--muted);font-size:.75rem;line-height:1.45}
+.deepDiveIntro{margin-top:18px}
+@media(max-width:520px){.meetingToolButtons{grid-template-columns:1fr 1fr}.meetingToolButtons #reloadMeetings{grid-column:1/-1}}

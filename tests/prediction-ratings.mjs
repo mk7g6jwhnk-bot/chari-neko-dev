@@ -20,7 +20,10 @@ assert.ok(f.concentration>=3,"focused race should rank above diffuse concentrati
 assert.ok(f.confidence>d.confidence,"focused race should have higher confidence");
 assert.ok(f.rollover>d.rollover,"focused race should have higher rollover suitability");
 assert.equal(f.verdict,"購入可");
+assert.equal(f.calibrationStatus,"UNVALIDATED");
+assert.ok(f.diagnostics.evaluationIndex>d.diagnostics.evaluationIndex,"continuous evaluation index should separate focused from diffuse");
 assert.equal(starText(3),"★★★☆☆");
 const blocked=derivePredictionRatings(snapshot({shares:[.2,.15,.1],scores:[8,6,4],bets:4,lineConfidence:"低"}));
 assert.ok(blocked.confidence<=2,"non-high line confidence must cap display confidence");
+assert.ok(blocked.diagnostics.evaluationIndex<=65,"caution verdict must cap provisional comparison index");
 console.log("prediction-ratings: ok",{diffuse:d,focused:f,blocked});
