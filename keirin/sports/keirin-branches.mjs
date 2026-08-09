@@ -26,13 +26,13 @@ export function generateKeirinBranches({scored,lines,lineConfidence,raceCategory
     }
   }
 
-  const battleScores=Object.fromEntries(scored.map(p=>[p.id,(p.roleScores.first||0)*.32+(p.evidence.finish||0)*.26+(p.evidence.tracking||0)*.22+(p.evidence.start||0)*.10+(p.evidence.recent||0)*.10]));
+  const battleScores=Object.fromEntries(scored.map(p=>[p.id,weightedAvailable([[p.roleScores.first,.32],[p.evidence.finish,.26],[p.evidence.tracking,.22],[p.evidence.start,.10],[p.evidence.recent,.10]])]));
   branches.push(make({id:"BATTLE",label:"踏み合い消耗戦",scenario:"踏み合い",branchType:"LEAD_BATTLE",scoreParts:[part("candidateMean",avg(Object.values(battleScores)),1)],firstCandidateScores:battleScores,enabled:true}));
 
-  const soloScores=Object.fromEntries(scored.filter(p=>p.role==="単騎").map(p=>[p.id,(p.roleScores.first||0)*.38+(p.evidence.finish||0)*.26+(p.evidence.sprint||0)*.22+(p.evidence.recent||0)*.14]));
+  const soloScores=Object.fromEntries(scored.filter(p=>p.role==="単騎").map(p=>[p.id,weightedAvailable([[p.roleScores.first,.38],[p.evidence.finish,.26],[p.evidence.sprint,.22],[p.evidence.recent,.14]])]));
   branches.push(make({id:"SOLO",label:"単騎浮上",scenario:"単騎浮上",branchType:"SOLO_RISE",scoreParts:[part("candidateMean",avg(Object.values(soloScores)),1)],firstCandidateScores:soloScores,enabled:Object.keys(soloScores).length>0}));
 
-  const separationScores=Object.fromEntries(scored.map(p=>[p.id,(p.roleScores.first||0)*.28+(p.evidence.finish||0)*.28+(p.evidence.tracking||0)*.30+(p.evidence.recent||0)*.14]));
+  const separationScores=Object.fromEntries(scored.map(p=>[p.id,weightedAvailable([[p.roleScores.first,.28],[p.evidence.finish,.28],[p.evidence.tracking,.30],[p.evidence.recent,.14]])]));
   branches.push(make({id:"SEPARATION",label:"番手離れ・繰り上がり",scenario:"番手離れ",branchType:"LINE_SEPARATION",scoreParts:[part("candidateMean",lineEnabled?avg(Object.values(separationScores)):0,1)],firstCandidateScores:separationScores,enabled:lineEnabled}));
 
   const enabled=branches.filter(branch=>branch.firstCandidates.length&&branch.enabled).sort(compareBranch);
@@ -132,7 +132,7 @@ function generateGirlsBranches(scored=[]){
       firstCandidateScores:{[id]:rider.roleScores.first||0}
     }));
   }
-  const battleScores=Object.fromEntries(scored.map(p=>[p.id,(p.roleScores.first||0)*.28+(p.evidence.start||0)*.24+(p.evidence.finish||0)*.20+(p.evidence.tracking||0)*.16+(p.evidence.recent||0)*.12]));
+  const battleScores=Object.fromEntries(scored.map(p=>[p.id,weightedAvailable([[p.roleScores.first,.28],[p.evidence.start,.24],[p.evidence.finish,.20],[p.evidence.tracking,.16],[p.evidence.recent,.12]])]));
   branches.push(make({id:"GIRLS-POSITION",label:"位置取り・仕掛け競合",scenario:"位置取り競合",branchType:"LEAD_BATTLE",scoreParts:[part("candidateMean",avg(Object.values(battleScores)),1)],firstCandidateScores:battleScores,enabled:true}));
   const structured=branches.filter(branch=>["LEADER_HOLD","MAKURI_SUCCESS"].includes(branch.branchType)).sort(compareBranch);
   const tiers=selectNaturalBranchTiers(structured);
@@ -144,12 +144,15 @@ function generateGirlsBranches(scored=[]){
 }
 
 function emptyTierResult(){return{main:[],contender:[],sub:[],diagnostics:{mode:"EMPTY",topScore:null,topTieCount:0,tailMedianGap:null,tailMadGap:null,contenderCutGap:null,contenderCutDetected:false}}}
-function part(key,value,weight){return{key,value:Number(value)||0,weight,contribution:(Number(value)||0)*weight}}
+function part(key,value,weight){const available=value!==null&&value!==undefined&&value!==""&&Number.isFinite(Number(value));return{key,value:available?Number(value):null,weight,available,contribution:0}}
 function make({id,label,scenario,branchType,scoreParts=[],firstCandidateScores={},primaryLineId=null,requiredFirstNumber=null,enabled}){
-  const score=scoreParts.reduce((sum,item)=>sum+item.contribution,0);
+  const availableWeight=scoreParts.filter(item=>item.available).reduce((sum,item)=>sum+item.weight,0);
+  const normalizedParts=scoreParts.map(item=>({...item,effectiveWeight:item.available&&availableWeight>0?item.weight/availableWeight:0,contribution:item.available&&availableWeight>0?item.value*(item.weight/availableWeight):0,missing:!item.available}));
+  const score=normalizedParts.reduce((sum,item)=>sum+item.contribution,0);
   const entries=Object.entries(firstCandidateScores).filter(([id,value])=>id&&Number.isFinite(value)&&value>0).sort((a,b)=>b[1]-a[1]||String(a[0]).localeCompare(String(b[0]),"en"));
-  return{id,label,scenario,branchType,primaryLineId,requiredFirstNumber,score,scoreTrace:[...scoreParts].sort((a,b)=>b.contribution-a.contribution),firstCandidates:entries.map(([id])=>id),firstCandidateScores:Object.fromEntries(entries),enabled:Boolean(enabled)&&score>=2.2,priority:"risk"};
+  return{id,label,scenario,branchType,primaryLineId,requiredFirstNumber,score,scoreTrace:[...normalizedParts].sort((a,b)=>b.contribution-a.contribution),firstCandidates:entries.map(([id])=>id),firstCandidateScores:Object.fromEntries(entries),enabled:Boolean(enabled)&&score>=2.2,priority:"risk"};
 }
 function compareBranch(a,b){return(b.score-a.score)||a.id.localeCompare(b.id,"en")}
 function avg(values){const valid=values.filter(Number.isFinite);return valid.length?valid.reduce((sum,value)=>sum+value,0)/valid.length:0}
+function weightedAvailable(items){const valid=items.filter(([value,weight])=>value!==null&&value!==undefined&&value!==""&&Number.isFinite(Number(value))&&weight>0);const total=valid.reduce((sum,[,weight])=>sum+weight,0);return total>0?valid.reduce((sum,[value,weight])=>sum+Number(value)*weight,0)/total:5}
 function median(values){const valid=values.filter(Number.isFinite).sort((a,b)=>a-b);if(!valid.length)return 0;const mid=Math.floor(valid.length/2);return valid.length%2?valid[mid]:(valid[mid-1]+valid[mid])/2}

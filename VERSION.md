@@ -1,3 +1,3 @@
-KEIRIN-0.5.41-main-class-preservation
+KEIRIN-0.5.42-missing-ability-renormalization
 
-Primary-family coverage no longer erases MAIN classification; main-supported natural terminals keep MAIN and at least one main anchor is preserved when available.
+Missing kimarite abilities are now stored/displayed as missing instead of neutral 5.00. Placing, branch and terminal scores renormalize verified weights rather than penalizing missing data.

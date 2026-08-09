@@ -145,12 +145,12 @@ function conditionedFirst(branch,participant){
   const e=participant.evidence||{};
   let branchAbility=participant.roleScores.first||5;
   switch(branch.branchType){
-    case"LEADER_HOLD": branchAbility=.30*(participant.roleScores.first||5)+.28*(e.start||5)+.22*(e.stamina||5)+.12*(e.recent||5)+.08*(e.finish||5); break;
-    case"BANTE_SASHI": branchAbility=.28*(participant.roleScores.first||5)+.30*(e.finish||5)+.22*(e.tracking||5)+.12*(e.recent||5)+.08*(e.lineTrust||5); break;
-    case"MAKURI_SUCCESS": branchAbility=.28*(participant.roleScores.first||5)+.34*(e.sprint||5)+.18*(e.finish||5)+.12*(e.recent||5)+.08*(e.start||5); break;
-    case"LEAD_BATTLE": branchAbility=.24*(participant.roleScores.first||5)+.28*(e.finish||5)+.20*(e.tracking||5)+.16*(e.recent||5)+.12*(e.stamina||5); break;
-    case"LINE_SEPARATION": branchAbility=.24*(participant.roleScores.first||5)+.30*(e.finish||5)+.26*(e.tracking||5)+.12*(e.recent||5)+.08*(e.lineTrust||5); break;
-    case"SOLO_RISE": branchAbility=.30*(participant.roleScores.first||5)+.28*(e.finish||5)+.22*(e.sprint||5)+.12*(e.recent||5)+.08*(e.tracking||5); break;
+    case"LEADER_HOLD": branchAbility=weightedAvailable([[participant.roleScores.first,.30],[e.start,.28],[e.stamina,.22],[e.recent,.12],[e.finish,.08]]); break;
+    case"BANTE_SASHI": branchAbility=weightedAvailable([[participant.roleScores.first,.28],[e.finish,.30],[e.tracking,.22],[e.recent,.12],[e.lineTrust,.08]]); break;
+    case"MAKURI_SUCCESS": branchAbility=weightedAvailable([[participant.roleScores.first,.28],[e.sprint,.34],[e.finish,.18],[e.recent,.12],[e.start,.08]]); break;
+    case"LEAD_BATTLE": branchAbility=weightedAvailable([[participant.roleScores.first,.24],[e.finish,.28],[e.tracking,.20],[e.recent,.16],[e.stamina,.12]]); break;
+    case"LINE_SEPARATION": branchAbility=weightedAvailable([[participant.roleScores.first,.24],[e.finish,.30],[e.tracking,.26],[e.recent,.12],[e.lineTrust,.08]]); break;
+    case"SOLO_RISE": branchAbility=weightedAvailable([[participant.roleScores.first,.30],[e.finish,.28],[e.sprint,.22],[e.recent,.12],[e.tracking,.08]]); break;
   }
   return positive(.45*candidate+.55*branchAbility)*branchRoleFactor(branch,participant,"first");
 }
@@ -161,27 +161,27 @@ function conditionedSecond(branch,first,second,lineById){
   let factor=1;
   switch(branch.branchType){
     case"LEADER_HOLD":
-      score=.28*score+.30*(e.tracking||5)+.18*(e.finish||5)+.14*(e.lineTrust||5)+.10*(e.recent||5);
+      score=weightedAvailable([[score,.28],[e.tracking,.30],[e.finish,.18],[e.lineTrust,.14],[e.recent,.10]]);
       if(same&&role==="番手")factor=1.55; else if(same&&role==="三番手")factor=1.18; else if(role==="番手")factor=1.04; else if(role==="自力")factor=.78;
       break;
     case"BANTE_SASHI":
-      score=.30*score+.24*(e.stamina||5)+.18*(e.recent||5)+.16*(e.tracking||5)+.12*(e.finish||5);
+      score=weightedAvailable([[score,.30],[e.stamina,.24],[e.recent,.18],[e.tracking,.16],[e.finish,.12]]);
       if(same&&role==="自力")factor=1.48; else if(same&&role==="三番手")factor=1.16; else if(role==="自力")factor=.98;
       break;
     case"MAKURI_SUCCESS":
-      score=.26*score+.28*(e.tracking||5)+.18*(e.sprint||5)+.16*(e.finish||5)+.12*(e.recent||5);
+      score=weightedAvailable([[score,.26],[e.tracking,.28],[e.sprint,.18],[e.finish,.16],[e.recent,.12]]);
       if(same&&role==="番手")factor=1.42; else if(same&&role==="三番手")factor=1.16; else if(!same&&role==="番手")factor=1.08; else if(role==="自力")factor=.82;
       break;
     case"LEAD_BATTLE":
-      score=.24*score+.28*(e.finish||5)+.24*(e.tracking||5)+.14*(e.recent||5)+.10*(e.stamina||5);
+      score=weightedAvailable([[score,.24],[e.finish,.28],[e.tracking,.24],[e.recent,.14],[e.stamina,.10]]);
       if(role==="番手")factor=1.30; else if(role==="三番手")factor=1.14; else if(role==="自力")factor=.72;
       break;
     case"LINE_SEPARATION":
-      score=.22*score+.32*(e.tracking||5)+.24*(e.finish||5)+.14*(e.recent||5)+.08*(e.lineTrust||5);
+      score=weightedAvailable([[score,.22],[e.tracking,.32],[e.finish,.24],[e.recent,.14],[e.lineTrust,.08]]);
       if(!same&&role==="番手")factor=1.30; else if(role==="単騎")factor=1.14; else if(same)factor=.72;
       break;
     case"SOLO_RISE":
-      score=.28*score+.26*(e.finish||5)+.22*(e.tracking||5)+.14*(e.recent||5)+.10*(e.sprint||5);
+      score=weightedAvailable([[score,.28],[e.finish,.26],[e.tracking,.22],[e.recent,.14],[e.sprint,.10]]);
       if(role==="番手")factor=1.12; else if(role==="自力")factor=.88;
       break;
   }
@@ -194,27 +194,27 @@ function conditionedThird(branch,first,second,third,lineById){
   let factor=1;
   switch(branch.branchType){
     case"LEADER_HOLD":
-      score=.26*score+.34*(e.tracking||5)+.16*(e.stamina||5)+.14*(e.recent||5)+.10*(e.finish||5);
+      score=weightedAvailable([[score,.26],[e.tracking,.34],[e.stamina,.16],[e.recent,.14],[e.finish,.10]]);
       if(sameFirst&&role==="三番手")factor=1.42; else if(sameFirst&&role==="番手")factor=1.18; else if(!sameFirst&&(role==="番手"||role==="三番手"))factor=1.08; else if(role==="自力")factor=.84;
       break;
     case"BANTE_SASHI":
-      score=.26*score+.32*(e.tracking||5)+.18*(e.stamina||5)+.14*(e.recent||5)+.10*(e.finish||5);
+      score=weightedAvailable([[score,.26],[e.tracking,.32],[e.stamina,.18],[e.recent,.14],[e.finish,.10]]);
       if(sameFirst&&role==="三番手")factor=1.38; else if(sameFirst&&role==="自力")factor=1.22; else if(role==="番手"||role==="三番手")factor=1.06;
       break;
     case"MAKURI_SUCCESS":
-      score=.24*score+.30*(e.tracking||5)+.20*(e.finish||5)+.14*(e.recent||5)+.12*(e.stamina||5);
+      score=weightedAvailable([[score,.24],[e.tracking,.30],[e.finish,.20],[e.recent,.14],[e.stamina,.12]]);
       if(sameFirst&&role==="三番手")factor=1.32; else if(sameFirst&&role==="番手")factor=1.26; else if(!sameFirst&&role==="番手")factor=1.12; else if(role==="自力")factor=.86;
       break;
     case"LEAD_BATTLE":
-      score=.22*score+.34*(e.tracking||5)+.22*(e.finish||5)+.12*(e.recent||5)+.10*(e.stamina||5);
+      score=weightedAvailable([[score,.22],[e.tracking,.34],[e.finish,.22],[e.recent,.12],[e.stamina,.10]]);
       if(role==="三番手")factor=1.28; else if(role==="番手")factor=1.20; else if(role==="自力")factor=.72;
       break;
     case"LINE_SEPARATION":
-      score=.22*score+.36*(e.tracking||5)+.22*(e.finish||5)+.12*(e.recent||5)+.08*(e.lineTrust||5);
+      score=weightedAvailable([[score,.22],[e.tracking,.36],[e.finish,.22],[e.recent,.12],[e.lineTrust,.08]]);
       if(!sameFirst&&!sameSecond&&(role==="番手"||role==="単騎"))factor=1.24; else if(sameFirst)factor=.74;
       break;
     case"SOLO_RISE":
-      score=.26*score+.34*(e.tracking||5)+.18*(e.finish||5)+.14*(e.recent||5)+.08*(e.stamina||5);
+      score=weightedAvailable([[score,.26],[e.tracking,.34],[e.finish,.18],[e.recent,.14],[e.stamina,.08]]);
       if(role==="番手"||role==="三番手")factor=1.12; else if(role==="自力")factor=.88;
       break;
   }
@@ -223,9 +223,9 @@ function conditionedThird(branch,first,second,third,lineById){
 
 function positionEvidence(branch,participant,target){
   const e=participant.evidence||{};
-  const values={recentForm:e.recent??5,startPower:e.start??5,sprintPower:e.sprint??5,finishPower:e.finish??5,trackingSkill:e.tracking??5,roleScore:participant.roleScores?.[target]??5};
+  const values={recentForm:e.recent??null,startPower:e.start??null,sprintPower:e.sprint??null,finishPower:e.finish??null,trackingSkill:e.tracking??null,roleScore:participant.roleScores?.[target]??null};
   const keys=branchKeys(branch.branchType,target);
-  return {number:participant.number,id:participant.id,role:participant.role,target,roleScore:values.roleScore,drivers:keys.map(key=>({key,value:values[key]})).sort((a,b)=>b.value-a.value||a.key.localeCompare(b.key,"en"))};
+  return {number:participant.number,id:participant.id,role:participant.role,target,roleScore:values.roleScore,drivers:keys.map(key=>({key,value:values[key],missing:values[key]===null||values[key]===undefined||values[key]===""||!Number.isFinite(Number(values[key]))})).sort((a,b)=>(Number.isFinite(Number(b.value))?Number(b.value):-1)-(Number.isFinite(Number(a.value))?Number(a.value):-1)||a.key.localeCompare(b.key,"en"))};
 }
 function branchKeys(type,target){
   if(target==="first"){
@@ -248,4 +248,5 @@ function branchRoleFactor(branch,participant,target){
   return 1;
 }
 function sameLine(a,b,lineById){const la=lineById.get(a.id),lb=lineById.get(b.id);return Boolean(la&&lb&&la===lb&&!String(la).startsWith("unknown-"))}
+function weightedAvailable(items){const valid=items.filter(([value,weight])=>value!==null&&value!==undefined&&value!==""&&Number.isFinite(Number(value))&&weight>0);const total=valid.reduce((sum,[,weight])=>sum+weight,0);return total>0?valid.reduce((sum,[value,weight])=>sum+Number(value)*weight,0)/total:5}
 function positive(value){return Math.max(.05,Number(value)||0)}

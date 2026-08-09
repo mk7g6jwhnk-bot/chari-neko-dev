@@ -147,7 +147,10 @@ export default async function handler(req) {
         nonNeutralRecentFormCount: participants.filter(item => Math.abs(Number(item.recentForm) - 5) > 0.000001).length,
         nonNeutralStartPowerCount: participants.filter(item => Math.abs(Number(item.startPower) - 5) > 0.000001).length,
         nonNeutralKimariteAbilityCount: participants.filter(item =>
-          [item.sprintPower, item.finishPower, item.trackingSkill].some(value => Math.abs(Number(value) - 5) > 0.000001)
+          [item.sprintPower, item.finishPower, item.trackingSkill].some(value => Number.isFinite(Number(value)) && value !== null && Math.abs(Number(value) - 5) > 0.000001)
+        ).length,
+        missingKimariteAbilityCount: participants.filter(item =>
+          [item.sprintPower, item.finishPower, item.trackingSkill].some(value => value === null || value === undefined)
         ).length
       },
       warnings: [
@@ -392,11 +395,11 @@ export function adaptParticipant(item, context = {}) {
     recentFormEvidence: { value: 5, confidence: "low", inputsUsed: [], missingInputs: ["official-profile"] },
     startPower: 5,
     startPowerEvidence: null,
-    sprintPower: 5,
+    sprintPower: null,
     stamina: 5,
     attackTiming: 5,
-    trackingSkill: 5,
-    finishPower: 5,
+    trackingSkill: null,
+    finishPower: null,
     lineTrust: 5,
     venueSuitability: 5,
     sourceType: item.sourceType || null,

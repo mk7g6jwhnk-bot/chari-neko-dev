@@ -99,7 +99,9 @@ export default async function handler(req) {
     }
 
     const lineText = buildLineText(officialLines);
-    const line = resolveOfficialLines({ participants, officialLines, lineText });
+    const line = raceCategory === "girls"
+      ? resolveGirlsDynamicPositions({ participants })
+      : resolveOfficialLines({ participants, officialLines, lineText });
     const race = {
       id: `${date}-${basic.venueName || venueName}-${basic.raceNo || raceNo}`,
       venue: basic.venueName || venueName,
@@ -109,6 +111,8 @@ export default async function handler(req) {
       raceName: basic.raceName || "",
       grade: basic.grade || "",
       className: basic.className || "",
+      raceCategory,
+      lineMode: raceCategory === "girls" ? "girls_dynamic" : "official_line",
       deadline: basic.deadline || "",
       startTime: basic.startTime || "",
       lineConfidence: line.confidence,
@@ -131,6 +135,7 @@ export default async function handler(req) {
       browserAudit: browserResult.data.audit || null,
       dataQuality: {
         lineConfidence: line.confidence,
+        lineMode: raceCategory === "girls" ? "girls_dynamic" : "official_line",
         lineSource: line.source || null,
         officialLineItemCount: officialLines.length,
         officialLineText: lineText,
@@ -142,7 +147,10 @@ export default async function handler(req) {
         nonNeutralRecentFormCount: participants.filter(item => Math.abs(Number(item.recentForm) - 5) > 0.000001).length,
         nonNeutralStartPowerCount: participants.filter(item => Math.abs(Number(item.startPower) - 5) > 0.000001).length,
         nonNeutralKimariteAbilityCount: participants.filter(item =>
-          [item.sprintPower, item.finishPower, item.trackingSkill].some(value => Math.abs(Number(value) - 5) > 0.000001)
+          [item.sprintPower, item.finishPower, item.trackingSkill].some(value => Number.isFinite(Number(value)) && value !== null && Math.abs(Number(value) - 5) > 0.000001)
+        ).length,
+        missingKimariteAbilityCount: participants.filter(item =>
+          [item.sprintPower, item.finishPower, item.trackingSkill].some(value => value === null || value === undefined)
         ).length
       },
       warnings: [
@@ -168,16 +176,23 @@ async function requestBrowserService(base, params) {
     raceNo: String(params.raceNo)
   });
 
-  const candidates = [
-    `${base}/keirin/race?${query}`
-  ];
-
+  const endpoint = `${base}/keirin/race?${query}`;
   const attempts = [];
-  for (const endpoint of candidates) {
+  const startedAt = Date.now();
+  const totalBudgetMs = 54000;
+
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    const elapsed = Date.now() - startedAt;
+    const remaining = totalBudgetMs - elapsed;
+    if (remaining < 5000) break;
+    const timeoutMs = attempt === 1
+      ? Math.min(42000, remaining - 1000)
+      : Math.min(34000, remaining - 1000);
+
     try {
       const response = await fetch(endpoint, {
         headers: { accept: "application/json" },
-        signal: AbortSignal.timeout(120000)
+        signal: AbortSignal.timeout(Math.max(4000, timeoutMs))
       });
       const text = await response.text();
       let data = null;
@@ -185,35 +200,69 @@ async function requestBrowserService(base, params) {
 
       attempts.push({
         endpoint: endpoint.replace(base, ""),
+        attempt,
         status: response.status,
-        parsed: data !== null
+        parsed: data !== null,
+        error: data?.error || null
       });
 
       if (data && (data.officialData || data.ok === false)) {
-        return {
-          ok: response.ok && data.ok !== false,
-          status: response.status,
-          data: { ...data, endpointAudit: attempts }
-        };
+        const ok = response.ok && data.ok !== false;
+        if (ok) {
+          return { ok: true, status: response.status, data: { ...data, endpointAudit: attempts } };
+        }
+        const retryable = response.status >= 500 || /page crashed|target closed|browser|navigation|timeout|timed out|execution context/i.test(String(data?.error || ""));
+        if (attempt < 2 && retryable && Date.now() - startedAt < 15000) {
+          await sleep(1200);
+          continue;
+        }
+        return { ok: false, status: response.status, data: { ...data, endpointAudit: attempts } };
       }
+
+      const retryableStatus = response.status >= 500;
+      if (attempt < 2 && retryableStatus && Date.now() - startedAt < 15000) {
+        await sleep(1200);
+        continue;
+      }
+      return {
+        ok: false,
+        status: response.status || 502,
+        data: {
+          ok: false,
+          error: `競輪ブラウザサービスの応答をJSONとして確認できません（HTTP ${response.status}）`,
+          endpointAudit: attempts
+        }
+      };
     } catch (error) {
-      attempts.push({
-        endpoint: endpoint.replace(base, ""),
-        error: error instanceof Error ? error.message : String(error)
-      });
+      const message = error instanceof Error ? error.message : String(error);
+      attempts.push({ endpoint: endpoint.replace(base, ""), attempt, error: message });
+      const timedOut = /timeout|timed out|abort/i.test(message);
+      if (attempt < 2 && !timedOut && Date.now() - startedAt < 15000) {
+        await sleep(1200);
+        continue;
+      }
+      return {
+        ok: false,
+        status: 502,
+        data: {
+          ok: false,
+          error: timedOut
+            ? "公式予想データ取得が時間内に完了しませんでした。数秒後に再試行してください。"
+            : "競輪ブラウザサービスへ接続できません",
+          endpointAudit: attempts
+        }
+      };
     }
   }
 
   return {
     ok: false,
     status: 502,
-    data: {
-      ok: false,
-      error: "競輪ブラウザサービスの取得エンドポイントを確認できません",
-      endpointAudit: attempts
-    }
+    data: { ok: false, error: "競輪ブラウザサービスの再試行でも取得できませんでした", endpointAudit: attempts }
   };
 }
+
+function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 
 
 export function hydrateParticipantEvidence(items, officialData = {}, browserData = {}) {
@@ -346,11 +395,11 @@ export function adaptParticipant(item, context = {}) {
     recentFormEvidence: { value: 5, confidence: "low", inputsUsed: [], missingInputs: ["official-profile"] },
     startPower: 5,
     startPowerEvidence: null,
-    sprintPower: 5,
+    sprintPower: null,
     stamina: 5,
     attackTiming: 5,
-    trackingSkill: 5,
-    finishPower: 5,
+    trackingSkill: null,
+    finishPower: null,
     lineTrust: 5,
     venueSuitability: 5,
     sourceType: item.sourceType || null,
@@ -446,7 +495,7 @@ function normalizeRegistration(value) { return String(value ?? "").replace(/\D/g
 function nullableNumber(value) { if (value === null || value === undefined || value === "") return null; const n = Number(value); return Number.isFinite(n) ? n : null; }
 function nullableNonNegativeInteger(value) { const n = nullableNumber(value); return n !== null && Number.isSafeInteger(n) && n >= 0 ? n : null; }
 
-function resolveOfficialLines({ participants, officialLines, lineText }) {
+export function resolveOfficialLines({ participants, officialLines, lineText }) {
   // The official line text is the canonical front-to-back order.
   // JSJ036 `position` is useful for grouping/identity checks, but treating its numeric
   // position as race-order can reverse leader/bante roles on some cards.
@@ -456,7 +505,7 @@ function resolveOfficialLines({ participants, officialLines, lineText }) {
     if (parsed?.confidence === "高") {
       return {
         ...parsed,
-        source: "公式JSJ036並び表記",
+        source: "公式JSJ036並び表記・順序監査",
         warnings: []
       };
     }
@@ -493,7 +542,7 @@ function resolveOfficialLines({ participants, officialLines, lineText }) {
           ...item,
           ...(assignments.get(Number(item.number)) || { lineId: "solo", lineOrder: 1, role: "単騎", lineStatus: "公式並び外" })
         })),
-        source: "公式JSJ036位置",
+        source: "公式JSJ036位置・順序監査",
         confidence: "高",
         warnings: []
       };
@@ -504,11 +553,11 @@ function resolveOfficialLines({ participants, officialLines, lineText }) {
 }
 
 function groupOfficialLineItems(items) {
-  const withLineId = items.filter(item => item.lineId != null && String(item.lineId).trim());
+  const withLineId = items.filter(item => lineIdentity(item));
   if (withLineId.length === items.length) {
     const groups = new Map();
     for (const item of items) {
-      const key = String(item.lineId);
+      const key = lineIdentity(item);
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key).push(item);
     }
@@ -531,14 +580,37 @@ function groupOfficialLineItems(items) {
   return groups;
 }
 
-function buildLineText(lines) {
+function lineIdentity(item) {
+  const raw = String(item?.lineId || item?.groupId || item?.className || "").trim();
+  if (!raw) return null;
+  if (/^(?:line|group)[-_ ]?\d+$/i.test(raw)) return raw.toLowerCase().replace(/[ _]+/g, "-");
+  if (/^\d+$/.test(raw)) return `line-${raw}`;
+  return null;
+}
+
+function resolveGirlsDynamicPositions({ participants }) {
+  return {
+    participants: participants.map(item => ({
+      ...item,
+      lineId: `girls-${item.number}`,
+      lineOrder: 1,
+      role: "単騎",
+      lineStatus: "ガールズ・固定ラインなし"
+    })),
+    source: "ガールズ専用・固定ライン不使用",
+    confidence: "高",
+    warnings: []
+  };
+}
+
+export function buildLineText(lines) {
   if (!lines.length) return null;
 
-  const withLineId = lines.filter(item => item.lineId != null && String(item.lineId).trim());
+  const withLineId = lines.filter(item => lineIdentity(item));
   if (withLineId.length === lines.length) {
     const groups = new Map();
     for (const item of lines) {
-      const key = String(item.lineId);
+      const key = lineIdentity(item);
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key).push(item);
     }
