@@ -1,3 +1,3 @@
-# Version
+KEIRIN-0.5.37-detail-navigation-audit-fix
 
-KEIRIN-0.5.36-evaluation-consistency-audit
+Detail navigation audit fix.
