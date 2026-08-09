@@ -26,4 +26,12 @@ assert.equal(starText(3),"★★★☆☆");
 const blocked=derivePredictionRatings(snapshot({shares:[.2,.15,.1],scores:[8,6,4],bets:4,lineConfidence:"低"}));
 assert.ok(blocked.confidence<=2,"non-high line confidence must cap display confidence");
 assert.ok(blocked.diagnostics.evaluationIndex<=65,"caution verdict must cap provisional comparison index");
-console.log("prediction-ratings: ok",{diffuse:d,focused:f,blocked});
+
+const broadButRawStrong=derivePredictionRatings(snapshot({shares:[.20,.17,.15,.12,.10],scores:[9,8,7,5,4],bets:12,cutGap:2.5}));
+assert.ok(broadButRawStrong.concentration<=2,"12点採用なのに展開集中度4相当を許している");
+assert.ok(broadButRawStrong.confidence<=3,"12点採用なのに信頼度4以上を許している");
+assert.equal(broadButRawStrong.verdict,"見送り寄り");
+assert.ok(broadButRawStrong.consistencyAudit.adjustments.length>0,"評価整合の補正履歴がない");
+assert.ok(broadButRawStrong.consistencyAudit.invariantChecks.every(x=>x.passed),"評価整合 invariant が破れている");
+
+console.log("prediction-ratings: ok",{diffuse:d,focused:f,blocked,broadButRawStrong});

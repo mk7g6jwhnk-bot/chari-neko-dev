@@ -83,8 +83,44 @@ export function classify(terminals,odds={}){
 
   const state=buildFirstFamilyState(base);
   const staged=base.map(item=>annotateFamilyPosition(item,state));
-  const valueGate=buildSubValueGate(staged);
-  return staged.map(item=>applyFamilyPurchaseDecision(item,valueGate));
+  const ranked=annotateTerminalRanks(staged);
+  const valueGate=buildSubValueGate(ranked);
+  return ranked.map(item=>applyFamilyPurchaseDecision(item,valueGate));
+}
+
+function annotateTerminalRanks(items){
+  const totalProbability=sum(items.map(item=>Number(item.probability)||0))||1;
+  const globalSorted=[...items].sort(compareTerminal);
+  const globalRank=new Map(globalSorted.map((item,index)=>[item.order.join("-"),index+1]));
+  const familyGroups=new Map(),pairGroups=new Map();
+  for(const item of items){
+    const [first,second]=(item.order||[]).map(Number);
+    if(!familyGroups.has(first))familyGroups.set(first,[]);
+    familyGroups.get(first).push(item);
+    const pairKey=`${first}-${second}`;
+    if(!pairGroups.has(pairKey))pairGroups.set(pairKey,[]);
+    pairGroups.get(pairKey).push(item);
+  }
+  const familyRank=new Map(),pairRank=new Map();
+  for(const group of familyGroups.values())
+    [...group].sort(compareTerminal).forEach((item,index)=>familyRank.set(item.order.join("-"),index+1));
+  for(const group of pairGroups.values())
+    [...group].sort(compareTerminal).forEach((item,index)=>pairRank.set(item.order.join("-"),index+1));
+  return items.map(item=>{
+    const key=item.order.join("-");
+    const probability=Number(item.probability)||0;
+    const familyProbability=Number(item.firstFamilyProbability)||0;
+    const odd=Number(item.odds);
+    return{
+      ...item,
+      terminalGlobalRank:globalRank.get(key)||null,
+      terminalFamilyRank:familyRank.get(key)||null,
+      terminalPairRank:pairRank.get(key)||null,
+      terminalProbabilityShare:probability/totalProbability,
+      firstFamilyProbabilityShare:familyProbability/totalProbability,
+      expectedValueIndex:Number.isFinite(odd)&&odd>1?probability*odd:null
+    };
+  });
 }
 
 function buildFirstFamilyState(items){
@@ -422,10 +458,13 @@ export function allocate(items,budget){
 function planRow(item,stake,fundingStatus,minimumRequired){return{
   order:item.order,betClass:item.betClass,stake,odds:item.odds,
   expectedPayout:item.odds&&stake?Math.floor(stake*item.odds):null,
-  probability:item.probability,branchSupport:item.branchSupport,purchaseReason:item.purchaseReason,
+  probability:item.probability,probabilityShare:item.terminalProbabilityShare??null,expectedValueIndex:item.expectedValueIndex??null,
+  globalRank:item.terminalGlobalRank??null,familyRank:item.terminalFamilyRank??null,pairRank:item.terminalPairRank??null,
+  branchSupport:item.branchSupport,purchaseReason:item.purchaseReason,
   dominantBranchId:item.dominantBranchId,dominantBranchLabel:item.dominantBranchLabel,decisionRatios:item.decisionRatios,positionEvidence:item.positionEvidence||null,evidenceSummary:item.evidenceSummary||null,
   highPayoutAttribute:Boolean(item.highPayoutAttribute),highPayoutAttributeLabel:item.highPayoutAttributeLabel||null,
-  firstFamilyNumber:item.firstFamilyNumber,firstFamilyTier:item.firstFamilyTier,subValueIndex:item.subValueIndex??null,
+  firstFamilyNumber:item.firstFamilyNumber,firstFamilyTier:item.firstFamilyTier,firstFamilyProbability:item.firstFamilyProbability??null,firstFamilyProbabilityShare:item.firstFamilyProbabilityShare??null,
+  secondFamilyRelativeToBest:item.secondFamilyRelativeToBest??null,thirdFamilyRelativeToBest:item.thirdFamilyRelativeToBest??null,subValueIndex:item.subValueIndex??null,
   fundingWeight:item.odds>1?(Number(item.probability)||0)*Math.sqrt(Math.max((Number(item.probability)||0)*Number(item.odds),.000001)):(Number(item.probability)||0),
   fundingStatus,minimumRequired
 }}
@@ -501,11 +540,12 @@ function buildAdoptedAudit(item,diagnosticBranchStats,diagnosticMaxBranchTotal){
   const supportLabelCounts=supportBranches.reduce((counts,branch)=>{const label=branch.branchLabel||"不明";counts[label]=(counts[label]||0)+1;return counts;},{});
   const duplicateSupportLabels=Object.entries(supportLabelCounts).filter(([,count])=>count>1).map(([label,count])=>({label,count}));
   return{
-    order:item.order.join("-"),betClass:item.betClass,probability:item.probability,
+    order:item.order.join("-"),betClass:item.betClass,probability:item.probability,probabilityShare:item.terminalProbabilityShare??null,
+    globalRank:item.terminalGlobalRank??null,familyRank:item.terminalFamilyRank??null,pairRank:item.terminalPairRank??null,odds:item.odds??null,expectedValueIndex:item.expectedValueIndex??null,
     dominantBranchId:item.dominantBranchId,dominantBranchLabel:item.dominantBranchLabel,dominantBranchPriority:item.dominantBranchPriority,dominantBranchTierLabel:branchPriorityLabel(item.dominantBranchPriority),
     branchFit:item.branchFit,branchRank:item.branchRank,branchSupport:item.branchSupport,weightedBranchSupport:item.weightedBranchSupport??sum(supportBranches.map(branch=>branch.weightedSupport||0)),
     thirdVariantEligible:item.thirdVariantEligible??true,thirdVariantGroupKey:item.thirdVariantGroupKey||null,thirdVariantRelativeToBest:item.thirdVariantRelativeToBest??null,thirdVariantConditionalShare:item.thirdVariantConditionalShare??null,thirdVariantNaturalCutDetected:item.thirdVariantNaturalCutDetected||false,thirdVariantCutGap:item.thirdVariantCutGap??null,thirdVariantGroupSize:item.thirdVariantGroupSize??null,
-    firstFamilyNumber:item.firstFamilyNumber,firstFamilyTier:item.firstFamilyTier,firstFamilyProbability:item.firstFamilyProbability,
+    firstFamilyNumber:item.firstFamilyNumber,firstFamilyTier:item.firstFamilyTier,firstFamilyProbability:item.firstFamilyProbability,firstFamilyProbabilityShare:item.firstFamilyProbabilityShare??null,
     secondFamilyRelativeToBest:item.secondFamilyRelativeToBest,secondFamilyNaturalEligible:item.secondFamilyNaturalEligible,thirdFamilyRelativeToBest:item.thirdFamilyRelativeToBest,thirdFamilyNaturalEligible:item.thirdFamilyNaturalEligible,
     subScenarioProbability:item.subScenarioProbability??null,subValueIndex:item.subValueIndex??null,subValueNaturalEligible:item.subValueNaturalEligible??null,
     highPayoutCandidate:Boolean(item.highPayoutCandidate),highPayoutAttribute:Boolean(item.highPayoutAttribute),highPayoutAttributeLabel:item.highPayoutAttributeLabel||null,oddsEvaluationStatus:item.oddsEvaluationStatus||null,

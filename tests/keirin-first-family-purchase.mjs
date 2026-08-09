@@ -18,6 +18,10 @@ const terminals=[
 const odds={"2-4-6":8,"2-4-1":20,"2-5-6":35,"3-1-5":12,"7-4-1":300,"7-1-6":500,"7-6-1":1000};
 const classified=classify(terminals,odds),by=Object.fromEntries(classified.map(x=>[x.order.join("-"),x]));
 assert.equal(by["2-4-6"].betClass,"MAIN");
+assert.equal(by["2-4-6"].terminalGlobalRank,1,"終端全体順位が保存されていない");
+assert.equal(by["2-4-6"].terminalFamilyRank,1,"1着ファミリー内順位が保存されていない");
+assert.equal(by["2-4-6"].terminalPairRank,1,"同1-2着内順位が保存されていない");
+assert.ok(Number(by["2-4-6"].expectedValueIndex)>0,"確率×オッズ監査値が保存されていない");
 assert.equal(by["2-4-1"].betClass,"MAIN","同一の本命1着・2着から自然な3着違いが本線に残っていない");
 assert.equal(by["2-5-6"].betClass,"MAIN","本命1着を固定した別2着の自然終端が本線に残っていない");
 assert.equal(by["2-7-6"].purchaseStatus,"購入不採用","2着の独立支持が弱い終端まで本線に混入している");
@@ -28,9 +32,15 @@ const diag=purchaseDiagnostics(classified,[],3000);
 const head2=diag.purchaseFamilyAudit.rows.find(x=>x.first===2),head7=diag.purchaseFamilyAudit.rows.find(x=>x.first===7);
 assert.ok(head2&&head2.main>=3,"本命頭ファミリーの生成→自然候補→購入の監査が不足");
 assert.ok(head7&&head7.buyableHigh>=1,"別頭高配当ファミリー監査が不足");
+const adopted246=diag.adoptedTerminalAudit.find(x=>x.order==="2-4-6");
+assert.equal(adopted246.globalRank,1,"採用終端監査に全体順位がない");
+assert.equal(adopted246.familyRank,1,"採用終端監査にファミリー順位がない");
+assert.equal(adopted246.odds,8,"採用終端監査に公式オッズがない");
+assert.ok(Number(adopted246.expectedValueIndex)>0,"採用終端監査に確率×オッズがない");
 const plan=allocate(classified,3000);
 assert.equal(plan.reduce((sum,x)=>sum+(x.stake||0),0),3000);
 assert.ok(plan.every(x=>x.stake>=100));
+assert.ok(plan.some(x=>Number.isFinite(Number(x.globalRank))),"購入計画に終端順位が引き継がれていない");
 const mainSameProb=[
   {order:[1,2,3],betClass:"MAIN",purchaseStatus:"購入採用",probability:.1,odds:10,branchSupport:1,purchaseReason:"a"},
   {order:[1,2,4],betClass:"MAIN",purchaseStatus:"購入採用",probability:.1,odds:100,branchSupport:1,purchaseReason:"b"}
