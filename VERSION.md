@@ -1,3 +1,9 @@
+# Current version
+
+- APP_RELEASE: `KEIRIN-0.5.49-chat-prediction-import`
+- Label: `v72-chat-prediction-import`
+- Purpose: チャット予想取り込み・比較基盤 STEP 2
+
 KEIRIN-0.5.48-forecast-possibility-separation
 
 ## KEIRIN-0.5.48-forecast-possibility-separation

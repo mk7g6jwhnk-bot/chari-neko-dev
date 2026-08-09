@@ -161,3 +161,5 @@
 .evaluationAudit strong{color:#fbbf24}.evaluationAudit p{margin:5px 0 0;color:var(--muted);font-size:.75rem;line-height:1.45}
 .deepDiveIntro{margin-top:18px}
 @media(max-width:520px){.meetingToolButtons{grid-template-columns:1fr 1fr}.meetingToolButtons #reloadMeetings{grid-column:1/-1}}
+
+.chatPredictionTextarea{width:100%;box-sizing:border-box;min-height:180px;border:1px solid #304664;border-radius:10px;background:#08172a;color:#eaf2ff;padding:12px;font:inherit;line-height:1.5;resize:vertical}.chatPredictionExample{white-space:pre-wrap;word-break:break-word;overflow:auto;background:#071426;border:1px solid #263d5b;border-radius:10px;padding:12px;font-size:.82rem}.chatImportSaved{border:1px solid #265b54;border-radius:10px;padding:12px;margin:10px 0;background:rgba(55,190,160,.07)}
