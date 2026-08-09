@@ -36,12 +36,13 @@ export function generateKeirinBranches({scored,lines,lineConfidence}){
 
   const enabled=branches.filter(branch=>branch.firstCandidates.length&&branch.enabled).sort(compareBranch);
   const structured=enabled.filter(branch=>["LEADER_HOLD","BANTE_SASHI","MAKURI_SUCCESS"].includes(branch.branchType));
-  const bestStructured=structured[0]||null;
-  const mainLineId=bestStructured?.primaryLineId||null;
-  const bestOnMainLine=mainLineId?Math.max(...structured.filter(branch=>branch.primaryLineId===mainLineId).map(branch=>branch.score),0):0;
+  const bestStructuredScore=structured[0]?.score||0;
+  const mainScoreFloor=bestStructuredScore*.90;
   return enabled.map(branch=>({
     ...branch,
-    priority:structured.includes(branch)?(mainLineId&&branch.primaryLineId===mainLineId&&branch.score>=bestOnMainLine*.90?"main":"sub"):"risk"
+    // Main-scenario candidates are compared across every official line.
+    // Do not lock the race to the line that happens to own the top branch.
+    priority:structured.includes(branch)&&(bestStructuredScore>0&&branch.score>=mainScoreFloor)?"main":structured.includes(branch)?"sub":"risk"
   }));
 }
 

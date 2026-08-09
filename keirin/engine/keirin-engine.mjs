@@ -21,7 +21,7 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
   if(lineBlocked){purchase.noBet=true;purchase.noBetReason="LINE_DATA_UNAVAILABLE";purchase.purchaseCandidateCountBeforeCompression=0;purchase.purchaseCandidateCountAfterCompression=0;purchase.finalBetCount=0;purchase.minimumRequired=0;}
 
   return{
-    engineVersion:"KEIRIN-0.5.3-branch-prior-audit",
+    engineVersion:"KEIRIN-0.5.4-global-main-branches",
     raceId:race.id,
     lineConfidence:race.lineConfidence,
     scored,lines,branches,terminals:classified,
@@ -51,8 +51,8 @@ function buildBranchSelectionAudit(branches){
   const totalScore=sorted.reduce((sum,branch)=>sum+(Number(branch.score)||0),0);
   const structured=sorted.filter(branch=>["LEADER_HOLD","BANTE_SASHI","MAKURI_SUCCESS"].includes(branch.branchType));
   const topStructured=structured[0]||null;
-  const mainLineId=topStructured?.primaryLineId||null;
-  const mainLineBestScore=mainLineId?Math.max(...structured.filter(branch=>branch.primaryLineId===mainLineId).map(branch=>Number(branch.score)||0),0):0;
+  const topStructuredScore=Number(topStructured?.score)||0;
+  const mainBranches=structured.filter(branch=>branch.priority==="main");
   const topScore=Number(sorted[0]?.score)||0;
   return{
     totalBranchScore:totalScore,
@@ -61,8 +61,12 @@ function buildBranchSelectionAudit(branches){
     topBranchScore:topScore,
     topStructuredBranchId:topStructured?.id||null,
     topStructuredBranchLabel:topStructured?.label||null,
-    mainLineId,
-    mainLineBestScore,
+    topStructuredScore,
+    mainSelectionMode:"GLOBAL_STRUCTURED_SCORE_BAND",
+    mainLineId:null,
+    mainLineIds:[...new Set(mainBranches.map(branch=>branch.primaryLineId).filter(Boolean))],
+    mainBranchIds:mainBranches.map(branch=>branch.id),
+    mainBranchLabels:mainBranches.map(branch=>branch.label),
     mainPriorityRatio:.90,
     rows:sorted.map(branch=>({
       id:branch.id,
