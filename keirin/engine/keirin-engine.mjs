@@ -30,7 +30,7 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
   purchase.girlsStartEvidenceRequired=race.raceCategory==="girls"?girlsEvidenceRequired:null;
 
   return{
-    engineVersion:"KEIRIN-0.5.43-terminal-lifecycle-audit",
+    engineVersion:"KEIRIN-0.5.44-chat-spec-baseline",
     raceId:race.id,
     lineConfidence:race.lineConfidence,
     scored,lines,branches,terminals:classified,
@@ -41,7 +41,8 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
       completedBranchCount:branches.filter(branch=>terminals.some(terminal=>terminal.contributingBranches.includes(branch.id))).length,
       ...purchase,
       terminalGenerationAudit,
-      terminalLifecycleAudit
+      terminalLifecycleAudit,
+      startPowerInputAudit:buildStartPowerInputAudit(scored)
     },
     recommendations:{
       main:classified.filter(item=>item.betClass==="MAIN"&&item.purchaseStatus==="購入採用"),
@@ -117,6 +118,60 @@ function buildBranchSelectionAudit(branches){
   };
 }
 function median(values){const valid=values.filter(Number.isFinite).sort((a,b)=>a-b);if(!valid.length)return 0;const mid=Math.floor(valid.length/2);return valid.length%2?valid[mid]:(valid[mid-1]+valid[mid])/2}
+
+function buildStartPowerInputAudit(scored){
+  const rows=(Array.isArray(scored)?scored:[]).map(item=>{
+    const e=item?.startPowerEvidence||null;
+    const missing=Array.isArray(e?.missingInputs)?e.missingInputs.filter(Boolean):[];
+    const hasEvidence=Boolean(e);
+    const hasComputed=Number.isFinite(Number(item?.startPower));
+    let status="VERIFIED";
+    if(!hasEvidence)status="EVIDENCE_UNAVAILABLE";
+    else if(missing.length)status="MISSING_INPUTS";
+    else if(Number(e?.officialTotalStarts)===0)status="ZERO_STARTS";
+    else if(!hasComputed)status="VALUE_UNAVAILABLE";
+    return{
+      number:Number(item?.number),
+      status,
+      auditable:hasEvidence,
+      verified:status==="VERIFIED",
+      startPower:hasComputed?Number(item.startPower):null,
+      confidence:e?.confidence||null,
+      missingInputs:missing,
+      profileIdentityPassed:e?.profileIdentityPassed===true,
+      officialTotalStarts:numberOrNull(e?.officialTotalStarts),
+      rawBackCount:numberOrNull(e?.rawBackCount),
+      rawHomeCount:numberOrNull(e?.rawHomeCount),
+      bFrequency:numberOrNull(e?.bFrequency),
+      hFrequency:numberOrNull(e?.hFrequency),
+      shrunkBFrequency:numberOrNull(e?.shrunkBFrequency),
+      shrunkHFrequency:numberOrNull(e?.shrunkHFrequency),
+      bPercentileScore:numberOrNull(e?.bPercentileScore),
+      hPercentileScore:numberOrNull(e?.hPercentileScore),
+      latentScore:numberOrNull(e?.latentScore),
+      raceCategory:e?.raceCategory||null,
+      priorStrength:numberOrNull(e?.priorStrength),
+      startsQuality:numberOrNull(e?.startsQuality)
+    };
+  });
+  const verifiedCount=rows.filter(row=>row.verified).length;
+  const missingCount=rows.filter(row=>row.status==="MISSING_INPUTS").length;
+  const unavailableCount=rows.filter(row=>["EVIDENCE_UNAVAILABLE","VALUE_UNAVAILABLE"].includes(row.status)).length;
+  return{
+    policy:"REQUIRED_OR_EXPLICITLY_UNAUDITABLE",
+    totalRiders:rows.length,
+    verifiedCount,
+    missingCount,
+    unavailableCount,
+    passed:rows.length>0&&unavailableCount===0,
+    rows
+  };
+}
+function numberOrNull(value){
+  if(value===null||value===undefined||value==="")return null;
+  const n=Number(value);
+  return Number.isFinite(n)?n:null;
+}
 
 function buildTerminalLifecycleAudit({sourceTerminals,classified,terminalGenerationAudit}){
   const sourceKeys=new Set((sourceTerminals||[]).map(item=>item.order.join("-")));

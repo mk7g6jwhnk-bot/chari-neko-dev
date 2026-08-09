@@ -1,3 +1,3 @@
-KEIRIN-0.5.43-terminal-lifecycle-audit
+KEIRIN-0.5.44-chat-spec-baseline
 
-Generated terminals are now protected by a lifecycle audit. Supported terminals cannot disappear between generation, probability evaluation and purchase evaluation. Purchase rejection requires a reason code and reason text. Generation exclusions are limited to explicit rule-impossible or data-contradiction reasons; duplicate terminal paths are merged, not deleted. A compact terminal ledger is saved with each prediction so post-result verification can distinguish "not generated" from "generated but not purchased".
+Chat版競輪予想エンジン仕様v1を基準設計として同梱。v67は移行フェーズ1として主導権入力監査を新規予想へ必須保存し、旧形式・欠損を「省略」ではなく明示的な監査不能/要確認として表示する。v66の終端ライフサイクル監査とv65の欠損能力再配分は維持。
