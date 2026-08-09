@@ -36,37 +36,87 @@ export function generateKeirinBranches({scored,lines,lineConfidence}){
 
   const enabled=branches.filter(branch=>branch.firstCandidates.length&&branch.enabled).sort(compareBranch);
   const structured=enabled.filter(branch=>["LEADER_HOLD","BANTE_SASHI","MAKURI_SUCCESS"].includes(branch.branchType));
-  const mainStructuredIds=new Set(selectAdaptiveMainCluster(structured).map(branch=>branch.id));
+  const tiers=selectNaturalBranchTiers(structured);
+  const mainIds=new Set(tiers.main.map(branch=>branch.id));
+  const contenderIds=new Set(tiers.contender.map(branch=>branch.id));
+
   return enabled.map(branch=>({
     ...branch,
-    // Compare structural scenarios across every official line, then separate the
-    // upper score cluster from the lower cluster using the score distribution itself.
-    // No fixed percentage-to-top cutoff is used.
-    priority:structured.includes(branch)?(mainStructuredIds.has(branch.id)?"main":"sub"):"risk"
+    // Structured branches are no longer forced into one upper/lower 2-cluster split.
+    // A uniquely highest (or exact-tied highest) branch is the core scenario.
+    // Remaining structural branches are only split into contender/sub tiers when the
+    // lower tail contains a robust natural gap; otherwise no artificial lower cutoff is invented.
+    priority:structured.includes(branch)
+      ?mainIds.has(branch.id)?"main":contenderIds.has(branch.id)?"contender":"sub"
+      :"risk"
   }));
 }
 
-export function selectAdaptiveMainCluster(structuredBranches=[]){
+export function selectNaturalBranchTiers(structuredBranches=[]){
   const sorted=[...structuredBranches].sort(compareBranch);
-  if(sorted.length<=1)return sorted;
-  const scores=sorted.map(branch=>Number(branch.score)||0);
-  const range=scores[0]-scores[scores.length-1];
-  if(range<=1e-9)return sorted;
+  if(!sorted.length)return emptyTierResult();
 
-  let bestSplit=1;
-  let bestLoss=Infinity;
-  for(let split=1;split<sorted.length;split+=1){
-    const high=scores.slice(0,split);
-    const low=scores.slice(split);
-    const loss=sse(high)+sse(low);
-    if(loss<bestLoss-1e-12){
-      bestLoss=loss;
-      bestSplit=split;
-    }
+  const scores=sorted.map(branch=>Number(branch.score)||0);
+  const topScore=scores[0];
+  const bottomScore=scores[scores.length-1];
+  const eps=Math.max(1e-9,Math.abs(topScore)*1e-12);
+
+  // If every structural branch has the same score, there is no evidence for a core
+  // scenario. Keep them all as contenders instead of inventing a winner.
+  if(Math.abs(topScore-bottomScore)<=eps){
+    return{
+      main:[],contender:sorted,sub:[],
+      diagnostics:{mode:"NO_SEPARATION",topScore,topTieCount:sorted.length,tailMedianGap:0,tailMadGap:0,contenderCutGap:null,contenderCutDetected:false}
+    };
   }
-  return sorted.slice(0,bestSplit);
+
+  let topTieCount=1;
+  while(topTieCount<sorted.length&&Math.abs(scores[topTieCount]-topScore)<=eps)topTieCount+=1;
+  const main=sorted.slice(0,topTieCount);
+  const tail=sorted.slice(topTieCount);
+  if(!tail.length){
+    return{main,contender:[],sub:[],diagnostics:{mode:"TOP_ONLY",topScore,topTieCount,tailMedianGap:null,tailMadGap:null,contenderCutGap:null,contenderCutDetected:false}};
+  }
+  if(tail.length===1){
+    return{main,contender:tail,sub:[],diagnostics:{mode:"NO_LOWER_CUT",topScore,topTieCount,tailMedianGap:null,tailMadGap:null,contenderCutGap:null,contenderCutDetected:false}};
+  }
+
+  const tailScores=tail.map(branch=>Number(branch.score)||0);
+  const gaps=[];
+  for(let i=0;i<tailScores.length-1;i+=1)gaps.push(Math.max(0,tailScores[i]-tailScores[i+1]));
+  const tailMedianGap=median(gaps);
+  const deviations=gaps.map(gap=>Math.abs(gap-tailMedianGap));
+  const tailMadGap=median(deviations);
+  let maxGap=-Infinity,maxGapIndex=-1;
+  for(let i=0;i<gaps.length;i+=1){
+    if(gaps[i]>maxGap){maxGap=gaps[i];maxGapIndex=i;}
+  }
+
+  // Robust, distribution-derived lower boundary. This does not compare against a
+  // fixed percentage of the top score and does not require two groups to exist.
+  const naturalGapFloor=tailMedianGap+tailMadGap;
+  const contenderCutDetected=maxGapIndex>=0&&maxGap>naturalGapFloor+eps&&maxGap>eps;
+  const contender=contenderCutDetected?tail.slice(0,maxGapIndex+1):tail;
+  const sub=contenderCutDetected?tail.slice(maxGapIndex+1):[];
+
+  return{
+    main,contender,sub,
+    diagnostics:{
+      mode:contenderCutDetected?"CORE_PLUS_NATURAL_LOWER_BREAK":"CORE_WITHOUT_FORCED_LOWER_BREAK",
+      topScore,topTieCount,tailMedianGap,tailMadGap,
+      contenderCutGap:contenderCutDetected?maxGap:null,
+      contenderCutDetected
+    }
+  };
 }
 
+// Kept as a compatibility export for older audit/tests. v28 semantics return only
+// the core branch tier; use selectNaturalBranchTiers for full classification.
+export function selectAdaptiveMainCluster(structuredBranches=[]){
+  return selectNaturalBranchTiers(structuredBranches).main;
+}
+
+function emptyTierResult(){return{main:[],contender:[],sub:[],diagnostics:{mode:"EMPTY",topScore:null,topTieCount:0,tailMedianGap:null,tailMadGap:null,contenderCutGap:null,contenderCutDetected:false}}}
 function part(key,value,weight){return{key,value:Number(value)||0,weight,contribution:(Number(value)||0)*weight}}
 function make({id,label,scenario,branchType,scoreParts=[],firstCandidateScores={},primaryLineId=null,requiredFirstNumber=null,enabled}){
   const score=scoreParts.reduce((sum,item)=>sum+item.contribution,0);
@@ -75,4 +125,4 @@ function make({id,label,scenario,branchType,scoreParts=[],firstCandidateScores={
 }
 function compareBranch(a,b){return(b.score-a.score)||a.id.localeCompare(b.id,"en")}
 function avg(values){const valid=values.filter(Number.isFinite);return valid.length?valid.reduce((sum,value)=>sum+value,0)/valid.length:0}
-function sse(values){if(!values.length)return 0;const mean=avg(values);return values.reduce((sum,value)=>sum+(value-mean)**2,0)}
+function median(values){const valid=values.filter(Number.isFinite).sort((a,b)=>a-b);if(!valid.length)return 0;const mid=Math.floor(valid.length/2);return valid.length%2?valid[mid]:(valid[mid-1]+valid[mid])/2}

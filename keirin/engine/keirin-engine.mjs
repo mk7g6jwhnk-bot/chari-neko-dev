@@ -21,7 +21,7 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
   if(lineBlocked){purchase.noBet=true;purchase.noBetReason="LINE_DATA_UNAVAILABLE";purchase.purchaseCandidateCountBeforeCompression=0;purchase.purchaseCandidateCountAfterCompression=0;purchase.finalBetCount=0;purchase.minimumRequired=0;}
 
   return{
-    engineVersion:"KEIRIN-0.5.5-adaptive-main-cluster",
+    engineVersion:"KEIRIN-0.5.6-natural-branch-tiers",
     raceId:race.id,
     lineConfidence:race.lineConfidence,
     scored,lines,branches,terminals:classified,
@@ -53,12 +53,16 @@ function buildBranchSelectionAudit(branches){
   const topStructured=structured[0]||null;
   const topStructuredScore=Number(topStructured?.score)||0;
   const mainBranches=structured.filter(branch=>branch.priority==="main");
+  const contenderBranches=structured.filter(branch=>branch.priority==="contender");
   const subBranches=structured.filter(branch=>branch.priority==="sub");
   const topScore=Number(sorted[0]?.score)||0;
-  const mainScores=mainBranches.map(branch=>Number(branch.score)||0);
-  const subScores=subBranches.map(branch=>Number(branch.score)||0);
-  const mainMinScore=mainScores.length?Math.min(...mainScores):null;
-  const nextSubScore=subScores.length?Math.max(...subScores):null;
+  const tailStructured=[...contenderBranches,...subBranches].sort((a,b)=>(b.score||0)-(a.score||0));
+  const tailGaps=[];
+  for(let i=0;i<tailStructured.length-1;i+=1)tailGaps.push(Math.max(0,(Number(tailStructured[i].score)||0)-(Number(tailStructured[i+1].score)||0)));
+  const medianGap=median(tailGaps);
+  const madGap=median(tailGaps.map(gap=>Math.abs(gap-medianGap)));
+  const contenderMin=contenderBranches.length?Math.min(...contenderBranches.map(branch=>Number(branch.score)||0)):null;
+  const subMax=subBranches.length?Math.max(...subBranches.map(branch=>Number(branch.score)||0)):null;
   return{
     totalBranchScore:totalScore,
     topBranchId:sorted[0]?.id||null,
@@ -67,20 +71,25 @@ function buildBranchSelectionAudit(branches){
     topStructuredBranchId:topStructured?.id||null,
     topStructuredBranchLabel:topStructured?.label||null,
     topStructuredScore,
-    mainSelectionMode:"ADAPTIVE_SCORE_CLUSTER",
+    mainSelectionMode:"HIERARCHICAL_NATURAL_TIERS",
     mainLineId:null,
     mainLineIds:[...new Set(mainBranches.map(branch=>branch.primaryLineId).filter(Boolean))],
     mainBranchIds:mainBranches.map(branch=>branch.id),
     mainBranchLabels:mainBranches.map(branch=>branch.label),
+    contenderBranchIds:contenderBranches.map(branch=>branch.id),
+    contenderBranchLabels:contenderBranches.map(branch=>branch.label),
+    subBranchIds:subBranches.map(branch=>branch.id),
+    subBranchLabels:subBranches.map(branch=>branch.label),
     mainPriorityRatio:null,
-    adaptiveSplit:{
+    tiering:{
       mainCount:mainBranches.length,
+      contenderCount:contenderBranches.length,
       subCount:subBranches.length,
-      mainMinScore,
-      nextSubScore,
-      cutGap:mainMinScore!=null&&nextSubScore!=null?mainMinScore-nextSubScore:null,
-      mainMean:mean(mainScores),
-      subMean:mean(subScores)
+      topTieCount:mainBranches.length,
+      tailMedianGap:tailGaps.length?medianGap:null,
+      tailMadGap:tailGaps.length?madGap:null,
+      contenderCutGap:contenderMin!=null&&subMax!=null?contenderMin-subMax:null,
+      contenderCutDetected:contenderMin!=null&&subMax!=null
     },
     rows:sorted.map(branch=>({
       id:branch.id,
@@ -96,4 +105,4 @@ function buildBranchSelectionAudit(branches){
     }))
   };
 }
-function mean(values){return values.length?values.reduce((sum,value)=>sum+value,0)/values.length:null}
+function median(values){const valid=values.filter(Number.isFinite).sort((a,b)=>a-b);if(!valid.length)return 0;const mid=Math.floor(valid.length/2);return valid.length%2?valid[mid]:(valid[mid-1]+valid[mid])/2}
