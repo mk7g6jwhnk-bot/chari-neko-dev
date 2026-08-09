@@ -5,14 +5,14 @@ const MIN_SCALE = 0.01;
 
 const CONFIG = {
   girls: {
-    sprintPower: { key: "makuri", baseline: 0.251, median: 0.250502, iqr: 0.191615 },
-    finishPower: { key: "sasi", baseline: 0.224, median: 0.196769, iqr: 0.131557 },
-    trackingSkill: { key: "mark", baseline: 0.370, median: 0.294211, iqr: 0.236789 }
+    sprintPower: { key: "makuri", profileKey: "makuri", baseline: 0.251, median: 0.250502, iqr: 0.191615 },
+    finishPower: { key: "sasi", profileKey: "difference", baseline: 0.224, median: 0.196769, iqr: 0.131557 },
+    trackingSkill: { key: "mark", profileKey: "mark", baseline: 0.370, median: 0.294211, iqr: 0.236789 }
   },
   standard: {
-    sprintPower: { key: "makuri", baseline: 0.230, median: 0.178889, iqr: 0.111494 },
-    finishPower: { key: "sasi", baseline: 0.360, median: 0.376667, iqr: 0.208571 },
-    trackingSkill: { key: "mark", baseline: 0.185, median: 0.163929, iqr: 0.166667 }
+    sprintPower: { key: "makuri", profileKey: "makuri", baseline: 0.230, median: 0.178889, iqr: 0.111494 },
+    finishPower: { key: "sasi", profileKey: "difference", baseline: 0.360, median: 0.376667, iqr: 0.208571 },
+    trackingSkill: { key: "mark", profileKey: "mark", baseline: 0.185, median: 0.163929, iqr: 0.166667 }
   }
 };
 
@@ -28,7 +28,10 @@ export function applyKimariteAbilities(participant) {
       reason: !category ? "category-unavailable" : "kimarite-evidence-unavailable"
     }
   };
-  if (!category || !isUsableEvidence(evidence)) return { ...participant, ...neutral };
+  if (!category) return { ...participant, ...neutral };
+  if (!isUsableEvidence(evidence)) {
+    return fromOfficialProfileRates(participant, category) || { ...participant, ...neutral };
+  }
 
   const n = integer(evidence.totalQuinellaCount);
   if (n === null || n <= 0) {
@@ -85,6 +88,67 @@ export function applyKimariteAbilities(participant) {
       details
     }
   };
+}
+
+
+function fromOfficialProfileRates(participant, category) {
+  const profile = participant?.officialProfileEvidence;
+  if (!profile || profile.identityPassed !== true) return null;
+  const rates = profile.winningStyleRates;
+  if (!rates || typeof rates !== "object") return null;
+
+  const result = {};
+  const details = {};
+  let adoptedAny = false;
+  for (const [ability, cfg] of Object.entries(CONFIG[category])) {
+    const share = normalizeProfileShare(rates?.[cfg.profileKey]);
+    if (share === null) {
+      result[ability] = 5;
+      details[ability] = { value: 5, adopted: false, reason: `${cfg.profileKey}-rate-missing` };
+      continue;
+    }
+    const scale = Math.max(cfg.iqr / IQR_TO_SIGMA, MIN_SCALE);
+    const z = (share - cfg.median) / scale;
+    const latent = clamp(normalCdf(z) * 10, 0.25, 9.75);
+    // Profile percentages are a useful fallback but do not expose a clean
+    // sample size here. Keep the effect deliberately softer than JSJ068.
+    const quality = 0.45;
+    const value = round(clamp(5 + quality * (latent - 5), 0.5, 9.5));
+    result[ability] = value;
+    details[ability] = {
+      adopted: true,
+      value,
+      sourceKey: `officialProfileEvidence.winningStyleRates.${cfg.profileKey}`,
+      share: round(share),
+      latent: round(latent),
+      quality,
+      confidence: "low",
+      posteriorMedian: cfg.median,
+      posteriorIqr: cfg.iqr
+    };
+    adoptedAny = true;
+  }
+  if (!adoptedAny) return null;
+  return {
+    ...participant,
+    ...result,
+    kimariteAbilityEvidence: {
+      adopted: true,
+      category,
+      n: null,
+      confidence: "low",
+      sourceType: "official-profile-winning-style-rates",
+      details
+    }
+  };
+}
+
+function normalizeProfileShare(value) {
+  if (value === null || value === undefined || value === "") return null;
+  const number = Number(value);
+  if (!Number.isFinite(number) || number < 0) return null;
+  const share = number > 1 ? number / 100 : number;
+  return share >= 0 && share <= 1 ? share : null;
 }
 
 function isUsableEvidence(evidence) {

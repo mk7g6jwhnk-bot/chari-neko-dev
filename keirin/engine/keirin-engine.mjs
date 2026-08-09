@@ -13,15 +13,22 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
   const a=audit({race,branches,terminals});
   const rawClassified=a.passed?classify(terminals,oddsByOrder):terminals;
   const lineBlocked=a.passed&&race.raceCategory!=="girls"&&race.lineConfidence!=="高";
-  const classified=lineBlocked
-    ? rawClassified.map(item=>({...item,betClass:"NONE",purchaseStatus:"購入不採用",purchaseReason:"公式ライン未取得のため購入判定を保留"}))
+  const girlsStartEvidenceCount=scored.filter(item=>item?.startPowerEvidence&&(!Array.isArray(item.startPowerEvidence.missingInputs)||item.startPowerEvidence.missingInputs.length===0)).length;
+  const girlsEvidenceRequired=Math.max(3,Math.ceil(scored.length*.5));
+  const girlsEvidenceBlocked=a.passed&&race.raceCategory==="girls"&&girlsStartEvidenceCount<girlsEvidenceRequired;
+  const purchaseBlocked=lineBlocked||girlsEvidenceBlocked;
+  const blockedReason=lineBlocked?"公式ライン未取得のため購入判定を保留":"ガールズ主導権の公式入力が不足しているため購入判定を保留";
+  const classified=purchaseBlocked
+    ? rawClassified.map(item=>({...item,betClass:"NONE",purchaseStatus:"購入不採用",purchaseReason:blockedReason}))
     : rawClassified;
-  const plan=a.passed&&!lineBlocked?allocate(classified,budget):[];
+  const plan=a.passed&&!purchaseBlocked?allocate(classified,budget):[];
   const purchase=purchaseDiagnostics(classified,plan,budget);
-  if(lineBlocked){purchase.noBet=true;purchase.noBetReason="LINE_DATA_UNAVAILABLE";purchase.purchaseCandidateCountBeforeCompression=0;purchase.purchaseCandidateCountAfterCompression=0;purchase.finalBetCount=0;purchase.minimumRequired=0;}
+  if(purchaseBlocked){purchase.noBet=true;purchase.noBetReason=lineBlocked?"LINE_DATA_UNAVAILABLE":"GIRLS_LEAD_EVIDENCE_UNAVAILABLE";purchase.purchaseCandidateCountBeforeCompression=0;purchase.purchaseCandidateCountAfterCompression=0;purchase.finalBetCount=0;purchase.minimumRequired=0;}
+  purchase.girlsStartEvidenceCount=girlsStartEvidenceCount;
+  purchase.girlsStartEvidenceRequired=race.raceCategory==="girls"?girlsEvidenceRequired:null;
 
   return{
-    engineVersion:"KEIRIN-0.5.19-line-order-girls-dynamic",
+    engineVersion:"KEIRIN-0.5.20-girls-evidence-gate",
     raceId:race.id,
     lineConfidence:race.lineConfidence,
     scored,lines,branches,terminals:classified,
