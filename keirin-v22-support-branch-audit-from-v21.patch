@@ -1,0 +1,211 @@
+diff -ruN /mnt/data/v21orig/VERSION.md /mnt/data/v21work/VERSION.md
+--- /mnt/data/v21orig/VERSION.md	2026-08-08 17:06:06.000000000 +0000
++++ /mnt/data/v21work/VERSION.md	2026-08-09 01:22:21.963981098 +0000
+@@ -1,4 +1,7 @@
+-# Current development version
++# Version
+ 
+-- KEIRIN engine: `KEIRIN-0.5.0-no-probability-cutoff`
+-- Adds purchase-funnel diagnostics only; purchase thresholds are unchanged from v18.
++KEIRIN-0.5.1-support-branch-audit
++
++- Displays every supporting branch for each adopted terminal.
++- Separately counts unique branch IDs and flags duplicate branch labels.
++- Prediction selection logic is unchanged from v21.
+diff -ruN /mnt/data/v21orig/keirin/engine/purchase.mjs /mnt/data/v21work/keirin/engine/purchase.mjs
+--- /mnt/data/v21orig/keirin/engine/purchase.mjs	2026-08-08 17:14:17.000000000 +0000
++++ /mnt/data/v21work/keirin/engine/purchase.mjs	2026-08-09 01:22:21.962649734 +0000
+@@ -197,20 +197,44 @@
+       representativePositionRatios:{first:.93,second:.91,third:.91},
+       credibleVariantPositionRatios:{first:.88,second:.85,third:.85}
+     },
+-    adoptedTerminalAudit:natural.map(item=>({
+-      order:item.order.join("-"),
+-      betClass:item.betClass,
+-      probability:item.probability,
+-      dominantBranchId:item.dominantBranchId,
+-      dominantBranchLabel:item.dominantBranchLabel,
+-      dominantBranchPriority:item.dominantBranchPriority,
+-      branchFit:item.branchFit,
+-      branchRank:item.branchRank,
+-      branchSupport:item.branchSupport,
+-      representativeTerminal:item.representativeTerminal,
+-      decisionRatios:item.decisionRatios||null,
+-      purchaseReason:item.purchaseReason
+-    })),
++    adoptedTerminalAudit:natural.map(item=>{
++      const supportBranches=[...(item.branchContributions||[])]
++        .filter(contribution=>contributionMatchesTerminal(contribution,item.order))
++        .sort((a,b)=>(b.probability||0)-(a.probability||0)||String(a.branchId).localeCompare(String(b.branchId),"en"))
++        .map(contribution=>({
++          branchId:contribution.branchId||null,
++          branchLabel:contribution.branchLabel||null,
++          branchPriority:contribution.branchPriority||null,
++          probability:contribution.probability||0,
++          requiredFirstNumber:contribution.requiredFirstNumber??null
++        }));
++      const uniqueSupportBranchIds=[...new Set(supportBranches.map(branch=>branch.branchId).filter(Boolean))];
++      const supportLabelCounts=supportBranches.reduce((counts,branch)=>{
++        const label=branch.branchLabel||"不明";
++        counts[label]=(counts[label]||0)+1;
++        return counts;
++      },{});
++      const duplicateSupportLabels=Object.entries(supportLabelCounts)
++        .filter(([,count])=>count>1)
++        .map(([label,count])=>({label,count}));
++      return{
++        order:item.order.join("-"),
++        betClass:item.betClass,
++        probability:item.probability,
++        dominantBranchId:item.dominantBranchId,
++        dominantBranchLabel:item.dominantBranchLabel,
++        dominantBranchPriority:item.dominantBranchPriority,
++        branchFit:item.branchFit,
++        branchRank:item.branchRank,
++        branchSupport:item.branchSupport,
++        uniqueSupportBranchCount:uniqueSupportBranchIds.length,
++        supportBranches,
++        duplicateSupportLabels,
++        representativeTerminal:item.representativeTerminal,
++        decisionRatios:item.decisionRatios||null,
++        purchaseReason:item.purchaseReason
++      };
++    }),
+     adoptedBranchCounts:natural.reduce((counts,item)=>{
+       const label=item.dominantBranchLabel||"不明";
+       counts[label]=(counts[label]||0)+1;
+diff -ruN /mnt/data/v21orig/modules/keirin/engine/purchase.mjs /mnt/data/v21work/modules/keirin/engine/purchase.mjs
+--- /mnt/data/v21orig/modules/keirin/engine/purchase.mjs	2026-08-08 17:14:17.000000000 +0000
++++ /mnt/data/v21work/modules/keirin/engine/purchase.mjs	2026-08-09 01:22:21.962896363 +0000
+@@ -197,20 +197,44 @@
+       representativePositionRatios:{first:.93,second:.91,third:.91},
+       credibleVariantPositionRatios:{first:.88,second:.85,third:.85}
+     },
+-    adoptedTerminalAudit:natural.map(item=>({
+-      order:item.order.join("-"),
+-      betClass:item.betClass,
+-      probability:item.probability,
+-      dominantBranchId:item.dominantBranchId,
+-      dominantBranchLabel:item.dominantBranchLabel,
+-      dominantBranchPriority:item.dominantBranchPriority,
+-      branchFit:item.branchFit,
+-      branchRank:item.branchRank,
+-      branchSupport:item.branchSupport,
+-      representativeTerminal:item.representativeTerminal,
+-      decisionRatios:item.decisionRatios||null,
+-      purchaseReason:item.purchaseReason
+-    })),
++    adoptedTerminalAudit:natural.map(item=>{
++      const supportBranches=[...(item.branchContributions||[])]
++        .filter(contribution=>contributionMatchesTerminal(contribution,item.order))
++        .sort((a,b)=>(b.probability||0)-(a.probability||0)||String(a.branchId).localeCompare(String(b.branchId),"en"))
++        .map(contribution=>({
++          branchId:contribution.branchId||null,
++          branchLabel:contribution.branchLabel||null,
++          branchPriority:contribution.branchPriority||null,
++          probability:contribution.probability||0,
++          requiredFirstNumber:contribution.requiredFirstNumber??null
++        }));
++      const uniqueSupportBranchIds=[...new Set(supportBranches.map(branch=>branch.branchId).filter(Boolean))];
++      const supportLabelCounts=supportBranches.reduce((counts,branch)=>{
++        const label=branch.branchLabel||"不明";
++        counts[label]=(counts[label]||0)+1;
++        return counts;
++      },{});
++      const duplicateSupportLabels=Object.entries(supportLabelCounts)
++        .filter(([,count])=>count>1)
++        .map(([label,count])=>({label,count}));
++      return{
++        order:item.order.join("-"),
++        betClass:item.betClass,
++        probability:item.probability,
++        dominantBranchId:item.dominantBranchId,
++        dominantBranchLabel:item.dominantBranchLabel,
++        dominantBranchPriority:item.dominantBranchPriority,
++        branchFit:item.branchFit,
++        branchRank:item.branchRank,
++        branchSupport:item.branchSupport,
++        uniqueSupportBranchCount:uniqueSupportBranchIds.length,
++        supportBranches,
++        duplicateSupportLabels,
++        representativeTerminal:item.representativeTerminal,
++        decisionRatios:item.decisionRatios||null,
++        purchaseReason:item.purchaseReason
++      };
++    }),
+     adoptedBranchCounts:natural.reduce((counts,item)=>{
+       const label=item.dominantBranchLabel||"不明";
+       counts[label]=(counts[label]||0)+1;
+diff -ruN /mnt/data/v21orig/public/app.mjs /mnt/data/v21work/public/app.mjs
+--- /mnt/data/v21orig/public/app.mjs	2026-08-08 17:14:17.000000000 +0000
++++ /mnt/data/v21work/public/app.mjs	2026-08-09 01:22:21.963561056 +0000
+@@ -49,7 +49,8 @@
+ function allocatePreviewStakes(bets,budget,mode){const n=bets.length,min=n*100;if(!n||budget<min)return null;const base=bets.map(b=>Math.max(1,Number(b.stake)||100));const mul=bets.map(b=>mode==="main"?(b.category==="MAIN"?1.6:b.category==="BUYABLE_HIGH"?.8:1):mode==="high"?(b.category==="BUYABLE_HIGH"?1.6:b.category==="MAIN"?1:.9):1);const weights=base.map((v,i)=>v*mul[i]),extra=budget-min,total=weights.reduce((a,b)=>a+b,0)||n;let out=weights.map(w=>100+Math.floor((extra*w/total)/100)*100),used=out.reduce((a,b)=>a+b,0),remain=Math.floor((budget-used)/100);const order=weights.map((w,i)=>({w,i})).sort((a,b)=>b.w-a.w||a.i-b.i);for(let k=0;k<remain;k++)out[order[k%order.length].i]+=100;return out}
+ function calcCompositeOdds(bets){const valid=bets.map(b=>Number(b.odds)).filter(v=>Number.isFinite(v)&&v>0);if(!valid.length||valid.length!==bets.length)return null;const inv=valid.reduce((s,v)=>s+1/v,0);return inv>0?1/inv:null}
+ 
+-function renderAdoptedTerminalAudit(audit){const rows=Array.isArray(audit?.adoptedTerminalAudit)?audit.adoptedTerminalAudit:[];if(!rows.length)return"";const branchRows=Object.entries(audit.adoptedBranchCounts||{}).sort((a,b)=>b[1]-a[1]).map(([label,count])=>`<div class="abilityRow"><strong>${esc(label)}</strong><span>${count}件</span></div>`).join("");const terminalRows=rows.map(item=>{const r=item.decisionRatios||{};const ratios=`1着 ${fmtRatio(r.first)} / 2着 ${fmtRatio(r.second)} / 3着 ${fmtRatio(r.third)}`;return `<div class="detailBet"><strong>${esc(item.order)}　${esc(item.betClass||"")}</strong><p>${esc(item.dominantBranchLabel||"由来枝不明")} / 枝適合 ${fmtRatio(item.branchFit)} / 枝内${item.branchRank??"-"}位 / 支持枝${item.branchSupport??0}</p><p class="muted">${ratios}</p></div>`}).join("");return `<h3>採用終端の由来</h3>${branchRows?`<div class="abilityList">${branchRows}</div>`:""}<div class="detailGroup">${terminalRows}</div>`}function fmtRatio(value){const n=Number(value);return Number.isFinite(n)?n.toFixed(3):"-"}
++function renderAdoptedTerminalAudit(audit){const rows=Array.isArray(audit?.adoptedTerminalAudit)?audit.adoptedTerminalAudit:[];if(!rows.length)return"";const branchRows=Object.entries(audit.adoptedBranchCounts||{}).sort((a,b)=>b[1]-a[1]).map(([label,count])=>`<div class="abilityRow"><strong>${esc(label)}</strong><span>${count}件</span></div>`).join("");const terminalRows=rows.map(item=>{const r=item.decisionRatios||{};const ratios=`1着 ${fmtRatio(r.first)} / 2着 ${fmtRatio(r.second)} / 3着 ${fmtRatio(r.third)}`;const supportBranches=Array.isArray(item.supportBranches)?item.supportBranches:[];const supportRows=supportBranches.map((branch,index)=>`<div class="abilityRow"><strong>${index+1}. ${esc(branch.branchLabel||branch.branchId||"不明")}</strong><span>${esc(branch.branchPriority||"-")} / 寄与 ${fmtRatio(branch.probability)}</span></div>`).join("");const dup=Array.isArray(item.duplicateSupportLabels)&&item.duplicateSupportLabels.length?`<p class="auditWarn">重複ラベル: ${item.duplicateSupportLabels.map(x=>`${esc(x.label)}×${x.count}`).join(" / ")}</p>`:"";return `<div class="detailBet"><strong>${esc(item.order)}　${esc(item.betClass||"")}</strong><p>${esc(item.dominantBranchLabel||"由来枝不明")} / 枝適合 ${fmtRatio(item.branchFit)} / 枝内${item.branchRank??"-"}位 / 支持枝${item.branchSupport??0}（固有${item.uniqueSupportBranchCount??item.branchSupport??0}）</p><p class="muted">${ratios}</p>${supportRows?`<details class="supportBranchAudit"><summary>支持枝を全部見る（${supportBranches.length}本）</summary><div class="abilityList">${supportRows}</div>${dup}</details>`:""}</div>`}).join("");return `<h3>採用終端の由来</h3>${branchRows?`<div class="abilityList">${branchRows}</div>`:""}<div class="detailGroup">${terminalRows}</div>`}
++function fmtRatio(value){const n=Number(value);return Number.isFinite(n)?n.toFixed(3):"-"}
+ function renderPredictionDetail(snapshot){const panel=$("predictionDetail");if(!panel)return;if(!snapshot){panel.classList.add("hidden");panel.innerHTML="";return}const groups=[["本線","MAIN"],["押さえ","COVER"],["買える高配当","BUYABLE_HIGH"]];const betDetail=groups.map(([label,key])=>{const bets=(snapshot.betSelections||[]).filter(b=>b.category===key);if(!bets.length)return"";return `<div class="detailGroup"><h3>${label}</h3>${bets.map(b=>`<div class="detailBet"><strong>${b.order.join("-")}</strong>${b.branchLabel?`<p>${esc(b.branchLabel)}${b.reason?` / ${esc(b.reason)}`:""}</p>`:""}${b.evidenceSummary?`<p class="muted">${esc(b.evidenceSummary)}</p>`:""}</div>`).join("")}</div>`}).join("");const abilities=(snapshot.abilitiesUsed||[]).map(a=>`<div class="abilityRow"><strong>${a.number}番</strong><span>近況 ${fmtAbility(a.recentForm)} / 主導権 ${fmtAbility(a.startPower)} / まくり ${fmtAbility(a.sprintPower)} / 差し ${fmtAbility(a.finishPower)} / 追走 ${fmtAbility(a.trackingSkill)}</span></div>`).join("");const audit=snapshot.predictionOutput?.audit||{};const rejectLabels={FLAT_DISTRIBUTION:"分布が平坦",NO_DOMINANT_BRANCH:"支配展開なし",PROBABILITY_SUPPORT:"確率支持不足",BRANCH_OR_POSITION_SUPPORT:"枝適合/着順支持不足",CLASS_RULE:"分類条件不成立",UNKNOWN:"その他"};const rejectRows=Object.entries(audit.rejectCodeCounts||{}).sort((a,b)=>b[1]-a[1]).map(([code,count])=>`<div class="abilityRow"><strong>${esc(rejectLabels[code]||code)}</strong><span>${count}件</span></div>`).join("");const auditDetail=Number.isFinite(audit.generatedTerminalCount)?`<details class="predictionAccordion" open><summary>購入採用監査を見る</summary><div class="accordionBody"><div class="abilityList"><div class="abilityRow"><strong>生成終端</strong><span>${audit.generatedTerminalCount}件</span></div><div class="abilityRow"><strong>確率評価済み</strong><span>${audit.probabilityEvaluatedTerminalCount??audit.terminalCount??0}件</span></div><div class="abilityRow"><strong>購入採用</strong><span>${audit.adoptedTerminalCount??audit.finalBetCount??0}件</span></div><div class="abilityRow"><strong>購入不採用</strong><span>${audit.rejectedTerminalCount??0}件</span></div></div>${rejectRows?`<h3>不採用理由</h3><div class="abilityList">${rejectRows}</div>`:""}${renderAdoptedTerminalAudit(audit)}<p class="muted">固定点数・枝内順位上限・確率比の一律足切りは使用していません。採用された各終端の由来枝と着順支持を確認します。</p></div></details>`:"";panel.innerHTML=`<div class="sectionHead"><div><small>保存済み予想の根拠</small><h2>予想詳細</h2></div><span class="pill">詳細</span></div>${auditDetail}<details class="predictionAccordion"><summary>展開・買い目の根拠を見る</summary><div class="accordionBody">${betDetail||'<p class="muted">購入候補はありません。</p>'}</div></details>${abilities?`<details class="predictionAccordion"><summary>選手別能力を見る</summary><div class="abilityList accordionBody">${abilities}</div></details>`:""}`;panel.classList.remove("hidden")}
+ function fmtAbility(v){return Number.isFinite(Number(v))?Number(v).toFixed(2):"-"}
+ function noBetReasonText(code){return({NO_TERMINALS:"展開候補を生成できませんでした。",FLAT_DISTRIBUTION_NO_SUPPORTED_CANDIDATE:"確率分布が平坦で、独立した展開根拠を持つ購入候補がありません。",BUDGET_BELOW_MINIMUM:"予算が最低購入単位を下回っています。",QUALITY_GATE:"データ品質基準を満たさないため購入を見送ります。",LINE_DATA_UNAVAILABLE:"公式ラインを確認できないため、通常の競輪予想としては購入判定を保留します。"})[code]||"購入価値を確認できないため見送ります。"}
+diff -ruN /mnt/data/v21orig/public/styles.css /mnt/data/v21work/public/styles.css
+--- /mnt/data/v21orig/public/styles.css	2026-08-08 16:27:32.000000000 +0000
++++ /mnt/data/v21work/public/styles.css	2026-08-09 01:22:21.963785328 +0000
+@@ -99,3 +99,5 @@
+ .oddsEvaluation.muted{color:var(--muted);background:rgba(100,116,139,.08)}
+ .timelineRace.race-warning .timelineMain{border-color:rgba(245,158,11,.7);box-shadow:0 0 0 1px rgba(245,158,11,.12) inset}
+ @media(max-width:520px){.timelineRace{grid-template-columns:1fr 40px}.timelineMain{padding:10px 11px}.timelineOdds{gap:6px}.oddsRefresh{padding:6px 8px}.oddsEvaluation{font-size:.64rem}}
++
++.supportBranchAudit{margin-top:8px;border-top:1px solid rgba(255,255,255,.08);padding-top:7px}.supportBranchAudit summary{cursor:pointer;font-size:12px;font-weight:700}.supportBranchAudit .abilityList{margin-top:7px}.auditWarn{margin:7px 0 0;font-size:12px;color:#f5b66f}
+diff -ruN /mnt/data/v21orig/tests/keirin-adopted-terminal-audit.mjs /mnt/data/v21work/tests/keirin-adopted-terminal-audit.mjs
+--- /mnt/data/v21orig/tests/keirin-adopted-terminal-audit.mjs	2026-08-08 17:14:46.000000000 +0000
++++ /mnt/data/v21work/tests/keirin-adopted-terminal-audit.mjs	2026-08-09 01:22:21.963899027 +0000
+@@ -19,6 +19,12 @@
+   assert.ok(item.dominantBranchLabel);
+   assert.ok(Number.isFinite(item.branchFit));
+   assert.ok(item.decisionRatios);
++  assert.ok(Array.isArray(item.supportBranches));
++  assert.equal(item.supportBranches.length,item.branchSupport);
++  assert.ok(Number.isInteger(item.uniqueSupportBranchCount));
++  assert.ok(item.uniqueSupportBranchCount<=item.branchSupport);
++  assert.ok(Array.isArray(item.duplicateSupportLabels));
+ }
++
+ assert.equal(out.audit.purchaseThresholds.probabilitySupportVsMaxMin,null);
+ console.log('Keirin adopted terminal provenance audit passed:', out.audit.adoptedTerminalAudit.length);
+diff -ruN /mnt/data/v21orig/tests/keirin-support-branch-audit.mjs /mnt/data/v21work/tests/keirin-support-branch-audit.mjs
+--- /mnt/data/v21orig/tests/keirin-support-branch-audit.mjs	1970-01-01 00:00:00.000000000 +0000
++++ /mnt/data/v21work/tests/keirin-support-branch-audit.mjs	2026-08-09 01:22:45.544551440 +0000
+@@ -0,0 +1,31 @@
++import assert from 'node:assert/strict';
++import { classify, purchaseDiagnostics } from '../keirin/engine/purchase.mjs';
++
++const strongRatios={first:1,second:1,third:1};
++const terminals=[
++  {
++    order:[1,2,3], probability:.8,
++    branchContributions:[
++      {branchId:'LEAD-A',branchLabel:'A先行押し切り',branchPriority:'main',probability:.8,requiredFirstNumber:1,decisionRatios:strongRatios},
++      {branchId:'ALT-A',branchLabel:'A先行押し切り',branchPriority:'sub',probability:.74,requiredFirstNumber:1,decisionRatios:strongRatios},
++      {branchId:'MAKURI-A',branchLabel:'Aまくり',branchPriority:'sub',probability:.70,requiredFirstNumber:1,decisionRatios:strongRatios}
++    ]
++  },
++  {
++    order:[1,3,2], probability:.2,
++    branchContributions:[
++      {branchId:'LEAD-A',branchLabel:'A先行押し切り',branchPriority:'main',probability:.2,requiredFirstNumber:1,decisionRatios:{first:.8,second:.7,third:.7}}
++    ]
++  }
++];
++const classified=classify(terminals,{});
++const audit=purchaseDiagnostics(classified,[],3000);
++assert.equal(audit.adoptedTerminalCount,1);
++const item=audit.adoptedTerminalAudit[0];
++assert.equal(item.order,'1-2-3');
++assert.equal(item.branchSupport,3);
++assert.equal(item.uniqueSupportBranchCount,3);
++assert.equal(item.supportBranches.length,3);
++assert.deepEqual(item.supportBranches.map(x=>x.branchId),['LEAD-A','ALT-A','MAKURI-A']);
++assert.deepEqual(item.duplicateSupportLabels,[{label:'A先行押し切り',count:2}]);
++console.log('Keirin supporting branch detail audit passed:', item.supportBranches.map(x=>x.branchId).join(','));
