@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#08111f">
   <title>チャリ猫</title>
-  <link rel="manifest" href="manifest.json?v=42">
-  <link rel="stylesheet" href="styles.css?v=42">
+  <link rel="manifest" href="manifest.json?v=50">
+  <link rel="stylesheet" href="styles.css?v=50">
 </head>
 <body>
 <header class="appHeader">
@@ -42,11 +42,11 @@
     <div class="pageTitle"><div><small>KEIRIN</small><h1>今日の競輪</h1></div><span id="meetingCount" class="pill">0会場</span></div>
     <nav class="raceTabs" aria-label="競輪表示切替">
       <button id="tabToday" class="raceTab active" type="button">今日のレース</button>
-      <button id="tabScreening" class="raceTab" type="button">一次選別</button>
+      <button id="tabScreening" class="raceTab" type="button">5R比較</button>
       <button id="tabBattle" class="raceTab" type="button">勝負レース</button>
       <button id="tabVenues" class="raceTab" type="button">会場一覧</button>
     </nav>
-    <section class="card compact meetingTools"><label>開催日<input id="raceDate" type="date"></label><div class="meetingToolButtons"><button id="bulkRefresh" class="primary" type="button">一括更新</button><button id="runScreening" class="secondary" type="button">一次選別</button><button id="reloadMeetings" class="secondary" type="button">開催情報を再取得</button></div><small id="bulkRefreshStatus" class="bulkRefreshStatus">締切時間・オッズをまとめて更新します。</small></section>
+    <section class="card compact meetingTools"><label>開催日<input id="raceDate" type="date"></label><div class="meetingToolButtons"><button id="bulkRefresh" class="primary" type="button">一括更新</button><button id="runScreening" class="secondary" type="button">5R深掘り</button><button id="reloadMeetings" class="secondary" type="button">開催情報を再取得</button></div><small id="bulkRefreshStatus" class="bulkRefreshStatus">一括更新は締切・オッズ確認用。比較は5Rずつ完全解析します。</small></section>
     <div id="todayRaceList" class="todayRaceList"></div>
     <div id="screeningRaceList" class="todayRaceList hidden"></div>
     <div id="battleRaceList" class="todayRaceList hidden"></div>
@@ -83,5 +83,5 @@
   <section id="loading" class="screen"><section class="card loadingCard"><div class="spinner"></div><h1 id="loadingTitle">取得中</h1><p id="loadingMessage">公式データを確認しています。</p></section></section>
   <section id="error" class="screen"><section class="card errorCard"><div class="errorIcon">!</div><h1 id="errorTitle">取得失敗</h1><p id="errorMessage"></p><button id="retryBtn" class="primary">再試行</button><button id="errorHome" class="secondary">ホームへ</button></section></section>
 </main>
-<script type="module" src="app.mjs?v=42"></script>
+<script type="module" src="app.mjs?v=50"></script>
 </body></html>
