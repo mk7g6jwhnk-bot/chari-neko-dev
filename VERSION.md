@@ -1,3 +1,3 @@
 # Version
 
-KEIRIN-0.5.34-main-head-sibling-purchase
+KEIRIN-0.5.35-first-family-purchase
