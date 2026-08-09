@@ -1,0 +1,125 @@
+diff -ruN pwa_v39_orig/CHANGES_AUTO_UPDATE.md pwa_v40/CHANGES_AUTO_UPDATE.md
+--- pwa_v39_orig/CHANGES_AUTO_UPDATE.md	1970-01-01 00:00:00.000000000 +0000
++++ pwa_v40/CHANGES_AUTO_UPDATE.md	2026-08-09 08:02:21.698907095 +0000
+@@ -0,0 +1,5 @@
++# v40 自動更新
++
++Netlifyへ新しい版をデプロイした後、スマホに追加済みのチャリ猫が起動・復帰時に `version.json` を確認し、版が変わっていれば自動で新しい画面を読み込みます。
++
++今後のリリースでは `public/version.json` と `APP_RELEASE` を同じ新しいバージョンへ更新してください。
+diff -ruN pwa_v39_orig/VERSION.md pwa_v40/VERSION.md
+--- pwa_v39_orig/VERSION.md	2026-08-09 07:45:07.000000000 +0000
++++ pwa_v40/VERSION.md	2026-08-09 08:02:21.698862444 +0000
+@@ -1,9 +1,10 @@
+-# KEIRIN-0.5.16-fast-result-path
++# KEIRIN-0.5.17-auto-update
+ 
+-終了済み・未予想レースでも、予想生成なしで公式結果を確認できるUI修正版。予想エンジンの展開・終端・購入判定ロジックは変更していない。
++スマホへホーム画面追加・インストールした後も、Netlifyへ新しい修正版を反映すると次回起動時またはアプリ復帰時に自動で最新版へ切り替える更新版。予想エンジンの展開・終端・購入判定ロジックは変更していない。
+ 
+-- 締切時刻未取得の未予想レースでは「公式結果を見る」と「このレースを予想」を分離して両方表示。
+-- 「公式結果を見る」は予想APIを呼ばず、結果取得APIだけを実行。
+-- 公式結果が確定済みなら、締切時刻が未取得でも詳細画面の状態を「終了」として扱う。
+-- 結果が未確定ならその旨を表示し、必要なら「このレースを予想」から通常予想へ進める。
+-- 保存済み予想の直接表示・再予想の明示操作は従来どおり維持。
++- `version.json` を no-store で確認し、アプリ内のリリース番号と異なれば自動再読込。
++- 起動時、バックグラウンドから戻った時、通信復帰時に更新確認。
++- 更新確認は通常5分以内の連続実行を抑制し、予想・結果取得中は再読込しない。
++- index/app/version のキャッシュを抑制し、スマホ側に古い画面が残りにくいようNetlifyヘッダーを追加。
++- 更新のためにアプリを削除・再インストールする必要はない。
++- アプリを完全に閉じている間は更新処理は走らず、次に開いた時に更新する。
+diff -ruN pwa_v39_orig/netlify.toml pwa_v40/netlify.toml
+--- pwa_v39_orig/netlify.toml	2026-08-09 15:44:12.000000000 +0000
++++ pwa_v40/netlify.toml	2026-08-09 08:02:21.698813469 +0000
+@@ -4,3 +4,38 @@
+ 
+ [functions]
+   node_bundler = "esbuild"
++
++[[headers]]
++  for = "/"
++  [headers.values]
++    Cache-Control = "no-cache, no-store, must-revalidate"
++
++[[headers]]
++  for = "/index.html"
++  [headers.values]
++    Cache-Control = "no-cache, no-store, must-revalidate"
++
++[[headers]]
++  for = "/app.mjs"
++  [headers.values]
++    Cache-Control = "no-cache, no-store, must-revalidate"
++
++[[headers]]
++  for = "/prediction-store.mjs"
++  [headers.values]
++    Cache-Control = "no-cache, no-store, must-revalidate"
++
++[[headers]]
++  for = "/styles.css"
++  [headers.values]
++    Cache-Control = "no-cache, must-revalidate"
++
++[[headers]]
++  for = "/manifest.json"
++  [headers.values]
++    Cache-Control = "no-cache, must-revalidate"
++
++[[headers]]
++  for = "/version.json"
++  [headers.values]
++    Cache-Control = "no-cache, no-store, must-revalidate"
+diff -ruN pwa_v39_orig/public/app.mjs pwa_v40/public/app.mjs
+--- pwa_v39_orig/public/app.mjs	2026-08-09 07:38:44.000000000 +0000
++++ pwa_v40/public/app.mjs	2026-08-09 08:02:21.698613314 +0000
+@@ -5,12 +5,19 @@
+ const RACE_META_CACHE_KEY="chari-neko:keirin-race-meta-cache:v1";
+ const RESULT_CACHE_KEY="chari-neko:keirin-result-cache:v1";
+ const MEETING_CACHE_KEY="chari-neko:keirin-meeting-cache:v1";
++const APP_RELEASE="KEIRIN-0.5.17-auto-update";
++const APP_UPDATE_CHECK_INTERVAL_MS=5*60*1000;
++let lastAppUpdateCheckAt=0,appUpdateCheckBusy=false;
+ const VENUE_CODES={函館:"11",青森:"12",いわき平:"13",弥彦:"21",前橋:"22",取手:"23",宇都宮:"24",大宮:"25",西武園:"26",京王閣:"27",立川:"28",松戸:"31",千葉:"32",川崎:"34",平塚:"35",小田原:"36",伊東:"37",静岡:"38",名古屋:"42",岐阜:"43",大垣:"44",豊橋:"45",富山:"46",松阪:"47",四日市:"48",福井:"51",奈良:"53",向日町:"54",和歌山:"55",岸和田:"56",玉野:"61",広島:"62",防府:"63",高松:"71",小松島:"73",高知:"74",松山:"75",小倉:"81",久留米:"83",武雄:"84",佐世保:"85",別府:"86",熊本:"87"};
+ 
+ $("todayKeirin").onclick=()=>openMeetings();$("homeBtn").onclick=$("brand").onclick=()=>goHome();$("headerBack").onclick=()=>goBack();$("venueSelectBtn").onclick=()=>openVenueSelection();$("raceSelectBtn").onclick=()=>openRaceSelection();$("reloadMeetings").onclick=()=>loadMeetings();$("bulkRefresh").onclick=()=>bulkRefreshRaceInfo();$("raceDate").onchange=e=>{state.date=e.target.value;loadMeetings()};$("tabToday").onclick=()=>setMeetingTab("today");$("tabBattle").onclick=()=>setMeetingTab("battle");$("tabVenues").onclick=()=>setMeetingTab("venues");$("predictBtn").onclick=()=>handleDetailPrimary();$("retryDetail").onclick=()=>handleDetailSecondary();$("backToDetail").onclick=()=>{renderDetail();show("detail")};$("checkResult").onclick=()=>checkResult();$("retryBtn").onclick=()=>state.retry?.();$("errorHome").onclick=()=>goHome();
+ window.addEventListener("popstate",()=>{if(state.history.length){state.history.pop();show(state.history.pop()||"home",false)}});
+ $("recommendationLimit").onchange=()=>renderHomeRecommendations();$("sportKeirin").onchange=()=>renderHomeRecommendations();
+ renderSaved();renderHomeRecommendations();
++setupAutoUpdate();
++
++function setupAutoUpdate(){checkForAppUpdate();document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")checkForAppUpdate()});window.addEventListener("online",()=>checkForAppUpdate(true))}
++async function checkForAppUpdate(force=false){if(appUpdateCheckBusy||state.busy)return;const now=Date.now();if(!force&&now-lastAppUpdateCheckAt<APP_UPDATE_CHECK_INTERVAL_MS)return;lastAppUpdateCheckAt=now;appUpdateCheckBusy=true;try{const response=await fetch(`/version.json?t=${now}`,{cache:"no-store",headers:{accept:"application/json"}});if(!response.ok)return;const remote=await response.json();const remoteVersion=String(remote?.version||"").trim();if(remoteVersion&&remoteVersion!==APP_RELEASE){const url=new URL(location.href);url.searchParams.set("appv",remoteVersion);location.replace(url.toString())}}catch{}finally{appUpdateCheckBusy=false}}
+ 
+ function show(id,push=true){if(push&&state.screen!==id){state.history.push(state.screen);history.pushState({screen:id},"")}state.screen=id;screens.forEach(x=>x.classList.toggle("active",x.id===id));updateHeaderNav(id);window.scrollTo(0,0)}
+ function updateHeaderNav(id){const simple=id==="home"||id==="loading"||id==="error";$("headerBack").classList.toggle("hidden",id==="home"||id==="loading");$("venueSelectBtn").classList.toggle("hidden",simple);const canPickRace=!simple&&Boolean(resolveCurrentMeeting());$("raceSelectBtn").classList.toggle("hidden",!canPickRace)}
+diff -ruN pwa_v39_orig/public/index.html pwa_v40/public/index.html
+--- pwa_v39_orig/public/index.html	2026-08-09 07:04:12.000000000 +0000
++++ pwa_v40/public/index.html	2026-08-09 08:02:21.697235967 +0000
+@@ -5,8 +5,8 @@
+   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+   <meta name="theme-color" content="#08111f">
+   <title>チャリ猫</title>
+-  <link rel="manifest" href="manifest.json?v=35">
+-  <link rel="stylesheet" href="styles.css?v=35">
++  <link rel="manifest" href="manifest.json?v=40">
++  <link rel="stylesheet" href="styles.css?v=40">
+ </head>
+ <body>
+ <header class="appHeader">
+@@ -79,5 +79,5 @@
+   <section id="loading" class="screen"><section class="card loadingCard"><div class="spinner"></div><h1 id="loadingTitle">取得中</h1><p id="loadingMessage">公式データを確認しています。</p></section></section>
+   <section id="error" class="screen"><section class="card errorCard"><div class="errorIcon">!</div><h1 id="errorTitle">取得失敗</h1><p id="errorMessage"></p><button id="retryBtn" class="primary">再試行</button><button id="errorHome" class="secondary">ホームへ</button></section></section>
+ </main>
+-<script type="module" src="app.mjs?v=37"></script>
++<script type="module" src="app.mjs?v=40"></script>
+ </body></html>
+diff -ruN pwa_v39_orig/public/version.json pwa_v40/public/version.json
+--- pwa_v39_orig/public/version.json	1970-01-01 00:00:00.000000000 +0000
++++ pwa_v40/public/version.json	2026-08-09 08:02:21.698761606 +0000
+@@ -0,0 +1,5 @@
++{
++  "version": "KEIRIN-0.5.17-auto-update",
++  "build": "v40",
++  "updatedAt": "2026-08-09T17:02:00+09:00"
++}
