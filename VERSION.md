@@ -1,3 +1,3 @@
-KEIRIN-0.5.40-primary-family-coverage-first
+KEIRIN-0.5.41-main-class-preservation
 
-Purchase selection now covers the highest-probability first-place family before adding other heads.
+Primary-family coverage no longer erases MAIN classification; main-supported natural terminals keep MAIN and at least one main anchor is preserved when available.

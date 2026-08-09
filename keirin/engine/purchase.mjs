@@ -268,10 +268,25 @@ function buildFamilyCoverageGate(items){
     const candidateMass=sum(candidates.map(item=>Math.max(0,Number(item.probability)||0)));
     familyCandidateMass.set(family.first,candidateMass);
     let selectedMass=0;
+    const selectedKeys=isPrimary?selectedPrimaryKeys:selectedOtherKeys;
+
+    // 購入カバーの優先順位と「本線/押さえ」の分類は別物。
+    // mainファミリーに自然なmain終端が存在する場合、確率カバーだけでcontender終端が先に埋まり
+    // 本線が0件になることを防ぐため、最上位のmainEligible終端を1本アンカーとして先に保持する。
+    if(family.tier==="main"){
+      const mainAnchor=candidates.filter(item=>Boolean(item.familyPriorityEligibility?.main)).sort(compareCoverageCandidate)[0]||null;
+      if(mainAnchor){
+        const anchorKey=mainAnchor.order.join("-");
+        selectedKeys.add(anchorKey);
+        selectedMass+=Math.max(0,Number(mainAnchor.probability)||0);
+      }
+    }
+
     for(const item of candidates){
       if(family.totalProbability>0&&selectedMass/family.totalProbability>=target)break;
       const key=item.order.join("-");
-      if(isPrimary)selectedPrimaryKeys.add(key);else selectedOtherKeys.add(key);
+      if(selectedKeys.has(key))continue;
+      selectedKeys.add(key);
       selectedMass+=Math.max(0,Number(item.probability)||0);
     }
     familySelectedMass.set(family.first,selectedMass);
@@ -336,14 +351,19 @@ function applyFamilyPurchaseDecision(item,valueGate,familyCoverageGate){
   if(item.concentrationRatio<1.04){
     purchaseReason=`terminal分布が平坦（集中比${item.concentrationRatio.toFixed(3)}）`;
     purchaseRejectCode="FLAT_DISTRIBUTION";
-  }else if(isPrimaryFamily&&selectedByFamilyCoverage){
+  }else if(selectedByFamilyCoverage){
+    // 1着ファミリーの「選ぶ順番」は確率カバーで決めるが、買い目区分は元の展開由来を維持する。
+    // main展開の自然終端は、最上位頭か別頭かにかかわらずMAIN。
     betClass=mainEligible?"MAIN":"COVER";adopted=true;purchaseRejectCode="ADOPTED";
-    purchaseReason=mainEligible
-      ?`${item.firstFamilyNumber}頭の最上位1着ファミリーを先に確率カバーし、2着${item.order[1]}・3着${item.order[2]}が本命展開で自然支持`
-      :`${item.firstFamilyNumber}頭の最上位1着ファミリーの確率カバー補完。2着${item.order[1]}・3着${item.order[2]}の独立支持を確認`;
-  }else if(!isPrimaryFamily&&selectedByFamilyCoverage){
-    betClass="COVER";adopted=true;purchaseRejectCode="ADOPTED";
-    purchaseReason=`最上位頭のカバー選定後、${item.firstFamilyNumber}頭の有力ファミリーを確率質量順に補完`;
+    if(mainEligible){
+      purchaseReason=isPrimaryFamily
+        ?`${item.firstFamilyNumber}頭の最上位1着ファミリーを先に確率カバーし、2着${item.order[1]}・3着${item.order[2]}が本命展開で自然支持`
+        :`最上位頭のカバー選定後も、${item.firstFamilyNumber}頭は本命展開由来の自然終端として本線を維持`;
+    }else{
+      purchaseReason=isPrimaryFamily
+        ?`${item.firstFamilyNumber}頭の最上位1着ファミリーの確率カバー補完。2着${item.order[1]}・3着${item.order[2]}の独立支持を確認`
+        :`最上位頭のカバー選定後、${item.firstFamilyNumber}頭の有力ファミリーを確率質量順に補完`;
+    }
   }else if(highPayoutCandidate){
     if(!item.odds){
       purchaseReason=`別展開${item.firstFamilyNumber}頭の自然終端・実オッズ待ち`;
@@ -389,7 +409,7 @@ function applyFamilyPurchaseDecision(item,valueGate,familyCoverageGate){
 
   return{
     ...item,betClass,purchaseStatus:adopted?PURCHASED:"購入不採用",purchaseReason,purchaseRejectCode,
-    adoptionMode:adopted?(isPrimaryFamily?(betClass==="MAIN"?"PRIMARY_FAMILY_MAIN_COVERAGE":"PRIMARY_FAMILY_COVERAGE_SUPPLEMENT"):betClass==="COVER"?"SECONDARY_FAMILY_COVERAGE":"SUB_VALUE_FAMILY"):null,
+    adoptionMode:adopted?(betClass==="MAIN"?(isPrimaryFamily?"PRIMARY_FAMILY_MAIN_COVERAGE":"SECONDARY_MAIN_FAMILY_COVERAGE"):betClass==="COVER"?(isPrimaryFamily?"PRIMARY_FAMILY_COVERAGE_SUPPLEMENT":"SECONDARY_FAMILY_COVERAGE"):"SUB_VALUE_FAMILY"):null,
     purchaseHierarchyMode:familyCoverageGate.mode,
     isPrimaryFirstFamily:isPrimaryFamily,
     primaryFirstFamilyNumber:familyCoverageGate.primaryFirst,
