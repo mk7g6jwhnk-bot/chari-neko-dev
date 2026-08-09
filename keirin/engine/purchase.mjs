@@ -193,10 +193,29 @@ export function purchaseDiagnostics(classified,plan,budget){
       concentrationRatioMin:1.04,
       representativeBranchFitMin:.975,
       credibleVariantBranchFitMin:.87,
-      probabilitySupportVsMaxMin:.42,
+      probabilitySupportVsMaxMin:null,
       representativePositionRatios:{first:.93,second:.91,third:.91},
       credibleVariantPositionRatios:{first:.88,second:.85,third:.85}
     },
+    adoptedTerminalAudit:natural.map(item=>({
+      order:item.order.join("-"),
+      betClass:item.betClass,
+      probability:item.probability,
+      dominantBranchId:item.dominantBranchId,
+      dominantBranchLabel:item.dominantBranchLabel,
+      dominantBranchPriority:item.dominantBranchPriority,
+      branchFit:item.branchFit,
+      branchRank:item.branchRank,
+      branchSupport:item.branchSupport,
+      representativeTerminal:item.representativeTerminal,
+      decisionRatios:item.decisionRatios||null,
+      purchaseReason:item.purchaseReason
+    })),
+    adoptedBranchCounts:natural.reduce((counts,item)=>{
+      const label=item.dominantBranchLabel||"不明";
+      counts[label]=(counts[label]||0)+1;
+      return counts;
+    },{}),
     classCounts:{
       main:natural.filter(item=>item.betClass==="MAIN").length,
       cover:natural.filter(item=>item.betClass==="COVER").length,
