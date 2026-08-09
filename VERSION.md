@@ -1,3 +1,3 @@
-KEIRIN-0.5.39-first-family-coverage-audit
+KEIRIN-0.5.40-primary-family-coverage-first
 
-First-family probability-mass coverage audit for purchase selection.
+Purchase selection now covers the highest-probability first-place family before adding other heads.

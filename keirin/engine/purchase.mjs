@@ -1,5 +1,7 @@
 const PURCHASED="購入採用";
 const POSITION_FLOORS={first:.88,second:.85,third:.85};
+const PRIMARY_COVERAGE_SUPPORT_FLOORS={first:.82,second:.70,third:.70};
+const PRIMARY_COVERAGE_TARGETS={base:.70,medium:.75,strong:.80};
 const STRUCTURAL_PRIORITIES=new Set(["main","contender","sub"]);
 
 export function classify(terminals,odds={}){
@@ -85,7 +87,8 @@ export function classify(terminals,odds={}){
   const staged=base.map(item=>annotateFamilyPosition(item,state));
   const ranked=annotateTerminalRanks(staged);
   const valueGate=buildSubValueGate(ranked);
-  return ranked.map(item=>applyFamilyPurchaseDecision(item,valueGate));
+  const familyCoverageGate=buildFamilyCoverageGate(ranked);
+  return ranked.map(item=>applyFamilyPurchaseDecision(item,valueGate,familyCoverageGate));
 }
 
 function annotateTerminalRanks(items){
@@ -239,7 +242,79 @@ function buildSubValueGate(items){
   return{candidateKeys:new Set(candidates.map(item=>item.order.join("-"))),supportedKeys:support.supportedCandidates,naturalCutDetected:support.naturalCutDetected,cutGap:support.cutGap,groupSize:support.groupSize};
 }
 
-function applyFamilyPurchaseDecision(item,valueGate){
+function buildFamilyCoverageGate(items){
+  const totalProbability=sum(items.map(item=>Math.max(0,Number(item.probability)||0)))||1;
+  const groups=new Map();
+  for(const item of items){
+    const first=Number(item.firstFamilyNumber)||Number(item.order?.[0])||0;
+    if(!first)continue;
+    if(!groups.has(first))groups.set(first,{first,totalProbability:0,items:[],tier:item.firstFamilyTier||"risk"});
+    const row=groups.get(first);row.totalProbability+=Math.max(0,Number(item.probability)||0);row.items.push(item);
+  }
+  const families=[...groups.values()].sort((a,b)=>b.totalProbability-a.totalProbability||familyTierRank(a.tier)-familyTierRank(b.tier)||a.first-b.first);
+  const primary=families[0]||null;
+  const primaryShare=primary?primary.totalProbability/totalProbability:0;
+  const primaryTarget=primaryShare>=.45?PRIMARY_COVERAGE_TARGETS.strong:primaryShare>=.32?PRIMARY_COVERAGE_TARGETS.medium:PRIMARY_COVERAGE_TARGETS.base;
+  const selectedPrimaryKeys=new Set(),selectedOtherKeys=new Set();
+  const familyTargets=new Map(),familyCandidateMass=new Map(),familySelectedMass=new Map();
+
+  for(const family of families){
+    const isPrimary=Boolean(primary&&family.first===primary.first);
+    const relativeToPrimary=primary?.totalProbability>0?family.totalProbability/primary.totalProbability:0;
+    const target=isPrimary?primaryTarget:Math.max(.30,Math.min(.50,.25+.25*relativeToPrimary));
+    familyTargets.set(family.first,target);
+    if(family.tier!=="main"&&family.tier!=="contender"&&!isPrimary)continue;
+    const candidates=family.items.filter(item=>isFamilyCoverageCandidate(item,isPrimary)).sort(compareCoverageCandidate);
+    const candidateMass=sum(candidates.map(item=>Math.max(0,Number(item.probability)||0)));
+    familyCandidateMass.set(family.first,candidateMass);
+    let selectedMass=0;
+    for(const item of candidates){
+      if(family.totalProbability>0&&selectedMass/family.totalProbability>=target)break;
+      const key=item.order.join("-");
+      if(isPrimary)selectedPrimaryKeys.add(key);else selectedOtherKeys.add(key);
+      selectedMass+=Math.max(0,Number(item.probability)||0);
+    }
+    familySelectedMass.set(family.first,selectedMass);
+  }
+
+  return{
+    mode:"PRIMARY_FIRST_FAMILY_PROBABILITY_MASS_FIRST",
+    primaryFirst:primary?.first||null,
+    primaryProbability:primary?.totalProbability||0,
+    primaryProbabilityShare:primaryShare,
+    primaryCoverageTarget:primaryTarget,
+    selectedPrimaryKeys,selectedOtherKeys,familyTargets,familyCandidateMass,familySelectedMass,
+    primaryCandidateCoverage:primary?.totalProbability>0?(familyCandidateMass.get(primary.first)||0)/primary.totalProbability:0,
+    primarySelectedCoverage:primary?.totalProbability>0?(familySelectedMass.get(primary.first)||0)/primary.totalProbability:0
+  };
+}
+
+function isFamilyCoverageCandidate(item,isPrimary){
+  const mainEligible=Boolean(item.familyPriorityEligibility?.main);
+  const contenderEligible=Boolean(item.familyPriorityEligibility?.contender);
+  if(mainEligible||contenderEligible)return true;
+  if(!isPrimary)return false;
+  // 明確な自然境界が検出されている場合、その境界を越えてカバー率だけを理由に復活させない。
+  if(item.secondFamilyNaturalCutDetected&&!item.secondFamilyNaturalEligible)return false;
+  if(item.thirdFamilyNaturalCutDetected&&!item.thirdFamilyNaturalEligible)return false;
+  if(item.thirdVariantNaturalCutDetected&&!item.thirdVariantEligible)return false;
+  const firstSupport=Math.max(Number(item.mainHeadSiblingFirstRelativeToBest)||0,Number(item.decisionRatios?.first)||0);
+  return Boolean(
+    item.familyStructuralCandidate&&
+    firstSupport>=PRIMARY_COVERAGE_SUPPORT_FLOORS.first&&
+    (Number(item.secondFamilyRelativeToBest)||0)>=PRIMARY_COVERAGE_SUPPORT_FLOORS.second&&
+    (Number(item.thirdFamilyRelativeToBest)||0)>=PRIMARY_COVERAGE_SUPPORT_FLOORS.third
+  );
+}
+function compareCoverageCandidate(a,b){
+  const ap=Number(a.probability)||0,bp=Number(b.probability)||0;
+  if(bp!==ap)return bp-ap;
+  const as=(Number(a.secondFamilyRelativeToBest)||0)*(Number(a.thirdFamilyRelativeToBest)||0);
+  const bs=(Number(b.secondFamilyRelativeToBest)||0)*(Number(b.thirdFamilyRelativeToBest)||0);
+  return bs-as||compareTerminal(a,b);
+}
+
+function applyFamilyPurchaseDecision(item,valueGate,familyCoverageGate){
   const key=item.order.join("-");
   const mainEligible=Boolean(item.familyPriorityEligibility?.main);
   const contenderEligible=Boolean(item.familyPriorityEligibility?.contender);
@@ -247,19 +322,28 @@ function applyFamilyPurchaseDecision(item,valueGate){
   const dominantPriority=normalizePriority(item.dominantBranchPriority);
   const highPayoutCandidate=Boolean(subEligible&&dominantPriority==="sub");
   const highPayoutAttribute=Boolean(item.odds&&item.odds>=100);
-  const valueCandidate=valueGate.candidateKeys.has(key);
   const valueNaturalEligible=valueGate.supportedKeys.has(key);
+  const isPrimaryFamily=Number(item.firstFamilyNumber)===Number(familyCoverageGate.primaryFirst);
+  const selectedByFamilyCoverage=isPrimaryFamily?familyCoverageGate.selectedPrimaryKeys.has(key):familyCoverageGate.selectedOtherKeys.has(key);
+  const familyCoverageCandidate=isFamilyCoverageCandidate(item,isPrimaryFamily);
+  const familyCoverageTarget=familyCoverageGate.familyTargets.get(Number(item.firstFamilyNumber))??null;
+  const familyCandidateMass=familyCoverageGate.familyCandidateMass.get(Number(item.firstFamilyNumber))||0;
+  const familySelectedMass=familyCoverageGate.familySelectedMass.get(Number(item.firstFamilyNumber))||0;
+  const familySelectedCoverage=Number(item.firstFamilyProbability)>0?familySelectedMass/Number(item.firstFamilyProbability):0;
+  const familyCandidateCoverage=Number(item.firstFamilyProbability)>0?familyCandidateMass/Number(item.firstFamilyProbability):0;
   let betClass="NONE",adopted=false,purchaseReason="着順ファミリーの自然支持が不足",purchaseRejectCode="POSITION_SUPPORT";
 
   if(item.concentrationRatio<1.04){
     purchaseReason=`terminal分布が平坦（集中比${item.concentrationRatio.toFixed(3)}）`;
     purchaseRejectCode="FLAT_DISTRIBUTION";
-  }else if(item.firstFamilyTier==="main"&&mainEligible){
-    betClass="MAIN";adopted=true;purchaseRejectCode="ADOPTED";
-    purchaseReason=`${item.firstFamilyNumber}頭の本命展開ファミリーで2着${item.order[1]}・3着${item.order[2]}を独立再評価した自然終端`;
-  }else if((item.firstFamilyTier==="main"||item.firstFamilyTier==="contender")&&contenderEligible){
+  }else if(isPrimaryFamily&&selectedByFamilyCoverage){
+    betClass=mainEligible?"MAIN":"COVER";adopted=true;purchaseRejectCode="ADOPTED";
+    purchaseReason=mainEligible
+      ?`${item.firstFamilyNumber}頭の最上位1着ファミリーを先に確率カバーし、2着${item.order[1]}・3着${item.order[2]}が本命展開で自然支持`
+      :`${item.firstFamilyNumber}頭の最上位1着ファミリーの確率カバー補完。2着${item.order[1]}・3着${item.order[2]}の独立支持を確認`;
+  }else if(!isPrimaryFamily&&selectedByFamilyCoverage){
     betClass="COVER";adopted=true;purchaseRejectCode="ADOPTED";
-    purchaseReason=`${item.firstFamilyNumber}頭の有力展開ファミリーで2着${item.order[1]}・3着${item.order[2]}を独立再評価したカバー終端`;
+    purchaseReason=`最上位頭のカバー選定後、${item.firstFamilyNumber}頭の有力ファミリーを確率質量順に補完`;
   }else if(highPayoutCandidate){
     if(!item.odds){
       purchaseReason=`別展開${item.firstFamilyNumber}頭の自然終端・実オッズ待ち`;
@@ -275,16 +359,28 @@ function applyFamilyPurchaseDecision(item,valueGate){
       purchaseRejectCode="SUB_VALUE_NATURAL_BOUNDARY";
     }else{
       betClass="BUYABLE_HIGH";adopted=true;purchaseRejectCode="ADOPTED";
-      purchaseReason=`別展開${item.firstFamilyNumber}頭の自然終端＋成立確率×実オッズ ${Number(item.subValueIndex).toFixed(2)}`;
+      purchaseReason=`最上位頭のカバー選定後、別展開${item.firstFamilyNumber}頭の自然終端＋成立確率×実オッズ ${Number(item.subValueIndex).toFixed(2)}`;
     }
+  }else if(isPrimaryFamily&&familyCoverageCandidate&&familyCandidateCoverage>0&&familySelectedCoverage>=Number(familyCoverageTarget||0)){
+    purchaseReason=`最上位${item.firstFamilyNumber}頭は目標カバー${Math.round(Number(familyCoverageTarget||0)*100)}%に到達後の下位終端`;
+    purchaseRejectCode="PRIMARY_COVERAGE_TARGET_REACHED";
+  }else if(!isPrimaryFamily&&familyCoverageCandidate&&familyCandidateCoverage>0&&familySelectedCoverage>=Number(familyCoverageTarget||0)){
+    purchaseReason=`${item.firstFamilyNumber}頭は最上位頭選定後の補完カバー目標に到達`;
+    purchaseRejectCode="OTHER_FAMILY_COVERAGE_TARGET_REACHED";
   }else if(!item.familyStructuralCandidate){
     purchaseReason="本命・有力・別展開の購入ファミリーに属さない";
     purchaseRejectCode="NO_FAMILY_TIER";
-  }else if(!item.secondFamilyNaturalEligible||item.secondFamilyRelativeToBest<POSITION_FLOORS.second){
-    purchaseReason=`${item.firstFamilyNumber}頭内で2着${item.order[1]}の独立支持が自然上位群に届かない`;
+  }else if((item.secondFamilyNaturalCutDetected&&!item.secondFamilyNaturalEligible)){
+    purchaseReason=`${item.firstFamilyNumber}頭内で2着${item.order[1]}が明確な自然境界の下位`;
     purchaseRejectCode="SECOND_POSITION_SUPPORT";
-  }else if(!item.thirdFamilyNaturalEligible||item.thirdFamilyRelativeToBest<POSITION_FLOORS.third){
-    purchaseReason=`${item.order[0]}-${item.order[1]}内で3着${item.order[2]}の独立支持が自然上位群に届かない`;
+  }else if((item.thirdVariantNaturalCutDetected&&!item.thirdVariantEligible)||(item.thirdFamilyNaturalCutDetected&&!item.thirdFamilyNaturalEligible)){
+    purchaseReason=`${item.order[0]}-${item.order[1]}内で3着${item.order[2]}が明確な自然境界の下位`;
+    purchaseRejectCode="THIRD_VARIANT_SUPPORT";
+  }else if((Number(item.secondFamilyRelativeToBest)||0)<(isPrimaryFamily?PRIMARY_COVERAGE_SUPPORT_FLOORS.second:POSITION_FLOORS.second)){
+    purchaseReason=`${item.firstFamilyNumber}頭内で2着${item.order[1]}の独立支持が購入カバー水準に届かない`;
+    purchaseRejectCode="SECOND_POSITION_SUPPORT";
+  }else if((Number(item.thirdFamilyRelativeToBest)||0)<(isPrimaryFamily?PRIMARY_COVERAGE_SUPPORT_FLOORS.third:POSITION_FLOORS.third)){
+    purchaseReason=`${item.order[0]}-${item.order[1]}内で3着${item.order[2]}の独立支持が購入カバー水準に届かない`;
     purchaseRejectCode="THIRD_VARIANT_SUPPORT";
   }else{
     purchaseReason="該当展開枝の1・2・3着支持が購入水準に届かない";
@@ -293,7 +389,17 @@ function applyFamilyPurchaseDecision(item,valueGate){
 
   return{
     ...item,betClass,purchaseStatus:adopted?PURCHASED:"購入不採用",purchaseReason,purchaseRejectCode,
-    adoptionMode:adopted?(betClass==="MAIN"?"FIRST_FAMILY_MAIN":betClass==="COVER"?"FIRST_FAMILY_COVER":"SUB_VALUE_FAMILY"):null,
+    adoptionMode:adopted?(isPrimaryFamily?(betClass==="MAIN"?"PRIMARY_FAMILY_MAIN_COVERAGE":"PRIMARY_FAMILY_COVERAGE_SUPPLEMENT"):betClass==="COVER"?"SECONDARY_FAMILY_COVERAGE":"SUB_VALUE_FAMILY"):null,
+    purchaseHierarchyMode:familyCoverageGate.mode,
+    isPrimaryFirstFamily:isPrimaryFamily,
+    primaryFirstFamilyNumber:familyCoverageGate.primaryFirst,
+    primaryFirstFamilyProbability:familyCoverageGate.primaryProbability,
+    primaryFirstFamilyProbabilityShare:familyCoverageGate.primaryProbabilityShare,
+    firstFamilyCoverageTarget:familyCoverageTarget,
+    firstFamilyCandidateCoverage:familyCandidateCoverage,
+    firstFamilySelectedCoverage:familySelectedCoverage,
+    familyCoverageCandidate,
+    selectedByFamilyCoverage,
     highPayoutCandidate,highPayoutAttribute,
     highPayoutAttributeLabel:highPayoutAttribute?(betClass==="MAIN"?"本線高配当":betClass==="COVER"?"有力展開高配当":dominantPriority==="sub"?"別展開高配当":"高配当"):null,
     oddsEvaluationStatus:item.odds?"ODDS_AVAILABLE":(highPayoutCandidate?"ODDS_PENDING":"NOT_VALUE_CANDIDATE"),
@@ -493,16 +599,18 @@ export function purchaseDiagnostics(classified,plan,budget){
     purchaseThresholds:{
       concentrationRatioMin:1.04,representativeBranchFitMin:.975,credibleVariantBranchFitMin:.87,probabilitySupportVsMaxMin:null,
       rawBranchCountUsedForAdoption:false,weightedMultiBranchSupportEquivalentMin:2,
-      purchaseSelectionMode:"FIRST_FAMILY_GLOBAL_THEN_INDEPENDENT_SECOND_THIRD",
-      firstFamilySelectionMode:"BRANCH_TIER_PROVENANCE_BY_REQUIRED_FIRST",
-      secondThirdSelectionMode:"ADAPTIVE_NATURAL_GAP_ON_INDEPENDENT_POSITION_RATIOS",
+      purchaseSelectionMode:"PRIMARY_FIRST_FAMILY_COVERAGE_THEN_OTHER_FAMILIES",
+      firstFamilySelectionMode:"TOP_FIRST_PROBABILITY_FAMILY_CUMULATIVE_COVERAGE_FIRST",
+      primaryFamilyCoverageTargets:{...PRIMARY_COVERAGE_TARGETS},
+      primaryCoverageSupportFloors:{...PRIMARY_COVERAGE_SUPPORT_FLOORS},
+      secondThirdSelectionMode:"INDEPENDENT_POSITION_SUPPORT_WITH_CUMULATIVE_FAMILY_COVERAGE",
       fixedTerminalRankCapApplied:false,fixedProbabilityCutoffApplied:false,
       positionRatios:{...POSITION_FLOORS},
       buyableHighMode:"SUB_SCENARIO_PROBABILITY_X_OFFICIAL_ODDS_THEN_ADAPTIVE_VALUE_GROUP",
       buyableHighBreakEvenIndex:1,
       fundingMode:"100YEN_BASE_PLUS_PROBABILITY_X_SQRT_PROBABILITY_ODDS"
     },
-    purchaseFamilyAudit:{mode:"FIRST_FAMILY_GLOBAL_THEN_SECOND_THIRD",headCount:familyRows.length,rows:familyRows},
+    purchaseFamilyAudit:{mode:"PRIMARY_FIRST_FAMILY_COVERAGE_THEN_OTHER_FAMILIES",headCount:familyRows.length,primaryFirst:classified.find(item=>item.isPrimaryFirstFamily)?.firstFamilyNumber??null,primaryCoverageTarget:classified.find(item=>item.isPrimaryFirstFamily)?.firstFamilyCoverageTarget??null,rows:familyRows},
     adoptedTerminalAudit:natural.map(item=>buildAdoptedAudit(item,diagnosticBranchStats,diagnosticMaxBranchTotal)),
     mainHeadSiblingAudit:{
       mode:"COMPAT_ALIAS_TO_FIRST_FAMILY_AUDIT",
@@ -525,8 +633,12 @@ function buildFamilyAuditRows(classified,totalProbability=1){
   const map=new Map();
   for(const item of classified){
     const first=Number(item.firstFamilyNumber)||Number(item.order?.[0])||0;
-    if(!map.has(first))map.set(first,{first,tier:item.firstFamilyTier||"risk",probability:0,generated:0,priorityMass:item.firstFamilyPriorityMass||{},naturalCandidateCount:0,naturalCandidateProbability:0,adopted:0,adoptedProbability:0,main:0,mainProbability:0,cover:0,coverProbability:0,buyableHigh:0,buyableHighProbability:0,rejected:0,rejectedProbability:0});
+    if(!map.has(first))map.set(first,{first,tier:item.firstFamilyTier||"risk",probability:0,generated:0,priorityMass:item.firstFamilyPriorityMass||{},isPrimaryFirstFamily:Boolean(item.isPrimaryFirstFamily),coverageTarget:item.firstFamilyCoverageTarget!=null&&Number.isFinite(Number(item.firstFamilyCoverageTarget))?Number(item.firstFamilyCoverageTarget):null,candidateCoverage:Number.isFinite(Number(item.firstFamilyCandidateCoverage))?Number(item.firstFamilyCandidateCoverage):null,selectedCoverageGate:Number.isFinite(Number(item.firstFamilySelectedCoverage))?Number(item.firstFamilySelectedCoverage):null,naturalCandidateCount:0,naturalCandidateProbability:0,adopted:0,adoptedProbability:0,main:0,mainProbability:0,cover:0,coverProbability:0,buyableHigh:0,buyableHighProbability:0,rejected:0,rejectedProbability:0});
     const row=map.get(first),probability=Math.max(0,Number(item.probability)||0);
+    row.isPrimaryFirstFamily=row.isPrimaryFirstFamily||Boolean(item.isPrimaryFirstFamily);
+    if(item.firstFamilyCoverageTarget!=null&&Number.isFinite(Number(item.firstFamilyCoverageTarget)))row.coverageTarget=Number(item.firstFamilyCoverageTarget);
+    if(Number.isFinite(Number(item.firstFamilyCandidateCoverage)))row.candidateCoverage=Number(item.firstFamilyCandidateCoverage);
+    if(Number.isFinite(Number(item.firstFamilySelectedCoverage)))row.selectedCoverageGate=Number(item.firstFamilySelectedCoverage);
     row.probability+=probability;
     row.generated+=1;
     if(item.familyNaturalPositionEligible){row.naturalCandidateCount+=1;row.naturalCandidateProbability+=probability;}
@@ -542,7 +654,9 @@ function buildFamilyAuditRows(classified,totalProbability=1){
     const familyProbability=row.probability>0?row.probability:1;
     const adoptedCoverage=row.probability>0?row.adoptedProbability/row.probability:0;
     const naturalCandidateCoverage=row.probability>0?row.naturalCandidateProbability/row.probability:0;
-    const coverageStatus=adoptedCoverage>=.70?"OK":adoptedCoverage>=.50?"CAUTION":"ALERT";
+    const coverageTarget=row.coverageTarget!=null&&Number.isFinite(Number(row.coverageTarget))?Number(row.coverageTarget):.70;
+    const cautionFloor=Math.max(.50,coverageTarget-.20);
+    const coverageStatus=adoptedCoverage+1e-12>=coverageTarget?"OK":adoptedCoverage>=cautionFloor?"CAUTION":"ALERT";
     return{
       ...row,
       probabilityShare:row.probability/denominator,
@@ -552,6 +666,10 @@ function buildFamilyAuditRows(classified,totalProbability=1){
       adoptedCoverage,
       rejectedCoverage:row.rejectedProbability/familyProbability,
       naturalCandidateCoverage,
+      coverageTarget,
+      coverageTargetMet:adoptedCoverage+1e-12>=(Number.isFinite(Number(row.coverageTarget))?Number(row.coverageTarget):.70),
+      candidateCoverage:Number.isFinite(Number(row.candidateCoverage))?Number(row.candidateCoverage):null,
+      selectedCoverageGate:Number.isFinite(Number(row.selectedCoverageGate))?Number(row.selectedCoverageGate):null,
       coverageStatus,
       coverageLabel:coverageStatus==="OK"?"カバー良好":coverageStatus==="CAUTION"?"カバー注意":"カバー要監査"
     };
@@ -572,6 +690,7 @@ function buildAdoptedAudit(item,diagnosticBranchStats,diagnosticMaxBranchTotal){
     branchFit:item.branchFit,branchRank:item.branchRank,branchSupport:item.branchSupport,weightedBranchSupport:item.weightedBranchSupport??sum(supportBranches.map(branch=>branch.weightedSupport||0)),
     thirdVariantEligible:item.thirdVariantEligible??true,thirdVariantGroupKey:item.thirdVariantGroupKey||null,thirdVariantRelativeToBest:item.thirdVariantRelativeToBest??null,thirdVariantConditionalShare:item.thirdVariantConditionalShare??null,thirdVariantNaturalCutDetected:item.thirdVariantNaturalCutDetected||false,thirdVariantCutGap:item.thirdVariantCutGap??null,thirdVariantGroupSize:item.thirdVariantGroupSize??null,
     firstFamilyNumber:item.firstFamilyNumber,firstFamilyTier:item.firstFamilyTier,firstFamilyProbability:item.firstFamilyProbability,firstFamilyProbabilityShare:item.firstFamilyProbabilityShare??null,
+    isPrimaryFirstFamily:Boolean(item.isPrimaryFirstFamily),primaryFirstFamilyNumber:item.primaryFirstFamilyNumber??null,firstFamilyCoverageTarget:item.firstFamilyCoverageTarget??null,firstFamilyCandidateCoverage:item.firstFamilyCandidateCoverage??null,firstFamilySelectedCoverage:item.firstFamilySelectedCoverage??null,selectedByFamilyCoverage:Boolean(item.selectedByFamilyCoverage),
     secondFamilyRelativeToBest:item.secondFamilyRelativeToBest,secondFamilyNaturalEligible:item.secondFamilyNaturalEligible,thirdFamilyRelativeToBest:item.thirdFamilyRelativeToBest,thirdFamilyNaturalEligible:item.thirdFamilyNaturalEligible,
     subScenarioProbability:item.subScenarioProbability??null,subValueIndex:item.subValueIndex??null,subValueNaturalEligible:item.subValueNaturalEligible??null,
     highPayoutCandidate:Boolean(item.highPayoutCandidate),highPayoutAttribute:Boolean(item.highPayoutAttribute),highPayoutAttributeLabel:item.highPayoutAttributeLabel||null,oddsEvaluationStatus:item.oddsEvaluationStatus||null,
