@@ -92,7 +92,12 @@ export function buildStartPowerEvidence(participant, baseline = KEIRIN_START_POW
   const sharedZ = (bZ + hZ) / 2;
   const latentScore = clamp(normalCdf(sharedZ) * 10, 0.25, 9.75);
   const startsQuality = officialTotalStarts / (officialTotalStarts + priorStrength);
-  const value = clamp(5 + startsQuality * (latentScore - 5), 0.5, 9.5);
+  // Sample-size uncertainty is already handled once by the empirical-Bayes
+  // shrinkFrequency() step above. Do not pull the resulting latent ability
+  // toward neutral 5 a second time; that double shrink was collapsing most
+  // riders into a narrow 5.x band. Keep startsQuality as diagnostics/confidence
+  // metadata only.
+  const value = clamp(latentScore, 0.5, 9.5);
 
   return {
     value: round(value),
@@ -129,7 +134,7 @@ export function buildStartPowerEvidence(participant, baseline = KEIRIN_START_POW
       `${raceCategory}.hFrequencyPriorMean`,
       `${raceCategory}.shrunkFrequencyRobustScale`,
       `${raceCategory}.bhSharedLatent`,
-      "startsQualityNeutralShrinkage"
+      "startsQualityConfidenceDiagnostic"
     ],
     missingInputs: []
   };

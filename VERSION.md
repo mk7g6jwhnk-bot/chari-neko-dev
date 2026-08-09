@@ -1,7 +1,7 @@
 # チャリ猫 Branch Deploy
 
-- UI bundle: v28
-- Keirin engine: `KEIRIN-0.5.6-natural-branch-tiers`
-- Main-branch selection: removed the forced upper/lower 2-cluster split. The uniquely highest structural branch (exact ties allowed) is the core scenario; remaining branches become contenders, and are only split into contender/sub tiers when the lower-tail adjacent-score distribution contains a robust natural break.
-- Removed from main-branch selection: fixed `top score × 90%` cutoff and forced 2-group clustering.
-- Terminal generation, weighted branch support, purchase thresholds, odds handling, and UI v24 navigation/deadline features are otherwise unchanged from v27.
+- UI bundle: v29
+- Keirin engine: `KEIRIN-0.5.7-start-power-single-shrink`
+- Start power: B/H frequency keeps the existing empirical-Bayes prior shrinkage, but the second `startsQuality` pull toward neutral 5 is removed. `startsQuality` remains diagnostic/confidence metadata only.
+- Purpose: restore meaningful separation between riders while retaining the original small-sample protection in the B/H frequency estimate.
+- Branch tiers, terminal generation, weighted branch support, purchase logic, odds handling, and UI navigation/deadline features are unchanged from v28.
