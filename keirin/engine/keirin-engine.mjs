@@ -10,8 +10,9 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
   const lines=buildLines(scored);
   const branches=generateKeirinBranches({scored,lines,lineConfidence:race.lineConfidence,raceCategory:race.raceCategory||"standard"});
   const terminals=generateKeirinTerminals({scored,branches});
+  const terminalGenerationAudit=terminals.generationAudit||null;
   const a=audit({race,branches,terminals});
-  const rawClassified=a.passed?classify(terminals,oddsByOrder):terminals;
+  const rawClassified=a.passed?classify(terminals,oddsByOrder):terminals.map(item=>({...item,betClass:"NONE",purchaseStatus:"購入不採用",purchaseReason:`エンジン生成監査不通過: ${(a.errors||[]).slice(0,3).join(" / ")||"原因未記録"}`,purchaseRejectCode:"ENGINE_AUDIT_FAILED",lifecycle:{generated:true,probabilityEvaluated:true,terminalDeleted:false,purchaseDecision:"REJECTED",purchaseDecisionCode:"ENGINE_AUDIT_FAILED",purchaseDecisionReason:`エンジン生成監査不通過: ${(a.errors||[]).slice(0,3).join(" / ")||"原因未記録"}`}}));
   const lineBlocked=a.passed&&race.raceCategory!=="girls"&&race.lineConfidence!=="高";
   const girlsStartEvidenceCount=scored.filter(item=>item?.startPowerEvidence&&(!Array.isArray(item.startPowerEvidence.missingInputs)||item.startPowerEvidence.missingInputs.length===0)).length;
   const girlsEvidenceRequired=Math.max(3,Math.ceil(scored.length*.5));
@@ -19,16 +20,17 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
   const purchaseBlocked=lineBlocked||girlsEvidenceBlocked;
   const blockedReason=lineBlocked?"公式ライン未取得のため購入判定を保留":"ガールズ主導権の公式入力が不足しているため購入判定を保留";
   const classified=purchaseBlocked
-    ? rawClassified.map(item=>({...item,betClass:"NONE",purchaseStatus:"購入不採用",purchaseReason:blockedReason}))
+    ? rawClassified.map(item=>({...item,betClass:"NONE",purchaseStatus:"購入不採用",purchaseReason:blockedReason,purchaseRejectCode:lineBlocked?"LINE_DATA_UNAVAILABLE":"GIRLS_LEAD_EVIDENCE_UNAVAILABLE",lifecycle:{...(item.lifecycle||{}),generated:true,probabilityEvaluated:true,terminalDeleted:false,purchaseDecision:"REJECTED",purchaseDecisionCode:lineBlocked?"LINE_DATA_UNAVAILABLE":"GIRLS_LEAD_EVIDENCE_UNAVAILABLE",purchaseDecisionReason:blockedReason}}))
     : rawClassified;
   const plan=a.passed&&!purchaseBlocked?allocate(classified,budget):[];
   const purchase=purchaseDiagnostics(classified,plan,budget);
+  const terminalLifecycleAudit=buildTerminalLifecycleAudit({sourceTerminals:terminals,classified,terminalGenerationAudit});
   if(purchaseBlocked){purchase.noBet=true;purchase.noBetReason=lineBlocked?"LINE_DATA_UNAVAILABLE":"GIRLS_LEAD_EVIDENCE_UNAVAILABLE";purchase.purchaseCandidateCountBeforeCompression=0;purchase.purchaseCandidateCountAfterCompression=0;purchase.finalBetCount=0;purchase.minimumRequired=0;}
   purchase.girlsStartEvidenceCount=girlsStartEvidenceCount;
   purchase.girlsStartEvidenceRequired=race.raceCategory==="girls"?girlsEvidenceRequired:null;
 
   return{
-    engineVersion:"KEIRIN-0.5.42-missing-ability-renormalization",
+    engineVersion:"KEIRIN-0.5.43-terminal-lifecycle-audit",
     raceId:race.id,
     lineConfidence:race.lineConfidence,
     scored,lines,branches,terminals:classified,
@@ -37,7 +39,9 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
       branchSelectionAudit:buildBranchSelectionAudit(branches),
       branchCount:branches.length,
       completedBranchCount:branches.filter(branch=>terminals.some(terminal=>terminal.contributingBranches.includes(branch.id))).length,
-      ...purchase
+      ...purchase,
+      terminalGenerationAudit,
+      terminalLifecycleAudit
     },
     recommendations:{
       main:classified.filter(item=>item.betClass==="MAIN"&&item.purchaseStatus==="購入採用"),
@@ -113,3 +117,33 @@ function buildBranchSelectionAudit(branches){
   };
 }
 function median(values){const valid=values.filter(Number.isFinite).sort((a,b)=>a-b);if(!valid.length)return 0;const mid=Math.floor(valid.length/2);return valid.length%2?valid[mid]:(valid[mid-1]+valid[mid])/2}
+
+function buildTerminalLifecycleAudit({sourceTerminals,classified,terminalGenerationAudit}){
+  const sourceKeys=new Set((sourceTerminals||[]).map(item=>item.order.join("-")));
+  const classifiedKeys=new Set((classified||[]).map(item=>item.order.join("-")));
+  const violations=[];
+  for(const key of sourceKeys)if(!classifiedKeys.has(key))violations.push(`確率・購入評価前後で終端消失:${key}`);
+  for(const item of classified||[]){
+    if(!Number.isFinite(Number(item.probability)))violations.push(`確率未評価:${item.order.join("-")}`);
+    if(item.purchaseStatus!=="購入採用"&&(!item.purchaseRejectCode||item.purchaseRejectCode==="UNCLASSIFIED"||!item.purchaseReason))violations.push(`購入不採用理由なし:${item.order.join("-")}`);
+    if(item.lifecycle?.terminalDeleted)violations.push(`終端削除フラグ検出:${item.order.join("-")}`);
+  }
+  if(Number(terminalGenerationAudit?.unexplainedExclusionCount||0)>0)violations.push(`生成段階の理由なし除外:${terminalGenerationAudit.unexplainedExclusionCount}件`);
+  const preserved=sourceKeys.size===classifiedKeys.size&&[...sourceKeys].every(key=>classifiedKeys.has(key));
+  return{
+    policy:"GENERATE_ALL_SUPPORTED_TERMINALS_THEN_SCORE_THEN_PURCHASE",
+    terminalDeletionPolicy:"終端は低確率・低人気・点数圧縮を理由に削除禁止。競技上不成立・入力矛盾のみ生成段階で理由付き除外、重複は統合。",
+    allowedGenerationExclusionReasonGroups:["RULE_IMPOSSIBLE","DATA_CONTRADICTION","DUPLICATE"],
+    generatedTerminalCount:sourceKeys.size,
+    probabilityEvaluatedTerminalCount:classified.length,
+    purchaseDecisionTerminalCount:classified.length,
+    preservedAcrossStages:preserved,
+    unreasonedPurchaseRejectCount:(classified||[]).filter(item=>item.purchaseStatus!=="購入採用"&&(!item.purchaseRejectCode||item.purchaseRejectCode==="UNCLASSIFIED"||!item.purchaseReason)).length,
+    unexplainedGenerationExclusionCount:Number(terminalGenerationAudit?.unexplainedExclusionCount||0),
+    fixedRankDeletionApplied:false,
+    fixedProbabilityDeletionApplied:false,
+    passed:preserved&&violations.length===0,
+    violations,
+    rows:(classified||[]).map(item=>({order:item.order.join("-"),probability:Number(item.probability)||0,purchaseStatus:item.purchaseStatus,purchaseRejectCode:item.purchaseRejectCode||null,purchaseReason:item.purchaseReason||null,betClass:item.betClass||"NONE",dominantBranchId:item.dominantBranchId||null,dominantBranchLabel:item.dominantBranchLabel||null,terminalDeleted:false}))
+  };
+}

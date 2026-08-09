@@ -2,15 +2,23 @@ export function generateKeirinTerminals({scored,branches}){
   const byId=new Map(scored.map(item=>[item.id,item]));
   const lineById=new Map(scored.map(item=>[item.id,item.lineId]));
   const raw=[];
+  const generationEvents=[];
 
   for(const branch of branches){
     const paths=[];
-    const firstEntries=branch.firstCandidates
-      .map(firstId=>byId.get(firstId))
-      .filter(Boolean)
-      .filter(first=>branchFirstRoleCompatible(branch,first))
-      .map(first=>({first,score:conditionedFirst(branch,first)}))
-      .filter(item=>item.score>0);
+    const firstEntries=[];
+    for(const firstId of branch.firstCandidates||[]){
+      const first=byId.get(firstId);
+      if(!first){
+        generationEvents.push({stage:"FIRST",branchId:branch.id,branchLabel:branch.label,participantId:firstId,action:"EXCLUDED",reasonGroup:"DATA_CONTRADICTION",reasonCode:"FIRST_CANDIDATE_NOT_FOUND",reason:"枝の1着候補IDが出走表に存在しない"});
+        continue;
+      }
+      if(!branchFirstRoleCompatible(branch,first)){
+        generationEvents.push({stage:"FIRST",branchId:branch.id,branchLabel:branch.label,number:first.number,action:"EXCLUDED",reasonGroup:"RULE_IMPOSSIBLE",reasonCode:"FIRST_ROLE_INCOMPATIBLE",reason:"展開枝が要求する1着役割と選手のライン役割が一致しない"});
+        continue;
+      }
+      firstEntries.push({first,score:conditionedFirst(branch,first)});
+    }
     const bestFirst=Math.max(...firstEntries.map(item=>item.score),0);
 
     for(const {first,score:firstScore} of firstEntries){
@@ -29,7 +37,10 @@ export function generateKeirinTerminals({scored,branches}){
 
         for(const {third,score:thirdScore} of thirdEntries){
           const pathScore=firstScore*secondScore*thirdScore;
-          if(!branchPathCompatible(branch,first,second,third))continue;
+          if(!branchPathCompatible(branch,first,second,third)){
+            generationEvents.push({stage:"PATH",branchId:branch.id,branchLabel:branch.label,order:[first.number,second.number,third.number],action:"EXCLUDED",reasonGroup:"RULE_IMPOSSIBLE",reasonCode:"BRANCH_PATH_INCOMPATIBLE",reason:"展開枝の役割条件と着順経路が両立しない"});
+            continue;
+          }
           paths.push({
             order:[first.number,second.number,third.number],
             branchId:branch.id,
@@ -91,6 +102,7 @@ export function generateKeirinTerminals({scored,branches}){
         branchContributions:[contribution]
       });
     }else{
+      generationEvents.push({stage:"MERGE",branchId:terminal.branchId,branchLabel:terminal.branchLabel,order:terminal.order,action:"MERGED",reasonGroup:"DUPLICATE",reasonCode:"DUPLICATE_TERMINAL_MERGED",reason:"同一3連単終端を削除せず、別展開枝の寄与として統合"});
       existing.score+=terminal.weightedScore;
       existing.contributingBranches=[...new Set([...existing.contributingBranches,terminal.branchId])];
       existing.branchContributions.push(contribution);
@@ -110,7 +122,23 @@ export function generateKeirinTerminals({scored,branches}){
     terminal.branchPriority=dominant?.branchPriority||terminal.branchPriority;
     terminal.branchType=dominant?.branchType||terminal.branchType;
   }
-  return terminals.sort((a,b)=>(b.probability-a.probability)||a.order.join("-").localeCompare(b.order.join("-"),"en"));
+  terminals.sort((a,b)=>(b.probability-a.probability)||a.order.join("-").localeCompare(b.order.join("-"),"en"));
+  const excluded=generationEvents.filter(event=>event.action==="EXCLUDED");
+  const merged=generationEvents.filter(event=>event.action==="MERGED");
+  const allowedReasonGroups=new Set(["RULE_IMPOSSIBLE","DATA_CONTRADICTION","DUPLICATE"]);
+  const unexplained=excluded.filter(event=>!allowedReasonGroups.has(event.reasonGroup)||!event.reasonCode||!event.reason);
+  Object.defineProperty(terminals,"generationAudit",{value:{
+    policy:"NO_UNEXPLAINED_TERMINAL_DROP",
+    allowedExclusionReasonGroups:[...allowedReasonGroups],
+    generatedUniqueTerminalCount:terminals.length,
+    rawSupportedPathCount:raw.length,
+    excludedCount:excluded.length,
+    mergedDuplicateCount:merged.length,
+    unexplainedExclusionCount:unexplained.length,
+    passed:unexplained.length===0,
+    events:generationEvents
+  },enumerable:false});
+  return terminals;
 }
 
 function branchFirstRoleCompatible(branch,participant){

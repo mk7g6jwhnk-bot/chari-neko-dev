@@ -409,6 +409,7 @@ function applyFamilyPurchaseDecision(item,valueGate,familyCoverageGate){
 
   return{
     ...item,betClass,purchaseStatus:adopted?PURCHASED:"購入不採用",purchaseReason,purchaseRejectCode,
+    lifecycle:{generated:true,probabilityEvaluated:true,terminalDeleted:false,purchaseDecision:adopted?"ADOPTED":"REJECTED",purchaseDecisionCode:purchaseRejectCode,purchaseDecisionReason:purchaseReason},
     adoptionMode:adopted?(betClass==="MAIN"?(isPrimaryFamily?"PRIMARY_FAMILY_MAIN_COVERAGE":"SECONDARY_MAIN_FAMILY_COVERAGE"):betClass==="COVER"?(isPrimaryFamily?"PRIMARY_FAMILY_COVERAGE_SUPPLEMENT":"SECONDARY_FAMILY_COVERAGE"):"SUB_VALUE_FAMILY"):null,
     purchaseHierarchyMode:familyCoverageGate.mode,
     isPrimaryFirstFamily:isPrimaryFamily,
