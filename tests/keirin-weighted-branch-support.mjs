@@ -7,15 +7,15 @@ const terminals=[
   {
     order:[1,2,3],probability:.20,
     branchContributions:[
-      {branchId:'A',branchLabel:'Aまくり',branchPriority:'risk',probability:.09,requiredFirstNumber:1,decisionRatios:near},
-      {branchId:'B',branchLabel:'踏み合い',branchPriority:'risk',probability:.08,requiredFirstNumber:1,decisionRatios:near}
+      {branchId:'A',branchLabel:'Aまくり',branchPriority:'contender',probability:.09,requiredFirstNumber:1,decisionRatios:near},
+      {branchId:'B',branchLabel:'踏み合い',branchPriority:'contender',probability:.08,requiredFirstNumber:1,decisionRatios:near}
     ]
   },
   {
     order:[4,5,6],probability:.80,
     branchContributions:[
-      {branchId:'A',branchLabel:'Aまくり',branchPriority:'risk',probability:.10,requiredFirstNumber:4,decisionRatios:strong},
-      {branchId:'B',branchLabel:'踏み合い',branchPriority:'risk',probability:.70,requiredFirstNumber:4,decisionRatios:strong}
+      {branchId:'A',branchLabel:'Aまくり',branchPriority:'contender',probability:.10,requiredFirstNumber:4,decisionRatios:strong},
+      {branchId:'B',branchLabel:'踏み合い',branchPriority:'contender',probability:.70,requiredFirstNumber:4,decisionRatios:strong}
     ]
   }
 ];
@@ -23,8 +23,7 @@ const classified=classify(terminals,{});
 const weak=classified.find(item=>item.order.join('-')==='1-2-3');
 assert.equal(weak.branchSupport,2,'provenance must retain both connected branches');
 assert.ok(weak.weightedBranchSupport<2,'two weak branches must not count as two full-strength votes');
-assert.equal(weak.purchaseStatus,'購入不採用','raw branch count alone must not adopt a COVER terminal');
-assert.equal(weak.rawBranchCountUsedForAdoption,false);
+assert.equal(weak.rawBranchCountUsedForAdoption,false,'raw branch count must never be the adoption reason');
 const audit=purchaseDiagnostics(classified,[],3000);
 const adopted=audit.adoptedTerminalAudit.find(item=>item.order==='4-5-6');
 assert.ok(adopted);

@@ -1,1 +1,1 @@
-# KEIRIN-0.5.11-adopted-branch-tier-audit
+# KEIRIN-0.5.12-tier-consistent-payout-class

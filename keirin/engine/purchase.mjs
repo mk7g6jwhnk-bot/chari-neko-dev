@@ -39,7 +39,8 @@ export function classify(terminals,odds={}){
     const thirdVariantEligible=thirdStats?thirdStats.supportedOrders.has(key):true;
     const thirdVariantRelativeToBest=thirdStats?.relativeToBestByOrder.get(key)??null;
     const thirdVariantConditionalShare=thirdStats?.conditionalShareByOrder.get(key)??null;
-    const highPayoutCandidate=Boolean(dominant&&dominant.branchPriority!=="main"&&credibleVariant&&thirdVariantEligible);
+    const highPayoutCandidate=Boolean(dominant&&dominant.branchPriority==="sub"&&credibleVariant&&thirdVariantEligible);
+    const highPayoutAttribute=Boolean(hasOdds&&odd>=100);
 
     let betClass="NONE";
     let adopted=false;
@@ -49,32 +50,34 @@ export function classify(terminals,odds={}){
       purchaseReason=`terminal分布が平坦（集中比${concentrationRatio.toFixed(3)}）`;
     }else if(dominant){
       const isMainBranch=dominant.branchPriority==="main";
-      const isAlternativeBranch=dominant.branchPriority!=="main";
-      const highValue=hasOdds&&odd>=100&&highPayoutCandidate;
+      const isContenderBranch=dominant.branchPriority==="contender";
+      const isSubBranch=dominant.branchPriority==="sub";
+      const highValue=isSubBranch&&highPayoutAttribute&&highPayoutCandidate;
 
-      // Purchase selection must not use a fixed branch-rank cap.
-      // Every logically completed terminal stays in classified; adoption is decided by
-      // continuous branch-fit / position support / probability support, not "top N".
+      // Purchase category follows the scenario tier. Payout never rewrites a main/contender
+      // scenario into BUYABLE_HIGH; high odds are retained as an attribute instead.
       if(!thirdVariantEligible){
         purchaseReason=`${dominant.branchLabel}の同一1-2着内で3着支持が自然境界の下位群`;
       }else if(isMainBranch&&representative){
         betClass="MAIN";
         adopted=true;
-        purchaseReason=`${dominant.branchLabel}の代表終端（3着独立支持を確認）`;
-      }else if(highValue&&isAlternativeBranch){
-        betClass="BUYABLE_HIGH";
-        adopted=true;
-        purchaseReason=`${dominant.branchLabel}の独立展開＋実オッズ${odd.toFixed(1)}倍で買える高配当`;
-      }else if(
-        (isMainBranch&&credibleVariant)||
-        (isAlternativeBranch&&representative)||
-        (weightedBranchSupport>=2&&branchFit>=.90&&credibleVariant)
-      ){
+        purchaseReason=`${dominant.branchLabel}の代表終端（3着独立支持を確認）${highPayoutAttribute?`＋実オッズ${odd.toFixed(1)}倍の本線高配当属性`:""}`;
+      }else if(isMainBranch&&credibleVariant){
         betClass="COVER";
         adopted=true;
-        purchaseReason=isMainBranch
-          ?`${dominant.branchLabel}の成立可能な着順変化（3着独立支持を確認）`
-          :`${dominant.branchLabel}由来の別展開カバー（3着独立支持を確認）`;
+        purchaseReason=`${dominant.branchLabel}の成立可能な着順変化（3着独立支持を確認）${highPayoutAttribute?`＋実オッズ${odd.toFixed(1)}倍の高配当属性`:""}`;
+      }else if(isContenderBranch&&(representative||credibleVariant||(weightedBranchSupport>=2&&branchFit>=.90))){
+        betClass="COVER";
+        adopted=true;
+        purchaseReason=`${dominant.branchLabel}由来の有力展開カバー（3着独立支持を確認）${highPayoutAttribute?`＋実オッズ${odd.toFixed(1)}倍の高配当属性`:""}`;
+      }else if(highValue){
+        betClass="BUYABLE_HIGH";
+        adopted=true;
+        purchaseReason=`${dominant.branchLabel}の別展開＋実オッズ${odd.toFixed(1)}倍で買える高配当`;
+      }else if(isSubBranch&&highPayoutCandidate&&!hasOdds){
+        purchaseReason=`${dominant.branchLabel}の別展開高配当候補・実オッズ待ち`;
+      }else if(isSubBranch){
+        purchaseReason=`${dominant.branchLabel}は別展開のため、実オッズ妙味確認前は購入不採用`;
       }
     }
 
@@ -86,9 +89,13 @@ export function classify(terminals,odds={}){
           ?"NO_DOMINANT_BRANCH"
           :!thirdVariantEligible
             ?"THIRD_VARIANT_SUPPORT"
-            :!(representative||credibleVariant)
-              ?"BRANCH_OR_POSITION_SUPPORT"
-              :"CLASS_RULE";
+            :dominant?.branchPriority==="sub"&&highPayoutCandidate&&!hasOdds
+              ?"SUB_ODDS_PENDING"
+              :dominant?.branchPriority==="sub"
+                ?"SUB_NO_VALUE"
+                :!(representative||credibleVariant)
+                  ?"BRANCH_OR_POSITION_SUPPORT"
+                  :"CLASS_RULE";
 
     return{
       ...terminal,
@@ -116,6 +123,8 @@ export function classify(terminals,odds={}){
       thirdVariantCutGap:thirdStats?.cutGap??null,
       thirdVariantGroupSize:thirdStats?.groupSize??null,
       highPayoutCandidate,
+      highPayoutAttribute,
+      highPayoutAttributeLabel:highPayoutAttribute?(dominant?.branchPriority==="main"?"本線高配当":dominant?.branchPriority==="contender"?"有力展開高配当":dominant?.branchPriority==="sub"?"別展開高配当":"高配当"):null,
       oddsEvaluationStatus:hasOdds?"ODDS_AVAILABLE":(highPayoutCandidate?"ODDS_PENDING":"NOT_VALUE_CANDIDATE"),
       decisionRatios:dominant?.decisionRatios||null,
       positionScores:dominant?.positionScores||null,
@@ -217,6 +226,7 @@ export function allocate(items,budget){
       order:item.order,betClass:item.betClass,stake:null,odds:item.odds,expectedPayout:null,
       probability:item.probability,branchSupport:item.branchSupport,purchaseReason:item.purchaseReason,
       dominantBranchId:item.dominantBranchId,dominantBranchLabel:item.dominantBranchLabel,decisionRatios:item.decisionRatios,positionEvidence:item.positionEvidence||null,evidenceSummary:item.evidenceSummary||null,
+      highPayoutAttribute:Boolean(item.highPayoutAttribute),highPayoutAttributeLabel:item.highPayoutAttributeLabel||null,
       fundingStatus:"予算不足",minimumRequired:minimum
     }));
   }
@@ -231,6 +241,7 @@ export function allocate(items,budget){
     expectedPayout:item.odds?Math.floor(stakes[i]*item.odds):null,
     probability:item.probability,branchSupport:item.branchSupport,purchaseReason:item.purchaseReason,
     dominantBranchId:item.dominantBranchId,dominantBranchLabel:item.dominantBranchLabel,decisionRatios:item.decisionRatios,positionEvidence:item.positionEvidence||null,evidenceSummary:item.evidenceSummary||null,
+    highPayoutAttribute:Boolean(item.highPayoutAttribute),highPayoutAttributeLabel:item.highPayoutAttributeLabel||null,
     fundingStatus:"配分済み",minimumRequired:minimum
   }));
 }
@@ -327,6 +338,8 @@ export function purchaseDiagnostics(classified,plan,budget){
         thirdVariantCutGap:item.thirdVariantCutGap??null,
         thirdVariantGroupSize:item.thirdVariantGroupSize??null,
         highPayoutCandidate:Boolean(item.highPayoutCandidate),
+        highPayoutAttribute:Boolean(item.highPayoutAttribute),
+        highPayoutAttributeLabel:item.highPayoutAttributeLabel||null,
         oddsEvaluationStatus:item.oddsEvaluationStatus||null,
         rawBranchCountUsedForAdoption:false,
         dominantBranchStrengthRatio:item.dominantBranchStrengthRatio??null,
