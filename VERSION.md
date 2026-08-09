@@ -1,4 +1,4 @@
-# KEIRIN-0.5.15-unsaved-result-access
+# KEIRIN-0.5.16-fast-result-path
 
 終了済み・未予想レースでも、予想生成なしで公式結果を確認できるUI修正版。予想エンジンの展開・終端・購入判定ロジックは変更していない。
 
