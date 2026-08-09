@@ -10,8 +10,8 @@ export default async function handler(req){
     if(!response.ok||payload?.ok===false)return jsonResponse(response.status||502,{ok:false,error:payload?.error||"公式オッズ取得失敗"});
     const basic=payload?.officialData?.basic||{},returnedDate=String(basic.date||"").replace(/\D/g,"").slice(0,8),returnedRace=Number(basic.raceNo||0),returnedVenue=String(basic.venueName||"");
     if(returnedDate!==date||returnedRace!==raceNo||(venueName&&returnedVenue&&returnedVenue!==venueName))return jsonResponse(409,{ok:false,error:"取得したレースが選択内容と一致しません",requested:{date,venueCode,venueName,raceNo},returned:{date:returnedDate,venueName:returnedVenue,raceNo:returnedRace}});
-    const odds=normalizeOdds(payload?.officialData?.odds),startTime=String(basic.startTime||basic.deadline||"");
-    return jsonResponse(200,{ok:true,race:{date,venueCode,venueName:returnedVenue||venueName,raceNo,startTime},odds,checkedAt:new Date().toISOString()});
+    const odds=normalizeOdds(payload?.officialData?.odds),startTime=String(basic.startTime||basic.deadline||""),deadline=String(basic.deadline||basic.startTime||"");
+    return jsonResponse(200,{ok:true,race:{date,venueCode,venueName:returnedVenue||venueName,raceNo,startTime,deadline},odds,checkedAt:new Date().toISOString()});
   }catch(error){return jsonResponse(502,{ok:false,error:error instanceof Error?error.message:String(error)})}
 }
 
