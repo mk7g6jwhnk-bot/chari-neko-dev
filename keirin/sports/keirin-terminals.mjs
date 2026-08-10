@@ -179,7 +179,7 @@ function buildFirstNode(branch,first,score,total){
     newRequiredConditions:required,
     resultingState:{events:[event],conditions:[...required],facts:{winner:first.number,branchType:branch.branchType,primaryLineId:branch.primaryLineId||null}},
     score,
-    conditionalProbability:total>0?score/total:0
+    conditionalProbability:nodeConditionalProbability(score,total,required)
   };
 }
 function buildSecondNode(branch,parent,first,second,score,total,lineById){
@@ -192,7 +192,7 @@ function buildSecondNode(branch,parent,first,second,score,total,lineById){
     newRequiredConditions:required,
     resultingState:{events:[...parent.resultingState.events,event],conditions:[...parent.resultingState.conditions,...required],facts:{...parent.resultingState.facts,second:second.number}},
     score,
-    conditionalProbability:total>0?score/total:0
+    conditionalProbability:nodeConditionalProbability(score,total,required)
   };
 }
 function buildThirdNode(branch,parent,first,second,third,score,total,lineById){
@@ -205,42 +205,69 @@ function buildThirdNode(branch,parent,first,second,third,score,total,lineById){
     newRequiredConditions:required,
     resultingState:{events:[...parent.resultingState.events,event],conditions:[...parent.resultingState.conditions,...required],facts:{...parent.resultingState.facts,third:third.number}},
     score,
-    conditionalProbability:total>0?score/total:0
+    conditionalProbability:nodeConditionalProbability(score,total,required)
   };
 }
 function firstConditions(branch,first){
   if(branch.branchType==="LEADER_HOLD")return[
-    condition(`FIRST_EVENT_${first.number}`,`${first.number}番が1着に入る`,"event"),
-    condition(`LEADER_HOLD_${first.number}`,`${first.number}番が主導権を取り押し切る`,"natural")
+    condition(`LEADER_HOLD_${first.number}`,`${first.number}番が主導権を取れる`,"natural",.78,true),
+    condition(`LEADER_FINISH_${first.number}`,`${first.number}番が先行後も1着まで脚を残せる`,"natural",.72,true)
   ];
   if(branch.branchType==="MAKURI_SUCCESS")return[
-    condition(`FIRST_EVENT_${first.number}`,`${first.number}番が1着に入る`,"event"),
-    condition(`MAKURI_${first.number}`,`${first.number}番の捲りが1着まで届く`,"natural")
+    condition(`MAKURI_POSITION_${first.number}`,`${first.number}番が捲りを打てる位置とタイミングを確保する`,"natural",.72,true),
+    condition(`MAKURI_REACH_${first.number}`,`${first.number}番の捲りが前団を越えて1着まで届く`,"natural",.68,true)
   ];
   if(branch.branchType==="BANTE_SASHI")return[
-    condition(`FIRST_EVENT_${first.number}`,`${first.number}番が1着に入る`,"event"),
-    condition(`BANTE_SASHI_${first.number}`,`${first.number}番が前を追走して番手差しを決める`,"natural")
+    condition(`BANTE_TRACK_${first.number}`,`${first.number}番が前を追走して番手位置を維持する`,"natural",.84,true),
+    condition(`BANTE_PASS_${first.number}`,`${first.number}番が直線で前を交わして1着になる`,"natural",.70,true)
+  ];
+  if(branch.branchType==="LINE_SEPARATION")return[
+    condition(`SEPARATION_OCCURRED_${first.number}`,`前位の追走崩れ・離れが発生し${first.number}番に進路が生まれる`,"extra",.42,true),
+    condition(`SEPARATION_USE_${first.number}`,`${first.number}番がその空いた位置を使って1着まで到達する`,"extra",.48,true)
   ];
   return[
-    condition(`FIRST_EVENT_${first.number}`,`${first.number}番が1着に入る`,"event"),
-    condition(`BRANCH_${branch.id}`,`${branch.label||branch.id}が${first.number}番1着まで成立する`,"scenario")
+    condition(`BRANCH_${branch.id}`,`${branch.label||branch.id}が${first.number}番1着まで成立する`,"scenario",.60,true)
   ];
 }
 function secondConditions(first,second,lineById){
   const same=sameLine(first,second,lineById);
-  return[
-    condition(`SECOND_EVENT_${first.number}_${second.number}`,`${first.number}番1着の成立状態を壊さず${second.number}番が2着に入る`,"event"),
-    condition(`SECOND_REL_${second.number}`,same?`${second.number}番が同ライン関係を利用して2着位置を保つ`:`${second.number}番が別線から2着位置へ残る・浮上する`,same?"natural":"extra")
-  ];
+  const out=[];
+  if(same){
+    out.push(condition(`SECOND_LINE_HOLD_${second.number}`,`${second.number}番が1着成立時の同ライン関係を壊さず2着位置を保つ`,"natural",.80,true));
+  }else{
+    out.push(condition(`SECOND_OTHER_LINE_SURVIVE_${second.number}`,`${second.number}番が1着成立状態と両立したまま別線から2着位置へ残る・浮上する`,"extra",.52,true));
+  }
+  return out;
 }
 function thirdConditions(first,second,third,lineById){
   const same=sameLine(first,third,lineById)||sameLine(second,third,lineById);
-  return[
-    condition(`THIRD_EVENT_${first.number}_${second.number}_${third.number}`,`${first.number}番1着・${second.number}番2着の成立状態を壊さず${third.number}番が3着に入る`,"event"),
-    condition(`THIRD_REL_${third.number}`,same?`${third.number}番が既成立のライン関係を利用して3着位置を保つ`:`${third.number}番が別線から3着位置へ残る・浮上する`,same?"natural":"extra")
-  ];
+  const out=[];
+  if(same){
+    out.push(condition(`THIRD_LINE_HOLD_${third.number}`,`${third.number}番が1・2着成立状態を壊さずライン関係から3着位置を保つ`,"natural",.78,true));
+  }else{
+    out.push(condition(`THIRD_OTHER_LINE_SURVIVE_${third.number}`,`${third.number}番が1・2着成立状態と両立したまま別線から3着位置へ残る・浮上する`,"extra",.56,true));
+  }
+  return out;
 }
-function condition(id,label,kind){return{id,label,kind}}
+function condition(id,label,kind,probability=null,critical=false){
+  const defaultProbability=kind==="natural"?.82:kind==="conditional"?.70:kind==="extra"?.48:kind==="scenario"?.62:kind==="event"?.88:.65;
+  return{id,label,kind,probability:finiteProbability(probability)?Number(probability):defaultProbability,critical:Boolean(critical)};
+}
+function nodeConditionalProbability(score,total,requiredConditions=[]){
+  const base=total>0?score/total:0;
+  const conds=(requiredConditions||[]).filter(c=>c?.kind!=="event");
+  if(!conds.length)return base;
+  let burden=1;
+  for(const c of conds){
+    const p=finiteProbability(c?.probability)?Number(c.probability):.65;
+    // Do not multiply raw probabilities directly: several conditions are dependent.
+    // Penalize only the incremental burden of the newly introduced node conditions.
+    const softness=c?.critical?1:.55;
+    burden*=Math.pow(Math.max(.12,Math.min(.98,p)),softness);
+  }
+  return Math.max(0,Math.min(1,base*burden));
+}
+function finiteProbability(v){return Number.isFinite(Number(v))&&Number(v)>=0&&Number(v)<=1}
 function cloneState(state){return{events:(state?.events||[]).map(x=>({...x})),conditions:(state?.conditions||[]).map(x=>({...x})),facts:{...(state?.facts||{})}}}
 function stateConflict(node){
   const events=node?.resultingState?.events||[],positions=new Map(),participants=new Map();
@@ -272,13 +299,27 @@ function buildNodeStateAudit(raw){
       if(conflict){violations++;examples.push({order:path.order,stage:node.stage,reason:conflict})}
     }
   }
+  const conditionStats={FIRST:{nodes:0,newConditions:0,critical:0,extra:0},SECOND:{nodes:0,newConditions:0,critical:0,extra:0},THIRD:{nodes:0,newConditions:0,critical:0,extra:0}};
+  for(const path of raw){
+    for(const node of path.nodeTrace||[]){
+      const row=conditionStats[node.stage];
+      if(!row)continue;
+      row.nodes++;
+      for(const c of node.newRequiredConditions||[]){
+        row.newConditions++;
+        if(c.critical)row.critical++;
+        if(c.kind==="extra")row.extra++;
+      }
+    }
+  }
   return{
-    version:"NODE-STATE-1.0",
+    version:"NODE-STATE-1.1-CONDITION-PROBABILITY",
     policy:"PARENT_STATE_INHERIT_PLUS_ONE_NEW_EVENT",
     checkedPathCount:raw.length,
     violationCount:violations,
     inheritanceViolationCount,
     oneNodeOneEventViolationCount,
+    conditionStats,
     passed:violations===0,
     examples:examples.slice(0,20)
   };
