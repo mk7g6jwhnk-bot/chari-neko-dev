@@ -11,7 +11,7 @@ const ODDS_CACHE_KEY="chari-neko:keirin-odds-cache:v1";
 const RACE_META_CACHE_KEY="chari-neko:keirin-race-meta-cache:v1";
 const RESULT_CACHE_KEY="chari-neko:keirin-result-cache:v1";
 const MEETING_CACHE_KEY="chari-neko:keirin-meeting-cache:v1";
-const APP_RELEASE="KEIRIN-0.8.0-rider-evaluation-v2";
+const APP_RELEASE="KEIRIN-0.8.1-rider-to-branch-link";
 const APP_UPDATE_CHECK_INTERVAL_MS=5*60*1000;
 let lastAppUpdateCheckAt=0,appUpdateCheckBusy=false;
 const VENUE_CODES={函館:"11",青森:"12",いわき平:"13",弥彦:"21",前橋:"22",取手:"23",宇都宮:"24",大宮:"25",西武園:"26",京王閣:"27",立川:"28",松戸:"31",千葉:"32",川崎:"34",平塚:"35",小田原:"36",伊東:"37",静岡:"38",名古屋:"42",岐阜:"43",大垣:"44",豊橋:"45",富山:"46",松阪:"47",四日市:"48",福井:"51",奈良:"53",向日町:"54",和歌山:"55",岸和田:"56",玉野:"61",広島:"62",防府:"63",高松:"71",小松島:"73",高知:"74",松山:"75",小倉:"81",久留米:"83",武雄:"84",佐世保:"85",別府:"86",熊本:"87"};
@@ -277,10 +277,11 @@ function renderPredictionDetail(snapshot){
     const markAudit=auditRiderMarkConsistency(snapshot,riderMarks);
     const markAuditHtml=renderRiderMarkAudit(markAudit);
     const audit=snapshot?.predictionOutput?.audit&&typeof snapshot.predictionOutput.audit==="object"?snapshot.predictionOutput.audit:{};
+    const riderBranchLinkHtml=renderRiderBranchLinkAudit(audit?.riderBranchLinkAudit);
     const wholeLinkageHtml=renderWholeLinkageAudit(audit?.wholeLinkageAudit);
     const hasAudit=Number.isFinite(Number(audit.generatedTerminalCount));
     const auditSummary=hasAudit?`<details id="purchaseAuditDetails" class="predictionAccordion"><summary>詳しい購入監査を見る（開発用）</summary><div id="purchaseAuditBody" class="accordionBody"><p class="muted">監査データは詳細を開いた時だけ描画します。レース詳細の表示を優先しています。</p></div></details>`:"";
-    panel.innerHTML=`<div class="sectionHead"><div><small>保存済み予想の根拠</small><h2>予想詳細</h2></div><span class="pill">詳細</span></div>${wholeLinkageHtml}${auditSummary}<details class="predictionAccordion"><summary>買い目の理由を見る</summary><div class="accordionBody">${betDetail||'<p class="muted">購入候補はありません。</p>'}</div></details>${abilities?`<details class="predictionAccordion" open><summary>選手印を見る</summary><div class="accordionBody"><p class="muted">まず「印＋選手名」で評価の全体像を確認します。チャット予想を取り込んでいる場合は横にチャット印も表示します。</p>${markTable}${markAuditHtml}<details class="supportBranchAudit"><summary>着順別能力の詳細を見る</summary><div class="abilityList">${abilities}</div></details></div></details>`:""}${renderStartPowerInputAuditSafe(snapshot)}`;
+    panel.innerHTML=`<div class="sectionHead"><div><small>保存済み予想の根拠</small><h2>予想詳細</h2></div><span class="pill">詳細</span></div>${riderBranchLinkHtml}${wholeLinkageHtml}${auditSummary}<details class="predictionAccordion"><summary>買い目の理由を見る</summary><div class="accordionBody">${betDetail||'<p class="muted">購入候補はありません。</p>'}</div></details>${abilities?`<details class="predictionAccordion" open><summary>選手印を見る</summary><div class="accordionBody"><p class="muted">まず「印＋選手名」で評価の全体像を確認します。チャット予想を取り込んでいる場合は横にチャット印も表示します。</p>${markTable}${markAuditHtml}<details class="supportBranchAudit"><summary>着順別能力の詳細を見る</summary><div class="abilityList">${abilities}</div></details></div></details>`:""}${renderStartPowerInputAuditSafe(snapshot)}`;
     panel.classList.remove("hidden");
     const auditDetails=$("purchaseAuditDetails"),auditBody=$("purchaseAuditBody");
     if(auditDetails&&auditBody)auditDetails.addEventListener("toggle",()=>{if(!auditDetails.open||auditBody.dataset.loaded==="1")return;auditBody.dataset.loaded="1";renderPurchaseAuditLazy(audit,auditBody)},{once:false});
@@ -291,6 +292,17 @@ function renderPredictionDetail(snapshot){
   }
 }
 
+
+function renderRiderBranchLinkAudit(audit){
+  if(!audit)return "";
+  const rows=Array.isArray(audit.rows)?audit.rows:[];
+  const warnings=Array.isArray(audit.warnings)?audit.warnings:[];
+  const title=audit.status==="WARN"?"要修正":audit.status==="CHECK"?"要確認":"整合";
+  return `<details class="supportBranchAudit" open><summary>選手評価v2 → 主展開枝 接続監査（${esc(title)}）</summary>
+    ${warnings.length?`<div class="auditWarning">${warnings.map(w=>`<p>${w.severity==="high"?"⚠ ":"△ "}${esc(w.message)}</p>`).join("")}</div>`:`<p class="muted">1着能力と逃げ・捲り・番手差し枝の接続に大きな矛盾はありません。</p>`}
+    <div class="compactAuditRows">${rows.slice(0,12).map(r=>`<p><strong>${esc(r.branchLabel)}</strong>　${r.firstNumber}番 / ${esc(r.mechanismName)} ${fmtAbility(r.mechanismScore)} / 1着 ${fmtAbility(r.firstPlacement)} / 枝 ${fmtAbility(r.branchScore)} / ${esc(r.priority)}</p>`).join("")}</div>
+  </details>`;
+}
 
 function renderWholeLinkageAudit(audit){
   if(!audit||typeof audit!=="object")return `<div class="auditWarning"><strong>全体連動監査：未記録</strong><p>この保存予想には全体連動監査がありません。新規予想で生成されます。</p></div>`;

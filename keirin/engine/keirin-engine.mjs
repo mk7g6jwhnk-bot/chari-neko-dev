@@ -7,6 +7,7 @@ import{composite,allocate,purchaseDiagnostics}from"./purchase.mjs";
 import{applyChatSpecV1}from"./chat-spec-v1-policy.mjs";
 import{buildWholeLinkageAudit}from"./whole-linkage-audit.mjs";
 import{buildCentralRulesAudit}from"./central-rules-audit.mjs";
+import{buildRiderBranchLinkAudit}from"./rider-branch-link-audit.mjs";
 
 export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000}){
   const scored=scoreKeirinParticipants({race,venueProfile});
@@ -17,6 +18,7 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
   const a=audit({race,branches,terminals});
   const chatSpec=a.passed?applyChatSpecV1({scored,lines,branches,terminals,oddsByOrder}):null;
   const rawClassified=a.passed?chatSpec.terminals:terminals.map(item=>({...item,betClass:"NONE",purchaseStatus:"購入不採用",purchaseReason:`エンジン生成監査不通過: ${(a.errors||[]).slice(0,3).join(" / ")||"原因未記録"}`,purchaseRejectCode:"ENGINE_AUDIT_FAILED",lifecycle:{generated:true,probabilityEvaluated:true,terminalDeleted:false,purchaseDecision:"REJECTED",purchaseDecisionCode:"ENGINE_AUDIT_FAILED",purchaseDecisionReason:`エンジン生成監査不通過: ${(a.errors||[]).slice(0,3).join(" / ")||"原因未記録"}`}}));
+  const riderBranchLinkAudit=buildRiderBranchLinkAudit({scored,branches});
   const wholeLinkageAudit=buildWholeLinkageAudit({scored,lines,branches,terminals:rawClassified});
   const centralRulesAudit=buildCentralRulesAudit({terminals:rawClassified});
   const lineBlocked=a.passed&&race.raceCategory!=="girls"&&race.lineConfidence!=="高";
@@ -41,7 +43,7 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
   purchase.girlsStartEvidenceRequired=race.raceCategory==="girls"?girlsEvidenceRequired:null;
 
   return{
-    engineVersion:"KEIRIN-0.8.0-rider-evaluation-v2",
+    engineVersion:"KEIRIN-0.8.1-rider-to-branch-link",
     raceId:race.id,
     lineConfidence:race.lineConfidence,
     scored,lines,branches,terminals:classified,
@@ -57,6 +59,7 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
       chatSpecV1:chatSpec?.audit||null,
       scenarioSummary:chatSpec?.scenarioSummary||[],
       firstFamilies:chatSpec?.families||[],
+      riderBranchLinkAudit,
       wholeLinkageAudit,
       centralRulesAudit
     },

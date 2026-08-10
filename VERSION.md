@@ -1,4 +1,4 @@
 # Current version
 
-- `KEIRIN-0.8.0-rider-evaluation-v2`
-- label: `v95-rider-evaluation-v2`
+- `KEIRIN-0.8.1-rider-to-branch-link`
+- label: `v96-rider-to-branch-link`

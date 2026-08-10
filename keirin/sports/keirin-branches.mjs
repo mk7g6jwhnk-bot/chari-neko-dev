@@ -8,19 +8,19 @@ export function generateKeirinBranches({scored,lines,lineConfidence,raceCategory
     if(leader){
       branches.push(make({
         id:`LEAD-${line.id}`,label:`${line.id}先行押し切り`,scenario:"先行押し切り",branchType:"LEADER_HOLD",primaryLineId:line.id,requiredFirstNumber:leader.number,enabled:lineEnabled,
-        scoreParts:[part("first",leader.roleScores.first,.40),part("startPower",leader.evidence.start,.35),part("recentForm",leader.evidence.recent,.15),part("finishPower",leader.evidence.finish,.10)],
+        scoreParts:[part("firstPlacement",leader.roleScores.first,.22),part("escapeMechanism",leader.riderEvaluationV2?.firstMechanisms?.escape,.43),part("startPower",leader.evidence.start,.20),part("recentForm",leader.evidence.recent,.10),part("finishPower",leader.evidence.finish,.05)],
         firstCandidateScores:{[leader.id]:leader.roleScores.first||0}
       }));
       branches.push(make({
         id:`MAKURI-${line.id}`,label:`${line.id}まくり`,scenario:"別線まくり",branchType:"MAKURI_SUCCESS",primaryLineId:line.id,requiredFirstNumber:leader.number,enabled:lineEnabled,
-        scoreParts:[part("first",leader.roleScores.first,.32),part("sprintPower",leader.evidence.sprint,.42),part("finishPower",leader.evidence.finish,.16),part("recentForm",leader.evidence.recent,.10)],
+        scoreParts:[part("firstPlacement",leader.roleScores.first,.22),part("makuriMechanism",leader.riderEvaluationV2?.firstMechanisms?.makuri,.46),part("sprintPower",leader.evidence.sprint,.17),part("finishPower",leader.evidence.finish,.10),part("recentForm",leader.evidence.recent,.05)],
         firstCandidateScores:{[leader.id]:leader.roleScores.first||0}
       }));
     }
     if(bante){
       branches.push(make({
         id:`BANTE-${line.id}`,label:`${line.id}番手差し`,scenario:"番手差し",branchType:"BANTE_SASHI",primaryLineId:line.id,requiredFirstNumber:bante.number,enabled:lineEnabled,
-        scoreParts:[part("first",bante.roleScores.first,.32),part("finishPower",bante.evidence.finish,.34),part("trackingSkill",bante.evidence.tracking,.24),part("recentForm",bante.evidence.recent,.10)],
+        scoreParts:[part("firstPlacement",bante.roleScores.first,.22),part("banteSashiMechanism",bante.riderEvaluationV2?.firstMechanisms?.banteSashi,.46),part("finishPower",bante.evidence.finish,.14),part("trackingSkill",bante.evidence.tracking,.13),part("recentForm",bante.evidence.recent,.05)],
         firstCandidateScores:{[bante.id]:bante.roleScores.first||0}
       }));
     }
