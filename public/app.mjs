@@ -3,6 +3,7 @@ import{derivePredictionRatings,starText}from"./prediction-ratings.mjs";
 import{findChatPrediction,parseChatPrediction,removeChatPrediction,saveChatPrediction}from"./chat-prediction-store.mjs";
 import{compareChatAndApp}from"./chat-app-diff.mjs";
 import{loadChatDiffTrends,recordChatDiffTrend,summarizeChatDiffTrends}from"./chat-diff-trend-store.mjs";
+import{auditRiderMarkConsistency,deriveRiderMarks}from"./rider-marks.mjs";
 const $=id=>document.getElementById(id),screens=[...document.querySelectorAll(".screen")];
 const state={screen:"home",history:[],date:localDate(),meeting:null,meetings:[],meetingTab:"today",race:null,payload:null,snapshot:null,retry:null,busy:false,oddsBusyKey:null,bulkBusy:false,bulkDone:0,bulkTotal:0,screeningBusy:false,deepDiveBusy:false,deepDiveCurrentKeys:[]};
 const BATCH_LOCK_KEY="chari-neko:keirin-batch-lock:v1",TAB_INSTANCE_ID=(globalThis.crypto?.randomUUID?.()||`${Date.now()}-${Math.random()}`),BATCH_LOCK_TTL_MS=10*60*1000;
@@ -10,7 +11,7 @@ const ODDS_CACHE_KEY="chari-neko:keirin-odds-cache:v1";
 const RACE_META_CACHE_KEY="chari-neko:keirin-race-meta-cache:v1";
 const RESULT_CACHE_KEY="chari-neko:keirin-result-cache:v1";
 const MEETING_CACHE_KEY="chari-neko:keirin-meeting-cache:v1";
-const APP_RELEASE="KEIRIN-0.5.52-chat-diff-trend-audit";
+const APP_RELEASE="KEIRIN-0.5.53-rider-marks-audit";
 const APP_UPDATE_CHECK_INTERVAL_MS=5*60*1000;
 let lastAppUpdateCheckAt=0,appUpdateCheckBusy=false;
 const VENUE_CODES={函館:"11",青森:"12",いわき平:"13",弥彦:"21",前橋:"22",取手:"23",宇都宮:"24",大宮:"25",西武園:"26",京王閣:"27",立川:"28",松戸:"31",千葉:"32",川崎:"34",平塚:"35",小田原:"36",伊東:"37",静岡:"38",名古屋:"42",岐阜:"43",大垣:"44",豊橋:"45",富山:"46",松阪:"47",四日市:"48",福井:"51",奈良:"53",向日町:"54",和歌山:"55",岸和田:"56",玉野:"61",広島:"62",防府:"63",高松:"71",小松島:"73",高知:"74",松山:"75",小倉:"81",久留米:"83",武雄:"84",佐世保:"85",別府:"86",熊本:"87"};
@@ -266,11 +267,15 @@ function renderPredictionDetail(snapshot){
       if(!bets.length)return"";
       return `<div class="detailGroup"><h3>${label}</h3>${bets.map(safeFriendlyBetReason).join("")}</div>`
     }).join("");
-    const abilities=abilitiesUsed.map(a=>`<div class="abilityRow"><strong>${a?.number??"-"}番</strong><span>近況 ${fmtAbility(a?.recentForm)} / 主導権 ${fmtAbility(a?.startPower)} / まくり ${fmtAbility(a?.sprintPower)} / 差し ${fmtAbility(a?.finishPower)} / 追走 ${fmtAbility(a?.trackingSkill)}</span></div>`).join("");
+    const riderMarks=Array.isArray(snapshot?.riderMarks)&&snapshot.riderMarks.length?snapshot.riderMarks:deriveRiderMarks(snapshot);
+    const markMap=new Map(riderMarks.map(m=>[Number(m.number),m]));
+    const abilities=abilitiesUsed.map(a=>{const m=markMap.get(Number(a?.number))||{};return `<div class="abilityRow"><strong>${a?.number??"-"}番　${esc(m.overallMark||"？")}</strong><span>1着 ${esc(m.firstMark||"？")} (${fmtAbility(m.firstScore)}) / 2着 ${esc(m.secondMark||"？")} (${fmtAbility(m.secondScore)}) / 3着 ${esc(m.thirdMark||"？")} (${fmtAbility(m.thirdScore)}) / 信頼 ${esc(m.confidence||"不明")}</span><small>近況 ${fmtAbility(a?.recentForm)} / 主導権 ${fmtAbility(a?.startPower)} / まくり ${fmtAbility(a?.sprintPower)} / 差し ${fmtAbility(a?.finishPower)} / 追走 ${fmtAbility(a?.trackingSkill)}</small></div>`}).join("");
+    const markAudit=auditRiderMarkConsistency(snapshot,riderMarks);
+    const markAuditHtml=renderRiderMarkAudit(markAudit);
     const audit=snapshot?.predictionOutput?.audit&&typeof snapshot.predictionOutput.audit==="object"?snapshot.predictionOutput.audit:{};
     const hasAudit=Number.isFinite(Number(audit.generatedTerminalCount));
     const auditSummary=hasAudit?`<details id="purchaseAuditDetails" class="predictionAccordion"><summary>詳しい購入監査を見る（開発用）</summary><div id="purchaseAuditBody" class="accordionBody"><p class="muted">監査データは詳細を開いた時だけ描画します。レース詳細の表示を優先しています。</p></div></details>`:"";
-    panel.innerHTML=`<div class="sectionHead"><div><small>保存済み予想の根拠</small><h2>予想詳細</h2></div><span class="pill">詳細</span></div>${auditSummary}<details class="predictionAccordion"><summary>買い目の理由を見る</summary><div class="accordionBody">${betDetail||'<p class="muted">購入候補はありません。</p>'}</div></details>${abilities?`<details class="predictionAccordion"><summary>選手別能力を見る</summary><div class="abilityList accordionBody">${abilities}</div></details>`:""}${renderStartPowerInputAuditSafe(snapshot)}`;
+    panel.innerHTML=`<div class="sectionHead"><div><small>保存済み予想の根拠</small><h2>予想詳細</h2></div><span class="pill">詳細</span></div>${auditSummary}<details class="predictionAccordion"><summary>買い目の理由を見る</summary><div class="accordionBody">${betDetail||'<p class="muted">購入候補はありません。</p>'}</div></details>${abilities?`<details class="predictionAccordion" open><summary>アプリ独自の選手印を見る</summary><div class="accordionBody"><p class="muted">◎○▲△×は買い目から逆算せず、1着・2着・3着の能力評価から独立して付けています。印と実際の買い目が矛盾した場合は下で警告します。</p><div class="abilityList">${abilities}</div>${markAuditHtml}</div></details>`:""}${renderStartPowerInputAuditSafe(snapshot)}`;
     panel.classList.remove("hidden");
     const auditDetails=$("purchaseAuditDetails"),auditBody=$("purchaseAuditBody");
     if(auditDetails&&auditBody)auditDetails.addEventListener("toggle",()=>{if(!auditDetails.open||auditBody.dataset.loaded==="1")return;auditBody.dataset.loaded="1";renderPurchaseAuditLazy(audit,auditBody)},{once:false});
@@ -279,6 +284,12 @@ function renderPredictionDetail(snapshot){
     panel.innerHTML=`<div class="sectionHead"><div><small>保存済み予想の根拠</small><h2>予想詳細</h2></div><span class="pill danger">一部表示エラー</span></div><div class="auditWarning"><strong>詳細表示の一部だけ読み込めませんでした</strong><p>${esc(error?.message||String(error))}</p><p class="muted">この表示エラーでレース画面や保存済み予想を開けなくならないよう保護しています。</p></div>`;
     panel.classList.remove("hidden");
   }
+}
+
+function renderRiderMarkAudit(audit){
+  const rows=Array.isArray(audit?.warnings)?audit.warnings:[];
+  if(!rows.length)return `<div class="notice success"><strong>選手印と買い目の整合監査：大きな矛盾なし</strong><p>印は買い目とは独立に算出しています。</p></div>`;
+  return `<div class="auditWarning"><strong>選手印と買い目の整合監査：要確認 ${rows.length}件</strong>${rows.map(w=>`<p>${esc(w.message)}</p>`).join("")}<p class="muted">印そのものを買い目に合わせて変更せず、どの工程で接続が崩れたかを確認します。</p></div>`;
 }
 function renderPurchaseAuditLazy(audit,root){try{const rejectLabels={FLAT_DISTRIBUTION:"分布が平坦",PRIMARY_COVERAGE_TARGET_REACHED:"最上位頭の優先カバー目標到達後",OTHER_FAMILY_COVERAGE_TARGET_REACHED:"別頭の補完カバー目標到達後",NO_FAMILY_TIER:"購入対象の1着ファミリー外",SECOND_POSITION_SUPPORT:"2着独立支持不足",THIRD_VARIANT_SUPPORT:"3着独立支持不足",SUB_ODDS_PENDING:"別展開・オッズ待ち",SUB_NOT_HIGH_PAYOUT:"別展開・高配当属性なし",SUB_VALUE_BELOW_BREAK_EVEN:"別展開・成立確率×オッズ不足",SUB_VALUE_NATURAL_BOUNDARY:"別展開・妙味上位群外",BRANCH_OR_POSITION_SUPPORT:"枝適合/着順支持不足",UNKNOWN:"その他"};const rejectCounts=audit?.rejectCodeCounts&&typeof audit.rejectCodeCounts==="object"&&!Array.isArray(audit.rejectCodeCounts)?audit.rejectCodeCounts:{};const rejectRows=Object.entries(rejectCounts).sort((a,b)=>Number(b[1])-Number(a[1])).map(([code,count])=>`<div class="abilityRow"><strong>${esc(rejectLabels[code]||code)}</strong><span>${Number(count)||0}件</span></div>`).join("");const lifecycle=audit?.terminalLifecycleAudit||{};const lifecycleText=lifecycle.passed===true?"OK（理由なし削除なし）":lifecycle.passed===false?`要監査 ${Array.isArray(lifecycle.violations)?lifecycle.violations.length:0}件`:"未記録";root.innerHTML=`<div class="abilityList"><div class="abilityRow"><strong>生成終端</strong><span>${Number(audit.generatedTerminalCount)||0}件</span></div><div class="abilityRow"><strong>確率評価済み</strong><span>${Number(audit.probabilityEvaluatedTerminalCount??audit.terminalCount)||0}件</span></div><div class="abilityRow"><strong>購入採用</strong><span>${Number(audit.adoptedTerminalCount??audit.finalBetCount)||0}件</span></div><div class="abilityRow"><strong>購入不採用</strong><span>${Number(audit.rejectedTerminalCount)||0}件</span></div><div class="abilityRow"><strong>終端保存監査</strong><span>${esc(lifecycleText)}</span></div><div class="abilityRow"><strong>理由なし生成除外</strong><span>${Number(lifecycle.unexplainedGenerationExclusionCount)||0}件</span></div><div class="abilityRow"><strong>理由なし購入不採用</strong><span>${Number(lifecycle.unreasonedPurchaseRejectCount)||0}件</span></div></div>${rejectRows?`<h3>不採用理由</h3><div class="abilityList">${rejectRows}</div>`:""}${safeAuditHtml(()=>renderBranchSelectionAudit(audit))}${safeAuditHtml(()=>renderPurchaseFamilyAudit(audit))}${safeAuditHtml(()=>renderAdoptedTerminalAudit(audit))}<p class="muted">終端は低確率・人気・点数圧縮を理由に削除しません。生成後は全終端を確率評価し、買わない終端も不採用理由付きで保存します。</p>`}catch(error){console.error("purchase audit render failed",error);root.innerHTML=`<div class="auditWarning"><strong>監査表示だけ読み込めませんでした</strong><p>${esc(error?.message||String(error))}</p><p class="muted">保存済み買い目と予想自体は保持されています。</p></div>`}}
 function safeAuditHtml(fn){try{return fn()||""}catch(error){console.error("audit section render failed",error);return `<div class="auditWarning"><strong>一部監査表示を省略</strong><p>${esc(error?.message||String(error))}</p></div>`}}

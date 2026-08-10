@@ -1,4 +1,4 @@
 # Current version
 
-- `KEIRIN-0.5.52-chat-diff-trend-audit`
-- label: `v75-chat-diff-trend-audit`
+- `KEIRIN-0.5.53-rider-marks-audit`
+- label: `v76-rider-marks-audit`
