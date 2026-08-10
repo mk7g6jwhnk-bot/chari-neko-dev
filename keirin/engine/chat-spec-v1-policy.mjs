@@ -57,7 +57,7 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
   // "Contender" branches are not automatically purchase-worthy covers.
   // Each alternate head must independently pass an absolute support/evidence gate.
   // No head is promoted merely because it is "next-best".
-  const contenderHeadAudit=selectContenderHeads(branches,centerHeads);
+  const contenderHeadAudit=selectContenderHeads(branches,centerHeads,families,primaryFamily,scored);
   const approvedContenderHeads=contenderHeadAudit.approved;
 
   // 2) Structural / position support is evaluated independently for every placing.
@@ -314,8 +314,11 @@ function deriveNaturalSupport(item){
   return{ok:first>=.78&&secondOk&&thirdOk,second:secondOk,third:thirdOk,secondRatio:second,thirdRatio:third,ratios:{first,second,third}};
 }
 
-function selectContenderHeads(branches,centerHeads){
+function selectContenderHeads(branches,centerHeads,families,primaryFamily,scored){
   const byHead=new Map();
+  const riderByNumber=new Map((scored||[]).map(r=>[Number(r.number),r]));
+  const primaryProbability=Number(primaryFamily?.probability)||0;
+  const primaryFirstScore=Number(riderByNumber.get(Number(primaryFamily?.first))?.roleScores?.first)||0;
 
   for(const b of branches){
     if(normalizePriority(b.priority)!=="contender")continue;
@@ -348,34 +351,62 @@ function selectContenderHeads(branches,centerHeads){
     const avgScore=x.totalScore/Math.max(1,x.branchCount);
     const evidenceCount=x.evidenceKeys.size;
     const netEvidence=x.positiveContribution-x.negativeContribution;
+    const familyProbability=Number(families?.get(x.head)?.probability)||0;
+    const familyRelative=primaryProbability>0?familyProbability/primaryProbability:0;
+    const firstScore=Number(riderByNumber.get(x.head)?.roleScores?.first)||0;
+    const firstRelative=primaryFirstScore>0?firstScore/primaryFirstScore:0;
 
-    // Independent pass/fail. A head does not become 押さえ merely because
-    // it is "the next-best" among alternatives.
-    const scorePass=x.maxScore>=6.2 || avgScore>=5.4;
+    // Branch evidence alone was too permissive in v86.
+    // A cover HEAD must independently have:
+    // 1) a credible alternate-win scenario,
+    // 2) actual 1st-place family mass, and
+    // 3) enough 1st-place suitability to make that scenario purchase-worthy.
+    const scenarioPass=x.maxScore>=6.2 || avgScore>=5.4;
 
-    // Prefer multiple explicit grounds. Older branch records may not carry scoreTrace;
-    // in that compatibility case only a clearly strong scenario score can substitute.
     const explicitEvidence=evidenceCount>=2 || x.positiveContribution>=1.5;
-    const legacyStrongEvidence=x.traceCount===0 && x.maxScore>=6.5;
+    const legacyStrongEvidence=x.traceCount===0 && x.maxScore>=6.8;
     const evidencePass=explicitEvidence || legacyStrongEvidence;
 
     const contradictionPass=x.negativeContribution<=Math.max(1.2,x.positiveContribution*.75);
-    const repeatSupport=x.branchCount>=2 && avgScore>=4.9;
-    const eligible=(scorePass && evidencePass && contradictionPass) ||
-      (repeatSupport && evidencePass && netEvidence>0);
+
+    // Absolute + relative family support. This is an eligibility gate, not a "top N" rank rule.
+    const familyPass=
+      familyProbability>=.055 ||
+      familyRelative>=.42;
+
+    // Independent head ability: allow a slightly weaker head if family/scenario evidence is strong,
+    // but do not promote a low head score just because a contender branch exists.
+    const firstAbilityPass=
+      firstScore>=6.0 ||
+      firstRelative>=.72 ||
+      (familyRelative>=.60 && x.maxScore>=7.0);
+
+    const repeatSupport=x.branchCount>=2 && avgScore>=5.0;
+    const eligible=
+      scenarioPass &&
+      evidencePass &&
+      contradictionPass &&
+      familyPass &&
+      firstAbilityPass &&
+      (repeatSupport || x.maxScore>=6.5 || x.positiveContribution>=1.8);
 
     return{
       head:x.head,branchCount:x.branchCount,avgScore,maxScore:x.maxScore,
       evidenceCount,positiveContribution:x.positiveContribution,
       negativeContribution:x.negativeContribution,netEvidence,
-      traceCount:x.traceCount,labels:x.labels,eligible,
-      reasons:{scorePass,evidencePass,explicitEvidence,legacyStrongEvidence,contradictionPass,repeatSupport}
+      traceCount:x.traceCount,labels:x.labels,
+      familyProbability,familyRelative,firstScore,firstRelative,
+      eligible,
+      reasons:{
+        scenarioPass,evidencePass,explicitEvidence,legacyStrongEvidence,
+        contradictionPass,familyPass,firstAbilityPass,repeatSupport
+      }
     };
   }).sort((a,b)=>
     Number(b.eligible)-Number(a.eligible) ||
+    b.familyProbability-a.familyProbability ||
     b.maxScore-a.maxScore ||
-    b.avgScore-a.avgScore ||
-    b.netEvidence-a.netEvidence ||
+    b.firstScore-a.firstScore ||
     a.head-b.head
   );
 
@@ -491,7 +522,7 @@ function buildChatSpecAudit(items,branches,families,primary){
   const center=branches.filter(b=>normalizePriority(b.priority)==="main");
   return{
     version:"KEIRIN-CHAT-SPEC-v1-CODED",
-    policy:"CENTER_HEAD_THEN_INDEPENDENT_CONTENDER_ELIGIBILITY_THEN_NATURAL_CONVERGENCE",
+    policy:"CENTER_HEAD_THEN_INDEPENDENT_HEAD_SCENARIO_FAMILY_ABILITY_GATE_THEN_NATURAL_CONVERGENCE",
     generatedTerminalCount:items.length,
     terminalDeletionCount:deleted.length,
     unexplainedPurchaseRejectCount:unexplainedRejects.length,
