@@ -40,29 +40,119 @@ export function deriveRiderMarks(snapshot){
 export function auditRiderMarkConsistency(snapshot, marks=deriveRiderMarks(snapshot)){
   const terminals=Array.isArray(snapshot?.terminalLedger)?snapshot.terminalLedger:[];
   const bets=Array.isArray(snapshot?.betSelections)?snapshot.betSelections:[];
+  const branches=Array.isArray(snapshot?.branches)?snapshot.branches:[];
   const familyMass=firstFamilyMass(snapshot,terminals);
   const familyRank=new Map([...familyMass.entries()].sort((a,b)=>b[1]-a[1]||a[0]-b[0]).map(([n],i)=>[n,i+1]));
+  const markByNumber=new Map(marks.map(m=>[Number(m.number),m]));
   const warnings=[];
+  const explanations=[];
+
+  const mainBets=bets.filter(b=>b?.category==="MAIN");
+  const highBets=bets.filter(b=>b?.category==="BUYABLE_HIGH");
+  const mainHeadCounts=countByPosition(mainBets,0);
+  const highHeadCounts=countByPosition(highBets,0);
+  const secondCounts=countByPosition(bets,1);
+  const thirdCounts=countByPosition(bets,2);
+  const mainTotal=mainBets.length||0;
+  const highTotal=highBets.length||0;
+
   for(const m of marks){
-    const n=m.number;
+    const n=Number(m.number);
     const headBets=bets.filter(b=>Number(b?.order?.[0])===n);
-    const thirdBets=bets.filter(b=>Number(b?.order?.[2])===n);
-    const mainHead=headBets.filter(b=>b?.category==="MAIN").length;
+    const mainHead=mainHeadCounts.get(n)||0;
+    const highHead=highHeadCounts.get(n)||0;
+    const secondBetCount=secondCounts.get(n)||0;
+    const thirdBetCount=thirdCounts.get(n)||0;
+
     if(m.overallMark==="◎" && familyRank.has(n) && familyRank.get(n)>2){
-      warnings.push({number:n,type:"OVERALL_MARK_FAMILY_MISMATCH",message:`${n}番は総合印◎ですが、1着ファミリー確率は${familyRank.get(n)}位です。総合印→中心予測の接続を確認。`});
+      warnings.push(warn(n,"OVERALL_MARK_FAMILY_MISMATCH","medium",
+        `${n}番は総合印◎ですが、1着ファミリー確率は${familyRank.get(n)}位です。総合印→1着評価→展開の接続を確認。`));
+    }
+
+    // First-place mark is the primary purchase-head consistency check.
+    if(m.firstMark==="◎" && mainHead===0){
+      warnings.push(warn(n,"FIRST_MARK_NO_MAIN_HEAD","high",
+        `${n}番は1着印◎ですが、本線の1着に1点もありません。1着評価→主展開→本線昇格の接続が切れていないか確認。`));
     }
     if(["◎","○"].includes(m.overallMark) && headBets.length===0){
-      warnings.push({number:n,type:"OVERALL_MARK_NO_HEAD_BET",message:`${n}番は総合印${m.overallMark}ですが、${n}番頭の購入候補がありません。中心予測→購入採否を確認。`});
+      warnings.push(warn(n,"OVERALL_MARK_NO_HEAD_BET","medium",
+        `${n}番は総合印${m.overallMark}ですが、${n}番頭の購入候補がありません。総合評価と購入採否の差に理由が必要です。`));
     }
-    if(m.thirdMark==="◎" && thirdBets.length===0){
-      warnings.push({number:n,type:"THIRD_MARK_NO_THIRD_BET",message:`${n}番は3着印◎ですが、${n}番3着の購入候補がありません。3着評価→購入採否を確認。`});
+
+    if(m.secondMark==="◎" && secondBetCount===0){
+      warnings.push(warn(n,"SECOND_MARK_NO_SECOND_BET","high",
+        `${n}番は2着印◎ですが、${n}番2着の購入終端がありません。1着成立後の2着再評価→購入採否を確認。`));
     }
+    if(m.thirdMark==="◎" && thirdBetCount===0){
+      warnings.push(warn(n,"THIRD_MARK_NO_THIRD_BET","high",
+        `${n}番は3着印◎ですが、${n}番3着の購入終端がありません。1-2着成立後の3着再評価→購入採否を確認。`));
+    }
+
+    if(["△","×"].includes(m.firstMark) && highTotal>=3 && highHead>=3 && highHead/highTotal>=.60){
+      warnings.push(warn(n,"LOW_FIRST_MARK_HIGH_HEAD_MONOPOLY","high",
+        `${n}番は1着印${m.firstMark}ですが、買える高配当${highTotal}点中${highHead}点（${Math.round(highHead/highTotal*100)}%）が${n}番頭です。穴頭を残す根拠は必要ですが、高配当枠の独占は1着評価との接続説明が必要です。`));
+    }
+
     if(m.overallMark==="×" && mainHead>0){
-      warnings.push({number:n,type:"LOW_OVERALL_MARK_MAIN_HEAD",message:`${n}番は総合印×ですが、本線の1着に${mainHead}点採用されています。分類根拠を確認。`});
+      warnings.push(warn(n,"LOW_OVERALL_MARK_MAIN_HEAD","high",
+        `${n}番は総合印×ですが、本線の1着に${mainHead}点採用されています。主展開側の明示理由を確認。`));
+    }
+
+    if(mainHead>0){
+      const mainShare=mainTotal?mainHead/mainTotal:0;
+      const branchReasons=unique(headBets.filter(b=>b.category==="MAIN").map(b=>b.dominantBranchLabel||b.branchLabel).filter(Boolean));
+      if(mainShare>=.60 && !["◎"].includes(m.firstMark)){
+        const reasonText=branchReasons.length?` 主展開理由候補: ${branchReasons.slice(0,2).join(" / ")}。`:"";
+        warnings.push(warn(n,"NON_TOP_FIRST_MARK_MAIN_DOMINANCE","medium",
+          `${n}番は1着印${m.firstMark}ですが、本線${mainTotal}点中${mainHead}点（${Math.round(mainShare*100)}%）を占めています。${reasonText}印と本線がズレるなら、この展開理由を明示できる必要があります。`));
+      }else if(branchReasons.length){
+        explanations.push({number:n,type:"MAIN_HEAD_EXPLANATION",
+          message:`${n}番頭の本線${mainHead}点は「${branchReasons.slice(0,2).join(" / ")}」由来。1着印${m.firstMark}とのズレがある場合はこの主展開根拠で説明します。`});
+      }
     }
   }
-  return {warnings,warningCount:warnings.length,familyRank:Object.fromEntries(familyRank)};
+
+  // Cross-rider inversion: 1着◎ has zero MAIN while another lower mark dominates MAIN.
+  const firstAce=marks.find(m=>m.firstMark==="◎");
+  if(firstAce && (mainHeadCounts.get(Number(firstAce.number))||0)===0 && mainTotal>0){
+    const dominant=[...mainHeadCounts.entries()].sort((a,b)=>b[1]-a[1])[0];
+    if(dominant){
+      const dm=markByNumber.get(Number(dominant[0]));
+      if(dm && Number(dominant[0])!==Number(firstAce.number)){
+        warnings.push(warn(Number(firstAce.number),"FIRST_MARK_MAIN_HEAD_INVERSION","high",
+          `1着印◎は${firstAce.number}番ですが、本線最多頭は${dominant[0]}番（1着印${dm.firstMark}、${dominant[1]}/${mainTotal}点）です。これは許容される場合もありますが、主展開が印順位を逆転させた直接根拠を必須表示にします。`));
+      }
+    }
+  }
+
+  const summary={
+    mainHeadCounts:Object.fromEntries(mainHeadCounts),
+    highHeadCounts:Object.fromEntries(highHeadCounts),
+    secondCounts:Object.fromEntries(secondCounts),
+    thirdCounts:Object.fromEntries(thirdCounts),
+    mainTotal,highTotal
+  };
+  return{
+    version:"RIDER-MARK-PURCHASE-LINKAGE-v2",
+    status:warnings.some(w=>w.severity==="high")?"WARN":warnings.length?"CHECK":"OK",
+    warnings,
+    explanations,
+    warningCount:warnings.length,
+    familyRank:Object.fromEntries(familyRank),
+    summary
+  };
 }
+
+function countByPosition(rows,index){
+  const map=new Map();
+  for(const row of rows){
+    const n=Number(row?.order?.[index]);
+    if(Number.isFinite(n))map.set(n,(map.get(n)||0)+1);
+  }
+  return map;
+}
+function unique(rows){return [...new Set(rows)]}
+function warn(number,type,severity,message){return{number,type,severity,message}}
 
 function deriveRaceContext(snapshot,rows){
   const terminals=Array.isArray(snapshot?.terminalLedger)?snapshot.terminalLedger:[];

@@ -1,4 +1,4 @@
 # Current version
 
-- `KEIRIN-0.7.1-multi-main-branch-cluster`
-- label: `v93-multi-main-branch-cluster`
+- `KEIRIN-0.7.2-mark-purchase-linkage-audit`
+- label: `v94-mark-purchase-linkage-audit`
