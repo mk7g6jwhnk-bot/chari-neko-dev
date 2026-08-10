@@ -1,4 +1,4 @@
 # Current version
 
-- `KEIRIN-0.6.2-balanced-undercoverage-guard`
-- label: `v84-balanced-undercoverage-guard`
+- `KEIRIN-0.6.3-selective-cover-heads`
+- label: `v85-selective-cover-heads`

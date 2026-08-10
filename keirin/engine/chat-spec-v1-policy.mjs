@@ -54,6 +54,12 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
   const centerHeads=new Set(branches.filter(b=>normalizePriority(b.priority)==="main").map(b=>Number(b.requiredFirstNumber)).filter(Number.isFinite));
   if(!centerHeads.size && primaryFamily)centerHeads.add(primaryFamily.first);
 
+  // "Contender" branches are not automatically purchase-worthy covers.
+  // Select contender HEADS first, using head-level scenario support. This prevents
+  // every merely possible alternate head from becoming 押さえ.
+  const contenderHeadAudit=selectContenderHeads(branches,centerHeads);
+  const approvedContenderHeads=contenderHeadAudit.approved;
+
   // 2) Structural / position support is evaluated independently for every placing.
   for(const item of evaluated){
     const family=families.get(Number(item.order?.[0]))||null;
@@ -89,6 +95,7 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
 
   for(const family of orderedFamilies){
     if(!["main","contender"].includes(family.tier))continue;
+    if(family.tier==="contender" && !approvedContenderHeads.has(family.first))continue;
 
     const allNatural=evaluated
       .filter(x=>x.firstFamilyNumber===family.first && x.familyNaturalPositionEligible)
@@ -194,7 +201,10 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
         betClass="MAIN";
         mode="CHAT_SPEC_CENTER";
         reason=humanPurchaseReason(item,"MAIN");
-      }else if(item.chatForecastRole==="main" || item.chatForecastRole==="contender"){
+      }else if(
+        item.chatForecastRole==="main" ||
+        (item.chatForecastRole==="contender" && approvedContenderHeads.has(item.firstFamilyNumber))
+      ){
         betClass="COVER";
         mode="CHAT_SPEC_SECONDARY";
         reason=humanPurchaseReason(item,"COVER");
@@ -204,7 +214,12 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
         reason=humanPurchaseReason(item,"BUYABLE_HIGH");
       }
     }else{
-      ({code,reason}=rejectReason(item,familyMeta));
+      if(item.chatForecastRole==="contender" && !approvedContenderHeads.has(item.firstFamilyNumber)){
+        code="CONTENDER_HEAD_NOT_SELECTED";
+        reason=`${orderText(item)}は有力候補枝として生成・保持。ただし${item.firstFamilyNumber}番頭は「押さえの中心頭」に選ばれていないため購入しない。`;
+      }else{
+        ({code,reason}=rejectReason(item,familyMeta));
+      }
     }
 
     Object.assign(item,{
@@ -258,7 +273,13 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
     families:[...families.values()].sort((a,b)=>b.probability-a.probability),
     centerHeads:[...centerHeads],
     scenarioSummary:buildScenarioSummary(branches),
-    audit:buildChatSpecAudit(evaluated,branches,families,primaryFamily)
+    audit:{
+      ...buildChatSpecAudit(evaluated,branches,families,primaryFamily),
+      contenderHeadAudit:{
+        candidates:contenderHeadAudit.candidates,
+        approved:[...approvedContenderHeads]
+      }
+    }
   };
 }
 
@@ -291,6 +312,58 @@ function deriveNaturalSupport(item){
   const secondOk=second>=.70;
   const thirdOk=third>=.70;
   return{ok:first>=.78&&secondOk&&thirdOk,second:secondOk,third:thirdOk,secondRatio:second,thirdRatio:third,ratios:{first,second,third}};
+}
+
+function selectContenderHeads(branches,centerHeads){
+  const byHead=new Map();
+  for(const b of branches){
+    if(normalizePriority(b.priority)!=="contender")continue;
+    const head=Number(b.requiredFirstNumber);
+    if(!Number.isFinite(head) || centerHeads.has(head))continue;
+    const score=Number(b.score)||0;
+    const cur=byHead.get(head)||{head,score:0,maxScore:0,count:0};
+    cur.score+=Math.max(0,score);
+    cur.maxScore=Math.max(cur.maxScore,score);
+    cur.count++;
+    byHead.set(head,cur);
+  }
+
+  const candidates=[...byHead.values()]
+    .map(x=>({...x,normalizedSupport:x.score/Math.max(1,x.count)}))
+    .sort((a,b)=>b.normalizedSupport-a.normalizedSupport||b.maxScore-a.maxScore||a.head-b.head);
+
+  const approved=new Set();
+  if(!candidates.length)return{candidates,approved};
+
+  const top=candidates[0].normalizedSupport||1;
+  const values=candidates.map(x=>x.normalizedSupport);
+  const gaps=values.slice(0,-1).map((v,i)=>({
+    i,
+    abs:v-values[i+1],
+    rel:v>0?(v-values[i+1])/v:0,
+    topRel:top>0?(v-values[i+1])/top:0
+  }));
+  const avg=gaps.length?sum(gaps.map(g=>g.topRel))/gaps.length:0;
+  const boundary=gaps
+    .filter(g=>g.rel>=.24 && g.topRel>=Math.max(.06,avg*1.25))
+    .sort((a,b)=>b.topRel-a.topRel||b.rel-a.rel||a.i-b.i)[0];
+
+  let selected;
+  if(boundary){
+    selected=candidates.slice(0,boundary.i+1);
+  }else{
+    // No clear separation: "押さえ" should remain selective.
+    // Keep only heads close to the best contender support, and cap by evidence quality,
+    // not by a fixed ticket count.
+    selected=candidates.filter((x,i)=>i===0 || x.normalizedSupport>=top*.82);
+  }
+
+  // An alternate head also needs meaningful absolute support; a weak field of
+  // uniformly poor contenders should not manufacture an 押さえ head.
+  for(const x of selected){
+    if(x.normalizedSupport>=4.8 || x.maxScore>=6.0)approved.add(x.head);
+  }
+  return{candidates,approved};
 }
 
 function buildFamilies(items,branches){
@@ -401,7 +474,7 @@ function buildChatSpecAudit(items,branches,families,primary){
   const center=branches.filter(b=>normalizePriority(b.priority)==="main");
   return{
     version:"KEIRIN-CHAT-SPEC-v1-CODED",
-    policy:"GENERATE_ALL_THEN_NATURAL_CONVERGENCE_WITH_UNDERCOVERAGE_GUARD",
+    policy:"CENTER_HEAD_THEN_SELECTIVE_CONTENDER_HEADS_THEN_NATURAL_CONVERGENCE",
     generatedTerminalCount:items.length,
     terminalDeletionCount:deleted.length,
     unexplainedPurchaseRejectCount:unexplainedRejects.length,
