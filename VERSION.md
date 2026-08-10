@@ -1,4 +1,4 @@
 # Current version
 
-- `KEIRIN-0.7.2-mark-purchase-linkage-audit`
-- label: `v94-mark-purchase-linkage-audit`
+- `KEIRIN-0.8.0-rider-evaluation-v2`
+- label: `v95-rider-evaluation-v2`

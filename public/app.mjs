@@ -11,7 +11,7 @@ const ODDS_CACHE_KEY="chari-neko:keirin-odds-cache:v1";
 const RACE_META_CACHE_KEY="chari-neko:keirin-race-meta-cache:v1";
 const RESULT_CACHE_KEY="chari-neko:keirin-result-cache:v1";
 const MEETING_CACHE_KEY="chari-neko:keirin-meeting-cache:v1";
-const APP_RELEASE="KEIRIN-0.7.2-mark-purchase-linkage-audit";
+const APP_RELEASE="KEIRIN-0.8.0-rider-evaluation-v2";
 const APP_UPDATE_CHECK_INTERVAL_MS=5*60*1000;
 let lastAppUpdateCheckAt=0,appUpdateCheckBusy=false;
 const VENUE_CODES={函館:"11",青森:"12",いわき平:"13",弥彦:"21",前橋:"22",取手:"23",宇都宮:"24",大宮:"25",西武園:"26",京王閣:"27",立川:"28",松戸:"31",千葉:"32",川崎:"34",平塚:"35",小田原:"36",伊東:"37",静岡:"38",名古屋:"42",岐阜:"43",大垣:"44",豊橋:"45",富山:"46",松阪:"47",四日市:"48",福井:"51",奈良:"53",向日町:"54",和歌山:"55",岸和田:"56",玉野:"61",広島:"62",防府:"63",高松:"71",小松島:"73",高知:"74",松山:"75",小倉:"81",久留米:"83",武雄:"84",佐世保:"85",別府:"86",熊本:"87"};
@@ -273,7 +273,7 @@ function renderPredictionDetail(snapshot){
     const chatSaved=findChatPrediction(state.race||snapshot?.targetRace||{});
     const chatMarkMap=new Map((Array.isArray(chatSaved?.riderMarks)?chatSaved.riderMarks:[]).map(m=>[Number(m.number),m]));
     const markTable=renderRiderMarkNameTable(riderMarks,participantMap,chatMarkMap);
-    const abilities=abilitiesUsed.map(a=>{const m=markMap.get(Number(a?.number))||{},p=participantMap.get(Number(a?.number))||{};return `<div class="abilityRow"><strong>${a?.number??"-"}番</strong><span><b>${esc(p?.name||"")}</b>　総合 ${esc(m.overallMark||"？")} / 1着 ${esc(m.firstMark||"？")} (${fmtAbility(m.firstScore)}) / 2着 ${esc(m.secondMark||"？")} (${fmtAbility(m.secondScore)}) / 3着 ${esc(m.thirdMark||"？")} (${fmtAbility(m.thirdScore)}) / 信頼 ${esc(m.confidence||"不明")}<br><small>近況 ${fmtAbility(a?.recentForm)} / 主導権 ${fmtAbility(a?.startPower)} / まくり ${fmtAbility(a?.sprintPower)} / 差し ${fmtAbility(a?.finishPower)} / 追走 ${fmtAbility(a?.trackingSkill)}</small></span></div>`}).join("");
+    const abilities=abilitiesUsed.map(a=>{const m=markMap.get(Number(a?.number))||{},p=participantMap.get(Number(a?.number))||{},v2=a?.riderEvaluationV2||{},fm=v2?.firstMechanisms||{},sm=v2?.secondMechanisms||{},tm=v2?.thirdMechanisms||{};return `<div class="abilityRow"><strong>${a?.number??"-"}番</strong><span><b>${esc(p?.name||"")}</b>　総合 ${esc(m.overallMark||"？")} / 1着 ${esc(m.firstMark||"？")} (${fmtAbility(m.firstScore)}) / 2着 ${esc(m.secondMark||"？")} (${fmtAbility(m.secondScore)}) / 3着 ${esc(m.thirdMark||"？")} (${fmtAbility(m.thirdScore)}) / 信頼 ${esc(v2?.confidence||m.confidence||"不明")}<br><small>選手評価v2: 逃げ ${fmtAbility(fm.escape)} / 捲り ${fmtAbility(fm.makuri)} / 差し ${fmtAbility(fm.sashi)} / 番手差し ${fmtAbility(fm.banteSashi)} / 2着追走 ${fmtAbility(sm.lineFollower)} / 先行残り ${fmtAbility(sm.leaderRemain)} / 3着位置残り ${fmtAbility(tm.positionRemain)}</small><br><small>基礎: 近況 ${fmtAbility(a?.recentForm)} / 主導権 ${fmtAbility(a?.startPower)} / まくり ${fmtAbility(a?.sprintPower)} / 差し ${fmtAbility(a?.finishPower)} / 追走 ${fmtAbility(a?.trackingSkill)}</small></span></div>`}).join("");
     const markAudit=auditRiderMarkConsistency(snapshot,riderMarks);
     const markAuditHtml=renderRiderMarkAudit(markAudit);
     const audit=snapshot?.predictionOutput?.audit&&typeof snapshot.predictionOutput.audit==="object"?snapshot.predictionOutput.audit:{};
