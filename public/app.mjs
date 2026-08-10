@@ -2,6 +2,7 @@ import{attachResult,createSnapshot,findLatestSnapshot,isResultPending,loadSnapsh
 import{derivePredictionRatings,starText}from"./prediction-ratings.mjs";
 import{findChatPrediction,parseChatPrediction,removeChatPrediction,saveChatPrediction}from"./chat-prediction-store.mjs";
 import{compareChatAndApp}from"./chat-app-diff.mjs";
+import{loadChatDiffTrends,recordChatDiffTrend,summarizeChatDiffTrends}from"./chat-diff-trend-store.mjs";
 const $=id=>document.getElementById(id),screens=[...document.querySelectorAll(".screen")];
 const state={screen:"home",history:[],date:localDate(),meeting:null,meetings:[],meetingTab:"today",race:null,payload:null,snapshot:null,retry:null,busy:false,oddsBusyKey:null,bulkBusy:false,bulkDone:0,bulkTotal:0,screeningBusy:false,deepDiveBusy:false,deepDiveCurrentKeys:[]};
 const BATCH_LOCK_KEY="chari-neko:keirin-batch-lock:v1",TAB_INSTANCE_ID=(globalThis.crypto?.randomUUID?.()||`${Date.now()}-${Math.random()}`),BATCH_LOCK_TTL_MS=10*60*1000;
@@ -9,7 +10,7 @@ const ODDS_CACHE_KEY="chari-neko:keirin-odds-cache:v1";
 const RACE_META_CACHE_KEY="chari-neko:keirin-race-meta-cache:v1";
 const RESULT_CACHE_KEY="chari-neko:keirin-result-cache:v1";
 const MEETING_CACHE_KEY="chari-neko:keirin-meeting-cache:v1";
-const APP_RELEASE="KEIRIN-0.5.51-storage-quota-compaction";
+const APP_RELEASE="KEIRIN-0.5.52-chat-diff-trend-audit";
 const APP_UPDATE_CHECK_INTERVAL_MS=5*60*1000;
 let lastAppUpdateCheckAt=0,appUpdateCheckBusy=false;
 const VENUE_CODES={函館:"11",青森:"12",いわき平:"13",弥彦:"21",前橋:"22",取手:"23",宇都宮:"24",大宮:"25",西武園:"26",京王閣:"27",立川:"28",松戸:"31",千葉:"32",川崎:"34",平塚:"35",小田原:"36",伊東:"37",静岡:"38",名古屋:"42",岐阜:"43",大垣:"44",豊橋:"45",富山:"46",松阪:"47",四日市:"48",福井:"51",奈良:"53",向日町:"54",和歌山:"55",岸和田:"56",玉野:"61",広島:"62",防府:"63",高松:"71",小松島:"73",高知:"74",松山:"75",小倉:"81",久留米:"83",武雄:"84",佐世保:"85",別府:"86",熊本:"87"};
@@ -209,6 +210,7 @@ function renderChatPredictionImport(){
   const saved=findChatPrediction(localStorage,state.race);
   const main=saved?.mainScenario;
   const comparison=saved&&state.snapshot?compareChatAndApp(saved,state.snapshot):null;
+  if(comparison)recordChatDiffTrend(localStorage,state.race,comparison);
   const comparisonHtml=renderChatAppComparison(comparison,saved);
   const summary=saved?`<div class="chatImportSaved"><div class="sectionHead"><strong>チャット予想 保存済み</strong><span class="pill success">比較用</span></div>${main?.description?`<p><b>主展開</b> ${esc(main.description)}</p>`:""}<p class="muted">1着候補 ${saved.firstCandidates?.length||0}件 / 1-2着枝 ${saved.pairBranches?.length||0}件 / 終端 ${saved.terminals?.length||0}件</p>${comparisonHtml}<button id="removeChatPrediction" class="secondary" type="button">取り込みを削除</button></div>`:"";
   panel.innerHTML=`<div class="sectionHead"><div><small>比較・修正点洗い出し用</small><h2>チャット予想を取り込む</h2></div><span class="pill">STEP 2-3</span></div><p class="muted">チャット予想はアプリ予想を上書きしません。保存後、同じレースのアプリ予想と工程ごとに比較し、最初にズレた場所を表示します。</p>${summary}<details class="predictionAccordion"><summary>${saved?"チャット予想を更新する":"チャット予想を貼り付ける"}</summary><div class="accordionBody"><textarea id="chatPredictionText" class="chatPredictionTextarea" rows="10" placeholder='チャットで「アプリ取り込み形式で出して」と依頼し、JSON全体をここへ貼り付け'></textarea><div id="chatPredictionImportMessage" class="muted"></div><button id="saveChatPrediction" class="primary" type="button">チャット予想を保存</button><details class="supportBranchAudit"><summary>必要な形式を見る</summary><pre class="chatPredictionExample">${esc(chatPredictionExample(state.race))}</pre></details></div></details>`;
@@ -229,7 +231,17 @@ function renderChatAppComparison(comparison,saved){
     const details=renderChatDiffDetails(stage);
     return `<div class="chatDiffStage ${cls}"><strong>${icon} ${esc(stage.label)}</strong><p>${esc(stage.summary||"")}</p>${details}</div>`;
   }).join("");
-  return `<section class="chatDiffBox"><div class="sectionHead"><strong>チャット対アプリ差分監査</strong><span class="pill ${first?"warning":"success"}">${first?"差分あり":"主要工程一致"}</span></div><p class="${headlineClass}"><b>${headline}</b>${first?.summary?` — ${esc(first.summary)}`:""}</p><p class="muted">比較順：1着評価 → 1-2着枝 → 3着終端 → 買い目分類 → 購入採否。後段の差より、最初にズレた工程を優先して修正します。</p><details class="predictionAccordion"><summary>差分の内訳を見る</summary><div class="accordionBody">${stageRows}<p class="muted">終端数 チャット ${comparison.totals?.chatTerminals??0} / アプリ ${comparison.totals?.appTerminals??0}　購入 チャット ${comparison.totals?.chatPurchased??0} / アプリ ${comparison.totals?.appPurchased??0}</p></div></details></section>`;
+  const trend=renderChatDiffTrendSummary();
+  return `<section class="chatDiffBox"><div class="sectionHead"><strong>チャット対アプリ差分監査</strong><span class="pill ${first?"warning":"success"}">${first?"差分あり":"主要工程一致"}</span></div><p class="${headlineClass}"><b>${headline}</b>${first?.summary?` — ${esc(first.summary)}`:""}</p><p class="muted">比較順：1着評価 → 1-2着枝 → 3着終端 → 買い目分類 → 購入採否。後段の差より、最初にズレた工程を優先して修正します。</p>${trend}<details class="predictionAccordion"><summary>差分の内訳を見る</summary><div class="accordionBody">${stageRows}<p class="muted">終端数 チャット ${comparison.totals?.chatTerminals??0} / アプリ ${comparison.totals?.appTerminals??0}　購入 チャット ${comparison.totals?.chatPurchased??0} / アプリ ${comparison.totals?.appPurchased??0}</p></div></details></section>`;
+}
+
+function renderChatDiffTrendSummary(){
+  const summary=summarizeChatDiffTrends(loadChatDiffTrends(localStorage));
+  if(!summary.raceCount)return"";
+  const rows=(summary.stages||[]).filter(s=>s.compared>0).map(s=>`<div class="chatTrendRow"><span>${esc(s.label)}</span><strong>${s.diffRaces}/${s.compared}R</strong><small>${Math.round(s.diffRate*100)}%</small></div>`).join("");
+  const p=summary.priority;
+  const priority=p?`<p class="auditWarn"><b>現在の優先修正：${esc(p.label)}</b> — ${p.compared}R中${p.diffRaces}Rで差分（${Math.round(p.diffRate*100)}%）</p>`:"";
+  return `<details class="predictionAccordion chatTrendAudit" open><summary>複数レースの差分傾向（${summary.raceCount}R）</summary><div class="accordionBody">${priority}<div class="chatTrendGrid">${rows}</div><p class="muted">同じレースを再比較した場合は最新結果で置き換えます。終端本体は重複保存せず、工程別の差分だけを軽量保存します。</p></div></details>`;
 }
 function renderChatDiffDetails(stage){
   const d=stage?.details||{};let rows=[];
