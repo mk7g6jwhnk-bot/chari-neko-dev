@@ -1,4 +1,4 @@
 # Current version
 
-- `KEIRIN-0.6.5-cover-head-family-ability-gate`
-- label: `v87-cover-head-family-ability-gate`
+- `KEIRIN-0.6.6-natural-convergence-gate`
+- label: `v88-natural-convergence-gate`

@@ -60,10 +60,12 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
   const contenderHeadAudit=selectContenderHeads(branches,centerHeads,families,primaryFamily,scored);
   const approvedContenderHeads=contenderHeadAudit.approved;
 
-  // 2) Structural / position support is evaluated independently for every placing.
+  // 2) Structural / position support AND scenario-coherent natural convergence
+  // are evaluated separately from mere terminal existence.
   for(const item of evaluated){
     const family=families.get(Number(item.order?.[0]))||null;
     const natural=deriveNaturalSupport(item);
+    const convergence=deriveNaturalConvergence(item,lines,branches);
     const ev=item.odds>1?item.probability*item.odds:null;
     Object.assign(item,{
       firstFamilyNumber:Number(item.order?.[0]),
@@ -79,6 +81,11 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
       secondFamilyRelativeToBest:natural.secondRatio,
       thirdFamilyRelativeToBest:natural.thirdRatio,
       decisionRatios:natural.ratios,
+      naturalConvergenceScore:convergence.score,
+      naturalConvergenceLevel:convergence.level,
+      naturalConvergenceReasons:convergence.reasons,
+      extraConditionCount:convergence.extraConditionCount,
+      scenarioCoherence:convergence.scenarioCoherence,
       expectedValueIndex:ev,
       terminalProbabilityShare:item.probability
     });
@@ -100,7 +107,9 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
     const allNatural=evaluated
       .filter(x=>x.firstFamilyNumber===family.first && x.familyNaturalPositionEligible)
       .filter(x=>x.chatForecastRole==="main" || x.chatForecastRole==="contender")
-      .sort(compareTerminal);
+      // Existence != purchase. Main/cover candidates need at least medium scenario coherence.
+      .filter(x=>x.naturalConvergenceScore>=.46)
+      .sort(comparePurchaseTerminal);
 
     if(!allNatural.length)continue;
 
@@ -181,6 +190,7 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
   //    only with explicit scenario support AND actual odds value.
   const possibleValue=evaluated
     .filter(x=>x.chatForecastRole==="sub" && x.familyNaturalPositionEligible && x.odds>1)
+    .filter(x=>x.naturalConvergenceScore>=.40)
     .filter(x=>Number(x.expectedValueIndex)>1.05)
     .filter(x=>x.probability >= (evaluated[0]?.probability||0)*.10)
     .sort((a,b)=>(b.expectedValueIndex-a.expectedValueIndex)||(b.probability-a.probability));
@@ -197,18 +207,18 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
     let betClass="NONE",code=null,reason=null,mode=null;
 
     if(chosen){
-      if(item.chatForecastRole==="main" && inCenter){
+      if(item.chatForecastRole==="main" && inCenter && item.naturalConvergenceScore>=.62){
         betClass="MAIN";
         mode="CHAT_SPEC_CENTER";
         reason=humanPurchaseReason(item,"MAIN");
       }else if(
-        item.chatForecastRole==="main" ||
-        (item.chatForecastRole==="contender" && approvedContenderHeads.has(item.firstFamilyNumber))
+        (item.chatForecastRole==="main" && item.naturalConvergenceScore>=.46) ||
+        (item.chatForecastRole==="contender" && approvedContenderHeads.has(item.firstFamilyNumber) && item.naturalConvergenceScore>=.46)
       ){
         betClass="COVER";
         mode="CHAT_SPEC_SECONDARY";
         reason=humanPurchaseReason(item,"COVER");
-      }else{
+      }else if(item.chatForecastRole==="sub" && item.naturalConvergenceScore>=.40){
         betClass="BUYABLE_HIGH";
         mode="CHAT_SPEC_VALUE";
         reason=humanPurchaseReason(item,"BUYABLE_HIGH");
@@ -414,6 +424,82 @@ function selectContenderHeads(branches,centerHeads,families,primaryFamily,scored
   return{candidates,approved};
 }
 
+function deriveNaturalConvergence(item,lines,branches){
+  const order=(item.order||[]).map(Number);
+  const [first,second,third]=order;
+  const contributions=[...(item.branchContributions||[])].filter(c=>contributionMatches(c,order));
+  const best=contributions.sort((a,b)=>(Number(b.probability)||0)-(Number(a.probability)||0))[0]||{};
+  const ratios=best.decisionRatios||{};
+  const firstR=finite(ratios.first)?Number(ratios.first):1;
+  const secondR=finite(ratios.second)?Number(ratios.second):1;
+  const thirdR=finite(ratios.third)?Number(ratios.third):1;
+
+  const lineInfo=findLineContext(lines,first);
+  let scenarioCoherence=.50;
+  let extra=0;
+  const reasons=[];
+
+  if(lineInfo){
+    const {members,index}=lineInfo;
+    const follower=members[index+1]??null;
+    const next=members[index+2]??null;
+
+    if(Number(follower)===second){
+      scenarioCoherence+=.28;
+      reasons.push(`${first}の直後を${second}が追走`);
+    }else if(Number(next)===second){
+      scenarioCoherence+=.16;
+      extra+=1;
+      reasons.push(`${second}がライン3番手から2着`);
+    }else if(follower!=null){
+      scenarioCoherence-=.16;
+      extra+=1;
+      reasons.push(`${follower}の追走失敗が必要`);
+    }
+
+    if(Number(follower)===third || Number(next)===third){
+      scenarioCoherence+=.10;
+      reasons.push(`${third}が同ライン残り`);
+    }else if(third!==second){
+      scenarioCoherence-=.05;
+      extra+=1;
+      reasons.push(`${third}の別線残り条件`);
+    }
+  }else{
+    reasons.push("ライン追走関係の直接確認なし");
+  }
+
+  // Decision ratios preserve branch-specific 2nd/3rd suitability.
+  const ratioScore=Math.pow(
+    Math.max(.01,firstR)*
+    Math.max(.01,secondR)*
+    Math.max(.01,thirdR),1/3
+  );
+
+  // Additional conditions are explicit penalties, not deletion rules.
+  const penalty=Math.max(.58,1-extra*.12);
+  const score=clamp((scenarioCoherence*.55 + ratioScore*.45)*penalty,0,1);
+  const level=score>=.70?"高":score>=.52?"中":"低";
+  return{score,level,reasons,extraConditionCount:extra,scenarioCoherence:clamp(scenarioCoherence,0,1)};
+}
+
+function findLineContext(lines,number){
+  const normalized=Array.isArray(lines)?lines:[];
+  for(const line of normalized){
+    const raw=Array.isArray(line)?line:(Array.isArray(line?.members)?line.members:[]);
+    const members=raw.map(m=>Number(m?.number??m)).filter(Number.isFinite);
+    const index=members.indexOf(Number(number));
+    if(index>=0)return{members,index};
+  }
+  return null;
+}
+
+function comparePurchaseTerminal(a,b){
+  return (Number(b.naturalConvergenceScore)-Number(a.naturalConvergenceScore)) ||
+    (b.probability-a.probability) ||
+    key(a.order).localeCompare(key(b.order),"en");
+}
+
 function buildFamilies(items,branches){
   const map=new Map();
   for(const x of items){
@@ -487,6 +573,7 @@ function selectNaturallySeparatedValue(rows){
 
 function rejectReason(item,familyMeta){
   if(!item.familyNaturalPositionEligible)return{code:"POSITION_SUPPORT_WEAK",reason:`${orderText(item)}は終端として保持。ただし2着・3着の位置支持が購入水準まで届かないため不採用。`};
+  if(Number(item.naturalConvergenceScore)<.40)return{code:"NATURAL_CONVERGENCE_TOO_LOW",reason:`${orderText(item)}は成立可能な終端として保持。ただし1着成立シナリオを固定した時、2着・3着へ自然に繋がる度合いが低いため購入しない。`};
   if(item.chatForecastRole==="risk")return{code:"RISK_SCENARIO_ONLY",reason:`${orderText(item)}は例外・リスク枝として保持するが、中心予測の購入対象にはしない。`};
   if(item.chatForecastRole==="sub"){
     if(!(item.odds>1))return{code:"ODDS_PENDING_FOR_VALUE",reason:`${orderText(item)}は可能性枝として保持。高配当候補に上げるには実オッズ確認が必要。`};
@@ -502,9 +589,11 @@ function humanPurchaseReason(item,cls){
   const [a,b,c]=item.order;
   const scenario=item.chatSupportingBranchLabels?.[0]||item.branchLabel||"展開枝";
   const oddsPart=item.odds>1?` 実オッズ${Number(item.odds).toFixed(1)}倍。`:"";
-  if(cls==="MAIN")return `主展開「${scenario}」から自然に残る終端。${a}を1着、${b}を2着、${c}を3着として独立評価し、本線ファミリーの確率カバーに採用。${oddsPart}`.trim();
-  if(cls==="COVER")return `有力な次候補「${scenario}」または主展開内の枝違いとして成立。中心予測を補う押さえとして採用。${oddsPart}`.trim();
-  return `可能性枝「${scenario}」を終端まで保持したうえで、実オッズまで含めた妙味が確認できたため買える高配当として採用。${oddsPart}`.trim();
+  const conv=`自然収束度${Math.round((Number(item.naturalConvergenceScore)||0)*100)}%`;
+  const why=(item.naturalConvergenceReasons||[]).slice(0,2).join(" / ");
+  if(cls==="MAIN")return `主展開「${scenario}」を固定した時に${a}→${b}→${c}が自然に繋がる終端（${conv}${why?`・${why}`:""}）。本線として採用。${oddsPart}`.trim();
+  if(cls==="COVER")return `有力な別シナリオ「${scenario}」内で${a}→${b}→${c}が自然に繋がる終端（${conv}${why?`・${why}`:""}）。押さえとして採用。${oddsPart}`.trim();
+  return `可能性枝「${scenario}」を終端まで保持し、${conv}と実オッズ妙味の両方を確認できたため買える高配当として採用。${oddsPart}`.trim();
 }
 
 function buildScenarioSummary(branches){
@@ -522,7 +611,7 @@ function buildChatSpecAudit(items,branches,families,primary){
   const center=branches.filter(b=>normalizePriority(b.priority)==="main");
   return{
     version:"KEIRIN-CHAT-SPEC-v1-CODED",
-    policy:"CENTER_HEAD_THEN_INDEPENDENT_HEAD_SCENARIO_FAMILY_ABILITY_GATE_THEN_NATURAL_CONVERGENCE",
+    policy:"FIX_1ST_SCENARIO_THEN_2ND_THEN_3RD_THEN_NATURAL_CONVERGENCE_THEN_PURCHASE",
     generatedTerminalCount:items.length,
     terminalDeletionCount:deleted.length,
     unexplainedPurchaseRejectCount:unexplainedRejects.length,
@@ -530,12 +619,19 @@ function buildChatSpecAudit(items,branches,families,primary){
     primaryFirstFamily:primary?.first||null,
     primaryFirstFamilyProbability:primary?.probability||0,
     familyCount:families.size,
-    passed:deleted.length===0&&unexplainedRejects.length===0,
+    naturalConvergence:{
+      high:items.filter(x=>x.naturalConvergenceLevel==="高").length,
+      medium:items.filter(x=>x.naturalConvergenceLevel==="中").length,
+      low:items.filter(x=>x.naturalConvergenceLevel==="低").length,
+      purchasedLow:items.filter(x=>x.purchaseStatus===PURCHASED && x.naturalConvergenceLevel==="低").length
+    },
+    passed:deleted.length===0&&unexplainedRejects.length===0&&items.filter(x=>x.purchaseStatus===PURCHASED && x.naturalConvergenceLevel==="低").length===0,
     invariants:[
       {key:"NO_TERMINAL_DELETION",passed:deleted.length===0},
       {key:"NO_UNEXPLAINED_PURCHASE_REJECT",passed:unexplainedRejects.length===0},
       {key:"PURCHASE_SEPARATE_FROM_GENERATION",passed:true},
-      {key:"POSSIBILITY_SEPARATE_FROM_CENTER_FORECAST",passed:true}
+      {key:"POSSIBILITY_SEPARATE_FROM_CENTER_FORECAST",passed:true},
+      {key:"NO_LOW_NATURAL_CONVERGENCE_PURCHASE",passed:items.filter(x=>x.purchaseStatus===PURCHASED && x.naturalConvergenceLevel==="低").length===0}
     ]
   };
 }
