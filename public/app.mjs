@@ -11,7 +11,7 @@ const ODDS_CACHE_KEY="chari-neko:keirin-odds-cache:v1";
 const RACE_META_CACHE_KEY="chari-neko:keirin-race-meta-cache:v1";
 const RESULT_CACHE_KEY="chari-neko:keirin-result-cache:v1";
 const MEETING_CACHE_KEY="chari-neko:keirin-meeting-cache:v1";
-const APP_RELEASE="KEIRIN-0.6.6-natural-convergence-gate";
+const APP_RELEASE="KEIRIN-0.6.7-whole-linkage-audit";
 const APP_UPDATE_CHECK_INTERVAL_MS=5*60*1000;
 let lastAppUpdateCheckAt=0,appUpdateCheckBusy=false;
 const VENUE_CODES={函館:"11",青森:"12",いわき平:"13",弥彦:"21",前橋:"22",取手:"23",宇都宮:"24",大宮:"25",西武園:"26",京王閣:"27",立川:"28",松戸:"31",千葉:"32",川崎:"34",平塚:"35",小田原:"36",伊東:"37",静岡:"38",名古屋:"42",岐阜:"43",大垣:"44",豊橋:"45",富山:"46",松阪:"47",四日市:"48",福井:"51",奈良:"53",向日町:"54",和歌山:"55",岸和田:"56",玉野:"61",広島:"62",防府:"63",高松:"71",小松島:"73",高知:"74",松山:"75",小倉:"81",久留米:"83",武雄:"84",佐世保:"85",別府:"86",熊本:"87"};
@@ -277,9 +277,10 @@ function renderPredictionDetail(snapshot){
     const markAudit=auditRiderMarkConsistency(snapshot,riderMarks);
     const markAuditHtml=renderRiderMarkAudit(markAudit);
     const audit=snapshot?.predictionOutput?.audit&&typeof snapshot.predictionOutput.audit==="object"?snapshot.predictionOutput.audit:{};
+    const wholeLinkageHtml=renderWholeLinkageAudit(audit?.wholeLinkageAudit);
     const hasAudit=Number.isFinite(Number(audit.generatedTerminalCount));
     const auditSummary=hasAudit?`<details id="purchaseAuditDetails" class="predictionAccordion"><summary>詳しい購入監査を見る（開発用）</summary><div id="purchaseAuditBody" class="accordionBody"><p class="muted">監査データは詳細を開いた時だけ描画します。レース詳細の表示を優先しています。</p></div></details>`:"";
-    panel.innerHTML=`<div class="sectionHead"><div><small>保存済み予想の根拠</small><h2>予想詳細</h2></div><span class="pill">詳細</span></div>${auditSummary}<details class="predictionAccordion"><summary>買い目の理由を見る</summary><div class="accordionBody">${betDetail||'<p class="muted">購入候補はありません。</p>'}</div></details>${abilities?`<details class="predictionAccordion" open><summary>選手印を見る</summary><div class="accordionBody"><p class="muted">まず「印＋選手名」で評価の全体像を確認します。チャット予想を取り込んでいる場合は横にチャット印も表示します。</p>${markTable}${markAuditHtml}<details class="supportBranchAudit"><summary>着順別能力の詳細を見る</summary><div class="abilityList">${abilities}</div></details></div></details>`:""}${renderStartPowerInputAuditSafe(snapshot)}`;
+    panel.innerHTML=`<div class="sectionHead"><div><small>保存済み予想の根拠</small><h2>予想詳細</h2></div><span class="pill">詳細</span></div>${wholeLinkageHtml}${auditSummary}<details class="predictionAccordion"><summary>買い目の理由を見る</summary><div class="accordionBody">${betDetail||'<p class="muted">購入候補はありません。</p>'}</div></details>${abilities?`<details class="predictionAccordion" open><summary>選手印を見る</summary><div class="accordionBody"><p class="muted">まず「印＋選手名」で評価の全体像を確認します。チャット予想を取り込んでいる場合は横にチャット印も表示します。</p>${markTable}${markAuditHtml}<details class="supportBranchAudit"><summary>着順別能力の詳細を見る</summary><div class="abilityList">${abilities}</div></details></div></details>`:""}${renderStartPowerInputAuditSafe(snapshot)}`;
     panel.classList.remove("hidden");
     const auditDetails=$("purchaseAuditDetails"),auditBody=$("purchaseAuditBody");
     if(auditDetails&&auditBody)auditDetails.addEventListener("toggle",()=>{if(!auditDetails.open||auditBody.dataset.loaded==="1")return;auditBody.dataset.loaded="1";renderPurchaseAuditLazy(audit,auditBody)},{once:false});
@@ -288,6 +289,26 @@ function renderPredictionDetail(snapshot){
     panel.innerHTML=`<div class="sectionHead"><div><small>保存済み予想の根拠</small><h2>予想詳細</h2></div><span class="pill danger">一部表示エラー</span></div><div class="auditWarning"><strong>詳細表示の一部だけ読み込めませんでした</strong><p>${esc(error?.message||String(error))}</p><p class="muted">この表示エラーでレース画面や保存済み予想を開けなくならないよう保護しています。</p></div>`;
     panel.classList.remove("hidden");
   }
+}
+
+
+function renderWholeLinkageAudit(audit){
+  if(!audit||typeof audit!=="object")return `<div class="auditWarning"><strong>全体連動監査：未記録</strong><p>この保存予想には全体連動監査がありません。新規予想で生成されます。</p></div>`;
+  const stages=Array.isArray(audit.stageChecks)?audit.stageChecks:[];
+  const traces=Array.isArray(audit.traces)?audit.traces:[];
+  const warnings=Array.isArray(audit.warnings)?audit.warnings:[];
+  const statusLabel=audit.status==="OK"?"整合":audit.status==="WARN"?"要修正":"要確認";
+  const stageHtml=stages.map(s=>`<div class="abilityRow"><strong>${esc(s.label||s.id)}</strong><span>${s.status==="OK"?"○ 整合":s.status==="WARN"?"! 要修正":"△ 要確認"}${Number(s.warningCount)?` (${Number(s.warningCount)}件)`:""}</span></div>`).join("");
+  const traceHtml=traces.slice(0,20).map(t=>{
+    const order=Array.isArray(t.order)?t.order.join("-"):"-";
+    const line=Array.isArray(t.line)&&t.line.length?t.line.join("-"):"ライン不明";
+    const conv=Number.isFinite(Number(t.naturalConvergenceScore))?`${(Number(t.naturalConvergenceScore)*100).toFixed(0)}%`:"-";
+    const prob=Number.isFinite(Number(t.probability))?`${(Number(t.probability)*100).toFixed(2)}%`:"-";
+    const ws=Array.isArray(t.warnings)?t.warnings:[];
+    return `<div class="detailBet"><strong>${esc(order)}　${esc(betClassLabel(t.category))}</strong><p><b>連動</b> 1着能力 ${fmtAbility(t.firstAbility)} → ライン ${esc(line)} → ${esc(t.branchLabel||"展開不明")} → 2着能力 ${fmtAbility(t.secondAbility)} → 3着能力 ${fmtAbility(t.thirdAbility)}</p><p class="muted">自然収束 ${esc(conv)} / 追加条件 ${Number(t.extraConditionCount)||0} / 終端確率 ${esc(prob)}${Array.isArray(t.naturalConvergenceReasons)&&t.naturalConvergenceReasons.length?` / ${t.naturalConvergenceReasons.slice(0,3).map(esc).join(" / ")}`:""}</p>${ws.length?`<p class="auditWarn">${ws.map(w=>esc(w.message)).join(" / ")}</p>`:'<p class="auditOk">この終端は上流から購入まで大きな接続矛盾なし。</p>'}</div>`;
+  }).join("");
+  const warnHtml=warnings.length?`<div class="auditWarning"><strong>接続警告 ${warnings.length}件</strong>${warnings.slice(0,12).map(w=>`<p>${esc(w.message)}</p>`).join("")}</div>`:`<div class="notice success"><strong>全体連動：大きな接続矛盾なし</strong></div>`;
+  return `<details class="predictionAccordion" open><summary>全体連動監査を見る（${esc(statusLabel)}）</summary><div class="accordionBody"><p class="muted">能力 → ライン/位置 → 1着シナリオ → 2着 → 3着 → 自然収束度 → 終端確率 → 購入採否を一本で追います。</p><div class="abilityList">${stageHtml}</div>${warnHtml}<details class="supportBranchAudit"><summary>購入終端ごとの連動を見る（${traces.length}件）</summary><div class="detailGroup">${traceHtml||'<p class="muted">購入終端なし</p>'}</div></details></div></details>`;
 }
 
 function renderRiderMarkNameTable(riderMarks,participantMap,chatMarkMap){

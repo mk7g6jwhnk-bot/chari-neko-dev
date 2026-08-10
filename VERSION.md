@@ -1,4 +1,4 @@
 # Current version
 
-- `KEIRIN-0.6.6-natural-convergence-gate`
-- label: `v88-natural-convergence-gate`
+- `KEIRIN-0.6.7-whole-linkage-audit`
+- label: `v89-whole-linkage-audit`

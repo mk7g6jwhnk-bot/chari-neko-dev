@@ -5,6 +5,7 @@ import{generateKeirinTerminals}from"../sports/keirin-terminals.mjs";
 import{audit}from"./audit.mjs";
 import{composite,allocate,purchaseDiagnostics}from"./purchase.mjs";
 import{applyChatSpecV1}from"./chat-spec-v1-policy.mjs";
+import{buildWholeLinkageAudit}from"./whole-linkage-audit.mjs";
 
 export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000}){
   const scored=scoreKeirinParticipants({race,venueProfile});
@@ -15,6 +16,7 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
   const a=audit({race,branches,terminals});
   const chatSpec=a.passed?applyChatSpecV1({scored,lines,branches,terminals,oddsByOrder}):null;
   const rawClassified=a.passed?chatSpec.terminals:terminals.map(item=>({...item,betClass:"NONE",purchaseStatus:"購入不採用",purchaseReason:`エンジン生成監査不通過: ${(a.errors||[]).slice(0,3).join(" / ")||"原因未記録"}`,purchaseRejectCode:"ENGINE_AUDIT_FAILED",lifecycle:{generated:true,probabilityEvaluated:true,terminalDeleted:false,purchaseDecision:"REJECTED",purchaseDecisionCode:"ENGINE_AUDIT_FAILED",purchaseDecisionReason:`エンジン生成監査不通過: ${(a.errors||[]).slice(0,3).join(" / ")||"原因未記録"}`}}));
+  const wholeLinkageAudit=buildWholeLinkageAudit({scored,lines,branches,terminals:rawClassified});
   const lineBlocked=a.passed&&race.raceCategory!=="girls"&&race.lineConfidence!=="高";
   const girlsStartEvidenceCount=scored.filter(item=>item?.startPowerEvidence&&(!Array.isArray(item.startPowerEvidence.missingInputs)||item.startPowerEvidence.missingInputs.length===0)).length;
   const girlsEvidenceRequired=Math.max(3,Math.ceil(scored.length*.5));
@@ -32,7 +34,7 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
   purchase.girlsStartEvidenceRequired=race.raceCategory==="girls"?girlsEvidenceRequired:null;
 
   return{
-    engineVersion:"KEIRIN-0.6.6-natural-convergence-gate",
+    engineVersion:"KEIRIN-0.6.7-whole-linkage-audit",
     raceId:race.id,
     lineConfidence:race.lineConfidence,
     scored,lines,branches,terminals:classified,
@@ -47,7 +49,8 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
       startPowerInputAudit:buildStartPowerInputAudit(scored),
       chatSpecV1:chatSpec?.audit||null,
       scenarioSummary:chatSpec?.scenarioSummary||[],
-      firstFamilies:chatSpec?.families||[]
+      firstFamilies:chatSpec?.families||[],
+      wholeLinkageAudit
     },
     recommendations:{
       main:classified.filter(item=>item.betClass==="MAIN"&&item.purchaseStatus==="購入採用"),
