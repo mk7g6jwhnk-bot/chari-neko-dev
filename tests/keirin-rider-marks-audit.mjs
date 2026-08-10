@@ -22,6 +22,7 @@ const snapshot={
 const marks=deriveRiderMarks(snapshot);
 assert.equal(marks.filter(x=>x.overallMark==="◎").length,1);
 assert.equal(marks.filter(x=>x.overallMark==="○").length,1);
+assert.ok(marks.filter(x=>x.overallMark==="☆").length<=1);
 assert.equal(marks.find(x=>x.number===1).overallMark,"◎");
 assert.equal(marks.find(x=>x.number===3).thirdMark,"◎");
 assert.equal(marks.find(x=>x.number===3).confidence,"中");

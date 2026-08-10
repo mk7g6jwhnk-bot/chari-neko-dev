@@ -114,27 +114,62 @@ function assignOverallMarks(ranked,context){
   const map=new Map();
   if(!valid.length)return map;
 
-  // Exactly one ◎ and one ○ whenever at least two evaluable riders exist.
+  // Exactly one ◎ and one ○ whenever possible.
   map.set(valid[0].number,"◎");
   if(valid[1])map.set(valid[1].number,"○");
 
   const top=Number(valid[0].overallScore);
+  const starCandidates=[];
+
   for(let i=2;i<valid.length;i++){
     const r=valid[i],score=Number(r.overallScore),gap=top-score;
     let mark="×";
 
-    // ▲ means realistic head upside; △ means mainly place/connection; ☆ means race-context sleeper.
-    const firstUpside=finite(r.first)&&finite(valid[0].first) && Number(r.first)>=Number(valid[0].first)-1.6;
+    const firstUpside=finite(r.first)&&finite(valid[0].first) && Number(r.first)>=Number(valid[0].first)-1.55;
     const familyRelative=context.maxFamily>0?(context.familyMass.get(r.number)||0)/context.maxFamily:0;
     const scenarioBoost=context.scenarioHeadBoost.get(r.number)||0;
     const placeStrength=Math.max(Number(r.second)||0,Number(r.third)||0);
 
-    if(firstUpside && gap<=1.6) mark="▲";
-    else if(placeStrength>=6.5 && gap<=2.8) mark="△";
-    else if((familyRelative>=0.35 || scenarioBoost>=0.45) && gap>1.6) mark="☆";
-    else if(gap<=3.2) mark="△";
+    // ▲ is reserved for realistic win-upside.
+    if(firstUpside && gap<=1.55){
+      mark="▲";
+    }else if(placeStrength>=6.4 && gap<=2.65){
+      mark="△";
+    }else if(gap<=3.0){
+      mark="△";
+    }
+
     map.set(r.number,mark);
+
+    // ☆ is NOT a fallback bucket. Candidate only when race-context uplift is explicit
+    // and the rider would otherwise be △/×. Score uplift must be meaningfully stronger
+    // than raw overall rank suggests.
+    const contextStrength=Math.max(familyRelative,scenarioBoost);
+    const rawAbility=(Number(r.first)||0)*0.5+(Number(r.second)||0)*0.3+(Number(r.third)||0)*0.2;
+    const contextUplift=score-rawAbility;
+    if(i>=2 && contextStrength>=0.52 && contextUplift>=0.55 && !firstUpside){
+      starCandidates.push({number:r.number,contextStrength,contextUplift,score});
+    }
   }
+
+  // ☆ is rare: at most one rider, and only if clearly separated from other hole candidates.
+  starCandidates.sort((a,b)=>
+    b.contextStrength-a.contextStrength ||
+    b.contextUplift-a.contextUplift ||
+    b.score-a.score ||
+    a.number-b.number
+  );
+  if(starCandidates.length){
+    const best=starCandidates[0];
+    const second=starCandidates[1];
+    const clearlyDistinct=!second ||
+      best.contextStrength-second.contextStrength>=0.12 ||
+      best.contextUplift-second.contextUplift>=0.35;
+    if(clearlyDistinct){
+      map.set(best.number,"☆");
+    }
+  }
+
   return map;
 }
 
