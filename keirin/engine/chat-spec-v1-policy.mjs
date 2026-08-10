@@ -10,6 +10,8 @@ const ROLE_LABEL={main:"中心予測",contender:"有力な次候補",sub:"可能
 export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],oddsByOrder={}}){
   const riderByNumber=new Map(scored.map(r=>[Number(r.number),r]));
   const branchById=new Map(branches.map(b=>[String(b.id),b]));
+  const mainBranches=branches.filter(b=>normalizePriority(b.priority)==="main");
+  const mainBranchIds=new Set(mainBranches.map(b=>String(b.id)));
 
   // 1) Keep every generated terminal. We re-evaluate probability and purchase,
   //    but never remove a logically possible terminal in this layer.
@@ -39,6 +41,7 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
       chatSupportWeight:support.weight,
       branchHeadMatched:support.headMatched!==false,
       foreignBranchContributionCount:Number(support.foreignBranchCount)||0,
+      directMainBranchSupport:(support.ids||[]).some(id=>mainBranchIds.has(String(id))),
       odds,
       lifecycle:{
         ...(terminal.lifecycle||{}),
@@ -53,8 +56,11 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
   addRanks(evaluated);
   const families=buildFamilies(evaluated,branches);
   const primaryFamily=selectPrimaryFamily(families,branches);
-  const centerHeads=new Set(branches.filter(b=>normalizePriority(b.priority)==="main").map(b=>Number(b.requiredFirstNumber)).filter(Number.isFinite));
+  const centerHeads=new Set(mainBranches.map(b=>Number(b.requiredFirstNumber)).filter(Number.isFinite));
   if(!centerHeads.size && primaryFamily)centerHeads.add(primaryFamily.first);
+
+  // MAIN is a natural terminal cluster from every main branch.
+  // Multiple main scenarios and natural head reversals are allowed simultaneously.
 
   // "Contender" branches are not automatically purchase-worthy covers.
   // Each alternate head must independently pass an absolute support/evidence gate.
@@ -217,9 +223,13 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
     }
 
     if(chosen){
-      if(item.chatForecastRole==="main" && inCenter && item.naturalConvergenceScore>=.62){
+      if(
+        item.directMainBranchSupport===true &&
+        item.branchHeadMatched===true &&
+        item.naturalConvergenceScore>=.58
+      ){
         betClass="MAIN";
-        mode="CHAT_SPEC_CENTER";
+        mode="CHAT_SPEC_MAIN_CLUSTER";
         reason=humanPurchaseReason(item,"MAIN");
       }else if(
         (item.chatForecastRole==="main" && item.naturalConvergenceScore>=.46) ||
@@ -290,7 +300,7 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
       if(!(gap>=.12 || (Number(natural.naturalConvergenceScore)>=.62 && Number(adopted.naturalConvergenceScore)<.62)))continue;
 
       const promoteClass=
-        natural.chatForecastRole==="main" && centerHeads.has(natural.firstFamilyNumber) && Number(natural.naturalConvergenceScore)>=.62
+        natural.directMainBranchSupport===true && Number(natural.naturalConvergenceScore)>=.58
           ?"MAIN":"COVER";
       Object.assign(natural,{
         betClass:promoteClass,
@@ -307,14 +317,14 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
 
   const mainPurchased=evaluated.filter(x=>x.purchaseStatus===PURCHASED&&x.betClass==="MAIN");
   const mainCandidates=evaluated.filter(x=>
-    centerHeads.has(Number(x.order?.[0])) &&
     x.branchHeadMatched===true &&
-    x.chatForecastRole==="main" &&
+    x.directMainBranchSupport===true &&
     x.familyNaturalPositionEligible &&
-    Number(x.naturalConvergenceScore)>=.62
+    Number(x.naturalConvergenceScore)>=.58
   );
   const mainInvariant={
-    centerScenarioCount:branches.filter(b=>normalizePriority(b.priority)==="main").length,
+    centerScenarioCount:mainBranches.length,
+    mainClusterCount:new Set(mainCandidates.flatMap(x=>x.chatSupportingBranchIds||[]).filter(id=>mainBranchIds.has(String(id)))).size,
     mainCandidateCount:mainCandidates.length,
     mainPurchasedCount:mainPurchased.length,
     passed:mainCandidates.length>0 && mainPurchased.length>0,
@@ -525,21 +535,30 @@ function deriveNaturalConvergence(item,lines,branches){
     const {members,index}=lineInfo;
     const follower=members[index+1]??null;
     const next=members[index+2]??null;
+    const predecessor=members[index-1]??null;
+    const prior2=members[index-2]??null;
 
     if(Number(follower)===second){
       scenarioCoherence+=.28;
       reasons.push(`${first}の直後を${second}が追走`);
+    }else if(Number(predecessor)===second){
+      scenarioCoherence+=.26;
+      reasons.push(`${first}の差し後も${second}が同ラインで2着残り`);
     }else if(Number(next)===second){
       scenarioCoherence+=.16;
       extra+=1;
       reasons.push(`${second}がライン3番手から2着`);
-    }else if(follower!=null){
+    }else if(Number(prior2)===second){
+      scenarioCoherence+=.12;
+      extra+=1;
+      reasons.push(`${second}が同ライン前方から2着残り`);
+    }else if(follower!=null || predecessor!=null){
       scenarioCoherence-=.16;
       extra+=1;
-      reasons.push(`${follower}の追走失敗が必要`);
+      reasons.push(`同ラインの追走失敗または並び崩れが必要`);
     }
 
-    if(Number(follower)===third || Number(next)===third){
+    if(Number(follower)===third || Number(next)===third || Number(predecessor)===third || Number(prior2)===third){
       scenarioCoherence+=.10;
       reasons.push(`${third}が同ライン残り`);
     }else if(third!==second){
@@ -673,7 +692,7 @@ function humanPurchaseReason(item,cls){
   const oddsPart=item.odds>1?` 実オッズ${Number(item.odds).toFixed(1)}倍。`:"";
   const conv=`自然収束度${Math.round((Number(item.naturalConvergenceScore)||0)*100)}%`;
   const why=(item.naturalConvergenceReasons||[]).slice(0,2).join(" / ");
-  if(cls==="MAIN")return `主展開「${scenario}」を固定した時に${a}→${b}→${c}が自然に繋がる終端（${conv}${why?`・${why}`:""}）。本線として採用。${oddsPart}`.trim();
+  if(cls==="MAIN")return `主展開クラスタ「${scenario}」から直接収束し、${a}→${b}→${c}が自然に繋がる終端（${conv}${why?`・${why}`:""}）。同一主展開内の押し切り・番手差し・自然な折り返しを含む本線群として採用。${oddsPart}`.trim();
   if(cls==="COVER")return `有力な別シナリオ「${scenario}」内で${a}→${b}→${c}が自然に繋がる終端（${conv}${why?`・${why}`:""}）。押さえとして採用。${oddsPart}`.trim();
   return `可能性枝「${scenario}」を終端まで保持し、${conv}と実オッズ妙味の両方を確認できたため買える高配当として採用。${oddsPart}`.trim();
 }
@@ -701,7 +720,7 @@ function buildChatSpecAudit(items,branches,families,primary){
   const center=branches.filter(b=>normalizePriority(b.priority)==="main");
   return{
     version:"KEIRIN-CHAT-SPEC-v1-CODED",
-    policy:"FIX_1ST_SCENARIO_THEN_2ND_THEN_3RD_THEN_NATURAL_CONVERGENCE_THEN_PURCHASE",
+    policy:"MULTI_MAIN_BRANCH_CLUSTER_THEN_NATURAL_TERMINAL_SET_THEN_PURCHASE",
     generatedTerminalCount:items.length,
     terminalDeletionCount:deleted.length,
     unexplainedPurchaseRejectCount:unexplainedRejects.length,
