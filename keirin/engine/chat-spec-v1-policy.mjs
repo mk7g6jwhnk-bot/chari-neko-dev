@@ -78,8 +78,8 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
     });
   }
 
-  // 3) Purchase is probability-mass coverage *inside* a forecast family,
-  //    not a global fixed point/rank cutoff.
+  // 3) Purchase candidates are chosen by natural convergence inside each first-place family.
+  // IMPORTANT: probability coverage is an AUDIT RESULT, not a quota that forces weak terminals into the bet list.
   const selected=new Set();
   const familyMeta=new Map();
   const orderedFamilies=[...families.values()].sort((a,b)=>{
@@ -89,26 +89,59 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
 
   for(const family of orderedFamilies){
     if(!["main","contender"].includes(family.tier))continue;
-    const members=evaluated
+
+    const allNatural=evaluated
       .filter(x=>x.firstFamilyNumber===family.first && x.familyNaturalPositionEligible)
       .filter(x=>x.chatForecastRole==="main" || x.chatForecastRole==="contender")
       .sort(compareTerminal);
 
-    if(!members.length)continue;
-    const target=dynamicCoverageTarget(family,primaryFamily);
-    const candidateMass=sum(members.map(x=>x.probability));
-    let mass=0;
+    if(!allNatural.length)continue;
 
-    // Preserve at least one CENTER terminal for a main family when one exists.
-    const anchor=family.tier==="main"?members.find(x=>x.chatForecastRole==="main"):null;
-    if(anchor){selected.add(key(anchor.order));mass+=anchor.probability;}
-
-    for(const item of members){
-      if(family.probability>0 && mass/family.probability>=target)break;
-      if(selected.has(key(item.order)))continue;
-      selected.add(key(item.order));mass+=item.probability;
+    // Step A: independently compare every 2nd-place candidate under this 1st-place family.
+    const bySecond=new Map();
+    for(const item of allNatural){
+      const second=Number(item.order?.[1]);
+      if(!bySecond.has(second))bySecond.set(second,[]);
+      bySecond.get(second).push(item);
     }
-    familyMeta.set(family.first,{target,candidateMass,selectedMass:mass});
+    const secondGroups=[...bySecond.entries()].map(([second,rows])=>({
+      second,
+      rows:rows.sort(compareTerminal),
+      mass:sum(rows.map(x=>x.probability)),
+      peak:Math.max(...rows.map(x=>x.probability))
+    })).sort((a,b)=>b.mass-a.mass||b.peak-a.peak||a.second-b.second);
+
+    const chosenSeconds=selectNaturalGroupCluster(secondGroups,x=>x.mass);
+
+    let selectedMass=0,candidateMass=sum(allNatural.map(x=>x.probability));
+    for(const group of chosenSeconds){
+      // Step B: for each selected 1-2 branch, independently compare all 3rd-place candidates.
+      const thirds=selectNaturalGroupCluster(group.rows,x=>x.probability);
+      for(const item of thirds){
+        selected.add(key(item.order));
+        selectedMass+=item.probability;
+      }
+    }
+
+    // Preserve a center-forecast anchor when the main family has one and natural-cluster
+    // selection somehow chose only contender contributions.
+    if(family.tier==="main"){
+      const anchor=allNatural.find(x=>x.chatForecastRole==="main");
+      if(anchor && !selected.has(key(anchor.order))){
+        selected.add(key(anchor.order));
+        selectedMass+=anchor.probability;
+      }
+    }
+
+    const target=dynamicCoverageTarget(family,primaryFamily);
+    familyMeta.set(family.first,{
+      target,
+      candidateMass,
+      selectedMass,
+      selectedSecondCount:chosenSeconds.length,
+      totalSecondCount:secondGroups.length,
+      selectionMode:"NATURAL_CONVERGENCE_FIRST"
+    });
   }
 
   // 4) Possible-only scenarios stay in the tree. They can become BUYABLE_HIGH
@@ -263,6 +296,37 @@ function dynamicCoverageTarget(family,primary){
   return clamp(.30+.18*rel,.30,.48);
 }
 
+function selectNaturalGroupCluster(rows,valueFn){
+  const sorted=[...rows].sort((a,b)=>(Number(valueFn(b))||0)-(Number(valueFn(a))||0));
+  if(!sorted.length)return[];
+  if(sorted.length===1)return sorted;
+
+  const vals=sorted.map(x=>Math.max(0,Number(valueFn(x))||0));
+  const top=vals[0]||1;
+  const gaps=[];
+  for(let i=0;i<vals.length-1;i++){
+    const abs=vals[i]-vals[i+1];
+    const rel=vals[i]>0?abs/vals[i]:0;
+    const topRel=abs/top;
+    gaps.push({i,abs,rel,topRel});
+  }
+
+  // A boundary is "natural" only when the drop is materially larger than the
+  // surrounding drops. This avoids a fixed top-N cap.
+  const avg=gaps.length?sum(gaps.map(g=>g.topRel))/gaps.length:0;
+  const candidates=gaps
+    .filter(g=>g.rel>=.28 && g.topRel>=Math.max(.07,avg*1.35))
+    .sort((a,b)=>b.topRel-a.topRel||b.rel-a.rel||a.i-b.i);
+
+  if(candidates.length){
+    return sorted.slice(0,candidates[0].i+1);
+  }
+
+  // No clear separation: do not manufacture breadth. Keep the strongest natural
+  // candidate only and leave the rest as generated-but-unpurchased possibilities.
+  return sorted.slice(0,1);
+}
+
 function selectNaturallySeparatedValue(rows){
   if(!rows.length)return[];
   if(rows.length===1)return rows;
@@ -311,7 +375,7 @@ function buildChatSpecAudit(items,branches,families,primary){
   const center=branches.filter(b=>normalizePriority(b.priority)==="main");
   return{
     version:"KEIRIN-CHAT-SPEC-v1-CODED",
-    policy:"GENERATE_ALL_THEN_EVALUATE_THEN_PURCHASE",
+    policy:"GENERATE_ALL_THEN_NATURAL_CONVERGENCE_THEN_PURCHASE",
     generatedTerminalCount:items.length,
     terminalDeletionCount:deleted.length,
     unexplainedPurchaseRejectCount:unexplainedRejects.length,
