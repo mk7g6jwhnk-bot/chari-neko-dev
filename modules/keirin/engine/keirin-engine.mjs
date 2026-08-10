@@ -21,20 +21,25 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
   const girlsStartEvidenceCount=scored.filter(item=>item?.startPowerEvidence&&(!Array.isArray(item.startPowerEvidence.missingInputs)||item.startPowerEvidence.missingInputs.length===0)).length;
   const girlsEvidenceRequired=Math.max(3,Math.ceil(scored.length*.5));
   const girlsEvidenceBlocked=a.passed&&race.raceCategory==="girls"&&girlsStartEvidenceCount<girlsEvidenceRequired;
-  const purchaseBlocked=lineBlocked||girlsEvidenceBlocked;
-  const blockedReason=lineBlocked?"公式ライン未取得のため購入判定を保留":"ガールズ主導権の公式入力が不足しているため購入判定を保留";
+  const mainInvariantBlocked=Boolean(a.passed&&chatSpec&&!chatSpec.audit?.mainInvariant?.passed);
+  const purchaseBlocked=lineBlocked||girlsEvidenceBlocked||mainInvariantBlocked;
+  const blockedReason=lineBlocked
+    ?"公式ライン未取得のため購入判定を保留"
+    :girlsEvidenceBlocked
+      ?"ガールズ主導権の公式入力が不足しているため購入判定を保留"
+      :"中心シナリオから本線となる自然終端を確定できませんでした。予想成立条件を満たしていないため購入処理を停止しました。";
   const classified=purchaseBlocked
-    ? rawClassified.map(item=>({...item,betClass:"NONE",purchaseStatus:"購入不採用",purchaseReason:blockedReason,purchaseRejectCode:lineBlocked?"LINE_DATA_UNAVAILABLE":"GIRLS_LEAD_EVIDENCE_UNAVAILABLE",lifecycle:{...(item.lifecycle||{}),generated:true,probabilityEvaluated:true,terminalDeleted:false,purchaseDecision:"REJECTED",purchaseDecisionCode:lineBlocked?"LINE_DATA_UNAVAILABLE":"GIRLS_LEAD_EVIDENCE_UNAVAILABLE",purchaseDecisionReason:blockedReason}}))
+    ? rawClassified.map(item=>({...item,betClass:"NONE",purchaseStatus:"購入不採用",purchaseReason:blockedReason,purchaseRejectCode:lineBlocked?"LINE_DATA_UNAVAILABLE":girlsEvidenceBlocked?"GIRLS_LEAD_EVIDENCE_UNAVAILABLE":"MAIN_INVARIANT_FAILED",lifecycle:{...(item.lifecycle||{}),generated:true,probabilityEvaluated:true,terminalDeleted:false,purchaseDecision:"REJECTED",purchaseDecisionCode:lineBlocked?"LINE_DATA_UNAVAILABLE":girlsEvidenceBlocked?"GIRLS_LEAD_EVIDENCE_UNAVAILABLE":"MAIN_INVARIANT_FAILED",purchaseDecisionReason:blockedReason}}))
     : rawClassified;
   const plan=a.passed&&!purchaseBlocked?allocate(classified,budget):[];
   const purchase=purchaseDiagnostics(classified,plan,budget);
   const terminalLifecycleAudit=buildTerminalLifecycleAudit({sourceTerminals:terminals,classified,terminalGenerationAudit});
-  if(purchaseBlocked){purchase.noBet=true;purchase.noBetReason=lineBlocked?"LINE_DATA_UNAVAILABLE":"GIRLS_LEAD_EVIDENCE_UNAVAILABLE";purchase.purchaseCandidateCountBeforeCompression=0;purchase.purchaseCandidateCountAfterCompression=0;purchase.finalBetCount=0;purchase.minimumRequired=0;}
+  if(purchaseBlocked){purchase.noBet=true;purchase.noBetReason=lineBlocked?"LINE_DATA_UNAVAILABLE":girlsEvidenceBlocked?"GIRLS_LEAD_EVIDENCE_UNAVAILABLE":"MAIN_INVARIANT_FAILED";purchase.purchaseCandidateCountBeforeCompression=0;purchase.purchaseCandidateCountAfterCompression=0;purchase.finalBetCount=0;purchase.minimumRequired=0;}
   purchase.girlsStartEvidenceCount=girlsStartEvidenceCount;
   purchase.girlsStartEvidenceRequired=race.raceCategory==="girls"?girlsEvidenceRequired:null;
 
   return{
-    engineVersion:"KEIRIN-0.6.8-browser-502-retry",
+    engineVersion:"KEIRIN-0.6.9-main-invariant-branch-head-gate",
     raceId:race.id,
     lineConfidence:race.lineConfidence,
     scored,lines,branches,terminals:classified,

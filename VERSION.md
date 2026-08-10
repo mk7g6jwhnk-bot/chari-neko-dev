@@ -1,4 +1,4 @@
 # Current version
 
-- `KEIRIN-0.6.8-browser-502-retry`
-- label: `v90-browser-502-retry`
+- `KEIRIN-0.6.9-main-invariant-branch-head-gate`
+- label: `v91-main-invariant-branch-head-gate`

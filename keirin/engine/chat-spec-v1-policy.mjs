@@ -37,6 +37,8 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
       chatSupportingBranchIds:support.ids,
       chatSupportingBranchLabels:support.labels,
       chatSupportWeight:support.weight,
+      branchHeadMatched:support.headMatched!==false,
+      foreignBranchContributionCount:Number(support.foreignBranchCount)||0,
       odds,
       lifecycle:{
         ...(terminal.lifecycle||{}),
@@ -106,6 +108,7 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
 
     const allNatural=evaluated
       .filter(x=>x.firstFamilyNumber===family.first && x.familyNaturalPositionEligible)
+      .filter(x=>x.branchHeadMatched===true)
       .filter(x=>x.chatForecastRole==="main" || x.chatForecastRole==="contender")
       // Existence != purchase. Main/cover candidates need at least medium scenario coherence.
       .filter(x=>x.naturalConvergenceScore>=.46)
@@ -189,7 +192,7 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
   // 4) Possible-only scenarios stay in the tree. They can become BUYABLE_HIGH
   //    only with explicit scenario support AND actual odds value.
   const possibleValue=evaluated
-    .filter(x=>x.chatForecastRole==="sub" && x.familyNaturalPositionEligible && x.odds>1)
+    .filter(x=>x.chatForecastRole==="sub" && x.familyNaturalPositionEligible && x.branchHeadMatched===true && x.odds>1)
     .filter(x=>x.naturalConvergenceScore>=.40)
     .filter(x=>Number(x.expectedValueIndex)>1.05)
     .filter(x=>x.probability >= (evaluated[0]?.probability||0)*.10)
@@ -202,9 +205,16 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
 
   // 5) Final classification and reason codes. Every non-purchase gets a reason.
   for(const item of evaluated){
-    const k=key(item.order),chosen=selected.has(k);
+    const k=key(item.order);
+    let chosen=selected.has(k);
     const inCenter=centerHeads.has(item.firstFamilyNumber);
     let betClass="NONE",code=null,reason=null,mode=null;
+
+    if(chosen && item.branchHeadMatched!==true){
+      chosen=false;
+      code="BRANCH_HEAD_MISMATCH";
+      reason=`${orderText(item)}は終端として保持。ただし1着${item.firstFamilyNumber}番と展開枝の1着条件が一致しないため購入根拠には使用しない。`;
+    }
 
     if(chosen){
       if(item.chatForecastRole==="main" && inCenter && item.naturalConvergenceScore>=.62){
@@ -222,9 +232,16 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
         betClass="BUYABLE_HIGH";
         mode="CHAT_SPEC_VALUE";
         reason=humanPurchaseReason(item,"BUYABLE_HIGH");
+      }else{
+        chosen=false;
+        code="PURCHASE_CLASS_NOT_SATISFIED";
+        reason=`${orderText(item)}は候補選択までは通過したが、本線・押さえ・高配当の分類条件を満たさないため購入しない。`;
       }
-    }else{
-      if(item.chatForecastRole==="contender" && !approvedContenderHeads.has(item.firstFamilyNumber)){
+    }
+    if(!chosen){
+      if(code){
+        // explicit rejection already set above
+      }else if(item.chatForecastRole==="contender" && !approvedContenderHeads.has(item.firstFamilyNumber)){
         code="CONTENDER_HEAD_NOT_SELECTED";
         reason=`${orderText(item)}は有力候補枝として生成・保持。ただし${item.firstFamilyNumber}番頭は「押さえの中心頭」に選ばれていないため購入しない。`;
       }else{
@@ -253,6 +270,26 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
       }
     });
   }
+
+  const mainPurchased=evaluated.filter(x=>x.purchaseStatus===PURCHASED&&x.betClass==="MAIN");
+  const mainCandidates=evaluated.filter(x=>
+    centerHeads.has(Number(x.order?.[0])) &&
+    x.branchHeadMatched===true &&
+    x.chatForecastRole==="main" &&
+    x.familyNaturalPositionEligible &&
+    Number(x.naturalConvergenceScore)>=.62
+  );
+  const mainInvariant={
+    centerScenarioCount:branches.filter(b=>normalizePriority(b.priority)==="main").length,
+    mainCandidateCount:mainCandidates.length,
+    mainPurchasedCount:mainPurchased.length,
+    passed:mainCandidates.length>0 && mainPurchased.length>0,
+    error:mainCandidates.length===0
+      ?"MAIN_NATURAL_TERMINAL_NOT_FOUND"
+      : mainPurchased.length===0
+        ?"MAIN_PURCHASE_CLASSIFICATION_FAILED"
+        : null
+  };
 
   // Compatibility fields used by existing diagnostics/UI.
   for(const item of evaluated){
@@ -288,16 +325,26 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
       contenderHeadAudit:{
         candidates:contenderHeadAudit.candidates,
         approved:[...approvedContenderHeads]
-      }
+      },
+      mainInvariant
     }
   };
 }
 
 function deriveBranchSupport(terminal,branchById){
-  const cs=[...(terminal.branchContributions||[])].filter(c=>contributionMatches(c,terminal.order));
+  const order=(terminal.order||[]).map(Number);
+  const first=Number(order[0]);
+  const all=[...(terminal.branchContributions||[])];
+  const cs=all.filter(c=>contributionMatches(c,order));
   if(!cs.length){
-    const p=normalizePriority(terminal.branchPriority);
-    return{role:p,weight:FORECAST_WEIGHT[p]||.18,ids:[terminal.branchId].filter(Boolean),labels:[terminal.branchLabel].filter(Boolean)};
+    const direct=branchById.get(String(terminal.branchId||""))||null;
+    const directHead=Number(direct?.requiredFirstNumber);
+    const directMatches=direct?.requiredFirstNumber==null || (Number.isFinite(directHead)&&directHead===first);
+    if(direct && directMatches){
+      const p=normalizePriority(direct.priority??terminal.branchPriority);
+      return{role:p,weight:FORECAST_WEIGHT[p]||.18,ids:[direct.id].filter(Boolean),labels:[direct.label].filter(Boolean),headMatched:true,foreignBranchCount:all.length};
+    }
+    return{role:"risk",weight:FORECAST_WEIGHT.risk,ids:[],labels:[],headMatched:false,foreignBranchCount:all.length};
   }
   cs.sort((a,b)=>{
     const ap=FORECAST_WEIGHT[normalizePriority(a.branchPriority)]||.18;
@@ -307,7 +354,7 @@ function deriveBranchSupport(terminal,branchById){
   const top=cs[0],role=normalizePriority(top.branchPriority);
   const weights=cs.map(c=>(FORECAST_WEIGHT[normalizePriority(c.branchPriority)]||.18)*Math.max(.1,ratioGeom(c.decisionRatios)));
   const weight=Math.min(1,Math.max(...weights,FORECAST_WEIGHT[role]||.18));
-  return{role,weight,ids:cs.map(c=>c.branchId).filter(Boolean),labels:cs.map(c=>c.branchLabel).filter(Boolean)};
+  return{role,weight,ids:cs.map(c=>c.branchId).filter(Boolean),labels:cs.map(c=>c.branchLabel).filter(Boolean),headMatched:true,foreignBranchCount:all.length-cs.length};
 }
 
 function deriveNaturalSupport(item){
@@ -619,6 +666,7 @@ function buildChatSpecAudit(items,branches,families,primary){
     primaryFirstFamily:primary?.first||null,
     primaryFirstFamilyProbability:primary?.probability||0,
     familyCount:families.size,
+    branchHeadMismatchCount:items.filter(x=>x.branchHeadMatched===false).length,
     naturalConvergence:{
       high:items.filter(x=>x.naturalConvergenceLevel==="高").length,
       medium:items.filter(x=>x.naturalConvergenceLevel==="中").length,
@@ -631,7 +679,8 @@ function buildChatSpecAudit(items,branches,families,primary){
       {key:"NO_UNEXPLAINED_PURCHASE_REJECT",passed:unexplainedRejects.length===0},
       {key:"PURCHASE_SEPARATE_FROM_GENERATION",passed:true},
       {key:"POSSIBILITY_SEPARATE_FROM_CENTER_FORECAST",passed:true},
-      {key:"NO_LOW_NATURAL_CONVERGENCE_PURCHASE",passed:items.filter(x=>x.purchaseStatus===PURCHASED && x.naturalConvergenceLevel==="低").length===0}
+      {key:"NO_LOW_NATURAL_CONVERGENCE_PURCHASE",passed:items.filter(x=>x.purchaseStatus===PURCHASED && x.naturalConvergenceLevel==="低").length===0},
+      {key:"NO_BRANCH_HEAD_MISMATCH_PURCHASE",passed:items.filter(x=>x.purchaseStatus===PURCHASED && x.branchHeadMatched===false).length===0}
     ]
   };
 }

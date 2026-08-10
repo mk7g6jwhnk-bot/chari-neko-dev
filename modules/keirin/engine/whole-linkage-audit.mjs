@@ -48,6 +48,8 @@ function buildTrace(t,riderMap,lines,branchMap){
   const reasons=Array.isArray(t.naturalConvergenceReasons)?t.naturalConvergenceReasons:[];
   const warnings=[];
 
+  if(t.branchHeadMatched===false)
+    warnings.push(warn("ABILITY_TO_SCENARIO","high",order,`${first}番1着の終端に、別の1着条件の展開枝が紐付いています。購入根拠として使用禁止です。`));
   if(t.betClass==="MAIN" && t.chatForecastRole && t.chatForecastRole!=="main")
     warnings.push(warn("ABILITY_TO_SCENARIO","high",order,"本線ですが中心予測枝ではありません。"));
 
