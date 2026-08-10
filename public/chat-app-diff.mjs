@@ -1,9 +1,11 @@
-export const DIFF_ENGINE_VERSION="CHAT-APP-DIFF-v1";
+import{deriveRiderMarks}from"./rider-marks.mjs";
+export const DIFF_ENGINE_VERSION="CHAT-APP-DIFF-v2-MARKS";
 
 export function compareChatAndApp(chat,snapshot){
   if(!chat||!snapshot)return null;
   const chatView=normalizeChat(chat),appView=normalizeApp(snapshot);
   const stages=[];
+  stages.push(compareRiderMarks(chatView,appView));
   stages.push(compareFirst(chatView,appView));
   stages.push(comparePairs(chatView,appView));
   stages.push(compareTerminals(chatView,appView));
@@ -14,7 +16,7 @@ export function compareChatAndApp(chat,snapshot){
     version:DIFF_ENGINE_VERSION,
     firstDivergence:firstDivergence?{stage:firstDivergence.stage,label:firstDivergence.label,summary:firstDivergence.summary}:null,
     stages,
-    totals:{chatTerminals:chatView.terminals.length,appTerminals:appView.terminals.length,chatPurchased:chatView.purchased.length,appPurchased:appView.purchased.length}
+    totals:{chatMarks:chatView.riderMarks.length,appMarks:appView.riderMarks.length,chatTerminals:chatView.terminals.length,appTerminals:appView.terminals.length,chatPurchased:chatView.purchased.length,appPurchased:appView.purchased.length}
   };
 }
 
@@ -23,6 +25,7 @@ function normalizeChat(chat){
   const firstCandidates=(chat.firstCandidates||[]).map(x=>Number(x.number)).filter(validNumber);
   const pairBranches=(chat.pairBranches||[]).map(x=>keyN(x.order,2)).filter(Boolean);
   return {
+    riderMarks:normalizeMarks(chat.riderMarks||[]),
     first:firstCandidates.length?unique(firstCandidates):rankFirstFamilies(terminals),
     pairs:pairBranches.length?unique(pairBranches):rankPrefixes(terminals,2),
     terminals,
@@ -33,8 +36,26 @@ function normalizeApp(snapshot){
   const terminals=(snapshot.terminalLedger||[]).map(t=>normalizeTerminal({order:t.order,probability:t.probability,category:t.betClass,purchaseStatus:normalizeAppPurchase(t.purchaseStatus),reason:t.purchaseReason})).filter(Boolean);
   const purchased=(snapshot.betSelections||[]).map(b=>normalizeTerminal({order:b.order,probability:b.probability,category:b.category,purchaseStatus:"ADOPTED",reason:b.reason})).filter(Boolean);
   const merged=mergeTerminalState(terminals,purchased);
-  return {first:rankFirstFamilies(merged),pairs:rankPrefixes(merged,2),terminals:merged,purchased:merged.filter(t=>t.purchaseStatus==="ADOPTED")};
+  return {riderMarks:normalizeMarks(Array.isArray(snapshot?.riderMarks)&&snapshot.riderMarks.length?snapshot.riderMarks:deriveRiderMarks(snapshot)),first:rankFirstFamilies(merged),pairs:rankPrefixes(merged,2),terminals:merged,purchased:merged.filter(t=>t.purchaseStatus==="ADOPTED")};
 }
+
+function compareRiderMarks(chat,app){
+  if(!chat.riderMarks.length)return unknown("RIDER_MARKS","選手印","チャット側に選手印がありません。印を含めて取り込むと能力評価の入口から比較できます。");
+  const appMap=new Map(app.riderMarks.map(m=>[m.number,m]));
+  const rows=[];let compared=0;
+  for(const c of chat.riderMarks){
+    const a=appMap.get(c.number);if(!a)continue;
+    for(const [field,label] of [["overallMark","総合"],["firstMark","1着"],["secondMark","2着"],["thirdMark","3着"]]){
+      if(c[field]==="？"||!c[field]||a[field]==="？"||!a[field])continue;
+      compared++;if(c[field]!==a[field])rows.push({key:`${c.number}番 ${label}`,chat:c[field],app:a[field]});
+    }
+  }
+  if(!compared)return unknown("RIDER_MARKS","選手印","比較できる共通の選手印がありません。");
+  if(!rows.length)return ok("RIDER_MARKS","選手印",`比較可能な ${compared}項目でチャット印とアプリ印が一致しています。`);
+  return diff("RIDER_MARKS","選手印",`比較可能な ${compared}項目のうち ${rows.length}項目で印が違います。`,{rows});
+}
+function normalizeMarks(rows){return (Array.isArray(rows)?rows:[]).map(x=>({number:Number(x?.number),overallMark:mark(x?.overallMark),firstMark:mark(x?.firstMark),secondMark:mark(x?.secondMark),thirdMark:mark(x?.thirdMark)})).filter(x=>validNumber(x.number))}
+function mark(v){const s=String(v||"").trim();return ["◎","○","▲","△","☆","×","？"].includes(s)?s:"？"}
 function compareFirst(chat,app){
   if(!chat.first.length)return unknown("FIRST_PLACE_EVALUATION","1着評価","チャット側に1着候補データがありません。");
   const chatTop=chat.first[0],appTop=app.first[0];

@@ -1,9 +1,9 @@
 import assert from"node:assert/strict";
 import{findChatPrediction,parseChatPrediction,removeChatPrediction,saveChatPrediction}from"../public/chat-prediction-store.mjs";
 const race={date:"20260810",venueCode:"28",venueName:"立川",raceNo:7};
-const text='```json\n'+JSON.stringify({schemaVersion:"CHAT-KEIRIN-IMPORT-v1",race,mainScenario:{description:"3番主導権、1番が中団から捲り"},firstCandidates:[{number:1,rank:1,probability:.3}],pairBranches:[{order:[1,4],probability:.12}],terminals:[{order:[1,4,7],probability:.05,category:"MAIN",purchaseStatus:"ADOPTED",reason:"主展開終端"}]})+'\n```';
+const text='```json\n'+JSON.stringify({schemaVersion:"CHAT-KEIRIN-IMPORT-v1",race,mainScenario:{description:"3番主導権、1番が中団から捲り"},riderMarks:[{number:1,overallMark:"◎",firstMark:"◎",secondMark:"○",thirdMark:"△"}],firstCandidates:[{number:1,rank:1,probability:.3}],pairBranches:[{order:[1,4],probability:.12}],terminals:[{order:[1,4,7],probability:.05,category:"MAIN",purchaseStatus:"ADOPTED",reason:"主展開終端"}]})+'\n```';
 const parsed=parseChatPrediction(text,race,new Date("2026-08-10T00:00:00Z"));
-assert.equal(parsed.terminals.length,1);assert.deepEqual(parsed.terminals[0].order,[1,4,7]);assert.equal(parsed.terminals[0].category,"MAIN");assert.equal(parsed.mainScenario.description,"3番主導権、1番が中団から捲り");
+assert.equal(parsed.riderMarks.length,1);assert.equal(parsed.riderMarks[0].firstMark,"◎");assert.equal(parsed.terminals.length,1);assert.deepEqual(parsed.terminals[0].order,[1,4,7]);assert.equal(parsed.terminals[0].category,"MAIN");assert.equal(parsed.mainScenario.description,"3番主導権、1番が中団から捲り");
 const data=new Map();const storage={getItem:k=>data.get(k)||null,setItem:(k,v)=>data.set(k,v)};
 saveChatPrediction(storage,parsed);assert.equal(findChatPrediction(storage,race)?.terminals?.length,1);removeChatPrediction(storage,race);assert.equal(findChatPrediction(storage,race),null);
 assert.throws(()=>parseChatPrediction(JSON.stringify({race:{...race,raceNo:8},terminals:[{order:[1,2,3]}]}),race),/別レース/);

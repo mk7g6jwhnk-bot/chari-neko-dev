@@ -20,6 +20,7 @@ export function parseChatPrediction(text,currentRace=null,now=new Date()){
     generatedAt:String(input.generatedAt||input.createdAt||""),
     race,
     mainScenario:normalizeMainScenario(input.mainScenario||input.primaryScenario||input.scenario||null),
+    riderMarks:normalizeRiderMarks(input.riderMarks||input.marks||input.riderRatings||[]),
     firstCandidates:normalizeFirstCandidates(input.firstCandidates||input.firstPlaceCandidates||[]),
     pairBranches:normalizePairBranches(input.pairBranches||input.pairs||input.secondPlaceBranches||[]),
     terminals,
@@ -72,6 +73,19 @@ function normalizeMainScenario(value){
   if(typeof value==="string")return{title:"主展開",description:value,evidence:[],counterEvidence:[]};
   return {title:String(value.title||value.label||"主展開"),description:String(value.description||value.reason||""),evidence:normalizeStringArray(value.evidence||value.reasons||[]),counterEvidence:normalizeStringArray(value.counterEvidence||value.risks||[])};
 }
+
+function normalizeRiderMarks(rows){
+  const source=Array.isArray(rows)?rows:Object.entries(rows||{}).map(([number,value])=>typeof value==="string"?{number,overall:value}:{number,...(value||{})});
+  return source.map(row=>({
+    number:Number(row?.number??row?.riderNumber),
+    overallMark:normalizeMark(row?.overallMark??row?.overall??row?.mark),
+    firstMark:normalizeMark(row?.firstMark??row?.first??row?.head),
+    secondMark:normalizeMark(row?.secondMark??row?.second),
+    thirdMark:normalizeMark(row?.thirdMark??row?.third),
+    reason:String(row?.reason||"")
+  })).filter(x=>Number.isFinite(x.number)&&x.number>0);
+}
+function normalizeMark(v){const s=String(v||"").trim();return ["◎","○","▲","△","☆","×","？"].includes(s)?s:"？"}
 function normalizeFirstCandidates(rows){return (Array.isArray(rows)?rows:[]).map((row,index)=>typeof row==="number"?{number:row,rank:index+1,probability:null,reason:""}:{number:Number(row?.number??row?.first),rank:Number(row?.rank)||index+1,probability:finiteOrNull(row?.probability??row?.share),reason:String(row?.reason||"")}).filter(x=>Number.isFinite(x.number)&&x.number>0)}
 function normalizePairBranches(rows){return (Array.isArray(rows)?rows:[]).map((row,index)=>{const order=normalizeOrder(row?.order||row?.pair,2);return{order,rank:Number(row?.rank)||index+1,probability:finiteOrNull(row?.probability),scenario:String(row?.scenario||row?.scenarioLabel||""),reason:String(row?.reason||"")}}).filter(x=>x.order.length===2)}
 function normalizeTerminals(rows){return (Array.isArray(rows)?rows:[]).map((row,index)=>{
