@@ -1,4 +1,4 @@
 # Current version
 
-- `KEIRIN-0.6.3-selective-cover-heads`
-- label: `v85-selective-cover-heads`
+- `KEIRIN-0.6.4-independent-cover-heads`
+- label: `v86-independent-cover-heads`

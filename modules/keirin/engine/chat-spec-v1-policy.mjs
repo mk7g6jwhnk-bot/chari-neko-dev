@@ -55,8 +55,8 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
   if(!centerHeads.size && primaryFamily)centerHeads.add(primaryFamily.first);
 
   // "Contender" branches are not automatically purchase-worthy covers.
-  // Select contender HEADS first, using head-level scenario support. This prevents
-  // every merely possible alternate head from becoming 押さえ.
+  // Each alternate head must independently pass an absolute support/evidence gate.
+  // No head is promoted merely because it is "next-best".
   const contenderHeadAudit=selectContenderHeads(branches,centerHeads);
   const approvedContenderHeads=contenderHeadAudit.approved;
 
@@ -316,53 +316,70 @@ function deriveNaturalSupport(item){
 
 function selectContenderHeads(branches,centerHeads){
   const byHead=new Map();
+
   for(const b of branches){
     if(normalizePriority(b.priority)!=="contender")continue;
     const head=Number(b.requiredFirstNumber);
     if(!Number.isFinite(head) || centerHeads.has(head))continue;
+
     const score=Number(b.score)||0;
-    const cur=byHead.get(head)||{head,score:0,maxScore:0,count:0};
-    cur.score+=Math.max(0,score);
+    const trace=Array.isArray(b.scoreTrace)?b.scoreTrace:[];
+    const positives=trace.filter(x=>(Number(x.contribution)||0)>0);
+    const negatives=trace.filter(x=>(Number(x.contribution)||0)<0);
+
+    const cur=byHead.get(head)||{
+      head,branchCount:0,totalScore:0,maxScore:0,
+      positiveContribution:0,negativeContribution:0,
+      evidenceKeys:new Set(),labels:[],traceCount:0
+    };
+
+    cur.branchCount++;
+    cur.totalScore+=Math.max(0,score);
     cur.maxScore=Math.max(cur.maxScore,score);
-    cur.count++;
+    cur.traceCount+=trace.length;
+    cur.positiveContribution+=sum(positives.map(x=>Math.max(0,Number(x.contribution)||0)));
+    cur.negativeContribution+=sum(negatives.map(x=>Math.abs(Number(x.contribution)||0)));
+    for(const x of positives)if(x?.key)cur.evidenceKeys.add(String(x.key));
+    if(b.label)cur.labels.push(String(b.label));
     byHead.set(head,cur);
   }
 
-  const candidates=[...byHead.values()]
-    .map(x=>({...x,normalizedSupport:x.score/Math.max(1,x.count)}))
-    .sort((a,b)=>b.normalizedSupport-a.normalizedSupport||b.maxScore-a.maxScore||a.head-b.head);
+  const candidates=[...byHead.values()].map(x=>{
+    const avgScore=x.totalScore/Math.max(1,x.branchCount);
+    const evidenceCount=x.evidenceKeys.size;
+    const netEvidence=x.positiveContribution-x.negativeContribution;
 
-  const approved=new Set();
-  if(!candidates.length)return{candidates,approved};
+    // Independent pass/fail. A head does not become 押さえ merely because
+    // it is "the next-best" among alternatives.
+    const scorePass=x.maxScore>=6.2 || avgScore>=5.4;
 
-  const top=candidates[0].normalizedSupport||1;
-  const values=candidates.map(x=>x.normalizedSupport);
-  const gaps=values.slice(0,-1).map((v,i)=>({
-    i,
-    abs:v-values[i+1],
-    rel:v>0?(v-values[i+1])/v:0,
-    topRel:top>0?(v-values[i+1])/top:0
-  }));
-  const avg=gaps.length?sum(gaps.map(g=>g.topRel))/gaps.length:0;
-  const boundary=gaps
-    .filter(g=>g.rel>=.24 && g.topRel>=Math.max(.06,avg*1.25))
-    .sort((a,b)=>b.topRel-a.topRel||b.rel-a.rel||a.i-b.i)[0];
+    // Prefer multiple explicit grounds. Older branch records may not carry scoreTrace;
+    // in that compatibility case only a clearly strong scenario score can substitute.
+    const explicitEvidence=evidenceCount>=2 || x.positiveContribution>=1.5;
+    const legacyStrongEvidence=x.traceCount===0 && x.maxScore>=6.5;
+    const evidencePass=explicitEvidence || legacyStrongEvidence;
 
-  let selected;
-  if(boundary){
-    selected=candidates.slice(0,boundary.i+1);
-  }else{
-    // No clear separation: "押さえ" should remain selective.
-    // Keep only heads close to the best contender support, and cap by evidence quality,
-    // not by a fixed ticket count.
-    selected=candidates.filter((x,i)=>i===0 || x.normalizedSupport>=top*.82);
-  }
+    const contradictionPass=x.negativeContribution<=Math.max(1.2,x.positiveContribution*.75);
+    const repeatSupport=x.branchCount>=2 && avgScore>=4.9;
+    const eligible=(scorePass && evidencePass && contradictionPass) ||
+      (repeatSupport && evidencePass && netEvidence>0);
 
-  // An alternate head also needs meaningful absolute support; a weak field of
-  // uniformly poor contenders should not manufacture an 押さえ head.
-  for(const x of selected){
-    if(x.normalizedSupport>=4.8 || x.maxScore>=6.0)approved.add(x.head);
-  }
+    return{
+      head:x.head,branchCount:x.branchCount,avgScore,maxScore:x.maxScore,
+      evidenceCount,positiveContribution:x.positiveContribution,
+      negativeContribution:x.negativeContribution,netEvidence,
+      traceCount:x.traceCount,labels:x.labels,eligible,
+      reasons:{scorePass,evidencePass,explicitEvidence,legacyStrongEvidence,contradictionPass,repeatSupport}
+    };
+  }).sort((a,b)=>
+    Number(b.eligible)-Number(a.eligible) ||
+    b.maxScore-a.maxScore ||
+    b.avgScore-a.avgScore ||
+    b.netEvidence-a.netEvidence ||
+    a.head-b.head
+  );
+
+  const approved=new Set(candidates.filter(x=>x.eligible).map(x=>x.head));
   return{candidates,approved};
 }
 
@@ -474,7 +491,7 @@ function buildChatSpecAudit(items,branches,families,primary){
   const center=branches.filter(b=>normalizePriority(b.priority)==="main");
   return{
     version:"KEIRIN-CHAT-SPEC-v1-CODED",
-    policy:"CENTER_HEAD_THEN_SELECTIVE_CONTENDER_HEADS_THEN_NATURAL_CONVERGENCE",
+    policy:"CENTER_HEAD_THEN_INDEPENDENT_CONTENDER_ELIGIBILITY_THEN_NATURAL_CONVERGENCE",
     generatedTerminalCount:items.length,
     terminalDeletionCount:deleted.length,
     unexplainedPurchaseRejectCount:unexplainedRejects.length,
