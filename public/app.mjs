@@ -11,7 +11,7 @@ const ODDS_CACHE_KEY="chari-neko:keirin-odds-cache:v1";
 const RACE_META_CACHE_KEY="chari-neko:keirin-race-meta-cache:v1";
 const RESULT_CACHE_KEY="chari-neko:keirin-result-cache:v1";
 const MEETING_CACHE_KEY="chari-neko:keirin-meeting-cache:v1";
-const APP_RELEASE="KEIRIN-0.8.2-scenario-explanation";
+const APP_RELEASE="KEIRIN-0.8.3-reliable-bulk-refresh";
 const APP_UPDATE_CHECK_INTERVAL_MS=5*60*1000;
 let lastAppUpdateCheckAt=0,appUpdateCheckBusy=false;
 const VENUE_CODES={函館:"11",青森:"12",いわき平:"13",弥彦:"21",前橋:"22",取手:"23",宇都宮:"24",大宮:"25",西武園:"26",京王閣:"27",立川:"28",松戸:"31",千葉:"32",川崎:"34",平塚:"35",小田原:"36",伊東:"37",静岡:"38",名古屋:"42",岐阜:"43",大垣:"44",豊橋:"45",富山:"46",松阪:"47",四日市:"48",福井:"51",奈良:"53",向日町:"54",和歌山:"55",岸和田:"56",玉野:"61",広島:"62",防府:"63",高松:"71",小松島:"73",高知:"74",松山:"75",小倉:"81",久留米:"83",武雄:"84",佐世保:"85",別府:"86",熊本:"87"};
@@ -39,7 +39,7 @@ async function jsonFetch(url){const r=await fetch(url,{cache:"no-store"});let p;
 
 function renderHomeRecommendations(){const list=$("todayRecommendations"),count=$("recommendationCount");if(!list||!count)return;const enabled=$("sportKeirin")?.checked!==false,limit=Math.max(1,Number($("recommendationLimit")?.value)||5),today=compact(localDate());if(!enabled){count.textContent="0件";list.innerHTML='<p class="empty">表示する競技を選んでください。</p>';return}const all=loadSnapshots(localStorage).filter(s=>String(s.targetRace?.date||"").replace(/\D/g,"")===today&&!s.result).sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));const recommended=all.filter(s=>!s.noBet&&(s.betSelections||[]).length).slice(0,limit);count.textContent=`${recommended.length}件`;list.innerHTML=recommended.length?recommended.map(s=>{const r=s.targetRace,bets=s.betSelections||[],hasHigh=bets.some(b=>b.category==="BUYABLE_HIGH"),main=bets.filter(b=>b.category==="MAIN").length,tags=[main?"通常":null,hasHigh?"高配当":null].filter(Boolean),rating=ratingOf(s);return `<article class="recommendationItem"><button class="recommendationOpen" data-rec-id="${esc(s.predictionSnapshotId)}"><span class="recommendationMain"><strong>${esc(r.venueName)} ${r.raceNo}R</strong><small>${r.scheduledStart?`発走 ${esc(r.scheduledStart)}`:"発走時刻確認中"} ・ ${bets.length}点</small><small>信頼 ${starText(rating.confidence)} / 集中 ${starText(rating.concentration)}</small></span><span class="recommendationTags">${tags.map(t=>`<em>${t}</em>`).join("")}</span></button></article>`}).join(""):'<p class="empty">今日の解析済みおすすめはまだありません。レースを予想するとここに表示されます。</p>';list.querySelectorAll("[data-rec-id]").forEach(b=>b.onclick=()=>{const s=loadSnapshots(localStorage).find(x=>x.predictionSnapshotId===b.dataset.recId);if(!s)return;openSavedDetail(s)})}
 function openMeetings(){state.date=localDate();state.meetingTab="today";$("raceDate").value=state.date;show("meetings");loadMeetings()}
-async function loadMeetings(){setLoading("開催情報を取得中","KEIRIN.JPの今日の開催を確認しています。");const dateKey=compact(state.date);try{const p=await jsonFetch(`/.netlify/functions/keirin-discover?date=${dateKey}`),items=(p.meetings||[]).filter(m=>getCard(m)).sort((a,b)=>Number(venueCode(a))-Number(venueCode(b)));state.meetings=items;storeMeetingCache(dateKey,items,p.checkedAt);$("meetingCount").textContent=`${items.length}会場`;renderVenueGrid(items);renderMeetingTabs();updateBulkRefreshUi(p.stale?"開催取得サービスが不安定なため、直近の開催情報を表示しています。":"締切時間・オッズをまとめて更新できます。");show("meetings")}catch(e){const cached=meetingCacheFor(dateKey);if(cached?.meetings?.length){state.meetings=cached.meetings;$("meetingCount").textContent=`${cached.meetings.length}会場`;renderVenueGrid(state.meetings);renderMeetingTabs();updateBulkRefreshUi("開催情報の再取得に失敗しました。保存済み一覧を表示中です。一括更新は再試行できます。");show("meetings");return}fail("開催情報の取得失敗",new Error("開催取得サービスが一時的に停止しています。数秒後に再試行してください。"),loadMeetings)}}
+async function loadMeetings(){setLoading("開催情報を取得中","KEIRIN.JPの今日の開催を確認しています。");const dateKey=compact(state.date);try{const p=await jsonFetch(`/.netlify/functions/keirin-discover?date=${dateKey}`),items=(p.meetings||[]).filter(m=>getCard(m)).sort((a,b)=>Number(venueCode(a))-Number(venueCode(b)));state.meetings=items;storeMeetingCache(dateKey,items,p.checkedAt);$("meetingCount").textContent=`${items.length}会場`;renderVenueGrid(items);renderMeetingTabs();updateBulkRefreshUi(p.stale?"開催取得サービスが不安定なため、直近の開催情報を表示しています。":"一括更新で未終了レースの締切時間・オッズをまとめて更新できます。");show("meetings")}catch(e){const cached=meetingCacheFor(dateKey);if(cached?.meetings?.length){state.meetings=cached.meetings;$("meetingCount").textContent=`${cached.meetings.length}会場`;renderVenueGrid(state.meetings);renderMeetingTabs();updateBulkRefreshUi("開催情報の再取得に失敗しました。保存済み一覧を表示中です。一括更新は再試行できます。");show("meetings");return}fail("開催情報の取得失敗",new Error("開催取得サービスが一時的に停止しています。数秒後に再試行してください。"),loadMeetings)}}
 function renderVenueGrid(items){$("meetingList").className="venueGrid";$("meetingList").innerHTML=items.length?items.map((m,i)=>{const nums=raceNumbersOf(m),count=nums.length||12,range=nums.length?`${nums[0]}R〜${nums[nums.length-1]}R`:`${count}R`,next=meetingNextDeadline(m),band=meetingTimeBand(m);return `<button class="venueCard venue-${band.key}" data-meeting="${i}" aria-label="${esc(m.venueName)}のレースを見る"><span class="venueCode">${esc(venueCode(m))}</span><span class="venueBand">${band.label}</span><strong>${esc(m.venueName)}</strong><small>${range}・${count}レース</small><span class="venueDeadline">${esc(next)}</span><span class="venueState ${getOdds(m)?"ready":"waiting"}">${getOdds(m)?"オッズ接続":"オッズ待ち"}</span></button>`}).join(""):'<section class="card empty venueEmpty">この日の開催は見つかりませんでした。</section>';$("meetingList").querySelectorAll("[data-meeting]").forEach(b=>b.onclick=()=>openRaces(items[Number(b.dataset.meeting)]))}
 function setMeetingTab(tab){state.meetingTab=tab;renderMeetingTabs()}
 function renderMeetingTabs(){const tab=state.meetingTab||"today";[["tabToday","today"],["tabScreening","screening"],["tabBattle","battle"],["tabVenues","venues"]].forEach(([id,key])=>$(id).classList.toggle("active",tab===key));$("todayRaceList").classList.toggle("hidden",tab!=="today");$("screeningRaceList").classList.toggle("hidden",tab!=="screening");$("battleRaceList").classList.toggle("hidden",tab!=="battle");$("meetingList").classList.toggle("hidden",tab!=="venues");if(tab==="today")renderFlatRaceList($("todayRaceList"),allMeetingRaces(),false);if(tab==="screening")renderPrimaryScreening();if(tab==="battle")renderFlatRaceList($("battleRaceList"),allMeetingRaces().filter(isBattleRace),true)}
@@ -116,7 +116,93 @@ function storeOddsCache(r,payload){const all=loadOddsCache(),key=raceKey(r);all[
 async function fetchRaceInfo(r){const q=new URLSearchParams({date:String(r.date).replace(/\D/g,"").slice(0,8),venueCode:String(r.venueCode||""),venueName:r.venueName||"",raceNo:String(r.raceNo)}),p=await jsonFetch(`/.netlify/functions/keirin-odds?${q}`);storeOddsCache(r,p);storeRaceMetaCache(r,p);return p}
 async function refreshRaceOdds(r){const key=raceKey(r);if(state.oddsBusyKey||raceStatus(r).label==="終了")return;state.oddsBusyKey=key;renderMeetingTabs();try{await fetchRaceInfo(r)}catch(error){const all=loadOddsCache();all[key]={checkedAt:new Date().toISOString(),available:false,count:0,odds:{},error:error?.message||String(error)};saveJsonCache(ODDS_CACHE_KEY,all,100)}finally{state.oddsBusyKey=null;renderVenueGrid(state.meetings||[]);renderMeetingTabs()}}
 function updateBulkRefreshUi(message){const button=$("bulkRefresh"),status=$("bulkRefreshStatus");if(button){button.disabled=state.bulkBusy;button.textContent=state.bulkBusy?(state.bulkTotal?`一括更新 ${state.bulkDone}/${state.bulkTotal}`:"高速更新中…"):"一括更新"}if(status&&message)status.textContent=message}
-async function bulkRefreshRaceInfo(){if(state.bulkBusy||state.screeningBusy)return;if(!acquireBatchLock("bulk")){updateBulkRefreshUi("別のチャリ猫タブで一括更新・一次選別を実行中です。完了後に再実行してください。");return}if(!(state.meetings||[]).length){releaseBatchLock();await loadMeetings();return}state.bulkBusy=true;const button=$("bulkRefresh");if(button){button.disabled=true;button.textContent="高速更新中…"}updateBulkRefreshUi("全96Rは走査せず、締切が近い3Rから一次選別データを確認しています…");try{const result=await preparePrimaryScreening({advance:false});renderVenueGrid(state.meetings||[]);renderMeetingTabs();if(result.established)updateBulkRefreshUi(`高速更新完了：一次選別成立。取得${result.attempted} / 成功${result.success} / 失敗${result.failed}。`);else{updateBulkRefreshUi(`高速更新完了：一次選別不成立 ${result.success}/${SCREENING_BATCH_SIZE}。締切順3Rを直接深掘り比較します…`);const fallback=await runFallbackDeepDiveComparison(3);renderMeetingTabs();updateBulkRefreshUi(`一次選別不成立 ${result.success}/${SCREENING_BATCH_SIZE} → 直接深掘り ${fallback.done}R保存${fallback.skipped?` / 締切除外${fallback.skipped}`:""}${fallback.failed?` / 失敗${fallback.failed}`:""}`)}}catch(error){updateBulkRefreshUi(error?.message||"高速更新に失敗しました")}finally{state.bulkBusy=false;releaseBatchLock();if(button){button.disabled=false;button.textContent="一括更新"}renderVenueGrid(state.meetings||[]);renderMeetingTabs()}}
+async function bulkRefreshRaceInfo(){
+  if(state.bulkBusy||state.screeningBusy)return;
+  if(!acquireBatchLock("bulk")){
+    updateBulkRefreshUi("別のチャリ猫タブで一括更新・一次選別を実行中です。完了後に再実行してください。");
+    return;
+  }
+  state.bulkBusy=true;
+  state.bulkDone=0;
+  state.bulkTotal=0;
+  const button=$("bulkRefresh");
+  if(button){button.disabled=true;button.textContent="一括更新 準備中…"}
+
+  try{
+    updateBulkRefreshUi("開催・締切情報を更新しています…");
+    await refreshMeetingsInPlace();
+
+    const targets=allMeetingRaces().filter(r=>raceStatus(r).label!=="終了");
+    state.bulkTotal=targets.length;
+    updateBulkRefreshUi(`一括更新開始：未終了${targets.length}Rの締切・オッズを更新します。`);
+
+    let success=0,failed=0,available=0,waiting=0;
+    const failures=[];
+
+    for(const venueRaces of groupRacesByVenue(targets)){
+      for(const chunk of chunkRows(venueRaces,4)){
+        const result=await fetchRaceInfoBatch(chunk);
+        const itemNos=new Set((result.items||[]).map(item=>Number(item.race?.raceNo||item.raceNo)));
+
+        const missing=chunk.filter(r=>!itemNos.has(Number(r.raceNo)));
+        for(const race of missing){
+          const retry=await fetchRaceInfoBatch([race]);
+          const got=(retry.items||[]).some(item=>Number(item.race?.raceNo||item.raceNo)===Number(race.raceNo));
+          if(got)itemNos.add(Number(race.raceNo));
+          else{
+            const detail=(retry.failures||[])[0]||(result.failures||[]).find(f=>Number(f.raceNo)===Number(race.raceNo));
+            failures.push({race,error:detail?.error||"取得できませんでした"});
+          }
+        }
+
+        for(const race of chunk){
+          if(itemNos.has(Number(race.raceNo))){
+            success++;
+            const cache=oddsCacheFor(race);
+            if(cache?.available)available++;else waiting++;
+          }else failed++;
+          state.bulkDone++;
+        }
+
+        renderMeetingTabs();
+        updateBulkRefreshUi(`一括更新中：${state.bulkDone}/${state.bulkTotal}R　成功${success} / オッズ公開${available} / 待ち${waiting} / 失敗${failed}`);
+      }
+    }
+
+    renderVenueGrid(state.meetings||[]);
+    renderMeetingTabs();
+    const suffix=failures.length?`　失敗例: ${failures.slice(0,2).map(x=>`${x.race.venueName}${x.race.raceNo}R`).join("、")}`:"";
+    updateBulkRefreshUi(`一括更新完了：${state.bulkTotal}R中 成功${success} / オッズ公開${available} / オッズ待ち${waiting} / 失敗${failed}。${suffix}`);
+  }catch(error){
+    updateBulkRefreshUi(`一括更新に失敗しました：${error?.message||String(error)}`);
+  }finally{
+    state.bulkBusy=false;
+    state.bulkDone=0;
+    state.bulkTotal=0;
+    releaseBatchLock();
+    if(button){button.disabled=false;button.textContent="一括更新"}
+    renderVenueGrid(state.meetings||[]);
+    renderMeetingTabs();
+  }
+}
+
+async function refreshMeetingsInPlace(){
+  const dateKey=compact(state.date);
+  const p=await jsonFetch(`/.netlify/functions/keirin-discover?date=${dateKey}`);
+  const items=(p.meetings||[]).filter(m=>getCard(m)).sort((a,b)=>Number(venueCode(a))-Number(venueCode(b)));
+  if(items.length){
+    state.meetings=items;
+    storeMeetingCache(dateKey,items,p.checkedAt);
+    $("meetingCount").textContent=`${items.length}会場`;
+  }
+  return p;
+}
+
+function chunkRows(rows,size=4){
+  const out=[];
+  for(let i=0;i<(rows||[]).length;i+=size)out.push(rows.slice(i,i+size));
+  return out;
+}
 function oddsRating(snapshot,cached){if(!cached)return{label:"未更新",className:"muted"};if(!cached.available)return{label:"オッズ待ち",className:"waiting"};if(!snapshot)return{label:`オッズ公開 ${cached.count||0}件`,className:"ready"};if(snapshot.noBet||!(snapshot.betSelections||[]).length)return{label:"見送り寄り",className:"muted"};const rows=(snapshot.betSelections||[]).map(b=>{const key=(b.order||[]).join("-"),odds=Number(cached.odds?.[key]),prob=Number(b.probability);return{...b,currentOdds:Number.isFinite(odds)?odds:null,value:Number.isFinite(odds)&&Number.isFinite(prob)?odds*prob:null}}).filter(x=>x.currentOdds);if(!rows.length)return{label:"買い目オッズ待ち",className:"waiting"};if(rows.some(x=>x.category==="MAIN"&&x.currentOdds>=100))return{label:"本線高配当",className:"high"};if(rows.some(x=>x.currentOdds>=100))return{label:"高配当あり",className:"high"};if(rows.some(x=>Number.isFinite(x.value)&&x.value>=1.12))return{label:"3連単妙味",className:"value"};if(rows.some(x=>x.currentOdds>=30))return{label:"中穴",className:"mid"};if(rows.every(x=>x.currentOdds<12))return{label:"人気集中",className:"popular"};return{label:"オッズ妙味なし",className:"muted"}}
 function openRaces(meeting){state.meeting=meeting;$("venueTitle").textContent=meeting.venueName;$("raceDateLabel").textContent=formatDate(compact(state.date));const nums=raceNumbersOf(meeting),races=(nums.length?nums:Array.from({length:12},(_,i)=>i+1)).map(n=>raceFrom(meeting,n));$("raceCount").textContent=`${races.length}R`;$("raceList").innerHTML=races.map((r,i)=>{const s=raceStatus(r),battle=isBattleRace(r),deadline=deadlineOf(r),saved=findLatestSnapshot(localStorage,r),ended=s.label==="終了",action=ended?(saved?"結果・詳細 ›":"結果を見る ›"):(saved?"詳細を見る ›":"予想する ›");return `<article class="raceCardWrap"><button class="raceCard compactRace" data-race="${i}"><div class="raceTop"><h2>${r.raceNo}R</h2><span class="status ${s.className}">${s.label}</span></div><p class="raceDeadline">${deadline?`締切 ${esc(deadline)}`:"締切確認中"}${saved?" ・ 保存済み":""}</p><span class="raceAction">${action}</span></button><button class="raceBattle ${battle?"active":""}" data-race-battle="${i}" aria-label="勝負レース${battle?"解除":"登録"}">${battle?"★":"☆"}</button></article>`}).join("");$("raceList").querySelectorAll("[data-race]").forEach(b=>b.onclick=()=>openDetail(races[Number(b.dataset.race)]));$("raceList").querySelectorAll("[data-race-battle]").forEach(b=>b.onclick=e=>{e.stopPropagation();toggleBattleRace(races[Number(b.dataset.raceBattle)]);openRaces(meeting)});show("races")}
 function raceFrom(m,raceNo){const base={date:compact(state.date),venueCode:venueCode(m),venueName:m.venueName,raceNo},saved=findLatestSnapshot(localStorage,base),meta=raceMetaOf(m,raceNo)||{},cached=raceMetaCacheFor(base)||{};return{...base,scheduledStart:cached.startTime||cached.scheduledStart||meta.scheduledStart||meta.startTime||meta.deadline||saved?.targetRace?.scheduledStart||"",deadline:cached.deadline||cached.cutoffTime||meta.deadline||meta.cutoffTime||meta.scheduledStart||meta.startTime||saved?.targetRace?.deadline||"",raceCardUrl:getCard(m)?.url||"",oddsUrl:getOdds(m)?.url||""}}
