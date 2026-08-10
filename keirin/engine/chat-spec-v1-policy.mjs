@@ -271,6 +271,40 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
     });
   }
 
+  const naturalPrecedenceAudit=[];
+  for(const adopted of evaluated.filter(x=>x.purchaseStatus===PURCHASED)){
+    const sameFirst=evaluated
+      .filter(x=>x.firstFamilyNumber===adopted.firstFamilyNumber)
+      .filter(x=>x.branchHeadMatched===true)
+      .filter(x=>x.familyNaturalPositionEligible)
+      .filter(x=>x.purchaseStatus!==PURCHASED)
+      .filter(x=>Number(x.naturalConvergenceScore)>=.46)
+      .sort(comparePurchaseTerminal);
+
+    for(const natural of sameFirst){
+      const sameScenario=
+        natural.chatForecastRole===adopted.chatForecastRole ||
+        (natural.chatSupportingBranchIds||[]).some(id=>(adopted.chatSupportingBranchIds||[]).includes(id));
+      if(!sameScenario)continue;
+      const gap=Number(natural.naturalConvergenceScore)-Number(adopted.naturalConvergenceScore);
+      if(!(gap>=.12 || (Number(natural.naturalConvergenceScore)>=.62 && Number(adopted.naturalConvergenceScore)<.62)))continue;
+
+      const promoteClass=
+        natural.chatForecastRole==="main" && centerHeads.has(natural.firstFamilyNumber) && Number(natural.naturalConvergenceScore)>=.62
+          ?"MAIN":"COVER";
+      Object.assign(natural,{
+        betClass:promoteClass,
+        purchaseStatus:PURCHASED,
+        purchaseRejectCode:null,
+        purchaseReason:`自然枝優先補正: 同じ${natural.firstFamilyNumber}番頭・同一シナリオ内で、採用済み${orderText(adopted)}より${orderText(natural)}の自然収束度が明確に高いため${promoteClass==="MAIN"?"本線":"押さえ"}へ昇格。`,
+        adoptionMode:"NATURAL_PRECEDENCE_PROMOTION",
+        lifecycle:{...(natural.lifecycle||{}),generated:true,probabilityEvaluated:true,terminalDeleted:false,purchaseDecision:"ADOPTED",purchaseDecisionCode:"NATURAL_PRECEDENCE_PROMOTION",purchaseDecisionReason:"より不自然な購入終端より先に自然終端を優先"}
+      });
+      naturalPrecedenceAudit.push({promoted:natural.order.join("-"),promotedClass:promoteClass,comparedWith:adopted.order.join("-"),promotedConvergence:Number(natural.naturalConvergenceScore)||0,adoptedConvergence:Number(adopted.naturalConvergenceScore)||0});
+      break;
+    }
+  }
+
   const mainPurchased=evaluated.filter(x=>x.purchaseStatus===PURCHASED&&x.betClass==="MAIN");
   const mainCandidates=evaluated.filter(x=>
     centerHeads.has(Number(x.order?.[0])) &&
@@ -326,7 +360,8 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
         candidates:contenderHeadAudit.candidates,
         approved:[...approvedContenderHeads]
       },
-      mainInvariant
+      mainInvariant,
+      naturalPrecedenceAudit
     }
   };
 }
@@ -652,6 +687,14 @@ function buildScenarioSummary(branches){
   }));
 }
 
+function countNaturalSkippedAhead(items){
+  let count=0;
+  for(const adopted of items.filter(x=>x.purchaseStatus===PURCHASED)){
+    if(items.some(x=>x.firstFamilyNumber===adopted.firstFamilyNumber&&x.purchaseStatus!==PURCHASED&&x.branchHeadMatched===true&&x.familyNaturalPositionEligible&&Number(x.naturalConvergenceScore)>=.62&&Number(x.naturalConvergenceScore)>=Number(adopted.naturalConvergenceScore)+.12))count++;
+  }
+  return count;
+}
+
 function buildChatSpecAudit(items,branches,families,primary){
   const unexplainedRejects=items.filter(x=>x.purchaseStatus===REJECTED&&(!x.purchaseRejectCode||!x.purchaseReason));
   const deleted=items.filter(x=>x?.lifecycle?.terminalDeleted===true);
@@ -667,6 +710,7 @@ function buildChatSpecAudit(items,branches,families,primary){
     primaryFirstFamilyProbability:primary?.probability||0,
     familyCount:families.size,
     branchHeadMismatchCount:items.filter(x=>x.branchHeadMatched===false).length,
+    naturalTerminalSkippedAheadCount:countNaturalSkippedAhead(items),
     naturalConvergence:{
       high:items.filter(x=>x.naturalConvergenceLevel==="高").length,
       medium:items.filter(x=>x.naturalConvergenceLevel==="中").length,
@@ -680,7 +724,8 @@ function buildChatSpecAudit(items,branches,families,primary){
       {key:"PURCHASE_SEPARATE_FROM_GENERATION",passed:true},
       {key:"POSSIBILITY_SEPARATE_FROM_CENTER_FORECAST",passed:true},
       {key:"NO_LOW_NATURAL_CONVERGENCE_PURCHASE",passed:items.filter(x=>x.purchaseStatus===PURCHASED && x.naturalConvergenceLevel==="低").length===0},
-      {key:"NO_BRANCH_HEAD_MISMATCH_PURCHASE",passed:items.filter(x=>x.purchaseStatus===PURCHASED && x.branchHeadMatched===false).length===0}
+      {key:"NO_BRANCH_HEAD_MISMATCH_PURCHASE",passed:items.filter(x=>x.purchaseStatus===PURCHASED && x.branchHeadMatched===false).length===0},
+      {key:"NATURAL_TERMINAL_PRECEDENCE",passed:countNaturalSkippedAhead(items)===0}
     ]
   };
 }
