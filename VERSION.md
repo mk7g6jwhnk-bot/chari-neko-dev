@@ -1,4 +1,4 @@
 # Current version
 
-- `KEIRIN-0.5.54-chat-rider-marks-diff`
-- label: `v77-chat-rider-marks-diff`
+- `KEIRIN-0.5.55-rider-mark-name-table`
+- label: `v78-rider-mark-name-table`
