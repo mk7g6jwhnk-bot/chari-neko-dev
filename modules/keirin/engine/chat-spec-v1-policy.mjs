@@ -118,13 +118,14 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
       // Step B: for each selected 1-2 branch, independently compare all 3rd-place candidates.
       const thirds=selectNaturalGroupCluster(group.rows,x=>x.probability);
       for(const item of thirds){
-        selected.add(key(item.order));
-        selectedMass+=item.probability;
+        if(!selected.has(key(item.order))){
+          selected.add(key(item.order));
+          selectedMass+=item.probability;
+        }
       }
     }
 
-    // Preserve a center-forecast anchor when the main family has one and natural-cluster
-    // selection somehow chose only contender contributions.
+    // Preserve a center-forecast anchor when the main family has one.
     if(family.tier==="main"){
       const anchor=allNatural.find(x=>x.chatForecastRole==="main");
       if(anchor && !selected.has(key(anchor.order))){
@@ -134,13 +135,38 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
     }
 
     const target=dynamicCoverageTarget(family,primaryFamily);
+
+    // Undercoverage guard: coverage is NOT a purchase quota.
+    // It only detects the v83-type failure where a major first family is represented
+    // by an implausibly tiny slice. Recovery adds strongest near-peer terminals only,
+    // then stops as soon as the family is no longer severely underrepresented.
+    const undercoverageFloor=
+      family.first===primaryFamily?.first ? .24 :
+      family.tier==="main" ? .18 :
+      .12;
+
+    if(family.probability>0 && selectedMass/family.probability<undercoverageFloor){
+      const bestProb=allNatural[0]?.probability||0;
+      const recoveryPool=allNatural
+        .filter(x=>!selected.has(key(x.order)))
+        .filter(x=>bestProb<=0 || x.probability>=bestProb*.62)
+        .sort(compareTerminal);
+
+      for(const item of recoveryPool){
+        selected.add(key(item.order));
+        selectedMass+=item.probability;
+        if(selectedMass/family.probability>=undercoverageFloor)break;
+      }
+    }
+
     familyMeta.set(family.first,{
       target,
+      undercoverageFloor,
       candidateMass,
       selectedMass,
-      selectedSecondCount:chosenSeconds.length,
+      selectedSecondCount:new Set([...selected].filter(k=>k.startsWith(`${family.first}-`)).map(k=>k.split("-")[1])).size,
       totalSecondCount:secondGroups.length,
-      selectionMode:"NATURAL_CONVERGENCE_FIRST"
+      selectionMode:"NATURAL_CONVERGENCE_WITH_UNDERCOVERAGE_GUARD"
     });
   }
 
@@ -375,7 +401,7 @@ function buildChatSpecAudit(items,branches,families,primary){
   const center=branches.filter(b=>normalizePriority(b.priority)==="main");
   return{
     version:"KEIRIN-CHAT-SPEC-v1-CODED",
-    policy:"GENERATE_ALL_THEN_NATURAL_CONVERGENCE_THEN_PURCHASE",
+    policy:"GENERATE_ALL_THEN_NATURAL_CONVERGENCE_WITH_UNDERCOVERAGE_GUARD",
     generatedTerminalCount:items.length,
     terminalDeletionCount:deleted.length,
     unexplainedPurchaseRejectCount:unexplainedRejects.length,
