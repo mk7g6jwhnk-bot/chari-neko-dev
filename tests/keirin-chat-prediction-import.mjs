@@ -8,3 +8,9 @@ const data=new Map();const storage={getItem:k=>data.get(k)||null,setItem:(k,v)=>
 saveChatPrediction(storage,parsed);assert.equal(findChatPrediction(storage,race)?.terminals?.length,1);removeChatPrediction(storage,race);assert.equal(findChatPrediction(storage,race),null);
 assert.throws(()=>parseChatPrediction(JSON.stringify({race:{...race,raceNo:8},terminals:[{order:[1,2,3]}]}),race),/別レース/);
 console.log("Keirin chat prediction import passed");
+
+const jpMarks=parseChatPrediction(JSON.stringify({race,"選手印":[{"車番":1,"総合印":"◎","１着印":"◎","２着印":"○","３着印":"△"}],terminals:[{order:[1,2,3]}]}),race);
+assert.equal(jpMarks.riderMarks[0].overallMark,"◎");
+assert.equal(jpMarks.riderMarks[0].firstMark,"◎");
+assert.equal(jpMarks.riderMarks[0].secondMark,"○");
+assert.equal(jpMarks.riderMarks[0].thirdMark,"△");

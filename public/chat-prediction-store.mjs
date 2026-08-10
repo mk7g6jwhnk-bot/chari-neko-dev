@@ -20,7 +20,7 @@ export function parseChatPrediction(text,currentRace=null,now=new Date()){
     generatedAt:String(input.generatedAt||input.createdAt||""),
     race,
     mainScenario:normalizeMainScenario(input.mainScenario||input.primaryScenario||input.scenario||null),
-    riderMarks:normalizeRiderMarks(input.riderMarks||input.marks||input.riderRatings||[]),
+    riderMarks:normalizeRiderMarks(input.riderMarks||input.marks||input.riderRatings||input["選手印"]||input["印"]||input["予想印"]||[]),
     firstCandidates:normalizeFirstCandidates(input.firstCandidates||input.firstPlaceCandidates||[]),
     pairBranches:normalizePairBranches(input.pairBranches||input.pairs||input.secondPlaceBranches||[]),
     terminals,
@@ -76,14 +76,27 @@ function normalizeMainScenario(value){
 
 function normalizeRiderMarks(rows){
   const source=Array.isArray(rows)?rows:Object.entries(rows||{}).map(([number,value])=>typeof value==="string"?{number,overall:value}:{number,...(value||{})});
-  return source.map(row=>({
-    number:Number(row?.number??row?.riderNumber),
-    overallMark:normalizeMark(row?.overallMark??row?.overall??row?.mark),
-    firstMark:normalizeMark(row?.firstMark??row?.first??row?.head),
-    secondMark:normalizeMark(row?.secondMark??row?.second),
-    thirdMark:normalizeMark(row?.thirdMark??row?.third),
-    reason:String(row?.reason||"")
-  })).filter(x=>Number.isFinite(x.number)&&x.number>0);
+  return source.map((row,index)=>{
+    if(typeof row==="string")row=parseMarkTextRow(row,index+1);
+    const number=Number(row?.number??row?.riderNumber??row?.["車番"]??row?.["番号"]??row?.["選手番号"]);
+    return {
+      number,
+      overallMark:normalizeMark(row?.overallMark??row?.overall??row?.mark??row?.["総合印"]??row?.["総合"]??row?.["印"]),
+      firstMark:normalizeMark(row?.firstMark??row?.first??row?.head??row?.["1着印"]??row?.["１着印"]??row?.["頭印"]??row?.["1着"]),
+      secondMark:normalizeMark(row?.secondMark??row?.second??row?.["2着印"]??row?.["２着印"]??row?.["2着"]),
+      thirdMark:normalizeMark(row?.thirdMark??row?.third??row?.["3着印"]??row?.["３着印"]??row?.["3着"]),
+      reason:String(row?.reason??row?.["理由"]??row?.["根拠"]??"")
+    };
+  }).filter(x=>Number.isFinite(x.number)&&x.number>0);
+}
+function parseMarkTextRow(text,fallbackNumber){
+  const t=String(text||"").trim();
+  const number=Number((t.match(/(?:^|\s)([1-9])(?:番|車)?/)||[])[1])||fallbackNumber;
+  const mark=(t.match(/[◎○▲△☆×？]/)||[])[0]||"？";
+  const first=(t.match(/(?:1着|１着|頭)\s*([◎○▲△☆×？])/)||[])[1]||"？";
+  const second=(t.match(/(?:2着|２着)\s*([◎○▲△☆×？])/)||[])[1]||"？";
+  const third=(t.match(/(?:3着|３着)\s*([◎○▲△☆×？])/)||[])[1]||"？";
+  return {number,overallMark:mark,firstMark:first,secondMark:second,thirdMark:third};
 }
 function normalizeMark(v){const s=String(v||"").trim();return ["◎","○","▲","△","☆","×","？"].includes(s)?s:"？"}
 function normalizeFirstCandidates(rows){return (Array.isArray(rows)?rows:[]).map((row,index)=>typeof row==="number"?{number:row,rank:index+1,probability:null,reason:""}:{number:Number(row?.number??row?.first),rank:Number(row?.rank)||index+1,probability:finiteOrNull(row?.probability??row?.share),reason:String(row?.reason||"")}).filter(x=>Number.isFinite(x.number)&&x.number>0)}

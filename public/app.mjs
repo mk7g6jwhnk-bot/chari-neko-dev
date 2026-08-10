@@ -11,7 +11,7 @@ const ODDS_CACHE_KEY="chari-neko:keirin-odds-cache:v1";
 const RACE_META_CACHE_KEY="chari-neko:keirin-race-meta-cache:v1";
 const RESULT_CACHE_KEY="chari-neko:keirin-result-cache:v1";
 const MEETING_CACHE_KEY="chari-neko:keirin-meeting-cache:v1";
-const APP_RELEASE="KEIRIN-0.5.55-rider-mark-name-table";
+const APP_RELEASE="KEIRIN-0.5.56-chat-mark-import-compat";
 const APP_UPDATE_CHECK_INTERVAL_MS=5*60*1000;
 let lastAppUpdateCheckAt=0,appUpdateCheckBusy=false;
 const VENUE_CODES={函館:"11",青森:"12",いわき平:"13",弥彦:"21",前橋:"22",取手:"23",宇都宮:"24",大宮:"25",西武園:"26",京王閣:"27",立川:"28",松戸:"31",千葉:"32",川崎:"34",平塚:"35",小田原:"36",伊東:"37",静岡:"38",名古屋:"42",岐阜:"43",大垣:"44",豊橋:"45",富山:"46",松阪:"47",四日市:"48",福井:"51",奈良:"53",向日町:"54",和歌山:"55",岸和田:"56",玉野:"61",広島:"62",防府:"63",高松:"71",小松島:"73",高知:"74",松山:"75",小倉:"81",久留米:"83",武雄:"84",佐世保:"85",別府:"86",熊本:"87"};
@@ -294,7 +294,7 @@ function renderRiderMarkNameTable(riderMarks,participantMap,chatMarkMap){
   const rows=(Array.isArray(riderMarks)?riderMarks:[]).slice().sort((a,b)=>Number(a.number)-Number(b.number));
   if(!rows.length)return '<p class="muted">選手印は未作成です。</p>';
   const hasChat=chatMarkMap instanceof Map&&chatMarkMap.size>0;
-  return `<div class="riderMarkTable"><div class="riderMarkHead"><span>車番</span><span>選手名</span><span>アプリ</span>${hasChat?'<span>チャット</span>':''}</div>${rows.map(m=>{const p=participantMap?.get?.(Number(m.number))||{},c=chatMarkMap?.get?.(Number(m.number))||null;return `<div class="riderMarkLine"><span class="riderMarkNo">${esc(m.number)}</span><span class="riderMarkName">${esc(p?.name||'選手名未取得')}<small>1着${esc(m.firstMark||'？')}・2着${esc(m.secondMark||'？')}・3着${esc(m.thirdMark||'？')}</small></span><strong class="riderMarkMain">${esc(m.overallMark||'？')}</strong>${hasChat?`<strong class="riderMarkChat">${esc(c?.overallMark||'―')}</strong>`:''}</div>`}).join('')}</div>`;
+  return `<div class="riderMarkTable"><div class="riderMarkHead"><span>車番</span><span>選手名</span><span>アプリ</span><span>チャット</span></div>${rows.map(m=>{const p=participantMap?.get?.(Number(m.number))||{},c=chatMarkMap?.get?.(Number(m.number))||null;return `<div class="riderMarkLine"><span class="riderMarkNo">${esc(m.number)}</span><span class="riderMarkName">${esc(p?.name||'選手名未取得')}<small>1着${esc(m.firstMark||'？')}・2着${esc(m.secondMark||'？')}・3着${esc(m.thirdMark||'？')}</small></span><strong class="riderMarkMain">${esc(m.overallMark||'？')}</strong><strong class="riderMarkChat">${esc(c?.overallMark||'未取込')}</strong></div>`}).join('')}</div>${hasChat?'':`<p class="auditWarn">チャット印が保存されていません。v77以前に取り込んだ予想、または印が認識できない形式の予想は再取り込みしてください。</p>`}`;
 }
 
 function renderRiderMarkAudit(audit){

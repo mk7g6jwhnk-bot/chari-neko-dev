@@ -1,4 +1,4 @@
 # Current version
 
-- `KEIRIN-0.5.55-rider-mark-name-table`
-- label: `v78-rider-mark-name-table`
+- `KEIRIN-0.5.56-chat-mark-import-compat`
+- label: `v79-chat-mark-import-compat`
