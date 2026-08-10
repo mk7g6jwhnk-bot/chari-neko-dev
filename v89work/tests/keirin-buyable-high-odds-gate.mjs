@@ -1,0 +1,20 @@
+import assert from "node:assert/strict";
+import {classify} from "../keirin/engine/purchase.mjs";
+function terminal(order,probability,id,label,priority){return{order,probability,branchContributions:[{branchId:id,branchLabel:label,branchPriority:priority,probability,requiredFirstNumber:order[0],decisionRatios:{first:.97,second:.94,third:.93},positionScores:{},positionEvidence:{}}]}}
+const main=terminal([7,9,3],.40,"MAIN-C","Cまくり","main");
+const contender=terminal([5,3,9],.35,"CONT-A","A先行押し切り","contender");
+const sub=terminal([2,4,6],.25,"SUB-B","Bまくり","sub");
+const noOdds=classify([main,contender,sub],{});
+const subNoOdds=noOdds.find(x=>x.order.join("-")==="2-4-6");
+assert.notEqual(subNoOdds.betClass,"BUYABLE_HIGH");
+assert.equal(subNoOdds.highPayoutCandidate,true);
+assert.equal(subNoOdds.oddsEvaluationStatus,"ODDS_PENDING");
+const withOdds=classify([main,contender,sub],{"5-3-9":150,"2-4-6":180});
+const contenderHigh=withOdds.find(x=>x.order.join("-")==="5-3-9");
+assert.equal(contenderHigh.betClass,"COVER");
+assert.equal(contenderHigh.highPayoutAttribute,true);
+const subHigh=withOdds.find(x=>x.order.join("-")==="2-4-6");
+assert.equal(subHigh.betClass,"BUYABLE_HIGH");
+assert.equal(subHigh.purchaseStatus,"購入採用");
+assert.equal(subHigh.odds,180);
+console.log("Keirin BUYABLE_HIGH odds gate passed");

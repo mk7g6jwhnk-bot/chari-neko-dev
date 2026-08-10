@@ -179,20 +179,24 @@ async function requestBrowserService(base, params) {
   const endpoint = `${base}/keirin/race?${query}`;
   const attempts = [];
   const startedAt = Date.now();
+  // Netlify側で無限待ちにせず、Railwayの一時502/HTML応答には必ずもう一度当てる。
   const totalBudgetMs = 54000;
 
   for (let attempt = 1; attempt <= 2; attempt += 1) {
     const elapsed = Date.now() - startedAt;
     const remaining = totalBudgetMs - elapsed;
-    if (remaining < 5000) break;
+    if (remaining < 6500) break;
+
+    // 1回目を長くし過ぎると、一時502の後に再試行する時間が消える。
+    // 1回目30秒、2回目は残り時間を最大22秒使う。
     const timeoutMs = attempt === 1
-      ? Math.min(42000, remaining - 1000)
-      : Math.min(34000, remaining - 1000);
+      ? Math.min(30000, remaining - 2500)
+      : Math.min(22000, remaining - 1500);
 
     try {
       const response = await fetch(endpoint, {
         headers: { accept: "application/json" },
-        signal: AbortSignal.timeout(Math.max(4000, timeoutMs))
+        signal: AbortSignal.timeout(Math.max(5000, timeoutMs))
       });
       const text = await response.text();
       let data = null;
@@ -203,7 +207,9 @@ async function requestBrowserService(base, params) {
         attempt,
         status: response.status,
         parsed: data !== null,
-        error: data?.error || null
+        bodyKind: data !== null ? "json" : "non-json",
+        error: data?.error || null,
+        elapsedMs: Date.now() - startedAt
       });
 
       if (data && (data.officialData || data.ok === false)) {
@@ -211,19 +217,25 @@ async function requestBrowserService(base, params) {
         if (ok) {
           return { ok: true, status: response.status, data: { ...data, endpointAudit: attempts } };
         }
-        const retryable = response.status >= 500 || /page crashed|target closed|browser|navigation|timeout|timed out|execution context/i.test(String(data?.error || ""));
-        if (attempt < 2 && retryable && Date.now() - startedAt < 15000) {
-          await sleep(1200);
+
+        const retryable = response.status >= 500 || /page crashed|target closed|browser|navigation|timeout|timed out|execution context|temporar|upstream/i.test(String(data?.error || ""));
+        const canRetry = attempt < 2 && retryable && (totalBudgetMs - (Date.now() - startedAt)) >= 6500;
+        if (canRetry) {
+          await sleep(900);
           continue;
         }
         return { ok: false, status: response.status, data: { ...data, endpointAudit: attempts } };
       }
 
-      const retryableStatus = response.status >= 500;
-      if (attempt < 2 && retryableStatus && Date.now() - startedAt < 15000) {
-        await sleep(1200);
+      // Railway/Proxyが502のHTMLを返すケース。以前は1回目が15秒を超えると再試行されなかった。
+      // 今回は残り時間がある限り、非JSONの5xxも必ず2回目へ進める。
+      const retryableStatus = response.status >= 500 || response.status === 429;
+      const canRetry = attempt < 2 && retryableStatus && (totalBudgetMs - (Date.now() - startedAt)) >= 6500;
+      if (canRetry) {
+        await sleep(900);
         continue;
       }
+
       return {
         ok: false,
         status: response.status || 502,
@@ -235,19 +247,27 @@ async function requestBrowserService(base, params) {
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      attempts.push({ endpoint: endpoint.replace(base, ""), attempt, error: message });
+      attempts.push({
+        endpoint: endpoint.replace(base, ""),
+        attempt,
+        error: message,
+        elapsedMs: Date.now() - startedAt
+      });
+
       const timedOut = /timeout|timed out|abort/i.test(message);
-      if (attempt < 2 && !timedOut && Date.now() - startedAt < 15000) {
-        await sleep(1200);
+      const canRetry = attempt < 2 && (totalBudgetMs - (Date.now() - startedAt)) >= 6500;
+      if (canRetry) {
+        await sleep(900);
         continue;
       }
+
       return {
         ok: false,
         status: 502,
         data: {
           ok: false,
           error: timedOut
-            ? "公式予想データ取得が時間内に完了しませんでした。数秒後に再試行してください。"
+            ? "公式予想データ取得が時間内に完了しませんでした。競輪ブラウザサービスへ再試行しましたが取得できませんでした。"
             : "競輪ブラウザサービスへ接続できません",
           endpointAudit: attempts
         }
@@ -258,7 +278,11 @@ async function requestBrowserService(base, params) {
   return {
     ok: false,
     status: 502,
-    data: { ok: false, error: "競輪ブラウザサービスの再試行でも取得できませんでした", endpointAudit: attempts }
+    data: {
+      ok: false,
+      error: "競輪ブラウザサービスの再試行でも取得できませんでした",
+      endpointAudit: attempts
+    }
   };
 }
 

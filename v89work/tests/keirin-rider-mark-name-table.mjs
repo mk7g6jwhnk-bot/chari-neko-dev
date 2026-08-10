@@ -1,0 +1,1 @@
+import assert from"node:assert/strict";import fs from"node:fs";const app=fs.readFileSync(new URL("../public/app.mjs",import.meta.url),"utf8");assert.match(app,/function renderRiderMarkNameTable/);assert.match(app,/選手印を見る/);assert.match(app,/着順別能力の詳細を見る/);assert.match(app,/チャット/);console.log("Keirin rider mark name table passed");

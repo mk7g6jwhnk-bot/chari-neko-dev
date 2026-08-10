@@ -1,0 +1,8 @@
+{
+  "name": "チャリ猫予想 DEV 1.0",
+  "short_name": "チャリ猫DEV",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#08111f",
+  "theme_color": "#08111f"
+}
