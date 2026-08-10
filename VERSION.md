@@ -1,4 +1,4 @@
 # Current version
 
-- `KEIRIN-0.9.3-result-verification-learning-v1`
-- label: `v104-result-verification-learning-v1`
+- `KEIRIN-0.9.4-detail-readability-fix`
+- label: `v105-detail-readability-fix`

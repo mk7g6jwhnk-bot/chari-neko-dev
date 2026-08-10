@@ -167,3 +167,54 @@
 .chatTrendAudit{margin-top:10px}.chatTrendGrid{display:grid;gap:6px;margin-top:8px}.chatTrendRow{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:8px 10px;border:1px solid #2d4666;border-radius:9px;background:rgba(7,22,42,.45)}.chatTrendRow small{min-width:42px;text-align:right;color:#9fb4ca}
 
 .riderMarkTable{margin-top:10px;border:1px solid var(--line);border-radius:12px;overflow:hidden}.riderMarkHead,.riderMarkLine{display:grid;grid-template-columns:48px minmax(0,1fr) 64px;align-items:center}.riderMarkTable:has(.riderMarkChat) .riderMarkHead,.riderMarkTable:has(.riderMarkChat) .riderMarkLine{grid-template-columns:48px minmax(0,1fr) 64px 64px}.riderMarkHead{background:#0b1729;color:var(--muted);font-size:.7rem;font-weight:700;padding:7px 9px}.riderMarkLine{min-height:54px;padding:8px 9px;border-top:1px solid rgba(255,255,255,.07)}.riderMarkNo{font-weight:900}.riderMarkName{min-width:0;font-weight:800;overflow-wrap:anywhere}.riderMarkName small{display:block;margin-top:3px;color:var(--muted);font-size:.68rem;font-weight:500}.riderMarkMain,.riderMarkChat{text-align:center;font-size:1.35rem}.riderMarkChat{color:#cbd5e1}@media(max-width:390px){.riderMarkHead,.riderMarkLine{grid-template-columns:38px minmax(0,1fr) 50px}.riderMarkTable:has(.riderMarkChat) .riderMarkHead,.riderMarkTable:has(.riderMarkChat) .riderMarkLine{grid-template-columns:38px minmax(0,1fr) 50px 50px}.riderMarkMain,.riderMarkChat{font-size:1.15rem}}
+
+
+/* v105: prediction-detail readability */
+.riderMarkHead,.riderMarkLine{
+  grid-template-columns:48px minmax(0,1fr) 72px;
+}
+.riderMarkHead.riderMarkWithChat,.riderMarkLine.riderMarkWithChat{
+  grid-template-columns:48px minmax(0,1fr) 64px 84px;
+}
+.riderMarkMain,.riderMarkChat{
+  white-space:nowrap;
+  overflow-wrap:normal;
+  word-break:keep-all;
+}
+.auditKeyValueList .auditKeyValueRow,
+.abilityList .auditKeyValueRow{
+  grid-template-columns:minmax(0,1fr) auto !important;
+  align-items:center;
+  column-gap:14px;
+}
+.auditKeyValueRow strong{
+  min-width:0;
+  overflow-wrap:anywhere;
+  word-break:normal;
+  line-height:1.35;
+}
+.auditKeyValueRow span{
+  min-width:max-content;
+  text-align:right;
+  white-space:nowrap;
+}
+#purchaseAuditBody .abilityRow{
+  grid-template-columns:minmax(0,1fr) auto;
+}
+#purchaseAuditBody .abilityRow strong{
+  overflow-wrap:anywhere;
+  word-break:normal;
+}
+#purchaseAuditBody .abilityRow span{
+  white-space:nowrap;
+  text-align:right;
+}
+.supportBranchAudit summary,
+.predictionAccordion summary{
+  overflow-wrap:anywhere;
+  word-break:normal;
+}
+@media(max-width:520px){
+  .riderMarkHead,.riderMarkLine{grid-template-columns:38px minmax(0,1fr) 52px}
+  .riderMarkHead.riderMarkWithChat,.riderMarkLine.riderMarkWithChat{grid-template-columns:38px minmax(0,1fr) 48px 64px}
+}

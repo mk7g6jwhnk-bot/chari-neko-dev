@@ -1,0 +1,10 @@
+import assert from"node:assert/strict";import fs from"node:fs";
+const app=fs.readFileSync(new URL("../public/app.mjs",import.meta.url),"utf8");
+const css=fs.readFileSync(new URL("../public/styles.css",import.meta.url),"utf8");
+assert.ok(app.includes("チャット印は未取込です。アプリ単独予想には影響しません。"));
+assert.ok(app.includes("POSITION_SUPPORT_WEAK:\"2・3着の位置支持が弱い\""));
+assert.ok(app.includes("NATURAL_CONVERGENCE_TOO_LOW:\"自然収束度が購入水準未満\""));
+assert.ok(app.includes("FAMILY_COVERAGE_ALREADY_MET:\"同じ1着候補の購入カバーが十分\""));
+assert.ok(css.includes(".auditKeyValueRow"));
+assert.ok(css.includes("grid-template-columns:minmax(0,1fr) auto"));
+console.log("PASS prediction detail readability UI");
