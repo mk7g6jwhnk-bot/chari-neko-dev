@@ -570,20 +570,51 @@ function deriveNaturalConvergence(item,lines,branches){
     reasons.push("ライン追走関係の直接確認なし");
   }
 
-  // Decision ratios preserve branch-specific 2nd/3rd suitability.
-  const ratioScore=Math.pow(
-    Math.max(.01,firstR)*
-    Math.max(.01,secondR)*
-    Math.max(.01,thirdR),1/3
+  const ratioScore=Math.pow(Math.max(.01,firstR)*Math.max(.01,secondR)*Math.max(.01,thirdR),1/3);
+
+  const trace=Array.isArray(best.nodeTrace)?best.nodeTrace:(Array.isArray(item.nodeTrace)?item.nodeTrace:[]);
+  const completeTrace=trace.length===3&&["FIRST","SECOND","THIRD"].every(stage=>trace.some(n=>n?.stage===stage));
+
+  // Backward-compatible path for old fixtures / legacy saved data.
+  if(!completeTrace){
+    const penalty=Math.max(.58,1-extra*.12);
+    const score=clamp((scenarioCoherence*.55 + ratioScore*.45)*penalty,0,1);
+    const level=score>=.70?"高":score>=.52?"中":"低";
+    return{score,level,reasons,extraConditionCount:extra,scenarioCoherence:clamp(scenarioCoherence,0,1),nodeProbabilityScore:null,nodeConditionCount:0};
+  }
+
+  const nodeByStage=new Map(trace.map(n=>[n.stage,n]));
+  const nodeProbs=["FIRST","SECOND","THIRD"].map(stage=>Number(nodeByStage.get(stage)?.conditionalProbability));
+  const nodeProbabilityScore=Math.pow(
+    Math.max(.0001,nodeProbs[0])*Math.max(.0001,nodeProbs[1])*Math.max(.0001,nodeProbs[2]),1/3
   );
+  const newConditions=trace.flatMap(n=>(n?.newRequiredConditions||[]).map(c=>({...c,stage:n.stage})));
+  const extraConditions=newConditions.filter(c=>c.kind==="extra");
+  const weakCritical=newConditions.filter(c=>c.critical===true&&finite(c.probability)&&Number(c.probability)<.58);
 
-  // Additional conditions are explicit penalties, not deletion rules.
-  const penalty=Math.max(.58,1-extra*.12);
-  const score=clamp((scenarioCoherence*.55 + ratioScore*.45)*penalty,0,1);
+  // Avoid double counting line-based extras already represented by node conditions.
+  const stageExtra=new Set(extraConditions.map(c=>c.stage));
+  let effectiveExtra=extra;
+  if(stageExtra.has("SECOND")&&effectiveExtra>0)effectiveExtra-=1;
+  if(stageExtra.has("THIRD")&&effectiveExtra>0)effectiveExtra-=1;
+  effectiveExtra+=extraConditions.length;
+
+  const conditionPenalty=Math.max(.42,1-effectiveExtra*.12-weakCritical.length*.07);
+  const score=clamp((scenarioCoherence*.40 + ratioScore*.22 + nodeProbabilityScore*.38)*conditionPenalty,0,1);
   const level=score>=.70?"高":score>=.52?"中":"低";
-  return{score,level,reasons,extraConditionCount:extra,scenarioCoherence:clamp(scenarioCoherence,0,1)};
-}
 
+  reasons.push(`着順ノード条件付き成立 ${(nodeProbabilityScore*100).toFixed(1)}%`);
+  if(extraConditions.length)reasons.push(`追加条件 ${extraConditions.length}件`);
+
+  return{
+    score,level,reasons,
+    extraConditionCount:effectiveExtra,
+    scenarioCoherence:clamp(scenarioCoherence,0,1),
+    nodeProbabilityScore,
+    nodeConditionCount:newConditions.length,
+    weakCriticalConditionCount:weakCritical.length
+  };
+}
 function findLineContext(lines,number){
   const normalized=Array.isArray(lines)?lines:[];
   for(const line of normalized){

@@ -1,4 +1,4 @@
 # Current version
 
-- `KEIRIN-0.9.1-node-condition-probability`
-- label: `v102-node-condition-probability`
+- `KEIRIN-0.9.2-node-probability-purchase-bridge`
+- label: `v103-node-probability-purchase-bridge`

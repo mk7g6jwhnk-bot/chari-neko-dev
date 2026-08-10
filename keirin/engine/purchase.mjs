@@ -596,10 +596,15 @@ function planRow(item,stake,fundingStatus,minimumRequired){return{
   probability:item.probability,probabilityShare:item.terminalProbabilityShare??null,expectedValueIndex:item.expectedValueIndex??null,
   globalRank:item.terminalGlobalRank??null,familyRank:item.terminalFamilyRank??null,pairRank:item.terminalPairRank??null,
   branchSupport:item.branchSupport,purchaseReason:item.purchaseReason,
-  dominantBranchId:item.dominantBranchId,dominantBranchLabel:item.dominantBranchLabel,decisionRatios:item.decisionRatios,positionEvidence:item.positionEvidence||null,evidenceSummary:item.evidenceSummary||null,
+  dominantBranchId:item.dominantBranchId,dominantBranchLabel:item.dominantBranchLabel,dominantBranchPriority:item.dominantBranchPriority||null,
+  decisionRatios:item.decisionRatios,positionEvidence:item.positionEvidence||null,evidenceSummary:item.evidenceSummary||null,
   highPayoutAttribute:Boolean(item.highPayoutAttribute),highPayoutAttributeLabel:item.highPayoutAttributeLabel||null,
   firstFamilyNumber:item.firstFamilyNumber,firstFamilyTier:item.firstFamilyTier,firstFamilyProbability:item.firstFamilyProbability??null,firstFamilyProbabilityShare:item.firstFamilyProbabilityShare??null,
   secondFamilyRelativeToBest:item.secondFamilyRelativeToBest??null,thirdFamilyRelativeToBest:item.thirdFamilyRelativeToBest??null,subValueIndex:item.subValueIndex??null,
+  chatForecastRole:item.chatForecastRole||null,directMainBranchSupport:Boolean(item.directMainBranchSupport),branchHeadMatched:item.branchHeadMatched!==false,
+  naturalConvergenceScore:item.naturalConvergenceScore??null,naturalConvergenceLevel:item.naturalConvergenceLevel||null,naturalConvergenceReasons:item.naturalConvergenceReasons||[],
+  extraConditionCount:item.extraConditionCount??0,scenarioCoherence:item.scenarioCoherence??null,
+  nodeConditionalProbability:item.nodeConditionalProbability??null,nodeTrace:item.nodeTrace||null,
   fundingWeight:item.odds>1?(Number(item.probability)||0)*Math.sqrt(Math.max((Number(item.probability)||0)*Number(item.odds),.000001)):(Number(item.probability)||0),
   fundingStatus,minimumRequired
 }}

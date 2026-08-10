@@ -11,7 +11,7 @@ const ODDS_CACHE_KEY="chari-neko:keirin-odds-cache:v1";
 const RACE_META_CACHE_KEY="chari-neko:keirin-race-meta-cache:v1";
 const RESULT_CACHE_KEY="chari-neko:keirin-result-cache:v1";
 const MEETING_CACHE_KEY="chari-neko:keirin-meeting-cache:v1";
-const APP_RELEASE="KEIRIN-0.9.1-node-condition-probability";
+const APP_RELEASE="KEIRIN-0.9.2-node-probability-purchase-bridge";
 const APP_UPDATE_CHECK_INTERVAL_MS=5*60*1000;
 let lastAppUpdateCheckAt=0,appUpdateCheckBusy=false;
 const VENUE_CODES={函館:"11",青森:"12",いわき平:"13",弥彦:"21",前橋:"22",取手:"23",宇都宮:"24",大宮:"25",西武園:"26",京王閣:"27",立川:"28",松戸:"31",千葉:"32",川崎:"34",平塚:"35",小田原:"36",伊東:"37",静岡:"38",名古屋:"42",岐阜:"43",大垣:"44",豊橋:"45",富山:"46",松阪:"47",四日市:"48",福井:"51",奈良:"53",向日町:"54",和歌山:"55",岸和田:"56",玉野:"61",広島:"62",防府:"63",高松:"71",小松島:"73",高知:"74",松山:"75",小倉:"81",久留米:"83",武雄:"84",佐世保:"85",別府:"86",熊本:"87"};
@@ -568,7 +568,8 @@ function scenarioBetSentence(b,marks){
   const [a,c,d]=order;
   const cls=betClassLabel(b?.category);
   const branch=b?.dominantBranchLabel||b?.branchLabel||"展開枝不明";
-  const conv=Number(b?.naturalConvergenceScore);
+  const convRaw=b?.naturalConvergenceScore;
+  const conv=convRaw===null||convRaw===undefined||convRaw===""?null:Number(convRaw);
   const convText=Number.isFinite(conv)?`${Math.round(conv*100)}%`:"不明";
   const m1=marks.get(a),m2=marks.get(c),m3=marks.get(d);
   const markText=[
@@ -586,7 +587,7 @@ function scenarioBetSentence(b,marks){
     sentence=`${a}-${c}-${d}は「${branch}」由来の別展開として成立し、自然さだけで本線には上げず、オッズ妙味が残るため高配当候補にしました。`;
   }
   const reason=b?.purchaseReason?` ${b.purchaseReason}`:"";
-  return `<div class="detailBet"><strong>${esc(`${a}-${c}-${d}`)}　${esc(cls)}</strong><p>${esc(sentence)}</p><p class="muted">自然収束度 ${esc(convText)}${markText?` / ${esc(markText)}`:""}${reason?` / ${esc(reason)}`:""}</p></div>`;
+  return `<div class="detailBet"><strong>${esc(`${a}-${c}-${d}`)}　${esc(cls)}</strong><p>${esc(sentence)}</p><p class="muted">自然収束度 ${esc(convText)}${Number.isFinite(Number(b?.nodeConditionalProbability))?` / ノード連鎖 ${esc((Number(b.nodeConditionalProbability)*100).toFixed(2))}%`:""}${Number(b?.extraConditionCount)>0?` / 追加条件 ${Number(b.extraConditionCount)}件`:""}${markText?` / ${esc(markText)}`:""}${reason?` / ${esc(reason)}`:""}</p></div>`;
 }
 
 function explainMarkScenarioGap(mainBets,marks){
