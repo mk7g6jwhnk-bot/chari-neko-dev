@@ -1,5 +1,10 @@
 ## Current
 
+- `KEIRIN-0.5.51-storage-quota-compaction`
+- label: `v74-storage-quota-compaction`
+
+## Current
+
 - `KEIRIN-0.5.50-chat-app-diff-audit`
 - label: `v73-chat-app-diff-audit`
 

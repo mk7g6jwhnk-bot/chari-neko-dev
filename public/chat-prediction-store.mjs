@@ -33,14 +33,14 @@ export function saveChatPrediction(storage,prediction){
   const all=loadChatPredictions(storage);
   const key=chatRaceKey(prediction.race);
   const filtered=all.filter(x=>chatRaceKey(x.race)!==key);
-  filtered.unshift(prediction);
-  storage.setItem(CHAT_PREDICTION_STORAGE_KEY,JSON.stringify(filtered.slice(0,100)));
+  filtered.unshift(compactChatPrediction(prediction));
+  persistChatPredictions(storage,filtered.slice(0,40));
   return prediction;
 }
 
 export function loadChatPredictions(storage){try{const value=JSON.parse(storage.getItem(CHAT_PREDICTION_STORAGE_KEY)||"[]");return Array.isArray(value)?value:[]}catch{return[]}}
 export function findChatPrediction(storage,race){const key=chatRaceKey(race);return loadChatPredictions(storage).find(x=>chatRaceKey(x.race)===key)||null}
-export function removeChatPrediction(storage,race){const key=chatRaceKey(race),next=loadChatPredictions(storage).filter(x=>chatRaceKey(x.race)!==key);storage.setItem(CHAT_PREDICTION_STORAGE_KEY,JSON.stringify(next));return next.length}
+export function removeChatPrediction(storage,race){const key=chatRaceKey(race),next=loadChatPredictions(storage).filter(x=>chatRaceKey(x.race)!==key);persistChatPredictions(storage,next);return next.length}
 
 function extractJson(text){
   const trimmed=text.trim();
@@ -87,3 +87,6 @@ function normalizeOrder(value,length){const parts=Array.isArray(value)?value:Str
 function normalizeStringArray(value){if(Array.isArray(value))return value.map(x=>String(x||"").trim()).filter(Boolean);if(typeof value==="string"&&value.trim())return[value.trim()];return[]}
 function finiteOrNull(value){const n=Number(value);return Number.isFinite(n)?n:null}
 function normalizeDate(value){return String(value||"").replace(/\D/g,"").slice(0,8)}
+
+function compactChatPrediction(p){const {rawSource,...rest}=p||{};return rest}
+function persistChatPredictions(storage,rows){let list=(rows||[]).map(compactChatPrediction);for(const limit of [40,20,10,5]){try{storage.setItem(CHAT_PREDICTION_STORAGE_KEY,JSON.stringify(list.slice(0,limit)));return}catch(error){if(!(error?.name==="QuotaExceededError"||/quota/i.test(String(error?.message||""))))throw error}}throw new Error("チャット予想の保存領域がいっぱいです。古い比較予想を整理してください。")}
