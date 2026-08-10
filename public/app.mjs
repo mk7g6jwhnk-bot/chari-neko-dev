@@ -11,7 +11,7 @@ const ODDS_CACHE_KEY="chari-neko:keirin-odds-cache:v1";
 const RACE_META_CACHE_KEY="chari-neko:keirin-race-meta-cache:v1";
 const RESULT_CACHE_KEY="chari-neko:keirin-result-cache:v1";
 const MEETING_CACHE_KEY="chari-neko:keirin-meeting-cache:v1";
-const APP_RELEASE="KEIRIN-0.8.1-rider-to-branch-link";
+const APP_RELEASE="KEIRIN-0.8.2-scenario-explanation";
 const APP_UPDATE_CHECK_INTERVAL_MS=5*60*1000;
 let lastAppUpdateCheckAt=0,appUpdateCheckBusy=false;
 const VENUE_CODES={函館:"11",青森:"12",いわき平:"13",弥彦:"21",前橋:"22",取手:"23",宇都宮:"24",大宮:"25",西武園:"26",京王閣:"27",立川:"28",松戸:"31",千葉:"32",川崎:"34",平塚:"35",小田原:"36",伊東:"37",静岡:"38",名古屋:"42",岐阜:"43",大垣:"44",豊橋:"45",富山:"46",松阪:"47",四日市:"48",福井:"51",奈良:"53",向日町:"54",和歌山:"55",岸和田:"56",玉野:"61",広島:"62",防府:"63",高松:"71",小松島:"73",高知:"74",松山:"75",小倉:"81",久留米:"83",武雄:"84",佐世保:"85",別府:"86",熊本:"87"};
@@ -279,9 +279,10 @@ function renderPredictionDetail(snapshot){
     const audit=snapshot?.predictionOutput?.audit&&typeof snapshot.predictionOutput.audit==="object"?snapshot.predictionOutput.audit:{};
     const riderBranchLinkHtml=renderRiderBranchLinkAudit(audit?.riderBranchLinkAudit);
     const wholeLinkageHtml=renderWholeLinkageAudit(audit?.wholeLinkageAudit);
+    const scenarioExplanationHtml=renderScenarioExplanation(snapshot,riderMarks);
     const hasAudit=Number.isFinite(Number(audit.generatedTerminalCount));
     const auditSummary=hasAudit?`<details id="purchaseAuditDetails" class="predictionAccordion"><summary>詳しい購入監査を見る（開発用）</summary><div id="purchaseAuditBody" class="accordionBody"><p class="muted">監査データは詳細を開いた時だけ描画します。レース詳細の表示を優先しています。</p></div></details>`:"";
-    panel.innerHTML=`<div class="sectionHead"><div><small>保存済み予想の根拠</small><h2>予想詳細</h2></div><span class="pill">詳細</span></div>${riderBranchLinkHtml}${wholeLinkageHtml}${auditSummary}<details class="predictionAccordion"><summary>買い目の理由を見る</summary><div class="accordionBody">${betDetail||'<p class="muted">購入候補はありません。</p>'}</div></details>${abilities?`<details class="predictionAccordion" open><summary>選手印を見る</summary><div class="accordionBody"><p class="muted">まず「印＋選手名」で評価の全体像を確認します。チャット予想を取り込んでいる場合は横にチャット印も表示します。</p>${markTable}${markAuditHtml}<details class="supportBranchAudit"><summary>着順別能力の詳細を見る</summary><div class="abilityList">${abilities}</div></details></div></details>`:""}${renderStartPowerInputAuditSafe(snapshot)}`;
+    panel.innerHTML=`<div class="sectionHead"><div><small>保存済み予想の根拠</small><h2>予想詳細</h2></div><span class="pill">詳細</span></div>${scenarioExplanationHtml}${riderBranchLinkHtml}${wholeLinkageHtml}${auditSummary}<details class="predictionAccordion"><summary>買い目の理由を見る</summary><div class="accordionBody">${betDetail||'<p class="muted">購入候補はありません。</p>'}</div></details>${abilities?`<details class="predictionAccordion" open><summary>選手印を見る</summary><div class="accordionBody"><p class="muted">まず「印＋選手名」で評価の全体像を確認します。チャット予想を取り込んでいる場合は横にチャット印も表示します。</p>${markTable}${markAuditHtml}<details class="supportBranchAudit"><summary>着順別能力の詳細を見る</summary><div class="abilityList">${abilities}</div></details></div></details>`:""}${renderStartPowerInputAuditSafe(snapshot)}`;
     panel.classList.remove("hidden");
     const auditDetails=$("purchaseAuditDetails"),auditBody=$("purchaseAuditBody");
     if(auditDetails&&auditBody)auditDetails.addEventListener("toggle",()=>{if(!auditDetails.open||auditBody.dataset.loaded==="1")return;auditBody.dataset.loaded="1";renderPurchaseAuditLazy(audit,auditBody)},{once:false});
@@ -293,6 +294,110 @@ function renderPredictionDetail(snapshot){
 }
 
 
+function renderScenarioExplanation(snapshot,riderMarks=[]){
+  const bets=Array.isArray(snapshot?.betSelections)?snapshot.betSelections:[];
+  const branches=Array.isArray(snapshot?.branches)?snapshot.branches:[];
+  const marks=new Map((riderMarks||[]).map(m=>[Number(m.number),m]));
+  if(!bets.length)return `<div class="auditCallout"><strong>展開説明</strong><p>購入候補がないため、買い目に至る展開説明はありません。</p></div>`;
+
+  const grouped=new Map();
+  for(const bet of bets){
+    const category=bet?.category||"";
+    if(!["MAIN","COVER","BUYABLE_HIGH"].includes(category))continue;
+    if(!grouped.has(category))grouped.set(category,[]);
+    grouped.get(category).push(bet);
+  }
+
+  const main=grouped.get("MAIN")||[];
+  const cover=grouped.get("COVER")||[];
+  const value=grouped.get("BUYABLE_HIGH")||[];
+  const mainHeads=countHeads(main);
+  const branchLabels=unique(main.map(b=>b.dominantBranchLabel||b.branchLabel).filter(Boolean));
+  const mainSentences=[];
+
+  if(branchLabels.length){
+    mainSentences.push(`中心に置いたのは「${branchLabels.slice(0,3).join("」「")}」です。`);
+  }else{
+    const mains=branches.filter(b=>b?.priority==="main").map(b=>b.label).filter(Boolean);
+    if(mains.length)mainSentences.push(`中心に置いたのは「${mains.slice(0,3).join("」「")}」です。`);
+  }
+
+  if(mainHeads.size){
+    const heads=[...mainHeads.entries()].sort((a,b)=>b[1]-a[1]||a[0]-b[0]);
+    mainSentences.push(`本線は${heads.map(([n,c])=>`${n}番頭${c}点`).join("、")}。同じ主展開内の押し切り・番手差し・自然な折り返しをまとめて本線群としています。`);
+  }
+
+  if(cover.length){
+    const heads=[...countHeads(cover).entries()].sort((a,b)=>b[1]-a[1]||a[0]-b[0]);
+    mainSentences.push(`押さえは${heads.map(([n,c])=>`${n}番頭${c}点`).join("、")}で、主展開から一段条件が増える枝や別の有力展開を補完しています。`);
+  }
+
+  if(value.length){
+    const heads=[...countHeads(value).entries()].sort((a,b)=>b[1]-a[1]||a[0]-b[0]);
+    mainSentences.push(`買える高配当は${heads.map(([n,c])=>`${n}番頭${c}点`).join("、")}。高配当だから採用したのではなく、成立する展開根拠と実オッズの両方が残った終端だけを対象にしています。`);
+  }
+
+  const markContrast=explainMarkScenarioGap(main,marks);
+  if(markContrast)mainSentences.push(markContrast);
+
+  const rows=bets
+    .filter(b=>["MAIN","COVER","BUYABLE_HIGH"].includes(b?.category))
+    .map(b=>scenarioBetSentence(b,marks))
+    .join("");
+
+  return `<details class="predictionAccordion" open><summary>展開説明：なぜこの買い目になったか</summary><div class="accordionBody">
+    <div class="auditCallout"><strong>レース全体の説明</strong>${mainSentences.map(x=>`<p>${esc(x)}</p>`).join("")}</div>
+    <div class="detailGroup">${rows}</div>
+    <p class="muted">この文章は保存された選手評価・主展開枝・自然収束度・購入分類から自動生成しています。印と買い目がズレる場合も、印を後から合わせず、展開側の理由を文章で明示します。</p>
+  </div></details>`;
+}
+
+function scenarioBetSentence(b,marks){
+  const order=Array.isArray(b?.order)?b.order.map(Number):String(b?.order||"").split("-").map(Number);
+  const [a,c,d]=order;
+  const cls=betClassLabel(b?.category);
+  const branch=b?.dominantBranchLabel||b?.branchLabel||"展開枝不明";
+  const conv=Number(b?.naturalConvergenceScore);
+  const convText=Number.isFinite(conv)?`${Math.round(conv*100)}%`:"不明";
+  const m1=marks.get(a),m2=marks.get(c),m3=marks.get(d);
+  const markText=[
+    m1?`${a}番1着印${m1.firstMark}`:null,
+    m2?`${c}番2着印${m2.secondMark}`:null,
+    m3?`${d}番3着印${m3.thirdMark}`:null
+  ].filter(Boolean).join(" / ");
+
+  let sentence="";
+  if(b?.category==="MAIN"){
+    sentence=`「${branch}」から直接つながる自然終端として${a}-${c}-${d}を本線にしました。`;
+  }else if(b?.category==="COVER"){
+    sentence=`${a}-${c}-${d}は「${branch}」から成立するものの、本線より追加条件があるため押さえにしました。`;
+  }else{
+    sentence=`${a}-${c}-${d}は「${branch}」由来の別展開として成立し、自然さだけで本線には上げず、オッズ妙味が残るため高配当候補にしました。`;
+  }
+  const reason=b?.purchaseReason?` ${b.purchaseReason}`:"";
+  return `<div class="detailBet"><strong>${esc(`${a}-${c}-${d}`)}　${esc(cls)}</strong><p>${esc(sentence)}</p><p class="muted">自然収束度 ${esc(convText)}${markText?` / ${esc(markText)}`:""}${reason?` / ${esc(reason)}`:""}</p></div>`;
+}
+
+function explainMarkScenarioGap(mainBets,marks){
+  if(!mainBets.length||!marks.size)return "";
+  const mainHeads=countHeads(mainBets);
+  const dominant=[...mainHeads.entries()].sort((a,b)=>b[1]-a[1])[0];
+  if(!dominant)return "";
+  const firstAce=[...marks.values()].find(m=>m.firstMark==="◎");
+  if(!firstAce||Number(firstAce.number)===Number(dominant[0]))return "";
+  const domMark=marks.get(Number(dominant[0]));
+  const branch=unique(mainBets.filter(b=>Number(b?.order?.[0])===Number(dominant[0])).map(b=>b.dominantBranchLabel||b.branchLabel).filter(Boolean));
+  return `1着印◎は${firstAce.number}番ですが、本線最多頭は${dominant[0]}番（1着印${domMark?.firstMark||"?"}）です。これは「${branch.slice(0,2).join(" / ")||"主展開"}」を今回のレース展開として上位に置いたためで、印を買い目に強制一致させていません。`;
+}
+
+function countHeads(rows){
+  const map=new Map();
+  for(const row of rows||[]){
+    const n=Number(Array.isArray(row?.order)?row.order[0]:String(row?.order||"").split("-")[0]);
+    if(Number.isFinite(n))map.set(n,(map.get(n)||0)+1);
+  }
+  return map;
+}
 function renderRiderBranchLinkAudit(audit){
   if(!audit)return "";
   const rows=Array.isArray(audit.rows)?audit.rows:[];
