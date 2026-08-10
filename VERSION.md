@@ -1,4 +1,4 @@
 # Current version
 
-- `KEIRIN-0.9.2-node-probability-purchase-bridge`
-- label: `v103-node-probability-purchase-bridge`
+- `KEIRIN-0.9.3-result-verification-learning-v1`
+- label: `v104-result-verification-learning-v1`

@@ -11,7 +11,7 @@ const ODDS_CACHE_KEY="chari-neko:keirin-odds-cache:v1";
 const RACE_META_CACHE_KEY="chari-neko:keirin-race-meta-cache:v1";
 const RESULT_CACHE_KEY="chari-neko:keirin-result-cache:v1";
 const MEETING_CACHE_KEY="chari-neko:keirin-meeting-cache:v1";
-const APP_RELEASE="KEIRIN-0.9.2-node-probability-purchase-bridge";
+const APP_RELEASE="KEIRIN-0.9.3-result-verification-learning-v1";
 const APP_UPDATE_CHECK_INTERVAL_MS=5*60*1000;
 let lastAppUpdateCheckAt=0,appUpdateCheckBusy=false;
 const VENUE_CODES={函館:"11",青森:"12",いわき平:"13",弥彦:"21",前橋:"22",取手:"23",宇都宮:"24",大宮:"25",西武園:"26",京王閣:"27",立川:"28",松戸:"31",千葉:"32",川崎:"34",平塚:"35",小田原:"36",伊東:"37",静岡:"38",名古屋:"42",岐阜:"43",大垣:"44",豊橋:"45",富山:"46",松阪:"47",四日市:"48",福井:"51",奈良:"53",向日町:"54",和歌山:"55",岸和田:"56",玉野:"61",広島:"62",防府:"63",高松:"71",小松島:"73",高知:"74",松山:"75",小倉:"81",久留米:"83",武雄:"84",佐世保:"85",別府:"86",熊本:"87"};
@@ -681,7 +681,29 @@ function renderRatings(panel,snapshot){if(!panel)return;if(!snapshot){panel.clas
 function noBetReasonText(code){return({NO_TERMINALS:"展開候補を生成できませんでした。",FLAT_DISTRIBUTION_NO_SUPPORTED_CANDIDATE:"確率分布が平坦で、独立した展開根拠を持つ購入候補がありません。",BUDGET_BELOW_MINIMUM:"予算が最低購入単位を下回っています。",QUALITY_GATE:"データ品質基準を満たさないため購入を見送ります。",LINE_DATA_UNAVAILABLE:"公式ラインを確認できないため、通常の競輪予想としては購入判定を保留します。"})[code]||"購入価値を確認できないため見送ります。"}
 async function checkResult(){if(state.busy||!state.snapshot)return;state.busy=true;setLoading("公式結果を確認中","レースIDを固定して確定着順と払戻を取得しています。");try{const r=state.snapshot.targetRace,p=await fetchOfficialResult(r);storeResultCache(r,p.result,p.checkedAt);if(isResultPending(p.result)){renderPrediction(state.snapshot);renderPendingResult();return}state.snapshot=attachResult(localStorage,state.snapshot.predictionSnapshotId,p.result);renderSaved();renderHomeRecommendations();renderPrediction(state.snapshot)}catch(e){fail("公式結果の取得・保存に失敗",e,checkResult)}finally{state.busy=false}}
 function renderPendingResult(){$("resultPanel").className="card";$("resultPanel").innerHTML='<div class="resultMark">結果はまだ確定していません</div><p class="muted">公式結果の確定後にもう一度確認してください。</p><button id="retryPendingResult" class="secondary">再試行</button>';$('retryPendingResult').onclick=()=>checkResult()}
-function renderResult(result){if(!result){$("resultPanel").classList.add("hidden");return}const cfg={hit:["○ 的中","resultHit"],miss:["✕ 不的中","resultMiss"],refund:["返還",""],cancelled:["中止",""]}[result.resultStatus]||[result.resultStatus,""];$("resultPanel").className=`card ${cfg[1]}`;$("resultPanel").innerHTML=`<div class="resultMark">${cfg[0]}</div>${result.matchedSelection?`<p>的中買い目 <strong>${result.matchedSelection.join("-")}</strong> / ${esc(result.betCategory||"")}</p>`:""}${result.officialPayout?`<p>公式配当 <strong>${Number(result.officialPayout).toLocaleString()}円</strong></p>`:""}<p class="muted">確認 ${formatTime(result.checkedAt)}</p>`}
+function renderResult(result){
+  if(!result){$("resultPanel").classList.add("hidden");return}
+  const cfg={hit:["○ 的中","resultHit"],miss:["✕ 不的中","resultMiss"],refund:["返還",""],cancelled:["中止",""]}[result.resultStatus]||[result.resultStatus,""];
+  const v=result.verification||null;
+  const stageHtml=Array.isArray(v?.stages)?v.stages.map(row=>{
+    const p=Number(row.conditionalProbability);
+    const ptxt=Number.isFinite(p)?`${(p*100).toFixed(1)}%`:"未保存";
+    return `<div class="detailBet"><strong>${row.position}着 ${row.number}番</strong><p>着順事象: 確定 / 予想ノード: ${row.predictedNodePresent?"あり":"なし"} / 条件付き成立 ${esc(ptxt)}</p><p class="muted">新規条件 ${row.newConditionCount??"-"} / 追加条件 ${row.extraConditionCount??"-"} / 原因検証 ${esc(row.conditionValidation?.status||"保留")}</p></div>`;
+  }).join(""):"";
+  const verifyHtml=v?`<details class="predictionAccordion" open><summary>結果検証・研究学習</summary><div class="accordionBody">
+    <p><strong>検証分類:</strong> ${esc(resultVerificationLabel(v.status))}</p>
+    ${v.exactTerminalGenerated!=null?`<p>正解終端 ${v.exactTerminalGenerated?"生成済み":"未生成"} / 正解1着ファミリー ${v.firstPlaceFamilyGenerated?"生成済み":"未生成"} / 正解1-2枝 ${v.firstSecondPairGenerated?"生成済み":"未生成"}</p>`:""}
+    ${Number.isFinite(Number(v.terminalProbability))?`<p>正解終端確率 ${(Number(v.terminalProbability)*100).toFixed(2)}%${v.terminalGlobalRank?` / 全体${v.terminalGlobalRank}位`:""}</p>`:""}
+    ${stageHtml}
+    <p class="muted">研究版へ保存: ${v.researchLearning?.savedToResearch?"はい":"いいえ"} / 通常学習: ${v.researchLearning?.includeInNormalLearning?"対象":"対象外"} / 本番ロジック自動反映: しない</p>
+    <p class="muted">確定着順だけで「捲り成功」「追走失敗」などの途中原因を成立扱いにはしません。原因ノードは公式経過・映像等の証拠が取れるまで保留です。</p>
+  </div></details>`:"";
+  $("resultPanel").className=`card ${cfg[1]}`;
+  $("resultPanel").innerHTML=`<div class="resultMark">${cfg[0]}</div>${result.officialFinishOrder?.length?`<p>確定 <strong>${result.officialFinishOrder.join("-")}</strong></p>`:""}${result.matchedSelection?`<p>的中買い目 <strong>${result.matchedSelection.join("-")}</strong> / ${esc(result.betCategory||"")}</p>`:""}${result.officialPayout?`<p>公式配当 <strong>${Number(result.officialPayout).toLocaleString()}円</strong></p>`:""}${verifyHtml}<p class="muted">確認 ${formatTime(result.checkedAt)}</p>`;
+}
+function resultVerificationLabel(v){
+  return({PURCHASE_HIT:"購入的中",PURCHASE_SELECTION_MISS:"正解終端は生成済み・購入不採用",TERMINAL_GENERATION_MISS:"正解終端の生成漏れ",NOT_APPLICABLE:"通常検証対象外",NONE:"検証済み"})[v]||v||"不明";
+}
 function renderSaved(){const all=loadSnapshots(localStorage);$("savedCount").textContent=`${all.length}件`;$("savedList").innerHTML=all.length?all.slice(0,8).map((s,i)=>`<article class="savedItem"><h3>${esc(s.targetRace.venueName)} ${s.targetRace.raceNo}R</h3><p>${formatDate(s.targetRace.date)} / ${formatTime(s.createdAt)} ${s.result?`/ ${resultLabel(s.result.resultStatus)}`:""}</p><button data-saved="${i}">詳細を見る</button></article>`).join(""):'<p class="empty">保存した予想はまだありません。</p>';$("savedList").querySelectorAll("[data-saved]").forEach(b=>b.onclick=()=>{const s=all[Number(b.dataset.saved)];openSavedDetail(s)})}
 function deadlineOf(r){return String(r?.deadline||r?.scheduledStart||"")}
 function raceStatus(r){const t=parseTime(r.date,deadlineOf(r));if(!t)return{label:"未発走",className:""};const diff=t-Date.now();if(diff<=0)return{label:"終了",className:"danger"};if(diff<=15*60000)return{label:"締切間近",className:"warning"};return{label:"未発走",className:""}}
