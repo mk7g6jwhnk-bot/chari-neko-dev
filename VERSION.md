@@ -1,4 +1,4 @@
 # Current version
 
-- `KEIRIN-0.5.56-rare-star-marks`
-- label: `v81-rare-star-marks`
+- `KEIRIN-0.6.0-chat-spec-v1-coded`
+- label: `v82-chat-spec-v1-coded`
