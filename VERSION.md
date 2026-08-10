@@ -1,3 +1,8 @@
+## Current
+
+- `KEIRIN-0.5.50-chat-app-diff-audit`
+- label: `v73-chat-app-diff-audit`
+
 # Current version
 
 - APP_RELEASE: `KEIRIN-0.5.49-chat-prediction-import`

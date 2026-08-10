@@ -1,6 +1,7 @@
 import{attachResult,createSnapshot,findLatestSnapshot,isResultPending,loadSnapshots,raceKey,saveSnapshot}from"./prediction-store.mjs";
 import{derivePredictionRatings,starText}from"./prediction-ratings.mjs";
 import{findChatPrediction,parseChatPrediction,removeChatPrediction,saveChatPrediction}from"./chat-prediction-store.mjs";
+import{compareChatAndApp}from"./chat-app-diff.mjs";
 const $=id=>document.getElementById(id),screens=[...document.querySelectorAll(".screen")];
 const state={screen:"home",history:[],date:localDate(),meeting:null,meetings:[],meetingTab:"today",race:null,payload:null,snapshot:null,retry:null,busy:false,oddsBusyKey:null,bulkBusy:false,bulkDone:0,bulkTotal:0,screeningBusy:false,deepDiveBusy:false,deepDiveCurrentKeys:[]};
 const BATCH_LOCK_KEY="chari-neko:keirin-batch-lock:v1",TAB_INSTANCE_ID=(globalThis.crypto?.randomUUID?.()||`${Date.now()}-${Math.random()}`),BATCH_LOCK_TTL_MS=10*60*1000;
@@ -8,7 +9,7 @@ const ODDS_CACHE_KEY="chari-neko:keirin-odds-cache:v1";
 const RACE_META_CACHE_KEY="chari-neko:keirin-race-meta-cache:v1";
 const RESULT_CACHE_KEY="chari-neko:keirin-result-cache:v1";
 const MEETING_CACHE_KEY="chari-neko:keirin-meeting-cache:v1";
-const APP_RELEASE="KEIRIN-0.5.49-chat-prediction-import";
+const APP_RELEASE="KEIRIN-0.5.50-chat-app-diff-audit";
 const APP_UPDATE_CHECK_INTERVAL_MS=5*60*1000;
 let lastAppUpdateCheckAt=0,appUpdateCheckBusy=false;
 const VENUE_CODES={函館:"11",青森:"12",いわき平:"13",弥彦:"21",前橋:"22",取手:"23",宇都宮:"24",大宮:"25",西武園:"26",京王閣:"27",立川:"28",松戸:"31",千葉:"32",川崎:"34",平塚:"35",小田原:"36",伊東:"37",静岡:"38",名古屋:"42",岐阜:"43",大垣:"44",豊橋:"45",富山:"46",松阪:"47",四日市:"48",福井:"51",奈良:"53",向日町:"54",和歌山:"55",岸和田:"56",玉野:"61",広島:"62",防府:"63",高松:"71",小松島:"73",高知:"74",松山:"75",小倉:"81",久留米:"83",武雄:"84",佐世保:"85",別府:"86",熊本:"87"};
@@ -207,12 +208,37 @@ function renderChatPredictionImport(){
   const panel=$("chatPredictionImport");if(!panel||!state.race)return;
   const saved=findChatPrediction(localStorage,state.race);
   const main=saved?.mainScenario;
-  const summary=saved?`<div class="chatImportSaved"><div class="sectionHead"><strong>チャット予想 保存済み</strong><span class="pill success">比較用</span></div>${main?.description?`<p><b>主展開</b> ${esc(main.description)}</p>`:""}<p class="muted">1着候補 ${saved.firstCandidates?.length||0}件 / 1-2着枝 ${saved.pairBranches?.length||0}件 / 終端 ${saved.terminals?.length||0}件</p><button id="removeChatPrediction" class="secondary" type="button">取り込みを削除</button></div>`:"";
-  panel.innerHTML=`<div class="sectionHead"><div><small>比較・修正点洗い出し用</small><h2>チャット予想を取り込む</h2></div><span class="pill">STEP 2</span></div><p class="muted">このレースのチャット予想JSONを貼り付けて保存します。アプリ予想を書き換えず、比較用データとして別保存します。</p>${summary}<details class="predictionAccordion"><summary>${saved?"チャット予想を更新する":"チャット予想を貼り付ける"}</summary><div class="accordionBody"><textarea id="chatPredictionText" class="chatPredictionTextarea" rows="10" placeholder='チャットで「アプリ取り込み形式で出して」と依頼し、JSON全体をここへ貼り付け'></textarea><div id="chatPredictionImportMessage" class="muted"></div><button id="saveChatPrediction" class="primary" type="button">チャット予想を保存</button><details class="supportBranchAudit"><summary>必要な形式を見る</summary><pre class="chatPredictionExample">${esc(chatPredictionExample(state.race))}</pre></details></div></details>`;
+  const comparison=saved&&state.snapshot?compareChatAndApp(saved,state.snapshot):null;
+  const comparisonHtml=renderChatAppComparison(comparison,saved);
+  const summary=saved?`<div class="chatImportSaved"><div class="sectionHead"><strong>チャット予想 保存済み</strong><span class="pill success">比較用</span></div>${main?.description?`<p><b>主展開</b> ${esc(main.description)}</p>`:""}<p class="muted">1着候補 ${saved.firstCandidates?.length||0}件 / 1-2着枝 ${saved.pairBranches?.length||0}件 / 終端 ${saved.terminals?.length||0}件</p>${comparisonHtml}<button id="removeChatPrediction" class="secondary" type="button">取り込みを削除</button></div>`:"";
+  panel.innerHTML=`<div class="sectionHead"><div><small>比較・修正点洗い出し用</small><h2>チャット予想を取り込む</h2></div><span class="pill">STEP 2-3</span></div><p class="muted">チャット予想はアプリ予想を上書きしません。保存後、同じレースのアプリ予想と工程ごとに比較し、最初にズレた場所を表示します。</p>${summary}<details class="predictionAccordion"><summary>${saved?"チャット予想を更新する":"チャット予想を貼り付ける"}</summary><div class="accordionBody"><textarea id="chatPredictionText" class="chatPredictionTextarea" rows="10" placeholder='チャットで「アプリ取り込み形式で出して」と依頼し、JSON全体をここへ貼り付け'></textarea><div id="chatPredictionImportMessage" class="muted"></div><button id="saveChatPrediction" class="primary" type="button">チャット予想を保存</button><details class="supportBranchAudit"><summary>必要な形式を見る</summary><pre class="chatPredictionExample">${esc(chatPredictionExample(state.race))}</pre></details></div></details>`;
   const saveBtn=$("saveChatPrediction"),textarea=$("chatPredictionText"),message=$("chatPredictionImportMessage");
   if(saveBtn&&textarea)saveBtn.onclick=()=>{try{const parsed=parseChatPrediction(textarea.value,state.race);saveChatPrediction(localStorage,parsed);renderChatPredictionImport()}catch(error){if(message){message.className="auditWarn";message.textContent=error?.message||String(error)}}};
   const removeBtn=$("removeChatPrediction");if(removeBtn)removeBtn.onclick=()=>{removeChatPrediction(localStorage,state.race);renderChatPredictionImport()};
 }
+function renderChatAppComparison(comparison,saved){
+  if(!saved)return"";
+  if(!state.snapshot)return `<section class="chatDiffBox"><div class="sectionHead"><strong>チャット対アプリ差分監査</strong><span class="pill warning">アプリ予想待ち</span></div><p class="muted">チャット予想は保存済みです。このレースをアプリでも予想すると、自動で差分監査を開始します。</p></section>`;
+  if(!comparison)return"";
+  const first=comparison.firstDivergence;
+  const headline=first?`最初のズレ：${esc(first.label)}`:"主要工程は一致";
+  const headlineClass=first?"auditWarn":"auditOk";
+  const stageRows=(comparison.stages||[]).map(stage=>{
+    const icon=stage.status==="OK"?"○":stage.status==="DIFF"?"!":"△";
+    const cls=stage.status==="OK"?"diffOk":stage.status==="DIFF"?"diffBad":"diffUnknown";
+    const details=renderChatDiffDetails(stage);
+    return `<div class="chatDiffStage ${cls}"><strong>${icon} ${esc(stage.label)}</strong><p>${esc(stage.summary||"")}</p>${details}</div>`;
+  }).join("");
+  return `<section class="chatDiffBox"><div class="sectionHead"><strong>チャット対アプリ差分監査</strong><span class="pill ${first?"warning":"success"}">${first?"差分あり":"主要工程一致"}</span></div><p class="${headlineClass}"><b>${headline}</b>${first?.summary?` — ${esc(first.summary)}`:""}</p><p class="muted">比較順：1着評価 → 1-2着枝 → 3着終端 → 買い目分類 → 購入採否。後段の差より、最初にズレた工程を優先して修正します。</p><details class="predictionAccordion"><summary>差分の内訳を見る</summary><div class="accordionBody">${stageRows}<p class="muted">終端数 チャット ${comparison.totals?.chatTerminals??0} / アプリ ${comparison.totals?.appTerminals??0}　購入 チャット ${comparison.totals?.chatPurchased??0} / アプリ ${comparison.totals?.appPurchased??0}</p></div></details></section>`;
+}
+function renderChatDiffDetails(stage){
+  const d=stage?.details||{};let rows=[];
+  if(Array.isArray(d.chatOnly)&&d.chatOnly.length)rows.push(`チャットにあってアプリにない: ${d.chatOnly.slice(0,12).map(esc).join(" / ")}${d.chatOnly.length>12?` ほか${d.chatOnly.length-12}件`:""}`);
+  if(Array.isArray(d.rows)&&d.rows.length)rows.push(d.rows.slice(0,10).map(r=>`${esc(r.key)}：チャット ${esc(diffValueLabel(r.chat))} / アプリ ${esc(diffValueLabel(r.app))}`).join("<br>"));
+  if(Number.isFinite(Number(d.appOnlyCount))&&Number(d.appOnlyCount)>0)rows.push(`アプリだけにある終端: ${Number(d.appOnlyCount)}件`);
+  return rows.length?`<p class="muted">${rows.join("<br>")}</p>`:"";
+}
+function diffValueLabel(v){return({MAIN:"本線",COVER:"押さえ",BUYABLE_HIGH:"買える高配当",ADOPTED:"購入",REJECTED:"不採用",UNCLASSIFIED:"未分類",UNSPECIFIED:"未指定"})[v]||String(v||"-")}
 function chatPredictionExample(race){return JSON.stringify({schemaVersion:"CHAT-KEIRIN-IMPORT-v1",race:{date:String(race?.date||"").replace(/\D/g,"").slice(0,8),venueCode:String(race?.venueCode||""),venueName:race?.venueName||"",raceNo:Number(race?.raceNo)||0},mainScenario:{title:"主展開",description:"誰が主導権を取り、誰がどの位置から残るかを日本語で記載",evidence:["主展開を支持する根拠"],counterEvidence:["反対材料"]},firstCandidates:[{number:1,rank:1,probability:0.30,reason:"1着候補の理由"}],pairBranches:[{order:[1,2],rank:1,probability:0.12,scenario:"主展開",reason:"1-2着になる理由"}],terminals:[{order:[1,2,3],rank:1,probability:0.05,category:"MAIN",purchaseStatus:"ADOPTED",scenario:"主展開",reason:"3着まで含めた終端理由"}],ratings:{confidence:3,concentration:3,rollover:2,verdict:"通常"},notes:[]},null,2)}
 function renderPredictionDetail(snapshot){
   const panel=$("predictionDetail"),ratingPanel=$("detailRatings");
