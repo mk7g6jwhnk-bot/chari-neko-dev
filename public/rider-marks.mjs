@@ -8,32 +8,39 @@ export function deriveRiderMarks(snapshot){
     first:finite(a?.roleScores?.first)?Number(a.roleScores.first):null,
     second:finite(a?.roleScores?.second)?Number(a.roleScores.second):null,
     third:finite(a?.roleScores?.third)?Number(a.roleScores.third):null,
+    startPower:finite(a?.startPower)?Number(a.startPower):null,
     confidence:deriveConfidence(a)
   }));
-  const firstMarks=marksFor(rows,"first"),secondMarks=marksFor(rows,"second"),thirdMarks=marksFor(rows,"third");
-  return rows.map(r=>{
-    const vals=[r.first,r.second,r.third].filter(finite);
-    const overall=vals.length?vals.reduce((s,v)=>s+Number(v),0)/vals.length:null;
-    return {
+
+  const firstMarks=marksFor(rows,"first");
+  const secondMarks=marksFor(rows,"second");
+  const thirdMarks=marksFor(rows,"third");
+
+  const context=deriveRaceContext(snapshot,rows);
+  const ranked=rows.map(r=>({
+    ...r,
+    overallScore:deriveOverallPredictionScore(r,context)
+  })).sort((a,b)=>(b.overallScore??-Infinity)-(a.overallScore??-Infinity)||a.number-b.number);
+
+  const overallMap=assignOverallMarks(ranked,context);
+
+  return rows.map(r=>({
       number:r.number,
-      overallScore:overall,
-      overallMark:overall===null?"？":overallMark(overall, rows),
+      overallScore:context.overallScores.get(r.number)??null,
+      overallMark:overallMap.get(r.number)||"？",
       firstScore:r.first,firstMark:firstMarks.get(r.number)||"？",
       secondScore:r.second,secondMark:secondMarks.get(r.number)||"？",
       thirdScore:r.third,thirdMark:thirdMarks.get(r.number)||"？",
-      confidence:r.confidence
-    };
-  }).sort((a,b)=>a.number-b.number);
+      confidence:r.confidence,
+      overallReasons:context.reasons.get(r.number)||[]
+    }))
+    .sort((a,b)=>a.number-b.number);
 }
 
 export function auditRiderMarkConsistency(snapshot, marks=deriveRiderMarks(snapshot)){
   const terminals=Array.isArray(snapshot?.terminalLedger)?snapshot.terminalLedger:[];
   const bets=Array.isArray(snapshot?.betSelections)?snapshot.betSelections:[];
-  const familyMass=new Map();
-  for(const t of terminals){
-    const first=Number(t?.order?.[0]),p=Number(t?.probability);
-    if(Number.isFinite(first)&&Number.isFinite(p))familyMass.set(first,(familyMass.get(first)||0)+p);
-  }
+  const familyMass=firstFamilyMass(snapshot,terminals);
   const familyRank=new Map([...familyMass.entries()].sort((a,b)=>b[1]-a[1]||a[0]-b[0]).map(([n],i)=>[n,i+1]));
   const warnings=[];
   for(const m of marks){
@@ -41,20 +48,150 @@ export function auditRiderMarkConsistency(snapshot, marks=deriveRiderMarks(snaps
     const headBets=bets.filter(b=>Number(b?.order?.[0])===n);
     const thirdBets=bets.filter(b=>Number(b?.order?.[2])===n);
     const mainHead=headBets.filter(b=>b?.category==="MAIN").length;
-    if(m.firstMark==="◎" && familyRank.has(n) && familyRank.get(n)>2){
-      warnings.push({number:n,type:"FIRST_MARK_FAMILY_MISMATCH",message:`${n}番は1着印◎ですが、1着ファミリー確率は${familyRank.get(n)}位です。1着評価→展開確率の接続を確認。`});
+    if(m.overallMark==="◎" && familyRank.has(n) && familyRank.get(n)>2){
+      warnings.push({number:n,type:"OVERALL_MARK_FAMILY_MISMATCH",message:`${n}番は総合印◎ですが、1着ファミリー確率は${familyRank.get(n)}位です。総合印→中心予測の接続を確認。`});
     }
-    if(["◎","○"].includes(m.firstMark) && headBets.length===0){
-      warnings.push({number:n,type:"FIRST_MARK_NO_HEAD_BET",message:`${n}番は1着印${m.firstMark}ですが、${n}番頭の購入候補がありません。購入採否を確認。`});
+    if(["◎","○"].includes(m.overallMark) && headBets.length===0){
+      warnings.push({number:n,type:"OVERALL_MARK_NO_HEAD_BET",message:`${n}番は総合印${m.overallMark}ですが、${n}番頭の購入候補がありません。中心予測→購入採否を確認。`});
     }
     if(m.thirdMark==="◎" && thirdBets.length===0){
       warnings.push({number:n,type:"THIRD_MARK_NO_THIRD_BET",message:`${n}番は3着印◎ですが、${n}番3着の購入候補がありません。3着評価→購入採否を確認。`});
     }
-    if(m.firstMark==="×" && mainHead>0){
-      warnings.push({number:n,type:"LOW_FIRST_MARK_MAIN_HEAD",message:`${n}番は1着印×ですが、本線の1着に${mainHead}点採用されています。分類根拠を確認。`});
+    if(m.overallMark==="×" && mainHead>0){
+      warnings.push({number:n,type:"LOW_OVERALL_MARK_MAIN_HEAD",message:`${n}番は総合印×ですが、本線の1着に${mainHead}点採用されています。分類根拠を確認。`});
     }
   }
   return {warnings,warningCount:warnings.length,familyRank:Object.fromEntries(familyRank)};
+}
+
+function deriveRaceContext(snapshot,rows){
+  const terminals=Array.isArray(snapshot?.terminalLedger)?snapshot.terminalLedger:[];
+  const familyMass=firstFamilyMass(snapshot,terminals);
+  const maxFamily=Math.max(0,...familyMass.values());
+  const scenarioHeadBoost=deriveScenarioHeadBoost(snapshot);
+  const linePosition=deriveLinePositionScores(snapshot);
+  const overallScores=new Map();
+  const reasons=new Map();
+
+  for(const r of rows){
+    const n=r.number;
+    const parts=[];
+    let sum=0,weight=0;
+    const add=(label,val,w)=>{
+      if(!finite(val)||w<=0)return;
+      sum+=Number(val)*w; weight+=w; parts.push(`${label}${Number(val).toFixed(2)}`);
+    };
+
+    // Overall prediction mark is intentionally NOT a simple average.
+    // Head ability and race-level center forecast carry the most weight.
+    add("1着",r.first,0.34);
+    add("2着",r.second,0.18);
+    add("3着",r.third,0.12);
+    add("主導権",r.startPower,0.12);
+
+    const fam=maxFamily>0?(familyMass.get(n)||0)/maxFamily:null;
+    if(fam!==null){ add("1着ファミリー",fam*10,0.14); }
+
+    const sc=scenarioHeadBoost.get(n);
+    if(finite(sc)) add("中心展開",Number(sc)*10,0.07);
+
+    const lp=linePosition.get(n);
+    if(finite(lp)) add("位置",Number(lp)*10,0.03);
+
+    const score=weight>0?sum/weight:null;
+    overallScores.set(n,score);
+    reasons.set(n,parts);
+  }
+  return {familyMass,maxFamily,scenarioHeadBoost,linePosition,overallScores,reasons};
+}
+
+function deriveOverallPredictionScore(r,context){
+  return context.overallScores.get(r.number)??null;
+}
+
+function assignOverallMarks(ranked,context){
+  const valid=ranked.filter(r=>finite(r.overallScore));
+  const map=new Map();
+  if(!valid.length)return map;
+
+  // Exactly one ◎ and one ○ whenever at least two evaluable riders exist.
+  map.set(valid[0].number,"◎");
+  if(valid[1])map.set(valid[1].number,"○");
+
+  const top=Number(valid[0].overallScore);
+  for(let i=2;i<valid.length;i++){
+    const r=valid[i],score=Number(r.overallScore),gap=top-score;
+    let mark="×";
+
+    // ▲ means realistic head upside; △ means mainly place/connection; ☆ means race-context sleeper.
+    const firstUpside=finite(r.first)&&finite(valid[0].first) && Number(r.first)>=Number(valid[0].first)-1.6;
+    const familyRelative=context.maxFamily>0?(context.familyMass.get(r.number)||0)/context.maxFamily:0;
+    const scenarioBoost=context.scenarioHeadBoost.get(r.number)||0;
+    const placeStrength=Math.max(Number(r.second)||0,Number(r.third)||0);
+
+    if(firstUpside && gap<=1.6) mark="▲";
+    else if(placeStrength>=6.5 && gap<=2.8) mark="△";
+    else if((familyRelative>=0.35 || scenarioBoost>=0.45) && gap>1.6) mark="☆";
+    else if(gap<=3.2) mark="△";
+    map.set(r.number,mark);
+  }
+  return map;
+}
+
+function firstFamilyMass(snapshot,terminals){
+  const direct=Array.isArray(snapshot?.firstFamilies)?snapshot.firstFamilies:[];
+  const map=new Map();
+  for(const f of direct){
+    const n=Number(f?.first??f?.number);
+    const p=Number(f?.probability??f?.totalProbability??f?.mass);
+    if(Number.isFinite(n)&&Number.isFinite(p))map.set(n,p);
+  }
+  if(map.size)return map;
+  for(const t of terminals){
+    const first=Number(t?.order?.[0]),p=Number(t?.probability);
+    if(Number.isFinite(first)&&Number.isFinite(p))map.set(first,(map.get(first)||0)+p);
+  }
+  return map;
+}
+
+function deriveScenarioHeadBoost(snapshot){
+  const map=new Map();
+  const scenarios=Array.isArray(snapshot?.scenarios)?snapshot.scenarios:
+                  Array.isArray(snapshot?.scenarioBranches)?snapshot.scenarioBranches:[];
+  for(const s of scenarios){
+    const head=Number(s?.first??s?.head??s?.winner??s?.order?.[0]);
+    if(!Number.isFinite(head))continue;
+    const role=String(s?.forecastRole??s?.role??s?.forecastTier??s?.tier??"").toLowerCase();
+    const prob=Number(s?.probability??s?.score??s?.weight);
+    let boost=Number.isFinite(prob)?Math.max(0,Math.min(1,prob)):0;
+    if(role.includes("center")||role.includes("main")||role.includes("中心"))boost=Math.max(boost,.9);
+    else if(role.includes("contender")||role.includes("有力"))boost=Math.max(boost,.65);
+    else if(role.includes("possible")||role.includes("可能"))boost=Math.max(boost,.35);
+    map.set(head,Math.max(map.get(head)||0,boost));
+  }
+  return map;
+}
+
+function deriveLinePositionScores(snapshot){
+  const map=new Map();
+  const lines=Array.isArray(snapshot?.lineModel)?snapshot.lineModel:
+              Array.isArray(snapshot?.lines)?snapshot.lines:[];
+  for(const line of lines){
+    const members=Array.isArray(line?.members)?line.members:
+                  Array.isArray(line)?line:[];
+    members.forEach((m,i)=>{
+      const n=Number(m?.number??m);
+      if(!Number.isFinite(n))return;
+      const pos=String(m?.position??m?.role??"").toLowerCase();
+      let v= i===0?.65:i===1?.8:i===2?.7:.45;
+      if(pos.includes("番手"))v=.85;
+      if(pos.includes("3番手")||pos.includes("三番手"))v=.72;
+      if(pos.includes("先頭")||pos.includes("自力"))v=.68;
+      if(pos.includes("単騎"))v=.5;
+      map.set(n,Math.max(map.get(n)||0,v));
+    });
+  }
+  return map;
 }
 
 function marksFor(rows,key){
@@ -73,17 +210,7 @@ function marksFor(rows,key){
   }
   return map;
 }
-function overallMark(score,rows){
-  const vals=rows.map(r=>[r.first,r.second,r.third].filter(finite)).flat().map(Number);
-  if(!vals.length)return"？";
-  const max=Math.max(...vals);
-  const gap=max-Number(score);
-  if(gap<=0.7)return"◎";
-  if(gap<=1.3)return"○";
-  if(gap<=2.0)return"▲";
-  if(gap<=2.8)return"△";
-  return"×";
-}
+
 function deriveConfidence(a){
   const miss=Number(a?.abilityMissingAudit?.missingCount);
   if(Number.isFinite(miss)){

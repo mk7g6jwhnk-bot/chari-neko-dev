@@ -1,4 +1,4 @@
 # Current version
 
-- `KEIRIN-0.5.56-chat-mark-import-compat`
-- label: `v79-chat-mark-import-compat`
+- `KEIRIN-0.5.55-overall-prediction-marks`
+- label: `v80-overall-prediction-marks`
