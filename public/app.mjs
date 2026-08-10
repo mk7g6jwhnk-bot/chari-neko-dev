@@ -11,7 +11,7 @@ const ODDS_CACHE_KEY="chari-neko:keirin-odds-cache:v1";
 const RACE_META_CACHE_KEY="chari-neko:keirin-race-meta-cache:v1";
 const RESULT_CACHE_KEY="chari-neko:keirin-result-cache:v1";
 const MEETING_CACHE_KEY="chari-neko:keirin-meeting-cache:v1";
-const APP_RELEASE="KEIRIN-0.8.4-scenario-unique-fix";
+const APP_RELEASE="KEIRIN-0.8.5-thick-recommendation-v1";
 const APP_UPDATE_CHECK_INTERVAL_MS=5*60*1000;
 let lastAppUpdateCheckAt=0,appUpdateCheckBusy=false;
 const VENUE_CODES={函館:"11",青森:"12",いわき平:"13",弥彦:"21",前橋:"22",取手:"23",宇都宮:"24",大宮:"25",西武園:"26",京王閣:"27",立川:"28",松戸:"31",千葉:"32",川崎:"34",平塚:"35",小田原:"36",伊東:"37",静岡:"38",名古屋:"42",岐阜:"43",大垣:"44",豊橋:"45",富山:"46",松阪:"47",四日市:"48",福井:"51",奈良:"53",向日町:"54",和歌山:"55",岸和田:"56",玉野:"61",広島:"62",防府:"63",高松:"71",小松島:"73",高知:"74",松山:"75",小倉:"81",久留米:"83",武雄:"84",佐世保:"85",別府:"86",熊本:"87"};
@@ -37,7 +37,83 @@ function fail(title,error,retry){state.retry=retry;$("errorTitle").textContent=t
 async function jsonFetch(url){const r=await fetch(url,{cache:"no-store"});let p;try{p=await r.json()}catch{throw new Error(`サーバー応答を読み取れません（HTTP ${r.status}）`)}if(!r.ok||p.ok===false)throw new Error(p.error||`取得失敗（HTTP ${r.status}）`);return p}
 
 
-function renderHomeRecommendations(){const list=$("todayRecommendations"),count=$("recommendationCount");if(!list||!count)return;const enabled=$("sportKeirin")?.checked!==false,limit=Math.max(1,Number($("recommendationLimit")?.value)||5),today=compact(localDate());if(!enabled){count.textContent="0件";list.innerHTML='<p class="empty">表示する競技を選んでください。</p>';return}const all=loadSnapshots(localStorage).filter(s=>String(s.targetRace?.date||"").replace(/\D/g,"")===today&&!s.result).sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));const recommended=all.filter(s=>!s.noBet&&(s.betSelections||[]).length).slice(0,limit);count.textContent=`${recommended.length}件`;list.innerHTML=recommended.length?recommended.map(s=>{const r=s.targetRace,bets=s.betSelections||[],hasHigh=bets.some(b=>b.category==="BUYABLE_HIGH"),main=bets.filter(b=>b.category==="MAIN").length,tags=[main?"通常":null,hasHigh?"高配当":null].filter(Boolean),rating=ratingOf(s);return `<article class="recommendationItem"><button class="recommendationOpen" data-rec-id="${esc(s.predictionSnapshotId)}"><span class="recommendationMain"><strong>${esc(r.venueName)} ${r.raceNo}R</strong><small>${r.scheduledStart?`発走 ${esc(r.scheduledStart)}`:"発走時刻確認中"} ・ ${bets.length}点</small><small>信頼 ${starText(rating.confidence)} / 集中 ${starText(rating.concentration)}</small></span><span class="recommendationTags">${tags.map(t=>`<em>${t}</em>`).join("")}</span></button></article>`}).join(""):'<p class="empty">今日の解析済みおすすめはまだありません。レースを予想するとここに表示されます。</p>';list.querySelectorAll("[data-rec-id]").forEach(b=>b.onclick=()=>{const s=loadSnapshots(localStorage).find(x=>x.predictionSnapshotId===b.dataset.recId);if(!s)return;openSavedDetail(s)})}
+function renderHomeRecommendations(){
+  const list=$("todayRecommendations"),count=$("recommendationCount");
+  if(!list||!count)return;
+  const enabled=$("sportKeirin")?.checked!==false;
+  const limit=Math.max(1,Number($("recommendationLimit")?.value)||5);
+  const today=compact(localDate());
+  if(!enabled){
+    count.textContent="0件";
+    list.innerHTML='<p class="empty">表示する競技を選んでください。</p>';
+    return;
+  }
+
+  const all=loadSnapshots(localStorage)
+    .filter(s=>String(s.targetRace?.date||"").replace(/\D/g,"")===today&&!s.result)
+    .map(s=>({snapshot:s,rec:evaluateRecommendation(s)}))
+    .sort((a,b)=>b.rec.score-a.rec.score||new Date(b.snapshot.createdAt)-new Date(a.snapshot.createdAt));
+
+  const recommended=all.filter(x=>x.rec.level==="RECOMMENDED").slice(0,limit);
+  const watch=all.filter(x=>x.rec.level==="WATCH").slice(0,Math.max(0,limit-recommended.length));
+  const rows=[...recommended,...watch].slice(0,limit);
+
+  count.textContent=`${recommended.length}件`;
+  list.innerHTML=rows.length?rows.map(({snapshot:s,rec})=>{
+    const r=s.targetRace,bets=s.betSelections||[],rating=ratingOf(s);
+    const thick=deriveThickBets(s).length;
+    const tags=[
+      rec.level==="RECOMMENDED"?"おすすめ":"要監査",
+      bets.some(b=>b.category==="BUYABLE_HIGH")?"高配当あり":null,
+      thick?`厚め${thick}点`:null
+    ].filter(Boolean);
+    return `<article class="recommendationItem"><button class="recommendationOpen" data-rec-id="${esc(s.predictionSnapshotId)}"><span class="recommendationMain"><strong>${esc(r.venueName)} ${r.raceNo}R</strong><small>${r.scheduledStart?`発走 ${esc(r.scheduledStart)}`:"発走時刻確認中"} ・ ${bets.length}点 ・ 構造評価 ${rec.score.toFixed(0)}</small><small>${esc(rec.reason)} / 信頼 ${starText(rating.confidence)} / 集中 ${starText(rating.concentration)}</small></span><span class="recommendationTags">${tags.map(t=>`<em>${esc(t)}</em>`).join("")}</span></button></article>`
+  }).join(""):'<p class="empty">現在、構造監査を通過したおすすめレースはありません。</p>';
+  list.querySelectorAll("[data-rec-id]").forEach(b=>b.onclick=()=>{
+    const s=loadSnapshots(localStorage).find(x=>x.predictionSnapshotId===b.dataset.recId);
+    if(s)openSavedDetail(s)
+  });
+}
+
+function evaluateRecommendation(snapshot){
+  const bets=Array.isArray(snapshot?.betSelections)?snapshot.betSelections:[];
+  const mains=bets.filter(b=>b.category==="MAIN");
+  const audit=snapshot?.audit||{};
+  const linkageHigh=countAuditSeverity(audit?.wholeLinkageAudit,"high");
+  const riderBranchHigh=countAuditSeverity(audit?.riderBranchLinkAudit,"high");
+  const mainInvariant=audit?.chatSpec?.mainInvariant||audit?.mainInvariant||null;
+  const oddsReady=bets.length>0&&bets.every(b=>Number.isFinite(Number(b.odds))&&Number(b.odds)>1);
+  const avgNatural=average(bets.map(b=>Number(b.naturalConvergenceScore)).filter(Number.isFinite));
+  const mainNatural=average(mains.map(b=>Number(b.naturalConvergenceScore)).filter(Number.isFinite));
+  const mainShare=bets.length?mains.length/bets.length:0;
+
+  const blockers=[];
+  if(snapshot?.noBet)blockers.push("見送り判定");
+  if(!bets.length)blockers.push("購入候補なし");
+  if(!mains.length)blockers.push("本線なし");
+  if(mainInvariant&&mainInvariant.passed===false)blockers.push("本線成立監査NG");
+  if(linkageHigh>0)blockers.push("展開連動に高重要度警告");
+  if(riderBranchHigh>0)blockers.push("選手評価→主展開に高重要度警告");
+
+  let score=0;
+  score+=Math.min(35,Math.max(0,(mainNatural||0)*35));
+  score+=Math.min(20,Math.max(0,(avgNatural||0)*20));
+  score+=Math.min(15,mainShare*15);
+  score+=oddsReady?15:5;
+  score+=Math.max(0,15-5*(linkageHigh+riderBranchHigh));
+  score=Math.max(0,Math.min(100,score));
+
+  if(blockers.length)return{level:"HOLD",score,reason:blockers.join("・"),blockers};
+  if(score>=65&&oddsReady)return{level:"RECOMMENDED",score,reason:"本線・連動・自然収束・オッズの構造条件を通過",blockers:[]};
+  return{level:"WATCH",score,reason:oddsReady?"構造条件は成立、優先度は比較待ち":"オッズ確認待ち",blockers:[]};
+}
+
+function countAuditSeverity(audit,severity){
+  return (Array.isArray(audit?.warnings)?audit.warnings:[]).filter(w=>w?.severity===severity).length;
+}
+function average(values){
+  return values.length?values.reduce((a,b)=>a+b,0)/values.length:0;
+}
 function openMeetings(){state.date=localDate();state.meetingTab="today";$("raceDate").value=state.date;show("meetings");loadMeetings()}
 async function loadMeetings(){setLoading("開催情報を取得中","KEIRIN.JPの今日の開催を確認しています。");const dateKey=compact(state.date);try{const p=await jsonFetch(`/.netlify/functions/keirin-discover?date=${dateKey}`),items=(p.meetings||[]).filter(m=>getCard(m)).sort((a,b)=>Number(venueCode(a))-Number(venueCode(b)));state.meetings=items;storeMeetingCache(dateKey,items,p.checkedAt);$("meetingCount").textContent=`${items.length}会場`;renderVenueGrid(items);renderMeetingTabs();updateBulkRefreshUi(p.stale?"開催取得サービスが不安定なため、直近の開催情報を表示しています。":"一括更新で未終了レースの締切時間・オッズをまとめて更新できます。");show("meetings")}catch(e){const cached=meetingCacheFor(dateKey);if(cached?.meetings?.length){state.meetings=cached.meetings;$("meetingCount").textContent=`${cached.meetings.length}会場`;renderVenueGrid(state.meetings);renderMeetingTabs();updateBulkRefreshUi("開催情報の再取得に失敗しました。保存済み一覧を表示中です。一括更新は再試行できます。");show("meetings");return}fail("開催情報の取得失敗",new Error("開催取得サービスが一時的に停止しています。数秒後に再試行してください。"),loadMeetings)}}
 function renderVenueGrid(items){$("meetingList").className="venueGrid";$("meetingList").innerHTML=items.length?items.map((m,i)=>{const nums=raceNumbersOf(m),count=nums.length||12,range=nums.length?`${nums[0]}R〜${nums[nums.length-1]}R`:`${count}R`,next=meetingNextDeadline(m),band=meetingTimeBand(m);return `<button class="venueCard venue-${band.key}" data-meeting="${i}" aria-label="${esc(m.venueName)}のレースを見る"><span class="venueCode">${esc(venueCode(m))}</span><span class="venueBand">${band.label}</span><strong>${esc(m.venueName)}</strong><small>${range}・${count}レース</small><span class="venueDeadline">${esc(next)}</span><span class="venueState ${getOdds(m)?"ready":"waiting"}">${getOdds(m)?"オッズ接続":"オッズ待ち"}</span></button>`}).join(""):'<section class="card empty venueEmpty">この日の開催は見つかりませんでした。</section>';$("meetingList").querySelectorAll("[data-meeting]").forEach(b=>b.onclick=()=>openRaces(items[Number(b.dataset.meeting)]))}
@@ -221,8 +297,52 @@ function renderOfficial(p){const race=p?.race;if(race){state.race={...state.race
 async function predict(){if(state.busy)return;const fixed={...state.race,key:raceKey(state.race)};state.busy=true;$("predictBtn").disabled=true;setLoading("予想を作成中","出走選手・公式ライン・3連単オッズを取得しています。");try{const result=await fetchAndSavePredictionForRace(fixed);state.payload=result.payload;state.race=result.race;state.snapshot=result.snapshot;renderOfficial(result.payload);renderHomeRecommendations();renderPrediction(result.snapshot)}catch(e){fail("予想の取得・保存に失敗",e,predict)}finally{state.busy=false;$("predictBtn").disabled=false}}
 function renderPrediction(snapshot){state.snapshot=snapshot;const r=snapshot?.targetRace||state.race||{},safeBets=Array.isArray(snapshot?.betSelections)?snapshot.betSelections:[];state.race={...state.race,...r};$("predictionTitle").textContent=`${r.venueName} ${r.raceNo}R`;$("recommendation").textContent=snapshot.noBet?"見送り":"買い目";$("predictionUpdated").textContent=formatTime(snapshot.createdAt);$("predictionSummary").innerHTML=metas([["買い目",`${safeBets.length}点`],["締切",deadlineOf(r)||"未取得"]]);renderRatings($("predictionRatings"),snapshot);renderPurchaseControls(snapshot);renderBetGroups(snapshot);renderResult(snapshot.result);show("prediction")}
 function renderPurchaseControls(snapshot){const panel=$("purchaseControls"),bets=Array.isArray(snapshot?.betSelections)?snapshot.betSelections:[];if(!panel||snapshot.noBet||!bets.length){if(panel)panel.classList.add("hidden");return}const originalTotal=bets.reduce((sum,b)=>sum+(Number(b.stake)||0),0)||Math.max(1000,bets.length*100);const current=Math.max(0,Number(panel.dataset.budget)||originalTotal);const mode=panel.dataset.mode||"standard";const minimum=bets.length*100;const composite=calcCompositeOdds(bets);panel.innerHTML=`<div class="sectionHead"><h2>購入資金</h2><span class="pill">${bets.length}点</span></div><div class="fundingRow"><label>購入資金<input id="purchaseBudget" type="number" min="0" step="100" value="${current}"></label><label>配分<select id="allocationMode"><option value="standard"${mode==="standard"?" selected":""}>標準</option><option value="main"${mode==="main"?" selected":""}>本線厚め</option><option value="high"${mode==="high"?" selected":""}>高配当重視</option></select></label></div><div class="quickBudget">${[1000,1500,2000,3000].map(v=>`<button type="button" data-budget="${v}">${v.toLocaleString()}円</button>`).join("")}</div><div class="purchaseStats"><span>最低必要資金 <strong>${minimum.toLocaleString()}円</strong></span><span>合成オッズ <strong>${composite?`${composite.toFixed(2)}倍`:"未取得"}</strong></span></div>${current<minimum?`<div class="notice">自然買い目${bets.length}点 / 必要最低資金${minimum.toLocaleString()}円。${current.toLocaleString()}円では全点購入できません。買い目は自動で削りません。</div>`:""}`;panel.classList.remove("hidden");panel.dataset.budget=String(current);panel.dataset.mode=mode;$("purchaseBudget").oninput=e=>{panel.dataset.budget=String(Math.max(0,Number(e.target.value)||0));renderBetGroups(snapshot);renderPurchaseControls(snapshot)};$("allocationMode").onchange=e=>{panel.dataset.mode=e.target.value;renderBetGroups(snapshot);renderPurchaseControls(snapshot)};panel.querySelectorAll("[data-budget]").forEach(b=>b.onclick=()=>{panel.dataset.budget=b.dataset.budget;renderBetGroups(snapshot);renderPurchaseControls(snapshot)})}
-function renderBetGroups(snapshot){const groups=[["本線","MAIN"],["押さえ","COVER"],["買える高配当","BUYABLE_HIGH"]],bets=snapshot.betSelections||[],panel=$("purchaseControls"),budget=Number(panel?.dataset.budget)||bets.reduce((s,b)=>s+(Number(b.stake)||0),0),mode=panel?.dataset.mode||"standard",stakes=allocatePreviewStakes(bets,budget,mode);$("betGroups").innerHTML=groups.map(([label,key])=>{const rows=bets.map((b,i)=>({b,i})).filter(x=>x.b.category===key);if(rows.length)return `<section class="betCard"><h3>${label}</h3><div class="betRows">${rows.map(({b,i})=>`<div class="betRow betRowSimple"><strong>${b.order.join("-")}</strong><span>${b.odds?`${Number(b.odds)}倍`:"オッズ確認待ち"}${stakes?` / ${Number(stakes[i]).toLocaleString()}円`:" / 配分不可"}</span></div>`).join("")}</div></section>`;if(key==="MAIN"&&bets.length)return `<section class="betCard"><h3>本線</h3><div class="notice">本線に該当する購入候補なし。主展開の自然終端が購入水準に届いていないか、分類監査が必要です。</div></section>`;return ""}).join("")||(snapshot.noBet?`<section class="card empty"><strong>見送り</strong><p>${esc(noBetReasonText(snapshot.noBetReason))}</p></section>`:'<section class="card empty">購入対象の買い目はありません。</section>')}
-function allocatePreviewStakes(bets,budget,mode){const n=bets.length,min=n*100;if(!n||budget<min)return null;const base=bets.map(b=>Math.max(1,Number(b.stake)||100));const mul=bets.map(b=>mode==="main"?(b.category==="MAIN"?1.6:b.category==="BUYABLE_HIGH"?.8:1):mode==="high"?(b.category==="BUYABLE_HIGH"?1.6:b.category==="MAIN"?1:.9):1);const weights=base.map((v,i)=>v*mul[i]),extra=budget-min,total=weights.reduce((a,b)=>a+b,0)||n;let out=weights.map(w=>100+Math.floor((extra*w/total)/100)*100),used=out.reduce((a,b)=>a+b,0),remain=Math.floor((budget-used)/100);const order=weights.map((w,i)=>({w,i})).sort((a,b)=>b.w-a.w||a.i-b.i);for(let k=0;k<remain;k++)out[order[k%order.length].i]+=100;return out}
+function renderBetGroups(snapshot){
+  const groups=[["本線","MAIN"],["押さえ","COVER"],["買える高配当","BUYABLE_HIGH"]],
+    bets=snapshot.betSelections||[],panel=$("purchaseControls"),
+    budget=Number(panel?.dataset.budget)||bets.reduce((s,b)=>s+(Number(b.stake)||0),0),
+    mode=panel?.dataset.mode||"standard",stakes=allocatePreviewStakes(bets,budget,mode),
+    thickKeys=new Set(deriveThickBets(snapshot).map(x=>x.order.join("-")));
+  const groupHtml=groups.map(([label,key])=>{
+    const rows=bets.map((b,i)=>({b,i})).filter(x=>x.b.category===key);
+    if(rows.length)return `<section class="betCard"><h3>${label}</h3><div class="betRows">${rows.map(({b,i})=>`<div class="betRow betRowSimple"><strong>${b.order.join("-")}${thickKeys.has(b.order.join("-"))?"　🔥厚め":""}</strong><span>${b.odds?`${Number(b.odds)}倍`:"オッズ確認待ち"}${stakes?` / ${Number(stakes[i]).toLocaleString()}円`:" / 配分不可"}</span></div>`).join("")}</div></section>`;
+    if(key==="MAIN"&&bets.length)return `<section class="betCard"><h3>本線</h3><div class="notice">本線に該当する購入候補なし。主展開の自然終端が購入水準に届いていないか、分類監査が必要です。</div></section>`;
+    return ""
+  }).join("");
+  const thick=deriveThickBets(snapshot);
+  const thickHtml=thick.length?`<section class="betCard"><h3>厚め</h3><div class="betRows">${thick.map(x=>`<div class="betRow betRowSimple"><strong>${x.order.join("-")}</strong><span>${esc(x.reason)}</span></div>`).join("")}</div><p class="muted">厚めは新しい買い目ではなく、既存購入候補の中で資金配分を優先する部分集合です。明確な上位クラスタがない場合は出しません。</p></section>`:"";
+  $("betGroups").innerHTML=(groupHtml+thickHtml)||(snapshot.noBet?`<section class="card empty"><strong>見送り</strong><p>${esc(noBetReasonText(snapshot.noBetReason))}</p></section>`:'<section class="card empty">購入対象の買い目はありません。</section>')
+}
+function deriveThickBets(snapshot){
+  const bets=(snapshot?.betSelections||[]).filter(b=>["MAIN","COVER","BUYABLE_HIGH"].includes(b?.category));
+  if(bets.length<2)return[];
+  const scored=bets.map(b=>{
+    const p=Math.max(0,Number(b.probability)||0);
+    const n=Math.max(0,Number(b.naturalConvergenceScore)||0);
+    const main=b.category==="MAIN"?1:.82;
+    const odds=Number(b.odds);
+    const oddsQuality=Number.isFinite(odds)&&odds>1?Math.min(1.15,Math.max(.8,Math.log10(odds+1)/1.5)):1;
+    return{b,score:p*(.55+.45*n)*main*oddsQuality};
+  }).sort((a,b)=>b.score-a.score);
+
+  const positive=scored.filter(x=>x.score>0);
+  if(positive.length<2)return[];
+  const gaps=[];
+  for(let i=0;i<positive.length-1;i++)gaps.push((positive[i].score-positive[i+1].score)/Math.max(1e-9,positive[i].score));
+  const medianGap=[...gaps].sort((a,b)=>a-b)[Math.floor(gaps.length/2)]||0;
+  const clearIndex=gaps.findIndex(g=>g>=Math.max(.18,medianGap*1.8));
+  if(clearIndex<0)return[];
+
+  const cluster=positive.slice(0,clearIndex+1);
+  if(cluster.length>Math.ceil(bets.length/2))return[];
+  return cluster.map(({b,score})=>({
+    ...b,
+    thickScore:score,
+    reason:`自然収束 ${Math.round((Number(b.naturalConvergenceScore)||0)*100)}%・終端確率 ${(Number(b.probability||0)*100).toFixed(1)}% が購入候補内の上位クラスタ`
+  }));
+}
+
+function allocatePreviewStakes(bets,budget,mode){const n=bets.length,min=n*100;if(!n||budget<min)return null;const base=bets.map(b=>Math.max(1,Number(b.stake)||100));const thickSet=mode==="main"?new Set(deriveThickBets({betSelections:bets}).map(x=>x.order.join("-"))):new Set();const mul=bets.map(b=>mode==="main"?(thickSet.size?(thickSet.has(b.order.join("-"))?1.8:1):(b.category==="MAIN"?1.35:1)):mode==="high"?(b.category==="BUYABLE_HIGH"?1.6:b.category==="MAIN"?1:.9):1);const weights=base.map((v,i)=>v*mul[i]),extra=budget-min,total=weights.reduce((a,b)=>a+b,0)||n;let out=weights.map(w=>100+Math.floor((extra*w/total)/100)*100),used=out.reduce((a,b)=>a+b,0),remain=Math.floor((budget-used)/100);const order=weights.map((w,i)=>({w,i})).sort((a,b)=>b.w-a.w||a.i-b.i);for(let k=0;k<remain;k++)out[order[k%order.length].i]+=100;return out}
 function calcCompositeOdds(bets){const valid=bets.map(b=>Number(b.odds)).filter(v=>Number.isFinite(v)&&v>0);if(!valid.length||valid.length!==bets.length)return null;const inv=valid.reduce((s,v)=>s+1/v,0);return inv>0?1/inv:null}
 
 function renderBranchSelectionAudit(audit){const data=audit?.branchSelectionAudit;if(!data||!Array.isArray(data.rows)||!data.rows.length)return"";const priorityLabel={main:"中心予測",contender:"有力な次候補",sub:"可能性として保持",risk:"例外・リスク"};const rows=data.rows.map((branch,index)=>{const trace=Array.isArray(branch.scoreTrace)?branch.scoreTrace:[];const traceText=trace.slice(0,5).map(item=>`${esc(item.key)} ${fmtRatio(item.value)}×${fmtRatio(item.weight)}=${fmtRatio(item.contribution)}`).join(" / ");return `<div class="detailBet"><strong>${index+1}. ${esc(branch.label||branch.id||"不明")}　${esc(priorityLabel[branch.priority]||branch.priority||"-")}</strong><p>枝スコア ${fmtRatio(branch.score)} / 全枝比 ${fmtPct(branch.share)} / 首位比 ${fmtPct(branch.relativeToTop)}${branch.primaryLineId?` / ライン ${esc(branch.primaryLineId)}`:""}</p>${traceText?`<p class="muted">内訳: ${traceText}</p>`:""}</div>`}).join("");const tier=data.tiering||{};let basis;if(data.mainSelectionMode==="HIERARCHICAL_NATURAL_TIERS"){const main=(data.mainBranchLabels||[]).map(esc).join(" / ")||"なし";const contenders=(data.contenderBranchLabels||[]).map(esc).join(" / ")||"なし";const cut=Number.isFinite(tier.contenderCutGap)?` 中心に次ぐ有力群と、単に成立可能な群の自然境界差 ${fmtRatio(tier.contenderCutGap)}。`:` 中心以外に明確な有力群を示す境界がないため、残りは「可能性として保持」に留めています。`;basis=`「成立可能」と「中心として予測」を分離。最上位（同点時のみ複数）だけを中心予測とし、中心以外はスコア分布に明確な自然境界がある場合だけ有力な次候補へ昇格します。境界がない枝は削除せず「可能性として保持」します。固定90%や点数都合の切り捨ては不使用。中心: ${main} / 有力な次候補: ${contenders}。${cut}`}else{const split=data.adaptiveSplit||{};const gap=Number.isFinite(split.cutGap)?` / 境界差 ${fmtRatio(split.cutGap)}`:"";basis=data.topStructuredBranchLabel?`旧方式: 枝スコア分布の2群分割。主展開候補: ${(data.mainBranchLabels||[]).map(esc).join(" / ")||"なし"}${gap}。`:"構造枝の主展開候補なし。"}return `<h3>展開枝の事前評価</h3><div class="auditCallout"><strong>展開分類の基準</strong><p>${basis}</p></div><div class="detailGroup">${rows}</div>`}

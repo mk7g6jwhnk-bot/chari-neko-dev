@@ -1,4 +1,4 @@
 # Current version
 
-- `KEIRIN-0.8.4-scenario-unique-fix`
-- label: `v99-scenario-unique-fix`
+- `KEIRIN-0.8.5-thick-recommendation-v1`
+- label: `v100-thick-recommendation-v1`
