@@ -1,0 +1,1 @@
+import assert from"node:assert/strict";import fs from"node:fs";const app=fs.readFileSync(new URL("../public/app.mjs",import.meta.url),"utf8");for(const t of["評価整合性あり","旧combined除外","同じ確率質量へ正規化","1パッケージだけ変えた孤立効果"])assert.ok(app.includes(t),t);console.log("PASS shadow evaluation integrity UI");

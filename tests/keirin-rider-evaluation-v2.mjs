@@ -12,6 +12,6 @@ assert.ok(leader.riderEvaluationV2.firstMechanisms.escape>leader.riderEvaluation
 assert.ok(bante.riderEvaluationV2.firstMechanisms.banteSashi>bante.riderEvaluationV2.firstMechanisms.escape);
 assert.ok(bante.roleScores.second>bante.roleScores.first-1);
 assert.ok(third.roleScores.third>third.roleScores.first);
-assert.equal(leader.riderEvaluationV2.version,"RIDER-EVAL-2.0");
+assert.equal(leader.riderEvaluationV2.version,"RIDER-EVAL-3.0-ABILITY-CONTEXT-SEPARATED");
 assert.ok(["high","medium","low"].includes(leader.riderEvaluationV2.confidence));
 console.log("PASS rider evaluation v2",out.map(x=>({n:x.number,role:x.riderEvaluationV2.role,s:x.roleScores})));

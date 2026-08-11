@@ -1,0 +1,3 @@
+# v131 方法論epoch連動承認
+
+旧方法論のシャドー承認・最終承認・カナリアを現行方法論へ持ち越さない。promotion packageに承認指紋を付与し、packageKeyだけでは承認不可。現行epochの孤立・対称正規化比較だけをqualificationへ採用。旧epochは再承認/再評価へ戻す。本番書込は引き続き禁止。

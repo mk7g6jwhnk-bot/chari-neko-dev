@@ -1,0 +1,13 @@
+import assert from"node:assert/strict";
+import{applyChatSpecV1}from"../keirin/engine/chat-spec-v1-policy.mjs";
+const mk=(second,third,p)=>({order:[3,second,third],probability:p,branchId:"B",branchPriority:"main",branchLabel:"主展開",branchContributions:[{branchId:"B",branchLabel:"主展開",branchPriority:"main",probability:p,decisionRatios:{first:.95,second:.90,third:.82}}],nodeTrace:[{stage:"FIRST",conditionalProbability:.82,newRequiredConditions:[{kind:"natural",probability:.82,critical:true}]},{stage:"SECOND",conditionalProbability:.77,newRequiredConditions:[{kind:"natural",probability:.77,critical:true}]},{stage:"THIRD",conditionalProbability:.66,newRequiredConditions:[{kind:"natural",probability:.66,critical:true}]}],lifecycle:{generated:true,terminalDeleted:false}});
+const terminals=[mk(7,1,.18),mk(7,2,.15),mk(1,7,.17),mk(1,2,.15),mk(2,7,.16),mk(2,1,.14)];
+const scored=[1,2,3,4,5,6,7].map(n=>({number:n,roleScores:{first:n===3?8:6,second:[7,1,2].includes(n)?7.8:5,third:6}}));
+const branches=[{id:"B",label:"主展開",priority:"main",requiredFirstNumber:3,score:9}];
+const out=applyChatSpecV1({terminals,branches,scored,lines:[],oddsByOrder:new Map()});
+const audit=out.audit.secondPurchaseBridgeAudit;
+assert.ok(audit);assert.equal(audit.passed,true);assert.equal(audit.nearTieFamilyCount,1);
+const row=audit.rows.find(r=>r.first===3);assert.ok(row);assert.equal(row.selectionMode,"SECOND_NEAR_TIE_BREADTH");assert.equal(row.selectedCount,3);
+assert.deepEqual(row.rows.filter(r=>r.selected).map(r=>r.second).sort((a,b)=>a-b),[1,2,7]);
+for(const second of [1,2,7])assert.ok(out.terminals.some(x=>x.order[0]===3&&x.order[1]===second&&x.purchaseStatus==="購入採用"),`second ${second} should survive purchase bridge`);
+console.log("PASS second near-tie breadth keeps independently supported seconds");

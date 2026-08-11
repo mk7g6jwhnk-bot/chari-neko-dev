@@ -27,12 +27,25 @@ const blocked=derivePredictionRatings(snapshot({shares:[.2,.15,.1],scores:[8,6,4
 assert.ok(blocked.confidence<=2,"non-high line confidence must cap display confidence");
 assert.ok(blocked.diagnostics.evaluationIndex<=65,"caution verdict must cap provisional comparison index");
 
-const broadButRawStrong=derivePredictionRatings(snapshot({shares:[.20,.17,.15,.12,.10],scores:[9,8,7,5,4],bets:12,cutGap:2.5}));
-assert.ok(broadButRawStrong.concentration<=2,"12点採用なのに展開集中度4相当を許している");
-assert.ok(broadButRawStrong.confidence<=3,"12点採用なのに信頼度4以上を許している");
-assert.equal(broadButRawStrong.verdict,"見送り寄り");
-assert.ok(broadButRawStrong.consistencyAudit.adjustments.length>0,"評価整合の補正履歴がない");
-assert.ok(broadButRawStrong.consistencyAudit.invariantChecks.every(x=>x.passed),"評価整合 invariant が破れている");
+const broadBase=snapshot({shares:[.20,.17,.15,.12,.10],scores:[9,8,7,5,4],bets:12,cutGap:2.5});
+broadBase.predictionOutput.audit.purchaseMassAudit={eligibleCoverage:.82,weightedCoverageTarget:.75,massEfficiency:.96,status:"BALANCED"};
+const broadButRawStrong=derivePredictionRatings(broadBase);
+assert.ok(broadButRawStrong.concentration>=4,"12点という点数だけで展開集中度を下げている");
+assert.ok(broadButRawStrong.confidence>=4,"12点という点数だけで信頼度を下げている");
+assert.equal(broadButRawStrong.verdict,"購入可");
+assert.ok(broadButRawStrong.consistencyAudit.invariantChecks.every(x=>x.passed),"構造的に強い多点購入の invariant が破れている");
+
+const broadMore=snapshot({shares:[.20,.17,.15,.12,.10],scores:[9,8,7,5,4],bets:18,cutGap:2.5});
+broadMore.predictionOutput.audit.purchaseMassAudit={eligibleCoverage:.82,weightedCoverageTarget:.75,massEfficiency:.96,status:"BALANCED"};
+const broadMoreRating=derivePredictionRatings(broadMore);
+assert.equal(broadMoreRating.verdict,"購入可","18点でも点数だけで見送りにしてはいけない");
+assert.equal(broadMoreRating.concentration,broadButRawStrong.concentration,"点数だけで集中度が変わっている");
+
+const massWarn=snapshot({shares:[.20,.17,.15,.12,.10],scores:[9,8,7,5,4],bets:6,cutGap:2.5});
+massWarn.predictionOutput.audit.purchaseMassAudit={eligibleCoverage:.48,weightedCoverageTarget:.75,massEfficiency:.92,status:"UNDER_COVERED"};
+const massWarnRating=derivePredictionRatings(massWarn);
+assert.equal(massWarnRating.verdict,"見送り寄り","点数が少なくても購入質量不足は注意判定にする");
+assert.ok(massWarnRating.consistencyAudit.invariantChecks.every(x=>x.passed),"質量不足による注意判定を矛盾扱いしている");
 
 const lowHeadCoverageSnapshot=snapshot({shares:[.18,.15,.12,.10],scores:[8,7,6,5],bets:4,generated:210,cutGap:1.2});
 lowHeadCoverageSnapshot.predictionOutput.audit.terminalProbabilitySum=1;

@@ -1,0 +1,1 @@
+import assert from"node:assert/strict";import fs from"node:fs";const a=fs.readFileSync(new URL("../public/app.mjs",import.meta.url),"utf8");for(const x of["3着→買い目ブリッジ","生成済みの3着終端を全件購入評価へ渡してから","購入評価前に消しません"])assert.ok(a.includes(x),x);console.log("PASS third purchase bridge UI");

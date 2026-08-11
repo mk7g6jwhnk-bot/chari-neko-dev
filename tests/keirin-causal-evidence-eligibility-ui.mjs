@@ -1,0 +1,1 @@
+import assert from"node:assert/strict";import fs from"node:fs";const app=fs.readFileSync(new URL("../public/app.mjs",import.meta.url),"utf8");for(const t of["証拠レビュー完了","証拠全件確定","因果学習可能","UNKNOWNはレビュー完了にはできますが、因果学習には使いません"])assert.ok(app.includes(t));console.log("PASS causal evidence eligibility UI");

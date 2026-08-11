@@ -1,0 +1,3 @@
+# v122 因果証拠学習適格性修正
+
+UNKNOWNはレビュー完了扱いにできるが因果学習不可。全条件CONFIRMED/REFUTEDかつ通常学習対象のみnodeCauseLearningEligible=true。例外レースは全件確定でも学習不可。UIもレビュー完了・全件確定・因果学習可能を分離。

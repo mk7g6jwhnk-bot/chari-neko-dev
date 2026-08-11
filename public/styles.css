@@ -218,3 +218,5 @@
   .riderMarkHead,.riderMarkLine{grid-template-columns:38px minmax(0,1fr) 52px}
   .riderMarkHead.riderMarkWithChat,.riderMarkLine.riderMarkWithChat{grid-template-columns:38px minmax(0,1fr) 48px 64px}
 }
+
+.evidenceButtons{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.evidenceButtons button{padding:7px 10px;border-radius:8px}.evidenceReviewRow p{margin:.35rem 0}

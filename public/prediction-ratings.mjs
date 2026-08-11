@@ -11,7 +11,14 @@ export function derivePredictionRatings(snapshot={}){
 
   const bets=Array.isArray(snapshot?.betSelections)?snapshot.betSelections:[];
   const betCount=bets.length;
-  const pointFactor=betCount<=3?1:betCount<=6?.90:betCount<=10?.72:betCount<=15?.48:betCount<=25?.25:.08;
+  const massAudit=audit?.purchaseMassAudit||{};
+  const eligibleCoverage=finiteOrNull(massAudit?.eligibleCoverage);
+  const weightedCoverageTarget=finiteOrNull(massAudit?.weightedCoverageTarget);
+  const massEfficiency=finiteOrNull(massAudit?.massEfficiency);
+  const massStatus=String(massAudit?.status||"");
+  const coverageTargetRatio=eligibleCoverage!=null&&weightedCoverageTarget>0?Math.max(0,Math.min(1,eligibleCoverage/weightedCoverageTarget)):null;
+  const purchaseStructureQuality=[coverageTargetRatio,massEfficiency].filter(Number.isFinite);
+  const purchaseQuality=purchaseStructureQuality.length?purchaseStructureQuality.reduce((a,b)=>a+b,0)/purchaseStructureQuality.length:.65;
 
   const probabilitySum=positiveOrNull(audit.terminalProbabilitySum);
   const terminalTop3Share=normalizedMass(audit.top3Mass,probabilitySum);
@@ -42,7 +49,7 @@ export function derivePredictionRatings(snapshot={}){
     .18*scale(top2FamilyShare,.48,.82)+
     .22*scale(terminalTop3Share,.08,.28)+
     .18*scale(terminalTop5Share,.14,.42)+
-    .12*pointFactor
+    .12*purchaseQuality
   ):branchConcentrationRaw;
 
   const concentrationRaw=.46*branchConcentrationRaw+.54*terminalConcentrationRaw;
@@ -50,15 +57,8 @@ export function derivePredictionRatings(snapshot={}){
   const consistencyAdjustments=[];
   let concentration=rawConcentration;
 
-  // 表示上の「集中」は買い目の広がりと矛盾させない。
-  // 点数を直接「悪い」と決めるのではなく、集中度の上限監査として使う。
-  if(betCount>=11&&concentration>2){
-    consistencyAdjustments.push(`採用${betCount}点のため展開集中度を${concentration}→2へ上限補正`);
-    concentration=2;
-  }else if(betCount>=7&&concentration>3){
-    consistencyAdjustments.push(`採用${betCount}点のため展開集中度を${concentration}→3へ上限補正`);
-    concentration=3;
-  }
+  // 買い目点数そのものは集中度の根拠にしない。
+  // 展開・終端確率・ファミリー構造・購入質量の実データだけで評価する。
   if(topShare>0&&topShare<.10&&concentration>2){
     consistencyAdjustments.push(`展開1位${formatPct(topShare)}のため展開集中度を${concentration}→2へ上限補正`);
     concentration=2;
@@ -77,23 +77,16 @@ export function derivePredictionRatings(snapshot={}){
   const lineQuality=isGirls?evidenceQuality:(lineConfidence==="高"?1:lineConfidence==="中"?.65:lineConfidence==="低"?.35:.70);
   const dataQuality=.55*lineQuality+.45*evidenceQuality;
   const concentrationNorm=concentration/5;
-  const confidenceRaw=.42*concentrationNorm+.33*dataQuality+.25*pointFactor;
+  const confidenceRaw=.42*concentrationNorm+.33*dataQuality+.25*purchaseQuality;
   const rawConfidence=starsFrom(confidenceRaw,[.30,.48,.64,.80]);
   let confidence=rawConfidence;
 
   // 信頼度は「データが良い」だけで4〜5にしない。
-  // 集中度と購入点数を越えて高評価にならないよう整合監査を入れる。
+  // 集中度を越えて高評価にならないよう整合監査を入れる。
   const concentrationConfidenceCap=Math.min(5,concentration+1);
   if(confidence>concentrationConfidenceCap){
     consistencyAdjustments.push(`展開集中度${concentration}に合わせ信頼度を${confidence}→${concentrationConfidenceCap}へ上限補正`);
     confidence=concentrationConfidenceCap;
-  }
-  if(betCount>=11&&confidence>3){
-    consistencyAdjustments.push(`採用${betCount}点のため信頼度を${confidence}→3へ上限補正`);
-    confidence=3;
-  }else if(betCount>=7&&confidence>4){
-    consistencyAdjustments.push(`採用${betCount}点のため信頼度を${confidence}→4へ上限補正`);
-    confidence=4;
   }
   if(!isGirls&&lineConfidence&&lineConfidence!=="高"&&confidence>2){
     consistencyAdjustments.push(`ライン確度${lineConfidence}のため信頼度を${confidence}→2へ上限補正`);
@@ -112,17 +105,16 @@ export function derivePredictionRatings(snapshot={}){
   if(snapshot?.noBet||betCount===0)provisionalVerdict={label:"見送り",tone:"stop",reason:"購入対象なし"};
   else if(concentration===1||confidence===1)provisionalVerdict={label:"見送り推奨",tone:"stop",reason:"予想の集中または信頼が低い"};
   else if(allOddsEvaluated&&maxExpectedValue!=null&&maxExpectedValue<1)provisionalVerdict={label:"妙味なし",tone:"caution",reason:"採用候補の確率×オッズが全て損益分岐未満"};
-  else if(betCount>=11||concentration<=2||confidence<=2)provisionalVerdict={label:"見送り寄り",tone:"caution",reason:"買い目が広い、または予想集中が低い"};
+  else if(["UNDER_COVERED","INEFFICIENT","OVER_SPREAD"].includes(massStatus))provisionalVerdict={label:"見送り寄り",tone:"caution",reason:`購入質量監査が${massStatus}`};
+  else if(concentration<=2||confidence<=2)provisionalVerdict={label:"見送り寄り",tone:"caution",reason:"予想集中または入力信頼が低い"};
   else provisionalVerdict={label:"購入可",tone:"go",reason:"評価整合条件を満たす"};
 
   let rollover,rolloverRaw;
   if(provisionalVerdict.tone==="stop"){rollover=1;rolloverRaw=.10;}
   else{
-    rolloverRaw=.42*(confidence/5)+.38*(concentration/5)+.20*pointFactor;
+    rolloverRaw=.42*(confidence/5)+.38*(concentration/5)+.20*purchaseQuality;
     rollover=starsFrom(rolloverRaw,[.40,.58,.72,.88]);
     rollover=Math.min(rollover,confidence,concentration);
-    if(betCount>=11)rollover=Math.min(rollover,2);
-    else if(betCount>=7)rollover=Math.min(rollover,3);
   }
 
   const confidenceContinuousCap=confidence<=1?.29:confidence===2?.47:confidence===3?.63:confidence===4?.79:1;
@@ -132,9 +124,9 @@ export function derivePredictionRatings(snapshot={}){
   else if(provisionalVerdict.tone==="caution")evaluationIndex=Math.min(evaluationIndex,65);
 
   const invariantChecks=[
-    {id:"BROAD_BETS_NOT_HIGH_CONCENTRATION",passed:!(betCount>=11&&concentration>=4),label:"11点以上で展開集中度4以上を禁止"},
-    {id:"BROAD_BETS_NOT_HIGH_CONFIDENCE",passed:!(betCount>=11&&confidence>=4),label:"11点以上で信頼度4以上を禁止"},
-    {id:"HIGH_CONF_HIGH_CONC_NOT_SKIP",passed:!((confidence>=4&&concentration>=4)&&/^見送り/.test(provisionalVerdict.label)),label:"信頼度4以上・集中度4以上で見送り表示を禁止"},
+    {id:"BET_COUNT_NOT_DIRECT_SKIP_FACTOR",passed:true,label:"買い目点数だけで見送り・信頼度・集中度を下げない"},
+    {id:"REFERENCE_PLAN_STAYS_SKIP",passed:!snapshot?.noBet||provisionalVerdict.tone==="stop",label:"参考買い目/noBetは購入可へ昇格させない"},
+    {id:"HIGH_CONF_HIGH_CONC_SKIP_REQUIRES_STRUCTURAL_REASON",passed:!((confidence>=4&&concentration>=4)&&/^見送り/.test(provisionalVerdict.label)&&!snapshot?.noBet)||["UNDER_COVERED","INEFFICIENT","OVER_SPREAD"].includes(massStatus)||(allOddsEvaluated&&maxExpectedValue!=null&&maxExpectedValue<1),label:"高信頼・高集中の見送りには点数以外の構造理由を必須にする"},
     {id:"ROLLOVER_NOT_ABOVE_CORE",passed:rollover<=confidence&&rollover<=concentration,label:"コロがし適性は信頼度・集中度を超えない"}
   ];
   const failedInvariants=invariantChecks.filter(item=>!item.passed);
@@ -142,7 +134,6 @@ export function derivePredictionRatings(snapshot={}){
   const auditFlags=[];
   if(topShare>0&&topShare<.10)auditFlags.push("展開1位の占有率が10%未満");
   if(dataQuality<.65)auditFlags.push("入力証拠の品質が十分でない");
-  if(betCount>=11)auditFlags.push(`採用${betCount}点で買い目が広い`);
   if(confidence>=3&&concentration<=2)auditFlags.push("信頼度より展開集中度が低い");
   if(isGirls&&evidenceQuality<.70)auditFlags.push("ガールズ主導権入力の信頼度を要監査");
   if(topFamilyShare>=.20&&topFamilyCoverage!=null&&topFamilyCoverage<.50)auditFlags.push(`1着最上位ファミリーの購入カバー率が低い（${formatPct(topFamilyCoverage)}）`);
@@ -162,7 +153,7 @@ export function derivePredictionRatings(snapshot={}){
   reasonParts.push(`判定根拠 ${provisionalVerdict.reason}`);
 
   return{
-    ratingAlgorithmVersion:"DISPLAY-RATING-0.3-CONSISTENCY-AUDIT",
+    ratingAlgorithmVersion:"DISPLAY-RATING-0.4-STRUCTURAL-SKIP-BOUNDARY",
     confidence,
     concentration,
     rollover,
@@ -179,11 +170,11 @@ export function derivePredictionRatings(snapshot={}){
       invariantChecks
     },
     diagnostics:{
-      topShare,top3Share,topGapRatio,cutGapRatio,betCount,dataQuality,pointFactor,
+      topShare,top3Share,topGapRatio,cutGapRatio,betCount,dataQuality,purchaseQuality,
       branchConcentrationRaw,terminalConcentrationRaw,concentrationRaw,rawConcentration,
       terminalTop3Share,terminalTop5Share,topFamilyShare,top2FamilyShare,topFamilyCoverage,
       confidenceRaw,rawConfidence,effectiveConfidence,rolloverRaw:rolloverRaw??.10,evaluationIndex,
-      maxExpectedValue,allOddsEvaluated
+      maxExpectedValue,allOddsEvaluated,eligibleCoverage,weightedCoverageTarget,massEfficiency,massStatus
     }
   };
 }

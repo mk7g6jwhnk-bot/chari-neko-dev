@@ -24,6 +24,6 @@ assert.equal(miss.verification.stages[1].finishEventConfirmed,true);
 assert.equal(miss.verification.stages[1].conditionValidation.status,"EVIDENCE_PENDING");
 assert.equal(miss.verification.researchLearning.autoPromoteToProduction,false);
 const missing=evaluateResult(base,{status:"confirmed",finishOrder:[3,2,1]},new Date("2026-08-10T06:00:00Z"));
-assert.equal(missing.verification.status,"TERMINAL_GENERATION_MISS");
+assert.equal(missing.verification.status,"FIRST_FAMILY_GENERATION_MISS");
 assert.equal(missing.verification.exactTerminalGenerated,false);
 console.log("PASS result verification + research learning separation");

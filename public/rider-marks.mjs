@@ -125,22 +125,98 @@ export function auditRiderMarkConsistency(snapshot, marks=deriveRiderMarks(snaps
     }
   }
 
+  const provenanceAudit=auditMarkScenarioBetProvenance({snapshot,marks,terminals,bets,branches});
+  warnings.push(...provenanceAudit.warnings);
+  explanations.push(...provenanceAudit.explanations);
+
   const summary={
     mainHeadCounts:Object.fromEntries(mainHeadCounts),
     highHeadCounts:Object.fromEntries(highHeadCounts),
     secondCounts:Object.fromEntries(secondCounts),
     thirdCounts:Object.fromEntries(thirdCounts),
-    mainTotal,highTotal
+    mainTotal,highTotal,
+    tracedBetCount:provenanceAudit.rows.length,
+    missingTerminalTraceCount:provenanceAudit.rows.filter(r=>!r.terminalMatched).length,
+    missingBranchTraceCount:provenanceAudit.rows.filter(r=>!r.branchIds.length).length
   };
   return{
-    version:"RIDER-MARK-PURCHASE-LINKAGE-v2",
+    version:"RIDER-MARK-SCENARIO-BET-CONSISTENCY-v3",
     status:warnings.some(w=>w.severity==="high")?"WARN":warnings.length?"CHECK":"OK",
     warnings,
     explanations,
     warningCount:warnings.length,
     familyRank:Object.fromEntries(familyRank),
+    provenanceAudit,
     summary
   };
+}
+
+function auditMarkScenarioBetProvenance({marks,terminals,bets,branches}){
+  const markByNumber=new Map((marks||[]).map(m=>[Number(m.number),m]));
+  const branchById=new Map((branches||[]).map(b=>[String(b?.id||b?.branchId||""),b]).filter(([id])=>id));
+  const terminalByOrder=new Map();
+  for(const t of terminals||[]){
+    const key=orderKey(t?.order);
+    if(!key)continue;
+    if(!terminalByOrder.has(key))terminalByOrder.set(key,[]);
+    terminalByOrder.get(key).push(t);
+  }
+  const warnings=[],explanations=[],rows=[];
+  for(const bet of bets||[]){
+    const order=(bet?.order||[]).map(Number);
+    const key=orderKey(order);
+    if(!key)continue;
+    const matches=terminalByOrder.get(key)||[];
+    const terminal=matches.slice().sort((a,b)=>(Number(b?.probability)||0)-(Number(a?.probability)||0))[0]||null;
+    const contributionIds=(Array.isArray(terminal?.branchContributions)?terminal.branchContributions:[])
+      .map(c=>String(c?.branchId||"")).filter(Boolean);
+    const explicitIds=[bet?.dominantBranchId,bet?.branchId,terminal?.dominantBranchId,terminal?.branchId,...(terminal?.chatSupportingBranchIds||[]),...contributionIds]
+      .map(x=>String(x||"")).filter(Boolean);
+    const branchIds=unique(explicitIds);
+    const branchLabels=unique([bet?.dominantBranchLabel,bet?.branchLabel,terminal?.dominantBranchLabel,terminal?.branchLabel,...branchIds.map(id=>branchById.get(id)?.label)].filter(Boolean));
+    const head=Number(order[0]),second=Number(order[1]),third=Number(order[2]);
+    const hm=markByNumber.get(head)||{},sm=markByNumber.get(second)||{},tm=markByNumber.get(third)||{};
+    const row={
+      order:key,category:bet?.category||"UNCLASSIFIED",terminalMatched:Boolean(terminal),
+      terminalProbability:finite(terminal?.probability)?Number(terminal.probability):null,
+      branchIds,branchLabels,
+      firstMark:hm.firstMark||"？",secondMark:sm.secondMark||"？",thirdMark:tm.thirdMark||"？",
+      classificationReason:bet?.classificationReason||bet?.purchaseReason||bet?.reason||null
+    };
+    rows.push(row);
+    if(!terminal){
+      warnings.push({type:"BET_WITHOUT_GENERATED_TERMINAL",severity:"high",order:key,message:`${key} は購入候補ですが、同一着順の生成終端が見つかりません。印→展開→終端→買い目の順序を確認。`});
+      continue;
+    }
+    if(!branchIds.length){
+      warnings.push({type:"BET_WITHOUT_BRANCH_PROVENANCE",severity:"high",order:key,message:`${key} は終端まで存在しますが、由来する展開枝IDを追跡できません。買い目分類前に branch provenance を保持する必要があります。`});
+    }
+    if(bet?.category==="MAIN" && ["△","×","？"].includes(hm.firstMark) && !branchLabels.length && !row.classificationReason){
+      warnings.push({type:"MAIN_HEAD_MARK_REVERSAL_WITHOUT_REASON",severity:"high",number:head,order:key,message:`${key} は本線ですが、${head}番の1着印は${hm.firstMark}です。印順位を展開が逆転させた直接理由が記録されていません。`});
+    }
+    if(bet?.category==="MAIN" && ["△","×","？"].includes(sm.secondMark) && !branchLabels.length && !row.classificationReason){
+      warnings.push({type:"MAIN_SECOND_MARK_REVERSAL_WITHOUT_REASON",severity:"medium",number:second,order:key,message:`${key} は本線ですが、${second}番の2着印は${sm.secondMark}です。2着再評価から本線採用へ進んだ根拠が必要です。`});
+    }
+    if(bet?.category==="MAIN" && ["△","×","？"].includes(tm.thirdMark) && !branchLabels.length && !row.classificationReason){
+      warnings.push({type:"MAIN_THIRD_MARK_REVERSAL_WITHOUT_REASON",severity:"medium",number:third,order:key,message:`${key} は本線ですが、${third}番の3着印は${tm.thirdMark}です。3着再評価から本線採用へ進んだ根拠が必要です。`});
+    }
+    if(branchIds.length){
+      explanations.push({type:"BET_PROVENANCE_TRACE",order,message:`${key} [${bet?.category||"未分類"}] → 終端 ${key} → 枝 ${branchLabels.length?branchLabels.join(" / "):branchIds.join(" / ")}。印は 1着${hm.firstMark||"？"} / 2着${sm.secondMark||"？"} / 3着${tm.thirdMark||"？"}。`});
+    }
+  }
+  return{
+    version:"MARK-SCENARIO-BET-PROVENANCE-v1",
+    passed:!warnings.some(w=>w.severity==="high"),
+    rows,warnings,explanations,
+    tracedBetCount:rows.length,
+    terminalMatchedCount:rows.filter(r=>r.terminalMatched).length,
+    branchTracedCount:rows.filter(r=>r.branchIds.length).length
+  };
+}
+
+function orderKey(order){
+  const a=(Array.isArray(order)?order:[]).map(Number);
+  return a.length===3&&a.every(Number.isFinite)?a.join("-"):"";
 }
 
 function countByPosition(rows,index){

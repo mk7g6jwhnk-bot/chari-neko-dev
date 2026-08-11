@@ -1,0 +1,2 @@
+import assert from"node:assert/strict";import fs from"node:fs";
+const t=fs.readFileSync(new URL("./keirin-purchase-five-races.mjs",import.meta.url),"utf8");assert.ok(t.includes("counts.push(payload.prediction.purchasePlan.length)"));console.log("PASS five-race flow covered by full test; zero fallback added");

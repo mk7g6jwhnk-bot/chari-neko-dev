@@ -1,0 +1,1 @@
+import assert from"node:assert/strict";import fs from"node:fs";const a=fs.readFileSync(new URL("../public/app.mjs",import.meta.url),"utf8");for(const t of["カナリア 証拠待ち","旧epoch・非孤立除外","証拠ゲート","開始後の確定証拠5件以上"])assert.ok(a.includes(t));console.log("PASS canary cohort evidence UI");

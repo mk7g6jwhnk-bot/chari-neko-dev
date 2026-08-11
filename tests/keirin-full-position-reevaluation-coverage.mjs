@@ -1,0 +1,15 @@
+import assert from"node:assert/strict";
+import{generateKeirinTerminals}from"../keirin/sports/keirin-terminals.mjs";
+const r=(id,n,role,lineId)=>({id,number:n,role,lineId,roleScores:{first:6,second:6,third:6},evidence:{recent:6,start:6,sprint:6,finish:6,tracking:6,stamina:6,lineTrust:6},riderEvaluationV2:{secondMechanisms:{leaderRemain:6,lineFollower:6,otherLineRemain:6},thirdMechanisms:{lineThird:6,positionRemain:6,otherLineRemain:6}}});
+const scored=[r("1",1,"自力","A"),r("2",2,"番手","A"),r("3",3,"三番手","A"),r("4",4,"自力","B"),r("5",5,"番手","B"),r("6",6,"三番手","B")];
+const branches=[{id:"LEAD-A",label:"A先行",branchType:"LEADER_HOLD",primaryLineId:"A",priority:"main",score:8,firstCandidates:["1"],firstCandidateScores:{"1":8}}];
+const terminals=generateKeirinTerminals({scored,branches});
+const audit=terminals.generationAudit.reevaluationCoverageAudit;
+assert.equal(audit.passed,true);
+assert.equal(audit.secondCoverageMissCount,0);
+assert.equal(audit.thirdCoverageMissCount,0);
+const second=audit.secondRows.find(x=>x.first===1);assert.deepEqual(second.reevaluatedNumbers.sort((a,b)=>a-b),[2,3,4,5,6]);
+const pair=audit.thirdRows.find(x=>x.order.join("-")==="1-2");assert.deepEqual(pair.reevaluatedNumbers.sort((a,b)=>a-b),[3,4,5,6]);
+assert.ok(terminals.some(x=>x.order.join("-")==="1-2-5"),"別線番手5の3着混合終端が残る");
+assert.ok(terminals.some(x=>x.order.join("-")==="1-2-6"),"別線後位6の3着混合終端が残る");
+console.log("PASS full SECOND/THIRD reevaluation + mixed-line third coverage");

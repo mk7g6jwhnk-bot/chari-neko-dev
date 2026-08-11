@@ -1,0 +1,3 @@
+# v124 訓練側だけで候補生成するホールドアウト修正
+
+先に時系列70/30分割し、訓練70%だけで提案候補を生成。訓練側がREADYのときだけ未使用ホールドアウトを評価。全データの候補判定はdescriptiveShadowProposalとして記述用途に限定。selectionLeakagePrevented=true。

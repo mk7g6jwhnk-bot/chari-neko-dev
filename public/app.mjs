@@ -1,17 +1,18 @@
-import{attachResult,createSnapshot,findLatestSnapshot,isResultPending,loadSnapshots,raceKey,saveSnapshot}from"./prediction-store.mjs";
+import{acknowledgeCanaryRollback,activateCanaryRun,attachResult,attachShadowComparisonResult,backfillResearchLearningLedger,buildCanaryActivationPlan,buildShadowComparisonRecord,canaryRunFor,createSnapshot,finalApprovalFor,findLatestSnapshot,isResultPending,loadCanaryRuns,loadFinalPromotionApprovals,loadShadowComparisons,loadSnapshots,loadResearchLearningRecords,loadPromotionReviews,promotionReviewFor,raceKey,refreshCanaryRuns,researchEvidenceQueue,saveFinalPromotionApproval,savePromotionReview,saveShadowComparison,saveSnapshot,stopCanaryRun,summarizeCanaryRuns,summarizeFinalPromotionApprovals,summarizePromotionReviews,summarizeResearchLearning,summarizeShadowComparisons,updateResearchConditionEvidence}from"./prediction-store.mjs";
 import{derivePredictionRatings,starText}from"./prediction-ratings.mjs";
 import{findChatPrediction,parseChatPrediction,removeChatPrediction,saveChatPrediction}from"./chat-prediction-store.mjs";
 import{compareChatAndApp}from"./chat-app-diff.mjs";
 import{loadChatDiffTrends,recordChatDiffTrend,summarizeChatDiffTrends}from"./chat-diff-trend-store.mjs";
 import{auditRiderMarkConsistency,deriveRiderMarks}from"./rider-marks.mjs";
+import{allocatePreviewStakes,deriveThickBets}from"./purchase-funding.mjs";
 const $=id=>document.getElementById(id),screens=[...document.querySelectorAll(".screen")];
-const state={screen:"home",history:[],date:localDate(),meeting:null,meetings:[],meetingTab:"today",race:null,payload:null,snapshot:null,retry:null,busy:false,oddsBusyKey:null,bulkBusy:false,bulkDone:0,bulkTotal:0,screeningBusy:false,deepDiveBusy:false,deepDiveCurrentKeys:[]};
+const state={screen:"home",history:[],date:localDate(),meeting:null,meetings:[],meetingTab:"today",race:null,payload:null,snapshot:null,legacySnapshot:null,retry:null,busy:false,oddsBusyKey:null,bulkBusy:false,bulkDone:0,bulkTotal:0,screeningBusy:false,deepDiveBusy:false,deepDiveCurrentKeys:[]};
 const BATCH_LOCK_KEY="chari-neko:keirin-batch-lock:v1",TAB_INSTANCE_ID=(globalThis.crypto?.randomUUID?.()||`${Date.now()}-${Math.random()}`),BATCH_LOCK_TTL_MS=10*60*1000;
 const ODDS_CACHE_KEY="chari-neko:keirin-odds-cache:v1";
 const RACE_META_CACHE_KEY="chari-neko:keirin-race-meta-cache:v1";
 const RESULT_CACHE_KEY="chari-neko:keirin-result-cache:v1";
 const MEETING_CACHE_KEY="chari-neko:keirin-meeting-cache:v1";
-const APP_RELEASE="KEIRIN-0.9.4-detail-readability-fix";
+const APP_RELEASE="KEIRIN-0.15.2-update-state-isolation";
 const APP_UPDATE_CHECK_INTERVAL_MS=5*60*1000;
 let lastAppUpdateCheckAt=0,appUpdateCheckBusy=false;
 const VENUE_CODES={函館:"11",青森:"12",いわき平:"13",弥彦:"21",前橋:"22",取手:"23",宇都宮:"24",大宮:"25",西武園:"26",京王閣:"27",立川:"28",松戸:"31",千葉:"32",川崎:"34",平塚:"35",小田原:"36",伊東:"37",静岡:"38",名古屋:"42",岐阜:"43",大垣:"44",豊橋:"45",富山:"46",松阪:"47",四日市:"48",福井:"51",奈良:"53",向日町:"54",和歌山:"55",岸和田:"56",玉野:"61",広島:"62",防府:"63",高松:"71",小松島:"73",高知:"74",松山:"75",小倉:"81",久留米:"83",武雄:"84",佐世保:"85",別府:"86",熊本:"87"};
@@ -34,6 +35,11 @@ function goBack(){show(state.history.pop()||"home",false)}function goHome(){stat
 function localDate(){const d=new Date(),z=new Date(d.getTime()-d.getTimezoneOffset()*60000);return z.toISOString().slice(0,10)}function compact(v){return String(v).replaceAll("-","")}
 function setLoading(title,message){$("loadingTitle").textContent=title;$("loadingMessage").textContent=message;show("loading")}
 function fail(title,error,retry){state.retry=retry;$("errorTitle").textContent=title;$("errorMessage").textContent=error?.message||String(error);show("error")}
+function isCurrentSnapshot(snapshot){return Boolean(snapshot&&snapshot.predictionVersion===APP_RELEASE)}
+function snapshotsForRace(race){return loadSnapshots(localStorage).filter(x=>raceKey(x.targetRace)===raceKey(race)).sort((a,b)=>String(b.createdAt).localeCompare(String(a.createdAt)))}
+function currentSnapshotForRace(race){return snapshotsForRace(race).find(isCurrentSnapshot)||null}
+function legacySnapshotForRace(race){return snapshotsForRace(race).find(x=>!isCurrentSnapshot(x))||null}
+function displaySnapshotForRace(race){const current=currentSnapshotForRace(race);if(current)return current;return raceStatus(race).label==="終了"?findLatestSnapshot(localStorage,race):null}
 async function jsonFetch(url){const r=await fetch(url,{cache:"no-store"});let p;try{p=await r.json()}catch{throw new Error(`サーバー応答を読み取れません（HTTP ${r.status}）`)}if(!r.ok||p.ok===false)throw new Error(p.error||`取得失敗（HTTP ${r.status}）`);return p}
 
 
@@ -50,7 +56,7 @@ function renderHomeRecommendations(){
   }
 
   const all=loadSnapshots(localStorage)
-    .filter(s=>String(s.targetRace?.date||"").replace(/\D/g,"")===today&&!s.result)
+    .filter(s=>String(s.targetRace?.date||"").replace(/\D/g,"")===today&&!s.result&&isCurrentSnapshot(s))
     .map(s=>({snapshot:s,rec:evaluateRecommendation(s)}))
     .sort((a,b)=>b.rec.score-a.rec.score||new Date(b.snapshot.createdAt)-new Date(a.snapshot.createdAt));
 
@@ -86,6 +92,7 @@ function evaluateRecommendation(snapshot){
   const avgNatural=average(bets.map(b=>Number(b.naturalConvergenceScore)).filter(Number.isFinite));
   const mainNatural=average(mains.map(b=>Number(b.naturalConvergenceScore)).filter(Number.isFinite));
   const mainShare=bets.length?mains.length/bets.length:0;
+  const rating=ratingOf(snapshot);
 
   const blockers=[];
   if(snapshot?.noBet)blockers.push("見送り判定");
@@ -94,6 +101,7 @@ function evaluateRecommendation(snapshot){
   if(mainInvariant&&mainInvariant.passed===false)blockers.push("本線成立監査NG");
   if(linkageHigh>0)blockers.push("展開連動に高重要度警告");
   if(riderBranchHigh>0)blockers.push("選手評価→主展開に高重要度警告");
+  if(rating.verdictTone==="stop"&&!snapshot?.noBet)blockers.push(`表示評価:${rating.verdict}`);
 
   let score=0;
   score+=Math.min(35,Math.max(0,(mainNatural||0)*35));
@@ -104,7 +112,8 @@ function evaluateRecommendation(snapshot){
   score=Math.max(0,Math.min(100,score));
 
   if(blockers.length)return{level:"HOLD",score,reason:blockers.join("・"),blockers};
-  if(score>=65&&oddsReady)return{level:"RECOMMENDED",score,reason:"本線・連動・自然収束・オッズの構造条件を通過",blockers:[]};
+  if(score>=65&&oddsReady&&rating.verdictTone==="go")return{level:"RECOMMENDED",score,reason:"本線・連動・自然収束・オッズ・購入質量の構造条件を通過",blockers:[]};
+  if(rating.verdictTone==="caution")return{level:"WATCH",score,reason:`${rating.verdict}：${rating.diagnostics?.massStatus||rating.reason}`,blockers:[]};
   return{level:"WATCH",score,reason:oddsReady?"構造条件は成立、優先度は比較待ち":"オッズ確認待ち",blockers:[]};
 }
 
@@ -123,7 +132,7 @@ function allMeetingRaces(){return(state.meetings||[]).flatMap(m=>{const nums=rac
 function battleKeys(){try{return new Set(JSON.parse(localStorage.getItem("chari-neko-battle-races")||"[]"))}catch{return new Set()}}
 function isBattleRace(r){return battleKeys().has(raceKey(r))}
 function toggleBattleRace(r){const keys=battleKeys(),key=raceKey(r);keys.has(key)?keys.delete(key):keys.add(key);localStorage.setItem("chari-neko-battle-races",JSON.stringify([...keys]));renderMeetingTabs()}
-function renderFlatRaceList(root,races,battleOnly){if(!races.length){root.innerHTML=`<section class="card empty">${battleOnly?"勝負レースはまだ登録されていません。":"この日のレースは見つかりませんでした。"}</section>`;return}const row=(r,i)=>{const s=raceStatus(r),battle=isBattleRace(r),saved=findLatestSnapshot(localStorage,r),cached=oddsCacheFor(r),rating=oddsRating(saved,cached),busy=state.oddsBusyKey===raceKey(r),ended=s.label==="終了",deadline=deadlineOf(r),action=ended?(saved?"結果・詳細を見る":"結果を見る"):(saved?"詳細を見る":"予想する");return `<article class="timelineRace ${s.className?`race-${s.className}`:""}"><div class="timelineBody"><button class="timelineMain" data-flat-race="${i}"><span class="timelineVenue"><strong>${esc(r.venueName)} ${r.raceNo}R</strong><small>${deadline?`締切 ${esc(deadline)}`:"締切確認中"}${saved?" ・ 予想保存済み":""}</small><em class="raceListAction">${action} ›</em></span><span class="status ${s.className}">${s.label}</span></button><div class="timelineOdds"><span class="oddsEvaluation ${rating.className}">${esc(rating.label)}</span><button class="oddsRefresh" data-odds-race="${i}" ${busy||ended?"disabled":""}>${busy?"更新中…":"オッズ更新"}</button></div></div><button class="battleToggle ${battle?"active":""}" data-battle-race="${i}" aria-label="勝負レース${battle?"解除":"登録"}">${battle?"★":"☆"}</button></article>`};let shown=races;if(!battleOnly){const upcoming=races.filter(r=>raceStatus(r).label!=="終了").slice(0,10),finished=races.filter(r=>raceStatus(r).label==="終了").sort((a,b)=>(parseTime(b.date,b.scheduledStart)||0)-(parseTime(a.date,a.scheduledStart)||0));shown=[...upcoming,...finished];const upcomingHtml=upcoming.length?`<div class="raceSectionHead"><strong>これからのレース</strong><span>${upcoming.length}件表示</span></div>${upcoming.map((r,i)=>row(r,i)).join("")}`:'<section class="card empty compactEmpty">これからのレースはありません。</section>';const finishedOffset=upcoming.length,finishedHtml=finished.length?`<details class="finishedRaces"><summary>終了したレース <span>${finished.length}件</span></summary><div class="finishedRaceList">${finished.map((r,j)=>row(r,finishedOffset+j)).join("")}</div></details>`:"";root.innerHTML=upcomingHtml+finishedHtml}else root.innerHTML=shown.map((r,i)=>row(r,i)).join("");root.querySelectorAll("[data-flat-race]").forEach(b=>b.onclick=()=>openDetail(shown[Number(b.dataset.flatRace)]));root.querySelectorAll("[data-battle-race]").forEach(b=>b.onclick=e=>{e.stopPropagation();toggleBattleRace(shown[Number(b.dataset.battleRace)])});root.querySelectorAll("[data-odds-race]").forEach(b=>b.onclick=e=>{e.stopPropagation();refreshRaceOdds(shown[Number(b.dataset.oddsRace)])})}
+function renderFlatRaceList(root,races,battleOnly){if(!races.length){root.innerHTML=`<section class="card empty">${battleOnly?"勝負レースはまだ登録されていません。":"この日のレースは見つかりませんでした。"}</section>`;return}const row=(r,i)=>{const s=raceStatus(r),battle=isBattleRace(r),saved=displaySnapshotForRace(r),cached=oddsCacheFor(r),rating=oddsRating(saved,cached),busy=state.oddsBusyKey===raceKey(r),ended=s.label==="終了",deadline=deadlineOf(r),action=ended?(saved?"結果・詳細を見る":"結果を見る"):(saved?"詳細を見る":"予想する");return `<article class="timelineRace ${s.className?`race-${s.className}`:""}"><div class="timelineBody"><button class="timelineMain" data-flat-race="${i}"><span class="timelineVenue"><strong>${esc(r.venueName)} ${r.raceNo}R</strong><small>${deadline?`締切 ${esc(deadline)}`:"締切確認中"}${saved?" ・ 予想保存済み":""}</small><em class="raceListAction">${action} ›</em></span><span class="status ${s.className}">${s.label}</span></button><div class="timelineOdds"><span class="oddsEvaluation ${rating.className}">${esc(rating.label)}</span><button class="oddsRefresh" data-odds-race="${i}" ${busy||ended?"disabled":""}>${busy?"更新中…":"オッズ更新"}</button></div></div><button class="battleToggle ${battle?"active":""}" data-battle-race="${i}" aria-label="勝負レース${battle?"解除":"登録"}">${battle?"★":"☆"}</button></article>`};let shown=races;if(!battleOnly){const upcoming=races.filter(r=>raceStatus(r).label!=="終了").slice(0,10),finished=races.filter(r=>raceStatus(r).label==="終了").sort((a,b)=>(parseTime(b.date,b.scheduledStart)||0)-(parseTime(a.date,a.scheduledStart)||0));shown=[...upcoming,...finished];const upcomingHtml=upcoming.length?`<div class="raceSectionHead"><strong>これからのレース</strong><span>${upcoming.length}件表示</span></div>${upcoming.map((r,i)=>row(r,i)).join("")}`:'<section class="card empty compactEmpty">これからのレースはありません。</section>';const finishedOffset=upcoming.length,finishedHtml=finished.length?`<details class="finishedRaces"><summary>終了したレース <span>${finished.length}件</span></summary><div class="finishedRaceList">${finished.map((r,j)=>row(r,finishedOffset+j)).join("")}</div></details>`:"";root.innerHTML=upcomingHtml+finishedHtml}else root.innerHTML=shown.map((r,i)=>row(r,i)).join("");root.querySelectorAll("[data-flat-race]").forEach(b=>b.onclick=()=>openDetail(shown[Number(b.dataset.flatRace)]));root.querySelectorAll("[data-battle-race]").forEach(b=>b.onclick=e=>{e.stopPropagation();toggleBattleRace(shown[Number(b.dataset.battleRace)])});root.querySelectorAll("[data-odds-race]").forEach(b=>b.onclick=e=>{e.stopPropagation();refreshRaceOdds(shown[Number(b.dataset.oddsRace)])})}
 
 function acquireBatchLock(kind){try{const now=Date.now(),raw=JSON.parse(localStorage.getItem(BATCH_LOCK_KEY)||"null");if(raw&&raw.owner!==TAB_INSTANCE_ID&&Number(raw.expiresAt)>now)return false;const next={owner:TAB_INSTANCE_ID,kind,expiresAt:now+BATCH_LOCK_TTL_MS};localStorage.setItem(BATCH_LOCK_KEY,JSON.stringify(next));const verify=JSON.parse(localStorage.getItem(BATCH_LOCK_KEY)||"null");return verify?.owner===TAB_INSTANCE_ID}catch{return true}}
 function releaseBatchLock(){try{const raw=JSON.parse(localStorage.getItem(BATCH_LOCK_KEY)||"null");if(raw?.owner===TAB_INSTANCE_ID)localStorage.removeItem(BATCH_LOCK_KEY)}catch{}}
@@ -157,12 +166,12 @@ function screeningNormalScore(row){const s=row.cache?.screening||{},coverage=Mat
 function screeningHighScore(row){const s=row.cache?.screening||{},coverage=Math.min(1,(Number(s.oddsCount)||0)/210);return 100*(.60*(Number(s.valuePotential)||0)+.25*(Number(s.predictability)||0)+.15*coverage)}
 function screeningGroups(rows=screeningRows()){if((rows||[]).length<SCREENING_MIN_ROWS)return{normal:[],high:[],hold:[...(rows||[])],established:false};const normal=selectNaturalScreeningCluster(rows,"predictability",3),normalKeys=new Set(normal.map(x=>raceKey(x.r))),highPool=rows.filter(x=>!normalKeys.has(raceKey(x.r))),high=selectNaturalScreeningCluster(highPool,"valuePotential",3),selectedKeys=new Set([...normal,...high].map(x=>raceKey(x.r))),hold=rows.filter(x=>!selectedKeys.has(raceKey(x.r)));return{normal,high,hold,established:true}}
 function recommendedScreeningRows(rows=screeningRows()){const groups=screeningGroups(rows);if(!groups.established)return[];return[...groups.normal,...groups.high].slice(0,3)}
-async function deepDiveRace(r){let snapshot=findLatestSnapshot(localStorage,r);if(!snapshot){const result=await fetchAndSavePredictionForRace(r,{enforceFutureWindow:true});snapshot=result.snapshot}markDeepDiveProcessed(r);renderHomeRecommendations();return snapshot}
+async function deepDiveRace(r){let snapshot=currentSnapshotForRace(r);if(!snapshot){const result=await fetchAndSavePredictionForRace(r,{enforceFutureWindow:true});snapshot=result.snapshot}markDeepDiveProcessed(r);renderHomeRecommendations();return snapshot}
 function fallbackDeepDiveCandidates(limit=FALLBACK_DEEP_DIVE_SCAN_LIMIT){const done=new Set(loadDeepDiveProgress().keys),seen=new Set(),current=screeningRows().map(x=>x.r),ordered=[...current,...screeningCandidateOrder()],now=Date.now(),out=[];for(const r of ordered){const key=raceKey(r);if(seen.has(key)||done.has(key))continue;seen.add(key);const t=parseTime(r.date,deadlineOf(r));if(t&&t<=now+5*60000)continue;out.push(r);if(out.length>=limit)break}return out}
 async function runFallbackDeepDiveComparison(limit=3){const candidates=fallbackDeepDiveCandidates(FALLBACK_DEEP_DIVE_SCAN_LIMIT);state.deepDiveCurrentKeys=candidates.map(raceKey);let done=0,failed=0,skipped=0,attempted=0;const failureDetails=[];for(const r of candidates){if(done>=limit)break;attempted++;try{await deepDiveRace(r);done++}catch(error){if(error?.code==="TOO_LATE_FOR_DEEP_DIVE")skipped++;else{failed++;failureDetails.push({venueName:r.venueName,raceNo:r.raceNo,error:error?.message||String(error)})}}finally{renderPrimaryScreening()}}return{requested:attempted,done,failed,skipped,failureDetails}}
 async function runDeepDiveTop(){if(state.deepDiveBusy||state.screeningBusy)return;const rows=recommendedScreeningRows();if(!rows.length){updateBulkRefreshUi("先に一次選別を実行してください。");return}if(!acquireBatchLock("deep-dive-top")){updateBulkRefreshUi("別のチャリ猫タブで解析中です。");return}state.deepDiveBusy=true;const button=$("runDeepDiveTop");if(button){button.disabled=true;button.textContent=`深掘り 0/${rows.length}`}let done=0,failed=0;try{for(const row of rows){try{await deepDiveRace(row.r);done++}catch{failed++}finally{if(button)button.textContent=`深掘り ${done+failed}/${rows.length}`;renderPrimaryScreening()}}updateBulkRefreshUi(`上位深掘り完了：${done}R保存${failed?` / ${failed}R失敗`:""}。最終評価は未校正のため検証対象として扱います。`)}finally{state.deepDiveBusy=false;releaseBatchLock();if(button){button.disabled=false;button.textContent="上位3Rを深掘り"}renderPrimaryScreening()}}
 async function runFiveRaceDeepDive(){if(state.deepDiveBusy||state.screeningBusy)return;if(!acquireBatchLock("direct-deep-dive")){updateBulkRefreshUi("別のチャリ猫タブで解析中です。");return}const progress=loadDeepDiveProgress(),doneSet=new Set(progress.keys),batch=screeningCandidateOrder().filter(r=>!doneSet.has(raceKey(r))).slice(0,5);if(!batch.length){releaseBatchLock();updateBulkRefreshUi("直接深掘りできる残りレースはありません。");return}state.deepDiveBusy=true;const button=$("runDirectDeepDive");if(button){button.disabled=true;button.textContent=`直接深掘り 0/${batch.length}`}let done=0,failed=0,skipped=0;try{for(const r of batch){try{await deepDiveRace(r);done++}catch(error){if(error?.code==="TOO_LATE_FOR_DEEP_DIVE")skipped++;else failed++}finally{if(button)button.textContent=`直接深掘り ${done+failed+skipped}/${batch.length}`;renderPrimaryScreening()}}updateBulkRefreshUi(`5R直接深掘り：${done}R保存${skipped?` / 締切除外${skipped}`:""}${failed?` / 失敗${failed}`:""}`)}finally{state.deepDiveBusy=false;releaseBatchLock();if(button){button.disabled=false;button.textContent="5R直接深掘り"}renderPrimaryScreening()}}
-function deepDiveRows(){const progress=loadDeepDiveProgress(),raceMap=new Map(allMeetingRaces().map(r=>[raceKey(r),r]));return progress.keys.map(key=>{const r=raceMap.get(key);if(!r)return null;const snapshot=findLatestSnapshot(localStorage,r);return snapshot?{r,snapshot,rating:ratingOf(snapshot)}:null}).filter(Boolean)}
+function deepDiveRows(){const progress=loadDeepDiveProgress(),raceMap=new Map(allMeetingRaces().map(r=>[raceKey(r),r]));return progress.keys.map(key=>{const r=raceMap.get(key);if(!r)return null;const snapshot=currentSnapshotForRace(r);return snapshot?{r,snapshot,rating:ratingOf(snapshot)}:null}).filter(Boolean)}
 function deepDiveComposite(row){const n=Number(row?.rating?.diagnostics?.evaluationIndex);return Number.isFinite(n)?n:20*(.40*(Number(row?.rating?.confidence)||1)+.35*(Number(row?.rating?.concentration)||1)+.25*(Number(row?.rating?.rollover)||1))}
 function maxHighOdds(snapshot){let max=0;for(const b of snapshot?.betSelections||[]){if(b.category!=="BUYABLE_HIGH"&&!(b.category==="MAIN"&&Number(b.odds)>=100))continue;const n=Number(b.odds);if(Number.isFinite(n))max=Math.max(max,n)}return max}
 function renderPrimaryScreening(){const root=$("screeningRaceList");if(!root)return;const rows=screeningRows(),progress=loadPrimaryScreeningProgress(),stats=progress.lastStats||{attempted:rows.length,success:rows.length,failed:0,established:rows.length>=SCREENING_MIN_ROWS},failureHtml=screeningFailureDetailsHtml(stats.failureDetails),groups=screeningGroups(rows),recommended=recommendedScreeningRows(rows),recKeys=new Set(recommended.map(x=>raceKey(x.r))),deep=deepDiveRows().filter(x=>recKeys.has(raceKey(x.r))||state.deepDiveCurrentKeys.includes(raceKey(x.r))).sort((a,b)=>deepDiveComposite(b)-deepDiveComposite(a)),topBtn=$("runDeepDiveTop");if(topBtn&&!state.deepDiveBusy)topBtn.disabled=!groups.established;if(!rows.length&&!deep.length){root.innerHTML='<section class="card empty">「一括更新」で締切が近いレースを3R以上集めて一次選別します。3R揃わない場合は締切順3Rの直接深掘り比較へ自動で切り替えます。</section>';return}const statusText=groups.established?`一次選別成立 ${rows.length}/${SCREENING_BATCH_SIZE}`:`一次選別不成立 ${rows.length}/${SCREENING_BATCH_SIZE}`;const screeningHtml=groups.established?`${screeningGroup("通常候補",groups.normal,"solid")}${screeningGroup("高配当寄り",groups.high,"high")}${groups.hold.length?`<details class="finishedRaces"><summary>見送り候補・保留 <span>${groups.hold.length}件</span></summary><div class="finishedRaceList">${groups.hold.map(x=>screeningPendingRow(x,"保留")).join("")}</div></details>`:""}`:`<section class="card compact auditWarning"><strong>${statusText}</strong><p>比較に必要な最低3Rが揃っていないため順位・通常候補・高配当候補は出しません。取得済みRは比較保留です。</p></section>${rows.length?`<section class="screeningGroup"><div class="raceSectionHead"><strong>取得済み・比較保留</strong><span>${rows.length}件</span></div>${rows.map(x=>screeningPendingRow(x,"比較保留")).join("")}</section>`:""}`;root.innerHTML=`<section class="screeningIntro"><strong>締切順3〜6R 一次選別</strong><span>${statusText} / 取得${Number(stats.attempted)||0}・成功${Number(stats.success)||0}・失敗${Number(stats.failed)||0}${stats.candidateSource?`・候補 ${esc(stats.candidateSource==="deadline"?"締切時刻":"締切時刻＋補助探索")}`:""}</span></section><section class="card compact auditWarning"><strong>評価監査中</strong><p>信頼度・集中度・コロがし・総合点は未校正です。現時点の順位は研究用で、結果照合が進むまで購入判断へ直結させません。</p></section>${screeningHtml}${failureHtml}${deep.length?`<section class="screeningIntro deepDiveIntro"><strong>深掘り結果（暫定評価）</strong><span>${deep.length}R / 評価は未校正</span></section>${deepDiveGroup("完全解析済み",deep,"solid")}`:""}`;root.querySelectorAll("[data-screen-race]").forEach(b=>{b.onclick=()=>{const key=b.dataset.screenRace,row=deep.find(x=>raceKey(x.r)===key);if(row)openSavedDetail(row.snapshot)}});root.querySelectorAll("[data-screen-preview]").forEach(b=>{b.onclick=()=>{const key=b.dataset.screenPreview,row=rows.find(x=>raceKey(x.r)===key);if(row)openDetail(row.r)}});root.querySelectorAll("[data-deep-race]").forEach(b=>{b.onclick=async e=>{e.stopPropagation();const key=b.dataset.deepRace,row=rows.find(x=>raceKey(x.r)===key);if(!row||state.deepDiveBusy)return;state.deepDiveBusy=true;b.disabled=true;b.textContent="深掘り中…";try{await deepDiveRace(row.r);renderPrimaryScreening()}catch(error){updateBulkRefreshUi(error?.message||"深掘り失敗")}finally{state.deepDiveBusy=false}}})}
@@ -280,13 +289,13 @@ function chunkRows(rows,size=4){
   return out;
 }
 function oddsRating(snapshot,cached){if(!cached)return{label:"未更新",className:"muted"};if(!cached.available)return{label:"オッズ待ち",className:"waiting"};if(!snapshot)return{label:`オッズ公開 ${cached.count||0}件`,className:"ready"};if(snapshot.noBet||!(snapshot.betSelections||[]).length)return{label:"見送り寄り",className:"muted"};const rows=(snapshot.betSelections||[]).map(b=>{const key=(b.order||[]).join("-"),odds=Number(cached.odds?.[key]),prob=Number(b.probability);return{...b,currentOdds:Number.isFinite(odds)?odds:null,value:Number.isFinite(odds)&&Number.isFinite(prob)?odds*prob:null}}).filter(x=>x.currentOdds);if(!rows.length)return{label:"買い目オッズ待ち",className:"waiting"};if(rows.some(x=>x.category==="MAIN"&&x.currentOdds>=100))return{label:"本線高配当",className:"high"};if(rows.some(x=>x.currentOdds>=100))return{label:"高配当あり",className:"high"};if(rows.some(x=>Number.isFinite(x.value)&&x.value>=1.12))return{label:"3連単妙味",className:"value"};if(rows.some(x=>x.currentOdds>=30))return{label:"中穴",className:"mid"};if(rows.every(x=>x.currentOdds<12))return{label:"人気集中",className:"popular"};return{label:"オッズ妙味なし",className:"muted"}}
-function openRaces(meeting){state.meeting=meeting;$("venueTitle").textContent=meeting.venueName;$("raceDateLabel").textContent=formatDate(compact(state.date));const nums=raceNumbersOf(meeting),races=(nums.length?nums:Array.from({length:12},(_,i)=>i+1)).map(n=>raceFrom(meeting,n));$("raceCount").textContent=`${races.length}R`;$("raceList").innerHTML=races.map((r,i)=>{const s=raceStatus(r),battle=isBattleRace(r),deadline=deadlineOf(r),saved=findLatestSnapshot(localStorage,r),ended=s.label==="終了",action=ended?(saved?"結果・詳細 ›":"結果を見る ›"):(saved?"詳細を見る ›":"予想する ›");return `<article class="raceCardWrap"><button class="raceCard compactRace" data-race="${i}"><div class="raceTop"><h2>${r.raceNo}R</h2><span class="status ${s.className}">${s.label}</span></div><p class="raceDeadline">${deadline?`締切 ${esc(deadline)}`:"締切確認中"}${saved?" ・ 保存済み":""}</p><span class="raceAction">${action}</span></button><button class="raceBattle ${battle?"active":""}" data-race-battle="${i}" aria-label="勝負レース${battle?"解除":"登録"}">${battle?"★":"☆"}</button></article>`}).join("");$("raceList").querySelectorAll("[data-race]").forEach(b=>b.onclick=()=>openDetail(races[Number(b.dataset.race)]));$("raceList").querySelectorAll("[data-race-battle]").forEach(b=>b.onclick=e=>{e.stopPropagation();toggleBattleRace(races[Number(b.dataset.raceBattle)]);openRaces(meeting)});show("races")}
+function openRaces(meeting){state.meeting=meeting;$("venueTitle").textContent=meeting.venueName;$("raceDateLabel").textContent=formatDate(compact(state.date));const nums=raceNumbersOf(meeting),races=(nums.length?nums:Array.from({length:12},(_,i)=>i+1)).map(n=>raceFrom(meeting,n));$("raceCount").textContent=`${races.length}R`;$("raceList").innerHTML=races.map((r,i)=>{const s=raceStatus(r),battle=isBattleRace(r),deadline=deadlineOf(r),saved=displaySnapshotForRace(r),ended=s.label==="終了",action=ended?(saved?"結果・詳細 ›":"結果を見る ›"):(saved?"詳細を見る ›":"予想する ›");return `<article class="raceCardWrap"><button class="raceCard compactRace" data-race="${i}"><div class="raceTop"><h2>${r.raceNo}R</h2><span class="status ${s.className}">${s.label}</span></div><p class="raceDeadline">${deadline?`締切 ${esc(deadline)}`:"締切確認中"}${saved?" ・ 保存済み":""}</p><span class="raceAction">${action}</span></button><button class="raceBattle ${battle?"active":""}" data-race-battle="${i}" aria-label="勝負レース${battle?"解除":"登録"}">${battle?"★":"☆"}</button></article>`}).join("");$("raceList").querySelectorAll("[data-race]").forEach(b=>b.onclick=()=>openDetail(races[Number(b.dataset.race)]));$("raceList").querySelectorAll("[data-race-battle]").forEach(b=>b.onclick=e=>{e.stopPropagation();toggleBattleRace(races[Number(b.dataset.raceBattle)]);openRaces(meeting)});show("races")}
 function raceFrom(m,raceNo){const base={date:compact(state.date),venueCode:venueCode(m),venueName:m.venueName,raceNo},saved=findLatestSnapshot(localStorage,base),meta=raceMetaOf(m,raceNo)||{},cached=raceMetaCacheFor(base)||{};return{...base,scheduledStart:cached.startTime||cached.scheduledStart||meta.scheduledStart||meta.startTime||meta.deadline||saved?.targetRace?.scheduledStart||"",deadline:cached.deadline||cached.cutoffTime||meta.deadline||meta.cutoffTime||meta.scheduledStart||meta.startTime||saved?.targetRace?.deadline||"",raceCardUrl:getCard(m)?.url||"",oddsUrl:getOdds(m)?.url||""}}
 function raceNumbersOf(m){const raw=m?.raceNumbers||m?.discovery?.raceNumbers||m?.races?.map?.(x=>x.raceNo??x.number) || [];return [...new Set((Array.isArray(raw)?raw:[]).map(Number).filter(n=>Number.isInteger(n)&&n>=1&&n<=12))].sort((a,b)=>a-b)}
 function raceMetaOf(m,raceNo){return Array.isArray(m?.races)?m.races.find(x=>Number(x?.raceNo??x?.number)===Number(raceNo)):null}
-function openDetail(race){state.race={...race};state.payload=null;state.snapshot=findLatestSnapshot(localStorage,race);renderDetail();show("detail")}
+function openDetail(race){state.race={...race};state.payload=null;state.snapshot=displaySnapshotForRace(race);state.legacySnapshot=state.snapshot&&isCurrentSnapshot(state.snapshot)?null:legacySnapshotForRace(race);if(raceStatus(race).label!=="終了"&&!isCurrentSnapshot(state.snapshot)){state.legacySnapshot=state.snapshot||legacySnapshotForRace(race);state.snapshot=null}renderDetail();show("detail")}
 function openSavedDetail(snapshot){if(!snapshot)return;state.payload=null;state.snapshot=snapshot;const target=snapshot?.targetRace&&typeof snapshot.targetRace==="object"?snapshot.targetRace:{};state.race={...(state.race||{}),...target};try{renderDetail();show("detail")}catch(error){console.error("saved detail render failed",error);renderBasicDetailFallback(snapshot,error);show("detail")}}
-function renderDetail(){const r=state.race,s=raceStatus(r),cachedResult=resultCacheFor(r),resultFinal=Boolean(cachedResult&&!isResultPending(cachedResult)),ended=s.label==="終了"||resultFinal,timeKnown=Boolean(deadlineOf(r)),displayStatus=ended?{label:"終了",className:"danger"}:s;$("detailDate").textContent=formatDate(r.date);$("detailTitle").textContent=`${r.venueName} ${r.raceNo}R`;$("raceStatus").textContent=displayStatus.label;$("raceStatus").className=`pill ${displayStatus.className}`;$("raceMeta").innerHTML=metas([["日付",formatDate(r.date)],["会場",r.venueName],["レース",`${r.raceNo}R`],["締切",deadlineOf(r)||"一括更新で取得"]]);renderOfficial(state.payload);renderPredictionDetail(state.snapshot);renderChatPredictionImport();renderDetailResult(state.snapshot?.result||cachedResult);if(state.snapshot){$("savedPrediction").classList.remove("hidden");$("savedPrediction").innerHTML=`<div class="sectionHead"><h2>保存済み予想あり</h2><span class="pill success">${formatTime(state.snapshot.createdAt)}</span></div><p class="muted">買い目・展開根拠は保存済みです。再生成しなくても確認できます。</p><button id="openSaved" class="secondary">保存済み買い目を見る</button>`;$("openSaved").onclick=()=>renderPrediction(state.snapshot)}else $("savedPrediction").classList.add("hidden");$("predictBtn").disabled=false;if(ended){$("predictBtn").textContent=cachedResult||state.snapshot?.result?"公式結果を更新":"公式結果を見る";$("retryDetail").classList.toggle("hidden",!state.snapshot);if(state.snapshot)$("retryDetail").textContent="保存済み予想を見る"}else if(state.snapshot){$("predictBtn").textContent="保存済み買い目を見る";$("retryDetail").classList.remove("hidden");$("retryDetail").textContent="再予想"}else if(!timeKnown){$("predictBtn").textContent=cachedResult?"公式結果を更新":"公式結果を見る";$("retryDetail").classList.remove("hidden");$("retryDetail").textContent="このレースを予想"}else{$("predictBtn").textContent="このレースを予想";$("retryDetail").classList.add("hidden")}}
+function renderDetail(){const r=state.race,s=raceStatus(r),cachedResult=resultCacheFor(r),resultFinal=Boolean(cachedResult&&!isResultPending(cachedResult)),ended=s.label==="終了"||resultFinal,timeKnown=Boolean(deadlineOf(r)),displayStatus=ended?{label:"終了",className:"danger"}:s;$("detailDate").textContent=formatDate(r.date);$("detailTitle").textContent=`${r.venueName} ${r.raceNo}R`;$("raceStatus").textContent=displayStatus.label;$("raceStatus").className=`pill ${displayStatus.className}`;$("raceMeta").innerHTML=metas([["日付",formatDate(r.date)],["会場",r.venueName],["レース",`${r.raceNo}R`],["締切",deadlineOf(r)||"一括更新で取得"]]);renderOfficial(state.payload);renderPredictionDetail(state.snapshot);renderChatPredictionImport();renderDetailResult(state.snapshot?.result||cachedResult);if(state.snapshot){$("savedPrediction").classList.remove("hidden");$("savedPrediction").innerHTML=`<div class="sectionHead"><h2>保存済み予想あり</h2><span class="pill success">${formatTime(state.snapshot.createdAt)}</span></div><p class="muted">買い目・展開根拠は保存済みです。再生成しなくても確認できます。</p><button id="openSaved" class="secondary">保存済み買い目を見る</button>`;$("openSaved").onclick=()=>renderPrediction(state.snapshot)}else if(state.legacySnapshot&&!ended){$("savedPrediction").classList.remove("hidden");$("savedPrediction").innerHTML=`<div class="sectionHead"><h2>旧版の保存予想あり</h2><span class="pill warning">旧版</span></div><p class="muted">${esc(state.legacySnapshot.predictionVersion||"旧版")} の予想履歴は検証用に保持しています。未発走レースでは現行版の予想として使いません。</p><button id="openSaved" class="secondary">旧版履歴を見る</button>`;$("openSaved").onclick=()=>renderPrediction(state.legacySnapshot)}else $("savedPrediction").classList.add("hidden");$("predictBtn").disabled=false;if(ended){$("predictBtn").textContent=cachedResult||state.snapshot?.result?"公式結果を更新":"公式結果を見る";$("retryDetail").classList.toggle("hidden",!state.snapshot);if(state.snapshot)$("retryDetail").textContent="保存済み予想を見る"}else if(state.snapshot){$("predictBtn").textContent="保存済み買い目を見る";$("retryDetail").classList.remove("hidden");$("retryDetail").textContent="再予想"}else if(!timeKnown){$("predictBtn").textContent=cachedResult?"公式結果を更新":"公式結果を見る";$("retryDetail").classList.remove("hidden");$("retryDetail").textContent="このレースを予想"}else{$("predictBtn").textContent="このレースを予想";$("retryDetail").classList.add("hidden")}}
 function handleDetailPrimary(){if(!state.race)return;const cachedResult=resultCacheFor(state.race),ended=raceStatus(state.race).label==="終了"||Boolean(cachedResult&&!isResultPending(cachedResult)),timeUnknown=!deadlineOf(state.race);if(ended||(!state.snapshot&&timeUnknown)){checkDetailResult();return}if(state.snapshot){renderPrediction(state.snapshot);return}predict()}
 function handleDetailSecondary(){if(!state.race)return;const cachedResult=resultCacheFor(state.race),ended=raceStatus(state.race).label==="終了"||Boolean(cachedResult&&!isResultPending(cachedResult)),timeUnknown=!deadlineOf(state.race);if(ended&&state.snapshot){renderPrediction(state.snapshot);return}if(state.snapshot||timeUnknown)predict()}
 async function fetchOfficialResult(r){const q=new URLSearchParams({date:r.date,venueCode:r.venueCode,venueName:r.venueName,raceNo:String(r.raceNo)}),p=await jsonFetch(`/.netlify/functions/keirin-result?${q}`);if(raceKey(p.race)!==raceKey(r))throw new Error("公式結果のレースが選択内容と一致しません");return p}
@@ -296,7 +305,7 @@ function renderOfficial(p){const race=p?.race;if(race){state.race={...state.race
 
 async function predict(){if(state.busy)return;const fixed={...state.race,key:raceKey(state.race)};state.busy=true;$("predictBtn").disabled=true;setLoading("予想を作成中","出走選手・公式ライン・3連単オッズを取得しています。");try{const result=await fetchAndSavePredictionForRace(fixed);state.payload=result.payload;state.race=result.race;state.snapshot=result.snapshot;renderOfficial(result.payload);renderHomeRecommendations();renderPrediction(result.snapshot)}catch(e){fail("予想の取得・保存に失敗",e,predict)}finally{state.busy=false;$("predictBtn").disabled=false}}
 function renderPrediction(snapshot){state.snapshot=snapshot;const r=snapshot?.targetRace||state.race||{},safeBets=Array.isArray(snapshot?.betSelections)?snapshot.betSelections:[];state.race={...state.race,...r};$("predictionTitle").textContent=`${r.venueName} ${r.raceNo}R`;$("recommendation").textContent=snapshot.noBet?"見送り":"買い目";$("predictionUpdated").textContent=formatTime(snapshot.createdAt);$("predictionSummary").innerHTML=metas([["買い目",`${safeBets.length}点`],["締切",deadlineOf(r)||"未取得"]]);renderRatings($("predictionRatings"),snapshot);renderPurchaseControls(snapshot);renderBetGroups(snapshot);renderResult(snapshot.result);show("prediction")}
-function renderPurchaseControls(snapshot){const panel=$("purchaseControls"),bets=Array.isArray(snapshot?.betSelections)?snapshot.betSelections:[];if(!panel||snapshot.noBet||!bets.length){if(panel)panel.classList.add("hidden");return}const originalTotal=bets.reduce((sum,b)=>sum+(Number(b.stake)||0),0)||Math.max(1000,bets.length*100);const current=Math.max(0,Number(panel.dataset.budget)||originalTotal);const mode=panel.dataset.mode||"standard";const minimum=bets.length*100;const composite=calcCompositeOdds(bets);panel.innerHTML=`<div class="sectionHead"><h2>購入資金</h2><span class="pill">${bets.length}点</span></div><div class="fundingRow"><label>購入資金<input id="purchaseBudget" type="number" min="0" step="100" value="${current}"></label><label>配分<select id="allocationMode"><option value="standard"${mode==="standard"?" selected":""}>標準</option><option value="main"${mode==="main"?" selected":""}>本線厚め</option><option value="high"${mode==="high"?" selected":""}>高配当重視</option></select></label></div><div class="quickBudget">${[1000,1500,2000,3000].map(v=>`<button type="button" data-budget="${v}">${v.toLocaleString()}円</button>`).join("")}</div><div class="purchaseStats"><span>最低必要資金 <strong>${minimum.toLocaleString()}円</strong></span><span>合成オッズ <strong>${composite?`${composite.toFixed(2)}倍`:"未取得"}</strong></span></div>${current<minimum?`<div class="notice">自然買い目${bets.length}点 / 必要最低資金${minimum.toLocaleString()}円。${current.toLocaleString()}円では全点購入できません。買い目は自動で削りません。</div>`:""}`;panel.classList.remove("hidden");panel.dataset.budget=String(current);panel.dataset.mode=mode;$("purchaseBudget").oninput=e=>{panel.dataset.budget=String(Math.max(0,Number(e.target.value)||0));renderBetGroups(snapshot);renderPurchaseControls(snapshot)};$("allocationMode").onchange=e=>{panel.dataset.mode=e.target.value;renderBetGroups(snapshot);renderPurchaseControls(snapshot)};panel.querySelectorAll("[data-budget]").forEach(b=>b.onclick=()=>{panel.dataset.budget=b.dataset.budget;renderBetGroups(snapshot);renderPurchaseControls(snapshot)})}
+function renderPurchaseControls(snapshot){const panel=$("purchaseControls"),bets=Array.isArray(snapshot?.betSelections)?snapshot.betSelections:[];if(!panel||snapshot.noBet||!bets.length){if(panel)panel.classList.add("hidden");return}const originalTotal=bets.reduce((sum,b)=>sum+(Number(b.stake)||0),0)||Math.max(1000,bets.length*100);const current=Math.max(0,Number(panel.dataset.budget)||originalTotal);const mode=panel.dataset.mode==="main"?"thick":panel.dataset.mode||"standard";const minimum=bets.length*100;const composite=calcCompositeOdds(bets);panel.innerHTML=`<div class="sectionHead"><h2>購入資金</h2><span class="pill">${bets.length}点</span></div><div class="fundingRow"><label>購入資金<input id="purchaseBudget" type="number" min="0" step="100" value="${current}"></label><label>配分<select id="allocationMode"><option value="standard"${mode==="standard"?" selected":""}>標準</option><option value="thick"${mode==="thick"||mode==="main"?" selected":""}>厚め優先</option><option value="high"${mode==="high"?" selected":""}>高配当重視</option></select></label></div><div class="quickBudget">${[1000,1500,2000,3000].map(v=>`<button type="button" data-budget="${v}">${v.toLocaleString()}円</button>`).join("")}</div><div class="purchaseStats"><span>最低必要資金 <strong>${minimum.toLocaleString()}円</strong></span><span>合成オッズ <strong>${composite?`${composite.toFixed(2)}倍`:"未取得"}</strong></span></div>${current<minimum?`<div class="notice">自然買い目${bets.length}点 / 必要最低資金${minimum.toLocaleString()}円。${current.toLocaleString()}円では全点購入できません。買い目は自動で削りません。</div>`:""}`;panel.classList.remove("hidden");panel.dataset.budget=String(current);panel.dataset.mode=mode;$("purchaseBudget").oninput=e=>{panel.dataset.budget=String(Math.max(0,Number(e.target.value)||0));renderBetGroups(snapshot);renderPurchaseControls(snapshot)};$("allocationMode").onchange=e=>{panel.dataset.mode=e.target.value;renderBetGroups(snapshot);renderPurchaseControls(snapshot)};panel.querySelectorAll("[data-budget]").forEach(b=>b.onclick=()=>{panel.dataset.budget=b.dataset.budget;renderBetGroups(snapshot);renderPurchaseControls(snapshot)})}
 function renderBetGroups(snapshot){
   const groups=[["本線","MAIN"],["押さえ","COVER"],["買える高配当","BUYABLE_HIGH"]],
     bets=snapshot.betSelections||[],panel=$("purchaseControls"),
@@ -313,36 +322,6 @@ function renderBetGroups(snapshot){
   const thickHtml=thick.length?`<section class="betCard"><h3>厚め</h3><div class="betRows">${thick.map(x=>`<div class="betRow betRowSimple"><strong>${x.order.join("-")}</strong><span>${esc(x.reason)}</span></div>`).join("")}</div><p class="muted">厚めは新しい買い目ではなく、既存購入候補の中で資金配分を優先する部分集合です。明確な上位クラスタがない場合は出しません。</p></section>`:"";
   $("betGroups").innerHTML=(groupHtml+thickHtml)||(snapshot.noBet?`<section class="card empty"><strong>見送り</strong><p>${esc(noBetReasonText(snapshot.noBetReason))}</p></section>`:'<section class="card empty">購入対象の買い目はありません。</section>')
 }
-function deriveThickBets(snapshot){
-  const bets=(snapshot?.betSelections||[]).filter(b=>["MAIN","COVER","BUYABLE_HIGH"].includes(b?.category));
-  if(bets.length<2)return[];
-  const scored=bets.map(b=>{
-    const p=Math.max(0,Number(b.probability)||0);
-    const n=Math.max(0,Number(b.naturalConvergenceScore)||0);
-    const main=b.category==="MAIN"?1:.82;
-    const odds=Number(b.odds);
-    const oddsQuality=Number.isFinite(odds)&&odds>1?Math.min(1.15,Math.max(.8,Math.log10(odds+1)/1.5)):1;
-    return{b,score:p*(.55+.45*n)*main*oddsQuality};
-  }).sort((a,b)=>b.score-a.score);
-
-  const positive=scored.filter(x=>x.score>0);
-  if(positive.length<2)return[];
-  const gaps=[];
-  for(let i=0;i<positive.length-1;i++)gaps.push((positive[i].score-positive[i+1].score)/Math.max(1e-9,positive[i].score));
-  const medianGap=[...gaps].sort((a,b)=>a-b)[Math.floor(gaps.length/2)]||0;
-  const clearIndex=gaps.findIndex(g=>g>=Math.max(.18,medianGap*1.8));
-  if(clearIndex<0)return[];
-
-  const cluster=positive.slice(0,clearIndex+1);
-  if(cluster.length>Math.ceil(bets.length/2))return[];
-  return cluster.map(({b,score})=>({
-    ...b,
-    thickScore:score,
-    reason:`自然収束 ${Math.round((Number(b.naturalConvergenceScore)||0)*100)}%・終端確率 ${(Number(b.probability||0)*100).toFixed(1)}% が購入候補内の上位クラスタ`
-  }));
-}
-
-function allocatePreviewStakes(bets,budget,mode){const n=bets.length,min=n*100;if(!n||budget<min)return null;const base=bets.map(b=>Math.max(1,Number(b.stake)||100));const thickSet=mode==="main"?new Set(deriveThickBets({betSelections:bets}).map(x=>x.order.join("-"))):new Set();const mul=bets.map(b=>mode==="main"?(thickSet.size?(thickSet.has(b.order.join("-"))?1.8:1):(b.category==="MAIN"?1.35:1)):mode==="high"?(b.category==="BUYABLE_HIGH"?1.6:b.category==="MAIN"?1:.9):1);const weights=base.map((v,i)=>v*mul[i]),extra=budget-min,total=weights.reduce((a,b)=>a+b,0)||n;let out=weights.map(w=>100+Math.floor((extra*w/total)/100)*100),used=out.reduce((a,b)=>a+b,0),remain=Math.floor((budget-used)/100);const order=weights.map((w,i)=>({w,i})).sort((a,b)=>b.w-a.w||a.i-b.i);for(let k=0;k<remain;k++)out[order[k%order.length].i]+=100;return out}
 function calcCompositeOdds(bets){const valid=bets.map(b=>Number(b.odds)).filter(v=>Number.isFinite(v)&&v>0);if(!valid.length||valid.length!==bets.length)return null;const inv=valid.reduce((s,v)=>s+1/v,0);return inv>0?1/inv:null}
 
 function renderNodeStateAudit(audit){
@@ -670,7 +649,7 @@ function renderRiderMarkAudit(audit){
   return warnHtml+explainHtml;
 }
 
-function renderPurchaseAuditLazy(audit,root){try{const rejectLabels={FLAT_DISTRIBUTION:"分布が平坦",PRIMARY_COVERAGE_TARGET_REACHED:"最上位頭の優先カバー目標到達後",OTHER_FAMILY_COVERAGE_TARGET_REACHED:"別頭の補完カバー目標到達後",NO_FAMILY_TIER:"購入対象の1着ファミリー外",SECOND_POSITION_SUPPORT:"2着独立支持不足",THIRD_VARIANT_SUPPORT:"3着独立支持不足",SUB_ODDS_PENDING:"別展開・オッズ待ち",SUB_NOT_HIGH_PAYOUT:"別展開・高配当属性なし",SUB_VALUE_BELOW_BREAK_EVEN:"別展開・成立確率×オッズ不足",SUB_VALUE_NATURAL_BOUNDARY:"別展開・妙味上位群外",BRANCH_OR_POSITION_SUPPORT:"枝適合/着順支持不足",POSITION_SUPPORT_WEAK:"2・3着の位置支持が弱い",NATURAL_CONVERGENCE_TOO_LOW:"自然収束度が購入水準未満",VALUE_NOT_ENOUGH:"成立確率×オッズの妙味不足",FAMILY_COVERAGE_ALREADY_MET:"同じ1着候補の購入カバーが十分",RISK_SCENARIO_ONLY:"例外・リスク枝のみ",ODDS_PENDING_FOR_VALUE:"高配当候補の実オッズ待ち",NO_NATURAL_VALUE_SEPARATION:"高配当候補間の差が不明確",UNKNOWN:"その他"};const rejectCounts=audit?.rejectCodeCounts&&typeof audit.rejectCodeCounts==="object"&&!Array.isArray(audit.rejectCodeCounts)?audit.rejectCodeCounts:{};const rejectRows=Object.entries(rejectCounts).sort((a,b)=>Number(b[1])-Number(a[1])).map(([code,count])=>`<div class="abilityRow auditKeyValueRow"><strong>${esc(rejectLabels[code]||code)}</strong><span>${Number(count)||0}件</span></div>`).join("");const lifecycle=audit?.terminalLifecycleAudit||{};const lifecycleText=lifecycle.passed===true?"OK（理由なし削除なし）":lifecycle.passed===false?`要監査 ${Array.isArray(lifecycle.violations)?lifecycle.violations.length:0}件`:"未記録";root.innerHTML=`<div class="abilityList auditKeyValueList"><div class="abilityRow auditKeyValueRow"><strong>生成終端</strong><span>${Number(audit.generatedTerminalCount)||0}件</span></div><div class="abilityRow auditKeyValueRow"><strong>確率評価済み</strong><span>${Number(audit.probabilityEvaluatedTerminalCount??audit.terminalCount)||0}件</span></div><div class="abilityRow auditKeyValueRow"><strong>購入採用</strong><span>${Number(audit.adoptedTerminalCount??audit.finalBetCount)||0}件</span></div><div class="abilityRow auditKeyValueRow"><strong>購入不採用</strong><span>${Number(audit.rejectedTerminalCount)||0}件</span></div><div class="abilityRow auditKeyValueRow"><strong>終端保存監査</strong><span>${esc(lifecycleText)}</span></div><div class="abilityRow auditKeyValueRow"><strong>理由なし生成除外</strong><span>${Number(lifecycle.unexplainedGenerationExclusionCount)||0}件</span></div><div class="abilityRow auditKeyValueRow"><strong>理由なし購入不採用</strong><span>${Number(lifecycle.unreasonedPurchaseRejectCount)||0}件</span></div></div>${rejectRows?`<h3>不採用理由</h3><div class="abilityList auditKeyValueList">${rejectRows}</div>`:""}${safeAuditHtml(()=>renderBranchSelectionAudit(audit))}${safeAuditHtml(()=>renderPurchaseFamilyAudit(audit))}${safeAuditHtml(()=>renderAdoptedTerminalAudit(audit))}<p class="muted">終端は低確率・人気・点数圧縮を理由に削除しません。生成後は全終端を確率評価し、買わない終端も不採用理由付きで保存します。</p>`}catch(error){console.error("purchase audit render failed",error);root.innerHTML=`<div class="auditWarning"><strong>監査表示だけ読み込めませんでした</strong><p>${esc(error?.message||String(error))}</p><p class="muted">保存済み買い目と予想自体は保持されています。</p></div>`}}
+function renderPurchaseAuditLazy(audit,root){try{const rejectLabels={FLAT_DISTRIBUTION:"分布が平坦",PRIMARY_COVERAGE_TARGET_REACHED:"最上位頭の優先カバー目標到達後",OTHER_FAMILY_COVERAGE_TARGET_REACHED:"別頭の補完カバー目標到達後",NO_FAMILY_TIER:"購入対象の1着ファミリー外",SECOND_POSITION_SUPPORT:"2着独立支持不足",THIRD_VARIANT_SUPPORT:"3着独立支持不足",SUB_ODDS_PENDING:"別展開・オッズ待ち",SUB_NOT_HIGH_PAYOUT:"別展開・高配当属性なし",SUB_VALUE_BELOW_BREAK_EVEN:"別展開・成立確率×オッズ不足",SUB_VALUE_NATURAL_BOUNDARY:"別展開・妙味上位群外",BRANCH_OR_POSITION_SUPPORT:"枝適合/着順支持不足",POSITION_SUPPORT_WEAK:"2・3着の位置支持が弱い",NATURAL_CONVERGENCE_TOO_LOW:"自然収束度が購入水準未満",VALUE_NOT_ENOUGH:"成立確率×オッズの妙味不足",FAMILY_COVERAGE_ALREADY_MET:"同じ1着候補の購入カバーが十分",RISK_SCENARIO_ONLY:"例外・リスク枝のみ",ODDS_PENDING_FOR_VALUE:"高配当候補の実オッズ待ち",NO_NATURAL_VALUE_SEPARATION:"高配当候補間の差が不明確",UNKNOWN:"その他"};const rejectCounts=audit?.rejectCodeCounts&&typeof audit.rejectCodeCounts==="object"&&!Array.isArray(audit.rejectCodeCounts)?audit.rejectCodeCounts:{};const rejectRows=Object.entries(rejectCounts).sort((a,b)=>Number(b[1])-Number(a[1])).map(([code,count])=>`<div class="abilityRow auditKeyValueRow"><strong>${esc(rejectLabels[code]||code)}</strong><span>${Number(count)||0}件</span></div>`).join("");const lifecycle=audit?.terminalLifecycleAudit||{},mass=audit?.purchaseMassAudit||{};const massStatusLabel={BALANCED:"適正",UNDER_COVERED:"カバー不足",OVER_SPREAD:"広げ過ぎ",INEFFICIENT:"質量効率注意"}[mass.status]||"未記録";const lifecycleText=lifecycle.passed===true?"OK（理由なし削除なし）":lifecycle.passed===false?`要監査 ${Array.isArray(lifecycle.violations)?lifecycle.violations.length:0}件`:"未記録";root.innerHTML=`<div class="abilityList auditKeyValueList"><div class="abilityRow auditKeyValueRow"><strong>生成終端</strong><span>${Number(audit.generatedTerminalCount)||0}件</span></div><div class="abilityRow auditKeyValueRow"><strong>確率評価済み</strong><span>${Number(audit.probabilityEvaluatedTerminalCount??audit.terminalCount)||0}件</span></div><div class="abilityRow auditKeyValueRow"><strong>購入採用</strong><span>${Number(audit.adoptedTerminalCount??audit.finalBetCount)||0}件</span></div><div class="abilityRow auditKeyValueRow"><strong>購入不採用</strong><span>${Number(audit.rejectedTerminalCount)||0}件</span></div><div class="abilityRow auditKeyValueRow"><strong>購入確率質量</strong><span>${Number.isFinite(Number(mass.purchasedMassShare))?fmtPct(Number(mass.purchasedMassShare)):"-"}</span></div><div class="abilityRow auditKeyValueRow"><strong>自然候補カバー率</strong><span>${Number.isFinite(Number(mass.eligibleCoverage))?fmtPct(Number(mass.eligibleCoverage)):"-"} / 目標 ${Number.isFinite(Number(mass.weightedCoverageTarget))?fmtPct(Number(mass.weightedCoverageTarget)):"-"}</span></div><div class="abilityRow auditKeyValueRow"><strong>質量効率</strong><span>${Number.isFinite(Number(mass.massEfficiency))?fmtPct(Number(mass.massEfficiency)):"-"}</span></div><div class="abilityRow auditKeyValueRow"><strong>質量判定</strong><span>${esc(massStatusLabel)}</span></div><div class="abilityRow auditKeyValueRow"><strong>質量不足補正</strong><span>${mass.recoveryApplied===true?`実施 ${Number(mass.recoveryCount)||0}件`:"なし"}</span></div><div class="abilityRow auditKeyValueRow"><strong>終端保存監査</strong><span>${esc(lifecycleText)}</span></div><div class="abilityRow auditKeyValueRow"><strong>理由なし生成除外</strong><span>${Number(lifecycle.unexplainedGenerationExclusionCount)||0}件</span></div><div class="abilityRow auditKeyValueRow"><strong>理由なし購入不採用</strong><span>${Number(lifecycle.unreasonedPurchaseRejectCount)||0}件</span></div></div>${rejectRows?`<h3>不採用理由</h3><div class="abilityList auditKeyValueList">${rejectRows}</div>`:""}${safeAuditHtml(()=>renderBranchSelectionAudit(audit))}${safeAuditHtml(()=>renderPurchaseFamilyAudit(audit))}${safeAuditHtml(()=>renderAdoptedTerminalAudit(audit))}<p class="muted">終端は低確率・人気・点数圧縮を理由に削除しません。生成後は全終端を確率評価し、買わない終端も不採用理由付きで保存します。</p>`}catch(error){console.error("purchase audit render failed",error);root.innerHTML=`<div class="auditWarning"><strong>監査表示だけ読み込めませんでした</strong><p>${esc(error?.message||String(error))}</p><p class="muted">保存済み買い目と予想自体は保持されています。</p></div>`}}
 function safeAuditHtml(fn){try{return fn()||""}catch(error){console.error("audit section render failed",error);return `<div class="auditWarning"><strong>一部監査表示を省略</strong><p>${esc(error?.message||String(error))}</p></div>`}}
 function renderStartPowerInputAuditSafe(snapshot){try{return renderStartPowerInputAudit(snapshot)}catch(error){console.error("start power audit render failed",error);return `<div class="auditWarning"><strong>主導権入力監査 表示エラー</strong><p>${esc(error?.message||"監査データの表示に失敗しました。")}</p></div>`}}
 
@@ -682,7 +661,7 @@ function fmtPct(v){const n=Number(v);return Number.isFinite(n)?`${(n*100).toFixe
 function fmtAuditNumber(v){const n=Number(v);return Number.isFinite(n)?String(Math.round(n*1000)/1000):"-"}
 function fmtAuditRate(v){const n=Number(v);return Number.isFinite(n)?`${(n*100).toFixed(1)}%`:"-"}
 function fmtAbility(v){return v!==null&&v!==undefined&&v!==""&&Number.isFinite(Number(v))?Number(v).toFixed(2):"未取得"}
-function ratingOf(snapshot){const saved=snapshot?.displayRatings;return saved?.ratingAlgorithmVersion==="DISPLAY-RATING-0.3-CONSISTENCY-AUDIT"?saved:derivePredictionRatings(snapshot)}
+function ratingOf(snapshot){const saved=snapshot?.displayRatings;return saved?.ratingAlgorithmVersion==="DISPLAY-RATING-0.4-STRUCTURAL-SKIP-BOUNDARY"?saved:derivePredictionRatings(snapshot)}
 function renderRatings(panel,snapshot){if(!panel)return;if(!snapshot){panel.classList.add("hidden");panel.innerHTML="";return}const r=ratingOf(snapshot),tone=r.verdictTone||"caution",flags=r.auditFlags||[],idx=Number(r.diagnostics?.evaluationIndex),consistency=r.consistencyAudit||{},adjustments=Array.isArray(consistency.adjustments)?consistency.adjustments:[],checks=Array.isArray(consistency.invariantChecks)?consistency.invariantChecks:[],failed=checks.filter(x=>!x.passed);const consistencyHtml=`<div class="evaluationAudit"><strong>評価整合監査: ${esc(consistency.label||"未監査")}</strong>${adjustments.length?`<p>${adjustments.map(esc).join(" / ")}</p>`:""}${failed.length?`<p class="auditWarn">矛盾: ${failed.map(x=>esc(x.label||x.id)).join(" / ")}</p>`:checks.length?'<p>信頼度・集中度・コロがし・最終判定の自動整合チェックを通過。</p>':""}</div>`;panel.className=`card compact ratingPanel rating-${tone}`;panel.innerHTML=`<div class="sectionHead"><div><small>表示用評価・監査中</small><h2>レース評価</h2></div><span class="pill ratingVerdict rating-${tone}">${esc(r.verdict)}</span></div><div class="ratingGrid"><div class="ratingItem"><span>信頼度</span><strong>${starText(r.confidence)}</strong></div><div class="ratingItem"><span>展開集中度</span><strong>${starText(r.concentration)}</strong></div><div class="ratingItem"><span>コロがし適性</span><strong>${starText(r.rollover)}</strong></div><div class="ratingItem"><span>最終判定</span><strong>${esc(r.verdict)}</strong></div></div><p class="ratingReason">${esc(r.reason||"")}${Number.isFinite(idx)?` ・ 暫定指数 ${idx.toFixed(1)}`:""}</p>${consistencyHtml}<div class="evaluationAudit"><strong>精度監査: ${esc(r.calibrationLabel||"未校正・検証対象")}</strong>${flags.length?`<p>${esc(flags.join(" / "))}</p>`:'<p>追加フラグなし。ただし的中率・回収率との校正は未実施です。</p>'}</div><p class="muted ratingNote">表示評価は買い目生成とは分離していますが、買い目点数と展開分布との矛盾は自動で上限補正します。確率自体は未校正です。</p>`;panel.classList.remove("hidden")}
 function noBetReasonText(code){return({NO_TERMINALS:"展開候補を生成できませんでした。",FLAT_DISTRIBUTION_NO_SUPPORTED_CANDIDATE:"確率分布が平坦で、独立した展開根拠を持つ購入候補がありません。",BUDGET_BELOW_MINIMUM:"予算が最低購入単位を下回っています。",QUALITY_GATE:"データ品質基準を満たさないため購入を見送ります。",LINE_DATA_UNAVAILABLE:"公式ラインを確認できないため、通常の競輪予想としては購入判定を保留します。"})[code]||"購入価値を確認できないため見送ります。"}
 async function checkResult(){if(state.busy||!state.snapshot)return;state.busy=true;setLoading("公式結果を確認中","レースIDを固定して確定着順と払戻を取得しています。");try{const r=state.snapshot.targetRace,p=await fetchOfficialResult(r);storeResultCache(r,p.result,p.checkedAt);if(isResultPending(p.result)){renderPrediction(state.snapshot);renderPendingResult();return}state.snapshot=attachResult(localStorage,state.snapshot.predictionSnapshotId,p.result);renderSaved();renderHomeRecommendations();renderPrediction(state.snapshot)}catch(e){fail("公式結果の取得・保存に失敗",e,checkResult)}finally{state.busy=false}}
@@ -696,19 +675,335 @@ function renderResult(result){
     const ptxt=Number.isFinite(p)?`${(p*100).toFixed(1)}%`:"未保存";
     return `<div class="detailBet"><strong>${row.position}着 ${row.number}番</strong><p>着順事象: 確定 / 予想ノード: ${row.predictedNodePresent?"あり":"なし"} / 条件付き成立 ${esc(ptxt)}</p><p class="muted">新規条件 ${row.newConditionCount??"-"} / 追加条件 ${row.extraConditionCount??"-"} / 原因検証 ${esc(row.conditionValidation?.status||"保留")}</p></div>`;
   }).join(""):"";
+  const researchBackfillSummary=backfillResearchLearningLedger(localStorage);
+  const researchSummary=summarizeResearchLearning(localStorage);
+  const promotionReviewSummary=summarizePromotionReviews(localStorage);
+  const shadowComparisonSummary=summarizeShadowComparisons(localStorage);
+  const finalApprovalSummary=summarizeFinalPromotionApprovals(localStorage);
+  refreshCanaryRuns(localStorage,shadowComparisonSummary);
+  const canarySummary=summarizeCanaryRuns(localStorage);
+  const researchAggregateHtml=renderResearchLearningSummary(researchSummary,promotionReviewSummary,shadowComparisonSummary,finalApprovalSummary,canarySummary,researchBackfillSummary);
+  const evidenceHtml=v?renderResultEvidenceReview(result):"";
   const verifyHtml=v?`<details class="predictionAccordion" open><summary>結果検証・研究学習</summary><div class="accordionBody">
     <p><strong>検証分類:</strong> ${esc(resultVerificationLabel(v.status))}</p>
     ${v.exactTerminalGenerated!=null?`<p>正解終端 ${v.exactTerminalGenerated?"生成済み":"未生成"} / 正解1着ファミリー ${v.firstPlaceFamilyGenerated?"生成済み":"未生成"} / 正解1-2枝 ${v.firstSecondPairGenerated?"生成済み":"未生成"}</p>`:""}
     ${Number.isFinite(Number(v.terminalProbability))?`<p>正解終端確率 ${(Number(v.terminalProbability)*100).toFixed(2)}%${v.terminalGlobalRank?` / 全体${v.terminalGlobalRank}位`:""}</p>`:""}
     ${stageHtml}
+    ${renderOfficialEvidenceSummary(result.officialEvidence)}
+    ${evidenceHtml}
     <p class="muted">研究版へ保存: ${v.researchLearning?.savedToResearch?"はい":"いいえ"} / 通常学習: ${v.researchLearning?.includeInNormalLearning?"対象":"対象外"} / 本番ロジック自動反映: しない</p>
     <p class="muted">確定着順だけで「捲り成功」「追走失敗」などの途中原因を成立扱いにはしません。原因ノードは公式経過・映像等の証拠が取れるまで保留です。</p>
+    ${researchAggregateHtml}
   </div></details>`:"";
   $("resultPanel").className=`card ${cfg[1]}`;
   $("resultPanel").innerHTML=`<div class="resultMark">${cfg[0]}</div>${result.officialFinishOrder?.length?`<p>確定 <strong>${result.officialFinishOrder.join("-")}</strong></p>`:""}${result.matchedSelection?`<p>的中買い目 <strong>${result.matchedSelection.join("-")}</strong> / ${esc(result.betCategory||"")}</p>`:""}${result.officialPayout?`<p>公式配当 <strong>${Number(result.officialPayout).toLocaleString()}円</strong></p>`:""}${verifyHtml}<p class="muted">確認 ${formatTime(result.checkedAt)}</p>`;
+  bindResultEvidenceButtons(result);
+  bindPromotionReviewButtons(result);
+  bindFinalApprovalButtons();
+  bindCanaryButtons();
+  maybeAttachShadowComparisonResult(result);
+  refreshCanaryRuns(localStorage,summarizeShadowComparisons(localStorage));
 }
+function renderOfficialEvidenceSummary(evidence){
+  if(!evidence)return `<p class="muted">公式の途中経過証拠: 今回は着順・配当以外の構造化データなし。</p>`;
+  const items=[];
+  if(evidence.winningMethod)items.push(`決まり手 ${evidence.winningMethod}`);
+  if(Number.isFinite(Number(evidence.markers?.startNumber)))items.push(`S ${Number(evidence.markers.startNumber)}番`);
+  if(Number.isFinite(Number(evidence.markers?.backNumber)))items.push(`B ${Number(evidence.markers.backNumber)}番`);
+  if(Array.isArray(evidence.incidents)&&evidence.incidents.length)items.push(`事故・違反情報 ${evidence.incidents.length}件`);
+  return `<div class="notice"><strong>公式証拠</strong><br>${items.length?items.map(esc).join(" / "):"構造化された追加証拠なし"}</div>`;
+}
+function renderResultEvidenceReview(result){
+  const id=result?.predictionSnapshotId;if(!id)return"";
+  const rows=researchEvidenceQueue(localStorage,{onlyPending:false}).filter(x=>x.predictionSnapshotId===id);
+  if(!rows.length)return `<details class="supportBranchAudit"><summary>成立条件の証拠検証</summary><p class="muted">この保存形式には条件別の証拠待ち項目がありません。</p></details>`;
+  const labels={EVIDENCE_PENDING:"保留",CONFIRMED:"成立確認",REFUTED:"不成立確認",UNKNOWN:"判定不能"};
+  const researchRecord=loadResearchLearningRecords(localStorage).find(r=>r.predictionSnapshotId===id);
+  const reviewState=researchRecord?.evidenceSummary||{};
+  const reviewBadge=reviewState.reviewComplete
+    ?(reviewState.decisiveEvidenceComplete?(researchRecord?.nodeCauseLearningEligible?"証拠レビュー完了・因果学習可能":"証拠レビュー完了・通常学習対象外"):"証拠レビュー完了・因果学習不可")
+    :"証拠レビュー未完了";
+  return `<details class="supportBranchAudit" open><summary>成立条件の証拠検証（保留${rows.filter(x=>x.status==="EVIDENCE_PENDING").length}件）</summary><p><strong>${esc(reviewBadge)}</strong></p><p class="muted">着順事象は公式結果で確定しますが、途中の成立条件は証拠なしで推測しません。UNKNOWNはレビュー完了にはできますが、因果学習には使いません。</p><div class="detailGroup">${rows.map(e=>`<div class="detailBet evidenceReviewRow"><strong>${esc(e.stage)} / ${esc(e.label||e.conditionId||e.evidenceKey)}</strong><p>現在: ${esc(labels[e.status]||e.status)}${e.autoResolved?"（公式証拠で自動判定）":""}${Number.isFinite(Number(e.predictedProbability))?` / 予測 ${(Number(e.predictedProbability)*100).toFixed(1)}%`:""}</p>${e.note?`<p class="muted">${esc(e.note)}</p>`:""}<div class="evidenceButtons"><button type="button" data-evidence-key="${esc(e.evidenceKey)}" data-evidence-status="CONFIRMED">成立</button><button type="button" data-evidence-key="${esc(e.evidenceKey)}" data-evidence-status="REFUTED">不成立</button><button type="button" data-evidence-key="${esc(e.evidenceKey)}" data-evidence-status="UNKNOWN">わからない</button><button type="button" data-evidence-key="${esc(e.evidenceKey)}" data-evidence-status="EVIDENCE_PENDING">保留に戻す</button></div></div>`).join("")}</div></details>`;
+}
+function bindResultEvidenceButtons(result){
+  const root=$("resultPanel");if(!root||!result?.predictionSnapshotId)return;
+  root.querySelectorAll("[data-evidence-key][data-evidence-status]").forEach(button=>button.onclick=()=>{try{updateResearchConditionEvidence(localStorage,{snapshotId:result.predictionSnapshotId,evidenceKey:button.dataset.evidenceKey,status:button.dataset.evidenceStatus,source:"manual_review"});renderResult(result)}catch(error){fail("成立条件の証拠判定を保存できません",error,()=>renderResult(result))}});
+}
+function maybeCreateShadowComparison(snapshot){
+  try{
+    if(!snapshot)return null;
+    const research=summarizeResearchLearning(localStorage);
+    const record=buildShadowComparisonRecord({snapshot,conditionCalibration:research.conditionCalibration,storage:localStorage});
+    return record?saveShadowComparison(localStorage,record):null;
+  }catch{return null}
+}
+function maybeAttachShadowComparisonResult(result){
+  try{
+    const id=result?.predictionSnapshotId;
+    if(!id||!Array.isArray(result?.officialFinishOrder)||result.officialFinishOrder.length<3)return 0;
+    const rows=loadShadowComparisons(localStorage).filter(r=>r.snapshotId===id&&r.status==="PENDING_RESULT");
+    for(const row of rows)attachShadowComparisonResult(localStorage,row.comparisonId,result.officialFinishOrder);
+    return rows.length;
+  }catch{return 0}
+}
+
+function bindPromotionReviewButtons(result){
+  const root=$("resultPanel");if(!root)return;
+  root.querySelectorAll("[data-promotion-package][data-promotion-decision]").forEach(button=>{
+    button.onclick=()=>{
+      try{
+        const decision=button.dataset.promotionDecision;
+        const note=decision==="APPROVE_SHADOW"?"シャドー比較へ進める":decision==="HOLD"?"追加データ待ち":"現時点では採用しない";
+        savePromotionReview(localStorage,{packageKey:button.dataset.promotionPackage,packageFingerprint:button.dataset.promotionFingerprint||null,decision,note,reviewer:"manual"});
+        if(decision==="APPROVE_SHADOW"){
+          for(const snapshot of loadSnapshots(localStorage).slice(0,20))maybeCreateShadowComparison(snapshot);
+        }
+        renderResult(result);
+      }catch(error){fail("昇格候補の審査を保存できません",error,()=>renderResult(result))}
+    };
+  });
+}
+
+function renderShadowQualification(q){
+  if(!q||!Array.isArray(q.packages)||!q.packages.length)return "";
+  const label={SAMPLE_BUILDING:"標本蓄積中",SHADOW_CONTINUE:"シャドー継続",SHADOW_VALIDATED:"シャドー検証済み",ROLLBACK_RECOMMENDED:"ロールバック推奨"};
+  const pct=v=>Number.isFinite(Number(v))?`${(Number(v)*100).toFixed(1)}%`:"-";
+  return `<details class="supportBranchAudit"><summary>シャドー運用判定</summary>
+    <div class="detailGroup">${q.packages.slice(0,20).map(p=>`<div class="detailBet">
+      <strong>${esc(label[p.status]||p.status)}</strong>
+      <p>N=${Number(p.n)||0} / シャドー勝率 ${pct(p.winShare)}</p>
+      <p>平均LogLoss改善 ${Number.isFinite(Number(p.avgLogLossImprovement))?Number(p.avgLogLossImprovement).toFixed(4):"-"} / 直近${Number(p.recentCount)||0}件 ${Number.isFinite(Number(p.recentAvgLogLossImprovement))?Number(p.recentAvgLogLossImprovement).toFixed(4):"-"}</p>
+      <p class="muted">前半 ${Number.isFinite(Number(p.firstHalfAvgImprovement))?Number(p.firstHalfAvgImprovement).toFixed(4):"-"} / 後半 ${Number.isFinite(Number(p.secondHalfAvgImprovement))?Number(p.secondHalfAvgImprovement).toFixed(4):"-"} / ${esc(p.reason||"")}</p>
+    </div>`).join("")}</div>
+    <p class="muted">パッケージ判定は、現行とシャドーを同じ確率質量へ正規化し、1パッケージだけ変えた孤立効果で比較します。旧combined比較 ${Number(q.excludedLegacy)||0}件・旧方法論比較 ${Number(q.excludedOldMethodology)||0}件は判定母数から除外します。</p>
+    <p class="muted">「シャドー検証済み」でも本番昇格はしません。ロールバック推奨ならシャドー承認を解除して追加監査へ戻します。</p>
+  </details>`;
+}
+
+function renderFinalPromotionReview(review){
+  if(!review||!Array.isArray(review.candidates)||!review.candidates.length)return "";
+  const label={FINAL_REVIEW_READY:"最終審査へ進行可",FINAL_REVIEW_BLOCKED:"最終審査は保留"};
+  const approvalLabel={APPROVE_CANARY:"カナリア承認",HOLD:"保留",REJECT:"却下",ROLLBACK_LOCKED:"ロールバック確定・承認失効"};
+  const pct=v=>Number.isFinite(Number(v))?`${(Number(v)*100).toFixed(1)}%`:"-";
+  return `<details class="supportBranchAudit" open><summary>最終昇格審査ゲート</summary>
+    <div class="detailGroup">${review.candidates.slice(0,20).map(c=>{
+      const approval=finalApprovalFor(localStorage,c.packageKey);
+      const plan=buildCanaryActivationPlan(c,approval);
+      return `<div class="detailBet">
+        <strong>${esc(label[c.status]||c.status)}</strong>
+        <p>${Number(c.passedCount)||0}/${Number(c.totalChecks)||0}条件通過 / N=${Number(c.comparisonCount)||0} / ${Number(c.venueCount)||0}会場</p>
+        <p>シャドー勝率 ${pct(c.shadowWinShare)} / 平均LogLoss改善 ${Number.isFinite(Number(c.avgLogLossImprovement))?Number(c.avgLogLossImprovement).toFixed(4):"-"} / 直近 ${Number.isFinite(Number(c.recentAvgLogLossImprovement))?Number(c.recentAvgLogLossImprovement).toFixed(4):"-"}</p>
+        <p class="muted">監査指紋 ${esc(c.fingerprint||"-")} / 方法論 ${esc(c.methodologyEpoch||"-")} / ${esc(c.reason||"")}</p>
+        <p><strong>最終承認:</strong> ${approval?esc(approvalLabel[approval.decision]||approval.decision):"未審査"} / <strong>カナリア:</strong> ${esc(plan.status||"BLOCKED")}</p>
+        ${approval?.note?`<p class="muted">承認メモ: ${esc(approval.note)}</p>`:""}
+        <details><summary>チェック内容</summary>
+          <div class="abilityList auditKeyValueList">${(c.checks||[]).map(x=>`<div class="abilityRow auditKeyValueRow"><strong>${esc(x.label)}</strong><span>${x.passed?"○":"×"}</span></div>`).join("")}</div>
+        </details>
+        ${c.status==="FINAL_REVIEW_READY"?`<div class="evidenceButtons finalApprovalButtons">
+          <button type="button" data-final-package="${esc(c.packageKey)}" data-final-fingerprint="${esc(c.fingerprint||"")}" data-final-decision="APPROVE_CANARY">カナリア承認</button>
+          <button type="button" data-final-package="${esc(c.packageKey)}" data-final-fingerprint="${esc(c.fingerprint||"")}" data-final-decision="HOLD">保留</button>
+          <button type="button" data-final-package="${esc(c.packageKey)}" data-final-fingerprint="${esc(c.fingerprint||"")}" data-final-decision="REJECT">却下</button>
+        </div>`:""}
+        ${plan.status==="CANARY_PLAN_READY"?`<div class="abilityList auditKeyValueList">
+          <div class="abilityRow auditKeyValueRow"><strong>カナリアモード</strong><span>CANARY_SHADOW</span></div>
+          <div class="abilityRow auditKeyValueRow"><strong>本番影響</strong><span>0%</span></div>
+          <div class="abilityRow auditKeyValueRow"><strong>表示予想変更</strong><span>なし</span></div>
+          <div class="abilityRow auditKeyValueRow"><strong>購入プラン変更</strong><span>なし</span></div>
+          <div class="abilityRow auditKeyValueRow"><strong>本番パラメータ変更</strong><span>なし</span></div>
+        </div>
+        <div class="evidenceButtons"><button type="button" data-canary-start="${esc(c.packageKey)}">0%カナリア開始</button></div>`:""}
+      </div>`;
+    }).join("")}</div>
+    <p class="muted">カナリア承認しても本番値は変更しません。本番影響0%の監視プランだけを許可します。監査指紋が変われば承認は無効です。</p>
+  </details>`;
+}
+function bindFinalApprovalButtons(){
+  document.querySelectorAll("[data-final-package][data-final-decision]").forEach(button=>{
+    button.onclick=()=>{
+      try{
+        const research=summarizeShadowComparisons(localStorage);
+        const candidate=research.finalReview?.candidates?.find(c=>c.packageKey===button.dataset.finalPackage);
+        if(!candidate)throw new Error("最終審査候補が見つかりません");
+        const decision=button.dataset.finalDecision;
+        const note=decision==="APPROVE_CANARY"?"本番影響0%のカナリア監視へ進める":decision==="HOLD"?"追加比較を継続":"最終承認しない";
+        saveFinalPromotionApproval(localStorage,{candidate,decision,note,reviewer:"manual"});
+        if(currentResult)renderResult(currentResult);
+      }catch(error){fail("最終承認を保存できません",error,()=>currentResult&&renderResult(currentResult))}
+    };
+  });
+}
+
+
+function renderCanaryOperations(summary){
+  if(!summary||!Array.isArray(summary.rows)||!summary.rows.length)return "";
+  const label={CANARY_ACTIVE:"カナリア稼働中",CANARY_VALIDATED:"カナリア検証済み",CANARY_ROLLBACK_RECOMMENDED:"ロールバック推奨",CANARY_ROLLED_BACK:"ロールバック確定",CANARY_STALE:"承認失効",CANARY_STOPPED:"停止済み"};
+  const pct=v=>Number.isFinite(Number(v))?`${(Number(v)*100).toFixed(1)}%`:"-";
+  return `<details class="supportBranchAudit"><summary>0%カナリア監視</summary>
+    <div class="detailGroup">${summary.rows.slice(0,20).map(r=>`<div class="detailBet">
+      <strong>${esc(label[r.status]||r.status)}</strong>
+      <p>新規比較 ${Number(r.currentNewResults)||0}/${Number(r.minimumNewResults)||0}件 / シャドー勝率 ${pct(r.currentWinShare)}</p>
+      <p>平均LogLoss改善 ${Number.isFinite(Number(r.currentAvgLogLossImprovement))?Number(r.currentAvgLogLossImprovement).toFixed(4):"-"} / 直近 ${Number.isFinite(Number(r.currentRecentAvgLogLossImprovement))?Number(r.currentRecentAvgLogLossImprovement).toFixed(4):"-"}</p>
+      <p>証拠確定率 ${Number.isFinite(Number(r.evidenceQualityCurrent?.decisiveRate))?`${(Number(r.evidenceQualityCurrent.decisiveRate)*100).toFixed(1)}%`:"-"} / カナリア開始後 ${Number.isFinite(Number(r.evidenceQualityRecent?.decisiveRate))?`${(Number(r.evidenceQualityRecent.decisiveRate)*100).toFixed(1)}%`:"-"} / 開始後確定 ${Number(r.postStartDecisiveCount)||0}件</p>
+      <p>比較コホート ${Number(r.eligibleComparisonCount)||0}件 / 旧epoch・非孤立除外 ${Number(r.excludedComparisonCount)||0}件 / 証拠ゲート ${r.postStartEvidenceGatePassed?"○":"待ち"}</p>
+      ${r.rollbackSignal?`<p class="muted">信号: ${esc(r.rollbackSignal)}${r.rollbackReason?` / ${esc(r.rollbackReason)}`:""}</p>`:""}
+      ${r.status==="CANARY_ROLLBACK_RECOMMENDED"?`<button type="button" data-canary-rollback="${esc(r.packageKey)}">ロールバック確定</button>`:""}
+      ${["CANARY_ACTIVE","CANARY_ROLLBACK_RECOMMENDED","CANARY_VALIDATED"].includes(r.status)?`<button type="button" data-canary-stop="${esc(r.packageKey)}">カナリア停止</button>`:""}
+      ${r.status==="CANARY_ROLLED_BACK"?`<p class="muted">同じ監査指紋 ${esc(r.restartBlockedFingerprint||r.fingerprint||"-")} では再開不可。最終カナリア承認も失効済みです。新しい監査指紋で再審査・再承認が必要です。</p>`:""}
+    </div>`).join("")}</div>
+    <p class="muted">この監視は本番影響0%です。比較母数は現行方法論epoch・孤立正規化済みだけに限定します。直近証拠の確定率も監視し、LogLoss・勝率が基準を満たしても、開始後の確定証拠5件以上かつ確定率60%以上を満たすまでCANARY_VALIDATEDにはしません。</p>
+  </details>`;
+}
+function bindCanaryButtons(){
+  document.querySelectorAll("[data-canary-start]").forEach(button=>{
+    button.onclick=()=>{
+      try{
+        const shadow=summarizeShadowComparisons(localStorage);
+        const candidate=shadow.finalReview?.candidates?.find(c=>c.packageKey===button.dataset.canaryStart);
+        const approval=finalApprovalFor(localStorage,button.dataset.canaryStart);
+        if(!candidate)throw new Error("カナリア候補が見つかりません");
+        activateCanaryRun(localStorage,{candidate,approval});
+        if(currentResult)renderResult(currentResult);
+      }catch(error){fail("カナリアを開始できません",error,()=>currentResult&&renderResult(currentResult))}
+    };
+  });
+  document.querySelectorAll("[data-canary-rollback]").forEach(button=>{
+    button.onclick=()=>{
+      try{
+        acknowledgeCanaryRollback(localStorage,button.dataset.canaryRollback,{reason:"manual_rollback_ack"});
+        if(currentResult)renderResult(currentResult);
+      }catch(error){fail("ロールバック確定に失敗しました",error,()=>currentResult&&renderResult(currentResult))}
+    };
+  });
+  document.querySelectorAll("[data-canary-stop]").forEach(button=>{
+    button.onclick=()=>{
+      stopCanaryRun(localStorage,button.dataset.canaryStop,{reason:"manual_stop"});
+      if(currentResult)renderResult(currentResult);
+    };
+  });
+}
+
+function renderResearchLearningSummary(summary,promotionReviewSummary={},shadowComparisonSummary={},finalApprovalSummary={},canarySummary={},backfillSummary={}){
+  if(!summary||!summary.totalRecords)return `<details class="supportBranchAudit"><summary>研究学習集計</summary><p class="muted">結果検証データはまだありません。</p></details>`;
+  const pct=v=>Number.isFinite(Number(v))?`${(Number(v)*100).toFixed(1)}%`:"-",num=v=>Number.isFinite(Number(v))?Number(v).toFixed(3):"-",cal=summary.stageCalibration||{};
+  const calRows=["FIRST","SECOND","THIRD"].map(k=>{const x=cal[k]||{},label={FIRST:"1着",SECOND:"2着｜1着",THIRD:"3着｜1-2着"}[k];return `<div class="abilityRow auditKeyValueRow"><strong>${label}確率校正</strong><span>N=${Number(x.sampleCount)||0} / Brier ${num(x.brier)} / LogLoss ${num(x.logLoss)}</span></div>`}).join("");
+  return `<details class="supportBranchAudit"><summary>研究学習集計（通常${Number(summary.normalCount)||0}R / 例外${Number(summary.exceptionalCount)||0}R）</summary><div class="abilityList auditKeyValueList">
+  <div class="abilityRow auditKeyValueRow"><strong>正解1着ファミリー生成率</strong><span>${pct(summary.firstFamilyGeneratedRate)}</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>正解1-2枝生成率</strong><span>${pct(summary.pairGeneratedRate)}</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>正解終端生成率</strong><span>${pct(summary.exactTerminalGeneratedRate)}</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>購入的中率</strong><span>${pct(summary.purchaseHitRate)}</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>1着候補の生成漏れ</strong><span>${Number(summary.firstFamilyGenerationMissCount)||0}R</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>2着枝の生成漏れ</strong><span>${Number(summary.secondBranchGenerationMissCount)||0}R</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>3着終端の生成漏れ</strong><span>${Number(summary.thirdTerminalGenerationMissCount)||0}R</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>生成済み・購入不採用</strong><span>${Number(summary.purchaseSelectionMissCount)||0}R</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>正解終端の平均順位</strong><span>${num(summary.avgTerminalRank)}</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>正解終端TOP10率</strong><span>${pct(summary.top10TerminalRate)}</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>終端Log Loss</strong><span>${num(summary.terminalLogLoss)}</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>条件証拠 保留</strong><span>${Number(summary.evidenceReview?.pending)||0}件</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>条件証拠 成立確認</strong><span>${Number(summary.evidenceReview?.confirmed)||0}件</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>条件証拠 不成立確認</strong><span>${Number(summary.evidenceReview?.refuted)||0}件</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>条件証拠 判定不能</strong><span>${Number(summary.evidenceReview?.unknown)||0}件</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>過去結果バックフィル</strong><span>${Number(backfillSummary.added)||0}件追加</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>既存研究レコード保護</strong><span>${Number(backfillSummary.skippedExisting)||0}件維持</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>縮約形式バックフィル</strong><span>${Number(backfillSummary.degradedCount)||0}件</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>確率質量 正常</strong><span>${Number(summary.probabilityMass?.verifiedCount)||0}R</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>確率質量 異常</strong><span>${Number(summary.probabilityMass?.invalidCount)||0}R</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>確率質量 未監査</strong><span>${Number(summary.probabilityMass?.unverifiedCount)||0}R</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>平均終端確率質量</strong><span>${Number.isFinite(Number(summary.probabilityMass?.avgTerminalMass))?Number(summary.probabilityMass.avgTerminalMass).toFixed(4):"-"}</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>公式証拠で自動判定</strong><span>${Number(summary.evidenceReview?.autoResolved)||0}件</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>証拠レビュー完了</strong><span>${Number(summary.evidenceReview?.reviewCompleteRaceCount)||0}R</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>証拠全件確定</strong><span>${Number(summary.evidenceReview?.decisiveEvidenceCompleteRaceCount)||0}R</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>因果学習可能</strong><span>${Number(summary.evidenceReview?.nodeCauseLearningEligibleRaceCount)||0}R</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>昇格審査 承認(シャドー)</strong><span>${Number(promotionReviewSummary.approvedShadow)||0}件</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>昇格審査 保留</strong><span>${Number(promotionReviewSummary.hold)||0}件</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>昇格審査 却下</strong><span>${Number(promotionReviewSummary.rejected)||0}件</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>シャドー比較 待ち</strong><span>${Number(shadowComparisonSummary.pending)||0}件</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>シャドー比較 完了</strong><span>${Number(shadowComparisonSummary.completed)||0}件</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>評価整合性あり</strong><span>${Number(shadowComparisonSummary.integrityCompleted)||0}件</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>旧combined除外</strong><span>${Number(shadowComparisonSummary.legacyExcluded)||0}件</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>シャドー優位</strong><span>${Number(shadowComparisonSummary.shadowBetter)||0}件</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>現行優位</strong><span>${Number(shadowComparisonSummary.currentBetter)||0}件</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>シャドー検証済み</strong><span>${Number(shadowComparisonSummary.qualification?.validatedCount)||0}件</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>ロールバック推奨</strong><span>${Number(shadowComparisonSummary.qualification?.rollbackRecommendedCount)||0}件</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>最終審査へ進行可</strong><span>${Number(shadowComparisonSummary.finalReview?.readyCount)||0}件</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>最終承認 カナリア</strong><span>${Number(finalApprovalSummary.canaryApproved)||0}件</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>最終承認 保留</strong><span>${Number(finalApprovalSummary.hold)||0}件</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>最終承認 却下</strong><span>${Number(finalApprovalSummary.rejected)||0}件</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>カナリア 稼働中</strong><span>${Number(canarySummary.active)||0}件</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>カナリア 検証済み</strong><span>${Number(canarySummary.validated)||0}件</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>カナリア ロールバック推奨</strong><span>${Number(canarySummary.rollbackRecommended)||0}件</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>カナリア ロールバック確定</strong><span>${Number(canarySummary.rolledBack)||0}件</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>カナリア 証拠待ち</strong><span>${Number(canarySummary.evidenceWaiting)||0}件</span></div>
+  <div class="abilityRow auditKeyValueRow"><strong>カナリア 承認失効</strong><span>${Number(canarySummary.stale)||0}件</span></div>
+  ${renderShadowQualification(shadowComparisonSummary.qualification)}
+  ${renderFinalPromotionReview(shadowComparisonSummary.finalReview)}
+  ${renderCanaryOperations(canarySummary)}
+  ${calRows}</div>${renderCalibrationBins(cal)}
+  ${renderConditionCalibration(summary.conditionCalibration)}
+  <p class="muted">1着・2着・3着を別々に校正します。2着は実際の1着を親状態、3着は実際の1-2着を親状態として候補全員を比較します。</p>
+  <p class="muted">研究版の校正・生成漏れ・購入採否監査用です。本番ロジックへは自動反映しません。</p></details>`;
+}
+function renderConditionCalibration(cal){
+  if(!cal||!Number(cal.decisiveSampleCount))return `<details class="supportBranchAudit"><summary>成立条件の確率校正</summary><p class="muted">成立/不成立が証拠で確定した条件がまだありません。</p></details>`;
+  const label={RECALIBRATION_CANDIDATE:"再校正候補",WATCH:"要監視",STABLE_OR_UNCLEAR:"現状維持/判定保留",INSUFFICIENT:"標本不足"};
+  const proposalLabel={READY_FOR_RESEARCH_REVIEW:"研究レビュー候補",SHADOW_WATCH:"シャドー監視",NO_CHANGE_PROPOSED:"変更提案なし"};
+  const holdoutLabel={HOLDOUT_PASS:"ホールドアウト合格",HOLDOUT_FAIL:"ホールドアウト不合格",TRAIN_NOT_READY:"訓練側未達",INSUFFICIENT_HOLDOUT:"ホールドアウト不足",NOT_APPLICABLE:"対象外"};
+  const contextLabel={CONTEXT_PASS:"会場横断合格",CONTEXT_FAIL:"会場横断不合格",INSUFFICIENT_CONTEXT:"会場標本不足",WAIT_HOLDOUT:"ホールドアウト待ち",NOT_APPLICABLE:"対象外"};
+  const independentLabel={INDEPENDENT_AUDIT_PASS:"独立監査合格",INDEPENDENT_AUDIT_FAIL:"独立監査不合格",INSUFFICIENT_INDEPENDENT_CONTEXT:"独立監査標本不足",NOT_APPLICABLE:"対象外"};
+  const pct=v=>Number.isFinite(Number(v))?`${(Number(v)*100).toFixed(1)}%`:"-";
+  return `<details class="supportBranchAudit"><summary>成立条件の確率校正（証拠確定 ${Number(cal.decisiveSampleCount)||0}件 / 研究提案 ${Number(cal.shadowProposalCount)||0}件 / ホールドアウト合格 ${Number(cal.holdoutPassedCount)||0}件 / 会場横断合格 ${Number(cal.contextPassedCount)||0}件 / 独立監査合格 ${Number(cal.independentAuditPassedCount)||0}件 / 昇格パッケージ ${Number(cal.promotionPackageReadyCount)||0}件）</summary><p class="muted">Brier / LogLossは診断値です。終端確率質量が1.0付近に正規化されていることを別監査し、異常があれば校正済み確率とは扱いません。</p><p class="muted">研究提案候補は訓練側だけで判定し、ホールドアウトは候補生成後まで未使用にします。</p><p class="muted">着順再評価監査: 1着成立後は残り全員を2着へ、1-2着成立後は残り全員を3着へ再投入。別線番手・後位の混合終端も候補生成段階では削除しません。</p><p class="muted">買い目0件防止: 終端生成に成功している限り、通常購入条件が0件でも自然度上位の参考買い目を最低1件表示します。見送り理由は別に保持します。</p><p class="muted">並び未取得時の全員MAIN化も防止: 選手間の1・2・3着評価や先行/まくり評価に十分な差がない場合は通常購入を止め、参考買い目だけを残します。完全横並び時は同じ1-2着へ4点固定せず、各1着候補から自然度最上位を1本ずつ残します。終端は削除しません。</p><p class="muted">3着専用工程: 1-2着成立後は残り全員について3着条件を先に独立生成し、その後にだけ3着score・確率を付与。低確率を理由に終端生成段階では削除しません。</p><p class="muted">3着→買い目ブリッジ: 選ばれた1-2着枝では、生成済みの3着終端を全件購入評価へ渡してから、本線・押さえ・高配当・不採用を決めます。3着評価が低いだけで購入評価前に消しません。</p><p class="muted">購入評価前の入口も1-2着専用化: 3着を含む自然収束度ではなく、FIRST+SECONDだけの収束度で1-2着枝を選びます。3着が弱いことでブリッジ到達前に落ちる経路を禁止しました。</p><p class="muted">選手能力評価v3: 素の能力評価とライン役割・位置文脈を分離。先に能力だけを評価し、その後に役割文脈を小さく補正します。並び不明時は役割補正を弱め、番手・三番手というだけで能力を過大評価しません。</p><p class="muted">以後の会場横断・独立監査・昇格パッケージも、訓練側で固定した同じ提案値を使います。全データで提案値を作り直しません。</p>
+    <p class="muted">予想条件の事前確率と、証拠で確認した実現率を比較します。UNKNOWN・保留・例外レースは母数に入れません。</p>
+    <div class="detailGroup">${(cal.groups||[]).slice(0,20).map(g=>{const p=g.shadowProposal||{},s=g.temporalStability||{};return `<div class="detailBet"><strong>${esc(g.stage||"?")} / ${esc(g.family||"UNKNOWN")}</strong><p>${esc(label[g.reviewStatus]||g.reviewStatus)} / ${esc(proposalLabel[p.status]||p.status||"")} / N=${Number(g.sampleCount)||0}</p><p>現行 ${pct(g.predictedAvg)} → 実現 ${pct(g.observedRate)}${Number.isFinite(Number(p.suggestedProbability))?` → <strong>研究提案 ${pct(p.suggestedProbability)}</strong>`:""}</p><p class="muted">差 ${Number.isFinite(Number(g.gap))?`${(Number(g.gap)*100).toFixed(1)}pt`:"-"} / 95%区間 ${pct(g.observedWilsonLow)}〜${pct(g.observedWilsonHigh)} / Brier ${Number.isFinite(Number(g.brier))?Number(g.brier).toFixed(3):"-"}</p><p class="muted">時系列 ${esc(s.status||"-")}${Number.isFinite(Number(s.earlierRate))?` / 前半${pct(s.earlierRate)}・後半${pct(s.recentRate)}`:""}${p.reason?` / ${esc(p.reason)}`:""}</p>${g.trainCandidate?`<p class="muted"><strong>訓練側候補判定</strong> N=${Number(g.trainCandidate.sampleCount)||0} / 現行 ${(Number(g.trainCandidate.predictedAvg)*100).toFixed(1)}% → 観測 ${(Number(g.trainCandidate.observedRate)*100).toFixed(1)}% / ${esc(g.trainCandidate.proposal?.status||"-")}</p>`:""}
+        ${g.holdoutValidation?`<p class="muted"><strong>${esc(holdoutLabel[g.holdoutValidation.status]||g.holdoutValidation.status)}</strong>${Number.isFinite(Number(g.holdoutValidation.brierImprovement))?` / Brier改善 ${(Number(g.holdoutValidation.brierImprovement)*1000).toFixed(2)}×10⁻³`:""}${Number.isFinite(Number(g.holdoutValidation.logLossImprovement))?` / LogLoss改善 ${Number(g.holdoutValidation.logLossImprovement).toFixed(3)}`:""} / ${esc(g.holdoutValidation.reason||"")}</p>`:""}
+        ${g.contextRobustness?`<p class="muted"><strong>${esc(contextLabel[g.contextRobustness.status]||g.contextRobustness.status)}</strong>${Number.isFinite(Number(g.contextRobustness.directionShare))?` / 方向一致 ${(Number(g.contextRobustness.directionShare)*100).toFixed(0)}%`:""}${Number.isFinite(Number(g.contextRobustness.improvementShare))?` / 改善会場 ${(Number(g.contextRobustness.improvementShare)*100).toFixed(0)}%`:""} / ${esc(g.contextRobustness.reason||"")}</p>`:""}
+        ${g.promotionAudit?`<p class="muted"><strong>${g.promotionAudit.status==="PROMOTION_AUDIT_READY"?"独立昇格監査へ進行可":"独立昇格監査は保留"}</strong> / ${Number(g.promotionAudit.passedCount)||0}/${Number(g.promotionAudit.totalChecks)||0}条件通過</p>`:""}
+        ${g.independentAudit?`<p class="muted"><strong>${esc(independentLabel[g.independentAudit.status]||g.independentAudit.status)}</strong>${Number.isFinite(Number(g.independentAudit.passShare))?` / 会場除外fold合格 ${(Number(g.independentAudit.passShare)*100).toFixed(0)}%`:""}${Number.isFinite(Number(g.independentAudit.proposalSpread))?` / 提案幅 ${(Number(g.independentAudit.proposalSpread)*100).toFixed(1)}pt`:""}${g.independentAudit.sensitivity?.status?` / 感度 ${esc(g.independentAudit.sensitivity.status)}`:""} / ${esc(g.independentAudit.reason||"")}</p>`:""}
+        ${renderPromotionPackage(g.promotionPackage)}
+      </div>`}).join("")}</div>
+    ${renderShadowProposalSummary(cal)}
+    <p class="muted">研究提案は観測率をそのまま採用せず、現行値へ縮約したシャドー値です。本番値は変更しません。</p>
+  </details>`;
+}
+function renderPromotionPackage(pkg){
+  if(!pkg||pkg.status!=="PROMOTION_PACKAGE_READY")return "";
+  const pct=v=>Number.isFinite(Number(v))?`${(Number(v)*100).toFixed(1)}%`:"-";
+  const review=promotionReviewFor(localStorage,pkg.packageKey);
+  const reviewLabel={APPROVE_SHADOW:"シャドー承認",HOLD:"保留",REJECT:"却下"};
+  const reviewCurrent=Boolean(review&&review.packageFingerprint===pkg.approvalFingerprint&&review.methodologyEpoch===pkg.methodologyEpoch);
+  return `<details class="supportBranchAudit" open><summary>昇格候補パッケージ</summary>
+    <div class="abilityList auditKeyValueList">
+      <div class="abilityRow auditKeyValueRow"><strong>現行確率</strong><span>${pct(pkg.currentProbability)}</span></div>
+      <div class="abilityRow auditKeyValueRow"><strong>研究提案値</strong><span>${pct(pkg.suggestedProbability)}</span></div>
+      <div class="abilityRow auditKeyValueRow"><strong>変更幅</strong><span>${Number.isFinite(Number(pkg.delta))?`${(Number(pkg.delta)*100).toFixed(1)}pt`:"-"}</span></div>
+      <div class="abilityRow auditKeyValueRow"><strong>運用モード</strong><span>SHADOW_ONLY</span></div>
+      <div class="abilityRow auditKeyValueRow"><strong>手動承認</strong><span>必須</span></div>
+      <div class="abilityRow auditKeyValueRow"><strong>現在の審査</strong><span>${review?(reviewCurrent?esc(reviewLabel[review.decision]||review.decision):"旧方法論の審査・再承認必要"):"未審査"}</span></div>
+      <div class="abilityRow auditKeyValueRow"><strong>方法論epoch</strong><span>${esc(pkg.methodologyEpoch||"-")}</span></div>
+      <div class="abilityRow auditKeyValueRow"><strong>承認指紋</strong><span>${esc(pkg.approvalFingerprint||"-")}</span></div>
+      <div class="abilityRow auditKeyValueRow"><strong>再監査まで</strong><span>${Number(pkg.rollbackPolicy?.reviewAfterSamples)||0}件</span></div>
+      <div class="abilityRow auditKeyValueRow"><strong>ロールバック</strong><span>Brier悪化 / 方向反転 / 証拠品質低下</span></div>
+    </div>
+    ${review?.note?`<p class="muted">審査メモ: ${esc(review.note)}</p>`:""}
+    <div class="evidenceButtons promotionReviewButtons">
+      <button type="button" data-promotion-package="${esc(pkg.packageKey)}" data-promotion-fingerprint="${esc(pkg.approvalFingerprint||"")}" data-promotion-decision="APPROVE_SHADOW">シャドー承認</button>
+      <button type="button" data-promotion-package="${esc(pkg.packageKey)}" data-promotion-fingerprint="${esc(pkg.approvalFingerprint||"")}" data-promotion-decision="HOLD">保留</button>
+      <button type="button" data-promotion-package="${esc(pkg.packageKey)}" data-promotion-fingerprint="${esc(pkg.approvalFingerprint||"")}" data-promotion-decision="REJECT">却下</button>
+    </div>
+    <p class="muted">このパッケージは本番変更命令ではありません。シャドー承認しても本番値は変更しません。承認後は保存済み予想について現行確率と研究提案値を並行計算するシャドー比較レコードを作ります。買い目・本番値は変えません。自動昇格しません。</p>
+  </details>`;
+}
+
+function renderShadowProposalSummary(cal){
+  const rows=Array.isArray(cal?.shadowProposals)?cal.shadowProposals:[];if(!rows.length)return `<p class="muted">現在、本番反映を検討できる研究提案はありません。</p>`;
+  const pct=v=>Number.isFinite(Number(v))?`${(Number(v)*100).toFixed(1)}%`:"-";
+  return `<details class="supportBranchAudit"><summary>研究レビュー候補 ${rows.length}件</summary><div class="abilityList auditKeyValueList">${rows.map(r=>`<div class="abilityRow auditKeyValueRow"><strong>${esc(r.stage||"?")} / ${esc(r.family||"UNKNOWN")}</strong><span>${pct(r.currentProbability)} → ${pct(r.suggestedProbability)} / N=${Number(r.sampleCount)||0} / ${r.holdoutValidation?.status==="HOLDOUT_PASS"?"検証○":"検証未通過"}</span></div>`).join("")}</div><p class="muted">研究提案値は、時系列ホールドアウト・会場横断監査・独立監査を通過しても直接本番へ入れず、まず昇格候補パッケージとして固定します。それでも自動昇格しません。手動承認なしでは本番値を変更しません。</p></details>`;
+}
+
+function renderCalibrationBins(cal){
+  return ["FIRST","SECOND","THIRD"].map(k=>{const bins=Array.isArray(cal?.[k]?.bins)?cal[k].bins:[];if(!bins.length)return"";const label={FIRST:"1着",SECOND:"2着｜1着",THIRD:"3着｜1-2着"}[k];return `<details class="supportBranchAudit"><summary>${label}の確率帯を見る</summary><div class="abilityList auditKeyValueList">${bins.map(b=>`<div class="abilityRow auditKeyValueRow"><strong>${Math.round(Number(b.low)*100)}〜${Math.round(Number(b.high)*100)}%</strong><span>N=${Number(b.count)||0} / 予測${(Number(b.avgPredicted)*100).toFixed(1)}% / 実現${(Number(b.observedRate)*100).toFixed(1)}%</span></div>`).join("")}</div></details>`}).join("");
+}
+
 function resultVerificationLabel(v){
-  return({PURCHASE_HIT:"購入的中",PURCHASE_SELECTION_MISS:"正解終端は生成済み・購入不採用",TERMINAL_GENERATION_MISS:"正解終端の生成漏れ",NOT_APPLICABLE:"通常検証対象外",NONE:"検証済み"})[v]||v||"不明";
+  return({PURCHASE_HIT:"購入的中",PURCHASE_SELECTION_MISS:"正解終端は生成済み・購入不採用",FIRST_FAMILY_GENERATION_MISS:"1着候補の生成漏れ",SECOND_BRANCH_GENERATION_MISS:"2着枝の生成漏れ",THIRD_TERMINAL_GENERATION_MISS:"3着終端の生成漏れ",TERMINAL_GENERATION_MISS:"正解終端の生成漏れ（旧形式）",NOT_APPLICABLE:"通常検証対象外",NONE:"検証済み"})[v]||v||"不明";
 }
 function renderSaved(){const all=loadSnapshots(localStorage);$("savedCount").textContent=`${all.length}件`;$("savedList").innerHTML=all.length?all.slice(0,8).map((s,i)=>`<article class="savedItem"><h3>${esc(s.targetRace.venueName)} ${s.targetRace.raceNo}R</h3><p>${formatDate(s.targetRace.date)} / ${formatTime(s.createdAt)} ${s.result?`/ ${resultLabel(s.result.resultStatus)}`:""}</p><button data-saved="${i}">詳細を見る</button></article>`).join(""):'<p class="empty">保存した予想はまだありません。</p>';$("savedList").querySelectorAll("[data-saved]").forEach(b=>b.onclick=()=>{const s=all[Number(b.dataset.saved)];openSavedDetail(s)})}
 function deadlineOf(r){return String(r?.deadline||r?.scheduledStart||"")}

@@ -1,0 +1,1 @@
+import assert from"node:assert/strict";import fs from"node:fs";const app=fs.readFileSync(new URL("../public/app.mjs",import.meta.url),"utf8");for(const t of["ホールドアウト合格","ホールドアウト不合格","ホールドアウト不足","Brier改善","時系列ホールドアウト"])assert.ok(app.includes(t));console.log("PASS shadow holdout UI");

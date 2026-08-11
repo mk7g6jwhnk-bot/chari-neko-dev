@@ -1,0 +1,1 @@
+import assert from"node:assert/strict";import fs from"node:fs";const a=fs.readFileSync(new URL("../public/app.mjs",import.meta.url),"utf8");for(const t of["選手能力評価v3","素の能力評価とライン役割・位置文脈を分離","並び不明時は役割補正を弱め"])assert.ok(a.includes(t),t);console.log("PASS ability-context UI");

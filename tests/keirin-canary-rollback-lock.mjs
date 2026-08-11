@@ -1,0 +1,14 @@
+import assert from"node:assert/strict";
+import{acknowledgeCanaryRollback,activateCanaryRun,loadCanaryRuns,saveFinalPromotionApproval}from"../public/prediction-store.mjs";
+const m=new Map(),storage={getItem:k=>m.get(k)||null,setItem:(k,v)=>m.set(k,String(v))};
+const epoch="PROMOTION-METHOD-2026-08-V2-SEALED-ISOLATED",evalEpoch="SHADOW-EVAL-ISOLATED-NORMALIZED-V1";
+const candidate={packageKey:"PKG",status:"FINAL_REVIEW_READY",fingerprint:"F1",methodologyEpoch:epoch,shadowEvaluationEpoch:evalEpoch};
+const approval=saveFinalPromotionApproval(storage,{candidate,decision:"APPROVE_CANARY"});
+activateCanaryRun(storage,{candidate,approval});
+const rows=loadCanaryRuns(storage);rows[0].status="CANARY_ROLLBACK_RECOMMENDED";rows[0].rollbackSignal="RECENT_LOGLOSS_FLIP";storage.setItem("chari-neko:keirin-canary-runs:v1",JSON.stringify(rows));
+const rolled=acknowledgeCanaryRollback(storage,"PKG");
+assert.equal(rolled.status,"CANARY_ROLLED_BACK");assert.equal(rolled.restartBlockedFingerprint,"F1");assert.equal(rolled.productionPromotionAllowed,false);
+assert.throws(()=>activateCanaryRun(storage,{candidate,approval}),/ロールバック済み/);
+const candidate2={...candidate,fingerprint:"F2"};const approval2=saveFinalPromotionApproval(storage,{candidate:candidate2,decision:"APPROVE_CANARY"});
+const restarted=activateCanaryRun(storage,{candidate:candidate2,approval:approval2});assert.equal(restarted.status,"CANARY_ACTIVE");assert.equal(restarted.fingerprint,"F2");
+console.log("PASS canary rollback acknowledgement locks same fingerprint");

@@ -88,7 +88,8 @@ export function classify(terminals,odds={}){
   const ranked=annotateTerminalRanks(staged);
   const valueGate=buildSubValueGate(ranked);
   const familyCoverageGate=buildFamilyCoverageGate(ranked);
-  return ranked.map(item=>applyFamilyPurchaseDecision(item,valueGate,familyCoverageGate));
+  const decided=ranked.map(item=>applyFamilyPurchaseDecision(item,valueGate,familyCoverageGate));
+  return applyUnderCoverageNaturalRecovery(decided,familyCoverageGate);
 }
 
 function annotateTerminalRanks(items){
@@ -271,14 +272,15 @@ function buildFamilyCoverageGate(items){
     const selectedKeys=isPrimary?selectedPrimaryKeys:selectedOtherKeys;
 
     // 購入カバーの優先順位と「本線/押さえ」の分類は別物。
-    // mainファミリーに自然なmain終端が存在する場合、確率カバーだけでcontender終端が先に埋まり
-    // 本線が0件になることを防ぐため、最上位のmainEligible終端を1本アンカーとして先に保持する。
+    // main展開から自然に成立した終端は、点数・順位・確率カバー目標を理由にCOVERへ降格/不採用化しない。
+    // まず全mainEligible終端をMAIN候補として保持し、その後にcontender等のCOVER補完だけを
+    // ファミリー確率カバー目標で追加する。
     if(family.tier==="main"){
-      const mainAnchor=candidates.filter(item=>Boolean(item.familyPriorityEligibility?.main)).sort(compareCoverageCandidate)[0]||null;
-      if(mainAnchor){
-        const anchorKey=mainAnchor.order.join("-");
-        selectedKeys.add(anchorKey);
-        selectedMass+=Math.max(0,Number(mainAnchor.probability)||0);
+      for(const mainItem of candidates.filter(item=>Boolean(item.familyPriorityEligibility?.main)).sort(compareCoverageCandidate)){
+        const mainKey=mainItem.order.join("-");
+        if(selectedKeys.has(mainKey))continue;
+        selectedKeys.add(mainKey);
+        selectedMass+=Math.max(0,Number(mainItem.probability)||0);
       }
     }
 
@@ -335,6 +337,77 @@ function compareCoverageCandidate(a,b){
   const as=(Number(a.secondFamilyRelativeToBest)||0)*(Number(a.thirdFamilyRelativeToBest)||0);
   const bs=(Number(b.secondFamilyRelativeToBest)||0)*(Number(b.thirdFamilyRelativeToBest)||0);
   return bs-as||compareTerminal(a,b);
+}
+
+
+function isMassCoverageEligible(item){
+  // v156: the chat-spec bridge can explicitly mark the narrower set that is
+  // safe for automatic mass recovery.  Respect explicit false as well as true.
+  // Rows from older/general diagnostics may not carry this flag; for those,
+  // preserve the v155 audit population (structural + natural, excluding sub/risk).
+  if(typeof item?.massCoverageEligible==="boolean")return item.massCoverageEligible;
+  return Boolean(
+    item&&
+    item.familyStructuralCandidate&&
+    item.familyNaturalPositionEligible&&
+    item.firstFamilyTier!=="sub"&&
+    item.firstFamilyTier!=="risk"
+  );
+}
+
+function applyUnderCoverageNaturalRecovery(items,familyCoverageGate){
+  const rows=[...(items||[])];
+  const eligible=rows.filter(isMassCoverageEligible);
+  if(!eligible.length)return rows;
+  const eligibleMass=sum(eligible.map(item=>Math.max(0,Number(item.probability)||0)));
+  if(!(eligibleMass>0))return rows;
+  const adoptedEligible=eligible.filter(item=>item.purchaseStatus===PURCHASED);
+  let adoptedMass=sum(adoptedEligible.map(item=>Math.max(0,Number(item.probability)||0)));
+
+  const familyMass=new Map();
+  for(const item of eligible){
+    const first=Number(item.firstFamilyNumber)||Number(item.order?.[0])||0;
+    familyMass.set(first,(familyMass.get(first)||0)+Math.max(0,Number(item.probability)||0));
+  }
+  const targetWeight=sum([...familyMass.values()]);
+  const weightedTarget=targetWeight>0?sum([...familyMass].map(([first,mass])=>{
+    const target=familyCoverageGate?.familyTargets?.get(Number(first));
+    return (mass/targetWeight)*Math.max(0,Math.min(1,Number.isFinite(Number(target))?Number(target):.70));
+  })):.70;
+  const initialCoverage=adoptedMass/eligibleMass;
+  if(initialCoverage+1e-12>=weightedTarget-.10)return rows;
+
+  const candidates=eligible
+    .filter(item=>item.purchaseStatus!==PURCHASED&&item.concentrationRatio>=1.04)
+    .sort(compareCoverageCandidate);
+  const recoveredKeys=new Set();
+  for(const item of candidates){
+    if(adoptedMass/eligibleMass+1e-12>=weightedTarget)break;
+    const key=item.order.join("-");
+    recoveredKeys.add(key);
+    adoptedMass+=Math.max(0,Number(item.probability)||0);
+  }
+  if(!recoveredKeys.size)return rows;
+
+  return rows.map(item=>{
+    const key=item.order.join("-");
+    if(!recoveredKeys.has(key))return item;
+    const mainEligible=Boolean(item.familyPriorityEligibility?.main);
+    const betClass=mainEligible?"MAIN":"COVER";
+    const reason=`確率質量カバー不足を検出し、${item.firstFamilyNumber}頭の自然終端${key}を追加（購入可能自然終端の質量カバー回復）`;
+    return{
+      ...item,
+      betClass,
+      purchaseStatus:PURCHASED,
+      purchaseReason:reason,
+      purchaseRejectCode:"ADOPTED",
+      adoptionMode:"MASS_UNDERCOVERAGE_RECOVERY",
+      massCoverageRecovery:true,
+      massCoverageRecoveryInitialCoverage:initialCoverage,
+      massCoverageRecoveryTarget:weightedTarget,
+      lifecycle:{generated:true,probabilityEvaluated:true,terminalDeleted:false,purchaseDecision:"ADOPTED",purchaseDecisionCode:"ADOPTED",purchaseDecisionReason:reason}
+    };
+  });
 }
 
 function applyFamilyPurchaseDecision(item,valueGate,familyCoverageGate){
@@ -564,7 +637,7 @@ export function composite(items){
 }
 
 export function allocate(items,budget){
-  const natural=items.filter(item=>item.purchaseStatus===PURCHASED).sort(comparePurchase);
+  const natural=dedupePurchasedOrders(items.filter(item=>item.purchaseStatus===PURCHASED)).sort(comparePurchase);
   if(!natural.length)return[];
   const minimum=natural.length*100;
   const numericBudget=Math.max(0,Number(budget||0));
@@ -611,7 +684,8 @@ function planRow(item,stake,fundingStatus,minimumRequired){return{
 
 export function purchaseDiagnostics(classified,plan,budget){
   const probabilities=classified.map(item=>item.probability).sort((a,b)=>b-a);
-  const natural=classified.filter(item=>item.purchaseStatus===PURCHASED);
+  const rawNatural=classified.filter(item=>item.purchaseStatus===PURCHASED);
+  const natural=dedupePurchasedOrders(rawNatural);
   const noBet=natural.length===0;
   const noBetReason=!noBet?null:classified.length===0?"NO_TERMINALS":(classified[0]?.concentrationRatio||0)<1.04?"FLAT_DISTRIBUTION_NO_SUPPORTED_CANDIDATE":"NO_FAMILY_SUPPORTED_CANDIDATE";
   const minimumRequired=natural.length*100;
@@ -630,6 +704,9 @@ export function purchaseDiagnostics(classified,plan,budget){
     fixedBranchRankCapApplied:false,representativeTerminalCount:classified.filter(item=>item.representativeTerminal).length,
     credibleVariantCount:classified.filter(item=>{const r=item.decisionRatios||{};return item.branchFit>=.87&&(r.first??0)>=.88&&(r.second??0)>=.85&&(r.third??0)>=.85;}).length,
     adoptedTerminalCount:natural.length,rejectedTerminalCount:classified.length-natural.length,rejectCodeCounts,
+    purchaseFunnelAudit:buildPurchaseFunnelAudit({classified,natural,plan,rejectCodeCounts}),
+    purchaseOverlapAudit:buildPurchaseOverlapAudit(rawNatural,natural),
+    purchaseMassAudit:buildPurchaseMassAudit({classified,natural,familyRows}),
     purchaseThresholds:{
       concentrationRatioMin:1.04,representativeBranchFitMin:.975,credibleVariantBranchFitMin:.87,probabilitySupportVsMaxMin:null,
       rawBranchCountUsedForAdoption:false,weightedMultiBranchSupportEquivalentMin:2,
@@ -660,6 +737,30 @@ export function purchaseDiagnostics(classified,plan,budget){
     adoptedBranchTierCounts:natural.reduce((counts,item)=>{const priority=item.dominantBranchPriority||"unknown";counts[priority]=(counts[priority]||0)+1;return counts;},{}),
     classCounts:{main:natural.filter(item=>item.betClass==="MAIN").length,cover:natural.filter(item=>item.betClass==="COVER").length,buyableHigh:natural.filter(item=>item.betClass==="BUYABLE_HIGH").length,highPayoutCandidateOddsPending:classified.filter(item=>item.highPayoutCandidate&&item.oddsEvaluationStatus==="ODDS_PENDING").length},
     minimumRequired,budget:Number(budget||0),budgetSufficient:Number(budget||0)>=minimumRequired,noBet,noBetReason
+  };
+}
+
+function buildPurchaseFunnelAudit({classified,natural,plan,rejectCodeCounts}){
+  const generated=classified.length;
+  const adopted=natural.length;
+  const finalPlan=Array.isArray(plan)?plan.length:0;
+  const rejected=Math.max(0,generated-adopted);
+  const reasons=Object.entries(rejectCodeCounts||{}).sort((a,b)=>Number(b[1])-Number(a[1])||String(a[0]).localeCompare(String(b[0]),"en"));
+  const dominant=reasons[0]||null;
+  return{
+    policy:"GENERATED_TO_PROBABILITY_TO_PURCHASE_DECISION_TO_FINAL_PLAN",
+    generatedTerminalCount:generated,
+    probabilityEvaluatedTerminalCount:generated,
+    standardPurchaseCandidateCount:adopted,
+    rejectedTerminalCount:rejected,
+    finalPlanCount:finalPlan,
+    adoptionRate:generated?adopted/generated:0,
+    rejectionRate:generated?rejected/generated:0,
+    dominantRejectCode:dominant?.[0]||null,
+    dominantRejectCount:dominant?Number(dominant[1])||0:0,
+    rejectCodeCounts:{...(rejectCodeCounts||{})},
+    extremeCompression:generated>=30&&adopted/generated<.08,
+    zeroStandardPurchase:generated>0&&adopted===0
   };
 }
 
@@ -731,6 +832,86 @@ function buildAdoptedAudit(item,diagnosticBranchStats,diagnosticMaxBranchTotal){
     rawBranchCountUsedForAdoption:false,dominantBranchStrengthRatio:item.dominantBranchStrengthRatio??null,uniqueSupportBranchCount:uniqueSupportBranchIds.length,supportBranches,duplicateSupportLabels,representativeTerminal:item.representativeTerminal,decisionRatios:item.decisionRatios||null,purchaseReason:item.purchaseReason,adoptionMode:item.adoptionMode||null
   };
 }
+function dedupePurchasedOrders(items){
+  const byOrder=new Map();
+  for(const item of items){
+    const key=(item.order||[]).join("-");
+    if(!key)continue;
+    const current=byOrder.get(key);
+    if(!current||comparePurchase(item,current)<0)byOrder.set(key,item);
+  }
+  return [...byOrder.values()];
+}
+
+function buildPurchaseMassAudit({classified,natural,familyRows}){
+  const totalMass=sum((classified||[]).map(item=>Math.max(0,Number(item.probability)||0)));
+  const purchasedMass=sum((natural||[]).map(item=>Math.max(0,Number(item.probability)||0)));
+  const eligible=(classified||[]).filter(isMassCoverageEligible);
+  const eligibleKeys=new Set(eligible.map(item=>(item.order||[]).join("-")));
+  const eligibleMass=sum(eligible.map(item=>Math.max(0,Number(item.probability)||0)));
+  const purchasedEligible=(natural||[]).filter(item=>eligibleKeys.has((item.order||[]).join("-")));
+  const purchasedEligibleMass=sum(purchasedEligible.map(item=>Math.max(0,Number(item.probability)||0)));
+  const eligibleCoverage=eligibleMass>0?purchasedEligibleMass/eligibleMass:0;
+  const structuralFamilyRows=(familyRows||[]).filter(row=>row.tier!=="risk"&&Number(row.naturalCandidateProbability)>0);
+  const targetWeight=sum(structuralFamilyRows.map(row=>Math.max(0,Number(row.naturalCandidateProbability)||0)));
+  const weightedTarget=targetWeight>0?sum(structuralFamilyRows.map(row=>(Math.max(0,Number(row.naturalCandidateProbability)||0)/targetWeight)*Math.max(0,Math.min(1,Number(row.coverageTarget)||0)))):.70;
+  const purchasedCount=(natural||[]).length;
+  const topEligibleMass=sum([...eligible].sort(compareTerminal).slice(0,purchasedCount).map(item=>Math.max(0,Number(item.probability)||0)));
+  const massEfficiency=topEligibleMass>0?purchasedEligibleMass/topEligibleMass:1;
+  const coverageGap=eligibleCoverage-weightedTarget;
+  const underCoverage=eligibleMass>0&&coverageGap<-.10;
+  const inefficientCoverage=purchasedCount>=4&&massEfficiency<.70;
+  const overSpread=purchasedCount>=8&&massEfficiency<.82&&eligibleCoverage>=weightedTarget;
+  const status=underCoverage?"UNDER_COVERED":overSpread?"OVER_SPREAD":inefficientCoverage?"INEFFICIENT":"BALANCED";
+  return{
+    policy:"PURCHASEABLE_NATURAL_MASS_COVERAGE_AND_TOP_N_EFFICIENCY",
+    totalProbabilityMass:totalMass,
+    purchasedProbabilityMass:purchasedMass,
+    purchasedMassShare:totalMass>0?purchasedMass/totalMass:0,
+    eligibleNaturalTerminalCount:eligible.length,
+    eligibleNaturalProbabilityMass:eligibleMass,
+    purchasedEligibleTerminalCount:purchasedEligible.length,
+    purchasedEligibleProbabilityMass:purchasedEligibleMass,
+    eligibleCoverage,
+    weightedCoverageTarget:weightedTarget,
+    coverageGap,
+    topNEligibleProbabilityMass:topEligibleMass,
+    massEfficiency,
+    underCoverage,
+    inefficientCoverage,
+    overSpread,
+    status,
+    recoveryCount:(natural||[]).filter(item=>item.massCoverageRecovery).length,
+    recoveryApplied:(natural||[]).some(item=>item.massCoverageRecovery)
+  };
+}
+
+function buildPurchaseOverlapAudit(rawNatural,natural){
+  const orderCounts=new Map();
+  const pairRows=new Map();
+  for(const item of rawNatural||[]){
+    const order=(item.order||[]).map(Number);
+    const orderKey=order.join("-");
+    orderCounts.set(orderKey,(orderCounts.get(orderKey)||0)+1);
+    const pairKey=`${order[0]||0}-${order[1]||0}`;
+    if(!pairRows.has(pairKey))pairRows.set(pairKey,{pair:pairKey,rawOrders:0,uniqueOrders:new Set(),probabilityMass:0,classes:new Set()});
+    const row=pairRows.get(pairKey);
+    row.rawOrders+=1;row.uniqueOrders.add(orderKey);row.probabilityMass+=Math.max(0,Number(item.probability)||0);row.classes.add(item.betClass||"NONE");
+  }
+  const duplicateOrders=[...orderCounts].filter(([,count])=>count>1).map(([order,count])=>({order,count})).sort((a,b)=>b.count-a.count||a.order.localeCompare(b.order,"en"));
+  const pairs=[...pairRows.values()].map(row=>({pair:row.pair,variantCount:row.uniqueOrders.size,probabilityMass:row.probabilityMass,betClasses:[...row.classes].sort(),overlapLevel:row.uniqueOrders.size>=5?"HIGH":row.uniqueOrders.size>=3?"MEDIUM":"NORMAL"})).sort((a,b)=>b.variantCount-a.variantCount||b.probabilityMass-a.probabilityMass||a.pair.localeCompare(b.pair,"en"));
+  return{
+    policy:"EXACT_ORDER_DEDUPE_ONLY_KEEP_NATURAL_THIRD_VARIANTS",
+    rawPurchasedCount:(rawNatural||[]).length,
+    uniquePurchasedCount:(natural||[]).length,
+    exactDuplicateOrderCount:duplicateOrders.reduce((sum,row)=>sum+(row.count-1),0),
+    duplicateOrders,
+    pairVariantRows:pairs,
+    maxThirdVariantsPerPair:pairs[0]?.variantCount||0,
+    highOverlapPairs:pairs.filter(row=>row.overlapLevel==="HIGH").map(row=>row.pair)
+  };
+}
+
 function familyTierRank(tier){return({main:0,contender:1,sub:2,risk:3})[tier]??9}
 
 function branchPriorityLabel(priority){

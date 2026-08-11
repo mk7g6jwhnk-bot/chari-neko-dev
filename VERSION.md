@@ -1,4 +1,1 @@
-# Current version
-
-- `KEIRIN-0.9.4-detail-readability-fix`
-- label: `v105-detail-readability-fix`
+KEIRIN-0.15.2-update-state-isolation

@@ -1,0 +1,10 @@
+import assert from"node:assert/strict";import{loadResearchLearningRecords,updateResearchConditionEvidence}from"../public/prediction-store.mjs";
+const key="chari-neko:keirin-research-learning:v1";const mem=new Map(),storage={getItem:k=>mem.get(k)||null,setItem:(k,v)=>mem.set(k,String(v))};
+const base={predictionSnapshotId:"R1",learningMode:"NORMAL",includeInNormalLearning:true,conditionEvidence:[{evidenceKey:"A",status:"EVIDENCE_PENDING"},{evidenceKey:"B",status:"EVIDENCE_PENDING"}]};
+storage.setItem(key,JSON.stringify([base]));
+updateResearchConditionEvidence(storage,{snapshotId:"R1",evidenceKey:"A",status:"CONFIRMED"});let r=loadResearchLearningRecords(storage)[0];assert.equal(r.evidenceReviewComplete,false);assert.equal(r.nodeCauseLearningEligible,false);
+updateResearchConditionEvidence(storage,{snapshotId:"R1",evidenceKey:"B",status:"UNKNOWN"});r=loadResearchLearningRecords(storage)[0];assert.equal(r.evidenceReviewComplete,true);assert.equal(r.decisiveEvidenceComplete,false);assert.equal(r.nodeCauseLearningEligible,false);assert.match(r.nodeCauseLearningReason,/UNKNOWN/);
+updateResearchConditionEvidence(storage,{snapshotId:"R1",evidenceKey:"B",status:"REFUTED"});r=loadResearchLearningRecords(storage)[0];assert.equal(r.decisiveEvidenceComplete,true);assert.equal(r.nodeCauseLearningEligible,true);
+storage.setItem(key,JSON.stringify([{...base,predictionSnapshotId:"R2",learningMode:"EXCEPTIONAL",includeInNormalLearning:false}]));
+updateResearchConditionEvidence(storage,{snapshotId:"R2",evidenceKey:"A",status:"CONFIRMED"});updateResearchConditionEvidence(storage,{snapshotId:"R2",evidenceKey:"B",status:"REFUTED"});r=loadResearchLearningRecords(storage)[0];assert.equal(r.decisiveEvidenceComplete,true);assert.equal(r.nodeCauseLearningEligible,false);assert.match(r.nodeCauseLearningReason,/通常学習対象外/);
+console.log("PASS causal evidence eligibility semantics");

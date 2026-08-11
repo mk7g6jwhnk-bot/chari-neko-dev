@@ -10,7 +10,7 @@ const ROLE_LABEL={main:"中心予測",contender:"有力な次候補",sub:"可能
 export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],oddsByOrder={}}){
   const riderByNumber=new Map(scored.map(r=>[Number(r.number),r]));
   const branchById=new Map(branches.map(b=>[String(b.id),b]));
-  const mainBranches=branches.filter(b=>normalizePriority(b.priority)==="main");
+  const mainBranches=branches.filter(b=>normalizePriority(b.priority)==="main"||b.sameScenarioMainSibling===true);
   const mainBranchIds=new Set(mainBranches.map(b=>String(b.id)));
 
   // 1) Keep every generated terminal. We re-evaluate probability and purchase,
@@ -42,6 +42,7 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
       branchHeadMatched:support.headMatched!==false,
       foreignBranchContributionCount:Number(support.foreignBranchCount)||0,
       directMainBranchSupport:(support.ids||[]).some(id=>mainBranchIds.has(String(id))),
+      lineIndependentMainSupport:(support.ids||[]).some(id=>mainBranchIds.has(String(id))&&branchById.get(String(id))?.lineIndependentFallback===true),
       odds,
       lifecycle:{
         ...(terminal.lifecycle||{}),
@@ -74,6 +75,7 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
     const family=families.get(Number(item.order?.[0]))||null;
     const natural=deriveNaturalSupport(item);
     const convergence=deriveNaturalConvergence(item,lines,branches);
+    const pairConvergence=derivePairNaturalConvergence(item,lines,branches);
     const ev=item.odds>1?item.probability*item.odds:null;
     Object.assign(item,{
       firstFamilyNumber:Number(item.order?.[0]),
@@ -84,6 +86,8 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
       isPrimaryFirstFamily:Boolean(primaryFamily&&family?.first===primaryFamily.first),
       primaryFirstFamilyNumber:primaryFamily?.first||null,
       familyNaturalPositionEligible:natural.ok,
+      firstFamilyNaturalEligible:natural.first,
+      pairNaturalPositionEligible:natural.pair,
       secondFamilyNaturalEligible:natural.second,
       thirdFamilyNaturalEligible:natural.third,
       secondFamilyRelativeToBest:natural.secondRatio,
@@ -92,6 +96,11 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
       naturalConvergenceScore:convergence.score,
       naturalConvergenceLevel:convergence.level,
       naturalConvergenceReasons:convergence.reasons,
+      pairNaturalConvergenceScore:pairConvergence.score,
+      pairNaturalConvergenceLevel:pairConvergence.level,
+      pairNaturalConvergenceReasons:pairConvergence.reasons,
+      pairScenarioCoherence:pairConvergence.scenarioCoherence,
+      pairNodeProbabilityScore:pairConvergence.nodeProbabilityScore,
       extraConditionCount:convergence.extraConditionCount,
       scenarioCoherence:convergence.scenarioCoherence,
       expectedValueIndex:ev,
@@ -113,12 +122,13 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
     if(family.tier==="contender" && !approvedContenderHeads.has(family.first))continue;
 
     const allNatural=evaluated
-      .filter(x=>x.firstFamilyNumber===family.first && x.familyNaturalPositionEligible)
+      .filter(x=>x.firstFamilyNumber===family.first && x.pairNaturalPositionEligible)
       .filter(x=>x.branchHeadMatched===true)
       .filter(x=>x.chatForecastRole==="main" || x.chatForecastRole==="contender")
-      // Existence != purchase. Main/cover candidates need at least medium scenario coherence.
-      .filter(x=>x.naturalConvergenceScore>=.46)
-      .sort(comparePurchaseTerminal);
+      // IMPORTANT: THIRD専用工程より前の入口では3着を含むterminal convergenceを使わない。
+      // 1-2枝だけの自然収束で購入評価へ進めるかを決める。
+      .filter(x=>x.pairNaturalConvergenceScore>=.46)
+      .sort(comparePairPurchaseTerminal);
 
     if(!allNatural.length)continue;
 
@@ -131,18 +141,73 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
     }
     const secondGroups=[...bySecond.entries()].map(([second,rows])=>({
       second,
-      rows:rows.sort(compareTerminal),
+      rows:rows.sort(comparePairPurchaseTerminal),
       mass:sum(rows.map(x=>x.probability)),
-      peak:Math.max(...rows.map(x=>x.probability))
+      peak:Math.max(...rows.map(x=>x.probability)),
+      classifiableCount:rows.filter(x=>canSatisfyCenterPurchaseClass(x,approvedContenderHeads)).length
     })).sort((a,b)=>b.mass-a.mass||b.peak-a.peak||a.second-b.second);
 
-    const chosenSeconds=selectNaturalGroupCluster(secondGroups,x=>x.mass);
+    const secondBridge=evaluateSecondPurchaseBridge(secondGroups);
+    const chosenSeconds=secondBridge.selected;
 
     let selectedMass=0,candidateMass=sum(allNatural.map(x=>x.probability));
+    const secondPurchaseBridgeRow={
+      first:family.first,
+      candidateCount:secondBridge.rows.length,
+      selectedCount:secondBridge.selected.length,
+      selectionMode:secondBridge.selectionMode,
+      rows:secondBridge.rows.map(group=>({
+        second:group.second,mass:group.mass,peak:group.peak,
+        selected:secondBridge.selectedSeconds.has(group.second),
+        decisionCode:secondBridge.selectedSeconds.has(group.second)?"SECOND_PURCHASE_BRIDGE_SELECTED":"SECOND_PURCHASE_BRIDGE_NOT_SELECTED"
+      }))
+    };
+    const thirdPurchaseBridgeRows=[];
     for(const group of chosenSeconds){
-      // Step B: for each selected 1-2 branch, independently compare all 3rd-place candidates.
-      const thirds=selectNaturalGroupCluster(group.rows,x=>x.probability);
-      for(const item of thirds){
+      const isAdditionalSecondNearPeer=secondBridge.selectionMode==="SECOND_NEAR_TIE_BREADTH" && Number(group.second)!==Number(chosenSeconds[0]?.second);
+      const bridge=evaluateThirdPurchaseBridge(group.rows,{allowNearTieBreadth:!isAdditionalSecondNearPeer,selectionEligible:isAdditionalSecondNearPeer?(item=>canSatisfyCenterPurchaseClass(item,approvedContenderHeads)):null});
+
+      // v153: combination-completeness recovery. A SECOND can legitimately survive
+      // the independent 1-2 bridge while every THIRD chosen by the local cluster
+      // later fails the normal MAIN/COVER classification gate. That leaves the
+      // 1st and 2nd candidates alive individually but deletes the usable 1-2-3
+      // combination. If this happens, keep exactly one strongest terminal that
+      // already satisfies the normal classification rules. No weak terminal is
+      // promoted and no cross-product of independent candidates is invented.
+      const bridgeSelectedKeys=new Set(bridge.selectedKeys);
+      let combinationRecoveryKey=null;
+      const selectedClassifiable=bridge.rows.some(item=>
+        bridgeSelectedKeys.has(key(item.order)) && canSatisfyCenterPurchaseClass(item,approvedContenderHeads)
+      );
+      if(!selectedClassifiable){
+        const recovery=bridge.rows
+          .filter(item=>canSatisfyCenterPurchaseClass(item,approvedContenderHeads))
+          .sort(comparePurchaseTerminal)[0]||null;
+        if(recovery){
+          combinationRecoveryKey=key(recovery.order);
+          bridgeSelectedKeys.add(combinationRecoveryKey);
+        }
+      }
+      const effectiveSelected=bridge.rows.filter(item=>bridgeSelectedKeys.has(key(item.order)));
+      const effectiveSelectionMode=combinationRecoveryKey?`${bridge.selectionMode}+COMBINATION_CLASSIFIABLE_RECOVERY`:bridge.selectionMode;
+      thirdPurchaseBridgeRows.push({
+        first:family.first,second:group.second,
+        candidateCount:bridge.rows.length,selectedCount:effectiveSelected.length,selectionMode:effectiveSelectionMode,
+        combinationRecoveryKey,
+        rows:bridge.rows.map(item=>({
+          order:item.order,third:Number(item.order?.[2]),probability:Number(item.probability)||0,
+          thirdRatio:Number(item.thirdFamilyRelativeToBest)||0,
+          naturalConvergenceScore:Number(item.naturalConvergenceScore)||0,
+          selected:bridgeSelectedKeys.has(key(item.order)),
+          decisionCode:bridgeSelectedKeys.has(key(item.order))?(key(item.order)===combinationRecoveryKey?"COMBINATION_CLASSIFIABLE_RECOVERY":"THIRD_PURCHASE_BRIDGE_SELECTED"):"THIRD_PURCHASE_BRIDGE_NOT_SELECTED"
+        }))
+      });
+      for(const item of bridge.rows){
+        const picked=bridgeSelectedKeys.has(key(item.order));
+        item.thirdPurchaseBridgeStatus=picked?"SELECTED_FOR_CLASSIFICATION":"EVALUATED_NOT_SELECTED";
+        item.thirdPurchaseBridgeCode=picked?(key(item.order)===combinationRecoveryKey?"COMBINATION_CLASSIFIABLE_RECOVERY":"THIRD_PURCHASE_BRIDGE_SELECTED"):"THIRD_PURCHASE_BRIDGE_NOT_SELECTED";
+      }
+      for(const item of effectiveSelected){
         if(!selected.has(key(item.order))){
           selected.add(key(item.order));
           selectedMass+=item.probability;
@@ -159,6 +224,28 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
       }
     }
 
+    // v149: an independently approved contender head must not disappear merely
+    // because pair/third clustering found no selected row for that family.
+    // Keep exactly one strongest classifiable natural terminal as a COVER anchor.
+    // This is a safety recovery, not a quota: unapproved heads, sub/risk scenarios,
+    // or terminals that cannot satisfy the normal COVER class are never promoted.
+    let contenderCoverAnchorKey=null;
+    if(family.tier==="contender" && approvedContenderHeads.has(family.first)){
+      const alreadyClassifiable=allNatural.some(x=>
+        selected.has(key(x.order)) && canSatisfyCenterPurchaseClass(x,approvedContenderHeads)
+      );
+      if(!alreadyClassifiable){
+        const anchor=allNatural
+          .filter(x=>canSatisfyCenterPurchaseClass(x,approvedContenderHeads))
+          .sort(comparePurchaseTerminal)[0]||null;
+        if(anchor){
+          contenderCoverAnchorKey=key(anchor.order);
+          selected.add(contenderCoverAnchorKey);
+          selectedMass+=anchor.probability;
+        }
+      }
+    }
+
     const target=dynamicCoverageTarget(family,primaryFamily);
 
     // Undercoverage guard: coverage is NOT a purchase quota.
@@ -170,19 +257,36 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
       family.tier==="main" ? .18 :
       .12;
 
-    if(family.probability>0 && selectedMass/family.probability<undercoverageFloor){
-      const bestProb=allNatural[0]?.probability||0;
-      const recoveryPool=allNatural
-        .filter(x=>!selected.has(key(x.order)))
-        .filter(x=>bestProb<=0 || x.probability>=bestProb*.62)
-        .sort(compareTerminal);
+    // Coverage must count only terminals that can actually survive the later
+    // MAIN/COVER classification gate. Previously, pair-selected rows with weak
+    // full 1-2-3 convergence were counted as coverage here, then rejected below.
+    // That made the recovery guard stop early while real purchased coverage
+    // remained extremely small.
+    let classifiableSelectedMass=sum(allNatural
+      .filter(x=>selected.has(key(x.order)))
+      .filter(x=>canSatisfyCenterPurchaseClass(x,approvedContenderHeads))
+      .map(x=>x.probability));
 
-      for(const item of recoveryPool){
+    if(family.probability>0 && classifiableSelectedMass/family.probability<undercoverageFloor){
+      const classifiablePool=allNatural
+        .filter(x=>!selected.has(key(x.order)))
+        .filter(x=>canSatisfyCenterPurchaseClass(x,approvedContenderHeads))
+        .sort(comparePurchaseTerminal);
+
+      // Do not impose a fixed top-N/probability-ratio cap here. Add the strongest
+      // genuinely classifiable natural terminals until severe undercoverage is
+      // resolved, then stop.
+      for(const item of classifiablePool){
         selected.add(key(item.order));
         selectedMass+=item.probability;
-        if(selectedMass/family.probability>=undercoverageFloor)break;
+        classifiableSelectedMass+=item.probability;
+        if(classifiableSelectedMass/family.probability>=undercoverageFloor)break;
       }
     }
+
+    // Audit coverage uses the mass that is capable of reaching a purchase class,
+    // not merely the mass that entered the provisional selected set.
+    selectedMass=classifiableSelectedMass;
 
     familyMeta.set(family.first,{
       target,
@@ -191,7 +295,10 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
       selectedMass,
       selectedSecondCount:new Set([...selected].filter(k=>k.startsWith(`${family.first}-`)).map(k=>k.split("-")[1])).size,
       totalSecondCount:secondGroups.length,
-      selectionMode:"NATURAL_CONVERGENCE_WITH_UNDERCOVERAGE_GUARD"
+      secondPurchaseBridgeRow,
+      thirdPurchaseBridgeRows,
+      contenderCoverAnchorKey,
+      selectionMode:"PAIR_SELECTION_THEN_DEDICATED_THIRD_PURCHASE_BRIDGE"
     });
   }
 
@@ -226,7 +333,7 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
       if(
         item.directMainBranchSupport===true &&
         item.branchHeadMatched===true &&
-        item.naturalConvergenceScore>=.58
+        item.naturalConvergenceScore>=mainNaturalThreshold(item)
       ){
         betClass="MAIN";
         mode="CHAT_SPEC_MAIN_CLUSTER";
@@ -286,7 +393,7 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
     const sameFirst=evaluated
       .filter(x=>x.firstFamilyNumber===adopted.firstFamilyNumber)
       .filter(x=>x.branchHeadMatched===true)
-      .filter(x=>x.familyNaturalPositionEligible)
+      .filter(x=>x.pairNaturalPositionEligible)
       .filter(x=>x.purchaseStatus!==PURCHASED)
       .filter(x=>Number(x.naturalConvergenceScore)>=.46)
       .sort(comparePurchaseTerminal);
@@ -315,12 +422,124 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
     }
   }
 
+  // v156: strong SECOND-pair breadth recovery.
+  // A near-tied SECOND candidate must not disappear merely because another
+  // 1-2 pair reached the family coverage target first.  For every supported
+  // first-family, keep one representative terminal for each strongly supported
+  // 1-2 pair.  This is pair coverage, not a fixed ticket quota: at most one
+  // terminal is recovered for a missing pair and the THIRD is chosen from the
+  // same pair only.
+  const secondPairBreadthRecoveries=[];
+  const strongSecondPairRows=evaluated.filter(item=>{
+    if(item.firstFamilyTier!=="main"&&item.firstFamilyTier!=="contender")return false;
+    if(item.branchHeadMatched!==true||item.pairNaturalPositionEligible!==true)return false;
+    if((Number(item.secondFamilyRelativeToBest)||0)<.94)return false;
+    if(item.chatForecastRole!=="main"&&item.chatForecastRole!=="contender")return false;
+    if(item.chatForecastRole==="contender"&&!approvedContenderHeads.has(item.firstFamilyNumber))return false;
+    return true;
+  });
+  const pairGroups=new Map();
+  for(const item of strongSecondPairRows){
+    const pairKey=`${Number(item.order?.[0])||0}-${Number(item.order?.[1])||0}`;
+    if(!pairGroups.has(pairKey))pairGroups.set(pairKey,[]);
+    pairGroups.get(pairKey).push(item);
+  }
+  for(const [pairKey,rows] of pairGroups){
+    if(rows.some(item=>item.purchaseStatus===PURCHASED))continue;
+    const representative=rows
+      .filter(item=>(Number(item.naturalConvergenceScore)||0)>=.30)
+      .sort(comparePurchaseTerminal)[0];
+    if(!representative)continue;
+    const representativeScore=Number(representative.naturalConvergenceScore)||0;
+    const recoveryClass=(representative.directMainBranchSupport===true&&representativeScore>=mainNaturalThreshold(representative))?"MAIN":"COVER";
+    const recoveryClassReason=recoveryClass==="MAIN"
+      ?"主展開の直接支持＋MAIN自然基準を満たすため本線を維持"
+      :"主展開内の枝違い／承認済み有力枝として押さえに分類";
+    const reason=`2着近接枝補正: ${pairKey}枝は2着独立評価が最上位比${Math.round((Number(representative.secondFamilyRelativeToBest)||0)*100)}%で、枝全体が消えないよう同一1-2枝の最自然終端${orderText(representative)}を${recoveryClass==="MAIN"?"本線":"押さえ"}へ追加（${recoveryClassReason}）`;
+    Object.assign(representative,{
+      betClass:recoveryClass,
+      purchaseStatus:PURCHASED,
+      purchaseRejectCode:null,
+      purchaseReason:reason,
+      classificationReason:recoveryClassReason,
+      adoptionMode:"SECOND_PAIR_BREADTH_RECOVERY",
+      secondPairBreadthRecovery:true,
+      lifecycle:{...(representative.lifecycle||{}),generated:true,probabilityEvaluated:true,terminalDeleted:false,purchaseDecision:"ADOPTED",purchaseDecisionCode:"SECOND_PAIR_BREADTH_RECOVERY",purchaseDecisionReason:reason}
+    });
+    selected.add(key(representative.order));
+    secondPairBreadthRecoveries.push({pair:pairKey,order:representative.order.join("-"),secondRelative:Number(representative.secondFamilyRelativeToBest)||0,convergence:Number(representative.naturalConvergenceScore)||0,betClass:recoveryClass,classificationReason:recoveryClassReason});
+  }
+  const secondPairBreadthAudit={
+    policy:"ONE_REPRESENTATIVE_PER_STRONGLY_SUPPORTED_SECOND_PAIR",
+    secondRelativeFloor:.94,
+    convergenceFloor:.30,
+    strongPairCount:pairGroups.size,
+    recoveryCount:secondPairBreadthRecoveries.length,
+    recoveries:secondPairBreadthRecoveries,
+    fixedTicketQuotaApplied:false
+  };
+
+  // v156: probability-mass undercoverage recovery.
+  // Only terminals that already satisfy normal MAIN/COVER classification can be
+  // recovered. SUB/value branches remain governed by the explicit odds gate.
+  const massCoverageCandidates=evaluated.filter(item=>{
+    if(item.branchHeadMatched!==true)return false;
+    if(item.familyNaturalPositionEligible!==true)return false;
+    if(item.naturalConvergenceLevel==="低")return false;
+    // Mass recovery may widen THIRD variants only inside a 1-2 pair that already
+    // survived the independent SECOND bridge. It must not resurrect an unselected
+    // 2nd-place branch merely to hit a global quota. Purchased anchors are counted
+    // in coverage even when they were added outside the third bridge.
+    const thirdBridgeEvaluated=["SELECTED_FOR_CLASSIFICATION","EVALUATED_NOT_SELECTED"].includes(item.thirdPurchaseBridgeStatus);
+    if(!thirdBridgeEvaluated&&item.purchaseStatus!==PURCHASED)return false;
+    const score=Number(item.naturalConvergenceScore)||0;
+    const mainEligible=item.directMainBranchSupport===true&&score>=mainNaturalThreshold(item);
+    const coverEligible=(item.chatForecastRole==="main"&&score>=.52)||(item.chatForecastRole==="contender"&&approvedContenderHeads.has(item.firstFamilyNumber)&&score>=.52);
+    return mainEligible||coverEligible;
+  });
+  const massCoverageCandidateKeys=new Set(massCoverageCandidates.map(item=>key(item.order)));
+  for(const item of evaluated)item.massCoverageEligible=massCoverageCandidateKeys.has(key(item.order));
+  const massEligibleTotal=sum(massCoverageCandidates.map(item=>Number(item.probability)||0));
+  const candidateMassByFirst=new Map();
+  for(const item of massCoverageCandidates){
+    const first=Number(item.firstFamilyNumber)||Number(item.order?.[0])||0;
+    candidateMassByFirst.set(first,(candidateMassByFirst.get(first)||0)+(Number(item.probability)||0));
+  }
+  const targetWeight=sum([...candidateMassByFirst.values()]);
+  const massWeightedTarget=targetWeight>0?sum([...candidateMassByFirst].map(([first,mass])=>{
+    const target=Number(familyMeta.get(Number(first))?.target);
+    return (mass/targetWeight)*(Number.isFinite(target)?clamp(target):.70);
+  })):.70;
+  const initiallyPurchasedMass=sum(massCoverageCandidates.filter(item=>item.purchaseStatus===PURCHASED).map(item=>Number(item.probability)||0));
+  const initialMassCoverage=massEligibleTotal>0?initiallyPurchasedMass/massEligibleTotal:0;
+  // v156 final policy: global probability-mass shortage is diagnostic only.
+  // Automatic recovery is performed by the strong 1-2 pair breadth guard above,
+  // so we do not fill a global mass quota across unrelated pairs/scenarios.
+  let recoveredMass=0;
+  const recoveredOrders=[];
+  const finalPurchasedMass=sum(massCoverageCandidates.filter(item=>item.purchaseStatus===PURCHASED).map(item=>Number(item.probability)||0));
+  const massCoverageRecoveryAudit={
+    policy:"GLOBAL_MASS_WARN_ONLY_PAIR_LOCAL_RECOVERY",
+    eligibleTerminalCount:massCoverageCandidates.length,
+    eligibleProbabilityMass:massEligibleTotal,
+    weightedCoverageTarget:massWeightedTarget,
+    initialCoverage:initialMassCoverage,
+    underCoverageDetected:massEligibleTotal>0&&initialMassCoverage+1e-12<massWeightedTarget-.10,
+    recoveryDelegatedTo:"SECOND_PAIR_BREADTH_RECOVERY",
+    recoveryApplied:recoveredOrders.length>0,
+    recoveredCount:recoveredOrders.length,
+    recoveredOrders,
+    recoveredProbabilityMass:recoveredMass,
+    finalCoverage:massEligibleTotal>0?finalPurchasedMass/massEligibleTotal:0,
+    overSpreadAction:"WARN_ONLY_NO_AUTO_DELETE"
+  };
+
   const mainPurchased=evaluated.filter(x=>x.purchaseStatus===PURCHASED&&x.betClass==="MAIN");
   const mainCandidates=evaluated.filter(x=>
     x.branchHeadMatched===true &&
     x.directMainBranchSupport===true &&
-    x.familyNaturalPositionEligible &&
-    Number(x.naturalConvergenceScore)>=.58
+    x.pairNaturalPositionEligible &&
+    Number(x.naturalConvergenceScore)>=mainNaturalThreshold(x)
   );
   const mainInvariant={
     centerScenarioCount:mainBranches.length,
@@ -342,7 +561,7 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
     item.firstFamilyCandidateCoverage=item.firstFamilyProbability>0&&fm?fm.candidateMass/item.firstFamilyProbability:null;
     item.firstFamilySelectedCoverage=item.firstFamilyProbability>0&&fm?fm.selectedMass/item.firstFamilyProbability:null;
     item.selectedByFamilyCoverage=selected.has(key(item.order)) && item.betClass!=="BUYABLE_HIGH";
-    item.mainHeadSiblingEligible=item.familyNaturalPositionEligible&&item.firstFamilyTier==="main";
+    item.mainHeadSiblingEligible=item.pairNaturalPositionEligible&&item.firstFamilyTier==="main";
     item.mainHeadSiblingBranchId=item.dominantBranchId;
     item.mainHeadSiblingBranchLabel=item.dominantBranchLabel;
     item.mainHeadSiblingSecondEligible=item.secondFamilyNaturalEligible;
@@ -370,9 +589,53 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
         candidates:contenderHeadAudit.candidates,
         approved:[...approvedContenderHeads]
       },
+      coverBreadthAudit:buildCoverBreadthAudit(evaluated,approvedContenderHeads,familyMeta),
+      firstPurchaseBreadthAudit:buildFirstPurchaseBreadthAudit(evaluated,centerHeads,approvedContenderHeads),
       mainInvariant,
+      secondPurchaseBridgeAudit:buildSecondPurchaseBridgeAudit(familyMeta),
+      thirdPurchaseBridgeAudit:buildThirdPurchaseBridgeAudit(evaluated,familyMeta),
+      combinationCompletenessAudit:buildCombinationCompletenessAudit(evaluated,familyMeta),
+      secondPairBreadthAudit,
+      scenarioClassificationAudit:buildScenarioClassificationAudit(evaluated,approvedContenderHeads),
+      massCoverageRecoveryAudit,
       naturalPrecedenceAudit
     }
+  };
+}
+
+function buildScenarioClassificationAudit(items,approvedContenderHeads){
+  const rows=[];
+  const mismatches=[];
+  for(const item of (items||[]).filter(x=>x.purchaseStatus===PURCHASED)){
+    const score=Number(item.naturalConvergenceScore)||0;
+    let expectedClass=null,basis=null;
+    if(item.chatForecastRole==="sub"){
+      expectedClass="BUYABLE_HIGH";
+      basis="SEPARATE_SUB_SCENARIO_VALUE_GATE";
+    }else if(item.directMainBranchSupport===true&&item.branchHeadMatched===true&&score>=mainNaturalThreshold(item)){
+      expectedClass="MAIN";
+      basis="DIRECT_MAIN_SCENARIO_NATURAL_TERMINAL";
+    }else if(item.adoptionMode==="SECOND_PAIR_BREADTH_RECOVERY"){
+      expectedClass="COVER";
+      basis="MAIN_OR_APPROVED_CONTENDER_PAIR_VARIATION_RECOVERY";
+    }else if(item.chatForecastRole==="main"&&score>=.46){
+      expectedClass="COVER";
+      basis="MAIN_SCENARIO_BRANCH_VARIATION";
+    }else if(item.chatForecastRole==="contender"&&approvedContenderHeads.has(Number(item.firstFamilyNumber))&&score>=.46){
+      expectedClass="COVER";
+      basis="APPROVED_CONTENDER_SCENARIO";
+    }
+    const row={order:key(item.order),actualClass:item.betClass,expectedClass,basis,adoptionMode:item.adoptionMode||null,forecastRole:item.chatForecastRole||null,naturalConvergenceScore:score};
+    rows.push(row);
+    if(expectedClass&&item.betClass!==expectedClass)mismatches.push(row);
+  }
+  return{
+    policy:"SCENARIO_ORIGIN_AND_NATURALITY_DETERMINE_CLASS_NOT_TICKET_COUNT",
+    purchasedCount:rows.length,
+    mismatchCount:mismatches.length,
+    mismatches,
+    pointCountBasedClassificationCount:0,
+    passed:mismatches.length===0
   };
 }
 
@@ -391,13 +654,17 @@ function deriveBranchSupport(terminal,branchById){
     }
     return{role:"risk",weight:FORECAST_WEIGHT.risk,ids:[],labels:[],headMatched:false,foreignBranchCount:all.length};
   }
+  const effectivePriority=contribution=>{
+    const branch=branchById.get(String(contribution?.branchId||""));
+    return branch?.sameScenarioMainSibling===true?"main":normalizePriority(contribution?.branchPriority);
+  };
   cs.sort((a,b)=>{
-    const ap=FORECAST_WEIGHT[normalizePriority(a.branchPriority)]||.18;
-    const bp=FORECAST_WEIGHT[normalizePriority(b.branchPriority)]||.18;
+    const ap=FORECAST_WEIGHT[effectivePriority(a)]||.18;
+    const bp=FORECAST_WEIGHT[effectivePriority(b)]||.18;
     return bp-ap||(Number(b.probability)||0)-(Number(a.probability)||0);
   });
-  const top=cs[0],role=normalizePriority(top.branchPriority);
-  const weights=cs.map(c=>(FORECAST_WEIGHT[normalizePriority(c.branchPriority)]||.18)*Math.max(.1,ratioGeom(c.decisionRatios)));
+  const top=cs[0],role=effectivePriority(top);
+  const weights=cs.map(c=>(FORECAST_WEIGHT[effectivePriority(c)]||.18)*Math.max(.1,ratioGeom(c.decisionRatios)));
   const weight=Math.min(1,Math.max(...weights,FORECAST_WEIGHT[role]||.18));
   return{role,weight,ids:cs.map(c=>c.branchId).filter(Boolean),labels:cs.map(c=>c.branchLabel).filter(Boolean),headMatched:true,foreignBranchCount:all.length-cs.length};
 }
@@ -413,7 +680,8 @@ function deriveNaturalSupport(item){
   // Failure only affects purchase eligibility; the terminal remains stored.
   const secondOk=second>=.70;
   const thirdOk=third>=.70;
-  return{ok:first>=.78&&secondOk&&thirdOk,second:secondOk,third:thirdOk,secondRatio:second,thirdRatio:third,ratios:{first,second,third}};
+  const firstOk=first>=.78;
+  return{ok:firstOk&&secondOk&&thirdOk,first:firstOk,pair:firstOk&&secondOk,second:secondOk,third:thirdOk,firstRatio:first,secondRatio:second,thirdRatio:third,ratios:{first,second,third}};
 }
 
 function selectContenderHeads(branches,centerHeads,families,primaryFamily,scored){
@@ -516,6 +784,103 @@ function selectContenderHeads(branches,centerHeads,families,primaryFamily,scored
   return{candidates,approved};
 }
 
+function derivePairNaturalConvergence(item,lines,branches){
+  const order=(item.order||[]).map(Number);
+  const [first,second]=order;
+  const contributions=[...(item.branchContributions||[])].filter(c=>contributionMatches(c,order));
+  const best=contributions.sort((a,b)=>(Number(b.probability)||0)-(Number(a.probability)||0))[0]||{};
+  const ratios=best.decisionRatios||{};
+  const firstR=finite(ratios.first)?Number(ratios.first):1;
+  const secondR=finite(ratios.second)?Number(ratios.second):1;
+
+  const branchById=new Map((Array.isArray(branches)?branches:[]).map(branch=>[String(branch.id),branch]));
+  const supportingBranch=branchById.get(String(best.branchId||item.branchId||""))||null;
+  const lineIndependentFallback=supportingBranch?.lineIndependentFallback===true;
+
+  const lineInfo=findLineContext(lines,first);
+  let scenarioCoherence=.50;
+  let extra=0;
+  const reasons=[];
+
+  if(lineInfo){
+    const {members,index}=lineInfo;
+    const follower=members[index+1]??null;
+    const next=members[index+2]??null;
+    const predecessor=members[index-1]??null;
+    const prior2=members[index-2]??null;
+
+    if(Number(follower)===second){
+      scenarioCoherence+=.28;
+      reasons.push(`${first}の直後を${second}が追走`);
+    }else if(Number(predecessor)===second){
+      scenarioCoherence+=.26;
+      reasons.push(`${first}の差し後も${second}が同ラインで2着残り`);
+    }else if(Number(next)===second){
+      scenarioCoherence+=.16;
+      extra+=1;
+      reasons.push(`${second}がライン3番手から2着`);
+    }else if(Number(prior2)===second){
+      scenarioCoherence+=.12;
+      extra+=1;
+      reasons.push(`${second}が同ライン前方から2着残り`);
+    }else if(follower!=null || predecessor!=null){
+      scenarioCoherence-=.16;
+      extra+=1;
+      reasons.push("同ラインの追走失敗または並び崩れが必要");
+    }
+  }else if(lineIndependentFallback){
+    scenarioCoherence=.62;
+    reasons.push("並び未取得のため1-2着ライン整合は中立評価");
+  }else{
+    reasons.push("1-2着ライン追走関係の直接確認なし");
+  }
+
+  const ratioScore=Math.sqrt(Math.max(.01,firstR)*Math.max(.01,secondR));
+  const trace=Array.isArray(best.nodeTrace)?best.nodeTrace:(Array.isArray(item.nodeTrace)?item.nodeTrace:[]);
+  const pairTrace=trace.filter(node=>node?.stage==="FIRST"||node?.stage==="SECOND");
+  const completePair=["FIRST","SECOND"].every(stage=>pairTrace.some(node=>node?.stage===stage));
+
+  if(!completePair){
+    const penalty=Math.max(.64,1-extra*.12);
+    const score=clamp((scenarioCoherence*.55+ratioScore*.45)*penalty,0,1);
+    const level=score>=.70?"高":score>=.52?"中":"低";
+    return{score,level,reasons,scenarioCoherence:clamp(scenarioCoherence,0,1),nodeProbabilityScore:null};
+  }
+
+  const nodeByStage=new Map(pairTrace.map(node=>[node.stage,node]));
+  const pairConditions=pairTrace.flatMap(node=>(node?.newRequiredConditions||[]).map(condition=>({...condition,stage:node.stage})));
+  const rawNodeProbs=["FIRST","SECOND"].map(stage=>Number(nodeByStage.get(stage)?.conditionalProbability));
+  const conditionOnlyNodeProbs=["FIRST","SECOND"].map(stage=>{
+    const conditions=nodeByStage.get(stage)?.newRequiredConditions||[];
+    if(!conditions.length)return 1;
+    return conditions.reduce((product,condition)=>product*Math.max(.0001,Number(condition.probability)||.0001),1);
+  });
+  const nodeProbs=lineIndependentFallback?conditionOnlyNodeProbs:rawNodeProbs;
+  const nodeProbabilityScore=Math.sqrt(Math.max(.0001,nodeProbs[0])*Math.max(.0001,nodeProbs[1]));
+
+  const extraConditions=pairConditions.filter(condition=>condition.kind==="extra");
+  const weakCritical=pairConditions.filter(condition=>condition.critical===true&&finite(condition.probability)&&Number(condition.probability)<.58);
+  let effectiveExtra=extra;
+  if(extraConditions.some(condition=>condition.stage==="SECOND")&&effectiveExtra>0)effectiveExtra-=1;
+  effectiveExtra+=extraConditions.length;
+
+  const conditionPenalty=Math.max(.48,1-effectiveExtra*.12-weakCritical.length*.07);
+  const score=clamp((scenarioCoherence*.42+ratioScore*.25+nodeProbabilityScore*.33)*conditionPenalty,0,1);
+  const level=score>=.70?"高":score>=.52?"中":"低";
+
+  reasons.push(`1-2着ノード成立 ${(nodeProbabilityScore*100).toFixed(1)}%`);
+  if(extraConditions.length)reasons.push(`1-2着追加条件 ${extraConditions.length}件`);
+
+  return{
+    score,level,reasons,
+    scenarioCoherence:clamp(scenarioCoherence,0,1),
+    nodeProbabilityScore,
+    extraConditionCount:effectiveExtra,
+    weakCriticalConditionCount:weakCritical.length,
+    policy:"FIRST_SECOND_ONLY_NO_THIRD_INPUT"
+  };
+}
+
 function deriveNaturalConvergence(item,lines,branches){
   const order=(item.order||[]).map(Number);
   const [first,second,third]=order;
@@ -525,6 +890,9 @@ function deriveNaturalConvergence(item,lines,branches){
   const firstR=finite(ratios.first)?Number(ratios.first):1;
   const secondR=finite(ratios.second)?Number(ratios.second):1;
   const thirdR=finite(ratios.third)?Number(ratios.third):1;
+  const branchById=new Map((Array.isArray(branches)?branches:[]).map(branch=>[String(branch.id),branch]));
+  const supportingBranch=branchById.get(String(best.branchId||item.branchId||""))||null;
+  const lineIndependentFallback=supportingBranch?.lineIndependentFallback===true;
 
   const lineInfo=findLineContext(lines,first);
   let scenarioCoherence=.50;
@@ -567,7 +935,12 @@ function deriveNaturalConvergence(item,lines,branches){
       reasons.push(`${third}の別線残り条件`);
     }
   }else{
-    reasons.push("ライン追走関係の直接確認なし");
+    if(lineIndependentFallback){
+      scenarioCoherence=.62;
+      reasons.push("並び未取得のためライン整合は中立評価");
+    }else{
+      reasons.push("ライン追走関係の直接確認なし");
+    }
   }
 
   const ratioScore=Math.pow(Math.max(.01,firstR)*Math.max(.01,secondR)*Math.max(.01,thirdR),1/3);
@@ -584,11 +957,15 @@ function deriveNaturalConvergence(item,lines,branches){
   }
 
   const nodeByStage=new Map(trace.map(n=>[n.stage,n]));
-  const nodeProbs=["FIRST","SECOND","THIRD"].map(stage=>Number(nodeByStage.get(stage)?.conditionalProbability));
-  const nodeProbabilityScore=Math.pow(
-    Math.max(.0001,nodeProbs[0])*Math.max(.0001,nodeProbs[1])*Math.max(.0001,nodeProbs[2]),1/3
-  );
   const newConditions=trace.flatMap(n=>(n?.newRequiredConditions||[]).map(c=>({...c,stage:n.stage})));
+  const rawNodeProbs=["FIRST","SECOND","THIRD"].map(stage=>Number(nodeByStage.get(stage)?.conditionalProbability));
+  const conditionOnlyNodeProbs=["FIRST","SECOND","THIRD"].map(stage=>{
+    const conditions=nodeByStage.get(stage)?.newRequiredConditions||[];
+    if(!conditions.length)return 1;
+    return conditions.reduce((product,condition)=>product*Math.max(.0001,Number(condition.probability)||.0001),1);
+  });
+  const nodeProbs=lineIndependentFallback?conditionOnlyNodeProbs:rawNodeProbs;
+  const nodeProbabilityScore=Math.pow(Math.max(.0001,nodeProbs[0])*Math.max(.0001,nodeProbs[1])*Math.max(.0001,nodeProbs[2]),1/3);
   const extraConditions=newConditions.filter(c=>c.kind==="extra");
   const weakCritical=newConditions.filter(c=>c.critical===true&&finite(c.probability)&&Number(c.probability)<.58);
 
@@ -609,6 +986,9 @@ function deriveNaturalConvergence(item,lines,branches){
   return{
     score,level,reasons,
     extraConditionCount:effectiveExtra,
+    uncertainConditionCount:newConditions.filter(c=>c.kind==="uncertain").length,
+    lineIndependentFallback,
+    nodeProbabilityMode:lineIndependentFallback?"CONDITION_ONLY_NO_DOUBLE_PENALTY":"FULL_CONDITIONAL",
     scenarioCoherence:clamp(scenarioCoherence,0,1),
     nodeProbabilityScore,
     nodeConditionCount:newConditions.length,
@@ -618,6 +998,8 @@ function deriveNaturalConvergence(item,lines,branches){
 function findLineContext(lines,number){
   const normalized=Array.isArray(lines)?lines:[];
   for(const line of normalized){
+    const lineId=String(line?.id||line?.lineId||"");
+    if(lineId.startsWith("unknown-"))continue;
     const raw=Array.isArray(line)?line:(Array.isArray(line?.members)?line.members:[]);
     const members=raw.map(m=>Number(m?.number??m)).filter(Number.isFinite);
     const index=members.indexOf(Number(number));
@@ -626,6 +1008,17 @@ function findLineContext(lines,number){
   return null;
 }
 
+function mainNaturalThreshold(item){
+  // 通常のMAIN基準は0.58を維持。
+  // 公式ライン未取得の degraded mode だけは、ライン整合情報を観測できない分を
+  // 罰点として扱わず 0.54 とする。未知情報を「悪材料」に変換しないための補正。
+  return item?.lineIndependentMainSupport===true?.54:.58;
+}
+function comparePairPurchaseTerminal(a,b){
+  return (Number(b.pairNaturalConvergenceScore)-Number(a.pairNaturalConvergenceScore)) ||
+    ((Number(b.firstFamilyProbability)||0)-(Number(a.firstFamilyProbability)||0)) ||
+    key(a.order).localeCompare(key(b.order),"en");
+}
 function comparePurchaseTerminal(a,b){
   return (Number(b.naturalConvergenceScore)-Number(a.naturalConvergenceScore)) ||
     (b.probability-a.probability) ||
@@ -659,6 +1052,68 @@ function dynamicCoverageTarget(family,primary){
   const rel=primary?.probability>0?family.probability/primary.probability:0;
   if(primary&&family.first===primary.first)return clamp(.62+.18*family.probability,.62,.80);
   return clamp(.30+.18*rel,.30,.48);
+}
+
+function evaluateSecondPurchaseBridge(groups){
+  const all=[...(Array.isArray(groups)?groups:[])].sort((a,b)=>b.mass-a.mass||b.peak-a.peak||a.second-b.second);
+  if(!all.length)return{rows:[],selected:[],selectedSeconds:new Set(),selectionMode:"EMPTY"};
+  let selected=selectNaturalGroupCluster(all,x=>x.mass);
+  let selectionMode="NATURAL_GAP";
+
+  // v151: SECOND-only breadth rule. The generic cluster helper intentionally
+  // collapses to one row when it cannot find a natural boundary. That is useful
+  // as a generic default, but for 2nd-place candidates it can erase independently
+  // supported near-peers. When there is no boundary, retain only genuinely near
+  // groups that independently clear the pair structural/convergence gates.
+  if(all.length>1 && selected.length===1){
+    const topMass=Math.max(0,Number(all[0]?.mass)||0);
+    const naturalPeers=all.filter(group=>
+      topMass>0 && Number(group.mass)>=topMass*.72 &&
+      Math.max(...group.rows.map(item=>Number(item.secondFamilyRelativeToBest)||0))>=.85 &&
+      group.classifiableCount>0 &&
+      group.rows.some(item=>item.secondFamilyNaturalEligible===true && Number(item.pairNaturalConvergenceScore)>=.46)
+    );
+    if(naturalPeers.length>1){
+      selected=naturalPeers;
+      selectionMode="SECOND_NEAR_TIE_BREADTH";
+    }else{
+      selectionMode="SINGLE_STRONGEST";
+    }
+  }
+
+  const selectedSeconds=new Set(selected.map(group=>Number(group.second)));
+  return{rows:all,selected,selectedSeconds,selectionMode};
+}
+
+function evaluateThirdPurchaseBridge(rows,{allowNearTieBreadth=true,selectionEligible=null}={}){
+  const all=[...(Array.isArray(rows)?rows:[])].sort(comparePurchaseTerminal);
+  if(!all.length)return{rows:[],selected:[],selectedKeys:new Set(),selectionMode:"EMPTY"};
+  const selectionPool=typeof selectionEligible==="function"?all.filter(selectionEligible):all;
+  if(!selectionPool.length)return{rows:all,selected:[],selectedKeys:new Set(),selectionMode:"NO_CLASSIFIABLE_SELECTION"};
+  let selected=selectNaturalGroupCluster(selectionPool,item=>Number(item.probability)||0);
+  let selectionMode="NATURAL_GAP";
+
+  // v150: THIRD-only breadth rule. When there is no meaningful separation among
+  // 3rd-place candidates, the generic cluster helper returns one row. That was
+  // over-compressing the same 1-2 branch to a single 3rd-place rider. In a near
+  // tie, keep every terminal that independently clears the THIRD structural and
+  // terminal-convergence gates. Weak THIRD candidates still remain evaluated but
+  // unpurchased, so this does not bypass the safety floors.
+  if(allowNearTieBreadth && selectionPool.length>1 && selected.length===1){
+    const naturalPeers=selectionPool.filter(item=>
+      item.thirdFamilyNaturalEligible===true &&
+      Number(item.naturalConvergenceScore)>=.46
+    );
+    if(naturalPeers.length>1){
+      selected=naturalPeers;
+      selectionMode="THIRD_NEAR_TIE_BREADTH";
+    }else{
+      selectionMode="SINGLE_STRONGEST";
+    }
+  }
+
+  const selectedKeys=new Set(selected.map(item=>key(item.order)));
+  return{rows:all,selected,selectedKeys,selectionMode};
 }
 
 function selectNaturalGroupCluster(rows,valueFn){
@@ -703,8 +1158,18 @@ function selectNaturallySeparatedValue(rows){
   return[]; // no natural boundary => do not force a value bet
 }
 
+function canSatisfyCenterPurchaseClass(item,approvedContenderHeads){
+  if(item.branchHeadMatched!==true)return false;
+  const convergence=Number(item.naturalConvergenceScore)||0;
+  if(item.directMainBranchSupport===true && convergence>=mainNaturalThreshold(item))return true;
+  if(item.chatForecastRole==="main" && convergence>=.46)return true;
+  if(item.chatForecastRole==="contender" && approvedContenderHeads.has(item.firstFamilyNumber) && convergence>=.46)return true;
+  return false;
+}
+
 function rejectReason(item,familyMeta){
-  if(!item.familyNaturalPositionEligible)return{code:"POSITION_SUPPORT_WEAK",reason:`${orderText(item)}は終端として保持。ただし2着・3着の位置支持が購入水準まで届かないため不採用。`};
+  if(!item.pairNaturalPositionEligible)return{code:"SECOND_POSITION_SUPPORT_WEAK",reason:`${orderText(item)}は終端として保持。ただし1-2着枝の位置支持が購入評価へ進む水準に届かないため不採用。`};
+  if(item.thirdPurchaseBridgeStatus==="EVALUATED_NOT_SELECTED")return{code:"THIRD_PURCHASE_BRIDGE_NOT_SELECTED",reason:`${orderText(item)}は3着専用工程で生成・確率評価まで完了し、同じ1-2着枝の3着購入評価にも投入済み。ただし自然な3着クラスターから外れたため購入不採用。`};
   if(Number(item.naturalConvergenceScore)<.40)return{code:"NATURAL_CONVERGENCE_TOO_LOW",reason:`${orderText(item)}は成立可能な終端として保持。ただし1着成立シナリオを固定した時、2着・3着へ自然に繋がる度合いが低いため購入しない。`};
   if(item.chatForecastRole==="risk")return{code:"RISK_SCENARIO_ONLY",reason:`${orderText(item)}は例外・リスク枝として保持するが、中心予測の購入対象にはしない。`};
   if(item.chatForecastRole==="sub"){
@@ -726,6 +1191,144 @@ function humanPurchaseReason(item,cls){
   if(cls==="MAIN")return `主展開クラスタ「${scenario}」から直接収束し、${a}→${b}→${c}が自然に繋がる終端（${conv}${why?`・${why}`:""}）。同一主展開内の押し切り・番手差し・自然な折り返しを含む本線群として採用。${oddsPart}`.trim();
   if(cls==="COVER")return `有力な別シナリオ「${scenario}」内で${a}→${b}→${c}が自然に繋がる終端（${conv}${why?`・${why}`:""}）。押さえとして採用。${oddsPart}`.trim();
   return `可能性枝「${scenario}」を終端まで保持し、${conv}と実オッズ妙味の両方を確認できたため買える高配当として採用。${oddsPart}`.trim();
+}
+
+function buildFirstPurchaseBreadthAudit(items,centerHeads,approvedContenderHeads){
+  const specs=[
+    ...[...centerHeads].map(first=>({first:Number(first),role:"main",betClass:"MAIN",source:"CENTER_MAIN"})),
+    ...[...approvedContenderHeads].filter(first=>![...centerHeads].map(Number).includes(Number(first))).map(first=>({first:Number(first),role:"contender",betClass:"COVER",source:"APPROVED_CONTENDER"}))
+  ];
+  const rows=specs.map(spec=>{
+    const candidates=(items||[])
+      .filter(item=>Number(item.firstFamilyNumber)===spec.first)
+      .filter(item=>item.branchHeadMatched===true)
+      .filter(item=>item.chatForecastRole===spec.role)
+      .filter(item=>item.pairNaturalPositionEligible===true)
+      .filter(item=>Number(item.pairNaturalConvergenceScore)>=.46);
+    const adopted=candidates.filter(item=>item.purchaseStatus===PURCHASED&&item.betClass===spec.betClass);
+    return{
+      first:spec.first,source:spec.source,expectedBetClass:spec.betClass,
+      naturalPairCandidateCount:candidates.length,adoptedCount:adopted.length,
+      candidateProbability:sum(candidates.map(item=>item.probability)),
+      adoptedProbability:sum(adopted.map(item=>item.probability)),
+      passed:candidates.length===0||adopted.length>0
+    };
+  });
+  return{
+    version:"FIRST-PURCHASE-BREADTH-1.0",
+    policy:"EVERY_CENTER_MAIN_HEAD_AND_APPROVED_CONTENDER_HEAD_WITH_A_NATURAL_PAIR_RETAINS_AT_LEAST_ONE_PURCHASE_TERMINAL",
+    expectedHeadCount:rows.length,
+    candidateHeadCount:rows.filter(row=>row.naturalPairCandidateCount>0).length,
+    retainedHeadCount:rows.filter(row=>row.adoptedCount>0).length,
+    rows,
+    passed:rows.every(row=>row.passed)
+  };
+}
+
+function buildCoverBreadthAudit(items,approvedContenderHeads,familyMeta){
+  const rows=[...approvedContenderHeads].map(first=>{
+    const candidates=(items||[])
+      .filter(item=>Number(item.firstFamilyNumber)===Number(first))
+      .filter(item=>item.branchHeadMatched===true)
+      .filter(item=>item.chatForecastRole==="contender")
+      .filter(item=>Number(item.naturalConvergenceScore)>=.46);
+    const adopted=candidates.filter(item=>item.purchaseStatus===PURCHASED&&item.betClass==="COVER");
+    const meta=familyMeta.get(Number(first));
+    return{
+      first:Number(first),
+      classifiableNaturalCount:candidates.length,
+      coverCount:adopted.length,
+      recoveryAnchor:meta?.contenderCoverAnchorKey||null,
+      passed:candidates.length===0||adopted.length>0
+    };
+  });
+  return{
+    policy:"APPROVED_CONTENDER_HEAD_RETAINS_ONE_NATURAL_COVER",
+    rows,
+    passed:rows.every(row=>row.passed)
+  };
+}
+
+function buildSecondPurchaseBridgeAudit(familyMeta){
+  const rows=[];
+  for(const meta of familyMeta.values())if(meta.secondPurchaseBridgeRow)rows.push(meta.secondPurchaseBridgeRow);
+  return{
+    version:"SECOND-PURCHASE-BRIDGE-1.0",
+    policy:"ALL_PAIR_ELIGIBLE_SECONDS_ARE_COMPARED_AND_NEAR_TIES_KEEP_MULTIPLE_INDEPENDENTLY_SUPPORTED_SECONDS",
+    familyCount:rows.length,
+    candidateCount:rows.reduce((sum,row)=>sum+row.candidateCount,0),
+    selectedCount:rows.reduce((sum,row)=>sum+row.selectedCount,0),
+    nearTieFamilyCount:rows.filter(row=>row.selectionMode==="SECOND_NEAR_TIE_BREADTH").length,
+    rows,
+    passed:rows.every(row=>row.candidateCount>0&&row.selectedCount>0)
+  };
+}
+
+function buildThirdPurchaseBridgeAudit(items,familyMeta){
+  const rows=[];
+  for(const meta of familyMeta.values())for(const row of (meta.thirdPurchaseBridgeRows||[]))rows.push(row);
+  const selectedPairs=new Set(rows.map(row=>`${row.first}-${row.second}`));
+  const expected=(items||[]).filter(item=>item.pairNaturalPositionEligible&&item.branchHeadMatched===true&&selectedPairs.has(`${item.order?.[0]}-${item.order?.[1]}`));
+  const evaluated=expected.filter(item=>["SELECTED_FOR_CLASSIFICATION","EVALUATED_NOT_SELECTED"].includes(item.thirdPurchaseBridgeStatus));
+  const selected=evaluated.filter(item=>item.thirdPurchaseBridgeStatus==="SELECTED_FOR_CLASSIFICATION");
+  return{
+    version:"THIRD-PURCHASE-BRIDGE-1.0",
+    policy:"PAIR_ONLY_GATE_THEN_ALL_THIRD_TERMINALS_ARE_EVALUATED_BEFORE_CLASSIFICATION",
+    pairCount:rows.length,
+    candidateCount:rows.reduce((sum,row)=>sum+row.candidateCount,0),
+    selectedCount:rows.reduce((sum,row)=>sum+row.selectedCount,0),
+    expectedEvaluatedCount:expected.length,evaluatedCount:evaluated.length,
+    lowThirdRatioEvaluatedCount:evaluated.filter(item=>Number(item.thirdFamilyRelativeToBest)<.70).length,
+    lowThirdRatioSelectedCount:selected.filter(item=>Number(item.thirdFamilyRelativeToBest)<.70).length,
+    lowTerminalConvergenceEvaluatedCount:evaluated.filter(item=>Number(item.naturalConvergenceScore)<.46).length,
+    pairGateUsesThirdInput:false,
+    rows,
+    passed:rows.every(row=>row.candidateCount>0&&row.selectedCount>0)&&expected.length===evaluated.length
+  };
+}
+
+function buildCombinationCompletenessAudit(items,familyMeta){
+  const itemByKey=new Map((items||[]).map(item=>[key(item.order),item]));
+  const rows=[];
+  for(const meta of familyMeta.values()){
+    const secondRow=meta.secondPurchaseBridgeRow;
+    if(!secondRow)continue;
+    const selectedSeconds=new Set((secondRow.rows||[]).filter(row=>row.selected).map(row=>Number(row.second)));
+    for(const second of selectedSeconds){
+      const thirdRow=(meta.thirdPurchaseBridgeRows||[]).find(row=>Number(row.second)===second);
+      const candidates=thirdRow?.rows||[];
+      const selectedOrders=candidates.filter(row=>row.selected).map(row=>Array.isArray(row.order)?row.order.join("-"):String(row.order));
+      const missingSelectedOrders=selectedOrders.filter(order=>!itemByKey.has(order));
+      const evaluatedSelected=selectedOrders.map(order=>itemByKey.get(order)).filter(Boolean);
+      const classifiableCandidates=candidates
+        .map(row=>itemByKey.get(Array.isArray(row.order)?row.order.join("-"):String(row.order)))
+        .filter(Boolean)
+        .filter(item=>Number(item.naturalConvergenceScore)>=.46 && item.branchHeadMatched===true);
+      const purchased=evaluatedSelected.filter(item=>item.purchaseStatus===PURCHASED);
+      const hasUsableCandidate=classifiableCandidates.length>0;
+      const passed=Boolean(thirdRow)&&missingSelectedOrders.length===0&&selectedOrders.length>0&&(!hasUsableCandidate||purchased.length>0);
+      rows.push({
+        first:Number(secondRow.first),second,
+        thirdBridgePresent:Boolean(thirdRow),
+        candidateThirdCount:candidates.length,selectedThirdCount:selectedOrders.length,
+        selectedOrders,missingSelectedOrders,
+        classifiableCandidateCount:classifiableCandidates.length,
+        purchasedSelectedCount:purchased.length,
+        combinationRecoveryKey:thirdRow?.combinationRecoveryKey||null,
+        passed
+      });
+    }
+  }
+  return{
+    version:"COMBINATION-COMPLETENESS-1.0",
+    policy:"EVERY_SELECTED_1_2_PAIR_MUST_HAVE_AN_EXISTING_EVALUATED_1_2_3_TERMINAL_AND_RETAIN_ONE_PURCHASE_TERMINAL_WHEN_A_NORMAL_CLASSIFIABLE_COMBINATION_EXISTS",
+    pairCount:rows.length,
+    recoveredPairCount:rows.filter(row=>row.combinationRecoveryKey).length,
+    missingTerminalCount:sum(rows.map(row=>row.missingSelectedOrders.length)),
+    uncoveredClassifiablePairCount:rows.filter(row=>row.classifiableCandidateCount>0&&row.purchasedSelectedCount===0).length,
+    rows,
+    passed:rows.every(row=>row.passed)
+  };
 }
 
 function buildScenarioSummary(branches){
@@ -751,7 +1354,7 @@ function buildChatSpecAudit(items,branches,families,primary){
   const center=branches.filter(b=>normalizePriority(b.priority)==="main");
   return{
     version:"KEIRIN-CHAT-SPEC-v1-CODED",
-    policy:"MULTI_MAIN_BRANCH_CLUSTER_THEN_NATURAL_TERMINAL_SET_THEN_PURCHASE",
+    policy:"MULTI_MAIN_BRANCH_CLUSTER_THEN_PAIR_SELECTION_THEN_DEDICATED_THIRD_PURCHASE_BRIDGE",
     generatedTerminalCount:items.length,
     terminalDeletionCount:deleted.length,
     unexplainedPurchaseRejectCount:unexplainedRejects.length,
@@ -765,15 +1368,17 @@ function buildChatSpecAudit(items,branches,families,primary){
       high:items.filter(x=>x.naturalConvergenceLevel==="高").length,
       medium:items.filter(x=>x.naturalConvergenceLevel==="中").length,
       low:items.filter(x=>x.naturalConvergenceLevel==="低").length,
-      purchasedLow:items.filter(x=>x.purchaseStatus===PURCHASED && x.naturalConvergenceLevel==="低").length
+      purchasedLow:items.filter(x=>x.purchaseStatus===PURCHASED && x.naturalConvergenceLevel==="低").length,
+      purchasedLowAuthorized:items.filter(x=>x.purchaseStatus===PURCHASED && x.naturalConvergenceLevel==="低" && ((Number(x.naturalConvergenceScore)||0)>=.40 || x.secondPairBreadthRecovery===true)).length,
+      purchasedBelowOrdinaryFloor:items.filter(x=>x.purchaseStatus===PURCHASED && (Number(x.naturalConvergenceScore)||0)<.40).length
     },
-    passed:deleted.length===0&&unexplainedRejects.length===0&&items.filter(x=>x.purchaseStatus===PURCHASED && x.naturalConvergenceLevel==="低").length===0,
+    passed:deleted.length===0&&unexplainedRejects.length===0&&items.filter(x=>x.purchaseStatus===PURCHASED && (Number(x.naturalConvergenceScore)||0)<.40 && x.secondPairBreadthRecovery!==true).length===0,
     invariants:[
       {key:"NO_TERMINAL_DELETION",passed:deleted.length===0},
       {key:"NO_UNEXPLAINED_PURCHASE_REJECT",passed:unexplainedRejects.length===0},
       {key:"PURCHASE_SEPARATE_FROM_GENERATION",passed:true},
       {key:"POSSIBILITY_SEPARATE_FROM_CENTER_FORECAST",passed:true},
-      {key:"NO_LOW_NATURAL_CONVERGENCE_PURCHASE",passed:items.filter(x=>x.purchaseStatus===PURCHASED && x.naturalConvergenceLevel==="低").length===0},
+      {key:"NO_UNAUTHORIZED_LOW_NATURAL_CONVERGENCE_PURCHASE",passed:items.filter(x=>x.purchaseStatus===PURCHASED && (Number(x.naturalConvergenceScore)||0)<.40 && x.secondPairBreadthRecovery!==true).length===0},
       {key:"NO_BRANCH_HEAD_MISMATCH_PURCHASE",passed:items.filter(x=>x.purchaseStatus===PURCHASED && x.branchHeadMatched===false).length===0},
       {key:"NATURAL_TERMINAL_PRECEDENCE",passed:countNaturalSkippedAhead(items)===0}
     ]

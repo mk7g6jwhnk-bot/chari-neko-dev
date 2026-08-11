@@ -25,5 +25,5 @@ const prediction=runKeirinEngine({
 });
 assert.equal(prediction.noBet,true);
 assert.equal(prediction.noBetReason,'GIRLS_LEAD_EVIDENCE_UNAVAILABLE');
-assert.equal(prediction.purchasePlan.length,0);
+assert.ok(prediction.purchasePlan.length>=1);assert.equal(prediction.audit.referencePlan,true);assert.equal(prediction.purchasePlan.every(x=>x.referenceOnly===true),true);
 console.log('PASS girls profile-rate fallback and missing lead-evidence purchase gate');

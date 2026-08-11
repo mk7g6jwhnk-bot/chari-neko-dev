@@ -1,0 +1,1 @@
+import assert from"node:assert/strict";import fs from"node:fs";const app=fs.readFileSync(new URL("../public/app.mjs",import.meta.url),"utf8");for(const t of["独立監査合格","独立監査不合格","独立監査標本不足","会場除外fold合格","提案幅","感度"])assert.ok(app.includes(t));console.log("PASS independent promotion audit UI");

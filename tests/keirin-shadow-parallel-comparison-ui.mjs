@@ -1,0 +1,1 @@
+import assert from"node:assert/strict";import fs from"node:fs";const app=fs.readFileSync(new URL("../public/app.mjs",import.meta.url),"utf8");for(const t of["シャドー比較 待ち","シャドー比較 完了","シャドー優位","現行優位","買い目・本番値は変えません"])assert.ok(app.includes(t));console.log("PASS shadow parallel comparison UI");

@@ -3,6 +3,11 @@ export function generateKeirinTerminals({scored,branches}){
   const lineById=new Map(scored.map(item=>[item.id,item.lineId]));
   const raw=[];
   const generationEvents=[];
+  const secondReevaluationRows=[];
+  const thirdReevaluationRows=[];
+  const thirdDedicatedGenerationRows=[];
+  const mixedLineThirdRows=[];
+  const placementEvaluationRows=[];
 
   for(const branch of branches){
     const paths=[];
@@ -17,7 +22,9 @@ export function generateKeirinTerminals({scored,branches}){
         generationEvents.push({stage:"FIRST",branchId:branch.id,branchLabel:branch.label,number:first.number,action:"EXCLUDED",reasonGroup:"RULE_IMPOSSIBLE",reasonCode:"FIRST_ROLE_INCOMPATIBLE",reason:"展開枝が要求する1着役割と選手のライン役割が一致しない"});
         continue;
       }
-      firstEntries.push({first,score:conditionedFirst(branch,first)});
+      const firstScore=conditionedFirst(branch,first);
+      firstEntries.push({first,score:firstScore});
+      placementEvaluationRows.push(buildPlacementEvaluationRow({stage:"FIRST",branch,participant:first,score:firstScore,orderPrefix:[]}));
     }
     const bestFirst=Math.max(...firstEntries.map(item=>item.score),0);
 
@@ -26,10 +33,28 @@ export function generateKeirinTerminals({scored,branches}){
     for(const {first,score:firstScore} of firstEntries){
       const firstNode=buildFirstNode(branch,first,firstScore,firstTotal);
 
+      // FIRST成立後はいったんライン序列を候補集合から外し、
+      // 1着本人以外の全員をSECONDとして独立再評価する。
+      const expectedSecondNumbers=scored.filter(second=>second.id!==first.id).map(second=>Number(second.number));
       const secondEntries=scored
         .filter(second=>second.id!==first.id)
-        .map(second=>({second,score:conditionedSecond(branch,first,second,lineById)}))
-        .filter(item=>item.score>0);
+        .map(second=>{
+          const score=conditionedSecond(branch,first,second,lineById);
+          placementEvaluationRows.push(buildPlacementEvaluationRow({stage:"SECOND",branch,participant:second,score,orderPrefix:[Number(first.number)]}));
+          return{second,score};
+        });
+      const actualSecondNumbers=secondEntries.map(item=>Number(item.second.number));
+      const missingSecondNumbers=expectedSecondNumbers.filter(number=>!actualSecondNumbers.includes(number));
+      secondReevaluationRows.push({
+        branchId:branch.id,branchLabel:branch.label,first:Number(first.number),
+        expectedNumbers:expectedSecondNumbers,reevaluatedNumbers:actualSecondNumbers,
+        missingNumbers:missingSecondNumbers,
+        expectedCount:expectedSecondNumbers.length,reevaluatedCount:actualSecondNumbers.length,
+        passed:missingSecondNumbers.length===0
+      });
+      if(missingSecondNumbers.length){
+        generationEvents.push({stage:"SECOND",branchId:branch.id,branchLabel:branch.label,order:[first.number],action:"AUDIT_MISS",reasonGroup:"COVERAGE_MISS",reasonCode:"SECOND_REEVALUATION_COVERAGE_MISS",reason:`1着${first.number}成立後に2着再評価されていない選手: ${missingSecondNumbers.join(",")}`});
+      }
       const bestSecond=Math.max(...secondEntries.map(item=>item.score),0);
       const secondTotal=secondEntries.reduce((sum,item)=>sum+item.score,0);
 
@@ -41,15 +66,65 @@ export function generateKeirinTerminals({scored,branches}){
           continue;
         }
 
-        const thirdEntries=scored
+        // THIRD専用工程:
+        // 1-2着が成立した時点で、それまでの総合順位・頭評価を候補生成条件に使わない。
+        // まず残り全員について「3着になる条件」を独立生成し、その後に初めて3着score/確率を付ける。
+        const thirdCandidates=generateThirdCandidates({
+          branch,first,second,scored,lineById
+        });
+        const expectedThirdNumbers=scored
           .filter(third=>third.id!==first.id&&third.id!==second.id)
-          .map(third=>({third,score:conditionedThird(branch,first,second,third,lineById)}))
-          .filter(item=>item.score>0);
-        const bestThird=Math.max(...thirdEntries.map(item=>item.score),0);
-        const thirdTotal=thirdEntries.reduce((sum,item)=>sum+item.score,0);
+          .map(third=>Number(third.number));
+        const generatedThirdNumbers=thirdCandidates.map(item=>Number(item.third.number));
+        const missingThirdNumbers=expectedThirdNumbers.filter(number=>!generatedThirdNumbers.includes(number));
 
-        for(const {third,score:thirdScore} of thirdEntries){
-          const thirdNode=buildThirdNode(branch,secondNode,first,second,third,thirdScore,thirdTotal,lineById);
+        thirdDedicatedGenerationRows.push({
+          branchId:branch.id,branchLabel:branch.label,order:[Number(first.number),Number(second.number)],
+          candidateNumbers:generatedThirdNumbers,
+          conditionSets:thirdCandidates.map(item=>({
+            number:Number(item.third.number),
+            conditionIds:item.requiredConditions.map(condition=>condition.id),
+            conditionKinds:item.requiredConditions.map(condition=>condition.kind)
+          })),
+          probabilityAssignedAfterConditionGeneration:true,
+          scoreBasedGenerationPruningApplied:false,
+          passed:missingThirdNumbers.length===0
+        });
+
+        // 条件生成後にだけ3着scoreを計算。低scoreを理由に候補集合から削除しない。
+        const thirdEntries=thirdCandidates.map(item=>{
+          const score=conditionedThird(branch,first,second,item.third,lineById);
+          placementEvaluationRows.push(buildPlacementEvaluationRow({stage:"THIRD",branch,participant:item.third,score,orderPrefix:[Number(first.number),Number(second.number)]}));
+          return{...item,score};
+        });
+        const actualThirdNumbers=thirdEntries.map(item=>Number(item.third.number));
+        thirdReevaluationRows.push({
+          branchId:branch.id,branchLabel:branch.label,order:[Number(first.number),Number(second.number)],
+          expectedNumbers:expectedThirdNumbers,reevaluatedNumbers:actualThirdNumbers,
+          missingNumbers:missingThirdNumbers,
+          expectedCount:expectedThirdNumbers.length,reevaluatedCount:actualThirdNumbers.length,
+          passed:missingThirdNumbers.length===0
+        });
+        if(missingThirdNumbers.length){
+          generationEvents.push({stage:"THIRD",branchId:branch.id,branchLabel:branch.label,order:[first.number,second.number],action:"AUDIT_MISS",reasonGroup:"COVERAGE_MISS",reasonCode:"THIRD_REEVALUATION_COVERAGE_MISS",reason:`${first.number}-${second.number}成立後に3着条件を独立生成されていない選手: ${missingThirdNumbers.join(",")}`});
+        }
+
+        const mixedExpected=thirdEntries
+          .map(item=>item.third)
+          .filter(third=>["番手","三番手"].includes(String(third.role||"")))
+          .filter(third=>!sameLine(first,third,lineById)&&!sameLine(second,third,lineById))
+          .map(third=>Number(third.number));
+        mixedLineThirdRows.push({
+          branchId:branch.id,branchLabel:branch.label,order:[Number(first.number),Number(second.number)],
+          mixedRearNumbers:mixedExpected,
+          evaluatedMixedRearNumbers:mixedExpected.filter(number=>actualThirdNumbers.includes(number)),
+          passed:mixedExpected.every(number=>actualThirdNumbers.includes(number))
+        });
+        const bestThird=Math.max(...thirdEntries.map(item=>item.score),0);
+        const thirdTotal=thirdEntries.reduce((sum,item)=>sum+Math.max(Number(item.score)||0,.000001),0);
+
+        for(const {third,requiredConditions,score:thirdScore} of thirdEntries){
+          const thirdNode=buildThirdNode(branch,secondNode,first,second,third,thirdScore,thirdTotal,lineById,requiredConditions);
           const thirdConflict=stateConflict(thirdNode);
           if(thirdConflict){
             generationEvents.push({stage:"THIRD",branchId:branch.id,branchLabel:branch.label,order:[first.number,second.number,third.number],action:"EXCLUDED",reasonGroup:"RULE_IMPOSSIBLE",reasonCode:"PARENT_STATE_CONTRADICTION",reason:thirdConflict});
@@ -154,8 +229,39 @@ export function generateKeirinTerminals({scored,branches}){
   const allowedReasonGroups=new Set(["RULE_IMPOSSIBLE","DATA_CONTRADICTION","DUPLICATE"]);
   const unexplained=excluded.filter(event=>!allowedReasonGroups.has(event.reasonGroup)||!event.reasonCode||!event.reason);
   const nodeStateAudit=buildNodeStateAudit(raw);
+  const secondCoverageMisses=secondReevaluationRows.filter(row=>!row.passed);
+  const thirdCoverageMisses=thirdReevaluationRows.filter(row=>!row.passed);
+  const mixedCoverageMisses=mixedLineThirdRows.filter(row=>!row.passed);
+  const thirdDedicatedAudit={
+    version:"THIRD-DEDICATED-GENERATION-1.0",
+    policy:"GENERATE_ALL_REMAINING_THIRD_CONDITIONS_BEFORE_SCORE_AND_PROBABILITY",
+    pairCount:thirdDedicatedGenerationRows.length,
+    missingCandidatePairCount:thirdDedicatedGenerationRows.filter(row=>!row.passed).length,
+    scoreBasedGenerationPruningCount:thirdDedicatedGenerationRows.filter(row=>row.scoreBasedGenerationPruningApplied===true).length,
+    allConditionsGeneratedBeforeProbability:thirdDedicatedGenerationRows.every(row=>row.probabilityAssignedAfterConditionGeneration===true),
+    rows:thirdDedicatedGenerationRows,
+    passed:thirdDedicatedGenerationRows.every(row=>row.passed&&row.scoreBasedGenerationPruningApplied===false&&row.probabilityAssignedAfterConditionGeneration===true)
+  };
+  const positionTerminalConnectionAudit=buildPositionTerminalConnectionAudit({
+    scored,branches,placementEvaluationRows,secondReevaluationRows,thirdReevaluationRows,raw,terminals
+  });
+  const reevaluationCoverageAudit={
+    version:"REEVALUATION-COVERAGE-1.2-POSITION-TERMINAL-CONNECTED",
+    policy:"POSITION_SPECIFIC_EVALUATION_FEEDS_EVERY_CHILD_THEN_COMPLETE_TERMINALS_BEFORE_FINAL_PROBABILITY",
+    secondBranchCount:secondReevaluationRows.length,
+    thirdPairCount:thirdReevaluationRows.length,
+    secondCoverageMissCount:secondCoverageMisses.length,
+    thirdCoverageMissCount:thirdCoverageMisses.length,
+    mixedLineThirdCoverageMissCount:mixedCoverageMisses.length,
+    secondRows:secondReevaluationRows,
+    thirdRows:thirdReevaluationRows,
+    mixedLineThirdRows,
+    thirdDedicatedAudit,
+    positionTerminalConnectionAudit,
+    passed:secondCoverageMisses.length===0&&thirdCoverageMisses.length===0&&mixedCoverageMisses.length===0&&thirdDedicatedAudit.passed&&positionTerminalConnectionAudit.passed
+  };
   Object.defineProperty(terminals,"generationAudit",{value:{
-    policy:"ONE_NODE_ONE_EVENT_PARENT_STATE_INHERITANCE",
+    policy:"ONE_NODE_ONE_EVENT_PLUS_DEDICATED_THIRD_CONDITION_GENERATION_BEFORE_PROBABILITY",
     allowedExclusionReasonGroups:[...allowedReasonGroups],
     generatedUniqueTerminalCount:terminals.length,
     rawSupportedPathCount:raw.length,
@@ -163,7 +269,9 @@ export function generateKeirinTerminals({scored,branches}){
     mergedDuplicateCount:merged.length,
     unexplainedExclusionCount:unexplained.length,
     nodeStateAudit,
-    passed:unexplained.length===0&&nodeStateAudit.passed,
+    reevaluationCoverageAudit,
+    positionTerminalConnectionAudit,
+    passed:unexplained.length===0&&nodeStateAudit.passed&&reevaluationCoverageAudit.passed&&positionTerminalConnectionAudit.passed,
     events:generationEvents
   },enumerable:false});
   return terminals;
@@ -177,81 +285,172 @@ function buildFirstNode(branch,first,score,total){
     event,
     inheritedState:{events:[],conditions:[],facts:{}},
     newRequiredConditions:required,
-    resultingState:{events:[event],conditions:[...required],facts:{winner:first.number,branchType:branch.branchType,primaryLineId:branch.primaryLineId||null}},
+    resultingState:buildWorldState({events:[],conditions:[],facts:{}},event,required,{winner:first.number,branchType:branch.branchType,primaryLineId:branch.primaryLineId||null}).state,
+    worldFactConflicts:buildWorldState({events:[],conditions:[],facts:{}},event,required,{winner:first.number,branchType:branch.branchType,primaryLineId:branch.primaryLineId||null}).conflicts,
     score,
     conditionalProbability:nodeConditionalProbability(score,total,required)
   };
 }
 function buildSecondNode(branch,parent,first,second,score,total,lineById){
   const event={type:"FINISH_POSITION",participantNumber:second.number,position:2,label:`${second.number}番が2着`};
-  const required=secondConditions(first,second,lineById);
+  const required=secondConditions(branch,first,second,lineById);
   return{
     stage:"SECOND",
     event,
     inheritedState:cloneState(parent.resultingState),
     newRequiredConditions:required,
-    resultingState:{events:[...parent.resultingState.events,event],conditions:[...parent.resultingState.conditions,...required],facts:{...parent.resultingState.facts,second:second.number}},
+    resultingState:buildWorldState(parent.resultingState,event,required,{second:second.number}).state,
+    worldFactConflicts:buildWorldState(parent.resultingState,event,required,{second:second.number}).conflicts,
     score,
     conditionalProbability:nodeConditionalProbability(score,total,required)
   };
 }
-function buildThirdNode(branch,parent,first,second,third,score,total,lineById){
+function generateThirdCandidates({branch,first,second,scored,lineById}){
+  return (Array.isArray(scored)?scored:[])
+    .filter(third=>third.id!==first.id&&third.id!==second.id)
+    .map(third=>({
+      third,
+      requiredConditions:thirdConditions(branch,first,second,third,lineById),
+      generatedBeforeProbability:true
+    }));
+}
+function buildThirdNode(branch,parent,first,second,third,score,total,lineById,preGeneratedConditions=null){
   const event={type:"FINISH_POSITION",participantNumber:third.number,position:3,label:`${third.number}番が3着`};
-  const required=thirdConditions(first,second,third,lineById);
+  const required=Array.isArray(preGeneratedConditions)?preGeneratedConditions:thirdConditions(branch,first,second,third,lineById);
   return{
     stage:"THIRD",
     event,
     inheritedState:cloneState(parent.resultingState),
     newRequiredConditions:required,
-    resultingState:{events:[...parent.resultingState.events,event],conditions:[...parent.resultingState.conditions,...required],facts:{...parent.resultingState.facts,third:third.number}},
+    resultingState:buildWorldState(parent.resultingState,event,required,{third:third.number}).state,
+    worldFactConflicts:buildWorldState(parent.resultingState,event,required,{third:third.number}).conflicts,
     score,
     conditionalProbability:nodeConditionalProbability(score,total,required)
   };
 }
 function firstConditions(branch,first){
   if(branch.branchType==="LEADER_HOLD")return[
-    condition(`LEADER_HOLD_${first.number}`,`${first.number}番が主導権を取れる`,"natural",.78,true),
-    condition(`LEADER_FINISH_${first.number}`,`${first.number}番が先行後も1着まで脚を残せる`,"natural",.72,true)
+    condition(`LEADER_HOLD_${first.number}`,`${first.number}番が主導権を取れる`,"natural",.78,true,{sets:{initiativeLine:branch.primaryLineId||first.lineId||null,leadRider:first.number}}),
+    condition(`LEADER_FINISH_${first.number}`,`${first.number}番が先行後も1着まで脚を残せる`,"natural",.72,true,{requires:{leadRider:first.number},sets:{winnerMechanism:"LEADER_HOLD"}})
   ];
   if(branch.branchType==="MAKURI_SUCCESS")return[
-    condition(`MAKURI_POSITION_${first.number}`,`${first.number}番が捲りを打てる位置とタイミングを確保する`,"natural",.72,true),
-    condition(`MAKURI_REACH_${first.number}`,`${first.number}番の捲りが前団を越えて1着まで届く`,"natural",.68,true)
+    condition(`MAKURI_POSITION_${first.number}`,`${first.number}番が捲りを打てる位置とタイミングを確保する`,"natural",.72,true,{sets:{attackLine:branch.primaryLineId||first.lineId||null,attacker:first.number}}),
+    condition(`MAKURI_REACH_${first.number}`,`${first.number}番の捲りが前団を越えて1着まで届く`,"natural",.68,true,{requires:{attacker:first.number},sets:{winnerMechanism:"MAKURI_SUCCESS"}})
   ];
   if(branch.branchType==="BANTE_SASHI")return[
-    condition(`BANTE_TRACK_${first.number}`,`${first.number}番が前を追走して番手位置を維持する`,"natural",.84,true),
-    condition(`BANTE_PASS_${first.number}`,`${first.number}番が直線で前を交わして1着になる`,"natural",.70,true)
+    condition(`BANTE_TRACK_${first.number}`,`${first.number}番が前を追走して番手位置を維持する`,"natural",.84,true,{sets:{trackedLine:branch.primaryLineId||first.lineId||null,trackedRider:first.number}}),
+    condition(`BANTE_PASS_${first.number}`,`${first.number}番が直線で前を交わして1着になる`,"natural",.70,true,{requires:{trackedRider:first.number},sets:{winnerMechanism:"BANTE_SASHI"}})
   ];
   if(branch.branchType==="LINE_SEPARATION")return[
-    condition(`SEPARATION_OCCURRED_${first.number}`,`前位の追走崩れ・離れが発生し${first.number}番に進路が生まれる`,"extra",.42,true),
-    condition(`SEPARATION_USE_${first.number}`,`${first.number}番がその空いた位置を使って1着まで到達する`,"extra",.48,true)
+    condition(`SEPARATION_OCCURRED_${first.number}`,`前位の追走崩れ・離れが発生し${first.number}番に進路が生まれる`,"extra",.42,true,{sets:{separationOccurred:true}}),
+    condition(`SEPARATION_USE_${first.number}`,`${first.number}番がその空いた位置を使って1着まで到達する`,"extra",.48,true,{requires:{separationOccurred:true},sets:{winnerMechanism:"LINE_SEPARATION"}})
   ];
   return[
     condition(`BRANCH_${branch.id}`,`${branch.label||branch.id}が${first.number}番1着まで成立する`,"scenario",.60,true)
   ];
 }
-function secondConditions(first,second,lineById){
-  const same=sameLine(first,second,lineById);
-  const out=[];
+function secondConditions(branch,first,second,lineById){
+  const relation=lineRelation(first,second,lineById);
+  const same=relation==="SAME";
+  const mechanism=relation==="UNKNOWN"?{key:"unresolvedPosition",id:"UNRESOLVED_POSITION",label:"並び未取得での位置残り"}:selectSecondMechanism(branch,first,second,same);
+  const score=mechanismScore(second,"second",mechanism.key);
   if(same){
-    out.push(condition(`SECOND_LINE_HOLD_${second.number}`,`${second.number}番が1着成立時の同ライン関係を壊さず2着位置を保つ`,"natural",.80,true));
-  }else{
-    out.push(condition(`SECOND_OTHER_LINE_SURVIVE_${second.number}`,`${second.number}番が1着成立状態と両立したまま別線から2着位置へ残る・浮上する`,"extra",.52,true));
+    return[condition(`SECOND_MECHANISM_${mechanism.id}_${second.number}`,`${second.number}番が${mechanism.label}で、1着成立状態を壊さず2着へ残る`,"natural",mechanismAdjustedProbability(.80,score),true,{sets:{secondMechanism:mechanism.key},mechanism:{stage:"SECOND",key:mechanism.key,label:mechanism.label,score,baseProbability:.80}})];
   }
-  return out;
+  if(relation==="UNKNOWN"){
+    return[condition(`SECOND_MECHANISM_${mechanism.id}_${second.number}`,`${second.number}番を並び関係未確定のまま独立評価し、2着へ残る`,"uncertain",mechanismAdjustedProbability(.62,score),true,{sets:{secondMechanism:mechanism.key},mechanism:{stage:"SECOND",key:mechanism.key,label:mechanism.label,score,baseProbability:.62}})];
+  }
+  return[condition(`SECOND_MECHANISM_${mechanism.id}_${second.number}`,`${second.number}番が${mechanism.label}で、1着成立状態と両立したまま2着へ浮上・残存する`,"extra",mechanismAdjustedProbability(.52,score),true,{sets:{secondMechanism:mechanism.key},mechanism:{stage:"SECOND",key:mechanism.key,label:mechanism.label,score,baseProbability:.52}})];
 }
-function thirdConditions(first,second,third,lineById){
-  const same=sameLine(first,third,lineById)||sameLine(second,third,lineById);
-  const out=[];
+function thirdConditions(branch,first,second,third,lineById){
+  const relationFirst=lineRelation(first,third,lineById),relationSecond=lineRelation(second,third,lineById);
+  const sameFirst=relationFirst==="SAME",sameSecond=relationSecond==="SAME",same=sameFirst||sameSecond;
+  const unresolved=!same&&(relationFirst==="UNKNOWN"||relationSecond==="UNKNOWN");
+  const mechanism=unresolved?{key:"unresolvedPosition",id:"UNRESOLVED_POSITION",label:"並び未取得での位置残り"}:selectThirdMechanism(branch,first,second,third,{sameFirst,sameSecond,same});
+  const score=mechanismScore(third,"third",mechanism.key);
   if(same){
-    out.push(condition(`THIRD_LINE_HOLD_${third.number}`,`${third.number}番が1・2着成立状態を壊さずライン関係から3着位置を保つ`,"natural",.78,true));
-  }else{
-    out.push(condition(`THIRD_OTHER_LINE_SURVIVE_${third.number}`,`${third.number}番が1・2着成立状態と両立したまま別線から3着位置へ残る・浮上する`,"extra",.56,true));
+    return[condition(`THIRD_MECHANISM_${mechanism.id}_${third.number}`,`${third.number}番が${mechanism.label}で、1・2着成立状態を壊さず3着へ残る`,"natural",mechanismAdjustedProbability(.78,score),true,{sets:{thirdMechanism:mechanism.key},mechanism:{stage:"THIRD",key:mechanism.key,label:mechanism.label,score,baseProbability:.78}})];
   }
-  return out;
+  if(unresolved){
+    return[condition(`THIRD_MECHANISM_${mechanism.id}_${third.number}`,`${third.number}番を並び関係未確定のまま独立評価し、3着へ残る`,"uncertain",mechanismAdjustedProbability(.64,score),true,{sets:{thirdMechanism:mechanism.key},mechanism:{stage:"THIRD",key:mechanism.key,label:mechanism.label,score,baseProbability:.64}})];
+  }
+  return[condition(`THIRD_MECHANISM_${mechanism.id}_${third.number}`,`${third.number}番が${mechanism.label}で、1・2着成立状態と両立したまま3着へ浮上・残存する`,"extra",mechanismAdjustedProbability(.56,score),true,{sets:{thirdMechanism:mechanism.key},mechanism:{stage:"THIRD",key:mechanism.key,label:mechanism.label,score,baseProbability:.56}})];
 }
-function condition(id,label,kind,probability=null,critical=false){
+function selectSecondMechanism(branch,first,second,same){
+  if(branch?.branchType==="BANTE_SASHI"&&same&&second?.role==="自力")
+    return{key:"leaderRemain",id:"LEADER_REMAIN",label:"先行残り"};
+  if(same)
+    return{key:"lineFollower",id:"LINE_FOLLOWER",label:"追走残り"};
+  return{key:"otherLineRemain",id:"OTHER_LINE_REMAIN",label:"別線残り"};
+}
+function selectThirdMechanism(branch,first,second,third,{sameFirst,sameSecond,same}={}){
+  if(same&&third?.role==="三番手")
+    return{key:"lineThird",id:"LINE_THIRD",label:"ライン3番手残り"};
+  if(same)
+    return{key:"positionRemain",id:"POSITION_REMAIN",label:"位置残り"};
+  return{key:"otherLineRemain",id:"OTHER_LINE_REMAIN",label:"別線残り"};
+}
+function mechanismScore(participant,stage,key){
+  const bucket=stage==="second"
+    ?participant?.riderEvaluationV2?.secondMechanisms
+    :participant?.riderEvaluationV2?.thirdMechanisms;
+  const value=Number(bucket?.[key]);
+  return Number.isFinite(value)?value:null;
+}
+function mechanismAdjustedProbability(baseProbability,score){
+  const base=Number(baseProbability);
+  if(!finiteProbability(base)||!Number.isFinite(Number(score)))return base;
+  // riderEvaluationV2 is on a roughly 0-10 scale. 5 is neutral.
+  // Use a narrow bounded adjustment so mechanism evidence can rank otherwise-similar
+  // child nodes without turning a heuristic rider score into a direct probability.
+  const centered=(Number(score)-5)/5;
+  const factor=1+Math.max(-.12,Math.min(.12,centered*.12));
+  return Math.max(.12,Math.min(.95,base*factor));
+}
+
+function condition(id,label,kind,probability=null,critical=false,worldFacts={}){
   const defaultProbability=kind==="natural"?.82:kind==="conditional"?.70:kind==="extra"?.48:kind==="scenario"?.62:kind==="event"?.88:.65;
-  return{id,label,kind,probability:finiteProbability(probability)?Number(probability):defaultProbability,critical:Boolean(critical)};
+  return{
+    id,label,kind,
+    probability:finiteProbability(probability)?Number(probability):defaultProbability,
+    critical:Boolean(critical),
+    requires:cleanFacts(worldFacts.requires),
+    sets:cleanFacts(worldFacts.sets),
+    forbids:cleanFacts(worldFacts.forbids),
+    mechanism:worldFacts?.mechanism?{
+      stage:worldFacts.mechanism.stage||null,
+      key:worldFacts.mechanism.key||null,
+      label:worldFacts.mechanism.label||null,
+      score:Number.isFinite(Number(worldFacts.mechanism.score))?Number(worldFacts.mechanism.score):null,
+      baseProbability:finiteProbability(worldFacts.mechanism.baseProbability)?Number(worldFacts.mechanism.baseProbability):null,
+      adjustedProbability:finiteProbability(probability)?Number(probability):defaultProbability
+    }:null
+  };
+}
+function cleanFacts(obj){const out={};for(const[k,v]of Object.entries(obj||{}))if(v!==null&&v!==undefined&&v!=="")out[k]=v;return out}
+export function auditWorldFactTransition(parentFacts={},conditions=[],eventFacts={}){
+  const facts={...(parentFacts||{})},conflicts=[];
+  for(const c of conditions||[]){
+    for(const[k,v]of Object.entries(c?.requires||{})){
+      if(Object.prototype.hasOwnProperty.call(facts,k)&&facts[k]!==v)conflicts.push(`${c.id||"condition"}: ${k}=${String(v)} が必要だが親状態は ${String(facts[k])}`);
+    }
+    for(const[k,v]of Object.entries(c?.forbids||{})){
+      if(Object.prototype.hasOwnProperty.call(facts,k)&&facts[k]===v)conflicts.push(`${c.id||"condition"}: ${k}=${String(v)} は親状態と両立不可`);
+    }
+    for(const[k,v]of Object.entries(c?.sets||{})){
+      if(Object.prototype.hasOwnProperty.call(facts,k)&&facts[k]!==v)conflicts.push(`${c.id||"condition"}: ${k}=${String(v)} は親状態 ${String(facts[k])} を破壊`);
+      else facts[k]=v;
+    }
+  }
+  for(const[k,v]of Object.entries(cleanFacts(eventFacts))){
+    if(Object.prototype.hasOwnProperty.call(facts,k)&&facts[k]!==v)conflicts.push(`event: ${k}=${String(v)} は親状態 ${String(facts[k])} と矛盾`);
+    else facts[k]=v;
+  }
+  return{facts,conflicts,passed:conflicts.length===0};
+}
+function buildWorldState(parent,event,conditions,eventFacts={}){
+  const transition=auditWorldFactTransition(parent?.facts||{},conditions,eventFacts);
+  return{state:{events:[...(parent?.events||[]),event],conditions:[...(parent?.conditions||[]),...(conditions||[])],facts:transition.facts},conflicts:transition.conflicts};
 }
 function nodeConditionalProbability(score,total,requiredConditions=[]){
   const base=total>0?score/total:0;
@@ -270,6 +469,7 @@ function nodeConditionalProbability(score,total,requiredConditions=[]){
 function finiteProbability(v){return Number.isFinite(Number(v))&&Number(v)>=0&&Number(v)<=1}
 function cloneState(state){return{events:(state?.events||[]).map(x=>({...x})),conditions:(state?.conditions||[]).map(x=>({...x})),facts:{...(state?.facts||{})}}}
 function stateConflict(node){
+  const world=node?.worldFactConflicts||[];if(world.length)return `世界状態矛盾: ${world[0]}`;
   const events=node?.resultingState?.events||[],positions=new Map(),participants=new Map();
   for(const event of events){
     if(event?.type!=="FINISH_POSITION")continue;
@@ -313,8 +513,8 @@ function buildNodeStateAudit(raw){
     }
   }
   return{
-    version:"NODE-STATE-1.1-CONDITION-PROBABILITY",
-    policy:"PARENT_STATE_INHERIT_PLUS_ONE_NEW_EVENT",
+    version:"NODE-STATE-1.2-WORLD-FACT-CONTRADICTION",
+    policy:"PARENT_STATE_INHERIT_PLUS_ONE_NEW_EVENT_PLUS_WORLD_FACTS",
     checkedPathCount:raw.length,
     violationCount:violations,
     inheritanceViolationCount,
@@ -353,9 +553,10 @@ function branchPathCompatible(branch,first,second,third){
 }
 
 function conditionedFirst(branch,participant){
-  const candidate=branch.firstCandidateScores?.[participant.id]??participant.roleScores.first;
+  const placementScore=placementScoreOf(participant,"first");
+  const candidate=branch.firstCandidateScores?.[participant.id]??placementScore;
   const e=participant.evidence||{};
-  let branchAbility=participant.roleScores.first||5;
+  let branchAbility=placementScore;
   switch(branch.branchType){
     case"LEADER_HOLD": branchAbility=weightedAvailable([[participant.roleScores.first,.30],[e.start,.28],[e.stamina,.22],[e.recent,.12],[e.finish,.08]]); break;
     case"BANTE_SASHI": branchAbility=weightedAvailable([[participant.roleScores.first,.28],[e.finish,.30],[e.tracking,.22],[e.recent,.12],[e.lineTrust,.08]]); break;
@@ -369,7 +570,7 @@ function conditionedFirst(branch,participant){
 
 function conditionedSecond(branch,first,second,lineById){
   const same=sameLine(first,second,lineById),role=second.role,e=second.evidence||{};
-  let score=second.roleScores.second||5;
+  let score=placementScoreOf(second,"second");
   let factor=1;
   switch(branch.branchType){
     case"LEADER_HOLD":
@@ -402,7 +603,7 @@ function conditionedSecond(branch,first,second,lineById){
 
 function conditionedThird(branch,first,second,third,lineById){
   const sameFirst=sameLine(first,third,lineById),sameSecond=sameLine(second,third,lineById),role=third.role,e=third.evidence||{};
-  let score=third.roleScores.third||5;
+  let score=placementScoreOf(third,"third");
   let factor=1;
   switch(branch.branchType){
     case"LEADER_HOLD":
@@ -433,6 +634,52 @@ function conditionedThird(branch,first,second,third,lineById){
   return positive(score)*factor;
 }
 
+function placementScoreOf(participant,stage){
+  const explicit=Number(participant?.riderEvaluationV2?.placementScores?.[stage]);
+  if(Number.isFinite(explicit))return explicit;
+  const legacy=Number(participant?.roleScores?.[stage]);
+  return Number.isFinite(legacy)?legacy:5;
+}
+function buildPlacementEvaluationRow({stage,branch,participant,score,orderPrefix=[]}){
+  const key=String(stage||"").toLowerCase();
+  const evalv=participant?.riderEvaluationV2||{};
+  return{
+    stage,branchId:branch?.id||null,branchLabel:branch?.label||null,orderPrefix:[...(orderPrefix||[])],
+    number:Number(participant?.number),
+    rawAbilityScore:Number.isFinite(Number(evalv?.rawAbilityPlacementScores?.[key]))?Number(evalv.rawAbilityPlacementScores[key]):null,
+    contextPriorScore:Number.isFinite(Number(evalv?.contextPriorScores?.[key]))?Number(evalv.contextPriorScores[key]):null,
+    finalPlacementScore:Number.isFinite(Number(evalv?.placementScores?.[key]))?Number(evalv.placementScores[key]):placementScoreOf(participant,key),
+    conditionedStageScore:Number(score),
+    inputSource:"RIDER_EVAL_V3_PLACEMENT_SCORES",
+    scorePruned:false
+  };
+}
+function buildPositionTerminalConnectionAudit({scored=[],branches=[],placementEvaluationRows=[],secondReevaluationRows=[],thirdReevaluationRows=[],raw=[],terminals=[]}={}){
+  const missingInputRows=placementEvaluationRows.filter(row=>!Number.isFinite(row.finalPlacementScore)||!Number.isFinite(row.conditionedStageScore));
+  const scorePrunedRows=placementEvaluationRows.filter(row=>row.scorePruned===true);
+  const secondMisses=secondReevaluationRows.filter(row=>!row.passed);
+  const thirdMisses=thirdReevaluationRows.filter(row=>!row.passed);
+  const rawOrders=new Set(raw.map(row=>(row.order||[]).join("-")));
+  const terminalOrders=new Set(terminals.map(row=>(row.order||[]).join("-")));
+  const mergeOnlyMissing=[...rawOrders].filter(order=>!terminalOrders.has(order));
+  return{
+    version:"POSITION-TERMINAL-CONNECTION-1.0",
+    policy:"ABILITY_AND_CONTEXT_STAY_SEPARATE_THROUGH_POSITION_EVAL_ALL_SECOND_ALL_THIRD_NO_SCORE_PRUNE_FINAL_TERMINAL_PROBABILITY_AFTER_COMPLETION",
+    riderCount:scored.length,branchCount:branches.length,evaluationRowCount:placementEvaluationRows.length,
+    stageCounts:{
+      first:placementEvaluationRows.filter(row=>row.stage==="FIRST").length,
+      second:placementEvaluationRows.filter(row=>row.stage==="SECOND").length,
+      third:placementEvaluationRows.filter(row=>row.stage==="THIRD").length
+    },
+    missingPlacementInputCount:missingInputRows.length,scoreBasedPruningCount:scorePrunedRows.length,
+    secondCoverageMissCount:secondMisses.length,thirdCoverageMissCount:thirdMisses.length,
+    completedRawPathCount:raw.length,uniqueTerminalCount:terminals.length,rawOrderMissingAfterMergeCount:mergeOnlyMissing.length,
+    terminalProbabilityAssignedAfterPathCompletion:true,
+    rows:placementEvaluationRows,
+    passed:missingInputRows.length===0&&scorePrunedRows.length===0&&secondMisses.length===0&&thirdMisses.length===0&&mergeOnlyMissing.length===0&&terminals.every(row=>Number.isFinite(Number(row.probability)))
+  };
+}
+
 function positionEvidence(branch,participant,target){
   const e=participant.evidence||{};
   const values={recentForm:e.recent??null,startPower:e.start??null,sprintPower:e.sprint??null,finishPower:e.finish??null,trackingSkill:e.tracking??null,roleScore:participant.roleScores?.[target]??null};
@@ -459,6 +706,11 @@ function branchRoleFactor(branch,participant,target){
   if(branch.branchType==="LINE_SEPARATION"&&participant.role==="番手")return 1.12;
   return 1;
 }
-function sameLine(a,b,lineById){const la=lineById.get(a.id),lb=lineById.get(b.id);return Boolean(la&&lb&&la===lb&&!String(la).startsWith("unknown-"))}
+function lineRelation(a,b,lineById){
+  const la=lineById.get(a.id),lb=lineById.get(b.id);
+  if(!la||!lb||String(la).startsWith("unknown-")||String(lb).startsWith("unknown-"))return"UNKNOWN";
+  return la===lb?"SAME":"DIFFERENT";
+}
+function sameLine(a,b,lineById){return lineRelation(a,b,lineById)==="SAME"}
 function weightedAvailable(items){const valid=items.filter(([value,weight])=>value!==null&&value!==undefined&&value!==""&&Number.isFinite(Number(value))&&weight>0);const total=valid.reduce((sum,[,weight])=>sum+weight,0);return total>0?valid.reduce((sum,[value,weight])=>sum+Number(value)*weight,0)/total:5}
 function positive(value){return Math.max(.05,Number(value)||0)}

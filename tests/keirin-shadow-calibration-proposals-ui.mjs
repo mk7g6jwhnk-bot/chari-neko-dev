@@ -1,0 +1,1 @@
+import assert from"node:assert/strict";import fs from"node:fs";const app=fs.readFileSync(new URL("../public/app.mjs",import.meta.url),"utf8");for(const t of["研究レビュー候補","シャドー監視","研究提案","縮約","自動昇格しません"])assert.ok(app.includes(t));console.log("PASS shadow calibration proposal UI");

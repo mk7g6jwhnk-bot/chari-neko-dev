@@ -1,0 +1,10 @@
+import assert from"node:assert/strict";import fs from"node:fs";
+const s=fs.readFileSync(new URL("../keirin/engine/chat-spec-v1-policy.mjs",import.meta.url),"utf8");
+assert.ok(s.includes(".filter(x=>x.pairNaturalConvergenceScore>=.46)"));
+const i=s.indexOf("function derivePairNaturalConvergence");
+const j=s.indexOf("function deriveNaturalConvergence",i);
+const block=s.slice(i,j);
+assert.equal(block.includes("thirdR"),false);
+assert.equal(block.includes('stage==="THIRD"'),false);
+assert.ok(block.includes('["FIRST","SECOND"]'));
+console.log("PASS pair convergence source has no THIRD input");

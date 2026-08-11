@@ -18,22 +18,22 @@ export function scoreKeirinParticipants({race,venueProfile={}}){
       escape:scoreMechanism([
         item("startPower",start,.27),item("stamina",stamina,.21),item("recentForm",recent,.17),
         item("attackTiming",timing,.14),item("sprintPower",sprint,.09),item("finishPower",finish,.05),
-        item("venueSuitability",venue,.03),item("rolePrior",rolePrior.firstEscape,.04)
+        item("venueSuitability",venue,.03)
       ]),
       makuri:scoreMechanism([
         item("sprintPower",sprint,.28),item("attackTiming",timing,.18),item("recentForm",recent,.16),
         item("finishPower",finish,.14),item("startPower",start,.08),item("stamina",stamina,.07),
-        item("venueSuitability",venue,.04),item("rolePrior",rolePrior.firstMakuri,.05)
+        item("venueSuitability",venue,.04)
       ]),
       sashi:scoreMechanism([
         item("finishPower",finish,.27),item("trackingSkill",tracking,.20),item("recentForm",recent,.16),
         item("attackTiming",timing,.12),item("lineTrust",lineTrust,.09),item("stamina",stamina,.05),
-        item("venueSuitability",venue,.04),item("rolePrior",rolePrior.firstSashi,.07)
+        item("venueSuitability",venue,.04)
       ]),
       banteSashi:scoreMechanism([
         item("finishPower",finish,.25),item("trackingSkill",tracking,.22),item("lineTrust",lineTrust,.13),
         item("recentForm",recent,.14),item("attackTiming",timing,.10),item("stamina",stamina,.05),
-        item("venueSuitability",venue,.04),item("rolePrior",rolePrior.firstBante,.07)
+        item("venueSuitability",venue,.04)
       ])
     };
 
@@ -41,39 +41,41 @@ export function scoreKeirinParticipants({race,venueProfile={}}){
       leaderRemain:scoreMechanism([
         item("stamina",stamina,.23),item("recentForm",recent,.18),item("startPower",start,.15),
         item("finishPower",finish,.12),item("sprintPower",sprint,.09),item("attackTiming",timing,.07),
-        item("venueSuitability",venue,.04),item("rolePrior",rolePrior.secondLeader,.12)
+        item("venueSuitability",venue,.04)
       ]),
       lineFollower:scoreMechanism([
         item("trackingSkill",tracking,.28),item("finishPower",finish,.19),item("lineTrust",lineTrust,.15),
         item("recentForm",recent,.15),item("stamina",stamina,.07),item("attackTiming",timing,.05),
-        item("venueSuitability",venue,.03),item("rolePrior",rolePrior.secondFollower,.08)
+        item("venueSuitability",venue,.03)
       ]),
       otherLineRemain:scoreMechanism([
         item("recentForm",recent,.20),item("finishPower",finish,.18),item("trackingSkill",tracking,.17),
         item("sprintPower",sprint,.14),item("stamina",stamina,.10),item("attackTiming",timing,.07),
-        item("venueSuitability",venue,.04),item("rolePrior",rolePrior.secondOther,.10)
+        item("venueSuitability",venue,.04)
       ])
     };
 
     const thirdMechanisms={
       lineThird:scoreMechanism([
         item("trackingSkill",tracking,.29),item("lineTrust",lineTrust,.17),item("recentForm",recent,.14),
-        item("finishPower",finish,.12),item("stamina",stamina,.08),item("venueSuitability",venue,.04),
-        item("rolePrior",rolePrior.thirdLine,.16)
+        item("finishPower",finish,.12),item("stamina",stamina,.08),item("venueSuitability",venue,.04)
       ]),
       positionRemain:scoreMechanism([
         item("trackingSkill",tracking,.23),item("recentForm",recent,.17),item("finishPower",finish,.15),
         item("stamina",stamina,.11),item("lineTrust",lineTrust,.09),item("sprintPower",sprint,.07),
-        item("venueSuitability",venue,.04),item("rolePrior",rolePrior.thirdPosition,.14)
+        item("venueSuitability",venue,.04)
       ]),
       otherLineRemain:scoreMechanism([
         item("recentForm",recent,.19),item("trackingSkill",tracking,.19),item("finishPower",finish,.15),
         item("sprintPower",sprint,.12),item("stamina",stamina,.10),item("attackTiming",timing,.06),
-        item("venueSuitability",venue,.04),item("rolePrior",rolePrior.thirdOther,.15)
+        item("venueSuitability",venue,.04)
       ])
     };
 
-    const placement=derivePlacementScores({role,firstMechanisms,secondMechanisms,thirdMechanisms});
+    const abilityPlacement=derivePlacementScores({role,firstMechanisms,secondMechanisms,thirdMechanisms});
+    const contextPriorScores=placementRolePriors(rolePrior);
+    const roleCertainty=deriveRoleCertainty(p,role);
+    const placement=applyRoleContext({abilityPlacement,contextPriorScores,roleCertainty});
     const roleScores={
       first:clamp(placement.first.score),
       second:clamp(placement.second.score),
@@ -89,18 +91,35 @@ export function scoreKeirinParticipants({race,venueProfile={}}){
     const evaluationConfidence=availableCore>=5?"high":availableCore>=3?"medium":"low";
 
     const riderEvaluationV2={
-      version:"RIDER-EVAL-2.0",
+      version:"RIDER-EVAL-3.0-ABILITY-CONTEXT-SEPARATED",
       role,
+      roleCertainty,
+      rawAbilityMechanisms:{
+        first:mapScores(firstMechanisms),
+        second:mapScores(secondMechanisms),
+        third:mapScores(thirdMechanisms)
+      },
       firstMechanisms:mapScores(firstMechanisms),
       secondMechanisms:mapScores(secondMechanisms),
       thirdMechanisms:mapScores(thirdMechanisms),
+      rawAbilityPlacementScores:{
+        first:clamp(abilityPlacement.first.score),
+        second:clamp(abilityPlacement.second.score),
+        third:clamp(abilityPlacement.third.score)
+      },
+      contextPriorScores,
       placementScores:{
         first:roleScores.first,second:roleScores.second,third:roleScores.third
       },
+      contextAdjustment:{
+        first:roleScores.first-clamp(abilityPlacement.first.score),
+        second:roleScores.second-clamp(abilityPlacement.second.score),
+        third:roleScores.third-clamp(abilityPlacement.third.score)
+      },
       selectedMechanisms:{
-        first:placement.first.mechanisms,
-        second:placement.second.mechanisms,
-        third:placement.third.mechanisms
+        first:abilityPlacement.first.mechanisms,
+        second:abilityPlacement.second.mechanisms,
+        third:abilityPlacement.third.mechanisms
       },
       reasons:{
         first:placement.first.reasons,
@@ -115,9 +134,9 @@ export function scoreKeirinParticipants({race,venueProfile={}}){
       ...p,
       roleScores,
       scoreTrace:{
-        first:aggregateTrace(placement.first.trace),
-        second:aggregateTrace(placement.second.trace),
-        third:aggregateTrace(placement.third.trace)
+        first:aggregateTrace(abilityPlacement.first.trace),
+        second:aggregateTrace(abilityPlacement.second.trace),
+        third:aggregateTrace(abilityPlacement.third.trace)
       },
       riderEvaluationV2,
       abilityMissingAudit:{
@@ -125,6 +144,18 @@ export function scoreKeirinParticipants({race,venueProfile={}}){
         missingCount:missingCoreAbilities.length,
         evaluationConfidence,
         kimariteEvidenceConfidence:p?.kimariteAbilityEvidence?.confidence||null
+      },
+      abilityContextAudit:{
+        version:"ABILITY-CONTEXT-SEPARATION-1.0",
+        rawAbilityIndependentOfRolePrior:true,
+        roleCertainty,
+        roleContextWeight:roleCertainty.contextWeight,
+        maxAbsoluteContextAdjustment:Math.max(
+          Math.abs(roleScores.first-clamp(abilityPlacement.first.score)),
+          Math.abs(roleScores.second-clamp(abilityPlacement.second.score)),
+          Math.abs(roleScores.third-clamp(abilityPlacement.third.score))
+        ),
+        policy:"RAW_ABILITY_FIRST_ROLE_CONTEXT_SECOND"
       },
       evidence
     };
@@ -141,6 +172,51 @@ function normalizeRole(p){
     if(pos>=3)return"三番手";
   }
   return p?.lineId?"自力":"単騎";
+}
+
+function deriveRoleCertainty(p,role){
+  const lineId=String(p?.lineId||"");
+  const rawRole=String(p?.role||"").trim();
+  const lineUnknown=!lineId||lineId.startsWith("unknown-");
+  const explicitRole=["自力","番手","三番手","単騎"].includes(rawRole);
+  const position=Number(p?.lineOrder??p?.linePosition);
+  const positionKnown=Number.isFinite(position)&&position>=1;
+  let level="low",contextWeight=.08;
+  if(explicitRole&&!lineUnknown){level="high";contextWeight=.22}
+  else if(positionKnown&&!lineUnknown){level="medium";contextWeight=.16}
+  else if(explicitRole){level="medium";contextWeight=.12}
+  return{level,contextWeight,lineUnknown,explicitRole,positionKnown,normalizedRole:role};
+}
+
+function placementRolePriors(rolePrior){
+  return{
+    first:clamp(Math.max(rolePrior.firstEscape??5,rolePrior.firstMakuri??5,rolePrior.firstSashi??5,rolePrior.firstBante??5)),
+    second:clamp(Math.max(rolePrior.secondLeader??5,rolePrior.secondFollower??5,rolePrior.secondOther??5)),
+    third:clamp(Math.max(rolePrior.thirdLine??5,rolePrior.thirdPosition??5,rolePrior.thirdOther??5))
+  };
+}
+
+function applyRoleContext({abilityPlacement,contextPriorScores,roleCertainty}){
+  const weight=Number(roleCertainty?.contextWeight)||0;
+  const merge=(stage)=>{
+    const base=Number(abilityPlacement?.[stage]?.score);
+    const prior=Number(contextPriorScores?.[stage]);
+    const score=finite(base)&&finite(prior)?base*(1-weight)+prior*weight:finite(base)?base:finite(prior)?prior:5;
+    const delta=score-(finite(base)?base:5);
+    return{
+      ...abilityPlacement[stage],
+      score:clamp(score),
+      reasons:[
+        ...(abilityPlacement?.[stage]?.reasons||[]),
+        `役割文脈 ${prior.toFixed(2)}×${Math.round(weight*100)}%`,
+        `能力→文脈補正 ${delta>=0?"+":""}${delta.toFixed(2)}`
+      ],
+      contextPrior:prior,
+      contextWeight:weight,
+      rawAbilityScore:finite(base)?base:null
+    };
+  };
+  return{first:merge("first"),second:merge("second"),third:merge("third")};
 }
 
 function rolePriors(role){

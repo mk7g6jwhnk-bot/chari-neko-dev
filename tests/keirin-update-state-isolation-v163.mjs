@@ -1,0 +1,11 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+const app=fs.readFileSync(new URL("../public/app.mjs",import.meta.url),"utf8");
+assert.match(app,/const APP_RELEASE="KEIRIN-0\.15\.2-update-state-isolation"/);
+assert.match(app,/function currentSnapshotForRace\(race\)/);
+assert.match(app,/function legacySnapshotForRace\(race\)/);
+assert.match(app,/displaySnapshotForRace\(race\)/);
+assert.match(app,/旧版の保存予想あり/);
+assert.match(app,/!s\.result&&isCurrentSnapshot\(s\)/);
+assert.match(app,/let snapshot=currentSnapshotForRace\(r\)/);
+console.log("PASS v163 update state isolation");
