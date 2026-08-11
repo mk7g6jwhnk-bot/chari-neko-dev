@@ -4,7 +4,7 @@ import handler from "../netlify/functions/keirin-predict.mjs";
 
 const source=fs.readFileSync(new URL("../keirin/engine/chat-spec-v1-policy.mjs",import.meta.url),"utf8");
 assert.match(source,/SECOND_PAIR_BREADTH_RECOVERY/);
-assert.match(source,/ONE_REPRESENTATIVE_PER_STRONGLY_SUPPORTED_SECOND_PAIR/);
+assert.match(source,/PRIMARY_FIRST_FAMILY_SECOND_PAIR_BREADTH_ONLY/);
 assert.match(source,/secondRelativeFloor:\.94/);
 assert.match(source,/fixedTicketQuotaApplied:false/);
 assert.match(source,/GLOBAL_MASS_WARN_ONLY_PAIR_LOCAL_RECOVERY/);

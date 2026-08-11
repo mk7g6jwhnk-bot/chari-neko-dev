@@ -84,7 +84,7 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
   purchase.girlsStartEvidenceRequired=race.raceCategory==="girls"?girlsEvidenceRequired:null;
 
   return{
-    engineVersion:"KEIRIN-0.16.43-whole-linkage-evidence-alignment",
+    engineVersion:"KEIRIN-0.16.44-reference-pair-breadth-guard",
     raceId:race.id,
     lineConfidence:race.lineConfidence,
     scored,lines,branches,terminals:classified,
@@ -293,14 +293,19 @@ function buildNonZeroReferencePlan({rawClassified=[],classified=[],budget=3000,b
   selected=selected.slice(0,maxByBudget);
   const referenceItems=selected.map(item=>({
     ...item,
+    // allocate() expects temporary purchase-adopted rows for stake calculation,
+    // but reference rows are converted to an explicit non-standard class below.
     purchaseStatus:"購入採用",
-    betClass:item.betClass&&item.betClass!=="NONE"?item.betClass:"COVER",
-    purchaseReason:`参考買い目: ${blockedReason||"通常購入条件で採用0件"}。終端生成済みの自然度上位からゼロ回避表示`,
+    betClass:"REFERENCE",
+    purchaseReason:`参考買い目: ${blockedReason||"通常購入条件で採用0件"}。通常購入ではなく参考表示`,
     referenceOnly:true,
     purchaseRejectCode:null
   }));
   return allocate(referenceItems,budget).map(row=>({
     ...row,
+    betClass:"REFERENCE",
+    purchaseStatus:"参考表示",
+    purchaseReason:`参考買い目: ${blockedReason||"通常購入条件で採用0件"}。通常購入クラスには含めません`,
     referenceOnly:true,
     referenceReason:blockedReason||"NO_STANDARD_PURCHASE_CANDIDATE"
   }));

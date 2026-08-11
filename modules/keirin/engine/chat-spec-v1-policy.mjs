@@ -149,6 +149,19 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
 
     const secondBridge=evaluateSecondPurchaseBridge(secondGroups);
     const chosenSeconds=secondBridge.selected;
+    const selectedSecondSet=secondBridge.selectedSeconds;
+    const topSecondMass=Math.max(0,Number(secondBridge.rows?.[0]?.mass)||0);
+    for(const group of secondBridge.rows||[]){
+      const selectedByBridge=selectedSecondSet.has(Number(group.second));
+      const massRatio=topSecondMass>0?(Number(group.mass)||0)/topSecondMass:0;
+      for(const item of group.rows||[]){
+        item.secondPurchaseBridgeSelected=selectedByBridge;
+        item.secondPurchaseBridgeSelectionMode=secondBridge.selectionMode;
+        item.secondPurchaseBridgeGroupMass=Number(group.mass)||0;
+        item.secondPurchaseBridgeTopMass=topSecondMass;
+        item.secondPurchaseBridgeMassRatio=massRatio;
+      }
+    }
 
     let selectedMass=0,candidateMass=sum(allNatural.map(x=>x.probability));
     const secondPurchaseBridgeRow={
@@ -433,6 +446,12 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
   const strongSecondPairRows=evaluated.filter(item=>{
     if(item.firstFamilyTier!=="main"&&item.firstFamilyTier!=="contender")return false;
     if(item.branchHeadMatched!==true||item.pairNaturalPositionEligible!==true)return false;
+    // v209: SECOND-pair breadth expansion is local to the primary first-family.
+    // Other independently supported heads are preserved by the first-family /
+    // cover breadth guards, but we do not cross-multiply every near-tied SECOND
+    // under every head. This preserves natural head reversals without the 20+
+    // ticket explosion seen when several heads each inherited all near SECONDs.
+    if(Number(item.firstFamilyNumber)!==Number(primaryFamily?.first))return false;
     if((Number(item.secondFamilyRelativeToBest)||0)<.94)return false;
     if(item.chatForecastRole!=="main"&&item.chatForecastRole!=="contender")return false;
     if(item.chatForecastRole==="contender"&&!approvedContenderHeads.has(item.firstFamilyNumber))return false;
@@ -464,7 +483,9 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
     secondPairBreadthRecoveries.push({pair:pairKey,order:representative.order.join("-"),secondRelative:Number(representative.secondFamilyRelativeToBest)||0,convergence:Number(representative.naturalConvergenceScore)||0});
   }
   const secondPairBreadthAudit={
-    policy:"ONE_REPRESENTATIVE_PER_STRONGLY_SUPPORTED_SECOND_PAIR",
+    policy:"PRIMARY_FIRST_FAMILY_SECOND_PAIR_BREADTH_ONLY",
+    primaryFirstFamilyNumber:primaryFamily?.first||null,
+    nonPrimaryHeadsUseFirstFamilyBreadthGuards:true,
     secondRelativeFloor:.94,
     convergenceFloor:.30,
     strongPairCount:pairGroups.size,
