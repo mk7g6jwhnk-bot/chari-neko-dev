@@ -19,7 +19,7 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
   const chatSpec=a.passed?applyChatSpecV1({scored,lines,branches,terminals,oddsByOrder}):null;
   const rawClassified=a.passed?chatSpec.terminals:terminals.map(item=>({...item,betClass:"NONE",purchaseStatus:"購入不採用",purchaseReason:`エンジン生成監査不通過: ${(a.errors||[]).slice(0,3).join(" / ")||"原因未記録"}`,purchaseRejectCode:"ENGINE_AUDIT_FAILED",lifecycle:{generated:true,probabilityEvaluated:true,terminalDeleted:false,purchaseDecision:"REJECTED",purchaseDecisionCode:"ENGINE_AUDIT_FAILED",purchaseDecisionReason:`エンジン生成監査不通過: ${(a.errors||[]).slice(0,3).join(" / ")||"原因未記録"}`}}));
   const riderBranchLinkAudit=buildRiderBranchLinkAudit({scored,branches});
-  const wholeLinkageAudit=buildWholeLinkageAudit({scored,lines,branches,terminals:rawClassified});
+  const wholeLinkageAudit=buildWholeLinkageAudit({scored,lines,branches,terminals:rawClassified,lineConfidence:race.lineConfidence});
   const centralRulesAudit=buildCentralRulesAudit({terminals:rawClassified,terminalGenerationAudit});
   const lineIndependentMainAvailable=branches.some(branch=>branch.lineIndependentFallback===true&&branch.priority==="main");
   const lineFallbackDiscriminationAudit=buildLineFallbackDiscriminationAudit({
@@ -84,7 +84,7 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
   purchase.girlsStartEvidenceRequired=race.raceCategory==="girls"?girlsEvidenceRequired:null;
 
   return{
-    engineVersion:"KEIRIN-0.15.2-update-state-isolation",
+    engineVersion:"KEIRIN-0.16.43-whole-linkage-evidence-alignment",
     raceId:race.id,
     lineConfidence:race.lineConfidence,
     scored,lines,branches,terminals:classified,

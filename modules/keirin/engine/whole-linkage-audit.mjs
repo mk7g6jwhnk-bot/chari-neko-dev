@@ -1,7 +1,7 @@
 const finite=v=>v!==null&&v!==undefined&&v!==""&&Number.isFinite(Number(v));
 const pct=v=>finite(v)?`${(Number(v)*100).toFixed(1)}%`:"-";
 
-export function buildWholeLinkageAudit({scored=[],lines=[],branches=[],terminals=[]}){
+export function buildWholeLinkageAudit({scored=[],lines=[],branches=[],terminals=[],lineConfidence=null}){
   const riderMap=new Map(scored.map(r=>[Number(r.number),r]));
   const branchMap=new Map(branches.map(b=>[String(b.id),b]));
   const purchased=terminals.filter(t=>t?.purchaseStatus==="購入採用");
@@ -9,12 +9,33 @@ export function buildWholeLinkageAudit({scored=[],lines=[],branches=[],terminals
     .map(t=>buildTrace(t,riderMap,lines,branchMap));
 
   const warnings=traces.flatMap(t=>t.warnings);
+  const resolutions=traces.flatMap(t=>t.resolutions||[]);
   const firstFamilyRanks=rankFirstFamilies(terminals);
   const top=topFirstScore(riderMap);
+  const headBranchMap=buildHeadBranchMap(branches);
   for(const [n,rider] of riderMap){
     const firstScore=Number(rider?.roleScores?.first),rank=firstFamilyRanks.get(n);
-    if(Number.isFinite(firstScore)&&rank&&rank>3&&top>0&&firstScore>=top*.88){
-      warnings.push({type:"ABILITY_TO_HEAD_PROBABILITY_DRIFT",stage:"ABILITY_TO_SCENARIO",severity:"medium",number:n,message:`${n}番は1着能力が上位圏ですが、1着ファミリー確率は${rank}位です。能力→展開→1着確率の接続を確認。`});
+    if(!Number.isFinite(firstScore)||!rank||rank<=3||top<=0||firstScore<top*.88)continue;
+    const headBranches=headBranchMap.get(n)||[];
+    const role=String(rider?.riderEvaluationV2?.role||rider?.role||"");
+    if(!headBranches.length){
+      if(isHeadCapableRole(role)){
+        warnings.push({type:"HEAD_SCENARIO_MISSING_FOR_CAPABLE_RIDER",stage:"ABILITY_TO_SCENARIO",severity:"medium",number:n,message:`${n}番は1着能力が上位圏で${role||"頭候補"}ですが、対応する1着展開枝がありません。能力→展開生成の接続を確認。`});
+      }else{
+        resolutions.push({type:"ABILITY_HEAD_DRIFT_CONTEXT_EXPLAINED",stage:"ABILITY_TO_SCENARIO",number:n,message:`${n}番は1着能力値が近接していますが、役割${role||"非頭役割"}で独立した1着展開枝がないため、1着ファミリー順位低下は役割・展開で説明済み。`});
+      }
+      continue;
+    }
+    const fallbackOnly=headBranches.every(b=>b?.lineIndependentFallback===true);
+    if(lineConfidence!=="高"&&fallbackOnly){
+      resolutions.push({type:"HEAD_PROBABILITY_UNRESOLVED_LINE_FALLBACK",stage:"ABILITY_TO_SCENARIO",number:n,message:`${n}番はライン未確定の参考分岐上にあるため、1着ファミリー順位差は確定的な接続矛盾として扱いません。`});
+      continue;
+    }
+    const mainLike=headBranches.some(b=>b.priority==="main");
+    if(mainLike){
+      warnings.push({type:"ABILITY_TO_HEAD_PROBABILITY_DRIFT",stage:"ABILITY_TO_SCENARIO",severity:"medium",number:n,message:`${n}番は1着能力が上位圏かつ主1着展開枝がありますが、1着ファミリー確率は${rank}位です。能力→展開→1着確率の接続を確認。`});
+    }else{
+      resolutions.push({type:"ABILITY_HEAD_DRIFT_SUB_BRANCH_EXPLAINED",stage:"ABILITY_TO_SCENARIO",number:n,message:`${n}番は1着能力上位圏ですが、1着展開は主枝ではなく補助枝のみのため、1着ファミリー順位低下は展開優先度で説明済み。`});
     }
   }
 
@@ -28,13 +49,15 @@ export function buildWholeLinkageAudit({scored=[],lines=[],branches=[],terminals
 
   const severe=warnings.filter(w=>w.severity==="high");
   return{
-    version:"WHOLE-LINKAGE-AUDIT-v1",
+    version:"WHOLE-LINKAGE-AUDIT-v2",
+    policy:"RECOVERY_EVIDENCE_AWARE_AND_ROLE_CONTEXT_AWARE",
     status:severe.length?"WARN":warnings.length?"CHECK":"OK",
     purchasedCount:purchased.length,
     traceCount:traces.length,
     warningCount:warnings.length,
     severeWarningCount:severe.length,
-    stageChecks,warnings,traces
+    resolvedCount:resolutions.length,
+    stageChecks,warnings,resolutions,traces
   };
 }
 
@@ -47,6 +70,7 @@ function buildTrace(t,riderMap,lines,branchMap){
   const thirdLine=line?.members?.[line.index+2]??null;
   const reasons=Array.isArray(t.naturalConvergenceReasons)?t.naturalConvergenceReasons:[];
   const warnings=[];
+  const resolutions=[];
 
   if(t.branchHeadMatched===false)
     warnings.push(warn("ABILITY_TO_SCENARIO","high",order,`${first}番1着の終端に、別の1着条件の展開枝が紐付いています。購入根拠として使用禁止です。`));
@@ -74,7 +98,11 @@ function buildTrace(t,riderMap,lines,branchMap){
 
   if(t.purchaseStatus==="購入採用"){
     if(t.betClass==="COVER"&&t.chatForecastRole==="sub")warnings.push(warn("PROBABILITY_TO_PURCHASE","high",order,"可能性枝が押さえへ昇格しています。"));
-    if(Number(t.naturalConvergenceScore)<.46&&t.betClass!=="BUYABLE_HIGH")warnings.push(warn("PROBABILITY_TO_PURCHASE","high",order,"自然収束度が押さえ水準未満なのに購入採用されています。"));
+    if(Number(t.naturalConvergenceScore)<.46&&t.betClass!=="BUYABLE_HIGH"){
+      const recovery=evaluateLowConvergenceRecovery(t);
+      if(recovery.accepted)resolutions.push(resolve("PROBABILITY_TO_PURCHASE",order,recovery.type,recovery.message));
+      else warnings.push(warn("PROBABILITY_TO_PURCHASE","high",order,recovery.message||"自然収束度が押さえ水準未満なのに購入採用されています。"));
+    }
   }
 
   return{
@@ -92,10 +120,45 @@ function buildTrace(t,riderMap,lines,branchMap){
     probability:finite(t.probability)?Number(t.probability):null,
     odds:finite(t.odds)?Number(t.odds):null,
     expectedValueIndex:finite(t.expectedValueIndex)?Number(t.expectedValueIndex):null,
-    warnings
+    warnings,resolutions
   };
 }
 
+function evaluateLowConvergenceRecovery(t){
+  const mode=String(t?.adoptionMode||"");
+  const second=Number(t?.secondFamilyRelativeToBest)||0;
+  const third=Number(t?.thirdFamilyRelativeToBest)||0;
+  const reason=String(t?.lifecycle?.purchaseDecisionReason||t?.purchaseReason||"").trim();
+  if(mode==="SECOND_PAIR_BREADTH_RECOVERY"){
+    const accepted=second>=.94&&third>=.90&&reason.length>=12&&(t.betClass==="COVER"||t.betClass==="MAIN");
+    return accepted
+      ?{accepted:true,type:"SECOND_PAIR_BREADTH_RECOVERY_EVIDENCE_ACCEPTED",message:`2着近接枝補正として根拠確認済み（2着独立支持${pct(second)}・3着独立支持${pct(third)}）。低い総合自然収束だけを理由に矛盾扱いしません。`}
+      :{accepted:false,message:"2着近接枝補正で低自然収束終端が購入採用されていますが、独立2着/3着支持または採用理由の記録が不足しています。"};
+  }
+  if(mode==="MASS_UNDERCOVERAGE_RECOVERY"){
+    const accepted=second>=.90&&third>=.90&&reason.length>=12;
+    return accepted
+      ?{accepted:true,type:"MASS_UNDERCOVERAGE_RECOVERY_EVIDENCE_ACCEPTED",message:`確率質量不足補正として独立支持と採用理由を確認済み（2着${pct(second)}・3着${pct(third)}）。`}
+      :{accepted:false,message:"確率質量不足補正の低自然収束終端ですが、独立支持または採用理由の記録が不足しています。"};
+  }
+  return{accepted:false,message:"自然収束度が押さえ水準未満なのに、例外採用を正当化する独立支持・採用理由が確認できません。"};
+}
+function buildHeadBranchMap(branches){
+  const map=new Map();
+  for(const b of Array.isArray(branches)?branches:[]){
+    const n=Number(b?.requiredFirstNumber);
+    if(!Number.isFinite(n))continue;
+    if(!map.has(n))map.set(n,[]);
+    map.get(n).push(b);
+  }
+  return map;
+}
+function isHeadCapableRole(role){
+  const text=String(role||"");
+  if(/三番手|3番手/.test(text))return false;
+  return /自力|先行|捲|まく|番手|自在|逃/.test(text);
+}
+function resolve(stage,order,type,message){return{stage,order,type,message}}
 function rankFirstFamilies(terminals){
   const map=new Map();
   for(const t of terminals){const n=Number(t?.order?.[0]),p=Number(t?.probability);if(Number.isFinite(n)&&Number.isFinite(p))map.set(n,(map.get(n)||0)+p)}

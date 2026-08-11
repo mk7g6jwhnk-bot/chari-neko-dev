@@ -1,4 +1,4 @@
 # Version
 
-- Version: `KEIRIN-0.16.42-merged-v163-app-v206-research`
-- Label: `v207-merged-v163-app-v206-research`
+- Version: `KEIRIN-0.16.43-whole-linkage-evidence-alignment`
+- Label: `v208-whole-linkage-evidence-alignment`

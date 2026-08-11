@@ -10,7 +10,7 @@ const participants=[
  {id:"7",number:7,role:"単騎",lineId:"unknown-7",recentForm:6,startPower:6,sprintPower:7,trackingSkill:6,finishPower:7,stamina:6,attackTiming:7,lineTrust:5,venueSuitability:6}
 ];
 const out=runKeirinEngine({race:{id:"v144",raceCategory:"standard",lineConfidence:"高",participants},budget:3000});
-assert.equal(out.engineVersion,"KEIRIN-0.15.2-update-state-isolation");
+assert.equal(out.engineVersion,"KEIRIN-0.16.43-whole-linkage-evidence-alignment");
 const a=out.audit.terminalGenerationAudit.positionTerminalConnectionAudit;
 assert.ok(a);assert.equal(a.passed,true);assert.equal(a.scoreBasedPruningCount,0);assert.equal(a.secondCoverageMissCount,0);assert.equal(a.thirdCoverageMissCount,0);assert.equal(a.rawOrderMissingAfterMergeCount,0);assert.equal(a.terminalProbabilityAssignedAfterPathCompletion,true);
 assert.ok(a.stageCounts.first>0&&a.stageCounts.second>0&&a.stageCounts.third>0);

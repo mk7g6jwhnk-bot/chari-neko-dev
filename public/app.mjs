@@ -14,7 +14,7 @@ const ODDS_CACHE_KEY="chari-neko:keirin-odds-cache:v1";
 const RACE_META_CACHE_KEY="chari-neko:keirin-race-meta-cache:v1";
 const RESULT_CACHE_KEY="chari-neko:keirin-result-cache:v1";
 const MEETING_CACHE_KEY="chari-neko:keirin-meeting-cache:v1";
-const APP_RELEASE="KEIRIN-0.16.42-merged-v163-app-v206-research";
+const APP_RELEASE="KEIRIN-0.16.43-whole-linkage-evidence-alignment";
 const APP_UPDATE_CHECK_INTERVAL_MS=5*60*1000;
 let lastAppUpdateCheckAt=0,appUpdateCheckBusy=false;
 const VENUE_CODES={函館:"11",青森:"12",いわき平:"13",弥彦:"21",前橋:"22",取手:"23",宇都宮:"24",大宮:"25",西武園:"26",京王閣:"27",立川:"28",松戸:"31",千葉:"32",川崎:"34",平塚:"35",小田原:"36",伊東:"37",静岡:"38",名古屋:"42",岐阜:"43",大垣:"44",豊橋:"45",富山:"46",松阪:"47",四日市:"48",福井:"51",奈良:"53",向日町:"54",和歌山:"55",岸和田:"56",玉野:"61",広島:"62",防府:"63",高松:"71",小松島:"73",高知:"74",松山:"75",小倉:"81",久留米:"83",武雄:"84",佐世保:"85",別府:"86",熊本:"87"};
@@ -618,6 +618,7 @@ function renderWholeLinkageAudit(audit){
   const stages=Array.isArray(audit.stageChecks)?audit.stageChecks:[];
   const traces=Array.isArray(audit.traces)?audit.traces:[];
   const warnings=Array.isArray(audit.warnings)?audit.warnings:[];
+  const resolutions=Array.isArray(audit.resolutions)?audit.resolutions:[];
   const statusLabel=audit.status==="OK"?"整合":audit.status==="WARN"?"要修正":"要確認";
   const stageHtml=stages.map(s=>`<div class="abilityRow auditKeyValueRow"><strong>${esc(s.label||s.id)}</strong><span>${s.status==="OK"?"○ 整合":s.status==="WARN"?"! 要修正":"△ 要確認"}${Number(s.warningCount)?` (${Number(s.warningCount)}件)`:""}</span></div>`).join("");
   const traceHtml=traces.slice(0,20).map(t=>{
@@ -626,10 +627,12 @@ function renderWholeLinkageAudit(audit){
     const conv=Number.isFinite(Number(t.naturalConvergenceScore))?`${(Number(t.naturalConvergenceScore)*100).toFixed(0)}%`:"-";
     const prob=Number.isFinite(Number(t.probability))?`${(Number(t.probability)*100).toFixed(2)}%`:"-";
     const ws=Array.isArray(t.warnings)?t.warnings:[];
-    return `<div class="detailBet"><strong>${esc(order)}　${esc(betClassLabel(t.category))}</strong><p><b>連動</b> 1着能力 ${fmtAbility(t.firstAbility)} → ライン ${esc(line)} → ${esc(t.branchLabel||"展開不明")} → 2着能力 ${fmtAbility(t.secondAbility)} → 3着能力 ${fmtAbility(t.thirdAbility)}</p><p class="muted">自然収束 ${esc(conv)} / 追加条件 ${Number(t.extraConditionCount)||0} / 終端確率 ${esc(prob)}${Array.isArray(t.naturalConvergenceReasons)&&t.naturalConvergenceReasons.length?` / ${t.naturalConvergenceReasons.slice(0,3).map(esc).join(" / ")}`:""}</p>${ws.length?`<p class="auditWarn">${ws.map(w=>esc(w.message)).join(" / ")}</p>`:'<p class="auditOk">この終端は上流から購入まで大きな接続矛盾なし。</p>'}</div>`;
+    const rs=Array.isArray(t.resolutions)?t.resolutions:[];
+    return `<div class="detailBet"><strong>${esc(order)}　${esc(betClassLabel(t.category))}</strong><p><b>連動</b> 1着能力 ${fmtAbility(t.firstAbility)} → ライン ${esc(line)} → ${esc(t.branchLabel||"展開不明")} → 2着能力 ${fmtAbility(t.secondAbility)} → 3着能力 ${fmtAbility(t.thirdAbility)}</p><p class="muted">自然収束 ${esc(conv)} / 追加条件 ${Number(t.extraConditionCount)||0} / 終端確率 ${esc(prob)}${Array.isArray(t.naturalConvergenceReasons)&&t.naturalConvergenceReasons.length?` / ${t.naturalConvergenceReasons.slice(0,3).map(esc).join(" / ")}`:""}</p>${ws.length?`<p class="auditWarn">${ws.map(w=>esc(w.message)).join(" / ")}</p>`:rs.length?`<p class="auditOk">根拠確認済み: ${rs.map(r=>esc(r.message)).join(" / ")}</p>`:'<p class="auditOk">この終端は上流から購入まで大きな接続矛盾なし。</p>'}</div>`;
   }).join("");
   const warnHtml=warnings.length?`<div class="auditWarning"><strong>接続警告 ${warnings.length}件</strong>${warnings.slice(0,12).map(w=>`<p>${esc(w.message)}</p>`).join("")}</div>`:`<div class="notice success"><strong>全体連動：大きな接続矛盾なし</strong></div>`;
-  return `<details class="predictionAccordion" open><summary>全体連動監査を見る（${esc(statusLabel)}）</summary><div class="accordionBody"><p class="muted">能力 → ライン/位置 → 1着シナリオ → 2着 → 3着 → 自然収束度 → 終端確率 → 購入採否を一本で追います。</p><div class="abilityList auditKeyValueList">${stageHtml}</div>${warnHtml}<details class="supportBranchAudit"><summary>購入終端ごとの連動を見る（${traces.length}件）</summary><div class="detailGroup">${traceHtml||'<p class="muted">購入終端なし</p>'}</div></details></div></details>`;
+  const resolvedHtml=resolutions.length?`<div class="notice"><strong>根拠確認済み ${resolutions.length}件</strong>${resolutions.slice(0,8).map(r=>`<p>${esc(r.message)}</p>`).join("")}</div>`:"";
+  return `<details class="predictionAccordion" open><summary>全体連動監査を見る（${esc(statusLabel)}）</summary><div class="accordionBody"><p class="muted">能力 → ライン/位置 → 1着シナリオ → 2着 → 3着 → 自然収束度 → 終端確率 → 購入採否を一本で追います。</p><div class="abilityList auditKeyValueList">${stageHtml}</div>${warnHtml}${resolvedHtml}<details class="supportBranchAudit"><summary>購入終端ごとの連動を見る（${traces.length}件）</summary><div class="detailGroup">${traceHtml||'<p class="muted">購入終端なし</p>'}</div></details></div></details>`;
 }
 
 function renderRiderMarkNameTable(riderMarks,participantMap,chatMarkMap){
