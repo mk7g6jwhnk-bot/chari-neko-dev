@@ -1,5 +1,7 @@
 import assert from"node:assert/strict";
-import{runKeirinEngine}from"../keirin/engine/keirin-engine.mjs";
+import{runKeirinPredictionEngine}from"../keirin/engine/prediction-engine.mjs";
+import{runKeirinPurchaseEngine}from"../keirin/engine/purchase-engine.mjs";
+
 const participants=[
  {id:"1",number:1,role:"自力",lineId:"A",lineOrder:1,recentForm:8,startPower:9,sprintPower:7,trackingSkill:5,finishPower:6,stamina:8,attackTiming:7,lineTrust:6,venueSuitability:6},
  {id:"2",number:2,role:"番手",lineId:"A",lineOrder:2,recentForm:7,startPower:4,sprintPower:5,trackingSkill:9,finishPower:8,stamina:7,attackTiming:6,lineTrust:9,venueSuitability:6},
@@ -9,11 +11,20 @@ const participants=[
  {id:"6",number:6,role:"三番手",lineId:"B",lineOrder:3,recentForm:5,startPower:3,sprintPower:4,trackingSkill:7,finishPower:5,stamina:6,attackTiming:4,lineTrust:7,venueSuitability:5},
  {id:"7",number:7,role:"単騎",lineId:"unknown-7",recentForm:6,startPower:6,sprintPower:7,trackingSkill:6,finishPower:7,stamina:6,attackTiming:7,lineTrust:5,venueSuitability:6}
 ];
-const out=runKeirinEngine({race:{id:"v144",raceCategory:"standard",lineConfidence:"高",participants},budget:3000});
-assert.equal(out.engineVersion,"KEIRIN-0.17.0-prediction-purchase-boundary");
-const a=out.audit.terminalGenerationAudit.positionTerminalConnectionAudit;
-assert.ok(a);assert.equal(a.passed,true);assert.equal(a.scoreBasedPruningCount,0);assert.equal(a.secondCoverageMissCount,0);assert.equal(a.thirdCoverageMissCount,0);assert.equal(a.rawOrderMissingAfterMergeCount,0);assert.equal(a.terminalProbabilityAssignedAfterPathCompletion,true);
-assert.ok(a.stageCounts.first>0&&a.stageCounts.second>0&&a.stageCounts.third>0);
-assert.ok(a.rows.every(r=>r.inputSource==="RIDER_EVAL_V3_PLACEMENT_SCORES"));
-assert.ok(a.rows.every(r=>Number.isFinite(r.finalPlacementScore)&&Number.isFinite(r.conditionedStageScore)));
-console.log("PASS v144 position-specific evaluation connected through terminal completion");
+const race={id:"V219-BOUNDARY",raceCategory:"standard",lineConfidence:"高",participants};
+const prediction=runKeirinPredictionEngine({race});
+assert.ok(prediction.terminals.length>0);
+for(const t of prediction.terminals){
+  assert.equal(Object.hasOwn(t,"betClass"),false);
+  assert.equal(Object.hasOwn(t,"purchaseStatus"),false);
+  assert.equal(Object.hasOwn(t,"purchaseReason"),false);
+  assert.equal(Object.hasOwn(t,"purchaseBorderEligible"),false);
+}
+assert.equal(prediction.audit.predictionBoundaryAudit.passed,true);
+const before=JSON.stringify(prediction.terminals.map(t=>[t.order,t.probability,t.score,t.contributingBranches]));
+const purchase=runKeirinPurchaseEngine({prediction,oddsByOrder:{},budget:3000});
+const after=JSON.stringify(prediction.terminals.map(t=>[t.order,t.probability,t.score,t.contributingBranches]));
+assert.equal(before,after);
+assert.equal(purchase.terminals.length,prediction.terminals.length);
+assert.equal(purchase.audit.predictionPurchaseBoundaryAudit.passed,true);
+console.log("keirin prediction/purchase boundary v219 passed");
