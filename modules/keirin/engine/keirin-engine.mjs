@@ -97,7 +97,7 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
   purchase.girlsStartEvidenceRequired=race.raceCategory==="girls"?girlsEvidenceRequired:null;
 
   return{
-    engineVersion:"KEIRIN-0.16.49-relative-condition-probability-separation",
+    engineVersion:"KEIRIN-0.16.50-composite-purchase-border",
     raceId:race.id,
     lineConfidence:race.lineConfidence,
     scored,lines,branches,terminals:classified,

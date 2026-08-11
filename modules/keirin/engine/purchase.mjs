@@ -3,6 +3,7 @@ const POSITION_FLOORS={first:.88,second:.85,third:.85};
 const PRIMARY_COVERAGE_SUPPORT_FLOORS={first:.82,second:.70,third:.70};
 const PRIMARY_COVERAGE_TARGETS={base:.70,medium:.75,strong:.80};
 const STRUCTURAL_PRIORITIES=new Set(["main","contender","sub"]);
+const PURCHASE_BORDER={terminalRelativeMin:.45,familyRelativeMin:.45,branchRelativeMin:.50,secondRelativeMin:.50,thirdRelativeMin:.50,strongTerminalRelativeMin:.75,strongFamilyRelativeMin:.60,strongBranchRelativeMin:.70,strongSecondRelativeMin:.70,strongThirdRelativeMin:.45,burdenFactorMin:.90,burdenStrongTerminalOverride:.80};
 
 export function classify(terminals,odds={}){
   const sorted=[...terminals].sort(compareTerminal);
@@ -85,7 +86,7 @@ export function classify(terminals,odds={}){
 
   const state=buildFirstFamilyState(base);
   const staged=base.map(item=>annotateFamilyPosition(item,state));
-  const ranked=annotateTerminalRanks(staged);
+  const ranked=annotatePurchaseBorder(annotateTerminalRanks(staged));
   const valueGate=buildSubValueGate(ranked);
   const familyCoverageGate=buildFamilyCoverageGate(ranked);
   const decided=ranked.map(item=>applyFamilyPurchaseDecision(item,valueGate,familyCoverageGate));
@@ -96,6 +97,7 @@ function annotateTerminalRanks(items){
   const totalProbability=sum(items.map(item=>Number(item.probability)||0))||1;
   const globalSorted=[...items].sort(compareTerminal);
   const globalRank=new Map(globalSorted.map((item,index)=>[item.order.join("-"),index+1]));
+  const maxTerminalProbability=Number(globalSorted[0]?.probability)||0;
   const familyGroups=new Map(),pairGroups=new Map();
   for(const item of items){
     const [first,second]=(item.order||[]).map(Number);
@@ -106,10 +108,20 @@ function annotateTerminalRanks(items){
     pairGroups.get(pairKey).push(item);
   }
   const familyRank=new Map(),pairRank=new Map();
-  for(const group of familyGroups.values())
+  const familyMass=new Map(),pairMass=new Map(),bestPairMassByFamily=new Map();
+  for(const [first,group] of familyGroups){
     [...group].sort(compareTerminal).forEach((item,index)=>familyRank.set(item.order.join("-"),index+1));
-  for(const group of pairGroups.values())
+    familyMass.set(first,sum(group.map(item=>Math.max(0,Number(item.probability)||0))));
+  }
+  for(const [pairKey,group] of pairGroups){
     [...group].sort(compareTerminal).forEach((item,index)=>pairRank.set(item.order.join("-"),index+1));
+    const mass=sum(group.map(item=>Math.max(0,Number(item.probability)||0)));
+    pairMass.set(pairKey,mass);
+    const first=Number(pairKey.split("-")[0])||0;
+    bestPairMassByFamily.set(first,Math.max(bestPairMassByFamily.get(first)||0,mass));
+  }
+  const structuralFamilyMass=[...familyGroups].filter(([,group])=>{const tier=group[0]?.firstFamilyTier;return tier==="main"||tier==="contender";}).map(([first])=>familyMass.get(first)||0);
+  const maxFamilyProbability=Math.max(0,...(structuralFamilyMass.length?structuralFamilyMass:[...familyMass.values()]));
   return items.map(item=>{
     const key=item.order.join("-");
     const probability=Number(item.probability)||0;
@@ -121,7 +133,11 @@ function annotateTerminalRanks(items){
       terminalFamilyRank:familyRank.get(key)||null,
       terminalPairRank:pairRank.get(key)||null,
       terminalProbabilityShare:probability/totalProbability,
+      terminalRelativeToBest:maxTerminalProbability>0?probability/maxTerminalProbability:0,
       firstFamilyProbabilityShare:familyProbability/totalProbability,
+      firstFamilyRelativeToBest:maxFamilyProbability>0?familyProbability/maxFamilyProbability:0,
+      pairProbability:pairMass.get(`${Number(item.order?.[0])||0}-${Number(item.order?.[1])||0}`)||0,
+      pairRelativeToBest:(bestPairMassByFamily.get(Number(item.order?.[0])||0)||0)>0?(pairMass.get(`${Number(item.order?.[0])||0}-${Number(item.order?.[1])||0}`)||0)/(bestPairMassByFamily.get(Number(item.order?.[0])||0)||1):0,
       expectedValueIndex:Number.isFinite(odd)&&odd>1?probability*odd:null
     };
   });
@@ -232,6 +248,31 @@ function annotateFamilyPosition(item,state){
   };
 }
 
+function annotatePurchaseBorder(items){
+  return (items||[]).map(item=>{
+    const terminalRelative=Math.max(0,Number(item.terminalRelativeToBest)||0);
+    const familyRelative=Math.max(0,Number(item.firstFamilyRelativeToBest)||0);
+    const traceByStage=new Map((item.relativeConditionTrace||[]).map(row=>[String(row?.stage||""),row]));
+    const branchRelative=Math.max(0,Number(traceByStage.get("BRANCH")?.ratio ?? 1)||0);
+    const firstRelative=Math.max(0,Number(traceByStage.get("FIRST")?.ratio ?? 1)||0);
+    const secondRelative=Math.max(0,Number(traceByStage.get("SECOND")?.ratio ?? item.secondFamilyRelativeToBest ?? 1)||0);
+    const thirdRelative=Math.max(0,Number(traceByStage.get("THIRD")?.ratio ?? item.thirdFamilyRelativeToBest ?? item.thirdVariantRelativeToBest ?? 1)||0);
+    const pairRelative=Math.max(0,Number(item.pairRelativeToBest)||0);
+    const burdenFactor=Math.max(0,Math.min(1,Number(item.relativeConditionPenalty)||1));
+    const strongTerminal=terminalRelative>=PURCHASE_BORDER.strongTerminalRelativeMin&&familyRelative>=PURCHASE_BORDER.strongFamilyRelativeMin&&branchRelative>=PURCHASE_BORDER.strongBranchRelativeMin&&secondRelative>=PURCHASE_BORDER.strongSecondRelativeMin;
+    const thirdFloor=strongTerminal?PURCHASE_BORDER.strongThirdRelativeMin:PURCHASE_BORDER.thirdRelativeMin;
+    const failures=[];
+    if(terminalRelative<PURCHASE_BORDER.terminalRelativeMin)failures.push("TERMINAL_RELATIVE");
+    if(familyRelative<PURCHASE_BORDER.familyRelativeMin)failures.push("FIRST_FAMILY_RELATIVE");
+    if(branchRelative<PURCHASE_BORDER.branchRelativeMin)failures.push("BRANCH_RELATIVE");
+    if(secondRelative<PURCHASE_BORDER.secondRelativeMin)failures.push("SECOND_RELATIVE");
+    if(thirdRelative<thirdFloor)failures.push("THIRD_RELATIVE");
+    if(burdenFactor<PURCHASE_BORDER.burdenFactorMin&&terminalRelative<PURCHASE_BORDER.burdenStrongTerminalOverride)failures.push("CONDITION_BURDEN");
+    const score=.25*terminalRelative+.15*familyRelative+.15*branchRelative+.15*secondRelative+.20*thirdRelative+.10*burdenFactor;
+    return{...item,purchaseBorderEligible:failures.length===0,purchaseBorderScore:score,purchaseBorderFailures:failures,purchaseBorderMetrics:{terminalRelative,familyRelative,pairRelative,branchRelative,firstRelative,secondRelative,thirdRelative,thirdFloor,burdenFactor,strongTerminal}};
+  });
+}
+
 function buildSubValueGate(items){
   const candidates=items.filter(item=>{
     const subEligible=Boolean(item.familyPriorityEligibility?.sub);
@@ -253,7 +294,7 @@ function buildFamilyCoverageGate(items){
     const row=groups.get(first);row.totalProbability+=Math.max(0,Number(item.probability)||0);row.items.push(item);
   }
   const families=[...groups.values()].sort((a,b)=>b.totalProbability-a.totalProbability||familyTierRank(a.tier)-familyTierRank(b.tier)||a.first-b.first);
-  const primary=families[0]||null;
+  const primary=families.find(family=>family.tier==="main"||family.tier==="contender")||families[0]||null;
   const primaryShare=primary?primary.totalProbability/totalProbability:0;
   const primaryTarget=primaryShare>=.45?PRIMARY_COVERAGE_TARGETS.strong:primaryShare>=.32?PRIMARY_COVERAGE_TARGETS.medium:PRIMARY_COVERAGE_TARGETS.base;
   const selectedPrimaryKeys=new Set(),selectedOtherKeys=new Set();
@@ -265,7 +306,7 @@ function buildFamilyCoverageGate(items){
     const target=isPrimary?primaryTarget:Math.max(.30,Math.min(.50,.25+.25*relativeToPrimary));
     familyTargets.set(family.first,target);
     if(family.tier!=="main"&&family.tier!=="contender"&&!isPrimary)continue;
-    const candidates=family.items.filter(item=>isFamilyCoverageCandidate(item,isPrimary)).sort(compareCoverageCandidate);
+    const candidates=family.items.filter(item=>item.purchaseBorderEligible&&isFamilyCoverageCandidate(item,isPrimary)).sort(compareCoverageCandidate);
     const candidateMass=sum(candidates.map(item=>Math.max(0,Number(item.probability)||0)));
     familyCandidateMass.set(family.first,candidateMass);
     let selectedMass=0;
@@ -345,6 +386,7 @@ function isMassCoverageEligible(item){
   // safe for automatic mass recovery.  Respect explicit false as well as true.
   // Rows from older/general diagnostics may not carry this flag; for those,
   // preserve the v155 audit population (structural + natural, excluding sub/risk).
+  if(item?.purchaseBorderEligible===false)return false;
   if(typeof item?.massCoverageEligible==="boolean")return item.massCoverageEligible;
   return Boolean(
     item&&
@@ -432,6 +474,10 @@ function applyFamilyPurchaseDecision(item,valueGate,familyCoverageGate){
   if(item.concentrationRatio<1.04){
     purchaseReason=`terminal分布が平坦（集中比${item.concentrationRatio.toFixed(3)}）`;
     purchaseRejectCode="FLAT_DISTRIBUTION";
+  }else if(selectedByFamilyCoverage&&!item.purchaseBorderEligible){
+    const m=item.purchaseBorderMetrics||{};
+    purchaseReason=`買い目化ボーダー未達（${(item.purchaseBorderFailures||[]).join("+") || "UNKNOWN"} / 終端${Math.round((m.terminalRelative||0)*100)}%・頭${Math.round((m.familyRelative||0)*100)}%・枝${Math.round((m.branchRelative||0)*100)}%・2着${Math.round((m.secondRelative||0)*100)}%・3着${Math.round((m.thirdRelative||0)*100)}%）`;
+    purchaseRejectCode="PURCHASE_BORDER";
   }else if(selectedByFamilyCoverage){
     // 1着ファミリーの「選ぶ順番」は確率カバーで決めるが、買い目区分は元の展開由来を維持する。
     // main展開の自然終端は、最上位頭か別頭かにかかわらずMAIN。
@@ -462,6 +508,10 @@ function applyFamilyPurchaseDecision(item,valueGate,familyCoverageGate){
       betClass="BUYABLE_HIGH";adopted=true;purchaseRejectCode="ADOPTED";
       purchaseReason=`最上位頭のカバー選定後、別展開${item.firstFamilyNumber}頭の自然終端＋成立確率×実オッズ ${Number(item.subValueIndex).toFixed(2)}`;
     }
+  }else if(!highPayoutCandidate&&!item.purchaseBorderEligible&&familyCoverageCandidate){
+    const m=item.purchaseBorderMetrics||{};
+    purchaseReason=`買い目化ボーダー未達（${(item.purchaseBorderFailures||[]).join("+") || "UNKNOWN"} / 終端${Math.round((m.terminalRelative||0)*100)}%・頭${Math.round((m.familyRelative||0)*100)}%・枝${Math.round((m.branchRelative||0)*100)}%・2着${Math.round((m.secondRelative||0)*100)}%・3着${Math.round((m.thirdRelative||0)*100)}%）`;
+    purchaseRejectCode="PURCHASE_BORDER";
   }else if(isPrimaryFamily&&familyCoverageCandidate&&familyCandidateCoverage>0&&familySelectedCoverage>=Number(familyCoverageTarget||0)){
     purchaseReason=`最上位${item.firstFamilyNumber}頭は目標カバー${Math.round(Number(familyCoverageTarget||0)*100)}%に到達後の下位終端`;
     purchaseRejectCode="PRIMARY_COVERAGE_TARGET_REACHED";
@@ -682,6 +732,7 @@ function planRow(item,stake,fundingStatus,minimumRequired){return{
   extraConditionPenalty:item.extraConditionPenalty??null,
   relativeConditionCount:item.relativeConditionCount??0,relativeConditionPenalty:item.relativeConditionPenalty??1,
   relativeConditionTrace:item.relativeConditionTrace||[],probabilitySeparationPolicy:item.probabilitySeparationPolicy||null,
+  purchaseBorderEligible:item.purchaseBorderEligible!==false,purchaseBorderScore:item.purchaseBorderScore??null,purchaseBorderFailures:item.purchaseBorderFailures||[],purchaseBorderMetrics:item.purchaseBorderMetrics||null,
   scenarioCoherence:item.scenarioCoherence??null,
   nodeConditionalProbability:item.nodeConditionalProbability??null,nodeTrace:item.nodeTrace||null,
   fundingWeight:item.odds>1?(Number(item.probability)||0)*Math.sqrt(Math.max((Number(item.probability)||0)*Number(item.odds),.000001)):(Number(item.probability)||0),
@@ -716,7 +767,8 @@ export function purchaseDiagnostics(classified,plan,budget){
     purchaseThresholds:{
       concentrationRatioMin:1.04,representativeBranchFitMin:.975,credibleVariantBranchFitMin:.87,probabilitySupportVsMaxMin:null,
       rawBranchCountUsedForAdoption:false,weightedMultiBranchSupportEquivalentMin:2,
-      purchaseSelectionMode:"PRIMARY_FIRST_FAMILY_COVERAGE_THEN_OTHER_FAMILIES",
+      purchaseSelectionMode:"COMPOSITE_RELATIVE_BORDER_THEN_PRIMARY_FIRST_FAMILY_COVERAGE",
+      purchaseBorder:{...PURCHASE_BORDER},
       firstFamilySelectionMode:"TOP_FIRST_PROBABILITY_FAMILY_CUMULATIVE_COVERAGE_FIRST",
       primaryFamilyCoverageTargets:{...PRIMARY_COVERAGE_TARGETS},
       primaryCoverageSupportFloors:{...PRIMARY_COVERAGE_SUPPORT_FLOORS},
@@ -727,7 +779,8 @@ export function purchaseDiagnostics(classified,plan,budget){
       buyableHighBreakEvenIndex:1,
       fundingMode:"100YEN_BASE_PLUS_PROBABILITY_X_SQRT_PROBABILITY_ODDS"
     },
-    purchaseFamilyAudit:{mode:"PRIMARY_FIRST_FAMILY_COVERAGE_THEN_OTHER_FAMILIES",headCount:familyRows.length,primaryFirst:classified.find(item=>item.isPrimaryFirstFamily)?.firstFamilyNumber??null,primaryCoverageTarget:classified.find(item=>item.isPrimaryFirstFamily)?.firstFamilyCoverageTarget??null,rows:familyRows},
+    purchaseBorderAudit:{policy:"TERMINAL_FAMILY_PAIR_THIRD_RELATIVE_PLUS_LIGHT_CONDITION_BURDEN_V1",thresholds:{...PURCHASE_BORDER},eligibleCount:classified.filter(item=>item.purchaseBorderEligible).length,rejectedCount:classified.filter(item=>!item.purchaseBorderEligible).length,adoptedBelowBorderCount:natural.filter(item=>!item.purchaseBorderEligible&&item.betClass!=="BUYABLE_HIGH").length,rows:classified.map(item=>({order:item.order.join("-"),adopted:item.purchaseStatus===PURCHASED,betClass:item.betClass,eligible:Boolean(item.purchaseBorderEligible),score:item.purchaseBorderScore??null,failures:item.purchaseBorderFailures||[],metrics:item.purchaseBorderMetrics||null}))},
+    purchaseFamilyAudit:{mode:"COMPOSITE_RELATIVE_BORDER_THEN_PRIMARY_FIRST_FAMILY_COVERAGE",headCount:familyRows.length,primaryFirst:classified.find(item=>item.isPrimaryFirstFamily)?.firstFamilyNumber??null,primaryCoverageTarget:classified.find(item=>item.isPrimaryFirstFamily)?.firstFamilyCoverageTarget??null,rows:familyRows},
     adoptedTerminalAudit:natural.map(item=>buildAdoptedAudit(item,diagnosticBranchStats,diagnosticMaxBranchTotal)),
     mainHeadSiblingAudit:{
       mode:"COMPAT_ALIAS_TO_FIRST_FAMILY_AUDIT",

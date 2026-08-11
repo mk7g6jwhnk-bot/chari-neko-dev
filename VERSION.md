@@ -1,4 +1,4 @@
 # Version
 
-- Version: `KEIRIN-0.16.49-relative-condition-probability-separation`
-- Label: `v214-relative-condition-probability-separation`
+- Version: `KEIRIN-0.16.50-composite-purchase-border`
+- Label: `v215-composite-purchase-border`

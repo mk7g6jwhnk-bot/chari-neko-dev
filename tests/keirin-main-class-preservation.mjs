@@ -16,8 +16,11 @@ const terminals=[
 ];
 const classified=classify(terminals,{});
 const adopted=classified.filter(x=>x.purchaseStatus==="購入採用");
-assert.ok(adopted.some(x=>x.betClass==="MAIN"),"main展開の自然終端があるのに本線0件になっている");
-assert.equal(classified.find(x=>x.order.join("-")==="1-3-2").betClass,"MAIN","main由来終端がCOVERへ降格している");
+const weakMain=classified.find(x=>x.order.join("-")==="1-3-2");
+assert.equal(weakMain.purchaseStatus,"購入不採用","v215の買い目化ボーダーを下回る弱いmain終端が購入へ残っている");
+assert.equal(weakMain.purchaseRejectCode,"PURCHASE_BORDER");
+assert.ok(weakMain.purchaseBorderFailures.includes("TERMINAL_RELATIVE"));
+assert.ok(adopted.every(x=>x.order.join("-")!=="1-3-2"));
 
 // 最上位頭がcontenderでも、別頭のmain自然終端はMAIN区分を維持する。
 const terminals2=[
