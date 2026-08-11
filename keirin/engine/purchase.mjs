@@ -99,18 +99,25 @@ export function classify(terminals,odds={}){
   const staged=base.map(item=>annotateFamilyPosition(item,state));
   const terminalRanked=annotateTerminalRanks(staged);
   const raceConcentrationBorder=buildRaceConcentrationBorder(terminalRanked);
+  const baseBorder=annotatePurchaseBorder(terminalRanked,{severity:0,regime:"NORMAL"});
+  const baseBorderEligibleCount=baseBorder.filter(item=>item.purchaseBorderEligible).length;
   const ranked=annotatePurchaseBorder(terminalRanked,raceConcentrationBorder);
+  const dispersionBorderEligibleCount=ranked.filter(item=>item.purchaseBorderEligible).length;
   const valueGate=buildSubValueGate(ranked);
   const familyCoverageGate=buildFamilyCoverageGate(ranked);
   const decided=ranked.map(item=>applyFamilyPurchaseDecision(item,valueGate,familyCoverageGate));
+  const preRecoveryPurchased=decided.filter(item=>item.purchaseStatus===PURCHASED).length;
   const firstPass=applyUnderCoverageNaturalRecovery(decided,familyCoverageGate);
   const skipLinked=buildSkipLinkedBorderContext(firstPass,raceConcentrationBorder);
   const firstPassPurchased=firstPass.filter(item=>item.purchaseStatus===PURCHASED).length;
+  const baseFailureCounts=countBorderFailures(baseBorder);
+  const dispersionFailureCounts=countBorderFailures(ranked);
   if(!skipLinked.active){
-    const flow={policy:"PURCHASE_BORDER_FLOW_AUDIT_V218",skipLinkedActive:false,firstPassPurchased,tightenedPurchased:null,secondRecoveryApplied:false,secondRecoveryAdded:0,finalPurchased:firstPassPurchased};
+    const flow=buildPurchaseZeroFunnelAudit({terminalCount:terminalRanked.length,baseBorderEligibleCount,dispersionBorderEligibleCount,preRecoveryPurchased,firstPassPurchased,skipLinkedActive:false,tightenedBorderEligibleCount:null,tightenedPurchased:null,finalPurchased:firstPassPurchased,secondRecoveryApplied:false,secondRecoveryAdded:0,recoveryLockReason:null,baseFailureCounts,dispersionFailureCounts,tightenedFailureCounts:null,raceConcentrationBorder});
     return firstPass.map(item=>attachSkipLinkedContext(item,skipLinked,flow));
   }
   const tightened=annotatePurchaseBorder(terminalRanked,{...raceConcentrationBorder,skipLinked});
+  const tightenedBorderEligibleCount=tightened.filter(item=>item.purchaseBorderEligible).length;
   const tightenedValueGate=buildSubValueGate(tightened);
   const tightenedFamilyCoverageGate=buildFamilyCoverageGate(tightened);
   const tightenedDecided=tightened.map(item=>applyFamilyPurchaseDecision(item,tightenedValueGate,tightenedFamilyCoverageGate));
@@ -118,7 +125,7 @@ export function classify(terminals,odds={}){
   // v218: once the skip-linked second-pass border activates, the border is authoritative.
   // Do not run mass-undercoverage recovery again, otherwise eligible-but-rejected derivative
   // terminals can be re-added only to satisfy a coverage target in a race already judged diffuse.
-  const flow={policy:"PURCHASE_BORDER_FLOW_AUDIT_V218",skipLinkedActive:true,firstPassPurchased,tightenedPurchased,secondRecoveryApplied:false,secondRecoveryAdded:0,finalPurchased:tightenedPurchased,recoveryLockReason:"SKIP_LINKED_BORDER_AUTHORITATIVE"};
+  const flow=buildPurchaseZeroFunnelAudit({terminalCount:terminalRanked.length,baseBorderEligibleCount,dispersionBorderEligibleCount,preRecoveryPurchased,firstPassPurchased,skipLinkedActive:true,tightenedBorderEligibleCount,tightenedPurchased,finalPurchased:tightenedPurchased,secondRecoveryApplied:false,secondRecoveryAdded:0,recoveryLockReason:"SKIP_LINKED_BORDER_AUTHORITATIVE",baseFailureCounts,dispersionFailureCounts,tightenedFailureCounts:countBorderFailures(tightened),raceConcentrationBorder});
   return tightenedDecided.map(item=>attachSkipLinkedContext(item,skipLinked,flow));
 }
 
@@ -275,6 +282,39 @@ function annotateFamilyPosition(item,state){
     mainHeadSiblingSecondRelativeToBest:secondRelative,
     mainHeadSiblingThirdRelativeToBest:thirdRelative
   };
+}
+
+function countBorderFailures(items){
+  const counts={};
+  for(const item of items||[])for(const code of item.purchaseBorderFailures||[])counts[code]=(counts[code]||0)+1;
+  return counts;
+}
+
+function topFailureRows(counts){
+  return Object.entries(counts||{}).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],"en")).slice(0,8).map(([code,count])=>({code,count}));
+}
+
+function buildPurchaseZeroFunnelAudit(input){
+  const finalPurchased=Number(input.finalPurchased)||0;
+  const stages=[
+    {stage:"GENERATED_TERMINALS",count:Number(input.terminalCount)||0},
+    {stage:"COMPOSITE_BORDER_ELIGIBLE",count:Number(input.baseBorderEligibleCount)||0},
+    {stage:"RACE_CONCENTRATION_BORDER_ELIGIBLE",count:Number(input.dispersionBorderEligibleCount)||0},
+    {stage:"FAMILY_DECISION_PRE_RECOVERY",count:Number(input.preRecoveryPurchased)||0},
+    {stage:"FIRST_RECOVERY_RESULT",count:Number(input.firstPassPurchased)||0},
+    ...(input.skipLinkedActive?[{stage:"SKIP_LINKED_BORDER_ELIGIBLE",count:Number(input.tightenedBorderEligibleCount)||0},{stage:"SKIP_LINKED_DECISION",count:Number(input.tightenedPurchased)||0}]:[]),
+    {stage:"FINAL_STANDARD_PURCHASE",count:finalPurchased}
+  ];
+  let directReason="STANDARD_PURCHASE_REMAINS";
+  if(finalPurchased===0){
+    if((Number(input.baseBorderEligibleCount)||0)===0)directReason="COMPOSITE_BORDER_ZERO";
+    else if((Number(input.dispersionBorderEligibleCount)||0)===0)directReason="RACE_CONCENTRATION_BORDER_ZERO";
+    else if((Number(input.preRecoveryPurchased)||0)===0&&(Number(input.firstPassPurchased)||0)===0)directReason="FAMILY_DECISION_AND_RECOVERY_ZERO";
+    else if(input.skipLinkedActive&&(Number(input.tightenedBorderEligibleCount)||0)===0)directReason="SKIP_LINKED_BORDER_ZERO";
+    else if(input.skipLinkedActive&&(Number(input.tightenedPurchased)||0)===0)directReason="SKIP_LINKED_DECISION_ZERO";
+    else directReason="FINAL_ZERO_AFTER_PURCHASE_PIPELINE";
+  }
+  return{policy:"PURCHASE_ZERO_FUNNEL_AUDIT_V228",...input,stages,directReason,baseTopFailures:topFailureRows(input.baseFailureCounts),dispersionTopFailures:topFailureRows(input.dispersionFailureCounts),tightenedTopFailures:topFailureRows(input.tightenedFailureCounts)};
 }
 
 function buildRaceConcentrationBorder(items){
