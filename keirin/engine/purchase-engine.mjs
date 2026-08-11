@@ -59,7 +59,9 @@ export function runKeirinPurchaseEngine({prediction,oddsByOrder={},budget=3000})
   const fallbackPlan=generationPassed&&normalPlan.length===0&&prediction.terminals.length
     ?buildNonZeroReferencePlan({rawClassified,classified,budget,blockedReason:purchaseBlocked?blockedReason:"通常購入条件で採用0件",blockCode,lineFallbackDiscriminationAudit,allocator:allocate})
     :[];
-  const plan=normalPlan.length?normalPlan:fallbackPlan;
+  const standardPurchasePlan=normalPlan;
+  const referencePurchasePlan=fallbackPlan;
+  const plan=standardPurchasePlan.length?standardPurchasePlan:referencePurchasePlan;
   const purchase=purchaseDiagnostics(classified,plan,budget);
   const terminalLifecycleAudit=buildTerminalLifecycleAudit({sourceTerminals:prediction.terminals,classified,terminalGenerationAudit:prediction.audit?.terminalGenerationAudit||null});
   const referenceToStandardTransitionAudit=buildReferenceToStandardTransitionAudit({lineConfidence:raceMeta.lineConfidence,purchaseBlocked,blockCode,lineFallbackDiscriminationAudit,normalPlan,fallbackPlan});
@@ -91,7 +93,7 @@ export function runKeirinPurchaseEngine({prediction,oddsByOrder={},budget=3000})
   };
 
   return{
-    purchaseVersion:"KEIRIN-PURCHASE-1.0",
+    purchaseVersion:"KEIRIN-PURCHASE-1.1",
     terminals:classified,
     recommendations:{
       main:classified.filter(item=>item.betClass==="MAIN"&&item.purchaseStatus==="購入採用"),
@@ -99,7 +101,7 @@ export function runKeirinPurchaseEngine({prediction,oddsByOrder={},budget=3000})
       value:classified.filter(item=>item.betClass==="BUYABLE_HIGH"&&item.purchaseStatus==="購入採用"),
       strong:[]
     },
-    compositeOdds:composite(plan),purchasePlan:plan,noBet:purchase.noBet,noBetReason:purchase.noBetReason,
+    compositeOdds:composite(standardPurchasePlan),purchasePlan:plan,standardPurchasePlan,referencePurchasePlan,noBet:purchase.noBet,noBetReason:purchase.noBetReason,
     audit:{
       ...purchase,
       chatSpecV1:chatSpec?.audit||null,
@@ -121,7 +123,8 @@ export function runKeirinPurchaseEngine({prediction,oddsByOrder={},budget=3000})
         nodeProbabilityPolicy:"NO_DOUBLE_PENALTY_FOR_LINE_INDEPENDENT_FALLBACK"
       },
       terminalLifecycleAudit,
-      predictionPurchaseBoundaryAudit:boundaryAudit
+      predictionPurchaseBoundaryAudit:boundaryAudit,
+      selectionBoundaryAudit:{version:"STANDARD-REFERENCE-SELECTION-1.0",standardBetCount:standardPurchasePlan.length,referenceBetCount:referencePurchasePlan.length,referenceExcludedFromFunding:true,referenceExcludedFromStandardPurchase:true,passed:standardPurchasePlan.every(x=>x.betClass!=="REFERENCE")&&referencePurchasePlan.every(x=>x.betClass==="REFERENCE")}
     }
   };
 }

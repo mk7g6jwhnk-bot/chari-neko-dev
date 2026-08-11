@@ -5,7 +5,7 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
   const prediction=runKeirinPredictionEngine({race,venueProfile});
   const purchase=runKeirinPurchaseEngine({prediction,oddsByOrder,budget});
   return{
-    engineVersion:"KEIRIN-0.17.0-prediction-purchase-boundary",
+    engineVersion:"KEIRIN-0.17.1-standard-reference-selection-boundary",
     raceId:race.id,
     lineConfidence:race.lineConfidence,
     scored:prediction.scored,
@@ -32,6 +32,8 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
     recommendations:purchase.recommendations,
     compositeOdds:purchase.compositeOdds,
     purchasePlan:purchase.purchasePlan,
+    standardPurchasePlan:purchase.standardPurchasePlan,
+    referencePurchasePlan:purchase.referencePurchasePlan,
     noBet:purchase.noBet,
     noBetReason:purchase.noBetReason,
     generatedAt:new Date().toISOString()
