@@ -1,0 +1,14 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+const source=fs.readFileSync(new URL("../public/app.mjs",import.meta.url),"utf8");
+assert.match(source,/primary-screening:v5/);
+assert.match(source,/keirin-active-races/);
+assert.ok(source.includes("async function preparePrimaryScreening"),"primary screening flow still exists");
+const start=source.indexOf("async function bulkRefreshRaceInfo()");
+const end=source.indexOf("function oddsRating(",start);
+const bulk=source.slice(start,end);
+assert.ok(bulk.includes("allMeetingRaces().filter"));
+assert.ok(bulk.includes("groupRacesByVenue(targets)"));
+assert.ok(!bulk.includes("preparePrimaryScreening"),"bulk refresh is separated from primary screening");
+assert.ok(!bulk.includes("runFallbackDeepDiveComparison"),"bulk refresh must not start deep-dive predictions");
+console.log("PASS frontier screening flow + separated bulk refresh");

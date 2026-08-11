@@ -13,13 +13,13 @@ assert.deepEqual(selectAdaptiveMainCluster(branches).map(branch=>branch.id),["a"
 
 const flat=selectNaturalBranchTiers([{id:"x",score:5},{id:"y",score:5},{id:"z",score:5}]);
 assert.equal(flat.main.length,0,"when all scores are equal, do not invent a core winner");
-assert.deepEqual(flat.contender.map(branch=>branch.id),["x","y","z"]);
-assert.equal(flat.sub.length,0);
+assert.equal(flat.contender.length,0,"equal scores do not justify a forecast contender");
+assert.deepEqual(flat.sub.map(branch=>branch.id),["x","y","z"],"equal-score branches remain possible only");
 
 const noLowerBreak=selectNaturalBranchTiers([
   {id:"a",score:7.0},{id:"b",score:6.6},{id:"c",score:6.4},{id:"d",score:6.2}
 ]);
 assert.deepEqual(noLowerBreak.main.map(branch=>branch.id),["a"]);
-assert.deepEqual(noLowerBreak.contender.map(branch=>branch.id),["b","c","d"],"without a robust lower break, do not force a sub cluster");
-assert.equal(noLowerBreak.sub.length,0);
+assert.equal(noLowerBreak.contender.length,0,"without a natural boundary, mere possibility must not be promoted to forecast contender");
+assert.deepEqual(noLowerBreak.sub.map(branch=>branch.id),["b","c","d"],"non-core branches stay possible when no secondary group is evidenced");
 console.log("Keirin natural branch tiers passed:",tiers.main.map(x=>x.id).join(","),"/",tiers.contender.map(x=>x.id).join(","),"/",tiers.sub.map(x=>x.id).join(","));

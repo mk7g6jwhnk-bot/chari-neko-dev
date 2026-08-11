@@ -1,0 +1,5 @@
+import assert from"node:assert/strict";import{summarizeResearchLearning}from"../public/prediction-store.mjs";
+const rows=[],venues=["立川","平塚","前橋","富山"];
+for(let i=0;i<64;i++){const v=venues[i%4],confirmed=v==="富山"?false:((i%10)!==9);rows.push({predictionSnapshotId:`IB${i}`,learningMode:"NORMAL",checkedAt:`2026-08-${String(1+Math.floor(i/6)).padStart(2,"0")}T00:00:00Z`,venueName:v,conditionEvidence:[{evidenceKey:`B:${i}`,conditionId:`MAKURI_REACH_${i+1}`,stage:"FIRST",kind:"natural",predictedProbability:.68,status:confirmed?"CONFIRMED":"REFUTED"}],verificationStatus:"PURCHASE_SELECTION_MISS",exactTerminalGenerated:true,firstPlaceFamilyGenerated:true,firstSecondPairGenerated:true})}
+const storage={getItem:k=>k==="chari-neko:keirin-research-learning:v1"?JSON.stringify(rows):null,setItem(){}};
+const g=summarizeResearchLearning(storage).conditionCalibration.groups[0];assert.notEqual(g.independentAudit.status,"INDEPENDENT_AUDIT_PASS");console.log("PASS independent audit blocks venue-dependent effect");

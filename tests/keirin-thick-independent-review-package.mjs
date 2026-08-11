@@ -1,0 +1,15 @@
+import assert from "node:assert/strict";
+import {buildThickIndependentReviewPackage} from "../public/research-outcome-diagnostics.mjs";
+const proposal={version:"THICK-SHADOW-PROPOSAL-1.0",status:"SHADOW_PROPOSAL_SEALED",proposalId:"THICK-SHADOW-abc",ledgerId:"THICK-GLOBAL-001",candidateType:"THICK_HEAD_REPRESENTATION_REVIEW",scope:"THICK_CLASSIFICATION",change:{headRepresentationWeightDelta:.05},seal:"abc123"};
+const comp={version:"THICK-SHADOW-PARALLEL-1.0",status:"SHADOW_PARALLEL_PASSED",decision:"RETAIN_FOR_INDEPENDENT_REVIEW",proposalId:proposal.proposalId,ledgerId:proposal.ledgerId,baseline:{races:60,returnRate:.91},shadow:{races:60,returnRate:.95},deltas:{returnRate:.04,thickHitRate:.04},supportingEvidence:[{type:"THICK_SHADOW_BENEFIT_WITHOUT_GUARDRAIL_REGRESSION"}],counterEvidence:[]};
+const oos={version:"THICK-OOS-EVALUATION-1.0",status:"OOS_REPLICATED",decision:"RETAIN_RESEARCH_CANDIDATE",counterEvidence:[]};
+const impact={version:"THICK-IMPACT-PRESCREEN-1.0",status:"IMPACT_PRESCREEN_PASSED",counterEvidence:[]};
+const held=buildThickIndependentReviewPackage(comp,proposal,oos,impact);
+assert.equal(held.status,"COUNTER_EVIDENCE_REQUIRED");
+const ready=buildThickIndependentReviewPackage(comp,proposal,oos,impact,{counterEvidence:[{type:"POSSIBLE_CONTEXT_DRIFT",note:"review venue/session balance"}],unresolvedQuestions:["Does benefit persist by venue?"]});
+assert.equal(ready.status,"INDEPENDENT_REVIEW_PACKAGE_READY");
+assert.equal(ready.decision,"MANUAL_INDEPENDENT_REVIEW_ONLY");
+assert.equal(ready.safeguards.productionWriteAllowed,false);
+assert.equal(ready.safeguards.negativeEvidenceMustBeReviewed,true);
+assert.ok(ready.reviewPackageId.startsWith("THICK-REVIEW-"));
+console.log("keirin thick independent review package tests: ok");

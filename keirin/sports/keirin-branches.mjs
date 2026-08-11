@@ -8,31 +8,52 @@ export function generateKeirinBranches({scored,lines,lineConfidence,raceCategory
     if(leader){
       branches.push(make({
         id:`LEAD-${line.id}`,label:`${line.id}先行押し切り`,scenario:"先行押し切り",branchType:"LEADER_HOLD",primaryLineId:line.id,requiredFirstNumber:leader.number,enabled:lineEnabled,
-        scoreParts:[part("first",leader.roleScores.first,.40),part("startPower",leader.evidence.start,.35),part("recentForm",leader.evidence.recent,.15),part("finishPower",leader.evidence.finish,.10)],
+        scoreParts:[part("firstPlacement",leader.roleScores.first,.22),part("escapeMechanism",leader.riderEvaluationV2?.firstMechanisms?.escape,.43),part("startPower",leader.evidence.start,.20),part("recentForm",leader.evidence.recent,.10),part("finishPower",leader.evidence.finish,.05)],
         firstCandidateScores:{[leader.id]:leader.roleScores.first||0}
       }));
       branches.push(make({
         id:`MAKURI-${line.id}`,label:`${line.id}まくり`,scenario:"別線まくり",branchType:"MAKURI_SUCCESS",primaryLineId:line.id,requiredFirstNumber:leader.number,enabled:lineEnabled,
-        scoreParts:[part("first",leader.roleScores.first,.32),part("sprintPower",leader.evidence.sprint,.42),part("finishPower",leader.evidence.finish,.16),part("recentForm",leader.evidence.recent,.10)],
+        scoreParts:[part("firstPlacement",leader.roleScores.first,.22),part("makuriMechanism",leader.riderEvaluationV2?.firstMechanisms?.makuri,.46),part("sprintPower",leader.evidence.sprint,.17),part("finishPower",leader.evidence.finish,.10),part("recentForm",leader.evidence.recent,.05)],
         firstCandidateScores:{[leader.id]:leader.roleScores.first||0}
       }));
     }
     if(bante){
       branches.push(make({
         id:`BANTE-${line.id}`,label:`${line.id}番手差し`,scenario:"番手差し",branchType:"BANTE_SASHI",primaryLineId:line.id,requiredFirstNumber:bante.number,enabled:lineEnabled,
-        scoreParts:[part("first",bante.roleScores.first,.32),part("finishPower",bante.evidence.finish,.34),part("trackingSkill",bante.evidence.tracking,.24),part("recentForm",bante.evidence.recent,.10)],
+        scoreParts:[part("firstPlacement",bante.roleScores.first,.22),part("banteSashiMechanism",bante.riderEvaluationV2?.firstMechanisms?.banteSashi,.46),part("finishPower",bante.evidence.finish,.14),part("trackingSkill",bante.evidence.tracking,.13),part("recentForm",bante.evidence.recent,.05)],
         firstCandidateScores:{[bante.id]:bante.roleScores.first||0}
       }));
     }
   }
 
-  const battleScores=Object.fromEntries(scored.map(p=>[p.id,(p.roleScores.first||0)*.32+(p.evidence.finish||0)*.26+(p.evidence.tracking||0)*.22+(p.evidence.start||0)*.10+(p.evidence.recent||0)*.10]));
+
+  if(!lineEnabled){
+    for(const rider of scored){
+      const id=rider.id;
+      branches.push(make({
+        id:`UNRESOLVED-LEAD-${rider.number}`,label:`${rider.number}先行残り（並び未取得）`,
+        scenario:"先行残り（並び未取得）",branchType:"LEADER_HOLD",
+        primaryLineId:null,requiredFirstNumber:rider.number,enabled:true,lineIndependentFallback:true,
+        scoreParts:[part("firstPlacement",rider.roleScores.first,.24),part("escapeMechanism",rider.riderEvaluationV2?.firstMechanisms?.escape,.40),part("startPower",rider.evidence.start,.20),part("recentForm",rider.evidence.recent,.10),part("finishPower",rider.evidence.finish,.06)],
+        firstCandidateScores:{[id]:rider.roleScores.first||0}
+      }));
+      branches.push(make({
+        id:`UNRESOLVED-MAKURI-${rider.number}`,label:`${rider.number}まくり（並び未取得）`,
+        scenario:"まくり（並び未取得）",branchType:"MAKURI_SUCCESS",
+        primaryLineId:null,requiredFirstNumber:rider.number,enabled:true,lineIndependentFallback:true,
+        scoreParts:[part("firstPlacement",rider.roleScores.first,.24),part("makuriMechanism",rider.riderEvaluationV2?.firstMechanisms?.makuri,.43),part("sprintPower",rider.evidence.sprint,.18),part("finishPower",rider.evidence.finish,.10),part("recentForm",rider.evidence.recent,.05)],
+        firstCandidateScores:{[id]:rider.roleScores.first||0}
+      }));
+    }
+  }
+
+  const battleScores=Object.fromEntries(scored.map(p=>[p.id,weightedAvailable([[p.roleScores.first,.32],[p.evidence.finish,.26],[p.evidence.tracking,.22],[p.evidence.start,.10],[p.evidence.recent,.10]])]));
   branches.push(make({id:"BATTLE",label:"踏み合い消耗戦",scenario:"踏み合い",branchType:"LEAD_BATTLE",scoreParts:[part("candidateMean",avg(Object.values(battleScores)),1)],firstCandidateScores:battleScores,enabled:true}));
 
-  const soloScores=Object.fromEntries(scored.filter(p=>p.role==="単騎").map(p=>[p.id,(p.roleScores.first||0)*.38+(p.evidence.finish||0)*.26+(p.evidence.sprint||0)*.22+(p.evidence.recent||0)*.14]));
+  const soloScores=Object.fromEntries(scored.filter(p=>p.role==="単騎").map(p=>[p.id,weightedAvailable([[p.roleScores.first,.38],[p.evidence.finish,.26],[p.evidence.sprint,.22],[p.evidence.recent,.14]])]));
   branches.push(make({id:"SOLO",label:"単騎浮上",scenario:"単騎浮上",branchType:"SOLO_RISE",scoreParts:[part("candidateMean",avg(Object.values(soloScores)),1)],firstCandidateScores:soloScores,enabled:Object.keys(soloScores).length>0}));
 
-  const separationScores=Object.fromEntries(scored.map(p=>[p.id,(p.roleScores.first||0)*.28+(p.evidence.finish||0)*.28+(p.evidence.tracking||0)*.30+(p.evidence.recent||0)*.14]));
+  const separationScores=Object.fromEntries(scored.map(p=>[p.id,weightedAvailable([[p.roleScores.first,.28],[p.evidence.finish,.28],[p.evidence.tracking,.30],[p.evidence.recent,.14]])]));
   branches.push(make({id:"SEPARATION",label:"番手離れ・繰り上がり",scenario:"番手離れ",branchType:"LINE_SEPARATION",scoreParts:[part("candidateMean",lineEnabled?avg(Object.values(separationScores)):0,1)],firstCandidateScores:separationScores,enabled:lineEnabled}));
 
   const enabled=branches.filter(branch=>branch.firstCandidates.length&&branch.enabled).sort(compareBranch);
@@ -41,16 +62,40 @@ export function generateKeirinBranches({scored,lines,lineConfidence,raceCategory
   const mainIds=new Set(tiers.main.map(branch=>branch.id));
   const contenderIds=new Set(tiers.contender.map(branch=>branch.id));
 
-  return enabled.map(branch=>({
-    ...branch,
-    // Structured branches are no longer forced into one upper/lower 2-cluster split.
-    // A uniquely highest (or exact-tied highest) branch is the core scenario.
-    // Remaining structural branches are only split into contender/sub tiers when the
-    // lower tail contains a robust natural gap; otherwise no artificial lower cutoff is invented.
-    priority:structured.includes(branch)
+  // LEADER_HOLD と BANTE_SASHI は、同じラインの「先行残り / 番手差し」
+  // という頭折り返しであり、片方が中心展開ならもう片方を能力順位だけで
+  // 別シナリオ扱いして消さない。priority自体は自然tierを保持しつつ、
+  // sameScenarioMainSibling で中心シナリオ・クラスターへ接続する。
+  const mainReversalLineIds=new Set(
+    structured
+      .filter(branch=>mainIds.has(branch.id))
+      .filter(branch=>["LEADER_HOLD","BANTE_SASHI"].includes(branch.branchType))
+      .map(branch=>branch.primaryLineId)
+      .filter(Boolean)
+  );
+
+  return enabled.map(branch=>{
+    const naturalPriority=structured.includes(branch)
       ?mainIds.has(branch.id)?"main":contenderIds.has(branch.id)?"contender":"sub"
-      :"risk"
-  }));
+      :"risk";
+    const sameScenarioMainSibling=Boolean(
+      branch.primaryLineId &&
+      mainReversalLineIds.has(branch.primaryLineId) &&
+      ["LEADER_HOLD","BANTE_SASHI"].includes(branch.branchType) &&
+      !mainIds.has(branch.id)
+    );
+    return{
+      ...branch,
+      priority:naturalPriority,
+      forecastRole:structured.includes(branch)
+        ?mainIds.has(branch.id)?"CENTER":sameScenarioMainSibling?"CENTER_SIBLING":contenderIds.has(branch.id)?"SECONDARY":"POSSIBLE"
+        :"RISK",
+      sameScenarioMainSibling,
+      sameScenarioClusterId:sameScenarioMainSibling||mainIds.has(branch.id)
+        ?(branch.primaryLineId&&["LEADER_HOLD","BANTE_SASHI"].includes(branch.branchType)?`LINE-REVERSAL-${branch.primaryLineId}`:null)
+        :null
+    };
+  });
 }
 
 export function selectNaturalBranchTiers(structuredBranches=[]){
@@ -62,12 +107,13 @@ export function selectNaturalBranchTiers(structuredBranches=[]){
   const bottomScore=scores[scores.length-1];
   const eps=Math.max(1e-9,Math.abs(topScore)*1e-12);
 
-  // If every structural branch has the same score, there is no evidence for a core
-  // scenario. Keep them all as contenders instead of inventing a winner.
+  // If every structural branch has the same score, there is no evidence for a
+  // central forecast. Keep all branches as POSSIBLE only; do not promote mere
+  // logical possibility into a forecast contender.
   if(Math.abs(topScore-bottomScore)<=eps){
     return{
-      main:[],contender:sorted,sub:[],
-      diagnostics:{mode:"NO_SEPARATION",topScore,topTieCount:sorted.length,tailMedianGap:0,tailMadGap:0,contenderCutGap:null,contenderCutDetected:false}
+      main:[],contender:[],sub:sorted,
+      diagnostics:{mode:"NO_CENTRAL_SEPARATION",topScore,topTieCount:sorted.length,tailMedianGap:0,tailMadGap:0,contenderCutGap:null,contenderCutDetected:false}
     };
   }
 
@@ -79,7 +125,7 @@ export function selectNaturalBranchTiers(structuredBranches=[]){
     return{main,contender:[],sub:[],diagnostics:{mode:"TOP_ONLY",topScore,topTieCount,tailMedianGap:null,tailMadGap:null,contenderCutGap:null,contenderCutDetected:false}};
   }
   if(tail.length===1){
-    return{main,contender:tail,sub:[],diagnostics:{mode:"NO_LOWER_CUT",topScore,topTieCount,tailMedianGap:null,tailMadGap:null,contenderCutGap:null,contenderCutDetected:false}};
+    return{main,contender:[],sub:tail,diagnostics:{mode:"CORE_ONLY_SINGLE_TAIL_POSSIBLE",topScore,topTieCount,tailMedianGap:null,tailMadGap:null,contenderCutGap:null,contenderCutDetected:false}};
   }
 
   const tailScores=tail.map(branch=>Number(branch.score)||0);
@@ -97,13 +143,17 @@ export function selectNaturalBranchTiers(structuredBranches=[]){
   // fixed percentage of the top score and does not require two groups to exist.
   const naturalGapFloor=tailMedianGap+tailMadGap;
   const contenderCutDetected=maxGapIndex>=0&&maxGap>naturalGapFloor+eps&&maxGap>eps;
-  const contender=contenderCutDetected?tail.slice(0,maxGapIndex+1):tail;
-  const sub=contenderCutDetected?tail.slice(maxGapIndex+1):[];
+  // Only call a non-core branch a forecast contender when the score distribution
+  // itself supplies a clear boundary separating an upper secondary group from
+  // weaker possibilities. If no such boundary exists, all non-core branches stay
+  // POSSIBLE (sub) rather than being treated as predictions to cover.
+  const contender=contenderCutDetected?tail.slice(0,maxGapIndex+1):[];
+  const sub=contenderCutDetected?tail.slice(maxGapIndex+1):tail;
 
   return{
     main,contender,sub,
     diagnostics:{
-      mode:contenderCutDetected?"CORE_PLUS_NATURAL_LOWER_BREAK":"CORE_WITHOUT_FORCED_LOWER_BREAK",
+      mode:contenderCutDetected?"CORE_PLUS_NATURAL_SECONDARY_GROUP":"CORE_ONLY_TAIL_POSSIBLE",
       topScore,topTieCount,tailMedianGap,tailMadGap,
       contenderCutGap:contenderCutDetected?maxGap:null,
       contenderCutDetected
@@ -132,24 +182,28 @@ function generateGirlsBranches(scored=[]){
       firstCandidateScores:{[id]:rider.roleScores.first||0}
     }));
   }
-  const battleScores=Object.fromEntries(scored.map(p=>[p.id,(p.roleScores.first||0)*.28+(p.evidence.start||0)*.24+(p.evidence.finish||0)*.20+(p.evidence.tracking||0)*.16+(p.evidence.recent||0)*.12]));
+  const battleScores=Object.fromEntries(scored.map(p=>[p.id,weightedAvailable([[p.roleScores.first,.28],[p.evidence.start,.24],[p.evidence.finish,.20],[p.evidence.tracking,.16],[p.evidence.recent,.12]])]));
   branches.push(make({id:"GIRLS-POSITION",label:"位置取り・仕掛け競合",scenario:"位置取り競合",branchType:"LEAD_BATTLE",scoreParts:[part("candidateMean",avg(Object.values(battleScores)),1)],firstCandidateScores:battleScores,enabled:true}));
   const structured=branches.filter(branch=>["LEADER_HOLD","MAKURI_SUCCESS"].includes(branch.branchType)).sort(compareBranch);
   const tiers=selectNaturalBranchTiers(structured);
   const mainIds=new Set(tiers.main.map(branch=>branch.id)),contenderIds=new Set(tiers.contender.map(branch=>branch.id));
   return branches.filter(branch=>branch.firstCandidates.length&&branch.enabled).sort(compareBranch).map(branch=>({
     ...branch,
-    priority:structured.includes(branch)?mainIds.has(branch.id)?"main":contenderIds.has(branch.id)?"contender":"sub":"risk"
+    priority:structured.includes(branch)?mainIds.has(branch.id)?"main":contenderIds.has(branch.id)?"contender":"sub":"risk",
+    forecastRole:structured.includes(branch)?mainIds.has(branch.id)?"CENTER":contenderIds.has(branch.id)?"SECONDARY":"POSSIBLE":"RISK"
   }));
 }
 
 function emptyTierResult(){return{main:[],contender:[],sub:[],diagnostics:{mode:"EMPTY",topScore:null,topTieCount:0,tailMedianGap:null,tailMadGap:null,contenderCutGap:null,contenderCutDetected:false}}}
-function part(key,value,weight){return{key,value:Number(value)||0,weight,contribution:(Number(value)||0)*weight}}
-function make({id,label,scenario,branchType,scoreParts=[],firstCandidateScores={},primaryLineId=null,requiredFirstNumber=null,enabled}){
-  const score=scoreParts.reduce((sum,item)=>sum+item.contribution,0);
+function part(key,value,weight){const available=value!==null&&value!==undefined&&value!==""&&Number.isFinite(Number(value));return{key,value:available?Number(value):null,weight,available,contribution:0}}
+function make({id,label,scenario,branchType,scoreParts=[],firstCandidateScores={},primaryLineId=null,requiredFirstNumber=null,enabled,lineIndependentFallback=false}){
+  const availableWeight=scoreParts.filter(item=>item.available).reduce((sum,item)=>sum+item.weight,0);
+  const normalizedParts=scoreParts.map(item=>({...item,effectiveWeight:item.available&&availableWeight>0?item.weight/availableWeight:0,contribution:item.available&&availableWeight>0?item.value*(item.weight/availableWeight):0,missing:!item.available}));
+  const score=normalizedParts.reduce((sum,item)=>sum+item.contribution,0);
   const entries=Object.entries(firstCandidateScores).filter(([id,value])=>id&&Number.isFinite(value)&&value>0).sort((a,b)=>b[1]-a[1]||String(a[0]).localeCompare(String(b[0]),"en"));
-  return{id,label,scenario,branchType,primaryLineId,requiredFirstNumber,score,scoreTrace:[...scoreParts].sort((a,b)=>b.contribution-a.contribution),firstCandidates:entries.map(([id])=>id),firstCandidateScores:Object.fromEntries(entries),enabled:Boolean(enabled)&&score>=2.2,priority:"risk"};
+  return{id,label,scenario,branchType,primaryLineId,requiredFirstNumber,lineIndependentFallback:Boolean(lineIndependentFallback),score,scoreTrace:[...normalizedParts].sort((a,b)=>b.contribution-a.contribution),firstCandidates:entries.map(([id])=>id),firstCandidateScores:Object.fromEntries(entries),enabled:Boolean(enabled)&&score>=2.2,priority:"risk"};
 }
 function compareBranch(a,b){return(b.score-a.score)||a.id.localeCompare(b.id,"en")}
 function avg(values){const valid=values.filter(Number.isFinite);return valid.length?valid.reduce((sum,value)=>sum+value,0)/valid.length:0}
+function weightedAvailable(items){const valid=items.filter(([value,weight])=>value!==null&&value!==undefined&&value!==""&&Number.isFinite(Number(value))&&weight>0);const total=valid.reduce((sum,[,weight])=>sum+weight,0);return total>0?valid.reduce((sum,[value,weight])=>sum+Number(value)*weight,0)/total:5}
 function median(values){const valid=values.filter(Number.isFinite).sort((a,b)=>a-b);if(!valid.length)return 0;const mid=Math.floor(valid.length/2);return valid.length%2?valid[mid]:(valid[mid-1]+valid[mid])/2}

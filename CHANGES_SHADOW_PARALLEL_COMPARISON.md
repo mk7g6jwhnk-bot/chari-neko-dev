@@ -1,0 +1,3 @@
+# v117 シャドー並行比較
+
+APPROVE_SHADOWされた条件だけ、保存済み予想の終端確率をシャドー側で再重み付けして結果後に現行vsシャドーのLog Lossを比較。買い目・本番値は変更せず、productionWriteAllowed=false。

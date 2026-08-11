@@ -1,0 +1,1 @@
+import assert from"node:assert/strict";import fs from"node:fs";const app=fs.readFileSync(new URL("../public/app.mjs",import.meta.url),"utf8");for(const t of["旧方法論の審査・再承認必要","方法論epoch","承認指紋","旧方法論比較"])assert.ok(app.includes(t),t);console.log("PASS methodology-bound approval UI");

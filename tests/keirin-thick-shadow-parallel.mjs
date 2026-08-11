@@ -1,0 +1,14 @@
+import assert from "node:assert/strict";
+import {createThickShadowProposal,compareThickShadowParallel} from "../public/research-outcome-diagnostics.mjs";
+const impact={version:"THICK-IMPACT-PRESCREEN-1.0",ledgerId:"THICK-GLOBAL-001",candidateType:"THICK_HEAD_REPRESENTATION_REVIEW",status:"IMPACT_PRESCREEN_PASSED",decision:"ALLOW_SHADOW_PROPOSAL_ONLY"};
+const proposal=createThickShadowProposal(impact,{scope:"THICK_CLASSIFICATION",change:{headRepresentationWeightDelta:.05}});
+assert.equal(proposal.status,"SHADOW_PROPOSAL_SEALED");
+assert.equal(proposal.decision,"ALLOW_SHADOW_PARALLEL_ONLY");
+assert.equal(proposal.safeguards.productionWriteAllowed,false);
+const base={races:60,returnRate:.91,thickHitRate:.14,mainHitRate:.31,supportHitRate:.22,betCount:9};
+const good={races:60,returnRate:.95,thickHitRate:.18,mainHitRate:.31,supportHitRate:.22,betCount:9.5};
+assert.equal(compareThickShadowParallel(proposal,base,good).status,"SHADOW_PARALLEL_PASSED");
+const bad={...good,mainHitRate:.27};
+assert.equal(compareThickShadowParallel(proposal,base,bad).status,"SHADOW_PARALLEL_NOT_QUALIFIED");
+assert.equal(createThickShadowProposal(impact,{scope:"PRODUCTION_ENGINE",change:{x:1}}).status,"SHADOW_SCOPE_INVALID");
+console.log("keirin thick shadow parallel tests: ok");

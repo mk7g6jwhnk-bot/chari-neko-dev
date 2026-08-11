@@ -1,0 +1,1 @@
+import assert from"node:assert/strict";import fs from"node:fs";const app=fs.readFileSync(new URL("../public/app.mjs",import.meta.url),"utf8");for(const t of["成立条件の証拠検証","着順事象は公式結果で確定","不成立","わからない","保留に戻す","条件証拠 保留"])assert.ok(app.includes(t));console.log("PASS node evidence review UI");

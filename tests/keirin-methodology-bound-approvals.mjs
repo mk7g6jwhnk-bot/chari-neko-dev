@@ -1,0 +1,8 @@
+import assert from"node:assert/strict";import{buildCanaryActivationPlan,buildShadowComparisonRecord,saveFinalPromotionApproval,savePromotionReview}from"../public/prediction-store.mjs";
+const mem=new Map(),storage={getItem:k=>mem.get(k)||null,setItem:(k,v)=>mem.set(k,String(v))};const epoch="PROMOTION-METHOD-2026-08-V2-SEALED-ISOLATED";
+const pkg={status:"PROMOTION_PACKAGE_READY",packageKey:"PKG",currentProbability:.68,suggestedProbability:.78,delta:.10,methodologyEpoch:epoch,approvalFingerprint:"PF-CURRENT"};
+const snapshot={predictionSnapshotId:"S",predictionVersion:"X",targetRace:{date:"20260810",venueName:"立川",raceNo:1},terminalLedger:[{order:[1,2,3],probability:1,nodeSummary:{FIRST:{conditions:[{id:"MAKURI_REACH_1"}]}}}]};
+const cal={groups:[{stage:"FIRST",family:"MAKURI_REACH_N",kind:"natural",promotionPackage:pkg}]};
+savePromotionReview(storage,{packageKey:"PKG",packageFingerprint:"PF-OLD",decision:"APPROVE_SHADOW"});assert.equal(buildShadowComparisonRecord({snapshot,conditionCalibration:cal,storage}),null);
+savePromotionReview(storage,{packageKey:"PKG",packageFingerprint:"PF-CURRENT",decision:"APPROVE_SHADOW"});assert.ok(buildShadowComparisonRecord({snapshot,conditionCalibration:cal,storage}));
+const candidate={packageKey:"PKG",status:"FINAL_REVIEW_READY",fingerprint:"F1",methodologyEpoch:epoch,shadowEvaluationEpoch:"SHADOW-EVAL-ISOLATED-NORMALIZED-V1"};const approval=saveFinalPromotionApproval(storage,{candidate,decision:"APPROVE_CANARY"});assert.equal(buildCanaryActivationPlan(candidate,approval).status,"CANARY_PLAN_READY");assert.equal(buildCanaryActivationPlan(candidate,{...approval,methodologyEpoch:"OLD"}).status,"STALE_METHODOLOGY");console.log("PASS methodology-bound approvals");

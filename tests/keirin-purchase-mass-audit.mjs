@@ -1,0 +1,16 @@
+import assert from "node:assert/strict";
+import {purchaseDiagnostics} from "../keirin/engine/purchase.mjs";
+const row=(order,probability,purchased=false)=>({order,probability,purchaseStatus:purchased?"購入採用":"購入不採用",betClass:purchased?"COVER":"NONE",familyStructuralCandidate:true,familyNaturalPositionEligible:true,massCoverageEligible:true,firstFamilyTier:"main",firstFamilyNumber:order[0],firstFamilyCoverageTarget:.70,branchContributions:[]});
+const classified=[row([1,2,3],.30,true),row([1,2,4],.25,true),row([1,3,2],.20,false),row([2,1,3],.15,false),row([2,3,1],.10,false)];
+const plan=classified.filter(x=>x.purchaseStatus==="購入採用").map(x=>({order:x.order}));
+const d=purchaseDiagnostics(classified,plan,1000);
+assert.equal(d.purchaseMassAudit.policy,"PURCHASEABLE_NATURAL_MASS_COVERAGE_AND_TOP_N_EFFICIENCY");
+assert.equal(d.purchaseMassAudit.eligibleNaturalTerminalCount,5);
+assert.ok(Math.abs(d.purchaseMassAudit.eligibleCoverage-.55)<1e-12);
+assert.ok(Math.abs(d.purchaseMassAudit.massEfficiency-1)<1e-12);
+assert.equal(d.purchaseMassAudit.status,"UNDER_COVERED");
+const scattered=[row([1,2,3],.30,false),row([1,2,4],.25,false),row([1,3,2],.20,true),row([2,1,3],.15,true),row([2,3,1],.10,true),row([3,1,2],.08,true)];
+const d2=purchaseDiagnostics(scattered,scattered.filter(x=>x.purchaseStatus==="購入採用").map(x=>({order:x.order})),1000);
+assert.ok(d2.purchaseMassAudit.massEfficiency<.70);
+assert.equal(d2.purchaseMassAudit.inefficientCoverage,true);
+console.log("PASS purchase probability mass audit");

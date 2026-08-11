@@ -1,0 +1,12 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+const source=fs.readFileSync(new URL("../public/app.mjs",import.meta.url),"utf8");
+assert.match(source,/SCREENING_MIN_ROWS=3/);
+assert.match(source,/SCREENING_PROBE_SIZE=3/);
+assert.match(source,/SCREENING_TIME_BUDGET_MS=55\*1000/);
+assert.match(source,/一次選別不成立/);
+assert.match(source,/runFallbackDeepDiveComparison\(3\)/);
+assert.match(source,/if\(\(rows\|\|\[\]\)\.length<SCREENING_MIN_ROWS\)return\{normal:\[\],high:\[\],hold:/);
+assert.match(source,/highPool=rows\.filter\(x=>!normalKeys\.has\(raceKey\(x\.r\)\)\)/);
+assert.match(source,/取得\$\{Number\(stats\.attempted\)\|\|0\}・成功/);
+console.log("PASS screening hybrid fallback");

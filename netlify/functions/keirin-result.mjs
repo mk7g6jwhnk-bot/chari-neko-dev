@@ -26,4 +26,57 @@ export default async function handler(req){
   }catch(error){attempts.push({path:"/keirin/race",error:error instanceof Error?error.message:String(error)})}
   return jsonResponse(409,{ok:false,error:"公式結果は未確定、または結果取得サービスが一時的に利用できません",attempts});
 }
-export function normalizeResult(value){if(!value||typeof value!=="object")return null;const rawStatus=String(value.status||value.resultStatus||"").toLowerCase();if(rawStatus==="not_finished")return{status:"not_finished",finishOrder:[],payout:null,source:value.source||value.sourceType||"official"};const status=["cancelled","canceled","中止"].includes(rawStatus)?"cancelled":["refund","refunded","返還"].includes(rawStatus)?"refund":"confirmed";const finishOrder=(value.finishOrder||value.order||value.arrivalOrder||[]).map(x=>Number(x?.number??x)).filter(Number.isFinite).slice(0,3);if(status==="confirmed"&&finishOrder.length<3)return null;const combination=finishOrder.join("-"),trifecta=Array.isArray(value.payouts?.trifecta)?value.payouts.trifecta.find(x=>String(x.combination||"").replace(/\D/g,"")===combination.replace(/\D/g,""))||value.payouts.trifecta[0]:null;return{status,finishOrder,payout:Number(value.payout||value.trifectaPayout||trifecta?.payout||0)||null,source:value.source||value.sourceType||"official"}}
+export function normalizeResult(value){
+  if(!value||typeof value!=="object")return null;
+  const rawStatus=String(value.status||value.resultStatus||"").toLowerCase();
+  if(rawStatus==="not_finished")return{status:"not_finished",finishOrder:[],payout:null,source:value.source||value.sourceType||"official"};
+  const status=["cancelled","canceled","中止"].includes(rawStatus)?"cancelled":["refund","refunded","返還"].includes(rawStatus)?"refund":"confirmed";
+  const finishOrder=(value.finishOrder||value.order||value.arrivalOrder||[]).map(x=>Number(x?.number??x)).filter(Number.isFinite).slice(0,3);
+  if(status==="confirmed"&&finishOrder.length<3)return null;
+  const combination=finishOrder.join("-");
+  const trifecta=Array.isArray(value.payouts?.trifecta)?value.payouts.trifecta.find(x=>String(x.combination||"").replace(/\D/g,"")===combination.replace(/\D/g,""))||value.payouts.trifecta[0]:null;
+  const base={status,finishOrder,payout:Number(value.payout||value.trifectaPayout||trifecta?.payout||0)||null,source:value.source||value.sourceType||"official"};
+
+  const winningMethod=normalizeWinningMethod(value.winningMethod||value.kimarite||value.winningTechnique||value.decisiveMove||null);
+  const markers=normalizeMarkers(value.markers||value.raceMarkers||value.sbMarkers||value);
+  const riderResults=normalizeRiderResults(value.riderResults||value.results||value.participants||[]);
+  const incidents=normalizeIncidents(value.incidents||value.accidents||value.penalties||value.disqualifications||[]);
+  const raceNotes=normalizeTextList(value.raceNotes||value.notes||value.remarks||value.comment||[]);
+  const evidenceAvailable=Boolean(winningMethod||markers.startNumber||markers.backNumber||riderResults.length||incidents.length||raceNotes.length);
+  return evidenceAvailable?{...base,winningMethod,markers,riderResults,incidents,raceNotes,officialEvidenceAvailable:true}:base;
+}
+function normalizeWinningMethod(value){
+  const raw=String(value||"").trim();if(!raw)return null;
+  if(/逃/.test(raw)||/^nige$/i.test(raw))return"逃げ";
+  if(/捲|まく/.test(raw)||/^makuri$/i.test(raw))return"捲り";
+  if(/差/.test(raw)||/^sashi$/i.test(raw))return"差し";
+  if(/マーク|mark/i.test(raw))return"マーク";
+  return raw;
+}
+function normalizeMarkers(value){
+  if(!value||typeof value!=="object")return{startNumber:null,backNumber:null};
+  const s=Number(value.startNumber??value.S??value.s??value.start??value.startRiderNumber);
+  const b=Number(value.backNumber??value.B??value.b??value.back??value.backRiderNumber);
+  return{startNumber:Number.isFinite(s)?s:null,backNumber:Number.isFinite(b)?b:null};
+}
+function normalizeRiderResults(rows){
+  if(!Array.isArray(rows))return[];
+  return rows.map(r=>{
+    if(!r||typeof r!=="object")return null;
+    const number=Number(r.number??r.riderNumber??r.carNumber);
+    if(!Number.isFinite(number))return null;
+    return{number,finish:Number(r.finish??r.rank??r.position)||null,start:Boolean(r.startMarker??r.S??r.s),back:Boolean(r.backMarker??r.B??r.b),note:String(r.note||r.remark||"").trim()||null};
+  }).filter(Boolean);
+}
+function normalizeIncidents(rows){
+  const list=Array.isArray(rows)?rows:(rows?[rows]:[]);
+  return list.map(x=>{
+    if(typeof x==="string")return{type:x,number:null,note:x};
+    if(!x||typeof x!=="object")return null;
+    return{type:String(x.type||x.kind||x.code||"incident"),number:Number.isFinite(Number(x.number??x.riderNumber))?Number(x.number??x.riderNumber):null,note:String(x.note||x.reason||x.label||"").trim()||null};
+  }).filter(Boolean);
+}
+function normalizeTextList(value){
+  const list=Array.isArray(value)?value:[value];
+  return list.map(x=>String(x||"").trim()).filter(Boolean).slice(0,10);
+}

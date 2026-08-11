@@ -1,0 +1,6 @@
+import assert from"node:assert/strict";import{runKeirinEngine}from"../keirin/engine/keirin-engine.mjs";
+const participants=Array.from({length:7},(_,i)=>({id:String(i+1),number:i+1,name:`選手${i+1}`,lineId:`unknown-${i+1}`,lineOrder:1,role:"判定保留",recentForm:5+(i%3)*.4,startPower:4.8+i*.25,sprintPower:5.2+i*.18,finishPower:5.1+i*.15,trackingSkill:5,stamina:5.2,attackTiming:5,lineTrust:null,venueSuitability:5}));
+const p=runKeirinEngine({race:{id:"line-missing",raceCategory:"standard",lineConfidence:"低",participants},budget:3000});
+const fb=p.branches.filter(x=>x.lineIndependentFallback===true);assert.ok(fb.length>=14);assert.ok(fb.some(x=>x.branchType==="LEADER_HOLD"));assert.ok(fb.some(x=>x.branchType==="MAKURI_SUCCESS"));assert.equal(fb.some(x=>x.branchType==="BANTE_SASHI"),false);
+assert.equal(p.audit.lineFallbackAudit.lineIndependentMainAvailable,true);assert.equal(p.audit.lineFallbackAudit.blanketLinePurchaseBlockApplied,false);assert.equal(p.audit.chatSpecV1.mainInvariant.passed,true);assert.ok(p.audit.chatSpecV1.mainInvariant.mainPurchasedCount>0);assert.ok(p.purchasePlan.length>0);assert.equal(p.noBet,false);assert.notEqual(p.audit.referencePlan,true);assert.equal(p.purchasePlan.some(x=>x.referenceOnly===true),false);
+console.log("PASS line missing root cause fixed");

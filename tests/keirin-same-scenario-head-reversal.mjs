@@ -1,0 +1,11 @@
+import assert from"node:assert/strict";
+import{generateKeirinBranches}from"../keirin/sports/keirin-branches.mjs";
+const rider=(id,number,role,lineId,first,escape,bante)=>({id,number,role,lineId,roleScores:{first,second:6,third:6},evidence:{start:7,sprint:6,finish:6,tracking:6,recent:6},riderEvaluationV2:{firstMechanisms:{escape,banteSashi:bante,makuri:5}}});
+const l=rider("l",5,"自力","A",8.4,9.3,2),b=rider("b",7,"番手","A",4.4,2,3.2),x=rider("x",1,"自力","B",5.0,4,2),y=rider("y",2,"番手","B",5.0,2,3);
+const branches=generateKeirinBranches({scored:[l,b,x,y],lines:[{id:"A",type:"ライン",leader:l,bante:b},{id:"B",type:"ライン",leader:x,bante:y}],lineConfidence:"高"});
+const lead=branches.find(x=>x.id==="LEAD-A"),bante=branches.find(x=>x.id==="BANTE-A");
+assert.ok(lead&&bante);
+assert.equal(lead.priority,"main");
+assert.equal(bante.sameScenarioMainSibling,true,"低い1着能力でも同じ主展開の番手差し折り返しは主シナリオへ接続");
+assert.equal(bante.sameScenarioClusterId,"LINE-REVERSAL-A");
+console.log("PASS same-line leader/bante head reversal retained in main scenario cluster");

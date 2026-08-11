@@ -1,0 +1,16 @@
+import assert from"node:assert/strict";
+import fs from"node:fs";
+const app=fs.readFileSync(new URL("../public/app.mjs",import.meta.url),"utf8");
+const start=app.indexOf("async function bulkRefreshRaceInfo()");
+const end=app.indexOf("function oddsRating(",start);
+const body=app.slice(start,end);
+assert.ok(body.includes("refreshMeetingsInPlace()"));
+assert.ok(body.includes('raceStatus(r).label!=="終了"'));
+assert.ok(body.includes("groupRacesByVenue(targets)"));
+assert.ok(body.includes("chunkRows(venueRaces,4)"));
+assert.ok(body.includes("fetchRaceInfoBatch(chunk)"));
+assert.ok(body.includes("fetchRaceInfoBatch([race])"));
+assert.ok(body.includes("state.bulkDone++"));
+assert.ok(!body.includes("preparePrimaryScreening"));
+assert.ok(!body.includes("runFallbackDeepDiveComparison"));
+console.log("PASS reliable all-race bulk refresh");

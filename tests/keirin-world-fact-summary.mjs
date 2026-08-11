@@ -1,0 +1,1 @@
+import assert from"node:assert/strict";import fs from"node:fs";const s=fs.readFileSync(new URL("../public/prediction-store.mjs",import.meta.url),"utf8");for(const t of["worldFacts:node?.resultingState?.facts","worldFactConflicts","requires:c?.requires","sets:c?.sets","forbids:c?.forbids"])assert.ok(s.includes(t),t);console.log("PASS node summary keeps world fact metadata");

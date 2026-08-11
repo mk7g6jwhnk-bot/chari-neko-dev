@@ -1,0 +1,6 @@
+import assert from"node:assert/strict";import{generateKeirinTerminals}from"../keirin/sports/keirin-terminals.mjs";
+const r=(id,n,role,lineId)=>({id,number:n,role,lineId,roleScores:{first:7,second:7,third:7},evidence:{recent:7,start:7,sprint:7,finish:7,tracking:7,stamina:7,lineTrust:7}});
+const scored=[r("1",1,"自力","A"),r("2",2,"番手","A"),r("3",3,"三番手","A"),r("4",4,"自力","B")];
+const branches=[{id:"LEAD",label:"A先行",branchType:"LEADER_HOLD",primaryLineId:"A",priority:"main",score:8,firstCandidates:["1"],firstCandidateScores:{"1":8}}];
+const terminals=generateKeirinTerminals({scored,branches}),x=terminals.find(t=>t.order.join("-")==="1-2-3");assert.ok(x);
+const[a,b,c]=x.nodeTrace;assert.equal(a.resultingState.facts.initiativeLine,"A");assert.equal(a.resultingState.facts.leadRider,1);assert.equal(a.resultingState.facts.winnerMechanism,"LEADER_HOLD");assert.equal(b.inheritedState.facts.winnerMechanism,"LEADER_HOLD");assert.equal(c.inheritedState.facts.winnerMechanism,"LEADER_HOLD");console.log("PASS world facts inherit through second/third nodes");

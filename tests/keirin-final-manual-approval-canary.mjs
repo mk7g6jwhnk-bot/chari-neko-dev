@@ -1,0 +1,13 @@
+import assert from"node:assert/strict";
+import{buildCanaryActivationPlan,finalApprovalFor,saveFinalPromotionApproval,summarizeFinalPromotionApprovals}from"../public/prediction-store.mjs";
+const mem=new Map(),storage={getItem:k=>mem.get(k)||null,setItem:(k,v)=>mem.set(k,String(v))};
+const candidate={packageKey:"PKG",fingerprint:"FNV1A-12345678",status:"FINAL_REVIEW_READY",methodologyEpoch:"PROMOTION-METHOD-2026-08-V2-SEALED-ISOLATED",shadowEvaluationEpoch:"SHADOW-EVAL-ISOLATED-NORMALIZED-V1"};
+let a=saveFinalPromotionApproval(storage,{candidate,decision:"APPROVE_CANARY",note:"0% canary"});
+assert.equal(a.canaryActivationAllowed,true);assert.equal(a.productionWriteAllowed,false);assert.equal(a.productionPromotionAllowed,false);
+assert.equal(finalApprovalFor(storage,"PKG").decision,"APPROVE_CANARY");
+let plan=buildCanaryActivationPlan(candidate,a);
+assert.equal(plan.status,"CANARY_PLAN_READY");assert.equal(plan.scope.trafficShare,0);assert.equal(plan.scope.affectsDisplayedPrediction,false);assert.equal(plan.scope.affectsPurchasePlan,false);assert.equal(plan.scope.affectsProductionParameters,false);assert.equal(plan.productionWriteAllowed,false);
+plan=buildCanaryActivationPlan({...candidate,fingerprint:"FNV1A-deadbeef"},a);
+assert.equal(plan.status,"STALE_APPROVAL");
+const s=summarizeFinalPromotionApprovals(storage);assert.equal(s.canaryApproved,1);assert.equal(s.productionPromotionAllowed,false);
+console.log("PASS final manual approval + zero-impact canary guard");

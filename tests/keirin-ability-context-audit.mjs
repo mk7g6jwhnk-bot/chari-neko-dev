@@ -1,0 +1,3 @@
+import assert from"node:assert/strict";import{runKeirinEngine}from"../keirin/engine/keirin-engine.mjs";
+const participants=Array.from({length:7},(_,i)=>({id:String(i+1),number:i+1,name:`R${i+1}`,role:i%3===0?"自力":i%3===1?"番手":"三番手",lineId:i<3?"A":i<6?"B":"unknown-7",lineOrder:(i%3)+1,recentForm:5+i*.2,startPower:5+i*.15,sprintPower:5+i*.18,finishPower:5+i*.12,trackingSkill:5+i*.1,stamina:5+i*.1,attackTiming:5+i*.08,lineTrust:5+i*.05,venueSuitability:5}));
+const p=runKeirinEngine({race:{id:"ability-audit",raceCategory:"standard",lineConfidence:"高",participants},budget:3000});assert.equal(p.audit.riderAbilityEvaluationAudit.passed,true);assert.equal(p.audit.riderAbilityEvaluationAudit.riderCount,7);console.log("PASS rider ability evaluation audit");

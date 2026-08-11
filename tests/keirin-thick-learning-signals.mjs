@@ -1,0 +1,13 @@
+import assert from"node:assert/strict";
+import{assessThickLearningSignals}from"../public/research-outcome-diagnostics.mjs";
+const row=tag=>({version:"RESEARCH-OUTCOME-DIAGNOSTICS-1.2",thickBetCount:2,highPayoutRace:false,tags:["THICK_CLUSTER_MISS",tag]});
+const hit={version:"RESEARCH-OUTCOME-DIAGNOSTICS-1.2",thickBetCount:2,highPayoutRace:false,tags:["THICK_CLUSTER_HIT"]};
+const small=assessThickLearningSignals([row("THICK_HEAD_MISS"),row("THICK_HEAD_MISS"),hit]);
+assert.equal(small.status,"INSUFFICIENT_SAMPLE");assert.equal(small.eligible,false);
+const sample=[];for(let i=0;i<12;i++)sample.push(row("THICK_HEAD_MISS"));for(let i=0;i<8;i++)sample.push(row("THICK_SECOND_MISS"));for(let i=0;i<10;i++)sample.push(hit);
+const enough=assessThickLearningSignals(sample,{minimumEvaluated:30,minimumMisses:10,dominanceShare:.35});
+assert.equal(enough.status,"REVIEW_CANDIDATE");assert.equal(enough.eligible,true);assert.equal(enough.candidates[0].type,"THICK_HEAD_REPRESENTATION_REVIEW");assert.equal(enough.productionWriteAllowed,false);
+const balanced=[];for(let i=0;i<4;i++){balanced.push(row("THICK_HEAD_MISS"),row("THICK_SECOND_MISS"),row("THICK_THIRD_MISS"));}for(let i=0;i<18;i++)balanced.push(hit);
+const noDom=assessThickLearningSignals(balanced,{minimumEvaluated:30,minimumMisses:10,dominanceShare:.35});
+assert.equal(noDom.status,"NO_DOMINANT_FAILURE_STAGE");assert.equal(noDom.eligible,false);
+console.log("PASS thick learning signals");

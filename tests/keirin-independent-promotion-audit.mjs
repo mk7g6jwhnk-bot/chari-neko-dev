@@ -1,0 +1,6 @@
+import assert from"node:assert/strict";import{summarizeResearchLearning}from"../public/prediction-store.mjs";
+const rows=[],venues=["立川","平塚","前橋","富山"];
+for(let i=0;i<64;i++){const confirmed=(i%10)!==9;rows.push({predictionSnapshotId:`I${i}`,learningMode:"NORMAL",checkedAt:`2026-08-${String(1+Math.floor(i/6)).padStart(2,"0")}T${String((i%6)*2).padStart(2,"0")}:00:00Z`,venueName:venues[i%4],conditionEvidence:[{evidenceKey:`E:${i}`,conditionId:`MAKURI_REACH_${i+1}`,stage:"FIRST",kind:"natural",predictedProbability:.68,status:confirmed?"CONFIRMED":"REFUTED"}],verificationStatus:"PURCHASE_SELECTION_MISS",exactTerminalGenerated:true,firstPlaceFamilyGenerated:true,firstSecondPairGenerated:true})}
+const storage={getItem:k=>k==="chari-neko:keirin-research-learning:v1"?JSON.stringify(rows):null,setItem(){}};
+const cal=summarizeResearchLearning(storage).conditionCalibration,g=cal.groups[0],a=g.independentAudit;
+assert.equal(g.promotionAudit.status,"PROMOTION_AUDIT_READY");assert.equal(a.status,"INDEPENDENT_AUDIT_PASS");assert.ok(a.foldCount>=3);assert.ok(a.passShare>=.75);assert.ok(a.proposalSpread<=.12);assert.equal(a.sensitivity.status,"SENSITIVITY_PASS");assert.equal(cal.independentAuditPassedCount,1);assert.equal(cal.productionApplyEnabled,false);console.log("PASS independent leave-one-venue-out promotion audit");

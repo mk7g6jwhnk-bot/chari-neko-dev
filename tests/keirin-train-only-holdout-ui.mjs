@@ -1,0 +1,1 @@
+import assert from"node:assert/strict";import fs from"node:fs";const app=fs.readFileSync(new URL("../public/app.mjs",import.meta.url),"utf8");for(const t of["訓練側候補判定","訓練側未達","ホールドアウトは候補生成後まで未使用"])assert.ok(app.includes(t),t);console.log("PASS train-only holdout UI");

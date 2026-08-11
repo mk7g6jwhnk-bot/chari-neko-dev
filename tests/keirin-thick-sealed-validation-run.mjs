@@ -1,0 +1,28 @@
+import assert from "node:assert/strict";
+import {createThickSealedValidationPackage,runThickSealedValidation} from "../public/research-outcome-diagnostics.mjs";
+const rp={status:"INDEPENDENT_REVIEW_PACKAGE_READY",reviewPackageId:"RP1",proposalId:"P1",proposalSeal:"PS1",scope:"THICK_ALLOCATION",change:{x:1},context:{venue:"A"},sourceChain:{oosVersion:"1"}};
+const p={status:"PRIMARY_REVIEW_APPROVED",reviewerId:"A",primaryReviewSeal:"PRS1"};
+const f={status:"DUAL_INDEPENDENT_REVIEW_APPROVED",decision:"ALLOW_SEALED_VALIDATION_ONLY",reviewerId:"B",primaryReviewSeal:"PRS1",finalReviewSeal:"FRS1"};
+const requiredMetrics=["races","returnRate","thickHitRate","mainHitRate","supportHitRate","betCount"];
+const pkg=createThickSealedValidationPackage(rp,p,f,{requiredMetrics,validationCohort:{id:"cohort-1",frozen:true},validationCriteria:{minimumRaces:30,minimumReturnDelta:0,minimumThickHitDelta:0,maxMainHitDrop:.01,maxSupportHitDrop:.02,maxBetCountIncrease:.10}});
+const baseline={races:50,returnRate:.90,thickHitRate:.20,mainHitRate:.40,supportHitRate:.30,betCount:100};
+const candidate={races:50,returnRate:.94,thickHitRate:.25,mainHitRate:.395,supportHitRate:.295,betCount:104};
+const pass=runThickSealedValidation(pkg,baseline,candidate,{cohortId:"cohort-1"});
+assert.equal(pass.status,"SEALED_VALIDATION_PASSED");
+assert.equal(pass.decision,"RETAIN_FOR_FINAL_PROMOTION_REVIEW");
+assert.equal(pass.safeguards.productionWriteAllowed,false);
+const fail=runThickSealedValidation(pkg,baseline,{...candidate,mainHitRate:.35},{cohortId:"cohort-1"});
+assert.equal(fail.status,"SEALED_VALIDATION_FAILED");
+assert.equal(fail.decision,"REJECT_RESEARCH_CANDIDATE");
+assert.ok(fail.counterEvidence.some(x=>x.type==="SEALED_MAIN_HIT_REGRESSION"));
+const wrongCohort=runThickSealedValidation(pkg,baseline,candidate,{cohortId:"cohort-2"});
+assert.equal(wrongCohort.status,"VALIDATION_EVIDENCE_INVALID");
+const tampered={...pkg,scope:"THICK_CLASSIFICATION"};
+const invalid=runThickSealedValidation(tampered,baseline,candidate,{cohortId:"cohort-1"});
+assert.equal(invalid.status,"SEAL_MISMATCH");
+console.log("keirin thick sealed validation run tests: ok");
+
+const overrideRejected=runThickSealedValidation(pkg,baseline,candidate,{cohortId:"cohort-1"},{minimumRaces:1});
+assert.equal(overrideRejected.status,"SEALED_VALIDATION_CRITERIA_MISMATCH");
+const matchingOverride=runThickSealedValidation(pkg,baseline,candidate,{cohortId:"cohort-1"},{minimumRaces:30,maxMainHitDrop:.01});
+assert.equal(matchingOverride.status,"SEALED_VALIDATION_PASSED");

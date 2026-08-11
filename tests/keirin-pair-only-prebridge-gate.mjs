@@ -1,0 +1,15 @@
+import assert from"node:assert/strict";import{applyChatSpecV1}from"../keirin/engine/chat-spec-v1-policy.mjs";
+const mk=(third,p,thirdRatio,thirdProb)=>({order:[3,7,third],probability:p,branchId:"B",branchPriority:"main",branchLabel:"主展開",branchContributions:[{branchId:"B",branchLabel:"主展開",branchPriority:"main",probability:p,decisionRatios:{first:.95,second:.91,third:thirdRatio},nodeTrace:[{stage:"FIRST",conditionalProbability:.82,newRequiredConditions:[{kind:"natural",probability:.82,critical:true}]},{stage:"SECOND",conditionalProbability:.78,newRequiredConditions:[{kind:"natural",probability:.78,critical:true}]},{stage:"THIRD",conditionalProbability:thirdProb,newRequiredConditions:[{kind:"extra",probability:thirdProb,critical:true}]}]}],nodeTrace:[{stage:"FIRST",conditionalProbability:.82,newRequiredConditions:[{kind:"natural",probability:.82,critical:true}]},{stage:"SECOND",conditionalProbability:.78,newRequiredConditions:[{kind:"natural",probability:.78,critical:true}]},{stage:"THIRD",conditionalProbability:thirdProb,newRequiredConditions:[{kind:"extra",probability:thirdProb,critical:true}]}],lifecycle:{generated:true,terminalDeleted:false}});
+const terminals=[mk(1,.34,.92,.75),mk(2,.25,.72,.58),mk(4,.18,.45,.35),mk(5,.14,.25,.20),mk(6,.09,.10,.12)];
+const scored=[1,2,3,4,5,6,7].map(n=>({number:n,roleScores:{first:n===3?8:6,second:n===7?8:6,third:6}}));
+const branches=[{id:"B",label:"主展開",priority:"main",requiredFirstNumber:3,score:9}];
+const out=applyChatSpecV1({terminals,branches,scored,lines:[],oddsByOrder:new Map()});
+const audit=out.audit.thirdPurchaseBridgeAudit;
+assert.equal(audit.pairGateUsesThirdInput,false);
+const pair=audit.rows.find(r=>r.first===3&&r.second===7);assert.ok(pair);assert.equal(pair.candidateCount,5);
+const low=out.terminals.find(x=>x.order.join("-")==="3-7-6");
+assert.ok(low);assert.ok(low.pairNaturalConvergenceScore>=.46,"1-2 gate stays strong");
+assert.ok(low.naturalConvergenceScore<.46,"full terminal convergence is intentionally weak from THIRD");
+assert.ok(["SELECTED_FOR_CLASSIFICATION","EVALUATED_NOT_SELECTED"].includes(low.thirdPurchaseBridgeStatus),"weak THIRD still reaches bridge");
+assert.ok(audit.lowTerminalConvergenceEvaluatedCount>=1);
+console.log("PASS pair-only prebridge gate does not use THIRD weakness");
