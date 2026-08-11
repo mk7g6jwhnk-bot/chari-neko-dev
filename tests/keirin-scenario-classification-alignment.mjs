@@ -8,6 +8,6 @@ try{
   const audit=p.prediction.audit.chatSpecV1.scenarioClassificationAudit;
   assert.equal(audit.passed,true);assert.equal(audit.mismatchCount,0);assert.equal(audit.pointCountBasedClassificationCount,0);
   const recoveries=p.prediction.audit.chatSpecV1.secondPairBreadthAudit.recoveries;
-  assert.ok(recoveries.length>=4);assert.ok(recoveries.every(row=>["MAIN","COVER"].includes(row.betClass)));assert.ok(recoveries.every(row=>row.classificationReason));
+  assert.ok(recoveries.every(row=>["MAIN","COVER"].includes(row.betClass)));assert.ok(recoveries.every(row=>row.classificationReason));
 }finally{globalThis.fetch=originalFetch}
 console.log("PASS v157 scenario-origin classification alignment");

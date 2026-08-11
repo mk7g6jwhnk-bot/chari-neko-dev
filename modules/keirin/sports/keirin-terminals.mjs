@@ -1,5 +1,6 @@
 export function generateKeirinTerminals({scored,branches}){
   const byId=new Map(scored.map(item=>[item.id,item]));
+  const topBranchScore=Math.max(...(branches||[]).map(branch=>Number(branch?.score)||0),0);
   const lineById=new Map(scored.map(item=>[item.id,item.lineId]));
   const raw=[];
   const generationEvents=[];
@@ -29,9 +30,12 @@ export function generateKeirinTerminals({scored,branches}){
     const bestFirst=Math.max(...firstEntries.map(item=>item.score),0);
 
     const firstTotal=firstEntries.reduce((sum,item)=>sum+item.score,0);
+    const firstStageEntries=firstEntries.map(({first,score})=>({first,score,node:buildFirstNode(branch,first,score,firstTotal)}));
+    const bestFirstConditional=Math.max(...firstStageEntries.map(item=>Number(item.node?.conditionalProbability)||0),0);
+    const branchDifferential=buildDifferentialCondition({stage:"BRANCH",value:Number(branch.score)||0,bestValue:topBranchScore,label:branch.label||branch.id});
 
-    for(const {first,score:firstScore} of firstEntries){
-      const firstNode=buildFirstNode(branch,first,firstScore,firstTotal);
+    for(const {first,score:firstScore,node:firstNode} of firstStageEntries){
+      const firstDifferential=buildDifferentialCondition({stage:"FIRST",value:Number(firstNode?.conditionalProbability)||0,bestValue:bestFirstConditional,label:`${first.number}番1着`});
 
       // FIRST成立後はいったんライン序列を候補集合から外し、
       // 1着本人以外の全員をSECONDとして独立再評価する。
@@ -57,14 +61,20 @@ export function generateKeirinTerminals({scored,branches}){
       }
       const bestSecond=Math.max(...secondEntries.map(item=>item.score),0);
       const secondTotal=secondEntries.reduce((sum,item)=>sum+item.score,0);
-
-      for(const {second,score:secondScore} of secondEntries){
-        const secondNode=buildSecondNode(branch,firstNode,first,second,secondScore,secondTotal,lineById);
-        const secondConflict=stateConflict(secondNode);
-        if(secondConflict){
-          generationEvents.push({stage:"SECOND",branchId:branch.id,branchLabel:branch.label,order:[first.number,second.number],action:"EXCLUDED",reasonGroup:"RULE_IMPOSSIBLE",reasonCode:"PARENT_STATE_CONTRADICTION",reason:secondConflict});
+      const secondStageEntries=[];
+      for(const {second,score} of secondEntries){
+        const node=buildSecondNode(branch,firstNode,first,second,score,secondTotal,lineById);
+        const conflict=stateConflict(node);
+        if(conflict){
+          generationEvents.push({stage:"SECOND",branchId:branch.id,branchLabel:branch.label,order:[first.number,second.number],action:"EXCLUDED",reasonGroup:"RULE_IMPOSSIBLE",reasonCode:"PARENT_STATE_CONTRADICTION",reason:conflict});
           continue;
         }
+        secondStageEntries.push({second,score,node});
+      }
+      const bestSecondConditional=Math.max(...secondStageEntries.map(item=>Number(item.node?.conditionalProbability)||0),0);
+
+      for(const {second,score:secondScore,node:secondNode} of secondStageEntries){
+        const secondDifferential=buildDifferentialCondition({stage:"SECOND",value:Number(secondNode?.conditionalProbability)||0,bestValue:bestSecondConditional,label:`${second.number}番2着`});
 
         // THIRD専用工程:
         // 1-2着が成立した時点で、それまでの総合順位・頭評価を候補生成条件に使わない。
@@ -122,16 +132,25 @@ export function generateKeirinTerminals({scored,branches}){
         });
         const bestThird=Math.max(...thirdEntries.map(item=>item.score),0);
         const thirdTotal=thirdEntries.reduce((sum,item)=>sum+Math.max(Number(item.score)||0,.000001),0);
-
-        for(const {third,requiredConditions,score:thirdScore} of thirdEntries){
-          const thirdNode=buildThirdNode(branch,secondNode,first,second,third,thirdScore,thirdTotal,lineById,requiredConditions);
-          const thirdConflict=stateConflict(thirdNode);
-          if(thirdConflict){
-            generationEvents.push({stage:"THIRD",branchId:branch.id,branchLabel:branch.label,order:[first.number,second.number,third.number],action:"EXCLUDED",reasonGroup:"RULE_IMPOSSIBLE",reasonCode:"PARENT_STATE_CONTRADICTION",reason:thirdConflict});
+        const thirdStageEntries=[];
+        for(const {third,requiredConditions,score} of thirdEntries){
+          const node=buildThirdNode(branch,secondNode,first,second,third,score,thirdTotal,lineById,requiredConditions);
+          const conflict=stateConflict(node);
+          if(conflict){
+            generationEvents.push({stage:"THIRD",branchId:branch.id,branchLabel:branch.label,order:[first.number,second.number,third.number],action:"EXCLUDED",reasonGroup:"RULE_IMPOSSIBLE",reasonCode:"PARENT_STATE_CONTRADICTION",reason:conflict});
             continue;
           }
+          thirdStageEntries.push({third,requiredConditions,score,node});
+        }
+        const bestThirdConditional=Math.max(...thirdStageEntries.map(item=>Number(item.node?.conditionalProbability)||0),0);
 
-          const pathScore=firstScore*secondScore*thirdScore;
+        for(const {third,requiredConditions,score:thirdScore,node:thirdNode} of thirdStageEntries){
+          const thirdDifferential=buildDifferentialCondition({stage:"THIRD",value:Number(thirdNode?.conditionalProbability)||0,bestValue:bestThirdConditional,label:`${third.number}番3着`});
+          const basePathScore=firstScore*secondScore*thirdScore;
+          const relativeConditionTrace=[branchDifferential,firstDifferential,secondDifferential,thirdDifferential];
+          const relativeConditionCount=relativeConditionTrace.reduce((total,row)=>total+(Number(row.count)||0),0);
+          const relativeConditionPenalty=relativeConditionTrace.reduce((product,row)=>product*(Number(row.factor)||1),1);
+          const pathScore=basePathScore*relativeConditionPenalty;
           if(!branchPathCompatible(branch,first,second,third)){
             generationEvents.push({stage:"PATH",branchId:branch.id,branchLabel:branch.label,order:[first.number,second.number,third.number],action:"EXCLUDED",reasonGroup:"RULE_IMPOSSIBLE",reasonCode:"BRANCH_PATH_INCOMPATIBLE",reason:"展開枝の役割条件と着順経路が両立しない"});
             continue;
@@ -145,7 +164,12 @@ export function generateKeirinTerminals({scored,branches}){
             primaryLineId:branch.primaryLineId||null,
             requiredFirstNumber:branch.requiredFirstNumber??null,
             branchScore:branch.score,
+            basePathScore,
             pathScore,
+            relativeConditionCount,
+            relativeConditionPenalty,
+            relativeConditionTrace,
+            probabilitySeparationPolicy:"BASE_PROBABILITY_FIRST_PLUS_LIGHT_DIFFERENTIAL_CONDITION_V1",
             nodeConditionalProbability:firstNode.conditionalProbability*secondNode.conditionalProbability*thirdNode.conditionalProbability,
             decisionRatios:{
               first:bestFirst>0?firstScore/bestFirst:0,
@@ -164,7 +188,7 @@ export function generateKeirinTerminals({scored,branches}){
     const branchPathTotal=paths.reduce((sum,path)=>sum+path.pathScore,0);
     if(!(branchPathTotal>0))continue;
     for(const path of paths){
-      raw.push({...path,weightedScore:branch.score*(path.pathScore/branchPathTotal)});
+      raw.push({...path,weightedScore:branch.score*branchDifferential.factor*(path.pathScore/branchPathTotal)});
     }
   }
 
@@ -180,7 +204,12 @@ export function generateKeirinTerminals({scored,branches}){
       requiredFirstNumber:terminal.requiredFirstNumber??null,
       branchScore:terminal.branchScore,
       weightedScore:terminal.weightedScore,
+      basePathScore:terminal.basePathScore,
       pathScore:terminal.pathScore,
+      relativeConditionCount:terminal.relativeConditionCount??0,
+      relativeConditionPenalty:terminal.relativeConditionPenalty??1,
+      relativeConditionTrace:terminal.relativeConditionTrace||[],
+      probabilitySeparationPolicy:terminal.probabilitySeparationPolicy||null,
       positionScores:terminal.positionScores,
       positionEvidence:terminal.positionEvidence,
       decisionRatios:terminal.decisionRatios,
@@ -222,6 +251,10 @@ export function generateKeirinTerminals({scored,branches}){
     terminal.branchType=dominant?.branchType||terminal.branchType;
     terminal.nodeTrace=dominant?.nodeTrace||[];
     terminal.nodeConditionalProbability=dominant?.nodeConditionalProbability??null;
+    terminal.relativeConditionCount=dominant?.relativeConditionCount??0;
+    terminal.relativeConditionPenalty=dominant?.relativeConditionPenalty??1;
+    terminal.relativeConditionTrace=dominant?.relativeConditionTrace||[];
+    terminal.probabilitySeparationPolicy=dominant?.probabilitySeparationPolicy||"BASE_PROBABILITY_FIRST_PLUS_LIGHT_DIFFERENTIAL_CONDITION_V1";
   }
   terminals.sort((a,b)=>(b.probability-a.probability)||a.order.join("-").localeCompare(b.order.join("-"),"en"));
   const excluded=generationEvents.filter(event=>event.action==="EXCLUDED");
@@ -261,7 +294,8 @@ export function generateKeirinTerminals({scored,branches}){
     passed:secondCoverageMisses.length===0&&thirdCoverageMisses.length===0&&mixedCoverageMisses.length===0&&thirdDedicatedAudit.passed&&positionTerminalConnectionAudit.passed
   };
   Object.defineProperty(terminals,"generationAudit",{value:{
-    policy:"ONE_NODE_ONE_EVENT_PLUS_DEDICATED_THIRD_CONDITION_GENERATION_BEFORE_PROBABILITY",
+    policy:"ONE_NODE_ONE_EVENT_PLUS_DEDICATED_THIRD_CONDITION_GENERATION_BEFORE_PROBABILITY_PLUS_LIGHT_DIFFERENTIAL_CONDITION_SEPARATION",
+    probabilitySeparationPolicy:"BASE_PROBABILITY_FIRST_PLUS_LIGHT_DIFFERENTIAL_CONDITION_V1",
     allowedExclusionReasonGroups:[...allowedReasonGroups],
     generatedUniqueTerminalCount:terminals.length,
     rawSupportedPathCount:raw.length,
@@ -452,6 +486,19 @@ function buildWorldState(parent,event,conditions,eventFacts={}){
   const transition=auditWorldFactTransition(parent?.facts||{},conditions,eventFacts);
   return{state:{events:[...(parent?.events||[]),event],conditions:[...(parent?.conditions||[]),...(conditions||[])],facts:transition.facts},conflicts:transition.conflicts};
 }
+function buildDifferentialCondition({stage,value,bestValue,label}){
+  const current=Math.max(0,Number(value)||0),best=Math.max(0,Number(bestValue)||0);
+  const eps=Math.max(1e-12,best*1e-10);
+  if(!(best>0)||best-current<=eps)return{stage,label,count:0,ratio:best>0?Math.min(1,current/best):1,gap:0,factor:1,penalty:0};
+  const ratio=Math.max(0,Math.min(1,current/best));
+  const gap=1-ratio;
+  // The base probability/score difference remains the primary signal.
+  // A lower-probability alternative gets one small extra burden so even a
+  // microscopic edge is never rounded back into practical equality.
+  const penalty=Math.min(.03,.008+gap*.022);
+  return{stage,label,count:1,ratio,gap,factor:1-penalty,penalty};
+}
+
 function nodeConditionalProbability(score,total,requiredConditions=[]){
   const base=total>0?score/total:0;
   const conds=(requiredConditions||[]).filter(c=>c?.kind!=="event");

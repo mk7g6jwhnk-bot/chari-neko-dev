@@ -4,10 +4,12 @@ globalThis.fetch=async()=>new Response(JSON.stringify({ok:true,officialData:{bas
 try{
  const res=await handler(new Request("https://test/.netlify/functions/keirin-predict?date=20260808&venueCode=28&venueName=%E7%AB%8B%E5%B7%9D&raceNo=12&budget=3000"));
  const p=await res.json();const pred=p.prediction;
- assert.equal(pred.audit.chatSpecV1.mainInvariant.passed,true);
- assert.ok(pred.audit.chatSpecV1.mainInvariant.mainPurchasedCount>0);
+ assert.equal(pred.audit.chatSpecV1.mainInvariant.mainPurchasedCount,0);
+ assert.equal(pred.audit.chatSpecV1.mainInvariant.passed,false);
  assert.equal(pred.noBet,true);
+ assert.equal(pred.noBetReason,"LINE_AND_START_EVIDENCE_UNAVAILABLE");
  assert.equal(pred.audit.referencePlan,true);
- assert.ok(pred.purchasePlan.length>=1);
- console.log("PASS degraded line-independent MAIN uses non-punitive threshold");
+ assert.equal(pred.purchasePlan.length,7);
+ assert.equal(pred.purchasePlan.every(x=>x.referenceOnly===true),true);
+ console.log("PASS missing line+start evidence keeps MAIN unresolved and uses 7 reference terminals");
 }finally{globalThis.fetch=originalFetch}

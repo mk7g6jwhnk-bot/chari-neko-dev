@@ -341,10 +341,13 @@ function compareCoverageCandidate(a,b){
 
 
 function isMassCoverageEligible(item){
-  if(item?.massCoverageEligible===true)return true;
+  // v156: the chat-spec bridge can explicitly mark the narrower set that is
+  // safe for automatic mass recovery.  Respect explicit false as well as true.
+  // Rows from older/general diagnostics may not carry this flag; for those,
+  // preserve the v155 audit population (structural + natural, excluding sub/risk).
+  if(typeof item?.massCoverageEligible==="boolean")return item.massCoverageEligible;
   return Boolean(
     item&&
-    item.familyCoverageCandidate&&
     item.familyStructuralCandidate&&
     item.familyNaturalPositionEligible&&
     item.firstFamilyTier!=="sub"&&
@@ -673,7 +676,13 @@ function planRow(item,stake,fundingStatus,minimumRequired){return{
   secondFamilyRelativeToBest:item.secondFamilyRelativeToBest??null,thirdFamilyRelativeToBest:item.thirdFamilyRelativeToBest??null,subValueIndex:item.subValueIndex??null,
   chatForecastRole:item.chatForecastRole||null,directMainBranchSupport:Boolean(item.directMainBranchSupport),branchHeadMatched:item.branchHeadMatched!==false,
   naturalConvergenceScore:item.naturalConvergenceScore??null,naturalConvergenceLevel:item.naturalConvergenceLevel||null,naturalConvergenceReasons:item.naturalConvergenceReasons||[],
-  extraConditionCount:item.extraConditionCount??0,scenarioCoherence:item.scenarioCoherence??null,
+  extraConditionCount:item.extraConditionCount??0,extraConditionDetails:item.extraConditionDetails||[],
+  nodeExtraConditionCount:item.nodeExtraConditionCount??0,structuralExtraConditionCount:item.structuralExtraConditionCount??0,
+  extraConditionProbabilityMin:item.extraConditionProbabilityMin??null,extraConditionProbabilityMean:item.extraConditionProbabilityMean??null,
+  extraConditionPenalty:item.extraConditionPenalty??null,
+  relativeConditionCount:item.relativeConditionCount??0,relativeConditionPenalty:item.relativeConditionPenalty??1,
+  relativeConditionTrace:item.relativeConditionTrace||[],probabilitySeparationPolicy:item.probabilitySeparationPolicy||null,
+  scenarioCoherence:item.scenarioCoherence??null,
   nodeConditionalProbability:item.nodeConditionalProbability??null,nodeTrace:item.nodeTrace||null,
   fundingWeight:item.odds>1?(Number(item.probability)||0)*Math.sqrt(Math.max((Number(item.probability)||0)*Number(item.odds),.000001)):(Number(item.probability)||0),
   fundingStatus,minimumRequired

@@ -13,7 +13,7 @@ const ODDS_CACHE_KEY="chari-neko:keirin-odds-cache:v1";
 const RACE_META_CACHE_KEY="chari-neko:keirin-race-meta-cache:v1";
 const RESULT_CACHE_KEY="chari-neko:keirin-result-cache:v1";
 const MEETING_CACHE_KEY="chari-neko:keirin-meeting-cache:v1";
-const APP_RELEASE="KEIRIN-0.16.47-start-power-audit-parameter-summary";
+const APP_RELEASE="KEIRIN-0.16.49-relative-condition-probability-separation";
 const APP_UPDATE_CHECK_INTERVAL_MS=5*60*1000;
 let lastAppUpdateCheckAt=0,appUpdateCheckBusy=false;
 const VENUE_CODES={函館:"11",青森:"12",いわき平:"13",弥彦:"21",前橋:"22",取手:"23",宇都宮:"24",大宮:"25",西武園:"26",京王閣:"27",立川:"28",松戸:"31",千葉:"32",川崎:"34",平塚:"35",小田原:"36",伊東:"37",静岡:"38",名古屋:"42",岐阜:"43",大垣:"44",豊橋:"45",富山:"46",松阪:"47",四日市:"48",福井:"51",奈良:"53",向日町:"54",和歌山:"55",岸和田:"56",玉野:"61",広島:"62",防府:"63",高松:"71",小松島:"73",高知:"74",松山:"75",小倉:"81",久留米:"83",武雄:"84",佐世保:"85",別府:"86",熊本:"87"};
@@ -471,10 +471,11 @@ function renderPredictionDetail(snapshot){
     const audit=snapshot?.predictionOutput?.audit&&typeof snapshot.predictionOutput.audit==="object"?snapshot.predictionOutput.audit:{};
     const riderBranchLinkHtml=renderRiderBranchLinkAudit(audit?.riderBranchLinkAudit);
     const wholeLinkageHtml=renderWholeLinkageAudit(audit?.wholeLinkageAudit);
+    const extraConditionHtml=renderExtraConditionAudit(audit?.chatSpecV1?.extraConditionAudit);
     const scenarioExplanationHtml=renderScenarioExplanation(snapshot);
     const hasAudit=Number.isFinite(Number(audit.generatedTerminalCount));
     const auditSummary=hasAudit?`<details id="purchaseAuditDetails" class="predictionAccordion"><summary>詳しい購入監査を見る（開発用）</summary><div id="purchaseAuditBody" class="accordionBody"><p class="muted">監査データは詳細を開いた時だけ描画します。レース詳細の表示を優先しています。</p></div></details>`:"";
-    panel.innerHTML=`<div class="sectionHead"><div><small>保存済み予想の根拠</small><h2>予想詳細</h2></div><span class="pill">詳細</span></div>${scenarioExplanationHtml}${renderNodeStateAudit(snapshot?.audit)}${riderBranchLinkHtml}${wholeLinkageHtml}${auditSummary}<details class="predictionAccordion"><summary>買い目の理由を見る</summary><div class="accordionBody">${betDetail||'<p class="muted">購入候補はありません。</p>'}</div></details>${abilities?`<details class="predictionAccordion" open><summary>着順別評価を見る</summary><div class="accordionBody"><p class="muted">印を介さず、1着・2着・3着の独立評価と展開役割を直接表示します。買い目との矛盾は全体連動監査で確認します。</p><div class="abilityList">${abilities}</div></div></details>`:""}${renderStartPowerInputAuditSafe(snapshot)}`;
+    panel.innerHTML=`<div class="sectionHead"><div><small>保存済み予想の根拠</small><h2>予想詳細</h2></div><span class="pill">詳細</span></div>${scenarioExplanationHtml}${renderNodeStateAudit(snapshot?.audit)}${riderBranchLinkHtml}${extraConditionHtml}${wholeLinkageHtml}${auditSummary}<details class="predictionAccordion"><summary>買い目の理由を見る</summary><div class="accordionBody">${betDetail||'<p class="muted">購入候補はありません。</p>'}</div></details>${abilities?`<details class="predictionAccordion" open><summary>着順別評価を見る</summary><div class="accordionBody"><p class="muted">印を介さず、1着・2着・3着の独立評価と展開役割を直接表示します。買い目との矛盾は全体連動監査で確認します。</p><div class="abilityList">${abilities}</div></div></details>`:""}${renderStartPowerInputAuditSafe(snapshot)}`;
     panel.classList.remove("hidden");
     const auditDetails=$("purchaseAuditDetails"),auditBody=$("purchaseAuditBody");
     if(auditDetails&&auditBody)auditDetails.addEventListener("toggle",()=>{if(!auditDetails.open||auditBody.dataset.loaded==="1")return;auditBody.dataset.loaded="1";renderPurchaseAuditLazy(audit,auditBody)},{once:false});
@@ -557,7 +558,9 @@ function scenarioBetSentence(b){
     sentence=`${a}-${c}-${d}は「${branch}」由来の別展開として成立し、自然さだけで本線には上げず、オッズ妙味が残るため高配当候補にしました。`;
   }
   const reason=b?.purchaseReason?` ${b.purchaseReason}`:"";
-  return `<div class="detailBet"><strong>${esc(`${a}-${c}-${d}`)}　${esc(cls)}</strong><p>${esc(sentence)}</p><p class="muted">自然収束度 ${esc(convText)}${Number.isFinite(Number(b?.nodeConditionalProbability))?` / ノード連鎖 ${esc((Number(b.nodeConditionalProbability)*100).toFixed(2))}%`:""}${Number(b?.extraConditionCount)>0?` / 追加条件 ${Number(b.extraConditionCount)}件`:""}${reason?` / ${esc(reason)}`:""}</p></div>`;
+  const extraDetails=Array.isArray(b?.extraConditionDetails)?b.extraConditionDetails:[];
+  const extraText=extraDetails.length?extraDetails.map(x=>{const p=Number(x?.probability);const prob=Number.isFinite(p)?`${(p*100).toFixed(1)}%`:"未校正";const mech=x?.mechanism?.label?`・${x.mechanism.label}`:"";return `${x?.stage||"構造"}:${x?.label||x?.id||"追加条件"}${mech} ${prob}${x?.critical===true?" 必須":""}`}).join(" ｜ "):"";
+  return `<div class="detailBet"><strong>${esc(`${a}-${c}-${d}`)}　${esc(cls)}</strong><p>${esc(sentence)}</p><p class="muted">自然収束度 ${esc(convText)}${Number.isFinite(Number(b?.nodeConditionalProbability))?` / ノード連鎖 ${esc((Number(b.nodeConditionalProbability)*100).toFixed(2))}%`:""}${Number(b?.extraConditionCount)>0?` / 追加条件 ${Number(b.extraConditionCount)}件`:""}${Number.isFinite(Number(b?.extraConditionPenalty))?` / 条件後残存 ${(Number(b.extraConditionPenalty)*100).toFixed(0)}%`:""}${Number(b?.relativeConditionCount)>0?` / 差分条件 ${Number(b.relativeConditionCount)}件・微調整 ${(Math.max(0,1-Number(b.relativeConditionPenalty||1))*100).toFixed(1)}%`:""}${reason?` / ${esc(reason)}`:""}</p>${extraText?`<p class="auditMeta"><b>追加条件内訳</b> ${esc(extraText)}</p>`:""}${Array.isArray(b?.relativeConditionTrace)&&b.relativeConditionTrace.some(x=>Number(x?.count)>0)?`<p class="auditMeta"><b>差分条件内訳</b> ${esc(b.relativeConditionTrace.filter(x=>Number(x?.count)>0).map(x=>`${x.stage}:${x.label||"候補"} 最有力比${(Number(x.ratio||0)*100).toFixed(2)}% / -${(Number(x.penalty||0)*100).toFixed(2)}%`).join(" ｜ "))}</p>`:""}</div>`;
 }
 
 function countHeads(rows){
@@ -582,6 +585,17 @@ function renderRiderBranchLinkAudit(audit){
   </details>`;
 }
 
+function renderExtraConditionAudit(audit){
+  if(!audit||typeof audit!=="object")return "";
+  const status=String(audit.status||"OK");
+  const extra=Number(audit.purchasedWithExtraCount)||0,uncal=Number(audit.uncalibratedStructuralCount)||0,fixed=Number(audit.fixedPenaltyCount)||0;
+  const allOne=audit.allPurchasedExtrasDisplayedAsOne===true;
+  const tone=uncal?"auditWarning":"notice";
+  const title=uncal?"追加条件監査：未校正の構造条件あり":allOne?"追加条件監査：『1件』表示の中身を分解":"追加条件監査";
+  const range=Number.isFinite(Number(audit.probabilityMin))&&Number.isFinite(Number(audit.probabilityMax))?`${(Number(audit.probabilityMin)*100).toFixed(1)}〜${(Number(audit.probabilityMax)*100).toFixed(1)}%`:"確率付き条件なし";
+  return `<details class="predictionAccordion" ${uncal?"open":""}><summary>${esc(title)}</summary><div class="accordionBody"><div class="${tone}"><strong>${esc(status)}</strong><p>追加条件あり購入 ${extra}件 / 未校正構造条件 ${uncal}件 / 1件固定12%減点 ${fixed}件</p><p class="muted">条件確率レンジ ${esc(range)}。件数は表示用の粗い指標で、条件ID・機構・条件確率を優先して監査します。未校正構造条件は件数だけで同じ減点になっているため、確率校正前は要確認です。</p></div></div></details>`;
+}
+
 function renderWholeLinkageAudit(audit){
   if(!audit||typeof audit!=="object")return `<div class="auditWarning"><strong>全体連動監査：未記録</strong><p>この保存予想には全体連動監査がありません。新規予想で生成されます。</p></div>`;
   const stages=Array.isArray(audit.stageChecks)?audit.stageChecks:[];
@@ -597,7 +611,9 @@ function renderWholeLinkageAudit(audit){
     const prob=Number.isFinite(Number(t.probability))?`${(Number(t.probability)*100).toFixed(2)}%`:"-";
     const ws=Array.isArray(t.warnings)?t.warnings:[];
     const rs=Array.isArray(t.resolutions)?t.resolutions:[];
-    return `<div class="detailBet"><strong>${esc(order)}　${esc(betClassLabel(t.category))}</strong><p><b>連動</b> 1着能力 ${fmtAbility(t.firstAbility)} → ライン ${esc(line)} → ${esc(t.branchLabel||"展開不明")} → 2着能力 ${fmtAbility(t.secondAbility)} → 3着能力 ${fmtAbility(t.thirdAbility)}</p><p class="muted">自然収束 ${esc(conv)} / 追加条件 ${Number(t.extraConditionCount)||0} / 終端確率 ${esc(prob)}${Array.isArray(t.naturalConvergenceReasons)&&t.naturalConvergenceReasons.length?` / ${t.naturalConvergenceReasons.slice(0,3).map(esc).join(" / ")}`:""}</p>${ws.length?`<p class="auditWarn">${ws.map(w=>esc(w.message)).join(" / ")}</p>`:rs.length?`<p class="auditOk">根拠確認済み: ${rs.map(r=>esc(r.message)).join(" / ")}</p>`:'<p class="auditOk">この終端は上流から購入まで大きな接続矛盾なし。</p>'}</div>`;
+    const details=Array.isArray(t.extraConditionDetails)?t.extraConditionDetails:[];
+    const detailText=details.map(x=>{const p=Number(x?.probability);return `${x?.stage||"構造"}:${x?.mechanism?.label||x?.label||x?.id||"追加条件"} ${Number.isFinite(p)?`${(p*100).toFixed(1)}%`:"未校正"}`}).join(" ｜ ");
+    return `<div class="detailBet"><strong>${esc(order)}　${esc(betClassLabel(t.category))}</strong><p><b>連動</b> 1着能力 ${fmtAbility(t.firstAbility)} → ライン ${esc(line)} → ${esc(t.branchLabel||"展開不明")} → 2着能力 ${fmtAbility(t.secondAbility)} → 3着能力 ${fmtAbility(t.thirdAbility)}</p><p class="muted">自然収束 ${esc(conv)} / 追加条件 ${Number(t.extraConditionCount)||0}${Number.isFinite(Number(t.extraConditionProbabilityMin))?` / 最低条件成立 ${(Number(t.extraConditionProbabilityMin)*100).toFixed(1)}%`:""} / 終端確率 ${esc(prob)}${Array.isArray(t.naturalConvergenceReasons)&&t.naturalConvergenceReasons.length?` / ${t.naturalConvergenceReasons.slice(0,3).map(esc).join(" / ")}`:""}</p>${detailText?`<p class="auditMeta"><b>追加条件</b> ${esc(detailText)}</p>`:""}${ws.length?`<p class="auditWarn">${ws.map(w=>esc(w.message)).join(" / ")}</p>`:rs.length?`<p class="auditOk">根拠確認済み: ${rs.map(r=>esc(r.message)).join(" / ")}</p>`:'<p class="auditOk">この終端は上流から購入まで大きな接続矛盾なし。</p>'}</div>`;
   }).join("");
   const warnHtml=warnings.length?`<div class="auditWarning"><strong>接続警告 ${warnings.length}件</strong>${warnings.slice(0,12).map(w=>`<p>${esc(w.message)}</p>`).join("")}</div>`:`<div class="notice success"><strong>全体連動：大きな接続矛盾なし</strong></div>`;
   const resolvedHtml=resolutions.length?`<div class="notice"><strong>根拠確認済み ${resolutions.length}件</strong>${resolutions.slice(0,8).map(r=>`<p>${esc(r.message)}</p>`).join("")}</div>`:"";

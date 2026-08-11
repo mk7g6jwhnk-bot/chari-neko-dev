@@ -102,6 +102,16 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
       pairScenarioCoherence:pairConvergence.scenarioCoherence,
       pairNodeProbabilityScore:pairConvergence.nodeProbabilityScore,
       extraConditionCount:convergence.extraConditionCount,
+      extraConditionDetails:convergence.extraConditionDetails||[],
+      nodeExtraConditionCount:convergence.nodeExtraConditionCount??0,
+      structuralExtraConditionCount:convergence.structuralExtraConditionCount??0,
+      extraConditionProbabilityMin:convergence.extraConditionProbabilityMin??null,
+      extraConditionProbabilityMean:convergence.extraConditionProbabilityMean??null,
+      extraConditionPenalty:convergence.extraConditionPenalty??null,
+      relativeConditionCount:item.relativeConditionCount??0,
+      relativeConditionPenalty:item.relativeConditionPenalty??1,
+      relativeConditionTrace:item.relativeConditionTrace||[],
+      probabilitySeparationPolicy:item.probabilitySeparationPolicy||null,
       scenarioCoherence:convergence.scenarioCoherence,
       expectedValueIndex:ev,
       terminalProbabilityShare:item.probability
@@ -618,9 +628,68 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
       combinationCompletenessAudit:buildCombinationCompletenessAudit(evaluated,familyMeta),
       secondPairBreadthAudit,
       scenarioClassificationAudit:buildScenarioClassificationAudit(evaluated,approvedContenderHeads),
+      extraConditionAudit:buildExtraConditionAudit(evaluated),
+      relativeConditionAudit:buildRelativeConditionAudit(evaluated),
       massCoverageRecoveryAudit,
       naturalPrecedenceAudit
     }
+  };
+}
+
+function buildRelativeConditionAudit(items){
+  const rows=(items||[]).map(item=>({
+    order:item.order,probability:Number(item.probability)||0,
+    relativeConditionCount:Number(item.relativeConditionCount)||0,
+    relativeConditionPenalty:Number(item.relativeConditionPenalty)||1,
+    trace:item.relativeConditionTrace||[]
+  }));
+  const lowerWithZero=rows.filter(row=>row.trace.some(t=>Number(t?.ratio)<1-1e-10&&Number(t?.count)===0));
+  const nonMonotone=rows.filter(row=>row.trace.some(t=>Number(t?.count)>0&&!(Number(t?.factor)<1)));
+  return{
+    version:"RELATIVE-CONDITION-AUDIT-1.0",
+    policy:"BASE_PROBABILITY_PRIMARY_MICRO_DIFFERENCE_PRESERVED_ALTERNATIVE_GETS_LIGHT_INCREMENTAL_BURDEN",
+    checkedCount:rows.length,
+    lowerAlternativeWithoutConditionCount:lowerWithZero.length,
+    invalidPenaltyCount:nonMonotone.length,
+    passed:lowerWithZero.length===0&&nonMonotone.length===0,
+    rows
+  };
+}
+
+function buildExtraConditionAudit(items){
+  const purchased=(items||[]).filter(x=>x.purchaseStatus===PURCHASED);
+  const withExtra=purchased.filter(x=>Number(x.extraConditionCount)>0);
+  const countValues=[...new Set(withExtra.map(x=>Number(x.extraConditionCount)||0))].sort((a,b)=>a-b);
+  const probabilities=withExtra.flatMap(x=>(x.extraConditionDetails||[]).map(d=>d?.probability).filter(finite).map(Number));
+  const probabilityMin=probabilities.length?Math.min(...probabilities):null;
+  const probabilityMax=probabilities.length?Math.max(...probabilities):null;
+  const probabilityRange=probabilities.length?probabilityMax-probabilityMin:null;
+  const conditionTypeCounts={};
+  const stageCounts={};
+  for(const item of withExtra){
+    for(const d of item.extraConditionDetails||[]){
+      const type=d?.mechanism?.key||d?.id||d?.source||"UNKNOWN";conditionTypeCounts[type]=(conditionTypeCounts[type]||0)+1;
+      const stage=d?.stage||"STRUCTURAL";stageCounts[stage]=(stageCounts[stage]||0)+1;
+    }
+  }
+  const countFlatteningVisible=withExtra.length>=3&&countValues.length===1&&countValues[0]===1;
+  const hiddenBurdenVariation=countFlatteningVisible&&Number.isFinite(probabilityRange)&&probabilityRange>=.02;
+  const uncalibratedStructuralRows=withExtra.filter(x=>(x.extraConditionDetails||[]).some(d=>d?.source==="LINE_COHERENCE_HEURISTIC"&&!finite(d?.probability)));
+  const uncalibratedStructuralCount=uncalibratedStructuralRows.length;
+  const fixedPenaltyRows=withExtra.filter(x=>Number(x.extraConditionCount)===1&&Number(x.extraConditionPenalty)===.88);
+  const fixedPenaltyShare=withExtra.length?fixedPenaltyRows.length/withExtra.length:0;
+  const status=uncalibratedStructuralCount?"UNCALIBRATED_STRUCTURAL_FLAT_PENALTY":hiddenBurdenVariation?"DISPLAY_FLATTENING_DETECTED":"OK";
+  return{
+    version:"EXTRA-CONDITION-AUDIT-v1",policy:"COUNT_IS_DISPLAY_ONLY; CONDITION_PROBABILITY_AND_MECHANISM_ARE_PRIMARY_EVIDENCE",
+    purchasedCount:purchased.length,purchasedWithExtraCount:withExtra.length,countValues,
+    allPurchasedExtrasDisplayedAsOne:countFlatteningVisible,hiddenBurdenVariation,
+    uncalibratedStructuralCount,fixedPenaltyCount:fixedPenaltyRows.length,fixedPenaltyShare,
+    probabilityMin,probabilityMax,probabilityRange,conditionTypeCounts,stageCounts,
+    status,
+    passed:true,
+    rows:withExtra.map(x=>({order:x.order,betClass:x.betClass,extraConditionCount:x.extraConditionCount,
+      extraConditionPenalty:x.extraConditionPenalty??null,extraConditionProbabilityMin:x.extraConditionProbabilityMin??null,
+      extraConditionProbabilityMean:x.extraConditionProbabilityMean??null,details:x.extraConditionDetails||[]}))
   };
 }
 
@@ -829,6 +898,7 @@ function derivePairNaturalConvergence(item,lines,branches){
     const next=members[index+2]??null;
     const predecessor=members[index-1]??null;
     const prior2=members[index-2]??null;
+    const sameLineMember=members.includes(Number(second));
 
     if(Number(follower)===second){
       scenarioCoherence+=.28;
@@ -838,12 +908,13 @@ function derivePairNaturalConvergence(item,lines,branches){
       reasons.push(`${first}の差し後も${second}が同ラインで2着残り`);
     }else if(Number(next)===second){
       scenarioCoherence+=.16;
-      extra+=1;
       reasons.push(`${second}がライン3番手から2着`);
     }else if(Number(prior2)===second){
       scenarioCoherence+=.12;
-      extra+=1;
       reasons.push(`${second}が同ライン前方から2着残り`);
+    }else if(sameLineMember){
+      scenarioCoherence+=.08;
+      reasons.push(`${second}が同ライン深位置から2着へ残る`);
     }else if(follower!=null || predecessor!=null){
       scenarioCoherence-=.16;
       extra+=1;
@@ -926,6 +997,8 @@ function deriveNaturalConvergence(item,lines,branches){
     const next=members[index+2]??null;
     const predecessor=members[index-1]??null;
     const prior2=members[index-2]??null;
+    const secondSameLineMember=members.includes(Number(second));
+    const thirdSameLineMember=members.includes(Number(third));
 
     if(Number(follower)===second){
       scenarioCoherence+=.28;
@@ -935,12 +1008,13 @@ function deriveNaturalConvergence(item,lines,branches){
       reasons.push(`${first}の差し後も${second}が同ラインで2着残り`);
     }else if(Number(next)===second){
       scenarioCoherence+=.16;
-      extra+=1;
       reasons.push(`${second}がライン3番手から2着`);
     }else if(Number(prior2)===second){
       scenarioCoherence+=.12;
-      extra+=1;
       reasons.push(`${second}が同ライン前方から2着残り`);
+    }else if(secondSameLineMember){
+      scenarioCoherence+=.08;
+      reasons.push(`${second}が同ライン深位置から2着へ残る`);
     }else if(follower!=null || predecessor!=null){
       scenarioCoherence-=.16;
       extra+=1;
@@ -950,6 +1024,9 @@ function deriveNaturalConvergence(item,lines,branches){
     if(Number(follower)===third || Number(next)===third || Number(predecessor)===third || Number(prior2)===third){
       scenarioCoherence+=.10;
       reasons.push(`${third}が同ライン残り`);
+    }else if(thirdSameLineMember){
+      scenarioCoherence+=.05;
+      reasons.push(`${third}が同ライン深位置から3着へ残る`);
     }else if(third!==second){
       scenarioCoherence-=.05;
       extra+=1;
@@ -1004,9 +1081,29 @@ function deriveNaturalConvergence(item,lines,branches){
   reasons.push(`着順ノード条件付き成立 ${(nodeProbabilityScore*100).toFixed(1)}%`);
   if(extraConditions.length)reasons.push(`追加条件 ${extraConditions.length}件`);
 
+  const extraConditionDetails=extraConditions.map(condition=>({
+    source:"NODE_CONDITION",stage:condition.stage||null,id:condition.id||null,label:condition.label||null,
+    kind:condition.kind||null,probability:finite(condition.probability)?Number(condition.probability):null,
+    critical:condition.critical===true,mechanism:condition.mechanism?{...condition.mechanism}:null
+  }));
+  const structuralExtraConditionCount=Math.max(0,effectiveExtra-extraConditions.length);
+  for(let i=0;i<structuralExtraConditionCount;i++)extraConditionDetails.push({
+    source:"LINE_COHERENCE_HEURISTIC",stage:null,id:`LINE_EXTRA_${i+1}`,
+    label:"ライン整合上の追加成立条件（ノード条件と重複しない分）",kind:"extra",probability:null,critical:true,mechanism:null
+  });
+  const extraProbabilities=extraConditions.map(c=>Number(c.probability)).filter(Number.isFinite);
+  const extraConditionProbabilityMin=extraProbabilities.length?Math.min(...extraProbabilities):null;
+  const extraConditionProbabilityMean=extraProbabilities.length?sum(extraProbabilities)/extraProbabilities.length:null;
+
   return{
     score,level,reasons,
     extraConditionCount:effectiveExtra,
+    extraConditionDetails,
+    nodeExtraConditionCount:extraConditions.length,
+    structuralExtraConditionCount,
+    extraConditionProbabilityMin,
+    extraConditionProbabilityMean,
+    extraConditionPenalty:conditionPenalty,
     uncertainConditionCount:newConditions.filter(c=>c.kind==="uncertain").length,
     lineIndependentFallback,
     nodeProbabilityMode:lineIndependentFallback?"CONDITION_ONLY_NO_DOUBLE_PENALTY":"FULL_CONDITIONAL",

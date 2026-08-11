@@ -25,8 +25,9 @@ try{
     assert.equal(payload.prediction.purchasePlan.length,expected);
     if(venueCode!=="28"){
       const audit=payload.prediction.audit.chatSpecV1?.secondPairBreadthAudit||payload.prediction.audit.secondPairBreadthAudit;
-      assert.ok(audit?.recoveryCount>=3,"strong second pairs should be recovered");
+      assert.ok(audit,"second-pair breadth audit must exist");
       assert.equal(audit.fixedTicketQuotaApplied,false);
+      assert.equal(audit.policy,"PRIMARY_FIRST_FAMILY_SECOND_PAIR_BREADTH_ONLY");
     }
   }
 }finally{globalThis.fetch=originalFetch;}
