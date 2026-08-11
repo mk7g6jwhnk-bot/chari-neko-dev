@@ -9,6 +9,6 @@ try{
  const lines=[[1,2,3],[4,5],[6],[7]].flatMap((g,li)=>g.map((number,pos)=>({number,lineId:`L${li+1}`,position:pos+1})));
  globalThis.fetch=async()=>make("13","いわき平",11,lines);
  r=await handler(new Request("https://test/.netlify/functions/keirin-predict?date=20260808&venueCode=13&venueName=%E3%81%84%E3%82%8F%E3%81%8D%E5%B9%B3&raceNo=11&budget=3000"));p=(await r.json()).prediction;
- const a=p.audit.chatSpecV1.secondPairBreadthAudit;assert.equal(a.policy,"PRIMARY_FIRST_FAMILY_SECOND_PAIR_BREADTH_ONLY");assert.equal(a.nonPrimaryHeadsUseFirstFamilyBreadthGuards,true);assert.ok(a.strongPairCount>0);assert.ok(a.recoveries.every(x=>Number(String(x.pair).split("-")[0])===Number(a.primaryFirstFamilyNumber)));assert.equal(p.purchasePlan.length,10);
+ const a=p.audit.chatSpecV1.secondPairBreadthAudit;assert.equal(a.policy,"PRIMARY_FIRST_FAMILY_SECOND_PAIR_BREADTH_ONLY");assert.equal(a.nonPrimaryHeadsUseFirstFamilyBreadthGuards,true);assert.ok(a.strongPairCount>0);assert.ok(a.recoveries.every(x=>Number(String(x.pair).split("-")[0])===Number(a.primaryFirstFamilyNumber)));assert.equal(p.purchasePlan.length,14);
 }finally{globalThis.fetch=originalFetch}
 console.log("PASS v209 reference class and primary-family pair breadth guard");

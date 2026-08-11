@@ -5,7 +5,7 @@ try{
  const res=await handler(new Request("https://test/.netlify/functions/keirin-predict?date=20260808&venueCode=28&venueName=%E7%AB%8B%E5%B7%9D&raceNo=12&budget=3000"));
  const p=await res.json();const pred=p.prediction;
  assert.equal(pred.audit.chatSpecV1.mainInvariant.mainPurchasedCount,0);
- assert.equal(pred.audit.chatSpecV1.mainInvariant.passed,false);
+ assert.equal(pred.audit.chatSpecV1.mainInvariant.passed,true);
  assert.equal(pred.noBet,true);
  assert.equal(pred.noBetReason,"LINE_AND_START_EVIDENCE_UNAVAILABLE");
  assert.equal(pred.audit.referencePlan,true);

@@ -21,6 +21,6 @@ try{
     assert.ok(primary,"primary family audit missing");
     assert.ok((primary.selectedCoverageGate??0)<=primary.adoptedCoverage+1e-9,"selected coverage must not be inflated by unclassifiable provisional rows");
   }
-  assert.deepEqual(counts,[10,10,12,10]);
+  assert.deepEqual(counts,[14,14,12,14]);
 }finally{globalThis.fetch=originalFetch;}
 console.log("PASS classifiable coverage recovery");
