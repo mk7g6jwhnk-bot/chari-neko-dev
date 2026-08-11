@@ -7,7 +7,7 @@ export function generateKeirinBranches({scored,lines,lineConfidence,raceCategory
     const leader=line.leader,bante=line.bante;
     if(leader){
       branches.push(make({
-        id:`LEAD-${line.id}`,label:`${line.id}先行押し切り`,scenario:"先行押し切り",branchType:"LEADER_HOLD",primaryLineId:line.id,requiredFirstNumber:leader.number,enabled:lineEnabled,
+        id:`LEAD-${line.id}`,label:`${line.id}先行押し切り`,scenario:"先行押し切り",branchType:"LEADER_HOLD",primaryLineId:line.id,requiredFirstNumber:leader.number,enabled:lineEnabled&&hasUsableStartPower(leader),
         scoreParts:[part("firstPlacement",leader.roleScores.first,.22),part("escapeMechanism",leader.riderEvaluationV2?.firstMechanisms?.escape,.43),part("startPower",leader.evidence.start,.20),part("recentForm",leader.evidence.recent,.10),part("finishPower",leader.evidence.finish,.05)],
         firstCandidateScores:{[leader.id]:leader.roleScores.first||0}
       }));
@@ -33,7 +33,7 @@ export function generateKeirinBranches({scored,lines,lineConfidence,raceCategory
       branches.push(make({
         id:`UNRESOLVED-LEAD-${rider.number}`,label:`${rider.number}先行残り（並び未取得）`,
         scenario:"先行残り（並び未取得）",branchType:"LEADER_HOLD",
-        primaryLineId:null,requiredFirstNumber:rider.number,enabled:true,lineIndependentFallback:true,
+        primaryLineId:null,requiredFirstNumber:rider.number,enabled:hasUsableStartPower(rider),lineIndependentFallback:true,
         scoreParts:[part("firstPlacement",rider.roleScores.first,.24),part("escapeMechanism",rider.riderEvaluationV2?.firstMechanisms?.escape,.40),part("startPower",rider.evidence.start,.20),part("recentForm",rider.evidence.recent,.10),part("finishPower",rider.evidence.finish,.06)],
         firstCandidateScores:{[id]:rider.roleScores.first||0}
       }));
@@ -172,7 +172,7 @@ function generateGirlsBranches(scored=[]){
   for(const rider of scored){
     const id=rider.id;
     branches.push(make({
-      id:`GIRLS-LEAD-${rider.number}`,label:`${rider.number}主導権先行`,scenario:"主導権先行",branchType:"LEADER_HOLD",primaryLineId:null,requiredFirstNumber:rider.number,enabled:true,
+      id:`GIRLS-LEAD-${rider.number}`,label:`${rider.number}主導権先行`,scenario:"主導権先行",branchType:"LEADER_HOLD",primaryLineId:null,requiredFirstNumber:rider.number,enabled:hasUsableStartPower(rider),
       scoreParts:[part("startPower",rider.evidence.start,.45),part("first",rider.roleScores.first,.25),part("stamina",rider.evidence.stamina,.15),part("recentForm",rider.evidence.recent,.15)],
       firstCandidateScores:{[id]:rider.roleScores.first||0}
     }));
@@ -192,6 +192,16 @@ function generateGirlsBranches(scored=[]){
     priority:structured.includes(branch)?mainIds.has(branch.id)?"main":contenderIds.has(branch.id)?"contender":"sub":"risk",
     forecastRole:structured.includes(branch)?mainIds.has(branch.id)?"CENTER":contenderIds.has(branch.id)?"SECONDARY":"POSSIBLE":"RISK"
   }));
+}
+
+function hasUsableStartPower(rider){
+  const evidence=rider?.startPowerEvidence;
+  if(evidence){
+    if(evidence?.usable===false)return false;
+    if(Array.isArray(evidence?.missingInputs)&&evidence.missingInputs.length)return false;
+    if(Number(evidence?.officialTotalStarts)===0)return false;
+  }
+  return rider?.evidence?.start!==null&&rider?.evidence?.start!==undefined&&Number.isFinite(Number(rider.evidence.start));
 }
 
 function emptyTierResult(){return{main:[],contender:[],sub:[],diagnostics:{mode:"EMPTY",topScore:null,topTieCount:0,tailMedianGap:null,tailMadGap:null,contenderCutGap:null,contenderCutDetected:false}}}

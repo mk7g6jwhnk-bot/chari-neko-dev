@@ -25,21 +25,32 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
   const lineFallbackDiscriminationAudit=buildLineFallbackDiscriminationAudit({
     scored,terminals:rawClassified,lineIndependentMainAvailable
   });
+  const startEvidenceCount=scored.filter(item=>isUsableStartPower(item)).length;
+  const startEvidenceRequired=Math.max(3,Math.ceil(scored.length*.5));
+  const lineAndStartEvidenceBlocked=Boolean(
+    a.passed &&
+    race.raceCategory!=="girls" &&
+    race.lineConfidence!=="高" &&
+    startEvidenceCount<startEvidenceRequired
+  );
   const lineFallbackEvidenceBlocked=Boolean(
     a.passed &&
     race.raceCategory!=="girls" &&
     race.lineConfidence!=="高" &&
+    !lineAndStartEvidenceBlocked &&
     lineIndependentMainAvailable &&
     !lineFallbackDiscriminationAudit.sufficient
   );
-  const lineBlocked=a.passed&&race.raceCategory!=="girls"&&race.lineConfidence!=="高"&&!lineIndependentMainAvailable;
-  const girlsStartEvidenceCount=scored.filter(item=>item?.startPowerEvidence&&(!Array.isArray(item.startPowerEvidence.missingInputs)||item.startPowerEvidence.missingInputs.length===0)).length;
-  const girlsEvidenceRequired=Math.max(3,Math.ceil(scored.length*.5));
+  const lineBlocked=a.passed&&race.raceCategory!=="girls"&&race.lineConfidence!=="高"&&!lineAndStartEvidenceBlocked&&!lineIndependentMainAvailable;
+  const girlsStartEvidenceCount=startEvidenceCount;
+  const girlsEvidenceRequired=startEvidenceRequired;
   const girlsEvidenceBlocked=a.passed&&race.raceCategory==="girls"&&girlsStartEvidenceCount<girlsEvidenceRequired;
   const mainInvariantBlocked=Boolean(a.passed&&chatSpec&&!chatSpec.audit?.mainInvariant?.passed);
-  const purchaseBlocked=lineBlocked||lineFallbackEvidenceBlocked||girlsEvidenceBlocked||mainInvariantBlocked;
+  const purchaseBlocked=lineBlocked||lineAndStartEvidenceBlocked||lineFallbackEvidenceBlocked||girlsEvidenceBlocked||mainInvariantBlocked;
   const blockedReason=lineBlocked
     ?"公式ライン未取得のため購入判定を保留"
+    :lineAndStartEvidenceBlocked
+      ?"公式ライン未取得かつ主導権入力も不足しているため通常購入を保留し、参考買い目だけを表示します。"
     :lineFallbackEvidenceBlocked
       ?"公式ライン未取得かつ選手間の着順評価差が不足しています。全員を本線扱いせず、参考買い目だけを表示します。"
       :girlsEvidenceBlocked
@@ -47,6 +58,8 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
         :"中心シナリオから本線となる自然終端を確定できませんでした。予想成立条件を満たしていないため購入処理を停止しました。";
   const blockCode=lineBlocked
     ?"LINE_DATA_UNAVAILABLE"
+    :lineAndStartEvidenceBlocked
+      ?"LINE_AND_START_EVIDENCE_UNAVAILABLE"
     :lineFallbackEvidenceBlocked
       ?"LINE_FALLBACK_INSUFFICIENT_DISCRIMINATION"
       :girlsEvidenceBlocked
@@ -84,7 +97,7 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
   purchase.girlsStartEvidenceRequired=race.raceCategory==="girls"?girlsEvidenceRequired:null;
 
   return{
-    engineVersion:"KEIRIN-0.16.44-reference-pair-breadth-guard",
+    engineVersion:"KEIRIN-0.16.45-start-power-missing-evidence-gate",
     raceId:race.id,
     lineConfidence:race.lineConfidence,
     scored,lines,branches,terminals:classified,
@@ -98,7 +111,10 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
         lineIndependentMainAvailable,
         blanketLinePurchaseBlockApplied:lineBlocked,
         flatEvidencePurchaseBlockApplied:lineFallbackEvidenceBlocked,
-        referenceBreadthPolicy:lineFallbackEvidenceBlocked?"FLAT_EVIDENCE_POSITION_BALANCED_REFERENCE_SET":"STANDARD_REFERENCE_SELECTION",
+        lineAndStartEvidenceBlockApplied:lineAndStartEvidenceBlocked,
+        startEvidenceCount,
+        startEvidenceRequired,
+        referenceBreadthPolicy:(lineFallbackEvidenceBlocked||lineAndStartEvidenceBlocked)?"FLAT_EVIDENCE_POSITION_BALANCED_REFERENCE_SET":"STANDARD_REFERENCE_SELECTION",
       referenceToStandardTransitionAudit,
         discriminationAudit:lineFallbackDiscriminationAudit,
         unresolvedRelationPolicy:"UNKNOWN_LINE_RELATION_IS_UNCERTAIN_NOT_OTHER_LINE",
@@ -109,7 +125,7 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
       ...purchase,
       terminalGenerationAudit,
       terminalLifecycleAudit,
-      startPowerInputAudit:buildStartPowerInputAudit(scored),
+      startPowerInputAudit:buildStartPowerInputAudit(scored,branches),
       riderAbilityEvaluationAudit:buildRiderAbilityEvaluationAudit(scored),
       chatSpecV1:chatSpec?.audit||null,
       scenarioSummary:chatSpec?.scenarioSummary||[],
@@ -138,7 +154,7 @@ function buildReferenceToStandardTransitionAudit({lineConfidence=null,purchaseBl
   const fallback=Array.isArray(fallbackPlan)?fallbackPlan:[];
   const referenceCarryoverCount=normal.filter(row=>row?.referenceOnly===true).length;
   const lineEvidenceResolved=lineConfidence==="高"||lineFallbackDiscriminationAudit?.sufficient===true;
-  const lineReferenceBlocked=blockCode==="LINE_DATA_UNAVAILABLE"||blockCode==="LINE_FALLBACK_INSUFFICIENT_DISCRIMINATION";
+  const lineReferenceBlocked=["LINE_DATA_UNAVAILABLE","LINE_FALLBACK_INSUFFICIENT_DISCRIMINATION","LINE_AND_START_EVIDENCE_UNAVAILABLE"].includes(blockCode);
   const decision=fallback.length
     ?"REFERENCE_ONLY_REQUIRES_FRESH_REEVALUATION"
     :normal.length
@@ -259,15 +275,17 @@ function buildNonZeroReferencePlan({rawClassified=[],classified=[],budget=3000,b
   const top=pool[0];
   if(!top)return[];
   const topProbability=Math.max(Number(top.probability)||0,1e-9);
-  const flatMissingLine=blockCode==="LINE_FALLBACK_INSUFFICIENT_DISCRIMINATION"
-    && lineFallbackDiscriminationAudit?.sufficient===false
-    && Math.max(
+  const flatMissingLine=blockCode==="LINE_AND_START_EVIDENCE_UNAVAILABLE" || (
+    blockCode==="LINE_FALLBACK_INSUFFICIENT_DISCRIMINATION" &&
+    lineFallbackDiscriminationAudit?.sufficient===false &&
+    Math.max(
       Number(lineFallbackDiscriminationAudit?.firstSpread)||0,
       Number(lineFallbackDiscriminationAudit?.secondSpread)||0,
       Number(lineFallbackDiscriminationAudit?.thirdSpread)||0,
       Number(lineFallbackDiscriminationAudit?.mechanismSpread)||0,
       Number(lineFallbackDiscriminationAudit?.topHeadGap)||0
-    )<.01;
+    )<.01
+  );
   let selected=[];
   if(flatMissingLine){
     // Completely flat evidence must not invent a ranking. Reference display is
@@ -456,23 +474,25 @@ function buildSameScenarioReversalAudit(structured){
 }
 function median(values){const valid=values.filter(Number.isFinite).sort((a,b)=>a-b);if(!valid.length)return 0;const mid=Math.floor(valid.length/2);return valid.length%2?valid[mid]:(valid[mid-1]+valid[mid])/2}
 
-function buildStartPowerInputAudit(scored){
+function buildStartPowerInputAudit(scored,branches=[]){
   const rows=(Array.isArray(scored)?scored:[]).map(item=>{
     const e=item?.startPowerEvidence||null;
     const missing=Array.isArray(e?.missingInputs)?e.missingInputs.filter(Boolean):[];
     const hasEvidence=Boolean(e);
     const hasComputed=Number.isFinite(Number(item?.startPower));
+    const usable=isUsableStartPower(item);
     let status="VERIFIED";
     if(!hasEvidence)status="EVIDENCE_UNAVAILABLE";
     else if(missing.length)status="MISSING_INPUTS";
     else if(Number(e?.officialTotalStarts)===0)status="ZERO_STARTS";
-    else if(!hasComputed)status="VALUE_UNAVAILABLE";
+    else if(!hasComputed||!usable)status="VALUE_UNAVAILABLE";
     return{
       number:Number(item?.number),
       status,
       auditable:hasEvidence,
-      verified:status==="VERIFIED",
-      startPower:hasComputed?Number(item.startPower):null,
+      verified:status==="VERIFIED"&&usable,
+      usable,
+      startPower:usable&&hasComputed?Number(item.startPower):null,
       confidence:e?.confidence||null,
       missingInputs:missing,
       profileIdentityPassed:e?.profileIdentityPassed===true,
@@ -492,17 +512,37 @@ function buildStartPowerInputAudit(scored){
     };
   });
   const verifiedCount=rows.filter(row=>row.verified).length;
+  const usableCount=rows.filter(row=>row.usable).length;
   const missingCount=rows.filter(row=>row.status==="MISSING_INPUTS").length;
+  const zeroStartsCount=rows.filter(row=>row.status==="ZERO_STARTS").length;
   const unavailableCount=rows.filter(row=>["EVIDENCE_UNAVAILABLE","VALUE_UNAVAILABLE"].includes(row.status)).length;
+  const withheldRiderNumbers=rows.filter(row=>!row.usable).map(row=>row.number);
+  const generatedLeadRiderNumbers=(branches||[]).filter(branch=>branch.branchType==="LEADER_HOLD").map(branch=>Number(branch.requiredFirstNumber)).filter(Number.isFinite);
+  const invalidLeadBranches=generatedLeadRiderNumbers.filter(number=>withheldRiderNumbers.includes(number));
   return{
-    policy:"REQUIRED_OR_EXPLICITLY_UNAUDITABLE",
+    version:"START-POWER-MISSING-EVIDENCE-GATE-1.0",
+    policy:"MISSING_OR_ZERO_START_EVIDENCE_MUST_NOT_FEED_SCORE_OR_LEADER_HOLD_BRANCH",
     totalRiders:rows.length,
     verifiedCount,
+    usableCount,
+    withheldCount:rows.length-usableCount,
     missingCount,
+    zeroStartsCount,
     unavailableCount,
-    passed:rows.length>0&&unavailableCount===0,
+    withheldRiderNumbers,
+    invalidLeadBranchCount:invalidLeadBranches.length,
+    invalidLeadBranches,
+    passed:rows.length>0&&invalidLeadBranches.length===0,
     rows
   };
+}
+function isUsableStartPower(item){
+  const e=item?.startPowerEvidence;
+  if(!e)return Number.isFinite(Number(item?.startPower));
+  if(e?.usable===false)return false;
+  if(Array.isArray(e?.missingInputs)&&e.missingInputs.length)return false;
+  if(Number(e?.officialTotalStarts)===0)return false;
+  return Number.isFinite(Number(item?.startPower));
 }
 function numberOrNull(value){
   if(value===null||value===undefined||value==="")return null;

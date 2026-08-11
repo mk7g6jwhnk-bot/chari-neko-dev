@@ -35,7 +35,9 @@ export function buildStartPowerEvidence(participant, baseline = KEIRIN_START_POW
   ].filter(Boolean);
 
   const neutral = overrides => ({
-    value: 5,
+    value: null,
+    usable: false,
+    evidenceStatus: "UNUSABLE",
     confidence: "low",
     officialTotalStarts,
     rawBackCount,
@@ -44,7 +46,7 @@ export function buildStartPowerEvidence(participant, baseline = KEIRIN_START_POW
     hFrequency: null,
     shrunkBFrequency: null,
     shrunkHFrequency: null,
-    latentScore: 5,
+    latentScore: null,
     bPercentileScore: null,
     hPercentileScore: null,
     startsQuality: 0,
@@ -63,9 +65,10 @@ export function buildStartPowerEvidence(participant, baseline = KEIRIN_START_POW
     ...overrides
   });
 
-  if (missingInputs.length > 0) return neutral();
+  if (missingInputs.length > 0) return neutral({ evidenceStatus: "MISSING_INPUTS" });
   if (officialTotalStarts === 0) {
     return neutral({
+      evidenceStatus: "ZERO_STARTS",
       inputsUsed: ["officialTotalStarts.actualZero"],
       missingInputs: []
     });
@@ -111,6 +114,8 @@ export function buildStartPowerEvidence(participant, baseline = KEIRIN_START_POW
 
   return {
     value: round(value),
+    usable: true,
+    evidenceStatus: "VERIFIED",
     confidence: confidenceFor({ officialTotalStarts, foreignFlag }),
     officialTotalStarts,
     rawBackCount,

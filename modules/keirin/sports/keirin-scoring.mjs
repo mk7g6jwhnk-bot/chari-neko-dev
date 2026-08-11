@@ -4,7 +4,7 @@ const valueOrNull=v=>finite(v)?clamp(Number(v)):null;
 
 export function scoreKeirinParticipants({race,venueProfile={}}){
   return race.participants.map(p=>{
-    const recent=valueOrNull(p.recentForm),start=valueOrNull(p.startPower),sprint=valueOrNull(p.sprintPower),tracking=valueOrNull(p.trackingSkill),finish=valueOrNull(p.finishPower);
+    const recent=valueOrNull(p.recentForm),start=usableStartPowerValue(p),sprint=valueOrNull(p.sprintPower),tracking=valueOrNull(p.trackingSkill),finish=valueOrNull(p.finishPower);
     const stamina=valueOrNull(p.stamina),timing=valueOrNull(p.attackTiming),lineTrust=valueOrNull(p.lineTrust),venue=valueOrNull(p.venueSuitability);
 
     const role=normalizeRole(p);
@@ -160,6 +160,15 @@ export function scoreKeirinParticipants({race,venueProfile={}}){
       evidence
     };
   });
+}
+
+function usableStartPowerValue(participant){
+  const evidence=participant?.startPowerEvidence;
+  if(!evidence)return valueOrNull(participant?.startPower);
+  if(evidence?.usable===false)return null;
+  if(Array.isArray(evidence?.missingInputs)&&evidence.missingInputs.length)return null;
+  if(Number(evidence?.officialTotalStarts)===0)return null;
+  return valueOrNull(participant?.startPower);
 }
 
 function normalizeRole(p){
