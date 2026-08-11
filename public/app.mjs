@@ -13,7 +13,7 @@ const ODDS_CACHE_KEY="chari-neko:keirin-odds-cache:v1";
 const RACE_META_CACHE_KEY="chari-neko:keirin-race-meta-cache:v1";
 const RESULT_CACHE_KEY="chari-neko:keirin-result-cache:v1";
 const MEETING_CACHE_KEY="chari-neko:keirin-meeting-cache:v1";
-const APP_RELEASE="KEIRIN-0.17.3-probability-path-audit";
+const APP_RELEASE="KEIRIN-0.17.4-conditional-probability-distribution-audit";
 const APP_UPDATE_CHECK_INTERVAL_MS=5*60*1000;
 let lastAppUpdateCheckAt=0,appUpdateCheckBusy=false;
 const VENUE_CODES={函館:"11",青森:"12",いわき平:"13",弥彦:"21",前橋:"22",取手:"23",宇都宮:"24",大宮:"25",西武園:"26",京王閣:"27",立川:"28",松戸:"31",千葉:"32",川崎:"34",平塚:"35",小田原:"36",伊東:"37",静岡:"38",名古屋:"42",岐阜:"43",大垣:"44",豊橋:"45",富山:"46",松阪:"47",四日市:"48",福井:"51",奈良:"53",向日町:"54",和歌山:"55",岸和田:"56",玉野:"61",広島:"62",防府:"63",高松:"71",小松島:"73",高知:"74",松山:"75",小倉:"81",久留米:"83",武雄:"84",佐世保:"85",別府:"86",熊本:"87"};
@@ -498,12 +498,12 @@ function renderPredictionDetail(snapshot){
 function renderScenarioExplanation(snapshot){
   const explanation=snapshot?.predictionExplanation||snapshot?.prediction?.explanation||null;
   const bets=standardSelections(snapshot);
-  const predictionHtml=renderPredictionAxisExplanation(explanation,snapshot?.prediction?.probabilityPathAudit||snapshot?.probabilityPathAudit||null);
+  const predictionHtml=renderPredictionAxisExplanation(explanation,snapshot?.prediction?.probabilityPathAudit||snapshot?.probabilityPathAudit||null,snapshot?.prediction?.conditionalProbabilityDistributionAudit||snapshot?.conditionalProbabilityDistributionAudit||null);
   const purchaseHtml=renderPurchaseScenarioExplanation(snapshot,bets);
   return `${predictionHtml}${purchaseHtml}`;
 }
 
-function renderPredictionAxisExplanation(explanation,probabilityPathAudit=null){
+function renderPredictionAxisExplanation(explanation,probabilityPathAudit=null,conditionalDistributionAudit=null){
   const axis=explanation?.axis;
   if(!axis?.timeline)return `<div class="auditCallout"><strong>予測エンジンの軸展開</strong><p>保存された予測側の展開説明がありません。旧予想データの可能性があります。</p></div>`;
   const reasons=(axis.reasons||[]).map(r=>`<li>${esc(r.text||"")}</li>`).join("");
@@ -515,6 +515,7 @@ function renderPredictionAxisExplanation(explanation,probabilityPathAudit=null){
     ${orders?`<p class="muted"><b>この展開から自然につながる上位終端</b> ${esc(orders)}</p>`:""}
     ${alternatives?`<details class="predictionAccordion"><summary>代替展開を見る</summary><div class="accordionBody">${alternatives}</div></details>`:""}
     ${renderProbabilityPathAudit(probabilityPathAudit,axis?.primaryOrder)}
+    ${renderConditionalDistributionAudit(conditionalDistributionAudit,axis?.primaryOrder)}
     <p class="muted">この説明は買い目ではなく、予測エンジンが保存した展開枝・着順条件・終端確率から生成しています。オッズ・購入分類・資金配分は使っていません。</p>
   </div></details>`;
 }
@@ -528,6 +529,24 @@ function renderProbabilityPathAudit(audit,primaryOrder=[]){
   const sibling=(audit.siblingGroups||[]).find(g=>String(g.key||"").endsWith(`|${row.order?.[0]}|${row.order?.[1]}`)&&g.items?.some(x=>(x.order||[]).join("-")===row.order.join("-")));
   const sibHtml=sibling?.items?.slice(0,6).map(x=>`<li>${esc((x.order||[]).join("-"))}: 3着条件 ${pct(x.thirdConditional)} / 3着score ${Number(x.thirdScore||0).toFixed(3)} / 最終 ${pct(x.terminalProbability)}</li>`).join("")||"";
   return `<details class="predictionAccordion"><summary>確率経路監査を見る</summary><div class="accordionBody"><div class="auditCallout"><strong>${esc((row.order||[]).join("-"))} が最終確率になるまで</strong><p>条件付き連鎖: 1着 ${pct(row.conditionalProbabilities?.first)} × 2着 ${pct(row.conditionalProbabilities?.second)} × 3着 ${pct(row.conditionalProbabilities?.third)} = <b>${pct(row.conditionalChainProduct)}</b></p><p>実際の最終確率: <b>${pct(row.finalProbability)}</b></p><p class="muted">最終確率は上の条件付き確率積を直接使わず、position score積 → 差分条件 → 枝内正規化 → branch寄与 → 複数枝合算 → 全終端正規化で作られています。</p></div>${sibHtml?`<div class="auditCallout"><strong>${row.order?.[0]}-${row.order?.[1]}-* の3着比較</strong><ul>${sibHtml}</ul>${sibling?.flatteningDetected?`<p><b>監査:</b> 3着条件付き確率の差より最終確率差が小さく、条件負荷がpathScoreへ十分伝播していない可能性があります。</p>`:""}</div>`:""}</div></details>`;
+}
+
+
+function renderConditionalDistributionAudit(audit,primaryOrder=[]){
+  if(!audit?.totalGroupCount)return "";
+  const pct=v=>`${(Number(v||0)*100).toFixed(1)}%`;
+  const [first,second]=Array.isArray(primaryOrder)?primaryOrder.map(Number):[];
+  const findRow=(stage)=>{
+    const rows=audit?.[stage?.toLowerCase()]?.rows||[];
+    if(stage==="FIRST")return rows.find(r=>String(r.key||"").length>0)||rows[0];
+    if(stage==="SECOND")return rows.find(r=>String(r.key||"").endsWith(`|${first}`))||rows[0];
+    if(stage==="THIRD")return rows.find(r=>String(r.key||"").endsWith(`|${first}|${second}`))||rows[0];
+    return null;
+  };
+  const f=findRow("FIRST"),s=findRow("SECOND"),t=findRow("THIRD");
+  const rowText=(label,row)=>row?`${label}候補合計 ${pct(row.conditionalSum)}${row.normalized?"（100%分布）":`（不足 ${pct(Math.max(0,row.missingMass))}）`}`:`${label}監査なし`;
+  const status=audit.nodeConditionalValuesAreValidDistributions?"条件付き確率として使用可能":"現状は100%分布ではないため、厳密な条件付き確率としては使用不可";
+  return `<details class="predictionAccordion"><summary>条件付き確率の100%監査</summary><div class="accordionBody"><div class="auditCallout"><strong>${esc(status)}</strong><p>${esc(rowText("1着",f))}<br>${esc(rowText("2着",s))}<br>${esc(rowText("3着",t))}</p><p class="muted">全 ${Number(audit.totalGroupCount||0)} 親状態中、100%分布 ${Number(audit.normalizedGroupCount||0)} / 非100%分布 ${Number(audit.nonNormalizedGroupCount||0)}。現在の値は score構成比 × 成立条件負荷 の後に再正規化していません。</p></div></div></details>`;
 }
 
 function renderPurchaseScenarioExplanation(snapshot,bets){
