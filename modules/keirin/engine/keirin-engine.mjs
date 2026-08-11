@@ -5,7 +5,7 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
   const prediction=runKeirinPredictionEngine({race,venueProfile});
   const purchase=runKeirinPurchaseEngine({prediction,oddsByOrder,budget});
   return{
-    engineVersion:"KEIRIN-0.17.2-prediction-axis-explanation",
+    engineVersion:"KEIRIN-0.17.3-probability-path-audit",
     raceId:race.id,
     lineConfidence:race.lineConfidence,
     scored:prediction.scored,

@@ -8,6 +8,7 @@ import{buildCentralRulesAudit}from"./central-rules-audit.mjs";
 import{buildRiderBranchLinkAudit}from"./rider-branch-link-audit.mjs";
 import{buildBranchSelectionAudit,buildRiderAbilityEvaluationAudit,buildStartPowerInputAudit}from"./engine-support.mjs";
 import{buildPredictionExplanation}from"./prediction-explanation.mjs";
+import{buildProbabilityPathAudit}from"./probability-path-audit.mjs";
 
 export function runKeirinPredictionEngine({race,venueProfile={}}){
   const scored=scoreKeirinParticipants({race,venueProfile});
@@ -21,12 +22,13 @@ export function runKeirinPredictionEngine({race,venueProfile={}}){
   const centralRulesAudit=buildCentralRulesAudit({terminals,terminalGenerationAudit});
   const boundaryAudit=buildPredictionBoundaryAudit(terminals);
   const explanation=buildPredictionExplanation({scored,lines,branches,terminals});
+  const probabilityPathAudit=buildProbabilityPathAudit(terminals);
   return{
     predictionVersion:"KEIRIN-PREDICTION-1.1-AXIS-EXPLANATION",
     raceId:race.id,
     lineConfidence:race.lineConfidence,
     raceCategory:race.raceCategory||"standard",
-    scored,lines,branches,terminals,explanation,
+    scored,lines,branches,terminals,explanation,probabilityPathAudit,
     audit:{
       ...generationAudit,
       branchSelectionAudit:buildBranchSelectionAudit(branches),
