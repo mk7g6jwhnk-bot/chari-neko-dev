@@ -9,6 +9,7 @@ export function buildPredictionExplanation({scored=[],lines=[],branches=[],termi
   const scenarios=ranked.slice(0,4).map((branch,index)=>buildScenario({branch,index,riderByNumber,lineById,terminals,massByBranch})).filter(Boolean);
   const axis=scenarios[0]||null;
   const alternatives=scenarios.slice(1);
+  const leaderHoldComparison=buildLeaderHoldComparison({scored,lines,branches,axisBranchId:axis?.branchId});
   return{
     version:"PREDICTION-EXPLANATION-1.0",
     generatedFrom:"PREDICTION_ENGINE_ONLY",
@@ -17,6 +18,7 @@ export function buildPredictionExplanation({scored=[],lines=[],branches=[],termi
     oddsUsed:false,
     axis,
     alternatives,
+    leaderHoldComparison,
     scenarioCount:scenarios.length,
     audit:{
       sourceBranchIds:scenarios.map(x=>x.branchId),
@@ -162,3 +164,82 @@ function numberLabel(r){return `${Number(r?.number)}番`;}
 function factorLabel(key){return ({firstPlacement:"1着適性",escapeMechanism:"先行押し切り力",startPower:"主導権獲得力",recentForm:"直近状態",finishPower:"末脚",makuriMechanism:"捲り力",sprintPower:"瞬発力",banteSashiMechanism:"番手差し力",trackingSkill:"追走力",candidateMean:"候補全体の成立力"})[String(key)]||String(key||"評価");}
 function fmt10(v){return Number.isFinite(Number(v))?Number(v).toFixed(2):"不明";}
 function pct(v){return Number.isFinite(Number(v))?`${(Number(v)*100).toFixed(1)}%`:"未算出";}
+
+
+function buildLeaderHoldComparison({scored=[],lines=[],branches=[],axisBranchId=null}={}){
+  const leaderByNumber=new Map();
+  for(const line of lines||[]){
+    if(line?.type!=="ライン"||!line?.leader)continue;
+    leaderByNumber.set(Number(line.leader.number),{lineId:line.id,line});
+  }
+  const branchByLeader=new Map();
+  for(const branch of branches||[]){
+    if(branch?.branchType!=="LEADER_HOLD")continue;
+    const n=Number(branch.requiredFirstNumber);
+    if(Number.isFinite(n))branchByLeader.set(n,branch);
+  }
+  const rows=(scored||[]).map(rider=>{
+    const n=Number(rider.number);
+    const leaderInfo=leaderByNumber.get(n)||null;
+    const branch=branchByLeader.get(n)||null;
+    const trace=branch?.scoreTrace||[];
+    const traceByKey=Object.fromEntries(trace.map(x=>[String(x.key),x]));
+    const raw={
+      firstPlacement:valueOf(rider?.roleScores?.first),
+      escapeMechanism:valueOf(rider?.riderEvaluationV2?.firstMechanisms?.escape),
+      startPower:valueOf(rider?.evidence?.start),
+      recentForm:valueOf(rider?.evidence?.recent),
+      finishPower:valueOf(rider?.evidence?.finish)
+    };
+    const factors=Object.entries(raw).map(([key,value])=>({
+      key,label:factorLabel(key),value,
+      configuredWeight:leaderHoldWeight(key),
+      effectiveWeight:valueOf(traceByKey[key]?.effectiveWeight),
+      contribution:valueOf(traceByKey[key]?.contribution),
+      available:value!==null
+    }));
+    let exclusionReason=null;
+    if(!leaderInfo)exclusionReason="NOT_OFFICIAL_LINE_LEADER";
+    else if(!branch)exclusionReason="LEADER_HOLD_BRANCH_NOT_ENABLED_OR_START_EVIDENCE_UNAVAILABLE";
+    return{
+      number:n,name:String(rider?.name||""),role:rider?.role||null,
+      officialLineLeader:Boolean(leaderInfo),lineId:leaderInfo?.lineId??null,
+      branchGenerated:Boolean(branch),branchId:branch?.id||null,
+      branchLabel:branch?.label||null,branchScore:valueOf(branch?.score),
+      forecastRole:branch?.forecastRole||null,priority:branch?.priority||null,
+      isAxisBranch:Boolean(branch&&String(branch.id)===String(axisBranchId)),
+      exclusionReason,raw,factors
+    };
+  }).sort((a,b)=>(b.branchGenerated-a.branchGenerated)||((b.branchScore??-1)-(a.branchScore??-1))||a.number-b.number);
+  const generated=rows.filter(x=>x.branchGenerated);
+  const axisRow=rows.find(x=>x.isAxisBranch)||null;
+  const strongestRival=generated.find(x=>!x.isAxisBranch)||null;
+  const decisiveFactors=axisRow&&strongestRival?compareLeaderHoldFactors(axisRow,strongestRival):[];
+  return{
+    version:"LEADER-HOLD-BRANCH-COMPARISON-1.0",
+    policy:"COMPARE_BRANCH_GENERATION_ELIGIBILITY_BEFORE_SCORE; THEN_COMPARE_EXACT_LEADER_HOLD_SCORE_TRACE",
+    axisNumber:axisRow?.number??null,
+    axisBranchId:axisRow?.branchId??null,
+    generatedLeaderHoldCount:generated.length,
+    rows,
+    strongestRivalNumber:strongestRival?.number??null,
+    decisiveFactors,
+    audit:{
+      branchEligibilitySeparatedFromAbility:true,
+      exactScoreTraceUsed:true,
+      lineLeaderRestrictionVisible:true,
+      passed:rows.length>0
+    }
+  };
+}
+function leaderHoldWeight(key){return({firstPlacement:.22,escapeMechanism:.43,startPower:.20,recentForm:.10,finishPower:.05})[String(key)]??null;}
+function compareLeaderHoldFactors(axis,rival){
+  const keys=["firstPlacement","escapeMechanism","startPower","recentForm","finishPower"];
+  return keys.map(key=>{
+    const a=axis.factors.find(x=>x.key===key)||{};
+    const b=rival.factors.find(x=>x.key===key)||{};
+    const ac=valueOf(a.contribution)??0,bc=valueOf(b.contribution)??0;
+    return{key,label:factorLabel(key),axisContribution:ac,rivalContribution:bc,delta:ac-bc,axisValue:valueOf(a.value),rivalValue:valueOf(b.value)};
+  }).sort((a,b)=>Math.abs(b.delta)-Math.abs(a.delta));
+}
+function valueOf(v){return v!==null&&v!==undefined&&v!==""&&Number.isFinite(Number(v))?Number(v):null;}

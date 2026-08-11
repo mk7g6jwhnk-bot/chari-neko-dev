@@ -26,7 +26,7 @@ export function runKeirinPredictionEngine({race,venueProfile={}}){
   const probabilityPathAudit=buildProbabilityPathAudit(terminals);
   const conditionalProbabilityDistributionAudit=buildConditionalProbabilityDistributionAudit(terminals);
   return{
-    predictionVersion:"KEIRIN-PREDICTION-1.2-CONDITIONAL-DISTRIBUTION-AUDIT",
+    predictionVersion:"KEIRIN-PREDICTION-1.3-LEADER-HOLD-AXIS-COMPARISON",
     raceId:race.id,
     lineConfidence:race.lineConfidence,
     raceCategory:race.raceCategory||"standard",

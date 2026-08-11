@@ -13,7 +13,7 @@ const ODDS_CACHE_KEY="chari-neko:keirin-odds-cache:v1";
 const RACE_META_CACHE_KEY="chari-neko:keirin-race-meta-cache:v1";
 const RESULT_CACHE_KEY="chari-neko:keirin-result-cache:v1";
 const MEETING_CACHE_KEY="chari-neko:keirin-meeting-cache:v1";
-const APP_RELEASE="KEIRIN-0.17.4-conditional-probability-distribution-audit";
+const APP_RELEASE="KEIRIN-0.17.5-leader-hold-axis-comparison";
 const APP_UPDATE_CHECK_INTERVAL_MS=5*60*1000;
 let lastAppUpdateCheckAt=0,appUpdateCheckBusy=false;
 const VENUE_CODES={函館:"11",青森:"12",いわき平:"13",弥彦:"21",前橋:"22",取手:"23",宇都宮:"24",大宮:"25",西武園:"26",京王閣:"27",立川:"28",松戸:"31",千葉:"32",川崎:"34",平塚:"35",小田原:"36",伊東:"37",静岡:"38",名古屋:"42",岐阜:"43",大垣:"44",豊橋:"45",富山:"46",松阪:"47",四日市:"48",福井:"51",奈良:"53",向日町:"54",和歌山:"55",岸和田:"56",玉野:"61",広島:"62",防府:"63",高松:"71",小松島:"73",高知:"74",松山:"75",小倉:"81",久留米:"83",武雄:"84",佐世保:"85",別府:"86",熊本:"87"};
@@ -512,12 +512,41 @@ function renderPredictionAxisExplanation(explanation,probabilityPathAudit=null,c
   return `<details class="predictionAccordion" open><summary>軸になった展開と根拠</summary><div class="accordionBody">
     <div class="auditCallout"><strong>軸になった展開</strong><p>${esc(axis.timeline)}</p><p class="muted">予測枝 ${esc(axis.branchLabel||axis.branchId||"")} / 枝寄与 ${(Number(axis.branchProbabilityMass||0)*100).toFixed(1)}%${axis.primaryOrder?.length?` / 代表終端 ${esc(axis.primaryOrder.join("-"))}`:""}</p></div>
     <div class="auditCallout"><strong>この展開を軸にした根拠</strong>${reasons?`<ul>${reasons}</ul>`:'<p>根拠データなし</p>'}</div>
+    ${renderLeaderHoldComparison(explanation?.leaderHoldComparison,axis)}
     ${orders?`<p class="muted"><b>この展開から自然につながる上位終端</b> ${esc(orders)}</p>`:""}
     ${alternatives?`<details class="predictionAccordion"><summary>代替展開を見る</summary><div class="accordionBody">${alternatives}</div></details>`:""}
     ${renderProbabilityPathAudit(probabilityPathAudit,axis?.primaryOrder)}
     ${renderConditionalDistributionAudit(conditionalDistributionAudit,axis?.primaryOrder)}
     <p class="muted">この説明は買い目ではなく、予測エンジンが保存した展開枝・着順条件・終端確率から生成しています。オッズ・購入分類・資金配分は使っていません。</p>
   </div></details>`;
+}
+
+
+
+function renderLeaderHoldComparison(audit,axis){
+  if(!audit?.rows?.length||axis?.branchType!=="LEADER_HOLD")return "";
+  const axisNo=Number(audit.axisNumber);
+  const rows=[...audit.rows].sort((a,b)=>{
+    if(Number(a.number)===axisNo)return -1;
+    if(Number(b.number)===axisNo)return 1;
+    return (b.branchGenerated-a.branchGenerated)||((Number(b.branchScore)||-1)-(Number(a.branchScore)||-1));
+  });
+  const rowHtml=rows.map(row=>{
+    const score=Number.isFinite(Number(row.branchScore))?Number(row.branchScore).toFixed(3):"—";
+    const state=row.branchGenerated?`先行押し切り枝あり / score ${score}`:row.exclusionReason==="NOT_OFFICIAL_LINE_LEADER"?"先行押し切り枝なし：公式ラインの先頭役ではない":"先行押し切り枝なし：ライン信頼度または先行根拠ゲートで停止";
+    const factors=(row.factors||[]).map(f=>{
+      const value=Number.isFinite(Number(f.value))?Number(f.value).toFixed(2):"欠損";
+      const contrib=Number.isFinite(Number(f.contribution))?` → 寄与 ${Number(f.contribution).toFixed(3)}`:"";
+      return `${esc(f.label)} ${value}${contrib}`;
+    }).join(" / ");
+    return `<li><b>${row.number}番 ${esc(row.name||"")}${Number(row.number)===axisNo?"（軸）":""}</b>：${esc(state)}<br><span class="muted">${factors}</span></li>`;
+  }).join("");
+  const decisive=(audit.decisiveFactors||[]).slice(0,5).map(f=>{
+    const sign=Number(f.delta)>=0?"軸側+":"軸側";
+    return `<li>${esc(f.label)}：${sign}${Number(f.delta||0).toFixed(3)}（軸 ${Number(f.axisValue||0).toFixed(2)} / 比較 ${Number(f.rivalValue||0).toFixed(2)}）</li>`;
+  }).join("");
+  const rival=audit.strongestRivalNumber?`最強の他先行枝は${audit.strongestRivalNumber}番。`:"比較できる他の先行押し切り枝はありません。";
+  return `<details class="predictionAccordion"><summary>なぜこの先行役を軸にしたかを見る</summary><div class="accordionBody"><div class="auditCallout"><strong>先行押し切り枝の入口比較</strong><p>${esc(rival)} 能力値が高くても、公式ライン先頭役でなければLEADER_HOLD枝は生成されません。</p><ul>${rowHtml}</ul></div>${decisive?`<div class="auditCallout"><strong>枝が両方ある場合の逆転要因</strong><ul>${decisive}</ul><p class="muted">branch scoreは 1着適性22%・先行押し切り力43%・主導権獲得力20%・直近10%・末脚5%（欠損時は残存項目で再正規化）の加重合成です。</p></div>`:""}</div></details>`;
 }
 
 function renderProbabilityPathAudit(audit,primaryOrder=[]){
