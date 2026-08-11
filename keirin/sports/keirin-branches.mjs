@@ -1,25 +1,28 @@
-export function generateKeirinBranches({scored,lines,lineConfidence,raceCategory="standard"}){
+export function generateKeirinBranches({scored,lines,lineConfidence,raceCategory="standard",initiativeAssessment=null}){
   if(raceCategory==="girls")return generateGirlsBranches(scored);
   const branches=[];
   const lineEnabled=lineConfidence==="高";
+  const initiativeByLine=new Map((initiativeAssessment?.candidates||[]).filter(x=>x?.lineId).map(x=>[String(x.lineId),x]));
+  const topInitiative=initiativeAssessment?.top||null;
+  const topInitiativeLineId=topInitiative?.lineId?String(topInitiative.lineId):null;
 
   for(const line of lines.filter(item=>item.type==="ライン")){
     const leader=line.leader,bante=line.bante;
     if(leader){
       branches.push(make({
-        id:`LEAD-${line.id}`,label:`${line.id}先行押し切り`,scenario:"先行押し切り",branchType:"LEADER_HOLD",primaryLineId:line.id,requiredFirstNumber:leader.number,enabled:lineEnabled&&hasUsableStartPower(leader),
+        id:`LEAD-${line.id}`,label:`${line.id}先行押し切り`,scenario:"先行押し切り",branchType:"LEADER_HOLD",primaryLineId:line.id,requiredFirstNumber:leader.number,enabled:lineEnabled&&hasUsableStartPower(leader),initiative:initiativeByLine.get(String(line.id))||null,
         scoreParts:[part("firstPlacement",leader.roleScores.first,.22),part("escapeMechanism",leader.riderEvaluationV2?.firstMechanisms?.escape,.43),part("startPower",leader.evidence.start,.20),part("recentForm",leader.evidence.recent,.10),part("finishPower",leader.evidence.finish,.05)],
         firstCandidateScores:{[leader.id]:leader.roleScores.first||0}
       }));
       branches.push(make({
-        id:`MAKURI-${line.id}`,label:`${line.id}まくり`,scenario:"別線まくり",branchType:"MAKURI_SUCCESS",primaryLineId:line.id,requiredFirstNumber:leader.number,enabled:lineEnabled,
+        id:`MAKURI-${line.id}`,label:`${line.id}まくり`,scenario:"別線まくり",branchType:"MAKURI_SUCCESS",primaryLineId:line.id,requiredFirstNumber:leader.number,enabled:lineEnabled,initiative:initiativeByLine.get(String(line.id))||null,
         scoreParts:[part("firstPlacement",leader.roleScores.first,.22),part("makuriMechanism",leader.riderEvaluationV2?.firstMechanisms?.makuri,.46),part("sprintPower",leader.evidence.sprint,.17),part("finishPower",leader.evidence.finish,.10),part("recentForm",leader.evidence.recent,.05)],
         firstCandidateScores:{[leader.id]:leader.roleScores.first||0}
       }));
     }
     if(bante){
       branches.push(make({
-        id:`BANTE-${line.id}`,label:`${line.id}番手差し`,scenario:"番手差し",branchType:"BANTE_SASHI",primaryLineId:line.id,requiredFirstNumber:bante.number,enabled:lineEnabled,
+        id:`BANTE-${line.id}`,label:`${line.id}番手差し`,scenario:"番手差し",branchType:"BANTE_SASHI",primaryLineId:line.id,requiredFirstNumber:bante.number,enabled:lineEnabled,initiative:initiativeByLine.get(String(line.id))||null,
         scoreParts:[part("firstPlacement",bante.roleScores.first,.22),part("banteSashiMechanism",bante.riderEvaluationV2?.firstMechanisms?.banteSashi,.46),part("finishPower",bante.evidence.finish,.14),part("trackingSkill",bante.evidence.tracking,.13),part("recentForm",bante.evidence.recent,.05)],
         firstCandidateScores:{[bante.id]:bante.roleScores.first||0}
       }));
@@ -59,8 +62,10 @@ export function generateKeirinBranches({scored,lines,lineConfidence,raceCategory
   const enabled=branches.filter(branch=>branch.firstCandidates.length&&branch.enabled).sort(compareBranch);
   const structured=enabled.filter(branch=>["LEADER_HOLD","BANTE_SASHI","MAKURI_SUCCESS"].includes(branch.branchType));
   const tiers=selectNaturalBranchTiers(structured);
-  const mainIds=new Set(tiers.main.map(branch=>branch.id));
-  const contenderIds=new Set(tiers.contender.map(branch=>branch.id));
+  const initiativeLineBranches=topInitiativeLineId?structured.filter(branch=>String(branch.primaryLineId)===topInitiativeLineId&&["LEADER_HOLD","BANTE_SASHI"].includes(branch.branchType)):[];
+  const initiativeMain=initiativeLineBranches.length?[...initiativeLineBranches].sort(compareBranch).slice(0,1):[];
+  const mainIds=new Set((initiativeMain.length?initiativeMain:tiers.main).map(branch=>branch.id));
+  const contenderIds=new Set(tiers.contender.filter(branch=>!mainIds.has(branch.id)).map(branch=>branch.id));
 
   // LEADER_HOLD と BANTE_SASHI は、同じラインの「先行残り / 番手差し」
   // という頭折り返しであり、片方が中心展開ならもう片方を能力順位だけで
@@ -91,6 +96,11 @@ export function generateKeirinBranches({scored,lines,lineConfidence,raceCategory
         ?mainIds.has(branch.id)?"CENTER":sameScenarioMainSibling?"CENTER_SIBLING":contenderIds.has(branch.id)?"SECONDARY":"POSSIBLE"
         :"RISK",
       sameScenarioMainSibling,
+      initiativeScore:Number(branch?.initiative?.score)||null,
+      initiativeProbability:Number(branch?.initiative?.probability)||null,
+      initiativeRank:Number(branch?.initiative?.rank)||null,
+      initiativePrimaryLine:Boolean(topInitiativeLineId&&String(branch.primaryLineId)===topInitiativeLineId),
+      initiativeSelectionPolicy:"INITIATIVE_LINE_FIRST_THEN_OUTCOME_BRANCH",
       sameScenarioClusterId:sameScenarioMainSibling||mainIds.has(branch.id)
         ?(branch.primaryLineId&&["LEADER_HOLD","BANTE_SASHI"].includes(branch.branchType)?`LINE-REVERSAL-${branch.primaryLineId}`:null)
         :null
@@ -206,12 +216,12 @@ function hasUsableStartPower(rider){
 
 function emptyTierResult(){return{main:[],contender:[],sub:[],diagnostics:{mode:"EMPTY",topScore:null,topTieCount:0,tailMedianGap:null,tailMadGap:null,contenderCutGap:null,contenderCutDetected:false}}}
 function part(key,value,weight){const available=value!==null&&value!==undefined&&value!==""&&Number.isFinite(Number(value));return{key,value:available?Number(value):null,weight,available,contribution:0}}
-function make({id,label,scenario,branchType,scoreParts=[],firstCandidateScores={},primaryLineId=null,requiredFirstNumber=null,enabled,lineIndependentFallback=false}){
+function make({id,label,scenario,branchType,scoreParts=[],firstCandidateScores={},primaryLineId=null,requiredFirstNumber=null,enabled,lineIndependentFallback=false,initiative=null}){
   const availableWeight=scoreParts.filter(item=>item.available).reduce((sum,item)=>sum+item.weight,0);
   const normalizedParts=scoreParts.map(item=>({...item,effectiveWeight:item.available&&availableWeight>0?item.weight/availableWeight:0,contribution:item.available&&availableWeight>0?item.value*(item.weight/availableWeight):0,missing:!item.available}));
   const score=normalizedParts.reduce((sum,item)=>sum+item.contribution,0);
   const entries=Object.entries(firstCandidateScores).filter(([id,value])=>id&&Number.isFinite(value)&&value>0).sort((a,b)=>b[1]-a[1]||String(a[0]).localeCompare(String(b[0]),"en"));
-  return{id,label,scenario,branchType,primaryLineId,requiredFirstNumber,lineIndependentFallback:Boolean(lineIndependentFallback),score,scoreTrace:[...normalizedParts].sort((a,b)=>b.contribution-a.contribution),firstCandidates:entries.map(([id])=>id),firstCandidateScores:Object.fromEntries(entries),enabled:Boolean(enabled)&&score>=2.2,priority:"risk"};
+  return{id,label,scenario,branchType,primaryLineId,requiredFirstNumber,lineIndependentFallback:Boolean(lineIndependentFallback),initiative,score,scoreTrace:[...normalizedParts].sort((a,b)=>b.contribution-a.contribution),firstCandidates:entries.map(([id])=>id),firstCandidateScores:Object.fromEntries(entries),enabled:Boolean(enabled)&&score>=2.2,priority:"risk"};
 }
 function compareBranch(a,b){return(b.score-a.score)||a.id.localeCompare(b.id,"en")}
 function avg(values){const valid=values.filter(Number.isFinite);return valid.length?valid.reduce((sum,value)=>sum+value,0)/valid.length:0}

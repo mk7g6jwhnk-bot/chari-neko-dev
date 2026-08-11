@@ -1,6 +1,7 @@
 import{scoreKeirinParticipants}from"../sports/keirin-scoring.mjs";
 import{buildLines}from"../sports/keirin-lines.mjs";
 import{generateKeirinBranches}from"../sports/keirin-branches.mjs";
+import{buildKeirinInitiativeAssessment}from"../sports/keirin-initiative.mjs";
 import{generateKeirinTerminals}from"../sports/keirin-terminals.mjs";
 import{audit}from"./audit.mjs";
 import{buildWholeLinkageAudit}from"./whole-linkage-audit.mjs";
@@ -14,7 +15,8 @@ import{buildConditionalProbabilityDistributionAudit}from"./conditional-probabili
 export function runKeirinPredictionEngine({race,venueProfile={}}){
   const scored=scoreKeirinParticipants({race,venueProfile});
   const lines=buildLines(scored);
-  const branches=generateKeirinBranches({scored,lines,lineConfidence:race.lineConfidence,raceCategory:race.raceCategory||"standard"});
+  const initiativeAssessment=buildKeirinInitiativeAssessment({scored,lines,raceCategory:race.raceCategory||"standard"});
+  const branches=generateKeirinBranches({scored,lines,lineConfidence:race.lineConfidence,raceCategory:race.raceCategory||"standard",initiativeAssessment});
   const terminals=generateKeirinTerminals({scored,branches});
   const terminalGenerationAudit=terminals.generationAudit||null;
   const generationAudit=audit({race,branches,terminals,terminalGenerationAudit});
@@ -26,11 +28,11 @@ export function runKeirinPredictionEngine({race,venueProfile={}}){
   const probabilityPathAudit=buildProbabilityPathAudit(terminals);
   const conditionalProbabilityDistributionAudit=buildConditionalProbabilityDistributionAudit(terminals);
   return{
-    predictionVersion:"KEIRIN-PREDICTION-1.3-LEADER-HOLD-AXIS-COMPARISON",
+    predictionVersion:"KEIRIN-PREDICTION-1.4-INDEPENDENT-INITIATIVE-FIRST",
     raceId:race.id,
     lineConfidence:race.lineConfidence,
     raceCategory:race.raceCategory||"standard",
-    scored,lines,branches,terminals,explanation,probabilityPathAudit,conditionalProbabilityDistributionAudit,
+    scored,lines,initiativeAssessment,branches,terminals,explanation,probabilityPathAudit,conditionalProbabilityDistributionAudit,
     audit:{
       ...generationAudit,
       branchSelectionAudit:buildBranchSelectionAudit(branches),

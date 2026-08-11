@@ -249,8 +249,8 @@ export function buildBranchSelectionAudit(branches){
     topStructuredBranchId:topStructured?.id||null,
     topStructuredBranchLabel:topStructured?.label||null,
     topStructuredScore,
-    mainSelectionMode:"HIERARCHICAL_NATURAL_TIERS",
-    mainLineId:null,
+    mainSelectionMode:structured.some(branch=>branch.initiativeSelectionPolicy)?"INITIATIVE_LINE_FIRST_THEN_OUTCOME_BRANCH":"HIERARCHICAL_NATURAL_TIERS",
+    mainLineId:mainBranches.find(branch=>branch.primaryLineId)?.primaryLineId||null,
     mainLineIds:[...new Set(mainBranches.map(branch=>branch.primaryLineId).filter(Boolean))],
     mainBranchIds:mainBranches.map(branch=>branch.id),
     mainBranchLabels:mainBranches.map(branch=>branch.label),
@@ -282,6 +282,10 @@ export function buildBranchSelectionAudit(branches){
       score:Number(branch.score)||0,
       share:totalScore>0?(Number(branch.score)||0)/totalScore:0,
       relativeToTop:topScore>0?(Number(branch.score)||0)/topScore:0,
+      initiativeScore:Number(branch.initiativeScore)||null,
+      initiativeProbability:Number(branch.initiativeProbability)||null,
+      initiativeRank:Number(branch.initiativeRank)||null,
+      initiativePrimaryLine:Boolean(branch.initiativePrimaryLine),
       scoreTrace:(branch.scoreTrace||[]).map(item=>({key:item.key,value:Number(item.value)||0,weight:Number(item.weight)||0,contribution:Number(item.contribution)||0}))
     }))
   };

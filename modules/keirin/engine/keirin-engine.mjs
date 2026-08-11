@@ -5,7 +5,7 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
   const prediction=runKeirinPredictionEngine({race,venueProfile});
   const purchase=runKeirinPurchaseEngine({prediction,oddsByOrder,budget});
   return{
-    engineVersion:"KEIRIN-0.18.1-main-scenario-class-invariant",
+    engineVersion:"KEIRIN-0.19.0-independent-initiative-first",
     raceId:race.id,
     lineConfidence:race.lineConfidence,
     scored:prediction.scored,
