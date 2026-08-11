@@ -105,12 +105,21 @@ export function classify(terminals,odds={}){
   const decided=ranked.map(item=>applyFamilyPurchaseDecision(item,valueGate,familyCoverageGate));
   const firstPass=applyUnderCoverageNaturalRecovery(decided,familyCoverageGate);
   const skipLinked=buildSkipLinkedBorderContext(firstPass,raceConcentrationBorder);
-  if(!skipLinked.active)return firstPass.map(item=>attachSkipLinkedContext(item,skipLinked));
+  const firstPassPurchased=firstPass.filter(item=>item.purchaseStatus===PURCHASED).length;
+  if(!skipLinked.active){
+    const flow={policy:"PURCHASE_BORDER_FLOW_AUDIT_V218",skipLinkedActive:false,firstPassPurchased,tightenedPurchased:null,secondRecoveryApplied:false,secondRecoveryAdded:0,finalPurchased:firstPassPurchased};
+    return firstPass.map(item=>attachSkipLinkedContext(item,skipLinked,flow));
+  }
   const tightened=annotatePurchaseBorder(terminalRanked,{...raceConcentrationBorder,skipLinked});
   const tightenedValueGate=buildSubValueGate(tightened);
   const tightenedFamilyCoverageGate=buildFamilyCoverageGate(tightened);
   const tightenedDecided=tightened.map(item=>applyFamilyPurchaseDecision(item,tightenedValueGate,tightenedFamilyCoverageGate));
-  return applyUnderCoverageNaturalRecovery(tightenedDecided,tightenedFamilyCoverageGate).map(item=>attachSkipLinkedContext(item,skipLinked));
+  const tightenedPurchased=tightenedDecided.filter(item=>item.purchaseStatus===PURCHASED).length;
+  // v218: once the skip-linked second-pass border activates, the border is authoritative.
+  // Do not run mass-undercoverage recovery again, otherwise eligible-but-rejected derivative
+  // terminals can be re-added only to satisfy a coverage target in a race already judged diffuse.
+  const flow={policy:"PURCHASE_BORDER_FLOW_AUDIT_V218",skipLinkedActive:true,firstPassPurchased,tightenedPurchased,secondRecoveryApplied:false,secondRecoveryAdded:0,finalPurchased:tightenedPurchased,recoveryLockReason:"SKIP_LINKED_BORDER_AUTHORITATIVE"};
+  return tightenedDecided.map(item=>attachSkipLinkedContext(item,skipLinked,flow));
 }
 
 function annotateTerminalRanks(items){
@@ -319,9 +328,9 @@ function buildSkipLinkedBorderContext(items,raceContext={}){
   return{active,policy:"SKIP_LIKE_PRE_RATING_TWO_PASS_V1",topBranchShare,topFamilyShare,topFamilyCoverage,primaryFirst:primary?.[0]??null,checks,thresholds:{...SKIP_LINKED_BORDER}};
 }
 
-function attachSkipLinkedContext(item,skipLinked){
+function attachSkipLinkedContext(item,skipLinked,flow=null){
   const metrics=item?.purchaseBorderMetrics||{};
-  return{...item,purchaseBorderMetrics:{...metrics,skipLinkedActive:Boolean(skipLinked?.active),skipLinkedPolicy:skipLinked?.policy||null,skipLinkedTopBranchShare:skipLinked?.topBranchShare??null,skipLinkedTopFamilyShare:skipLinked?.topFamilyShare??null,skipLinkedTopFamilyCoverage:skipLinked?.topFamilyCoverage??null,skipLinkedPrimaryFirst:skipLinked?.primaryFirst??null,skipLinkedChecks:skipLinked?.checks||null}};
+  return{...item,purchaseBorderMetrics:{...metrics,skipLinkedActive:Boolean(skipLinked?.active),skipLinkedPolicy:skipLinked?.policy||null,skipLinkedTopBranchShare:skipLinked?.topBranchShare??null,skipLinkedTopFamilyShare:skipLinked?.topFamilyShare??null,skipLinkedTopFamilyCoverage:skipLinked?.topFamilyCoverage??null,skipLinkedPrimaryFirst:skipLinked?.primaryFirst??null,skipLinkedChecks:skipLinked?.checks||null,purchaseFlowAudit:flow}};
 }
 
 function annotatePurchaseBorder(items,raceContext={severity:0,regime:"NORMAL"}){
@@ -873,7 +882,7 @@ export function purchaseDiagnostics(classified,plan,budget){
       buyableHighBreakEvenIndex:1,
       fundingMode:"100YEN_BASE_PLUS_PROBABILITY_X_SQRT_PROBABILITY_ODDS"
     },
-    purchaseBorderAudit:{policy:"COMPOSITE_RELATIVE_PLUS_RACE_CONCENTRATION_PLUS_SKIP_LINKED_TWO_PASS_V3",thresholds:{...PURCHASE_BORDER},raceConcentrationThresholds:{...RACE_CONCENTRATION_BORDER},skipLinkedThresholds:{...SKIP_LINKED_BORDER},raceConcentration:classified[0]?.purchaseBorderMetrics?{topBranchShare:classified[0].purchaseBorderMetrics.raceTopBranchShare??null,topFamilyShare:classified[0].purchaseBorderMetrics.raceTopFamilyShare??null,top5Share:classified[0].purchaseBorderMetrics.raceTop5Share??null,severity:classified[0].purchaseBorderMetrics.raceDispersionSeverity??0,regime:classified[0].purchaseBorderMetrics.raceDispersionRegime||"NORMAL"}:null,eligibleCount:classified.filter(item=>item.purchaseBorderEligible).length,rejectedCount:classified.filter(item=>!item.purchaseBorderEligible).length,adoptedBelowBorderCount:natural.filter(item=>!item.purchaseBorderEligible&&item.betClass!=="BUYABLE_HIGH").length,rows:classified.map(item=>({order:item.order.join("-"),adopted:item.purchaseStatus===PURCHASED,betClass:item.betClass,eligible:Boolean(item.purchaseBorderEligible),score:item.purchaseBorderScore??null,failures:item.purchaseBorderFailures||[],metrics:item.purchaseBorderMetrics||null}))},
+    purchaseBorderAudit:{policy:"COMPOSITE_RELATIVE_PLUS_RACE_CONCENTRATION_PLUS_SKIP_LINKED_RECOVERY_LOCK_V4",flowAudit:classified[0]?.purchaseBorderMetrics?.purchaseFlowAudit||null,thresholds:{...PURCHASE_BORDER},raceConcentrationThresholds:{...RACE_CONCENTRATION_BORDER},skipLinkedThresholds:{...SKIP_LINKED_BORDER},raceConcentration:classified[0]?.purchaseBorderMetrics?{topBranchShare:classified[0].purchaseBorderMetrics.raceTopBranchShare??null,topFamilyShare:classified[0].purchaseBorderMetrics.raceTopFamilyShare??null,top5Share:classified[0].purchaseBorderMetrics.raceTop5Share??null,severity:classified[0].purchaseBorderMetrics.raceDispersionSeverity??0,regime:classified[0].purchaseBorderMetrics.raceDispersionRegime||"NORMAL"}:null,eligibleCount:classified.filter(item=>item.purchaseBorderEligible).length,rejectedCount:classified.filter(item=>!item.purchaseBorderEligible).length,adoptedBelowBorderCount:natural.filter(item=>!item.purchaseBorderEligible&&item.betClass!=="BUYABLE_HIGH").length,rows:classified.map(item=>({order:item.order.join("-"),adopted:item.purchaseStatus===PURCHASED,betClass:item.betClass,eligible:Boolean(item.purchaseBorderEligible),score:item.purchaseBorderScore??null,failures:item.purchaseBorderFailures||[],metrics:item.purchaseBorderMetrics||null}))},
     purchaseFamilyAudit:{mode:"COMPOSITE_RELATIVE_BORDER_THEN_PRIMARY_FIRST_FAMILY_COVERAGE",headCount:familyRows.length,primaryFirst:classified.find(item=>item.isPrimaryFirstFamily)?.firstFamilyNumber??null,primaryCoverageTarget:classified.find(item=>item.isPrimaryFirstFamily)?.firstFamilyCoverageTarget??null,rows:familyRows},
     adoptedTerminalAudit:natural.map(item=>buildAdoptedAudit(item,diagnosticBranchStats,diagnosticMaxBranchTotal)),
     mainHeadSiblingAudit:{

@@ -1,4 +1,4 @@
 # Version
 
-- Version: `KEIRIN-0.16.52-skip-linked-purchase-border`
-- Label: `v217-skip-linked-purchase-border`
+- Version: `KEIRIN-0.16.53-purchase-border-recovery-lock`
+- Label: `v218-purchase-border-recovery-lock`
