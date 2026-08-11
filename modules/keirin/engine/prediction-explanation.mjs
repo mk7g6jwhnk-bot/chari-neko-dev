@@ -9,6 +9,7 @@ export function buildPredictionExplanation({scored=[],lines=[],branches=[],termi
   const scenarios=ranked.slice(0,4).map((branch,index)=>buildScenario({branch,index,riderByNumber,lineById,terminals,massByBranch})).filter(Boolean);
   const axis=scenarios[0]||null;
   const alternatives=scenarios.slice(1);
+  const axisSelectionAudit=buildAxisSelectionAudit({pool,ranked,massByBranch,axis});
   const axisBranch=axis?.branchId?branchById.get(String(axis.branchId)):null;
   const comparisonAxisBranch=axisBranch?.branchType==="BANTE_SASHI"
     ?(branches||[]).find(branch=>branch?.branchType==="LEADER_HOLD"&&String(branch?.primaryLineId)===String(axisBranch?.primaryLineId))||null
@@ -26,6 +27,7 @@ export function buildPredictionExplanation({scored=[],lines=[],branches=[],termi
     axis,
     alternatives,
     leaderHoldComparison,
+    axisSelectionAudit,
     scenarioCount:scenarios.length,
     audit:{
       sourceBranchIds:scenarios.map(x=>x.branchId),
@@ -34,6 +36,38 @@ export function buildPredictionExplanation({scored=[],lines=[],branches=[],termi
       hasIndependentReasons:Boolean(axis?.reasons?.length),
       passed:Boolean(axis?.timeline&&axis?.reasons?.length)
     }
+  };
+}
+
+function buildAxisSelectionAudit({pool=[],ranked=[],massByBranch=new Map(),axis=null}={}){
+  const rows=(ranked||[]).map((branch,index)=>({
+    rank:index+1,
+    branchId:branch?.id||null,
+    branchLabel:branch?.label||null,
+    branchType:branch?.branchType||null,
+    primaryLineId:branch?.primaryLineId??null,
+    requiredFirstNumber:branch?.requiredFirstNumber??null,
+    branchProbabilityMass:Number(massByBranch.get(String(branch?.id)))||0,
+    branchScore:Number(branch?.score)||0,
+    forecastRole:branch?.forecastRole||null,
+    priority:branch?.priority||null
+  }));
+  const selected=rows[0]||null;
+  const axisId=axis?.branchId||null;
+  const consistent=Boolean(!axisId||String(selected?.branchId)===String(axisId));
+  const scoreLeader=[...rows].sort((a,b)=>b.branchScore-a.branchScore||String(a.branchId).localeCompare(String(b.branchId),'en'))[0]||null;
+  return{
+    version:'AXIS-SELECTION-AUDIT-1.0',
+    policy:'CENTER_POOL_FIRST; THEN BRANCH_TERMINAL_PROBABILITY_MASS DESC; THEN BRANCH_SCORE DESC; THEN BRANCH_ID',
+    poolMode:(pool||[]).some(b=>['CENTER','CENTER_SIBLING'].includes(b?.forecastRole)||b?.priority==='main')?'CENTER_OR_MAIN_ONLY':'ALL_BRANCHES',
+    selectedBranchId:selected?.branchId||null,
+    selectedBranchMass:selected?.branchProbabilityMass||0,
+    selectedBranchScore:selected?.branchScore||0,
+    highestScoreBranchId:scoreLeader?.branchId||null,
+    highestScore:Number(scoreLeader?.branchScore)||0,
+    selectionDrivenByMass:Boolean(selected&&scoreLeader&&String(selected.branchId)!==String(scoreLeader.branchId)&&selected.branchProbabilityMass>scoreLeader.branchProbabilityMass),
+    rows:rows.slice(0,8),
+    audit:{axisMatchesSelection:consistent,passed:consistent}
   };
 }
 
@@ -267,7 +301,9 @@ function buildLeaderHoldUserFacingComparison(axis,rival,factors=[]){
     `${rival.number}番が優勢だった項目は${topRival.length?topRival.join("・"):"なし"}。`,
     `${axis.number}番が優勢だった項目は${topAxis.length?topAxis.join("・"):"なし"}。`,
     `重み付け後の先行押し切り枝scoreは${axis.number}番 ${fmt10(axis.branchScore)}、${rival.number}番 ${fmt10(rival.branchScore)}で、差は${scoreDelta>=0?"+":""}${scoreDelta.toFixed(3)}。`,
-    axisAdvantages.length?`最終的に${axis.number}番を押し上げた主因は${axisAdvantages.slice(0,2).map(x=>x.label).join("と")}です。`:"軸側に明確な加点優位はなく、枝生成条件や他の微差で上位になっています。"
+    scoreDelta>=0
+      ?(axisAdvantages.length?`先行押し切り枝scoreで${axis.number}番を押し上げた主因は${axisAdvantages.slice(0,2).map(x=>x.label).join("と")}です。`:"先行押し切り枝score上は軸側に明確な加点優位はありません。")
+      :`${rival.number}番の先行押し切り枝scoreの方が高いため、この比較だけでは${axis.number}番を軸にした理由を説明できません。実際の軸選択は終端確率質量を先に比較します。`
   ].join(" ");
   return{
     mode:"HEAD_TO_HEAD",axisNumber:axis.number,rivalNumber:rival.number,

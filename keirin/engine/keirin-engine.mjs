@@ -5,7 +5,7 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
   const prediction=runKeirinPredictionEngine({race,venueProfile});
   const purchase=runKeirinPurchaseEngine({prediction,oddsByOrder,budget});
   return{
-    engineVersion:"KEIRIN-0.17.7-bante-axis-comparison-ui-fix",
+    engineVersion:"KEIRIN-0.17.8-axis-selection-trace-fix",
     raceId:race.id,
     lineConfidence:race.lineConfidence,
     scored:prediction.scored,
