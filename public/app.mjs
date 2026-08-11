@@ -13,7 +13,7 @@ const ODDS_CACHE_KEY="chari-neko:keirin-odds-cache:v1";
 const RACE_META_CACHE_KEY="chari-neko:keirin-race-meta-cache:v1";
 const RESULT_CACHE_KEY="chari-neko:keirin-result-cache:v1";
 const MEETING_CACHE_KEY="chari-neko:keirin-meeting-cache:v1";
-const APP_RELEASE="KEIRIN-0.17.1-standard-reference-selection-boundary";
+const APP_RELEASE="KEIRIN-0.17.2-prediction-axis-explanation";
 const APP_UPDATE_CHECK_INTERVAL_MS=5*60*1000;
 let lastAppUpdateCheckAt=0,appUpdateCheckBusy=false;
 const VENUE_CODES={函館:"11",青森:"12",いわき平:"13",弥彦:"21",前橋:"22",取手:"23",宇都宮:"24",大宮:"25",西武園:"26",京王閣:"27",立川:"28",松戸:"31",千葉:"32",川崎:"34",平塚:"35",小田原:"36",伊東:"37",静岡:"38",名古屋:"42",岐阜:"43",大垣:"44",豊橋:"45",富山:"46",松阪:"47",四日市:"48",福井:"51",奈良:"53",向日町:"54",和歌山:"55",岸和田:"56",玉野:"61",広島:"62",防府:"63",高松:"71",小松島:"73",高知:"74",松山:"75",小倉:"81",久留米:"83",武雄:"84",佐世保:"85",別府:"86",熊本:"87"};
@@ -496,10 +496,31 @@ function renderPredictionDetail(snapshot){
 
 
 function renderScenarioExplanation(snapshot){
+  const explanation=snapshot?.predictionExplanation||snapshot?.prediction?.explanation||null;
   const bets=standardSelections(snapshot);
-  const branches=Array.isArray(snapshot?.branches)?snapshot.branches:[];
-  if(!bets.length)return `<div class="auditCallout"><strong>展開説明</strong><p>購入候補がないため、買い目に至る展開説明はありません。</p></div>`;
+  const predictionHtml=renderPredictionAxisExplanation(explanation);
+  const purchaseHtml=renderPurchaseScenarioExplanation(snapshot,bets);
+  return `${predictionHtml}${purchaseHtml}`;
+}
 
+function renderPredictionAxisExplanation(explanation){
+  const axis=explanation?.axis;
+  if(!axis?.timeline)return `<div class="auditCallout"><strong>予測エンジンの軸展開</strong><p>保存された予測側の展開説明がありません。旧予想データの可能性があります。</p></div>`;
+  const reasons=(axis.reasons||[]).map(r=>`<li>${esc(r.text||"")}</li>`).join("");
+  const orders=(axis.naturalOrders||[]).slice(0,4).map(x=>`${(x.order||[]).join("-")} ${Number.isFinite(Number(x.terminalProbability))?`(${(Number(x.terminalProbability)*100).toFixed(2)}%)`:""}`).join(" / ");
+  const alternatives=(explanation?.alternatives||[]).slice(0,3).map(a=>`<div class="detailBet"><strong>${esc(a.branchLabel||"代替展開")}</strong><p>${esc(a.timeline||"")}</p><p class="muted">枝寄与 ${(Number(a.branchProbabilityMass||0)*100).toFixed(1)}%${a.primaryOrder?.length?` / 代表終端 ${esc(a.primaryOrder.join("-"))}`:""}</p></div>`).join("");
+  return `<details class="predictionAccordion" open><summary>軸になった展開と根拠</summary><div class="accordionBody">
+    <div class="auditCallout"><strong>軸になった展開</strong><p>${esc(axis.timeline)}</p><p class="muted">予測枝 ${esc(axis.branchLabel||axis.branchId||"")} / 枝寄与 ${(Number(axis.branchProbabilityMass||0)*100).toFixed(1)}%${axis.primaryOrder?.length?` / 代表終端 ${esc(axis.primaryOrder.join("-"))}`:""}</p></div>
+    <div class="auditCallout"><strong>この展開を軸にした根拠</strong>${reasons?`<ul>${reasons}</ul>`:'<p>根拠データなし</p>'}</div>
+    ${orders?`<p class="muted"><b>この展開から自然につながる上位終端</b> ${esc(orders)}</p>`:""}
+    ${alternatives?`<details class="predictionAccordion"><summary>代替展開を見る</summary><div class="accordionBody">${alternatives}</div></details>`:""}
+    <p class="muted">この説明は買い目ではなく、予測エンジンが保存した展開枝・着順条件・終端確率から生成しています。オッズ・購入分類・資金配分は使っていません。</p>
+  </div></details>`;
+}
+
+function renderPurchaseScenarioExplanation(snapshot,bets){
+  const branches=Array.isArray(snapshot?.branches)?snapshot.branches:[];
+  if(!bets.length)return `<div class="auditCallout"><strong>購入エンジンの判断</strong><p>標準購入候補はありません。上の軸展開は予測として保持されています。</p></div>`;
   const grouped=new Map();
   for(const bet of bets){
     const category=bet?.category||"";
@@ -507,46 +528,15 @@ function renderScenarioExplanation(snapshot){
     if(!grouped.has(category))grouped.set(category,[]);
     grouped.get(category).push(bet);
   }
-
   const main=grouped.get("MAIN")||[];
   const cover=grouped.get("COVER")||[];
   const value=grouped.get("BUYABLE_HIGH")||[];
-  const mainHeads=countHeads(main);
-  const branchLabels=unique(main.map(b=>b.dominantBranchLabel||b.branchLabel).filter(Boolean));
   const mainSentences=[];
-
-  if(branchLabels.length){
-    mainSentences.push(`中心に置いたのは「${branchLabels.slice(0,3).join("」「")}」です。`);
-  }else{
-    const mains=branches.filter(b=>b?.priority==="main").map(b=>b.label).filter(Boolean);
-    if(mains.length)mainSentences.push(`中心に置いたのは「${mains.slice(0,3).join("」「")}」です。`);
-  }
-
-  if(mainHeads.size){
-    const heads=[...mainHeads.entries()].sort((a,b)=>b[1]-a[1]||a[0]-b[0]);
-    mainSentences.push(`本線は${heads.map(([n,c])=>`${n}番頭${c}点`).join("、")}。同じ主展開内の押し切り・番手差し・自然な折り返しをまとめて本線群としています。`);
-  }
-
-  if(cover.length){
-    const heads=[...countHeads(cover).entries()].sort((a,b)=>b[1]-a[1]||a[0]-b[0]);
-    mainSentences.push(`押さえは${heads.map(([n,c])=>`${n}番頭${c}点`).join("、")}で、主展開から一段条件が増える枝や別の有力展開を補完しています。`);
-  }
-
-  if(value.length){
-    const heads=[...countHeads(value).entries()].sort((a,b)=>b[1]-a[1]||a[0]-b[0]);
-    mainSentences.push(`買える高配当は${heads.map(([n,c])=>`${n}番頭${c}点`).join("、")}。高配当だから採用したのではなく、成立する展開根拠と実オッズの両方が残った終端だけを対象にしています。`);
-  }
-
-  const rows=bets
-    .filter(b=>["MAIN","COVER","BUYABLE_HIGH"].includes(b?.category))
-    .map(b=>scenarioBetSentence(b))
-    .join("");
-
-  return `<details class="predictionAccordion" open><summary>展開説明：なぜこの買い目になったか</summary><div class="accordionBody">
-    <div class="auditCallout"><strong>レース全体の説明</strong>${mainSentences.map(x=>`<p>${esc(x)}</p>`).join("")}</div>
-    <div class="detailGroup">${rows}</div>
-    <p class="muted">この文章は保存された着順別評価・主展開枝・自然収束度・購入分類から自動生成しています。</p>
-  </div></details>`;
+  if(main.length)mainSentences.push(`本線 ${main.length}点。予測側の終端を購入エンジンが確率・集中度・オッズで評価して採用しています。`);
+  if(cover.length)mainSentences.push(`押さえ ${cover.length}点。主展開の派生または別の有力展開として残した終端です。`);
+  if(value.length)mainSentences.push(`買える高配当 ${value.length}点。成立根拠とオッズ妙味の両方が残った終端です。`);
+  const rows=bets.filter(b=>["MAIN","COVER","BUYABLE_HIGH"].includes(b?.category)).map(b=>scenarioBetSentence(b)).join("");
+  return `<details class="predictionAccordion"><summary>購入エンジン：なぜこの買い目を採用したか</summary><div class="accordionBody"><div class="auditCallout">${mainSentences.map(x=>`<p>${esc(x)}</p>`).join("")}</div><div class="detailGroup">${rows}</div></div></details>`;
 }
 
 function scenarioBetSentence(b){
