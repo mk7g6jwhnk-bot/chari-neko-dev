@@ -8,6 +8,7 @@ for(const text of [
   "押さえにしました",
   "高配当候補にしました",
   "自然収束度",
-  "印を買い目に強制一致させていません"
+  "着順別評価・主展開枝・自然収束度・購入分類"
 ])assert.ok(app.includes(text),`${text} missing`);
-console.log("PASS scenario explanation UI");
+assert.ok(!app.includes("印を買い目に強制一致させていません"));
+console.log("PASS scenario explanation UI without rider marks");

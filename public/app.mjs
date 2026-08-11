@@ -3,7 +3,6 @@ import{derivePredictionRatings,starText}from"./prediction-ratings.mjs";
 import{findChatPrediction,parseChatPrediction,removeChatPrediction,saveChatPrediction}from"./chat-prediction-store.mjs";
 import{compareChatAndApp}from"./chat-app-diff.mjs";
 import{loadChatDiffTrends,recordChatDiffTrend,summarizeChatDiffTrends}from"./chat-diff-trend-store.mjs";
-import{auditRiderMarkConsistency,deriveRiderMarks}from"./rider-marks.mjs";
 import{loadOperationalLearningState,runOperationalLearningPipeline}from"./research-auto-pipeline.mjs";
 import{buildResultOnlyPredictionCrosscheckLedger,hasResultOnlyResearch,saveResultOnlyResearch,summarizeResultOnlyResearch}from"./result-only-research.mjs";
 import{allocatePreviewStakes,deriveThickBets}from"./purchase-funding.mjs";
@@ -14,7 +13,7 @@ const ODDS_CACHE_KEY="chari-neko:keirin-odds-cache:v1";
 const RACE_META_CACHE_KEY="chari-neko:keirin-race-meta-cache:v1";
 const RESULT_CACHE_KEY="chari-neko:keirin-result-cache:v1";
 const MEETING_CACHE_KEY="chari-neko:keirin-meeting-cache:v1";
-const APP_RELEASE="KEIRIN-0.16.45-start-power-missing-evidence-gate";
+const APP_RELEASE="KEIRIN-0.16.46-direct-linkage-no-marks";
 const APP_UPDATE_CHECK_INTERVAL_MS=5*60*1000;
 let lastAppUpdateCheckAt=0,appUpdateCheckBusy=false;
 const VENUE_CODES={函館:"11",青森:"12",いわき平:"13",弥彦:"21",前橋:"22",取手:"23",宇都宮:"24",大宮:"25",西武園:"26",京王閣:"27",立川:"28",松戸:"31",千葉:"32",川崎:"34",平塚:"35",小田原:"36",伊東:"37",静岡:"38",名古屋:"42",岐阜:"43",大垣:"44",豊橋:"45",富山:"46",松阪:"47",四日市:"48",福井:"51",奈良:"53",向日町:"54",和歌山:"55",岸和田:"56",玉野:"61",広島:"62",防府:"63",高松:"71",小松島:"73",高知:"74",松山:"75",小倉:"81",久留米:"83",武雄:"84",佐世保:"85",別府:"86",熊本:"87"};
@@ -467,22 +466,15 @@ function renderPredictionDetail(snapshot){
       if(!bets.length)return"";
       return `<div class="detailGroup"><h3>${label}</h3>${bets.map(safeFriendlyBetReason).join("")}</div>`
     }).join("");
-    const riderMarks=Array.isArray(snapshot?.riderMarks)&&snapshot.riderMarks.length?snapshot.riderMarks:deriveRiderMarks(snapshot);
-    const markMap=new Map(riderMarks.map(m=>[Number(m.number),m]));
     const participantMap=new Map((Array.isArray(snapshot?.participants)?snapshot.participants:[]).map(p=>[Number(p.number),p]));
-    const chatSaved=findChatPrediction(state.race||snapshot?.targetRace||{});
-    const chatMarkMap=new Map((Array.isArray(chatSaved?.riderMarks)?chatSaved.riderMarks:[]).map(m=>[Number(m.number),m]));
-    const markTable=renderRiderMarkNameTable(riderMarks,participantMap,chatMarkMap);
-    const abilities=abilitiesUsed.map(a=>{const m=markMap.get(Number(a?.number))||{},p=participantMap.get(Number(a?.number))||{},v2=a?.riderEvaluationV2||{},fm=v2?.firstMechanisms||{},sm=v2?.secondMechanisms||{},tm=v2?.thirdMechanisms||{};return `<div class="abilityRow"><strong>${a?.number??"-"}番</strong><span><b>${esc(p?.name||"")}</b>　総合 ${esc(m.overallMark||"？")} / 1着 ${esc(m.firstMark||"？")} (${fmtAbility(m.firstScore)}) / 2着 ${esc(m.secondMark||"？")} (${fmtAbility(m.secondScore)}) / 3着 ${esc(m.thirdMark||"？")} (${fmtAbility(m.thirdScore)}) / 信頼 ${esc(v2?.confidence||m.confidence||"不明")}<br><small>選手評価v2: 逃げ ${fmtAbility(fm.escape)} / 捲り ${fmtAbility(fm.makuri)} / 差し ${fmtAbility(fm.sashi)} / 番手差し ${fmtAbility(fm.banteSashi)} / 2着追走 ${fmtAbility(sm.lineFollower)} / 先行残り ${fmtAbility(sm.leaderRemain)} / 3着位置残り ${fmtAbility(tm.positionRemain)}</small><br><small>基礎: 近況 ${fmtAbility(a?.recentForm)} / 主導権 ${fmtAbility(a?.startPower)} / まくり ${fmtAbility(a?.sprintPower)} / 差し ${fmtAbility(a?.finishPower)} / 追走 ${fmtAbility(a?.trackingSkill)}</small></span></div>`}).join("");
-    const markAudit=auditRiderMarkConsistency(snapshot,riderMarks);
-    const markAuditHtml=renderRiderMarkAudit(markAudit);
+    const abilities=abilitiesUsed.map(a=>{const p=participantMap.get(Number(a?.number))||{},v2=a?.riderEvaluationV2||{},fm=v2?.firstMechanisms||{},sm=v2?.secondMechanisms||{},tm=v2?.thirdMechanisms||{},rs=a?.roleScores||{};return `<div class="abilityRow"><strong>${a?.number??"-"}番</strong><span><b>${esc(p?.name||"")}</b>　1着 ${fmtAbility(rs.first)} / 2着 ${fmtAbility(rs.second)} / 3着 ${fmtAbility(rs.third)} / 信頼 ${esc(v2?.confidence||"不明")}<br><small>選手評価v2: 逃げ ${fmtAbility(fm.escape)} / 捲り ${fmtAbility(fm.makuri)} / 差し ${fmtAbility(fm.sashi)} / 番手差し ${fmtAbility(fm.banteSashi)} / 2着追走 ${fmtAbility(sm.lineFollower)} / 先行残り ${fmtAbility(sm.leaderRemain)} / 3着位置残り ${fmtAbility(tm.positionRemain)}</small><br><small>基礎: 近況 ${fmtAbility(a?.recentForm)} / 主導権 ${fmtAbility(a?.startPower)} / まくり ${fmtAbility(a?.sprintPower)} / 差し ${fmtAbility(a?.finishPower)} / 追走 ${fmtAbility(a?.trackingSkill)}</small></span></div>`}).join("");
     const audit=snapshot?.predictionOutput?.audit&&typeof snapshot.predictionOutput.audit==="object"?snapshot.predictionOutput.audit:{};
     const riderBranchLinkHtml=renderRiderBranchLinkAudit(audit?.riderBranchLinkAudit);
     const wholeLinkageHtml=renderWholeLinkageAudit(audit?.wholeLinkageAudit);
-    const scenarioExplanationHtml=renderScenarioExplanation(snapshot,riderMarks);
+    const scenarioExplanationHtml=renderScenarioExplanation(snapshot);
     const hasAudit=Number.isFinite(Number(audit.generatedTerminalCount));
     const auditSummary=hasAudit?`<details id="purchaseAuditDetails" class="predictionAccordion"><summary>詳しい購入監査を見る（開発用）</summary><div id="purchaseAuditBody" class="accordionBody"><p class="muted">監査データは詳細を開いた時だけ描画します。レース詳細の表示を優先しています。</p></div></details>`:"";
-    panel.innerHTML=`<div class="sectionHead"><div><small>保存済み予想の根拠</small><h2>予想詳細</h2></div><span class="pill">詳細</span></div>${scenarioExplanationHtml}${renderNodeStateAudit(snapshot?.audit)}${riderBranchLinkHtml}${wholeLinkageHtml}${auditSummary}<details class="predictionAccordion"><summary>買い目の理由を見る</summary><div class="accordionBody">${betDetail||'<p class="muted">購入候補はありません。</p>'}</div></details>${abilities?`<details class="predictionAccordion" open><summary>選手印を見る</summary><div class="accordionBody"><p class="muted">まず「印＋選手名」で評価の全体像を確認します。チャット予想を取り込んでいる場合は横にチャット印も表示します。</p>${markTable}${markAuditHtml}<details class="supportBranchAudit"><summary>着順別能力の詳細を見る</summary><div class="abilityList">${abilities}</div></details></div></details>`:""}${renderStartPowerInputAuditSafe(snapshot)}`;
+    panel.innerHTML=`<div class="sectionHead"><div><small>保存済み予想の根拠</small><h2>予想詳細</h2></div><span class="pill">詳細</span></div>${scenarioExplanationHtml}${renderNodeStateAudit(snapshot?.audit)}${riderBranchLinkHtml}${wholeLinkageHtml}${auditSummary}<details class="predictionAccordion"><summary>買い目の理由を見る</summary><div class="accordionBody">${betDetail||'<p class="muted">購入候補はありません。</p>'}</div></details>${abilities?`<details class="predictionAccordion" open><summary>着順別評価を見る</summary><div class="accordionBody"><p class="muted">印を介さず、1着・2着・3着の独立評価と展開役割を直接表示します。買い目との矛盾は全体連動監査で確認します。</p><div class="abilityList">${abilities}</div></div></details>`:""}${renderStartPowerInputAuditSafe(snapshot)}`;
     panel.classList.remove("hidden");
     const auditDetails=$("purchaseAuditDetails"),auditBody=$("purchaseAuditBody");
     if(auditDetails&&auditBody)auditDetails.addEventListener("toggle",()=>{if(!auditDetails.open||auditBody.dataset.loaded==="1")return;auditBody.dataset.loaded="1";renderPurchaseAuditLazy(audit,auditBody)},{once:false});
@@ -494,10 +486,9 @@ function renderPredictionDetail(snapshot){
 }
 
 
-function renderScenarioExplanation(snapshot,riderMarks=[]){
+function renderScenarioExplanation(snapshot){
   const bets=Array.isArray(snapshot?.betSelections)?snapshot.betSelections:[];
   const branches=Array.isArray(snapshot?.branches)?snapshot.branches:[];
-  const marks=new Map((riderMarks||[]).map(m=>[Number(m.number),m]));
   if(!bets.length)return `<div class="auditCallout"><strong>展開説明</strong><p>購入候補がないため、買い目に至る展開説明はありません。</p></div>`;
 
   const grouped=new Map();
@@ -537,22 +528,19 @@ function renderScenarioExplanation(snapshot,riderMarks=[]){
     mainSentences.push(`買える高配当は${heads.map(([n,c])=>`${n}番頭${c}点`).join("、")}。高配当だから採用したのではなく、成立する展開根拠と実オッズの両方が残った終端だけを対象にしています。`);
   }
 
-  const markContrast=explainMarkScenarioGap(main,marks);
-  if(markContrast)mainSentences.push(markContrast);
-
   const rows=bets
     .filter(b=>["MAIN","COVER","BUYABLE_HIGH"].includes(b?.category))
-    .map(b=>scenarioBetSentence(b,marks))
+    .map(b=>scenarioBetSentence(b))
     .join("");
 
   return `<details class="predictionAccordion" open><summary>展開説明：なぜこの買い目になったか</summary><div class="accordionBody">
     <div class="auditCallout"><strong>レース全体の説明</strong>${mainSentences.map(x=>`<p>${esc(x)}</p>`).join("")}</div>
     <div class="detailGroup">${rows}</div>
-    <p class="muted">この文章は保存された選手評価・主展開枝・自然収束度・購入分類から自動生成しています。印と買い目がズレる場合も、印を後から合わせず、展開側の理由を文章で明示します。</p>
+    <p class="muted">この文章は保存された着順別評価・主展開枝・自然収束度・購入分類から自動生成しています。</p>
   </div></details>`;
 }
 
-function scenarioBetSentence(b,marks){
+function scenarioBetSentence(b){
   const order=Array.isArray(b?.order)?b.order.map(Number):String(b?.order||"").split("-").map(Number);
   const [a,c,d]=order;
   const cls=betClassLabel(b?.category);
@@ -560,13 +548,6 @@ function scenarioBetSentence(b,marks){
   const convRaw=b?.naturalConvergenceScore;
   const conv=convRaw===null||convRaw===undefined||convRaw===""?null:Number(convRaw);
   const convText=Number.isFinite(conv)?`${Math.round(conv*100)}%`:"不明";
-  const m1=marks.get(a),m2=marks.get(c),m3=marks.get(d);
-  const markText=[
-    m1?`${a}番1着印${m1.firstMark}`:null,
-    m2?`${c}番2着印${m2.secondMark}`:null,
-    m3?`${d}番3着印${m3.thirdMark}`:null
-  ].filter(Boolean).join(" / ");
-
   let sentence="";
   if(b?.category==="MAIN"){
     sentence=`「${branch}」から直接つながる自然終端として${a}-${c}-${d}を本線にしました。`;
@@ -576,19 +557,7 @@ function scenarioBetSentence(b,marks){
     sentence=`${a}-${c}-${d}は「${branch}」由来の別展開として成立し、自然さだけで本線には上げず、オッズ妙味が残るため高配当候補にしました。`;
   }
   const reason=b?.purchaseReason?` ${b.purchaseReason}`:"";
-  return `<div class="detailBet"><strong>${esc(`${a}-${c}-${d}`)}　${esc(cls)}</strong><p>${esc(sentence)}</p><p class="muted">自然収束度 ${esc(convText)}${Number.isFinite(Number(b?.nodeConditionalProbability))?` / ノード連鎖 ${esc((Number(b.nodeConditionalProbability)*100).toFixed(2))}%`:""}${Number(b?.extraConditionCount)>0?` / 追加条件 ${Number(b.extraConditionCount)}件`:""}${markText?` / ${esc(markText)}`:""}${reason?` / ${esc(reason)}`:""}</p></div>`;
-}
-
-function explainMarkScenarioGap(mainBets,marks){
-  if(!mainBets.length||!marks.size)return "";
-  const mainHeads=countHeads(mainBets);
-  const dominant=[...mainHeads.entries()].sort((a,b)=>b[1]-a[1])[0];
-  if(!dominant)return "";
-  const firstAce=[...marks.values()].find(m=>m.firstMark==="◎");
-  if(!firstAce||Number(firstAce.number)===Number(dominant[0]))return "";
-  const domMark=marks.get(Number(dominant[0]));
-  const branch=unique(mainBets.filter(b=>Number(b?.order?.[0])===Number(dominant[0])).map(b=>b.dominantBranchLabel||b.branchLabel).filter(Boolean));
-  return `1着印◎は${firstAce.number}番ですが、本線最多頭は${dominant[0]}番（1着印${domMark?.firstMark||"?"}）です。これは「${branch.slice(0,2).join(" / ")||"主展開"}」を今回のレース展開として上位に置いたためで、印を買い目に強制一致させていません。`;
+  return `<div class="detailBet"><strong>${esc(`${a}-${c}-${d}`)}　${esc(cls)}</strong><p>${esc(sentence)}</p><p class="muted">自然収束度 ${esc(convText)}${Number.isFinite(Number(b?.nodeConditionalProbability))?` / ノード連鎖 ${esc((Number(b.nodeConditionalProbability)*100).toFixed(2))}%`:""}${Number(b?.extraConditionCount)>0?` / 追加条件 ${Number(b.extraConditionCount)}件`:""}${reason?` / ${esc(reason)}`:""}</p></div>`;
 }
 
 function countHeads(rows){
@@ -633,33 +602,6 @@ function renderWholeLinkageAudit(audit){
   const warnHtml=warnings.length?`<div class="auditWarning"><strong>接続警告 ${warnings.length}件</strong>${warnings.slice(0,12).map(w=>`<p>${esc(w.message)}</p>`).join("")}</div>`:`<div class="notice success"><strong>全体連動：大きな接続矛盾なし</strong></div>`;
   const resolvedHtml=resolutions.length?`<div class="notice"><strong>根拠確認済み ${resolutions.length}件</strong>${resolutions.slice(0,8).map(r=>`<p>${esc(r.message)}</p>`).join("")}</div>`:"";
   return `<details class="predictionAccordion" open><summary>全体連動監査を見る（${esc(statusLabel)}）</summary><div class="accordionBody"><p class="muted">能力 → ライン/位置 → 1着シナリオ → 2着 → 3着 → 自然収束度 → 終端確率 → 購入採否を一本で追います。</p><div class="abilityList auditKeyValueList">${stageHtml}</div>${warnHtml}${resolvedHtml}<details class="supportBranchAudit"><summary>購入終端ごとの連動を見る（${traces.length}件）</summary><div class="detailGroup">${traceHtml||'<p class="muted">購入終端なし</p>'}</div></details></div></details>`;
-}
-
-function renderRiderMarkNameTable(riderMarks,participantMap,chatMarkMap){
-  const rows=(Array.isArray(riderMarks)?riderMarks:[]).slice().sort((a,b)=>Number(a.number)-Number(b.number));
-  if(!rows.length)return '<p class="muted">選手印は未作成です。</p>';
-  const hasChat=chatMarkMap instanceof Map&&chatMarkMap.size>0;
-  const head=hasChat
-    ?`<div class="riderMarkHead riderMarkWithChat"><span>車番</span><span>選手名</span><span>アプリ</span><span>チャット</span></div>`
-    :`<div class="riderMarkHead"><span>車番</span><span>選手名</span><span>アプリ</span></div>`;
-  const body=rows.map(m=>{
-    const p=participantMap?.get?.(Number(m.number))||{},c=chatMarkMap?.get?.(Number(m.number))||null;
-    return `<div class="riderMarkLine${hasChat?" riderMarkWithChat":""}"><span class="riderMarkNo">${esc(m.number)}</span><span class="riderMarkName">${esc(p?.name||'選手名未取得')}<small>1着${esc(m.firstMark||'？')}・2着${esc(m.secondMark||'？')}・3着${esc(m.thirdMark||'？')}</small></span><strong class="riderMarkMain">${esc(m.overallMark||'？')}</strong>${hasChat?`<strong class="riderMarkChat">${esc(c?.overallMark||'？')}</strong>`:""}</div>`;
-  }).join("");
-  return `<div class="riderMarkTable">${head}${body}</div>${hasChat?"":`<p class="muted">チャット印は未取込です。アプリ単独予想には影響しません。</p>`}`;
-}
-function renderRiderMarkAudit(audit){
-  const rows=Array.isArray(audit?.warnings)?audit.warnings:[];
-  const explanations=Array.isArray(audit?.explanations)?audit.explanations:[];
-  const status=audit?.status||"OK";
-  const title=status==="WARN"?"要修正":status==="CHECK"?"要確認":"整合";
-  const warnHtml=rows.length
-    ?`<div class="auditWarning"><strong>印 → 着順評価 → 買い目 接続監査：${esc(title)} ${rows.length}件</strong>${rows.map(w=>`<p>${w.severity==="high"?"⚠ ":"△ "}${esc(w.message)}</p>`).join("")}<p class="muted">印を買い目へ強制的に合わせません。ズレた場合は、主展開・位置・自然収束のどこで順位が逆転したか直接根拠を要求します。</p></div>`
-    :`<div class="notice success"><strong>印 → 着順評価 → 買い目 接続監査：大きな矛盾なし</strong><p>総合印・1着印・2着印・3着印と購入終端を独立に照合しています。</p></div>`;
-  const explainHtml=explanations.length
-    ?`<details class="supportBranchAudit"><summary>印と買い目がズレる理由を見る</summary>${explanations.slice(0,10).map(x=>`<p class="muted">${esc(x.message)}</p>`).join("")}</details>`
-    :"";
-  return warnHtml+explainHtml;
 }
 
 function renderPurchaseAuditLazy(audit,root){try{const rejectLabels={FLAT_DISTRIBUTION:"分布が平坦",PRIMARY_COVERAGE_TARGET_REACHED:"最上位頭の優先カバー目標到達後",OTHER_FAMILY_COVERAGE_TARGET_REACHED:"別頭の補完カバー目標到達後",NO_FAMILY_TIER:"購入対象の1着ファミリー外",SECOND_POSITION_SUPPORT:"2着独立支持不足",THIRD_VARIANT_SUPPORT:"3着独立支持不足",SUB_ODDS_PENDING:"別展開・オッズ待ち",SUB_NOT_HIGH_PAYOUT:"別展開・高配当属性なし",SUB_VALUE_BELOW_BREAK_EVEN:"別展開・成立確率×オッズ不足",SUB_VALUE_NATURAL_BOUNDARY:"別展開・妙味上位群外",BRANCH_OR_POSITION_SUPPORT:"枝適合/着順支持不足",POSITION_SUPPORT_WEAK:"2・3着の位置支持が弱い",NATURAL_CONVERGENCE_TOO_LOW:"自然収束度が購入水準未満",VALUE_NOT_ENOUGH:"成立確率×オッズの妙味不足",FAMILY_COVERAGE_ALREADY_MET:"同じ1着候補の購入カバーが十分",RISK_SCENARIO_ONLY:"例外・リスク枝のみ",ODDS_PENDING_FOR_VALUE:"高配当候補の実オッズ待ち",NO_NATURAL_VALUE_SEPARATION:"高配当候補間の差が不明確",UNKNOWN:"その他"};const rejectCounts=audit?.rejectCodeCounts&&typeof audit.rejectCodeCounts==="object"&&!Array.isArray(audit.rejectCodeCounts)?audit.rejectCodeCounts:{};const rejectRows=Object.entries(rejectCounts).sort((a,b)=>Number(b[1])-Number(a[1])).map(([code,count])=>`<div class="abilityRow auditKeyValueRow"><strong>${esc(rejectLabels[code]||code)}</strong><span>${Number(count)||0}件</span></div>`).join("");const lifecycle=audit?.terminalLifecycleAudit||{},mass=audit?.purchaseMassAudit||{};const massStatusLabel={BALANCED:"適正",UNDER_COVERED:"カバー不足",OVER_SPREAD:"広げ過ぎ",INEFFICIENT:"質量効率注意"}[mass.status]||"未記録";const lifecycleText=lifecycle.passed===true?"OK（理由なし削除なし）":lifecycle.passed===false?`要監査 ${Array.isArray(lifecycle.violations)?lifecycle.violations.length:0}件`:"未記録";root.innerHTML=`<div class="abilityList auditKeyValueList"><div class="abilityRow auditKeyValueRow"><strong>生成終端</strong><span>${Number(audit.generatedTerminalCount)||0}件</span></div><div class="abilityRow auditKeyValueRow"><strong>確率評価済み</strong><span>${Number(audit.probabilityEvaluatedTerminalCount??audit.terminalCount)||0}件</span></div><div class="abilityRow auditKeyValueRow"><strong>購入採用</strong><span>${Number(audit.adoptedTerminalCount??audit.finalBetCount)||0}件</span></div><div class="abilityRow auditKeyValueRow"><strong>購入不採用</strong><span>${Number(audit.rejectedTerminalCount)||0}件</span></div><div class="abilityRow auditKeyValueRow"><strong>購入確率質量</strong><span>${Number.isFinite(Number(mass.purchasedMassShare))?fmtPct(Number(mass.purchasedMassShare)):"-"}</span></div><div class="abilityRow auditKeyValueRow"><strong>自然候補カバー率</strong><span>${Number.isFinite(Number(mass.eligibleCoverage))?fmtPct(Number(mass.eligibleCoverage)):"-"} / 目標 ${Number.isFinite(Number(mass.weightedCoverageTarget))?fmtPct(Number(mass.weightedCoverageTarget)):"-"}</span></div><div class="abilityRow auditKeyValueRow"><strong>質量効率</strong><span>${Number.isFinite(Number(mass.massEfficiency))?fmtPct(Number(mass.massEfficiency)):"-"}</span></div><div class="abilityRow auditKeyValueRow"><strong>質量判定</strong><span>${esc(massStatusLabel)}</span></div><div class="abilityRow auditKeyValueRow"><strong>質量不足補正</strong><span>${mass.recoveryApplied===true?`実施 ${Number(mass.recoveryCount)||0}件`:"なし"}</span></div><div class="abilityRow auditKeyValueRow"><strong>終端保存監査</strong><span>${esc(lifecycleText)}</span></div><div class="abilityRow auditKeyValueRow"><strong>理由なし生成除外</strong><span>${Number(lifecycle.unexplainedGenerationExclusionCount)||0}件</span></div><div class="abilityRow auditKeyValueRow"><strong>理由なし購入不採用</strong><span>${Number(lifecycle.unreasonedPurchaseRejectCount)||0}件</span></div></div>${rejectRows?`<h3>不採用理由</h3><div class="abilityList auditKeyValueList">${rejectRows}</div>`:""}${safeAuditHtml(()=>renderBranchSelectionAudit(audit))}${safeAuditHtml(()=>renderPurchaseFamilyAudit(audit))}${safeAuditHtml(()=>renderAdoptedTerminalAudit(audit))}<p class="muted">終端は低確率・人気・点数圧縮を理由に削除しません。生成後は全終端を確率評価し、買わない終端も不採用理由付きで保存します。</p>`}catch(error){console.error("purchase audit render failed",error);root.innerHTML=`<div class="auditWarning"><strong>監査表示だけ読み込めませんでした</strong><p>${esc(error?.message||String(error))}</p><p class="muted">保存済み買い目と予想自体は保持されています。</p></div>`}}

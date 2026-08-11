@@ -1,5 +1,3 @@
-import{auditRiderMarkConsistency,deriveRiderMarks}from"./rider-marks.mjs";
-
 const key=o=>(o||[]).map(Number).join("-");
 const finite=v=>v!==null&&v!==undefined&&v!==""&&Number.isFinite(Number(v));
 
@@ -53,7 +51,6 @@ export function buildOutcomeDiagnostics(snapshot,result){
   const payout=finite(result?.officialPayout)?Number(result.officialPayout):null,totalStake=bets.reduce((s,b)=>s+(finite(b.stake)?Number(b.stake):0),0),hitStake=matched&&finite(matched.stake)?Number(matched.stake):0;
   const grossReturn=matched&&payout!==null&&hitStake>0?payout/100*hitStake:null;
   const netReturn=grossReturn!==null&&totalStake>0?grossReturn-totalStake:null;
-  const markAudit=auditRiderMarkConsistency(snapshot,Array.isArray(snapshot?.riderMarks)&&snapshot.riderMarks.length?snapshot.riderMarks:deriveRiderMarks(snapshot));
   const exactTerminal=(snapshot?.terminalLedger||[]).find(t=>key(t.order)===officialKey)||null;
   const exactGenerated=Boolean(exactTerminal);
   const thickMiss=classifyThickMiss(snapshot,official,thick,matched,exactTerminal);
@@ -64,19 +61,18 @@ export function buildOutcomeDiagnostics(snapshot,result){
   if(highPayoutRace&&!matched)tags.push("HIGH_PAYOUT_OPPORTUNITY_MISSED");
   if(highPayoutRace&&matched)tags.push("HIGH_PAYOUT_CAPTURED");
   if(highPayoutRace&&!exactGenerated)tags.push("HIGH_PAYOUT_TERMINAL_GENERATION_MISS");
-  if(markAudit.status!=="OK")tags.push("MARK_PURCHASE_ALIGNMENT_REVIEW");
   return{
-    version:"RESEARCH-OUTCOME-DIAGNOSTICS-1.3",researchOnly:true,productionWriteAllowed:false,
+    version:"RESEARCH-OUTCOME-DIAGNOSTICS-1.4",researchOnly:true,productionWriteAllowed:false,
     raceDate:String(snapshot?.raceDate||snapshot?.targetRace?.date||result?.raceDate||result?.date||"").slice(0,10)||null,venue:String(snapshot?.venue||snapshot?.targetRace?.venue||result?.venue||"")||null,session:String(snapshot?.session||snapshot?.timeBand||snapshot?.targetRace?.session||result?.session||"")||null,raceGrade:String(snapshot?.raceGrade||snapshot?.grade||snapshot?.targetRace?.grade||result?.raceGrade||result?.grade||"")||null,
     officialOrder:official,payout,totalStake,hitStake,grossReturn,netReturn,
     thickBetCount:thick.length,thickOrders:thick.map(x=>x.order),thickHit:Boolean(officialKey&&thickKeys.has(officialKey)),thickMiss,
     highPayoutRace,exactTerminalGenerated:exactGenerated,exactTerminalPurchased:Boolean(matched),
-    markPurchaseAudit:{status:markAudit.status,warningCount:markAudit.warningCount,warnings:markAudit.warnings},tags
+    markPurchaseAudit:{status:"RETIRED",warningCount:0,warnings:[],reason:"MARK_LAYER_RETIRED_USE_DIRECT_LINKAGE_AUDIT"},tags
   };
 }
 
 export function summarizeOutcomeDiagnostics(rows){
-  const ds=(rows||[]).map(r=>r?.outcomeDiagnostics||r).filter(d=>["RESEARCH-OUTCOME-DIAGNOSTICS-1.0","RESEARCH-OUTCOME-DIAGNOSTICS-1.1","RESEARCH-OUTCOME-DIAGNOSTICS-1.2","RESEARCH-OUTCOME-DIAGNOSTICS-1.3"].includes(d?.version));
+  const ds=(rows||[]).map(r=>r?.outcomeDiagnostics||r).filter(d=>["RESEARCH-OUTCOME-DIAGNOSTICS-1.0","RESEARCH-OUTCOME-DIAGNOSTICS-1.1","RESEARCH-OUTCOME-DIAGNOSTICS-1.2","RESEARCH-OUTCOME-DIAGNOSTICS-1.3","RESEARCH-OUTCOME-DIAGNOSTICS-1.4"].includes(d?.version));
   const count=t=>ds.filter(d=>d.tags?.includes(t)).length;
   const thickEvaluatedCount=ds.filter(d=>d.thickBetCount>0).length,thickMissCount=count("THICK_CLUSTER_MISS");
   const rate=(n,d)=>d>0?n/d:null;
@@ -101,7 +97,7 @@ const diagnosticDate=d=>String(d?.raceDate||d?.date||d?.targetRace?.date||d?.obs
 export function assessThickLearningRobustness(rows,{minimumEvaluated=30,minimumMisses=10,dominanceShare=.35,minimumDistinctDates=3,minimumWindowEvaluated=10}={}){
   const base=assessThickLearningSignals(rows,{minimumEvaluated,minimumMisses,dominanceShare});
   const cfg={minimumEvaluated:Number(minimumEvaluated),minimumMisses:Number(minimumMisses),dominanceShare:Number(dominanceShare),minimumDistinctDates:Number(minimumDistinctDates),minimumWindowEvaluated:Number(minimumWindowEvaluated)};
-  const ds=(rows||[]).map(r=>r?.outcomeDiagnostics||r).filter(d=>["RESEARCH-OUTCOME-DIAGNOSTICS-1.0","RESEARCH-OUTCOME-DIAGNOSTICS-1.1","RESEARCH-OUTCOME-DIAGNOSTICS-1.2","RESEARCH-OUTCOME-DIAGNOSTICS-1.3"].includes(d?.version));
+  const ds=(rows||[]).map(r=>r?.outcomeDiagnostics||r).filter(d=>["RESEARCH-OUTCOME-DIAGNOSTICS-1.0","RESEARCH-OUTCOME-DIAGNOSTICS-1.1","RESEARCH-OUTCOME-DIAGNOSTICS-1.2","RESEARCH-OUTCOME-DIAGNOSTICS-1.3","RESEARCH-OUTCOME-DIAGNOSTICS-1.4"].includes(d?.version));
   const dated=ds.filter(d=>diagnosticDate(d));
   const dates=[...new Set(dated.map(diagnosticDate))].sort();
   const common={version:"THICK-LEARNING-ROBUSTNESS-1.0",researchOnly:true,productionWriteAllowed:false,config:cfg,baseSignal:base,distinctDateCount:dates.length,dates};
@@ -134,7 +130,7 @@ const candidateTag=type=>type==="THICK_HEAD_REPRESENTATION_REVIEW"?"THICK_HEAD_M
 export function assessThickLearningContextRobustness(rows,{minimumEvaluated=30,minimumMisses=10,dominanceShare=.35,minimumDistinctDates=3,minimumWindowEvaluated=10,minimumContextEvaluated=8,minimumAuditedDimensions=1,localizationShare=.8,dimensions=["venue","session","raceGrade"]}={}){
   const temporal=assessThickLearningRobustness(rows,{minimumEvaluated,minimumMisses,dominanceShare,minimumDistinctDates,minimumWindowEvaluated});
   const cfg={minimumContextEvaluated:Number(minimumContextEvaluated),minimumAuditedDimensions:Math.max(1,Number(minimumAuditedDimensions)||1),localizationShare:Number(localizationShare),dimensions:[...dimensions]};
-  const ds=(rows||[]).map(r=>r?.outcomeDiagnostics||r).filter(d=>["RESEARCH-OUTCOME-DIAGNOSTICS-1.0","RESEARCH-OUTCOME-DIAGNOSTICS-1.1","RESEARCH-OUTCOME-DIAGNOSTICS-1.2","RESEARCH-OUTCOME-DIAGNOSTICS-1.3"].includes(d?.version));
+  const ds=(rows||[]).map(r=>r?.outcomeDiagnostics||r).filter(d=>["RESEARCH-OUTCOME-DIAGNOSTICS-1.0","RESEARCH-OUTCOME-DIAGNOSTICS-1.1","RESEARCH-OUTCOME-DIAGNOSTICS-1.2","RESEARCH-OUTCOME-DIAGNOSTICS-1.3","RESEARCH-OUTCOME-DIAGNOSTICS-1.4"].includes(d?.version));
   const common={version:"THICK-LEARNING-CONTEXT-ROBUSTNESS-1.1",researchOnly:true,productionWriteAllowed:false,config:cfg,temporalRobustness:temporal};
   if(!temporal.eligible)return{...common,status:temporal.status,eligible:false,globalCandidates:[],contextualCandidates:[],counterEvidence:[{type:"TEMPORAL_ROBUSTNESS_NOT_ELIGIBLE",status:temporal.status}]};
   const globalCandidates=[],contextualCandidates=[],counterEvidence=[];
@@ -256,7 +252,7 @@ export function evaluateSealedThickOutOfSampleCandidate(entry,sealed,rows,{minim
   const cfg={minimumEvaluated:Number(minimumEvaluated),minimumStageMisses:Number(minimumStageMisses),minimumReplicationShare:Number(minimumReplicationShare)};
   const common={version:"THICK-OOS-EVALUATION-1.0",researchOnly:true,productionWriteAllowed:false,ledgerId:entry?.ledgerId||sealed?.ledgerId||null,candidateType:entry?.candidateType||sealed?.candidateType||null,config:cfg,sealCheck};
   if(!sealCheck.valid)return{...common,status:"SEAL_MISMATCH",eligible:false,decision:"INVALIDATE",counterEvidence:sealCheck.counterEvidence||[]};
-  const ds=(rows||[]).map(r=>r?.outcomeDiagnostics||r).filter(d=>["RESEARCH-OUTCOME-DIAGNOSTICS-1.0","RESEARCH-OUTCOME-DIAGNOSTICS-1.1","RESEARCH-OUTCOME-DIAGNOSTICS-1.2","RESEARCH-OUTCOME-DIAGNOSTICS-1.3"].includes(d?.version));
+  const ds=(rows||[]).map(r=>r?.outcomeDiagnostics||r).filter(d=>["RESEARCH-OUTCOME-DIAGNOSTICS-1.0","RESEARCH-OUTCOME-DIAGNOSTICS-1.1","RESEARCH-OUTCOME-DIAGNOSTICS-1.2","RESEARCH-OUTCOME-DIAGNOSTICS-1.3","RESEARCH-OUTCOME-DIAGNOSTICS-1.4"].includes(d?.version));
   const contextFiltered=entry?.scope==="LOCAL_CONTEXT_ONLY"&&entry?.dimension&&entry?.contextValue?ds.filter(d=>contextValue(d,entry.dimension)===String(entry.contextValue)):ds;
   const evaluated=contextFiltered.filter(d=>d.thickBetCount>0),tag=oosCandidateTypeToTag(entry?.candidateType),stageMisses=tag?evaluated.filter(d=>d.tags?.includes(tag)).length:0,allThickMisses=evaluated.filter(d=>d.tags?.includes("THICK_CLUSTER_MISS")).length;
   const replicationShare=allThickMisses>0?stageMisses/allThickMisses:null;

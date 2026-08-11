@@ -1,4 +1,4 @@
 # Version
 
-- Version: `KEIRIN-0.16.45-start-power-missing-evidence-gate`
-- Label: `v210-start-power-missing-evidence-gate`
+- Version: `KEIRIN-0.16.46-direct-linkage-no-marks`
+- Label: `v211-direct-linkage-no-marks`
