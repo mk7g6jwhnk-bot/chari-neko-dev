@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 const app=fs.readFileSync(new URL("../public/app.mjs",import.meta.url),"utf8");
-assert.match(app,/const APP_RELEASE="KEIRIN-0\.15\.2-update-state-isolation"/);
+assert.match(app,/const APP_RELEASE="KEIRIN-[^"]+"/);
+assert.match(app,/function isCurrentSnapshot\(snapshot\)\{return Boolean\(snapshot&&snapshot\.predictionVersion===APP_RELEASE\)\}/);
 assert.match(app,/function currentSnapshotForRace\(race\)/);
 assert.match(app,/function legacySnapshotForRace\(race\)/);
 assert.match(app,/displaySnapshotForRace\(race\)/);

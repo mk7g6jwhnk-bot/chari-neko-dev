@@ -1,0 +1,13 @@
+import assert from"node:assert/strict";
+import{sealThickResearchLedgerCandidate,validateThickResearchLedgerSeal,prepareThickOutOfSampleValidation}from"../public/research-outcome-diagnostics.mjs";
+const entry={ledgerId:"THICK-CONTEXT-001",scope:"LOCAL_CONTEXT_ONLY",candidateType:"THICK_HEAD_REPRESENTATION_REVIEW",dimension:"venue",contextValue:"A",requiredNextEvidence:["INDEPENDENT_CONTEXT_REPLICATION","OUT_OF_SAMPLE_CONTEXT_VALIDATION","MANUAL_REVIEW"],researchOnly:true,productionWriteAllowed:false};
+const sealed=sealThickResearchLedgerCandidate(entry,{sealedAt:"2026-08-11T00:45:00+09:00"});
+assert.equal(sealed.status,"SEALED_FOR_OUT_OF_SAMPLE_VALIDATION");
+assert.equal(validateThickResearchLedgerSeal(entry,sealed).status,"SEAL_VALID");
+const mutated={...entry,contextValue:"B"};
+assert.equal(validateThickResearchLedgerSeal(mutated,sealed).status,"SEAL_MISMATCH");
+const pack=prepareThickOutOfSampleValidation({version:"THICK-CONTEXT-RESEARCH-LEDGER-1.0",globalLedger:[],contextualLedger:[entry]},{sealedAt:"2026-08-11T00:45:00+09:00"});
+assert.equal(pack.status,"READY_FOR_OOS_VALIDATION");
+assert.equal(pack.safeguards.postOutcomeCriterionEditingForbidden,true);
+assert.equal(pack.productionWriteAllowed,false);
+console.log("keirin thick oos candidate seal ok");

@@ -1,0 +1,14 @@
+import assert from "node:assert/strict";
+import{sealThickResearchLedgerCandidate,evaluateSealedThickOutOfSampleCandidate,evaluateThickOutOfSampleValidationPackage}from"../public/research-outcome-diagnostics.mjs";
+const entry={ledgerId:"THICK-GLOBAL-001",scope:"GLOBAL_RESEARCH",candidateType:"THICK_HEAD_REPRESENTATION_REVIEW",requiredNextEvidence:["OUT_OF_SAMPLE_VALIDATION"],researchOnly:true,productionWriteAllowed:false};
+const sealed=sealThickResearchLedgerCandidate(entry,{sealedAt:"2026-08-11T00:50:00+09:00"});
+const mk=(i,head)=>({version:"RESEARCH-OUTCOME-DIAGNOSTICS-1.3",raceDate:`2026-08-${String(11+(i%5)).padStart(2,"0")}`,thickBetCount:1,tags:head?["THICK_CLUSTER_MISS","THICK_HEAD_MISS"]:["THICK_CLUSTER_MISS","THICK_SECOND_MISS"]});
+const passRows=Array.from({length:20},(_,i)=>mk(i,i<10));
+const failRows=Array.from({length:20},(_,i)=>mk(i,i<3));
+assert.equal(evaluateSealedThickOutOfSampleCandidate(entry,sealed,passRows,{minimumEvaluated:20,minimumStageMisses:5,minimumReplicationShare:.35}).status,"OOS_REPLICATED");
+assert.equal(evaluateSealedThickOutOfSampleCandidate(entry,sealed,failRows,{minimumEvaluated:20,minimumStageMisses:1,minimumReplicationShare:.35}).decision,"REJECT_RESEARCH_CANDIDATE");
+const mutated={...entry,candidateType:"THICK_SECOND_REPRESENTATION_REVIEW"};
+assert.equal(evaluateSealedThickOutOfSampleCandidate(mutated,sealed,passRows).status,"SEAL_MISMATCH");
+const ledger={globalLedger:[entry],contextualLedger:[]},pack={seals:[sealed]};
+assert.equal(evaluateThickOutOfSampleValidationPackage(ledger,pack,{[entry.ledgerId]:passRows},{minimumEvaluated:20,minimumStageMisses:5}).retainedCount,1);
+console.log("keirin thick oos evaluation ok");

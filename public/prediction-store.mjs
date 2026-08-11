@@ -1,3 +1,4 @@
+import{buildOutcomeDiagnostics}from"./research-outcome-diagnostics.mjs";
 import{deriveRiderMarks}from"./rider-marks.mjs";
 import{derivePredictionRatings}from"./prediction-ratings.mjs";
 export const STORAGE_KEY="chari-neko:keirin-predictions:v1";
@@ -1176,6 +1177,21 @@ function stageCalibration(records,stage){
   return{sampleCount:samples.length,brier,logLoss,bins,probabilityMassStatus,massVerifiedRecordCount,massInvalidRecordCount,massUnverifiedRecordCount};
 }
 
+function buildOperationalRaceMetrics(snapshot,result){
+  const bets=Array.isArray(snapshot?.betSelections)?snapshot.betSelections:[];
+  const order=(result?.officialFinishOrder||[]).map(Number).slice(0,3),officialKey=order.join("-");
+  const matched=bets.find(b=>(b?.order||[]).map(Number).join("-")===officialKey)||null;
+  const payout=Number(result?.officialPayout),totalStake=bets.reduce((sum,b)=>sum+(Number.isFinite(Number(b?.stake))?Number(b.stake):0),0),hitStake=matched&&Number.isFinite(Number(matched.stake))?Number(matched.stake):0;
+  const grossReturn=matched&&Number.isFinite(payout)&&hitStake>0?payout/100*hitStake:0;
+  const thick=buildOutcomeDiagnostics(snapshot,result);
+  return{
+    version:"OPERATIONAL-RACE-METRICS-1.0",betCount:bets.length,totalStake,grossReturn,
+    thickEligible:Number(thick?.thickBetCount)>0,thickHit:Boolean(thick?.thickHit),
+    mainHit:bets.some(b=>b?.category==="MAIN"&&(b?.order||[]).map(Number).join("-")===officialKey),
+    supportHit:bets.some(b=>["COVER","BUYABLE_HIGH"].includes(b?.category)&&(b?.order||[]).map(Number).join("-")===officialKey)
+  };
+}
+
 function buildResearchLearningRecord(snapshot,result){
   const v=result?.verification||{};
   const order=(result?.officialFinishOrder||[]).map(Number);
@@ -1230,7 +1246,9 @@ function buildResearchLearningRecord(snapshot,result){
     evidenceReviewComplete:false,
     decisiveEvidenceComplete:false,
     nodeCauseLearningEligible:false,
-    nodeCauseLearningReason:"証拠レビュー未完了"
+    nodeCauseLearningReason:"証拠レビュー未完了",
+    outcomeDiagnostics:buildOutcomeDiagnostics(snapshot,result),
+    operationalMetrics:buildOperationalRaceMetrics(snapshot,result)
   };
 }
 

@@ -1,0 +1,13 @@
+import assert from "node:assert/strict";
+import {reviewThickIndependentPackageStageOne,reviewThickIndependentPackageStageTwo} from "../public/research-outcome-diagnostics.mjs";
+const pkg={status:"INDEPENDENT_REVIEW_PACKAGE_READY",decision:"MANUAL_INDEPENDENT_REVIEW_ONLY",reviewPackageId:"RP1",proposalId:"P1"};
+const p=reviewThickIndependentPackageStageOne(pkg,{reviewerId:"reviewer-A",verdict:"APPROVE",counterEvidenceReviewed:true,unresolvedQuestionsReviewed:true});
+assert.equal(p.status,"PRIMARY_REVIEW_APPROVED");
+assert.equal(p.decision,"SECOND_REVIEW_REQUIRED");
+const same=reviewThickIndependentPackageStageTwo(pkg,p,{reviewerId:"reviewer-A",verdict:"APPROVE",sourceChainReviewed:true,counterEvidenceReviewed:true});
+assert.equal(same.status,"INDEPENDENT_REVIEWER_REQUIRED");
+const f=reviewThickIndependentPackageStageTwo(pkg,p,{reviewerId:"reviewer-B",verdict:"APPROVE",sourceChainReviewed:true,counterEvidenceReviewed:true});
+assert.equal(f.status,"DUAL_INDEPENDENT_REVIEW_APPROVED");
+assert.equal(f.decision,"ALLOW_SEALED_VALIDATION_ONLY");
+assert.equal(f.safeguards.productionWriteAllowed,false);
+console.log("keirin thick dual independent review tests: ok");

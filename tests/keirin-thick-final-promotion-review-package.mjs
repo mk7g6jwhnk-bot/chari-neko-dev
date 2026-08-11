@@ -1,0 +1,24 @@
+import assert from "node:assert/strict";
+import {buildThickFinalPromotionReviewPackage,verifyThickFinalPromotionReviewPackage} from "../public/research-outcome-diagnostics.mjs";
+const validationPackage={version:"THICK-SEALED-VALIDATION-PACKAGE-1.0",status:"SEALED_VALIDATION_PACKAGE_READY",validationPackageId:"VP1",proposalId:"P1",reviewPackageId:"RP1",proposalSeal:"PS1",scope:"THICK_ALLOCATION",change:{x:1},context:{venue:"A"},sourceChain:{oosVersion:"1"},requiredMetrics:["races","returnRate","thickHitRate","mainHitRate","supportHitRate","betCount"],validationCohort:{id:"cohort-1",frozen:true},primaryReviewSeal:"PRS1",finalReviewSeal:"FRS1",primaryReviewerId:"A",finalReviewerId:"B"};
+const payload={reviewPackageId:"RP1",proposalId:"P1",proposalSeal:"PS1",scope:"THICK_ALLOCATION",change:{x:1},context:{venue:"A"},sourceChain:{oosVersion:"1"},primaryReviewSeal:"PRS1",finalReviewSeal:"FRS1",primaryReviewerId:"A",finalReviewerId:"B",requiredMetrics:["races","returnRate","thickHitRate","mainHitRate","supportHitRate","betCount"],validationCohort:{id:"cohort-1",frozen:true}};
+// seal helper mirrored only to construct a valid fixture via package creator is intentionally avoided here.
+import {createThickSealedValidationPackage} from "../public/research-outcome-diagnostics.mjs";
+const rp={status:"INDEPENDENT_REVIEW_PACKAGE_READY",reviewPackageId:"RP1",proposalId:"P1",proposalSeal:"PS1",scope:"THICK_ALLOCATION",change:{x:1},context:{venue:"A"},sourceChain:{oosVersion:"1"}};
+const pr={status:"PRIMARY_REVIEW_APPROVED",reviewerId:"A",primaryReviewSeal:"PRS1"};
+const fr={status:"DUAL_INDEPENDENT_REVIEW_APPROVED",decision:"ALLOW_SEALED_VALIDATION_ONLY",reviewerId:"B",primaryReviewSeal:"PRS1",finalReviewSeal:"FRS1"};
+const vp=createThickSealedValidationPackage(rp,pr,fr,{requiredMetrics:payload.requiredMetrics,validationCohort:payload.validationCohort});
+const run={version:"THICK-SEALED-VALIDATION-RUN-1.0",status:"SEALED_VALIDATION_PASSED",decision:"RETAIN_FOR_FINAL_PROMOTION_REVIEW",validationRunId:"VR1",validationPackageId:vp.validationPackageId,proposalId:"P1",cohortId:"cohort-1",deltas:{returnRate:.04,thickHitRate:.05,mainHitRate:-.005,supportHitRate:-.005,betCountRelative:.04},supportingEvidence:[{type:"PASS"}],counterEvidence:[]};
+const rollbackConditions=["RETURN_RATE_DROP","THICK_HIT_REGRESSION","MAIN_HIT_REGRESSION","SUPPORT_HIT_REGRESSION","BET_COUNT_INFLATION"];
+const pkg=buildThickFinalPromotionReviewPackage(run,vp,{counterEvidence:[{type:"LIMITED_SAMPLE_GENERALIZATION_RISK"}],unresolvedQuestions:["別開催期で再確認"],rollbackConditions});
+assert.equal(pkg.status,"FINAL_PROMOTION_REVIEW_PACKAGE_READY");
+assert.equal(pkg.decision,"MANUAL_FINAL_PROMOTION_REVIEW_ONLY");
+assert.equal(pkg.safeguards.productionWriteAllowed,false);
+assert.equal(verifyThickFinalPromotionReviewPackage(pkg).valid,true);
+const noCounter=buildThickFinalPromotionReviewPackage(run,vp,{rollbackConditions});
+assert.equal(noCounter.status,"FINAL_REVIEW_COUNTER_EVIDENCE_REQUIRED");
+const missingRollback=buildThickFinalPromotionReviewPackage(run,vp,{counterEvidence:[{type:"RISK"}],rollbackConditions:["RETURN_RATE_DROP"]});
+assert.equal(missingRollback.status,"ROLLBACK_CONDITIONS_INCOMPLETE");
+const tampered={...pkg,scope:"THICK_CLASSIFICATION"};
+assert.equal(verifyThickFinalPromotionReviewPackage(tampered).status,"SEAL_MISMATCH");
+console.log("keirin thick final promotion review package tests: ok");
