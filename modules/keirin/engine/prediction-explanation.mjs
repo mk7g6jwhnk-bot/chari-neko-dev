@@ -9,7 +9,14 @@ export function buildPredictionExplanation({scored=[],lines=[],branches=[],termi
   const scenarios=ranked.slice(0,4).map((branch,index)=>buildScenario({branch,index,riderByNumber,lineById,terminals,massByBranch})).filter(Boolean);
   const axis=scenarios[0]||null;
   const alternatives=scenarios.slice(1);
-  const leaderHoldComparison=buildLeaderHoldComparison({scored,lines,branches,axisBranchId:axis?.branchId});
+  const axisBranch=axis?.branchId?branchById.get(String(axis.branchId)):null;
+  const comparisonAxisBranch=axisBranch?.branchType==="BANTE_SASHI"
+    ?(branches||[]).find(branch=>branch?.branchType==="LEADER_HOLD"&&String(branch?.primaryLineId)===String(axisBranch?.primaryLineId))||null
+    :axisBranch;
+  const leaderHoldComparison=buildLeaderHoldComparison({
+    scored,lines,branches,axisBranchId:comparisonAxisBranch?.id||null,
+    sourceAxisBranchId:axis?.branchId||null,sourceAxisBranchType:axis?.branchType||null
+  });
   return{
     version:"PREDICTION-EXPLANATION-1.0",
     generatedFrom:"PREDICTION_ENGINE_ONLY",
@@ -166,7 +173,7 @@ function fmt10(v){return Number.isFinite(Number(v))?Number(v).toFixed(2):"不明
 function pct(v){return Number.isFinite(Number(v))?`${(Number(v)*100).toFixed(1)}%`:"未算出";}
 
 
-function buildLeaderHoldComparison({scored=[],lines=[],branches=[],axisBranchId=null}={}){
+function buildLeaderHoldComparison({scored=[],lines=[],branches=[],axisBranchId=null,sourceAxisBranchId=null,sourceAxisBranchType=null}={}){
   const leaderByNumber=new Map();
   for(const line of lines||[]){
     if(line?.type!=="ライン"||!line?.leader)continue;
@@ -221,6 +228,9 @@ function buildLeaderHoldComparison({scored=[],lines=[],branches=[],axisBranchId=
     policy:"COMPARE_BRANCH_GENERATION_ELIGIBILITY_BEFORE_SCORE; THEN_COMPARE_EXACT_LEADER_HOLD_SCORE_TRACE",
     axisNumber:axisRow?.number??null,
     axisBranchId:axisRow?.branchId??null,
+    sourceAxisBranchId:sourceAxisBranchId??null,
+    sourceAxisBranchType:sourceAxisBranchType??null,
+    mappedFromBanteSashi:sourceAxisBranchType==="BANTE_SASHI"&&Boolean(axisRow),
     generatedLeaderHoldCount:generated.length,
     rows,
     strongestRivalNumber:strongestRival?.number??null,
