@@ -5,6 +5,11 @@ import{
   buildReferencePositionBalanceAudit,buildTerminalLifecycleAudit,isUsableStartPower
 }from"./engine-support.mjs";
 
+export function resolvePurchaseBlock({lineBlocked=false,lineAndStartEvidenceBlocked=false,lineFallbackEvidenceBlocked=false,girlsEvidenceBlocked=false,mainInvariantFailed=false}={}){
+  const blocked=Boolean(lineBlocked||lineAndStartEvidenceBlocked||lineFallbackEvidenceBlocked||girlsEvidenceBlocked);
+  return{blocked,mainInvariantDiagnostic:Boolean(mainInvariantFailed),mainInvariantHardBlock:false};
+}
+
 export function runKeirinPurchaseEngine({prediction,oddsByOrder={},budget=3000}){
   if(!prediction||!Array.isArray(prediction.terminals))throw new Error("prediction snapshot is required");
   const raceMeta={
@@ -32,8 +37,12 @@ export function runKeirinPurchaseEngine({prediction,oddsByOrder={},budget=3000})
   const lineFallbackEvidenceBlocked=Boolean(generationPassed&&raceMeta.raceCategory!=="girls"&&raceMeta.lineConfidence!=="高"&&!lineAndStartEvidenceBlocked&&lineIndependentMainAvailable&&!lineFallbackDiscriminationAudit.sufficient);
   const lineBlocked=generationPassed&&raceMeta.raceCategory!=="girls"&&raceMeta.lineConfidence!=="高"&&!lineAndStartEvidenceBlocked&&!lineIndependentMainAvailable;
   const girlsEvidenceBlocked=generationPassed&&raceMeta.raceCategory==="girls"&&startEvidenceCount<startEvidenceRequired;
-  const mainInvariantBlocked=Boolean(generationPassed&&chatSpec&&!chatSpec.audit?.mainInvariant?.passed);
-  const purchaseBlocked=lineBlocked||lineAndStartEvidenceBlocked||lineFallbackEvidenceBlocked||girlsEvidenceBlocked||mainInvariantBlocked;
+  // v229: MAIN invariant is a diagnostic, not a race-wide purchase kill switch.
+  // A race may legitimately have no MAIN while still having a natural COVER/BUYABLE_HIGH.
+  // Hard-block only on missing/insufficient evidence that makes purchase evaluation unsafe.
+  const mainInvariantDiagnostic=Boolean(generationPassed&&chatSpec&&!chatSpec.audit?.mainInvariant?.passed);
+  const blockDecision=resolvePurchaseBlock({lineBlocked,lineAndStartEvidenceBlocked,lineFallbackEvidenceBlocked,girlsEvidenceBlocked,mainInvariantFailed:mainInvariantDiagnostic});
+  const purchaseBlocked=blockDecision.blocked;
   const blockedReason=lineBlocked
     ?"公式ライン未取得のため購入判定を保留"
     :lineAndStartEvidenceBlocked
@@ -42,7 +51,7 @@ export function runKeirinPurchaseEngine({prediction,oddsByOrder={},budget=3000})
         ?"公式ライン未取得かつ選手間の着順評価差が不足しています。全員を本線扱いせず、参考買い目だけを表示します。"
         :girlsEvidenceBlocked
           ?"ガールズ主導権の公式入力が不足しているため購入判定を保留"
-          :"中心シナリオから本線となる自然終端を確定できませんでした。予想成立条件を満たしていないため購入処理を停止しました。";
+          :null;
   const blockCode=lineBlocked
     ?"LINE_DATA_UNAVAILABLE"
     :lineAndStartEvidenceBlocked
@@ -51,13 +60,13 @@ export function runKeirinPurchaseEngine({prediction,oddsByOrder={},budget=3000})
         ?"LINE_FALLBACK_INSUFFICIENT_DISCRIMINATION"
         :girlsEvidenceBlocked
           ?"GIRLS_LEAD_EVIDENCE_UNAVAILABLE"
-          :"MAIN_INVARIANT_FAILED";
+          :null;
   const classified=purchaseBlocked
     ?rawClassified.map(item=>({...item,betClass:"NONE",purchaseStatus:"購入不採用",purchaseReason:blockedReason,purchaseRejectCode:blockCode,lifecycle:{...(item.lifecycle||{}),generated:true,probabilityEvaluated:true,terminalDeleted:false,purchaseDecision:"REJECTED",purchaseDecisionCode:blockCode,purchaseDecisionReason:blockedReason}}))
     :rawClassified;
   const normalPlan=generationPassed&&!purchaseBlocked?allocate(classified,budget):[];
   const fallbackPlan=generationPassed&&normalPlan.length===0&&prediction.terminals.length
-    ?buildNonZeroReferencePlan({rawClassified,classified,budget,blockedReason:purchaseBlocked?blockedReason:"通常購入条件で採用0件",blockCode,lineFallbackDiscriminationAudit,allocator:allocate})
+    ?buildNonZeroReferencePlan({rawClassified,classified,budget,blockedReason:purchaseBlocked?blockedReason:"通常購入条件で採用0件",blockCode:purchaseBlocked?blockCode:"NO_STANDARD_PURCHASE_CANDIDATE",lineFallbackDiscriminationAudit,allocator:allocate})
     :[];
   const standardPurchasePlan=normalPlan;
   const referencePurchasePlan=fallbackPlan;
@@ -77,6 +86,16 @@ export function runKeirinPurchaseEngine({prediction,oddsByOrder={},budget=3000})
   if(purchaseBlocked){purchase.noBet=true;purchase.noBetReason=blockCode;}
   purchase.girlsStartEvidenceCount=startEvidenceCount;
   purchase.girlsStartEvidenceRequired=raceMeta.raceCategory==="girls"?startEvidenceRequired:null;
+  purchase.mainInvariantAudit={
+    diagnosticOnly:true,
+    failed:mainInvariantDiagnostic,
+    error:chatSpec?.audit?.mainInvariant?.error||null,
+    centerScenarioCount:Number(chatSpec?.audit?.mainInvariant?.centerScenarioCount)||0,
+    mainCandidateCount:Number(chatSpec?.audit?.mainInvariant?.mainCandidateCount)||0,
+    mainPurchasedCount:Number(chatSpec?.audit?.mainInvariant?.mainPurchasedCount)||0,
+    raceWidePurchaseBlockedByMainInvariant:false,
+    policy:"MAIN_ABSENCE_DOES_NOT_ERASE_NATURAL_COVER_OR_BUYABLE_HIGH"
+  };
 
   const afterFingerprint=fingerprintPrediction(prediction.terminals);
   const boundaryAudit={
