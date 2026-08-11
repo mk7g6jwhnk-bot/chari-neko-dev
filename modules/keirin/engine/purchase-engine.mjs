@@ -37,9 +37,9 @@ export function runKeirinPurchaseEngine({prediction,oddsByOrder={},budget=3000})
   const lineFallbackEvidenceBlocked=Boolean(generationPassed&&raceMeta.raceCategory!=="girls"&&raceMeta.lineConfidence!=="高"&&!lineAndStartEvidenceBlocked&&lineIndependentMainAvailable&&!lineFallbackDiscriminationAudit.sufficient);
   const lineBlocked=generationPassed&&raceMeta.raceCategory!=="girls"&&raceMeta.lineConfidence!=="高"&&!lineAndStartEvidenceBlocked&&!lineIndependentMainAvailable;
   const girlsEvidenceBlocked=generationPassed&&raceMeta.raceCategory==="girls"&&startEvidenceCount<startEvidenceRequired;
-  // v229: MAIN invariant is a diagnostic, not a race-wide purchase kill switch.
-  // A race may legitimately have no MAIN while still having a natural COVER/BUYABLE_HIGH.
-  // Hard-block only on missing/insufficient evidence that makes purchase evaluation unsafe.
+  // v230: MAIN absence is not a race-wide kill switch, but COVER/BUYABLE_HIGH-only
+  // standard purchase is forbidden inside classification. Main-scenario natural purchases
+  // are normalized to MAIN before this diagnostic is evaluated.
   const mainInvariantDiagnostic=Boolean(generationPassed&&chatSpec&&!chatSpec.audit?.mainInvariant?.passed);
   const blockDecision=resolvePurchaseBlock({lineBlocked,lineAndStartEvidenceBlocked,lineFallbackEvidenceBlocked,girlsEvidenceBlocked,mainInvariantFailed:mainInvariantDiagnostic});
   const purchaseBlocked=blockDecision.blocked;
@@ -94,7 +94,7 @@ export function runKeirinPurchaseEngine({prediction,oddsByOrder={},budget=3000})
     mainCandidateCount:Number(chatSpec?.audit?.mainInvariant?.mainCandidateCount)||0,
     mainPurchasedCount:Number(chatSpec?.audit?.mainInvariant?.mainPurchasedCount)||0,
     raceWidePurchaseBlockedByMainInvariant:false,
-    policy:"MAIN_ABSENCE_DOES_NOT_ERASE_NATURAL_COVER_OR_BUYABLE_HIGH"
+    policy:"STANDARD_PURCHASE_REQUIRES_MAIN; MAIN_ABSENCE_DOES_NOT_RACE_WIDE_KILL_PREDICTION"
   };
 
   const afterFingerprint=fingerprintPrediction(prediction.terminals);

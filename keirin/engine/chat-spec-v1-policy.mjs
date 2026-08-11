@@ -362,8 +362,17 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
         mode="CHAT_SPEC_MAIN_CLUSTER";
         reason=humanPurchaseReason(item,"MAIN");
       }else if(
-        (item.chatForecastRole==="main" && item.naturalConvergenceScore>=.46) ||
-        (item.chatForecastRole==="contender" && approvedContenderHeads.has(item.firstFamilyNumber) && item.naturalConvergenceScore>=.46)
+        item.chatForecastRole==="main" && item.naturalConvergenceScore>=.46
+      ){
+        // v230: purchase class follows scenario origin. A natural terminal from the
+        // main forecast cannot become COVER merely because directMainBranchSupport
+        // or the old MAIN convergence threshold is missed. If it is purchase-worthy
+        // and belongs to the main scenario, it is MAIN by definition.
+        betClass="MAIN";
+        mode="MAIN_SCENARIO_NATURAL_TERMINAL";
+        reason=humanPurchaseReason(item,"MAIN");
+      }else if(
+        item.chatForecastRole==="contender" && approvedContenderHeads.has(item.firstFamilyNumber) && item.naturalConvergenceScore>=.46
       ){
         betClass="COVER";
         mode="CHAT_SPEC_SECONDARY";
@@ -565,7 +574,58 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
     overSpreadAction:"WARN_ONLY_NO_AUTO_DELETE"
   };
 
-  const mainPurchased=evaluated.filter(x=>x.purchaseStatus===PURCHASED&&x.betClass==="MAIN");
+  // v230 semantic invariant: standard purchase classes cannot exist without MAIN.
+  // MAIN/COVER/BUYABLE_HIGH describes scenario origin, not a descending score bucket.
+  // Any adopted natural terminal from the main forecast is normalized to MAIN.
+  for(const item of evaluated){
+    if(
+      item.purchaseStatus===PURCHASED &&
+      item.chatForecastRole==="main" &&
+      item.branchHeadMatched===true &&
+      item.pairNaturalPositionEligible===true &&
+      Number(item.naturalConvergenceScore)>=.46 &&
+      item.betClass!=="MAIN"
+    ){
+      item.betClass="MAIN";
+      item.adoptionMode="MAIN_SCENARIO_CLASS_NORMALIZATION";
+      item.purchaseRejectCode=null;
+      item.purchaseReason=humanPurchaseReason(item,"MAIN");
+      item.lifecycle={...(item.lifecycle||{}),purchaseDecision:"ADOPTED",purchaseDecisionCode:"MAIN_SCENARIO_CLASS_NORMALIZATION",purchaseDecisionReason:"主展開由来の自然終端は本線として分類"};
+    }
+  }
+
+  let adoptedStandard=evaluated.filter(x=>x.purchaseStatus===PURCHASED&&["MAIN","COVER","BUYABLE_HIGH"].includes(x.betClass));
+  let normalizedMain=adoptedStandard.filter(x=>x.betClass==="MAIN");
+  let mainSemanticRecovery=null;
+  if(adoptedStandard.length>0 && normalizedMain.length===0){
+    const anchor=evaluated
+      .filter(x=>x.chatForecastRole==="main"&&x.branchHeadMatched===true&&x.pairNaturalPositionEligible===true)
+      .filter(x=>Number(x.pairNaturalConvergenceScore)>=.46&&Number(x.naturalConvergenceScore)>=.46)
+      .sort(comparePurchaseTerminal)[0]||null;
+    if(anchor){
+      anchor.betClass="MAIN";
+      anchor.purchaseStatus=PURCHASED;
+      anchor.purchaseRejectCode=null;
+      anchor.purchaseReason=humanPurchaseReason(anchor,"MAIN");
+      anchor.adoptionMode="MAIN_SCENARIO_ANCHOR_RECOVERY";
+      anchor.lifecycle={...(anchor.lifecycle||{}),generated:true,probabilityEvaluated:true,terminalDeleted:false,purchaseDecision:"ADOPTED",purchaseDecisionCode:"MAIN_SCENARIO_ANCHOR_RECOVERY",purchaseDecisionReason:"標準購入候補があるため主展開の自然終端を本線アンカーとして採用"};
+      mainSemanticRecovery=anchor.order.join("-");
+    }else{
+      // A COVER/BUYABLE_HIGH-only standard plan is semantically invalid.
+      for(const item of adoptedStandard){
+        item.betClass="NONE";
+        item.purchaseStatus=REJECTED;
+        item.purchaseRejectCode="MAIN_REQUIRED_FOR_STANDARD_PURCHASE";
+        item.purchaseReason=`${orderText(item)}は終端として保持。ただし主展開から本線を成立させられない状態で押さえ・高配当だけを購入することは禁止。`;
+        item.adoptionMode=null;
+        item.lifecycle={...(item.lifecycle||{}),purchaseDecision:"REJECTED",purchaseDecisionCode:"MAIN_REQUIRED_FOR_STANDARD_PURCHASE",purchaseDecisionReason:item.purchaseReason};
+      }
+    }
+  }
+
+  adoptedStandard=evaluated.filter(x=>x.purchaseStatus===PURCHASED&&["MAIN","COVER","BUYABLE_HIGH"].includes(x.betClass));
+  normalizedMain=adoptedStandard.filter(x=>x.betClass==="MAIN");
+  const mainPurchased=normalizedMain;
   const mainCandidates=evaluated.filter(x=>
     x.branchHeadMatched===true &&
     x.directMainBranchSupport===true &&
@@ -577,12 +637,13 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
     mainClusterCount:new Set(mainCandidates.flatMap(x=>x.chatSupportingBranchIds||[]).filter(id=>mainBranchIds.has(String(id)))).size,
     mainCandidateCount:mainCandidates.length,
     mainPurchasedCount:mainPurchased.length,
-    passed:mainCandidates.length>0 && mainPurchased.length>0,
-    error:mainCandidates.length===0
-      ?"MAIN_NATURAL_TERMINAL_NOT_FOUND"
-      : mainPurchased.length===0
-        ?"MAIN_PURCHASE_CLASSIFICATION_FAILED"
-        : null
+    standardPurchasedCount:adoptedStandard.length,
+    mainSemanticRecovery,
+    semanticPolicy:"STANDARD_PURCHASE_REQUIRES_MAIN_AND_MAIN_SCENARIO_PURCHASE_IS_MAIN",
+    passed:adoptedStandard.length===0 || mainPurchased.length>0,
+    error:adoptedStandard.length>0&&mainPurchased.length===0
+      ?"STANDARD_PURCHASE_WITHOUT_MAIN_FORBIDDEN"
+      : null
   };
 
   // Compatibility fields used by existing diagnostics/UI.
@@ -702,15 +763,12 @@ function buildScenarioClassificationAudit(items,approvedContenderHeads){
     if(item.chatForecastRole==="sub"){
       expectedClass="BUYABLE_HIGH";
       basis="SEPARATE_SUB_SCENARIO_VALUE_GATE";
-    }else if(item.directMainBranchSupport===true&&item.branchHeadMatched===true&&score>=mainNaturalThreshold(item)){
+    }else if(item.chatForecastRole==="main"&&item.branchHeadMatched===true&&score>=.46){
       expectedClass="MAIN";
-      basis="DIRECT_MAIN_SCENARIO_NATURAL_TERMINAL";
+      basis=item.directMainBranchSupport===true?"DIRECT_MAIN_SCENARIO_NATURAL_TERMINAL":"MAIN_SCENARIO_NATURAL_TERMINAL";
     }else if(item.adoptionMode==="SECOND_PAIR_BREADTH_RECOVERY"){
       expectedClass="COVER";
-      basis="MAIN_OR_APPROVED_CONTENDER_PAIR_VARIATION_RECOVERY";
-    }else if(item.chatForecastRole==="main"&&score>=.46){
-      expectedClass="COVER";
-      basis="MAIN_SCENARIO_BRANCH_VARIATION";
+      basis="APPROVED_CONTENDER_PAIR_VARIATION_RECOVERY";
     }else if(item.chatForecastRole==="contender"&&approvedContenderHeads.has(Number(item.firstFamilyNumber))&&score>=.46){
       expectedClass="COVER";
       basis="APPROVED_CONTENDER_SCENARIO";
