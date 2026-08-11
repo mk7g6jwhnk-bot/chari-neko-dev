@@ -13,7 +13,7 @@ const ODDS_CACHE_KEY="chari-neko:keirin-odds-cache:v1";
 const RACE_META_CACHE_KEY="chari-neko:keirin-race-meta-cache:v1";
 const RESULT_CACHE_KEY="chari-neko:keirin-result-cache:v1";
 const MEETING_CACHE_KEY="chari-neko:keirin-meeting-cache:v1";
-const APP_RELEASE="KEIRIN-0.17.5-leader-hold-axis-comparison";
+const APP_RELEASE="KEIRIN-0.17.6-leader-hold-user-comparison";
 const APP_UPDATE_CHECK_INTERVAL_MS=5*60*1000;
 let lastAppUpdateCheckAt=0,appUpdateCheckBusy=false;
 const VENUE_CODES={函館:"11",青森:"12",いわき平:"13",弥彦:"21",前橋:"22",取手:"23",宇都宮:"24",大宮:"25",西武園:"26",京王閣:"27",立川:"28",松戸:"31",千葉:"32",川崎:"34",平塚:"35",小田原:"36",伊東:"37",静岡:"38",名古屋:"42",岐阜:"43",大垣:"44",豊橋:"45",富山:"46",松阪:"47",四日市:"48",福井:"51",奈良:"53",向日町:"54",和歌山:"55",岸和田:"56",玉野:"61",広島:"62",防府:"63",高松:"71",小松島:"73",高知:"74",松山:"75",小倉:"81",久留米:"83",武雄:"84",佐世保:"85",別府:"86",熊本:"87"};
@@ -546,7 +546,11 @@ function renderLeaderHoldComparison(audit,axis){
     return `<li>${esc(f.label)}：${sign}${Number(f.delta||0).toFixed(3)}（軸 ${Number(f.axisValue||0).toFixed(2)} / 比較 ${Number(f.rivalValue||0).toFixed(2)}）</li>`;
   }).join("");
   const rival=audit.strongestRivalNumber?`最強の他先行枝は${audit.strongestRivalNumber}番。`:"比較できる他の先行押し切り枝はありません。";
-  return `<details class="predictionAccordion"><summary>なぜこの先行役を軸にしたかを見る</summary><div class="accordionBody"><div class="auditCallout"><strong>先行押し切り枝の入口比較</strong><p>${esc(rival)} 能力値が高くても、公式ライン先頭役でなければLEADER_HOLD枝は生成されません。</p><ul>${rowHtml}</ul></div>${decisive?`<div class="auditCallout"><strong>枝が両方ある場合の逆転要因</strong><ul>${decisive}</ul><p class="muted">branch scoreは 1着適性22%・先行押し切り力43%・主導権獲得力20%・直近10%・末脚5%（欠損時は残存項目で再正規化）の加重合成です。</p></div>`:""}</div></details>`;
+  const user=audit.userFacingComparison||null;
+  const axisAdv=(user?.axisAdvantages||[]).slice(0,3).map(x=>`${esc(x.label)} +${Number(x.delta||0).toFixed(3)}`).join(" / ");
+  const rivalAdv=(user?.rivalAdvantages||[]).slice(0,3).map(x=>`${esc(x.label)} ${Number(x.delta||0).toFixed(3)}`).join(" / ");
+  const userHtml=user?`<div class="auditCallout"><strong>${esc(user.headline||"軸候補比較")}</strong><p>${esc(user.summary||"")}</p>${user.mode==="HEAD_TO_HEAD"?`<p><b>軸側が上回った項目</b> ${axisAdv||"なし"}</p><p><b>比較側が上回った項目</b> ${rivalAdv||"なし"}</p>`:""}<p class="muted">この比較は発走前の予測枝scoreと構成要素だけから生成しています。結果・オッズ・購入結果は使っていません。</p></div>`:"";
+  return `<details class="predictionAccordion" open><summary>なぜこの先行役を軸にしたか</summary><div class="accordionBody">${userHtml}<div class="auditCallout"><strong>先行押し切り枝の入口比較</strong><p>${esc(rival)} 能力値が高くても、公式ライン先頭役でなければLEADER_HOLD枝は生成されません。</p><ul>${rowHtml}</ul></div>${decisive?`<div class="auditCallout"><strong>枝が両方ある場合の逆転要因</strong><ul>${decisive}</ul><p class="muted">branch scoreは 1着適性22%・先行押し切り力43%・主導権獲得力20%・直近10%・末脚5%（欠損時は残存項目で再正規化）の加重合成です。</p></div>`:""}</div></details>`;
 }
 
 function renderProbabilityPathAudit(audit,primaryOrder=[]){

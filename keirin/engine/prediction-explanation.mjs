@@ -215,8 +215,9 @@ function buildLeaderHoldComparison({scored=[],lines=[],branches=[],axisBranchId=
   const axisRow=rows.find(x=>x.isAxisBranch)||null;
   const strongestRival=generated.find(x=>!x.isAxisBranch)||null;
   const decisiveFactors=axisRow&&strongestRival?compareLeaderHoldFactors(axisRow,strongestRival):[];
+  const userFacingComparison=buildLeaderHoldUserFacingComparison(axisRow,strongestRival,decisiveFactors);
   return{
-    version:"LEADER-HOLD-BRANCH-COMPARISON-1.0",
+    version:"LEADER-HOLD-BRANCH-COMPARISON-1.1",
     policy:"COMPARE_BRANCH_GENERATION_ELIGIBILITY_BEFORE_SCORE; THEN_COMPARE_EXACT_LEADER_HOLD_SCORE_TRACE",
     axisNumber:axisRow?.number??null,
     axisBranchId:axisRow?.branchId??null,
@@ -224,6 +225,7 @@ function buildLeaderHoldComparison({scored=[],lines=[],branches=[],axisBranchId=
     rows,
     strongestRivalNumber:strongestRival?.number??null,
     decisiveFactors,
+    userFacingComparison,
     audit:{
       branchEligibilitySeparatedFromAbility:true,
       exactScoreTraceUsed:true,
@@ -232,6 +234,38 @@ function buildLeaderHoldComparison({scored=[],lines=[],branches=[],axisBranchId=
     }
   };
 }
+
+function buildLeaderHoldUserFacingComparison(axis,rival,factors=[]){
+  if(!axis)return null;
+  if(!rival){
+    return{
+      mode:"NO_COMPARABLE_RIVAL",
+      axisNumber:axis.number,
+      rivalNumber:null,
+      headline:`${axis.number}番を先行押し切りの軸に採用`,
+      summary:"比較できる他の先行押し切り枝がありません。軸採用は、能力比較で他候補を上回ったという意味ではなく、生成されたLEADER_HOLD枝の中で最上位だったためです。",
+      axisAdvantages:[],rivalAdvantages:[],decisiveReasons:[]
+    };
+  }
+  const axisAdvantages=factors.filter(x=>Number(x.delta)>1e-9).sort((a,b)=>b.delta-a.delta);
+  const rivalAdvantages=factors.filter(x=>Number(x.delta)<-1e-9).sort((a,b)=>a.delta-b.delta);
+  const scoreDelta=(Number(axis.branchScore)||0)-(Number(rival.branchScore)||0);
+  const topAxis=axisAdvantages.slice(0,3).map(x=>`${x.label} +${x.delta.toFixed(3)}`);
+  const topRival=rivalAdvantages.slice(0,3).map(x=>`${x.label} ${x.delta.toFixed(3)}`);
+  const decisiveReasons=axisAdvantages.slice(0,3).map(x=>({label:x.label,delta:x.delta,axisValue:x.axisValue,rivalValue:x.rivalValue}));
+  const summary=[
+    `${rival.number}番が優勢だった項目は${topRival.length?topRival.join("・"):"なし"}。`,
+    `${axis.number}番が優勢だった項目は${topAxis.length?topAxis.join("・"):"なし"}。`,
+    `重み付け後の先行押し切り枝scoreは${axis.number}番 ${fmt10(axis.branchScore)}、${rival.number}番 ${fmt10(rival.branchScore)}で、差は${scoreDelta>=0?"+":""}${scoreDelta.toFixed(3)}。`,
+    axisAdvantages.length?`最終的に${axis.number}番を押し上げた主因は${axisAdvantages.slice(0,2).map(x=>x.label).join("と")}です。`:"軸側に明確な加点優位はなく、枝生成条件や他の微差で上位になっています。"
+  ].join(" ");
+  return{
+    mode:"HEAD_TO_HEAD",axisNumber:axis.number,rivalNumber:rival.number,
+    headline:`軸候補比較：${axis.number}番 vs ${rival.number}番`,
+    summary,scoreDelta,axisAdvantages,rivalAdvantages,decisiveReasons
+  };
+}
+
 function leaderHoldWeight(key){return({firstPlacement:.22,escapeMechanism:.43,startPower:.20,recentForm:.10,finishPower:.05})[String(key)]??null;}
 function compareLeaderHoldFactors(axis,rival){
   const keys=["firstPlacement","escapeMechanism","startPower","recentForm","finishPower"];
