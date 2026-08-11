@@ -10,6 +10,11 @@ const RACE_CONCENTRATION_BORDER={
   terminalTightenMax:.10,familyTightenMax:.12,branchTightenMax:.10,
   secondTightenMax:.06,thirdTightenMax:.06,burdenTightenMax:.03
 };
+const SKIP_LINKED_BORDER={
+  topBranchMax:.12,topFamilyMax:.20,topFamilyCoverageMax:.12,
+  terminalTighten:.06,familyTighten:.08,branchTighten:.07,
+  secondTighten:.05,thirdTighten:.05,burdenTighten:.02
+};
 
 export function classify(terminals,odds={}){
   const sorted=[...terminals].sort(compareTerminal);
@@ -98,7 +103,14 @@ export function classify(terminals,odds={}){
   const valueGate=buildSubValueGate(ranked);
   const familyCoverageGate=buildFamilyCoverageGate(ranked);
   const decided=ranked.map(item=>applyFamilyPurchaseDecision(item,valueGate,familyCoverageGate));
-  return applyUnderCoverageNaturalRecovery(decided,familyCoverageGate);
+  const firstPass=applyUnderCoverageNaturalRecovery(decided,familyCoverageGate);
+  const skipLinked=buildSkipLinkedBorderContext(firstPass,raceConcentrationBorder);
+  if(!skipLinked.active)return firstPass.map(item=>attachSkipLinkedContext(item,skipLinked));
+  const tightened=annotatePurchaseBorder(terminalRanked,{...raceConcentrationBorder,skipLinked});
+  const tightenedValueGate=buildSubValueGate(tightened);
+  const tightenedFamilyCoverageGate=buildFamilyCoverageGate(tightened);
+  const tightenedDecided=tightened.map(item=>applyFamilyPurchaseDecision(item,tightenedValueGate,tightenedFamilyCoverageGate));
+  return applyUnderCoverageNaturalRecovery(tightenedDecided,tightenedFamilyCoverageGate).map(item=>attachSkipLinkedContext(item,skipLinked));
 }
 
 function annotateTerminalRanks(items){
@@ -281,6 +293,37 @@ function buildRaceConcentrationBorder(items){
   return{topBranchShare,topFamilyShare,top5Share,branchDeficit,familyDeficit,top5Deficit,severity,regime};
 }
 
+function buildSkipLinkedBorderContext(items,raceContext={}){
+  const rows=items||[];
+  const structural=rows.filter(item=>item.firstFamilyTier==="main"||item.firstFamilyTier==="contender");
+  const headMass=new Map();
+  const adoptedMass=new Map();
+  for(const item of structural){
+    const first=Number(item.order?.[0])||0;
+    if(!first)continue;
+    headMass.set(first,Math.max(headMass.get(first)||0,Number(item.firstFamilyProbability)||0));
+    if(item.purchaseStatus===PURCHASED)adoptedMass.set(first,(adoptedMass.get(first)||0)+Math.max(0,Number(item.probability)||0));
+  }
+  const primary=[...headMass.entries()].sort((a,b)=>b[1]-a[1]||a[0]-b[0])[0]||null;
+  const primaryMass=Math.max(0,Number(primary?.[1])||0);
+  const primaryAdopted=primary?Math.max(0,Number(adoptedMass.get(primary[0]))||0):0;
+  const topFamilyCoverage=primaryMass>0?primaryAdopted/primaryMass:null;
+  const topBranchShare=Math.max(0,Number(raceContext?.topBranchShare)||0);
+  const topFamilyShare=Math.max(0,Number(raceContext?.topFamilyShare)||0);
+  const checks={
+    topBranchLow:topBranchShare>0&&topBranchShare<SKIP_LINKED_BORDER.topBranchMax,
+    topFamilyLow:topFamilyShare>0&&topFamilyShare<SKIP_LINKED_BORDER.topFamilyMax,
+    topFamilyCoverageLow:topFamilyCoverage!=null&&topFamilyCoverage<SKIP_LINKED_BORDER.topFamilyCoverageMax
+  };
+  const active=checks.topBranchLow&&checks.topFamilyLow&&checks.topFamilyCoverageLow;
+  return{active,policy:"SKIP_LIKE_PRE_RATING_TWO_PASS_V1",topBranchShare,topFamilyShare,topFamilyCoverage,primaryFirst:primary?.[0]??null,checks,thresholds:{...SKIP_LINKED_BORDER}};
+}
+
+function attachSkipLinkedContext(item,skipLinked){
+  const metrics=item?.purchaseBorderMetrics||{};
+  return{...item,purchaseBorderMetrics:{...metrics,skipLinkedActive:Boolean(skipLinked?.active),skipLinkedPolicy:skipLinked?.policy||null,skipLinkedTopBranchShare:skipLinked?.topBranchShare??null,skipLinkedTopFamilyShare:skipLinked?.topFamilyShare??null,skipLinkedTopFamilyCoverage:skipLinked?.topFamilyCoverage??null,skipLinkedPrimaryFirst:skipLinked?.primaryFirst??null,skipLinkedChecks:skipLinked?.checks||null}};
+}
+
 function annotatePurchaseBorder(items,raceContext={severity:0,regime:"NORMAL"}){
   const severity=Math.max(0,Math.min(1,Number(raceContext?.severity)||0));
   return (items||[]).map(item=>{
@@ -298,18 +341,19 @@ function annotatePurchaseBorder(items,raceContext={severity:0,regime:"NORMAL"}){
     const structuralFamily=item.firstFamilyTier==="main"||item.firstFamilyTier==="contender";
     const anchor=structuralFamily&&Number(item.terminalFamilyRank)===1;
     const adaptiveSeverity=structuralFamily&&!anchor?severity:0;
+    const skipLinkedActive=Boolean(raceContext?.skipLinked?.active)&&structuralFamily&&!anchor;
     const thresholds={
-      terminal:PURCHASE_BORDER.terminalRelativeMin+RACE_CONCENTRATION_BORDER.terminalTightenMax*adaptiveSeverity,
-      family:PURCHASE_BORDER.familyRelativeMin+RACE_CONCENTRATION_BORDER.familyTightenMax*adaptiveSeverity,
-      branch:PURCHASE_BORDER.branchRelativeMin+RACE_CONCENTRATION_BORDER.branchTightenMax*adaptiveSeverity,
-      second:PURCHASE_BORDER.secondRelativeMin+RACE_CONCENTRATION_BORDER.secondTightenMax*adaptiveSeverity,
-      third:baseThirdFloor+RACE_CONCENTRATION_BORDER.thirdTightenMax*adaptiveSeverity,
-      burden:PURCHASE_BORDER.burdenFactorMin+RACE_CONCENTRATION_BORDER.burdenTightenMax*adaptiveSeverity
+      terminal:PURCHASE_BORDER.terminalRelativeMin+RACE_CONCENTRATION_BORDER.terminalTightenMax*adaptiveSeverity+(skipLinkedActive?SKIP_LINKED_BORDER.terminalTighten:0),
+      family:PURCHASE_BORDER.familyRelativeMin+RACE_CONCENTRATION_BORDER.familyTightenMax*adaptiveSeverity+(skipLinkedActive?SKIP_LINKED_BORDER.familyTighten:0),
+      branch:PURCHASE_BORDER.branchRelativeMin+RACE_CONCENTRATION_BORDER.branchTightenMax*adaptiveSeverity+(skipLinkedActive?SKIP_LINKED_BORDER.branchTighten:0),
+      second:PURCHASE_BORDER.secondRelativeMin+RACE_CONCENTRATION_BORDER.secondTightenMax*adaptiveSeverity+(skipLinkedActive?SKIP_LINKED_BORDER.secondTighten:0),
+      third:baseThirdFloor+RACE_CONCENTRATION_BORDER.thirdTightenMax*adaptiveSeverity+(skipLinkedActive?SKIP_LINKED_BORDER.thirdTighten:0),
+      burden:PURCHASE_BORDER.burdenFactorMin+RACE_CONCENTRATION_BORDER.burdenTightenMax*adaptiveSeverity+(skipLinkedActive?SKIP_LINKED_BORDER.burdenTighten:0)
     };
     const failures=[];
     const fail=(metric,baseFloor,adaptiveFloor,baseCode,globalCode)=>{
       if(metric<baseFloor)failures.push(baseCode);
-      else if(metric<adaptiveFloor)failures.push(globalCode);
+      else if(metric<adaptiveFloor)failures.push(skipLinkedActive?`SKIP_LINKED_${baseCode}`:globalCode);
     };
     fail(terminalRelative,PURCHASE_BORDER.terminalRelativeMin,thresholds.terminal,"TERMINAL_RELATIVE","RACE_DISPERSION_TERMINAL");
     fail(familyRelative,PURCHASE_BORDER.familyRelativeMin,thresholds.family,"FIRST_FAMILY_RELATIVE","RACE_DISPERSION_FIRST_FAMILY");
@@ -317,9 +361,9 @@ function annotatePurchaseBorder(items,raceContext={severity:0,regime:"NORMAL"}){
     fail(secondRelative,PURCHASE_BORDER.secondRelativeMin,thresholds.second,"SECOND_RELATIVE","RACE_DISPERSION_SECOND");
     fail(thirdRelative,baseThirdFloor,thresholds.third,"THIRD_RELATIVE","RACE_DISPERSION_THIRD");
     if(burdenFactor<PURCHASE_BORDER.burdenFactorMin&&terminalRelative<PURCHASE_BORDER.burdenStrongTerminalOverride)failures.push("CONDITION_BURDEN");
-    else if(burdenFactor<thresholds.burden&&terminalRelative<PURCHASE_BORDER.burdenStrongTerminalOverride)failures.push("RACE_DISPERSION_CONDITION_BURDEN");
+    else if(burdenFactor<thresholds.burden&&terminalRelative<PURCHASE_BORDER.burdenStrongTerminalOverride)failures.push(skipLinkedActive?"SKIP_LINKED_CONDITION_BURDEN":"RACE_DISPERSION_CONDITION_BURDEN");
     const score=.25*terminalRelative+.15*familyRelative+.15*branchRelative+.15*secondRelative+.20*thirdRelative+.10*burdenFactor;
-    return{...item,purchaseBorderEligible:failures.length===0,purchaseBorderScore:score,purchaseBorderFailures:failures,purchaseBorderMetrics:{terminalRelative,familyRelative,pairRelative,branchRelative,firstRelative,secondRelative,thirdRelative,thirdFloor:thresholds.third,burdenFactor,strongTerminal,raceDispersionSeverity:severity,raceDispersionRegime:raceContext?.regime||"NORMAL",raceTopBranchShare:raceContext?.topBranchShare??null,raceTopFamilyShare:raceContext?.topFamilyShare??null,raceTop5Share:raceContext?.top5Share??null,raceConcentrationAnchor:anchor,adaptiveThresholds:thresholds}};
+    return{...item,purchaseBorderEligible:failures.length===0,purchaseBorderScore:score,purchaseBorderFailures:failures,purchaseBorderMetrics:{terminalRelative,familyRelative,pairRelative,branchRelative,firstRelative,secondRelative,thirdRelative,thirdFloor:thresholds.third,burdenFactor,strongTerminal,raceDispersionSeverity:severity,raceDispersionRegime:raceContext?.regime||"NORMAL",raceTopBranchShare:raceContext?.topBranchShare??null,raceTopFamilyShare:raceContext?.topFamilyShare??null,raceTop5Share:raceContext?.top5Share??null,raceConcentrationAnchor:anchor,skipLinkedAdaptive:skipLinkedActive,adaptiveThresholds:thresholds}};
   });
 }
 
@@ -829,7 +873,7 @@ export function purchaseDiagnostics(classified,plan,budget){
       buyableHighBreakEvenIndex:1,
       fundingMode:"100YEN_BASE_PLUS_PROBABILITY_X_SQRT_PROBABILITY_ODDS"
     },
-    purchaseBorderAudit:{policy:"COMPOSITE_RELATIVE_PLUS_RACE_CONCENTRATION_ADAPTIVE_V2",thresholds:{...PURCHASE_BORDER},raceConcentrationThresholds:{...RACE_CONCENTRATION_BORDER},raceConcentration:classified[0]?.purchaseBorderMetrics?{topBranchShare:classified[0].purchaseBorderMetrics.raceTopBranchShare??null,topFamilyShare:classified[0].purchaseBorderMetrics.raceTopFamilyShare??null,top5Share:classified[0].purchaseBorderMetrics.raceTop5Share??null,severity:classified[0].purchaseBorderMetrics.raceDispersionSeverity??0,regime:classified[0].purchaseBorderMetrics.raceDispersionRegime||"NORMAL"}:null,eligibleCount:classified.filter(item=>item.purchaseBorderEligible).length,rejectedCount:classified.filter(item=>!item.purchaseBorderEligible).length,adoptedBelowBorderCount:natural.filter(item=>!item.purchaseBorderEligible&&item.betClass!=="BUYABLE_HIGH").length,rows:classified.map(item=>({order:item.order.join("-"),adopted:item.purchaseStatus===PURCHASED,betClass:item.betClass,eligible:Boolean(item.purchaseBorderEligible),score:item.purchaseBorderScore??null,failures:item.purchaseBorderFailures||[],metrics:item.purchaseBorderMetrics||null}))},
+    purchaseBorderAudit:{policy:"COMPOSITE_RELATIVE_PLUS_RACE_CONCENTRATION_PLUS_SKIP_LINKED_TWO_PASS_V3",thresholds:{...PURCHASE_BORDER},raceConcentrationThresholds:{...RACE_CONCENTRATION_BORDER},skipLinkedThresholds:{...SKIP_LINKED_BORDER},raceConcentration:classified[0]?.purchaseBorderMetrics?{topBranchShare:classified[0].purchaseBorderMetrics.raceTopBranchShare??null,topFamilyShare:classified[0].purchaseBorderMetrics.raceTopFamilyShare??null,top5Share:classified[0].purchaseBorderMetrics.raceTop5Share??null,severity:classified[0].purchaseBorderMetrics.raceDispersionSeverity??0,regime:classified[0].purchaseBorderMetrics.raceDispersionRegime||"NORMAL"}:null,eligibleCount:classified.filter(item=>item.purchaseBorderEligible).length,rejectedCount:classified.filter(item=>!item.purchaseBorderEligible).length,adoptedBelowBorderCount:natural.filter(item=>!item.purchaseBorderEligible&&item.betClass!=="BUYABLE_HIGH").length,rows:classified.map(item=>({order:item.order.join("-"),adopted:item.purchaseStatus===PURCHASED,betClass:item.betClass,eligible:Boolean(item.purchaseBorderEligible),score:item.purchaseBorderScore??null,failures:item.purchaseBorderFailures||[],metrics:item.purchaseBorderMetrics||null}))},
     purchaseFamilyAudit:{mode:"COMPOSITE_RELATIVE_BORDER_THEN_PRIMARY_FIRST_FAMILY_COVERAGE",headCount:familyRows.length,primaryFirst:classified.find(item=>item.isPrimaryFirstFamily)?.firstFamilyNumber??null,primaryCoverageTarget:classified.find(item=>item.isPrimaryFirstFamily)?.firstFamilyCoverageTarget??null,rows:familyRows},
     adoptedTerminalAudit:natural.map(item=>buildAdoptedAudit(item,diagnosticBranchStats,diagnosticMaxBranchTotal)),
     mainHeadSiblingAudit:{

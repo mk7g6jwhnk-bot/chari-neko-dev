@@ -1,4 +1,4 @@
 # Version
 
-- Version: `KEIRIN-0.16.51-race-concentration-purchase-border`
-- Label: `v216-race-concentration-purchase-border`
+- Version: `KEIRIN-0.16.52-skip-linked-purchase-border`
+- Label: `v217-skip-linked-purchase-border`
