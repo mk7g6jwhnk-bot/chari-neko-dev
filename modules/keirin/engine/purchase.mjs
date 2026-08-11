@@ -4,6 +4,12 @@ const PRIMARY_COVERAGE_SUPPORT_FLOORS={first:.82,second:.70,third:.70};
 const PRIMARY_COVERAGE_TARGETS={base:.70,medium:.75,strong:.80};
 const STRUCTURAL_PRIORITIES=new Set(["main","contender","sub"]);
 const PURCHASE_BORDER={terminalRelativeMin:.45,familyRelativeMin:.45,branchRelativeMin:.50,secondRelativeMin:.50,thirdRelativeMin:.50,strongTerminalRelativeMin:.75,strongFamilyRelativeMin:.60,strongBranchRelativeMin:.70,strongSecondRelativeMin:.70,strongThirdRelativeMin:.45,burdenFactorMin:.90,burdenStrongTerminalOverride:.80};
+const RACE_CONCENTRATION_BORDER={
+  branchHealthy:.18,familyHealthy:.30,top5Healthy:.25,
+  severityMedium:.20,severityHigh:.45,
+  terminalTightenMax:.10,familyTightenMax:.12,branchTightenMax:.10,
+  secondTightenMax:.06,thirdTightenMax:.06,burdenTightenMax:.03
+};
 
 export function classify(terminals,odds={}){
   const sorted=[...terminals].sort(compareTerminal);
@@ -86,7 +92,9 @@ export function classify(terminals,odds={}){
 
   const state=buildFirstFamilyState(base);
   const staged=base.map(item=>annotateFamilyPosition(item,state));
-  const ranked=annotatePurchaseBorder(annotateTerminalRanks(staged));
+  const terminalRanked=annotateTerminalRanks(staged);
+  const raceConcentrationBorder=buildRaceConcentrationBorder(terminalRanked);
+  const ranked=annotatePurchaseBorder(terminalRanked,raceConcentrationBorder);
   const valueGate=buildSubValueGate(ranked);
   const familyCoverageGate=buildFamilyCoverageGate(ranked);
   const decided=ranked.map(item=>applyFamilyPurchaseDecision(item,valueGate,familyCoverageGate));
@@ -248,7 +256,33 @@ function annotateFamilyPosition(item,state){
   };
 }
 
-function annotatePurchaseBorder(items){
+function buildRaceConcentrationBorder(items){
+  const rows=items||[];
+  const totalProbability=sum(rows.map(item=>Math.max(0,Number(item.probability)||0)))||1;
+  const structuralHeads=new Map();
+  for(const item of rows){
+    if(item.firstFamilyTier!=="main"&&item.firstFamilyTier!=="contender")continue;
+    const first=Number(item.order?.[0])||0;
+    structuralHeads.set(first,Math.max(structuralHeads.get(first)||0,Number(item.firstFamilyProbability)||0));
+  }
+  const topFamilyShare=Math.max(0,...[...structuralHeads.values()].map(v=>v/totalProbability));
+  const branchStats=buildBranchStats(rows);
+  const branchTotals=[...branchStats.values()].map(stats=>Math.max(0,Number(stats.total)||0));
+  const branchMass=sum(branchTotals)||1;
+  const topBranchShare=Math.max(0,...branchTotals)/branchMass;
+  const probabilities=rows.map(item=>Math.max(0,Number(item.probability)||0)).sort((a,b)=>b-a);
+  const top5Share=sum(probabilities.slice(0,5))/totalProbability;
+  const deficit=(value,healthy)=>healthy>0?Math.max(0,Math.min(1,(healthy-value)/healthy)):0;
+  const branchDeficit=deficit(topBranchShare,RACE_CONCENTRATION_BORDER.branchHealthy);
+  const familyDeficit=deficit(topFamilyShare,RACE_CONCENTRATION_BORDER.familyHealthy);
+  const top5Deficit=deficit(top5Share,RACE_CONCENTRATION_BORDER.top5Healthy);
+  const severity=.40*branchDeficit+.40*familyDeficit+.20*top5Deficit;
+  const regime=severity>=RACE_CONCENTRATION_BORDER.severityHigh?"HIGH_DISPERSION":severity>=RACE_CONCENTRATION_BORDER.severityMedium?"MEDIUM_DISPERSION":"NORMAL";
+  return{topBranchShare,topFamilyShare,top5Share,branchDeficit,familyDeficit,top5Deficit,severity,regime};
+}
+
+function annotatePurchaseBorder(items,raceContext={severity:0,regime:"NORMAL"}){
+  const severity=Math.max(0,Math.min(1,Number(raceContext?.severity)||0));
   return (items||[]).map(item=>{
     const terminalRelative=Math.max(0,Number(item.terminalRelativeToBest)||0);
     const familyRelative=Math.max(0,Number(item.firstFamilyRelativeToBest)||0);
@@ -260,16 +294,32 @@ function annotatePurchaseBorder(items){
     const pairRelative=Math.max(0,Number(item.pairRelativeToBest)||0);
     const burdenFactor=Math.max(0,Math.min(1,Number(item.relativeConditionPenalty)||1));
     const strongTerminal=terminalRelative>=PURCHASE_BORDER.strongTerminalRelativeMin&&familyRelative>=PURCHASE_BORDER.strongFamilyRelativeMin&&branchRelative>=PURCHASE_BORDER.strongBranchRelativeMin&&secondRelative>=PURCHASE_BORDER.strongSecondRelativeMin;
-    const thirdFloor=strongTerminal?PURCHASE_BORDER.strongThirdRelativeMin:PURCHASE_BORDER.thirdRelativeMin;
+    const baseThirdFloor=strongTerminal?PURCHASE_BORDER.strongThirdRelativeMin:PURCHASE_BORDER.thirdRelativeMin;
+    const structuralFamily=item.firstFamilyTier==="main"||item.firstFamilyTier==="contender";
+    const anchor=structuralFamily&&Number(item.terminalFamilyRank)===1;
+    const adaptiveSeverity=structuralFamily&&!anchor?severity:0;
+    const thresholds={
+      terminal:PURCHASE_BORDER.terminalRelativeMin+RACE_CONCENTRATION_BORDER.terminalTightenMax*adaptiveSeverity,
+      family:PURCHASE_BORDER.familyRelativeMin+RACE_CONCENTRATION_BORDER.familyTightenMax*adaptiveSeverity,
+      branch:PURCHASE_BORDER.branchRelativeMin+RACE_CONCENTRATION_BORDER.branchTightenMax*adaptiveSeverity,
+      second:PURCHASE_BORDER.secondRelativeMin+RACE_CONCENTRATION_BORDER.secondTightenMax*adaptiveSeverity,
+      third:baseThirdFloor+RACE_CONCENTRATION_BORDER.thirdTightenMax*adaptiveSeverity,
+      burden:PURCHASE_BORDER.burdenFactorMin+RACE_CONCENTRATION_BORDER.burdenTightenMax*adaptiveSeverity
+    };
     const failures=[];
-    if(terminalRelative<PURCHASE_BORDER.terminalRelativeMin)failures.push("TERMINAL_RELATIVE");
-    if(familyRelative<PURCHASE_BORDER.familyRelativeMin)failures.push("FIRST_FAMILY_RELATIVE");
-    if(branchRelative<PURCHASE_BORDER.branchRelativeMin)failures.push("BRANCH_RELATIVE");
-    if(secondRelative<PURCHASE_BORDER.secondRelativeMin)failures.push("SECOND_RELATIVE");
-    if(thirdRelative<thirdFloor)failures.push("THIRD_RELATIVE");
+    const fail=(metric,baseFloor,adaptiveFloor,baseCode,globalCode)=>{
+      if(metric<baseFloor)failures.push(baseCode);
+      else if(metric<adaptiveFloor)failures.push(globalCode);
+    };
+    fail(terminalRelative,PURCHASE_BORDER.terminalRelativeMin,thresholds.terminal,"TERMINAL_RELATIVE","RACE_DISPERSION_TERMINAL");
+    fail(familyRelative,PURCHASE_BORDER.familyRelativeMin,thresholds.family,"FIRST_FAMILY_RELATIVE","RACE_DISPERSION_FIRST_FAMILY");
+    fail(branchRelative,PURCHASE_BORDER.branchRelativeMin,thresholds.branch,"BRANCH_RELATIVE","RACE_DISPERSION_BRANCH");
+    fail(secondRelative,PURCHASE_BORDER.secondRelativeMin,thresholds.second,"SECOND_RELATIVE","RACE_DISPERSION_SECOND");
+    fail(thirdRelative,baseThirdFloor,thresholds.third,"THIRD_RELATIVE","RACE_DISPERSION_THIRD");
     if(burdenFactor<PURCHASE_BORDER.burdenFactorMin&&terminalRelative<PURCHASE_BORDER.burdenStrongTerminalOverride)failures.push("CONDITION_BURDEN");
+    else if(burdenFactor<thresholds.burden&&terminalRelative<PURCHASE_BORDER.burdenStrongTerminalOverride)failures.push("RACE_DISPERSION_CONDITION_BURDEN");
     const score=.25*terminalRelative+.15*familyRelative+.15*branchRelative+.15*secondRelative+.20*thirdRelative+.10*burdenFactor;
-    return{...item,purchaseBorderEligible:failures.length===0,purchaseBorderScore:score,purchaseBorderFailures:failures,purchaseBorderMetrics:{terminalRelative,familyRelative,pairRelative,branchRelative,firstRelative,secondRelative,thirdRelative,thirdFloor,burdenFactor,strongTerminal}};
+    return{...item,purchaseBorderEligible:failures.length===0,purchaseBorderScore:score,purchaseBorderFailures:failures,purchaseBorderMetrics:{terminalRelative,familyRelative,pairRelative,branchRelative,firstRelative,secondRelative,thirdRelative,thirdFloor:thresholds.third,burdenFactor,strongTerminal,raceDispersionSeverity:severity,raceDispersionRegime:raceContext?.regime||"NORMAL",raceTopBranchShare:raceContext?.topBranchShare??null,raceTopFamilyShare:raceContext?.topFamilyShare??null,raceTop5Share:raceContext?.top5Share??null,raceConcentrationAnchor:anchor,adaptiveThresholds:thresholds}};
   });
 }
 
@@ -779,7 +829,7 @@ export function purchaseDiagnostics(classified,plan,budget){
       buyableHighBreakEvenIndex:1,
       fundingMode:"100YEN_BASE_PLUS_PROBABILITY_X_SQRT_PROBABILITY_ODDS"
     },
-    purchaseBorderAudit:{policy:"TERMINAL_FAMILY_PAIR_THIRD_RELATIVE_PLUS_LIGHT_CONDITION_BURDEN_V1",thresholds:{...PURCHASE_BORDER},eligibleCount:classified.filter(item=>item.purchaseBorderEligible).length,rejectedCount:classified.filter(item=>!item.purchaseBorderEligible).length,adoptedBelowBorderCount:natural.filter(item=>!item.purchaseBorderEligible&&item.betClass!=="BUYABLE_HIGH").length,rows:classified.map(item=>({order:item.order.join("-"),adopted:item.purchaseStatus===PURCHASED,betClass:item.betClass,eligible:Boolean(item.purchaseBorderEligible),score:item.purchaseBorderScore??null,failures:item.purchaseBorderFailures||[],metrics:item.purchaseBorderMetrics||null}))},
+    purchaseBorderAudit:{policy:"COMPOSITE_RELATIVE_PLUS_RACE_CONCENTRATION_ADAPTIVE_V2",thresholds:{...PURCHASE_BORDER},raceConcentrationThresholds:{...RACE_CONCENTRATION_BORDER},raceConcentration:classified[0]?.purchaseBorderMetrics?{topBranchShare:classified[0].purchaseBorderMetrics.raceTopBranchShare??null,topFamilyShare:classified[0].purchaseBorderMetrics.raceTopFamilyShare??null,top5Share:classified[0].purchaseBorderMetrics.raceTop5Share??null,severity:classified[0].purchaseBorderMetrics.raceDispersionSeverity??0,regime:classified[0].purchaseBorderMetrics.raceDispersionRegime||"NORMAL"}:null,eligibleCount:classified.filter(item=>item.purchaseBorderEligible).length,rejectedCount:classified.filter(item=>!item.purchaseBorderEligible).length,adoptedBelowBorderCount:natural.filter(item=>!item.purchaseBorderEligible&&item.betClass!=="BUYABLE_HIGH").length,rows:classified.map(item=>({order:item.order.join("-"),adopted:item.purchaseStatus===PURCHASED,betClass:item.betClass,eligible:Boolean(item.purchaseBorderEligible),score:item.purchaseBorderScore??null,failures:item.purchaseBorderFailures||[],metrics:item.purchaseBorderMetrics||null}))},
     purchaseFamilyAudit:{mode:"COMPOSITE_RELATIVE_BORDER_THEN_PRIMARY_FIRST_FAMILY_COVERAGE",headCount:familyRows.length,primaryFirst:classified.find(item=>item.isPrimaryFirstFamily)?.firstFamilyNumber??null,primaryCoverageTarget:classified.find(item=>item.isPrimaryFirstFamily)?.firstFamilyCoverageTarget??null,rows:familyRows},
     adoptedTerminalAudit:natural.map(item=>buildAdoptedAudit(item,diagnosticBranchStats,diagnosticMaxBranchTotal)),
     mainHeadSiblingAudit:{
