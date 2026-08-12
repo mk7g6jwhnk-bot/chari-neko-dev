@@ -13,7 +13,7 @@ const ODDS_CACHE_KEY="chari-neko:keirin-odds-cache:v1";
 const RACE_META_CACHE_KEY="chari-neko:keirin-race-meta-cache:v1";
 const RESULT_CACHE_KEY="chari-neko:keirin-result-cache:v1";
 const MEETING_CACHE_KEY="chari-neko:keirin-meeting-cache:v1";
-const APP_RELEASE="KEIRIN-0.19.4-causal-purchase-scenario";
+const APP_RELEASE="KEIRIN-0.19.5-all-buy-explanation-ui";
 const APP_UPDATE_CHECK_INTERVAL_MS=5*60*1000;
 let lastAppUpdateCheckAt=0,appUpdateCheckBusy=false;
 const VENUE_CODES={函館:"11",青森:"12",いわき平:"13",弥彦:"21",前橋:"22",取手:"23",宇都宮:"24",大宮:"25",西武園:"26",京王閣:"27",立川:"28",松戸:"31",千葉:"32",川崎:"34",平塚:"35",小田原:"36",伊東:"37",静岡:"38",名古屋:"42",岐阜:"43",大垣:"44",豊橋:"45",富山:"46",松阪:"47",四日市:"48",福井:"51",奈良:"53",向日町:"54",和歌山:"55",岸和田:"56",玉野:"61",広島:"62",防府:"63",高松:"71",小松島:"73",高知:"74",松山:"75",小倉:"81",久留米:"83",武雄:"84",佐世保:"85",別府:"86",熊本:"87"};
@@ -410,7 +410,9 @@ function renderFriendlyBetReason(b){
   const caution=friendlyPurchaseCaution(b);
   const rawReason=b?.reason||"";
   const rawBranch=b?.branchLabel||"";
-  return `<div class="detailBet"><strong>${esc(order)}　${esc(label)}</strong><p><b>なぜ買う？</b> ${esc(friendlyPurchaseReason(b))}</p>${checks.length?`<p class="muted"><b>判断材料</b> ${checks.map(esc).join(" / ")}</p>`:""}${caution?`<p class="auditWarn"><b>分類チェック</b> ${esc(caution)}</p>`:""}<details class="supportBranchAudit"><summary>詳しい監査情報</summary>${rawReason?`<p><b>内部の採用理由</b> ${esc(rawReason)}</p>`:""}${rawBranch?`<p class="muted"><b>保存された展開ラベル</b> ${esc(rawBranch)}</p>`:""}${b?.evidenceSummary?`<p class="muted"><b>根拠データ</b> ${esc(b.evidenceSummary)}</p>`:""}<p class="muted">内部コードや枝ラベルは開発・監査用です。通常判断は上の日本語説明を基準にします。</p></details></div>`;
+  const explanation=friendlyPurchaseReason(b);
+  const hasAudit=Boolean(rawReason||rawBranch||b?.evidenceSummary);
+  return `<details class="buyExplanation"><summary><span><b>${esc(order)}</b>　${esc(label)}</span><small>理由を見る</small></summary><div class="buyExplanationBody"><p><b>なぜ買う？</b> ${esc(explanation)}</p>${checks.length?`<p class="muted"><b>判断材料</b> ${checks.map(esc).join(" / ")}</p>`:""}${caution?`<p class="auditWarn"><b>分類チェック</b> ${esc(caution)}</p>`:""}${hasAudit?`<details class="supportBranchAudit"><summary>詳しい監査情報</summary>${rawReason?`<p><b>内部の採用理由</b> ${esc(rawReason)}</p>`:""}${rawBranch?`<p class="muted"><b>保存された展開ラベル</b> ${esc(rawBranch)}</p>`:""}${b?.evidenceSummary?`<p class="muted"><b>根拠データ</b> ${esc(b.evidenceSummary)}</p>`:""}<p class="muted">内部コードや枝ラベルは開発・監査用です。通常判断は上の日本語説明を基準にします。</p></details>`:""}</div></details>`;
 }
 function safeFriendlyBetReason(b){try{return renderFriendlyBetReason(b)}catch(error){console.error("friendly purchase reason render failed",error);const order=Array.isArray(b?.order)?b.order.join("-"):String(b?.order||"-");return `<div class="detailBet"><strong>${esc(order)}　${esc(betClassLabel(b?.category))}</strong><p class="muted">買い目の理由表示だけ読み込めませんでした。保存済み買い目は保持されています。</p></div>`}}
 function renderChatPredictionImport(){

@@ -1,5 +1,5 @@
 # Chari-Neko version
 
-- Version: `KEIRIN-0.19.3-initiative-first-axis`
-- Label: `v226-bante-axis-comparison-ui-fix`
-- Scope: prediction explanation UI/data mapping fix only; BANTE_SASHI axis maps to same-line LEADER_HOLD leader comparison. No branch score, terminal probability, purchase classification, or funding behavior change.
+- Version: `KEIRIN-0.19.5-all-buy-explanation-ui`
+- Label: `v240-all-buy-explanation-ui`
+- Scope: purchase-explanation UI only; every displayed buy candidate can be opened individually to read its Japanese rationale and judgment materials. Prediction, purchase classification, probability, and funding logic are unchanged.

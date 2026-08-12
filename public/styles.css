@@ -220,3 +220,13 @@
 }
 
 .evidenceButtons{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.evidenceButtons button{padding:7px 10px;border-radius:8px}.evidenceReviewRow p{margin:.35rem 0}
+
+.buyExplanation{border:1px solid rgba(255,255,255,.08);border-radius:10px;background:rgba(7,18,34,.28);margin:7px 0;overflow:hidden}
+.buyExplanation>summary{cursor:pointer;list-style:none;padding:11px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:800}
+.buyExplanation>summary::-webkit-details-marker{display:none}
+.buyExplanation>summary::after{content:"＋";font-size:17px;opacity:.75;flex:none}
+.buyExplanation[open]>summary::after{content:"−"}
+.buyExplanation>summary small{font-size:.72rem;font-weight:700;color:var(--muted);margin-left:auto}
+.buyExplanationBody{padding:0 12px 12px;border-top:1px solid rgba(255,255,255,.06)}
+.buyExplanationBody>p{margin:9px 0 0;font-size:.8rem;line-height:1.5}
+.buyExplanationBody .supportBranchAudit{margin-top:10px}
