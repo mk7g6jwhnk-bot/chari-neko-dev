@@ -1,5 +1,5 @@
 # Chari-Neko version
 
-- Version: `KEIRIN-0.19.6-causal-buy-explanation-ui`
-- Label: `v241-causal-buy-explanation-ui`
-- Scope: per-buy explanation UI only. Each buy candidate now resolves its saved dominant prediction branch and exact node conditions before explaining why the 1st/2nd/3rd positions are expected. Prediction, purchase classification, probability, and funding logic are unchanged.
+- Version: `KEIRIN-0.19.10-predict-preview-first-v246`
+- Label: `v246-predict-preview-first`
+- Scope: 個別予想の取得経路を preview-first に統一。重い `/keirin/race` の502/timeoutで予想全体が停止しないよう、まず `/keirin/preview` を取得し、失敗時のみ `/keirin/race` にフォールバックする。

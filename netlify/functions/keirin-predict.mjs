@@ -176,22 +176,24 @@ async function requestBrowserService(base, params) {
     raceNo: String(params.raceNo)
   });
 
-  const endpoint = `${base}/keirin/race?${query}`;
   const attempts = [];
   const startedAt = Date.now();
-  // Netlify側で無限待ちにせず、Railwayの一時502/HTML応答には必ずもう一度当てる。
+  // 個別予想でも重い /keirin/race を最初に叩かない。
+  // 軽量な /keirin/preview で公式カードを取得し、必要な情報が不足した場合だけ /keirin/race を使う。
   const totalBudgetMs = 18000;
+  const endpoints = [
+    `${base}/keirin/preview?${query}`,
+    `${base}/keirin/race?${query}`
+  ];
 
-  for (let attempt = 1; attempt <= 2; attempt += 1) {
+  for (let attempt = 1; attempt <= endpoints.length; attempt += 1) {
     const elapsed = Date.now() - startedAt;
     const remaining = totalBudgetMs - elapsed;
-    if (remaining < 3000) break;
-
-    // 1回目を長くし過ぎると、一時502の後に再試行する時間が消える。
-    // 1回目30秒、2回目は残り時間を最大22秒使う。
+    if (remaining < 2500) break;
+    const endpoint = endpoints[attempt - 1];
     const timeoutMs = attempt === 1
-      ? Math.min(13000, remaining - 2000)
-      : Math.min(4000, remaining - 800);
+      ? Math.min(9000, remaining - 1000)
+      : Math.min(6500, remaining - 500);
 
     try {
       const response = await fetch(endpoint, {
@@ -219,23 +221,25 @@ async function requestBrowserService(base, params) {
         }
 
         const retryable = response.status >= 500 || /page crashed|target closed|browser|navigation|timeout|timed out|execution context|temporar|upstream/i.test(String(data?.error || ""));
-        const canRetry = attempt < 2 && retryable && (totalBudgetMs - (Date.now() - startedAt)) >= 3000;
+        const canRetry = false;
         if (canRetry) {
-          await sleep(500);
+          await sleep(250);
           continue;
         }
+        if (attempt === 1) { continue; }
         return { ok: false, status: response.status, data: { ...data, endpointAudit: attempts } };
       }
 
       // Railway/Proxyが502のHTMLを返すケース。以前は1回目が15秒を超えると再試行されなかった。
       // 今回は残り時間がある限り、非JSONの5xxも必ず2回目へ進める。
       const retryableStatus = response.status >= 500 || response.status === 429;
-      const canRetry = attempt < 2 && retryableStatus && (totalBudgetMs - (Date.now() - startedAt)) >= 3000;
+      const canRetry = false;
       if (canRetry) {
-        await sleep(500);
+        await sleep(250);
         continue;
       }
 
+      if (attempt === 1) { continue; }
       return {
         ok: false,
         status: response.status || 502,
@@ -255,11 +259,7 @@ async function requestBrowserService(base, params) {
       });
 
       const timedOut = /timeout|timed out|abort/i.test(message);
-      const canRetry = attempt < 2 && (totalBudgetMs - (Date.now() - startedAt)) >= 3000;
-      if (canRetry) {
-        await sleep(500);
-        continue;
-      }
+      if (attempt === 1) { continue; }
 
       return {
         ok: false,
@@ -280,7 +280,7 @@ async function requestBrowserService(base, params) {
     status: 502,
     data: {
       ok: false,
-      error: "競輪ブラウザサービスの再試行でも取得できませんでした",
+      error: "公式レースデータをpreview/raceの両経路で取得できませんでした",
       endpointAudit: attempts
     }
   };

@@ -176,11 +176,15 @@ async function requestBrowserService(base, params) {
     raceNo: String(params.raceNo)
   });
 
-  const endpoint = `${base}/keirin/race?${query}`;
   const attempts = [];
   const startedAt = Date.now();
-  // Netlify側で無限待ちにせず、Railwayの一時502/HTML応答には必ずもう一度当てる。
-  const totalBudgetMs = 54000;
+  // 個別予想でも重い /keirin/race を最初に叩かない。
+  // 軽量な /keirin/preview で公式カードを取得し、必要な情報が不足した場合だけ /keirin/race を使う。
+  const totalBudgetMs = 18000;
+  const endpoints = [
+    `${base}/keirin/preview?${query}`,
+    `${base}/keirin/race?${query}`
+  ];
 
   for (let attempt = 1; attempt <= 2; attempt += 1) {
     const elapsed = Date.now() - startedAt;
@@ -224,6 +228,7 @@ async function requestBrowserService(base, params) {
           await sleep(900);
           continue;
         }
+        if (attempt === 1) { continue; }
         return { ok: false, status: response.status, data: { ...data, endpointAudit: attempts } };
       }
 
@@ -236,6 +241,7 @@ async function requestBrowserService(base, params) {
         continue;
       }
 
+      if (attempt === 1) { continue; }
       return {
         ok: false,
         status: response.status || 502,
@@ -280,7 +286,7 @@ async function requestBrowserService(base, params) {
     status: 502,
     data: {
       ok: false,
-      error: "競輪ブラウザサービスの再試行でも取得できませんでした",
+      error: "公式レースデータをpreview/raceの両経路で取得できませんでした",
       endpointAudit: attempts
     }
   };
