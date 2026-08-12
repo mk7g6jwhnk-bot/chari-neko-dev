@@ -13,7 +13,7 @@ const ODDS_CACHE_KEY="chari-neko:keirin-odds-cache:v1";
 const RACE_META_CACHE_KEY="chari-neko:keirin-race-meta-cache:v1";
 const RESULT_CACHE_KEY="chari-neko:keirin-result-cache:v1";
 const MEETING_CACHE_KEY="chari-neko:keirin-meeting-cache:v1";
-const APP_RELEASE="KEIRIN-0.19.3-initiative-first-axis";
+const APP_RELEASE="KEIRIN-0.19.4-causal-purchase-scenario";
 const APP_UPDATE_CHECK_INTERVAL_MS=5*60*1000;
 let lastAppUpdateCheckAt=0,appUpdateCheckBusy=false;
 const VENUE_CODES={函館:"11",青森:"12",いわき平:"13",弥彦:"21",前橋:"22",取手:"23",宇都宮:"24",大宮:"25",西武園:"26",京王閣:"27",立川:"28",松戸:"31",千葉:"32",川崎:"34",平塚:"35",小田原:"36",伊東:"37",静岡:"38",名古屋:"42",岐阜:"43",大垣:"44",豊橋:"45",富山:"46",松阪:"47",四日市:"48",福井:"51",奈良:"53",向日町:"54",和歌山:"55",岸和田:"56",玉野:"61",広島:"62",防府:"63",高松:"71",小松島:"73",高知:"74",松山:"75",小倉:"81",久留米:"83",武雄:"84",佐世保:"85",別府:"86",熊本:"87"};
@@ -634,12 +634,28 @@ function scenarioBetSentence(b,explanation=null){
   }
   const scenarioText=scenario?.timeline||"";
   const scenarioReason=scenario?.leaderReason||"";
-  if(scenarioReason) sentence=`${scenarioReason}${sentence}`;
-  else if(scenarioText) sentence=`予測側では「${scenarioText}」という保存済みシナリオから、${sentence}`;
+  if(scenarioText) sentence=`${scenarioText}${sentence}`;
+  else if(scenarioReason) sentence=`${scenarioReason}${sentence}`;
+
+  // The purchase explanation must be causal, not just a restatement of the final order.
+  // Reuse prediction-engine evidence saved on the scenario so the user can see why
+  // the leader is expected to lead and why the 2nd/3rd positions follow from it.
+  const scenarioReasons=Array.isArray(scenario?.reasons)?scenario.reasons:[];
+  const leaderReasonText=scenarioReason||scenarioReasons.find(r=>r?.type==="LEADER_REASON")?.text||"";
+  const pathReasons=scenarioReasons
+    .filter(r=>["FIRST_PATH","SECOND_PATH","THIRD_PATH","LINE_ROLE"].includes(r?.type))
+    .map(r=>String(r?.text||"").trim())
+    .filter(Boolean);
+  const causalReasons=[];
+  if(leaderReasonText)causalReasons.push(`主導権の理由：${leaderReasonText}`);
+  for(const text of pathReasons.slice(0,3)){
+    if(!causalReasons.some(x=>x.includes(text)))causalReasons.push(text);
+  }
+  if(!causalReasons.length&&scenarioText)causalReasons.push(`展開シナリオ：${scenarioText}`);
   const reason=b?.purchaseReason?` ${b.purchaseReason}`:"";
   const extraDetails=Array.isArray(b?.extraConditionDetails)?b.extraConditionDetails:[];
   const extraText=extraDetails.length?extraDetails.map(x=>{const p=Number(x?.probability);const prob=Number.isFinite(p)?`${(p*100).toFixed(1)}%`:"未校正";const mech=x?.mechanism?.label?`・${x.mechanism.label}`:"";return `${x?.stage||"構造"}:${x?.label||x?.id||"追加条件"}${mech} ${prob}${x?.critical===true?" 必須":""}`}).join(" ｜ "):"";
-  return `<div class="detailBet"><strong>${esc(`${a}-${c}-${d}`)}　${esc(cls)}</strong><p>${esc(sentence)}</p><p class="muted">自然収束度 ${esc(convText)}${Number.isFinite(Number(b?.nodeConditionalProbability))?` / ノード連鎖 ${esc((Number(b.nodeConditionalProbability)*100).toFixed(2))}%`:""}${Number(b?.extraConditionCount)>0?` / 追加条件 ${Number(b.extraConditionCount)}件`:""}${Number.isFinite(Number(b?.extraConditionPenalty))?` / 条件後残存 ${(Number(b.extraConditionPenalty)*100).toFixed(0)}%`:""}${Number(b?.relativeConditionCount)>0?` / 差分条件 ${Number(b.relativeConditionCount)}件・微調整 ${(Math.max(0,1-Number(b.relativeConditionPenalty||1))*100).toFixed(1)}%`:""}${reason?` / ${esc(reason)}`:""}</p>${extraText?`<p class="auditMeta"><b>追加条件内訳</b> ${esc(extraText)}</p>`:""}${Array.isArray(b?.relativeConditionTrace)&&b.relativeConditionTrace.some(x=>Number(x?.count)>0)?`<p class="auditMeta"><b>差分条件内訳</b> ${esc(b.relativeConditionTrace.filter(x=>Number(x?.count)>0).map(x=>`${x.stage}:${x.label||"候補"} 最有力比${(Number(x.ratio||0)*100).toFixed(2)}% / -${(Number(x.penalty||0)*100).toFixed(2)}%`).join(" ｜ "))}</p>`:""}</div>`;
+  return `<div class="detailBet"><strong>${esc(`${a}-${c}-${d}`)}　${esc(cls)}</strong>${causalReasons.length?`<div class="purchaseScenario"><p><b>この買い目になるシナリオ</b></p><ol>${causalReasons.map(x=>`<li>${esc(x)}</li>`).join("")}</ol></div>`:""}<p><b>購入判断：</b>${esc(sentence)}</p><p class="muted">自然収束度 ${esc(convText)}${Number.isFinite(Number(b?.nodeConditionalProbability))?` / ノード連鎖 ${esc((Number(b.nodeConditionalProbability)*100).toFixed(2))}%`:""}${Number(b?.extraConditionCount)>0?` / 追加条件 ${Number(b.extraConditionCount)}件`:""}${Number.isFinite(Number(b?.extraConditionPenalty))?` / 条件後残存 ${(Number(b.extraConditionPenalty)*100).toFixed(0)}%`:""}${Number(b?.relativeConditionCount)>0?` / 差分条件 ${Number(b.relativeConditionCount)}件・微調整 ${(Math.max(0,1-Number(b.relativeConditionPenalty||1))*100).toFixed(1)}%`:""}${reason?` / ${esc(reason)}`:""}</p>${extraText?`<p class="auditMeta"><b>追加条件内訳</b> ${esc(extraText)}</p>`:""}${Array.isArray(b?.relativeConditionTrace)&&b.relativeConditionTrace.some(x=>Number(x?.count)>0)?`<p class="auditMeta"><b>差分条件内訳</b> ${esc(b.relativeConditionTrace.filter(x=>Number(x?.count)>0).map(x=>`${x.stage}:${x.label||"候補"} 最有力比${(Number(x.ratio||0)*100).toFixed(2)}% / -${(Number(x.penalty||0)*100).toFixed(2)}%`).join(" ｜ "))}</p>`:""}</div>`;
 }
 
 function countHeads(rows){
