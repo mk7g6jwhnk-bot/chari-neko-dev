@@ -1,119 +1,279 @@
-const RETRY_DELAYS = [0, 5000, 15000];
-
 export default async (req) => {
   try {
-    const p = await req.json();
+    const p =
+      await req.json();
 
-    const date = String(p?.date || "");
-    const venueCode = String(p?.venueCode || "").padStart(2, "0");
-    const venueName = String(p?.venueName || "");
-    const raceNo = Number(p?.raceNo || 0);
+    const date =
+      String(
+        p?.date || ""
+      );
+
+    const jobs =
+      Array.isArray(
+        p?.jobs
+      )
+        ? p.jobs
+        : [];
 
     if (
-      !/^\d{8}$/.test(date) ||
-      !/^\d{2}$/.test(venueCode) ||
-      !venueName ||
-      !Number.isInteger(raceNo) ||
-      raceNo < 1 ||
-      raceNo > 12
+      !/^\d{8}$/.test(
+        date
+      ) ||
+      jobs.length === 0
     ) {
-      throw new Error("結果ワーカーのレース情報が不正です");
+      throw new Error(
+        "結果Workerの入力が不正です"
+      );
     }
 
-    const siteUrl = String(
-      process.env.URL ||
-      process.env.DEPLOY_PRIME_URL ||
-      ""
-    ).replace(/\/$/, "");
+    console.log(
+      `[keirin-result-worker-background] ` +
+      `start date=${date} ` +
+      `jobs=${jobs.length}`
+    );
 
-    if (!siteUrl) {
-      throw new Error("NetlifyサイトURLが取得できません");
-    }
+    let saved = 0;
+    let unavailable = 0;
+    let failed = 0;
 
-    const params = new URLSearchParams({
-      date,
-      venueCode,
-      venueName,
-      raceNo: String(raceNo)
-    });
+    /*
+     * 重要:
+     *
+     * Promise.allは禁止。
+     * 複数Worker起動も禁止。
+     *
+     * 1R完了
+     * ↓
+     * 次の1R
+     *
+     * の完全逐次処理。
+     */
+    for (
+      let index = 0;
+      index < jobs.length;
+      index++
+    ) {
+      const job =
+        jobs[index];
 
-    const headers = {
-      accept: "application/json"
-    };
+      const venueCode =
+        String(
+          job?.venueCode ||
+          ""
+        ).padStart(2, "0");
 
-    const secret = String(
-      process.env.RESULT_STORE_SECRET || ""
-    ).trim();
+      const venueName =
+        String(
+          job?.venueName ||
+          ""
+        ).trim();
 
-    if (secret) {
-      headers["x-result-store-secret"] = secret;
-    }
+      const raceNo =
+        Number(
+          job?.raceNo ||
+          0
+        );
 
-    const resultUrl =
-      `${siteUrl}/.netlify/functions/keirin-result-store?${params}`;
+      if (
+        !/^\d{2}$/.test(
+          venueCode
+        ) ||
+        !venueName ||
+        !Number.isInteger(
+          raceNo
+        ) ||
+        raceNo < 1 ||
+        raceNo > 12
+      ) {
+        failed++;
 
-    for (let i = 0; i < RETRY_DELAYS.length; i++) {
-      if (RETRY_DELAYS[i]) {
-        await sleep(RETRY_DELAYS[i]);
+        console.error(
+          `[RESULT INVALID] ` +
+          `${date} ${venueName} ` +
+          `${raceNo}R`
+        );
+
+        continue;
       }
 
-      try {
-        const response = await fetch(resultUrl, {
-          method: "GET",
-          headers,
-          signal: AbortSignal.timeout(50000)
+      const siteUrl =
+        String(
+          process.env.URL ||
+          process.env.DEPLOY_PRIME_URL ||
+          ""
+        ).replace(
+          /\/$/,
+          ""
+        );
+
+      if (!siteUrl) {
+        throw new Error(
+          "NetlifyサイトURLが取得できません"
+        );
+      }
+
+      const params =
+        new URLSearchParams({
+          date,
+          venueCode,
+          venueName,
+          raceNo:
+            String(raceNo)
         });
+
+      const resultUrl =
+        `${siteUrl}/.netlify/functions/` +
+        `keirin-result-store?${params}`;
+
+      const headers = {
+        accept:
+          "application/json"
+      };
+
+      const secret =
+        String(
+          process.env.RESULT_STORE_SECRET ||
+          ""
+        ).trim();
+
+      if (secret) {
+        headers[
+          "x-result-store-secret"
+        ] = secret;
+      }
+
+      let completed =
+        false;
+
+      try {
+        const response =
+          await fetch(
+            resultUrl,
+            {
+              method: "GET",
+              headers,
+
+              /*
+               * result-store側の
+               * ブラウザ取得時間を考慮。
+               */
+              signal:
+                AbortSignal.timeout(
+                  30000
+                )
+            }
+          );
 
         let data = null;
 
         try {
-          data = await response.json();
+          data =
+            await response.json();
         } catch {}
 
-        if (response.ok && data?.ok === true) {
-          console.log(
-            `[RESULT SAVED] ${date} ${venueName} ${raceNo}R`
-          );
-
-          return new Response(null, { status: 204 });
-        }
-
-        const errorText = String(data?.error || "");
-
         if (
-          response.status === 409 ||
-          /未確定|未取得|not.*available/i.test(errorText)
+          response.ok &&
+          data?.ok === true
         ) {
-          console.log(
-            `[RESULT NOT READY] ${date} ${venueName} ${raceNo}R ` +
-            `attempt=${i + 1}/${RETRY_DELAYS.length}`
-          );
+          saved++;
+          completed =
+            true;
 
-          // まだ結果が出ていない場合は、次の試行へ
-          continue;
+          console.log(
+            `[RESULT SAVED] ` +
+            `${index + 1}/${jobs.length} ` +
+            `${date} ` +
+            `${venueName} ` +
+            `${raceNo}R`
+          );
+        } else {
+          const errorText =
+            String(
+              data?.error ||
+              ""
+            );
+
+          if (
+            response.status === 409 ||
+            /未確定|未取得|not.*available/i.test(
+              errorText
+            )
+          ) {
+            unavailable++;
+            completed =
+              true;
+
+            console.log(
+              `[RESULT NOT READY] ` +
+              `${index + 1}/${jobs.length} ` +
+              `${date} ` +
+              `${venueName} ` +
+              `${raceNo}R`
+            );
+          } else {
+            failed++;
+
+            console.error(
+              `[RESULT FAILED RESPONSE] ` +
+              `${date} ` +
+              `${venueName} ` +
+              `${raceNo}R ` +
+              `HTTP ${response.status}`,
+              errorText
+            );
+          }
         }
 
-        console.log(
-          `[RESULT RETRY] ${date} ${venueName} ${raceNo}R ` +
-          `attempt=${i + 1}/${RETRY_DELAYS.length}`,
-          errorText || response.status
-        );
       } catch (error) {
-        console.log(
-          `[RESULT ERROR] ${date} ${venueName} ${raceNo}R ` +
-          `attempt=${i + 1}/${RETRY_DELAYS.length}`,
+        failed++;
+
+        console.error(
+          `[RESULT ERROR] ` +
+          `${index + 1}/${jobs.length} ` +
+          `${date} ` +
+          `${venueName} ` +
+          `${raceNo}R`,
           error instanceof Error
             ? error.message
             : String(error)
         );
       }
+
+      if (!completed) {
+        console.error(
+          `[RESULT FAILED] ` +
+          `${index + 1}/${jobs.length} ` +
+          `${date} ` +
+          `${venueName} ` +
+          `${raceNo}R`
+        );
+      }
+
+      /*
+       * ブラウザサービスへの連続アクセスを
+       * 少しだけ間隔を空ける。
+       */
+      await sleep(1000);
     }
 
-    console.error(
-      `[RESULT FAILED] ${date} ${venueName} ${raceNo}R`
+    console.log(
+      JSON.stringify({
+        ok: true,
+        date,
+        jobs:
+          jobs.length,
+        saved,
+        unavailable,
+        failed
+      })
     );
 
-    return new Response(null, { status: 204 });
+    return new Response(
+      null,
+      {
+        status: 204
+      }
+    );
 
   } catch (error) {
     console.error(
@@ -123,7 +283,12 @@ export default async (req) => {
         : String(error)
     );
 
-    return new Response(null, { status: 204 });
+    return new Response(
+      null,
+      {
+        status: 204
+      }
+    );
   }
 };
 
@@ -132,5 +297,11 @@ export const config = {
 };
 
 function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise(
+    resolve =>
+      setTimeout(
+        resolve,
+        ms
+      )
+  );
 }
