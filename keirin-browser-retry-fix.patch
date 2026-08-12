@@ -1,0 +1,336 @@
+diff --git a/modules/keirin/netlify/functions/keirin-predict.mjs b/modules/keirin/netlify/functions/keirin-predict.mjs
+index df97d72..e472fe5 100644
+--- a/modules/keirin/netlify/functions/keirin-predict.mjs
++++ b/modules/keirin/netlify/functions/keirin-predict.mjs
+@@ -173,40 +173,52 @@ async function requestBrowserService(base, params) {
+     date: params.date,
+     venueCode: params.venueCode,
+     venueName: params.venueName,
+-    raceNo: String(params.raceNo)
++    raceNo: String(params.raceNo),
++    ...(params.raceCardUrl ? { raceCardUrl: params.raceCardUrl } : {})
+   });
+ 
+-  const endpoints = [
+-    `${base}/keirin/preview?${query}`,
+-    `${base}/keirin/race?${query}`
+-  ];
++  // 個別予想は公式Rページの取得が本体。previewを先に挟むと、
++  // preview側で薄い応答/タイムアウトになった時点で本予想まで到達しない。
++  // screening-batch/result と同じく、RailwayのChromium取得に十分な時間を与える。
++  const endpoint = `${base}/keirin/race?${query}`;
+   const attempts = [];
+   const startedAt = Date.now();
+-  // 一次選別用previewを先に使い、重いrace取得を必要な場合だけフォールバックする。
+-  // Netlify Function内で外部ブラウザサービスを長時間待ち続けない。
+-  const totalBudgetMs = 28000;
++  const totalBudgetMs = 56000;
+ 
+-  for (let endpointIndex = 0; endpointIndex < endpoints.length; endpointIndex += 1) {
+-    const endpoint = endpoints[endpointIndex];
++  for (let attempt = 1; attempt <= 2; attempt += 1) {
+     const remaining = totalBudgetMs - (Date.now() - startedAt);
+-    if (remaining < 5000) break;
++    if (remaining < 6000) break;
++
++    const timeoutMs = Math.min(
++      attempt === 1 ? 30000 : 24000,
++      remaining - 1200
++    );
+ 
+-    const timeoutMs = Math.min(endpointIndex === 0 ? 12000 : 11000, remaining - 1200);
+     try {
+       const response = await fetch(endpoint, {
+-        headers: { accept: "application/json" },
++        headers: {
++          accept: "application/json",
++          "cache-control": "no-cache"
++        },
+         signal: AbortSignal.timeout(Math.max(5000, timeoutMs))
+       });
++
+       const text = await response.text();
+       let data = null;
+       try { data = JSON.parse(text); } catch {}
+ 
+       const officialData = data?.officialData || {};
+-      const participantCount = Array.isArray(officialData.participants) ? officialData.participants.length : 0;
+-      const hasUsableRaceData = participantCount >= 5 && officialData.basic;
++      const participantCount = Array.isArray(officialData.participants)
++        ? officialData.participants.length
++        : 0;
++      const hasUsableRaceData = Boolean(
++        officialData.basic &&
++        participantCount >= 5
++      );
++
+       attempts.push({
+-        endpoint: endpoint.replace(base, ""),
+-        endpointType: endpointIndex === 0 ? "preview" : "race",
++        endpoint: "/keirin/race",
++        attempt,
+         status: response.status,
+         parsed: data !== null,
+         participantCount,
+@@ -219,38 +231,80 @@ async function requestBrowserService(base, params) {
+         return {
+           ok: true,
+           status: response.status,
+-          data: { ...data, endpointAudit: attempts }
++          data: {
++            ...data,
++            endpointAudit: attempts,
++            diagnostics: {
++              ...(data.diagnostics || {}),
++              predictionFetchPath: "/keirin/race",
++              fallbackUsed: false
++            }
++          }
+         };
+       }
+ 
+-      const retryable = response.status >= 500 || response.status === 429 || /page crashed|target closed|browser|navigation|timeout|timed out|execution context|temporar|upstream/i.test(String(data?.error || ""));
+-      if (!retryable && response.ok && !hasUsableRaceData) {
+-        // 200だが予想に必要な出走表がない場合は重いrace取得へ進む。
++      const retryable =
++        response.status >= 500 ||
++        response.status === 429 ||
++        /page crashed|target closed|browser|navigation|timeout|timed out|execution context|temporar|upstream|socket|fetch failed/i
++          .test(String(data?.error || ""));
++
++      if (attempt < 2 && retryable && Date.now() - startedAt < totalBudgetMs - 5000) {
++        await sleep(500);
+         continue;
+       }
+-      if (!retryable && !response.ok) break;
++
++      if (response.ok && !hasUsableRaceData && attempt < 2) {
++        await sleep(500);
++        continue;
++      }
++
++      return {
++        ok: false,
++        status: response.status || 502,
++        data: {
++          ok: false,
++          error: data?.error ||
++            (hasUsableRaceData
++              ? `競輪ブラウザサービスが予想データを返しましたが処理に失敗しました（HTTP ${response.status}）`
++              : `競輪ブラウザサービスから出走表を取得できませんでした（HTTP ${response.status}）`),
++          endpointAudit: attempts
++        }
++      };
+     } catch (error) {
+       const message = error instanceof Error ? error.message : String(error);
+       attempts.push({
+-        endpoint: endpoint.replace(base, ""),
+-        endpointType: endpointIndex === 0 ? "preview" : "race",
++        endpoint: "/keirin/race",
++        attempt,
+         error: message,
+         elapsedMs: Date.now() - startedAt
+       });
+-    }
+ 
+-    if (endpointIndex === 0) await sleep(350);
++      if (attempt < 2 && Date.now() - startedAt < totalBudgetMs - 5000) {
++        await sleep(500);
++        continue;
++      }
++
++      return {
++        ok: false,
++        status: 502,
++        data: {
++          ok: false,
++          error: /timeout|timed out|abort/i.test(message)
++            ? "公式予想データ取得が時間内に完了しませんでした。2回の取得を試しましたが完了しませんでした。"
++            : "競輪ブラウザサービスへ接続できませんでした。",
++          endpointAudit: attempts
++        }
++      };
++    }
+   }
+ 
+-  const timedOut = attempts.some(item => /timeout|timed out|abort/i.test(String(item.error || "")));
+   return {
+     ok: false,
+     status: 502,
+     data: {
+       ok: false,
+-      error: timedOut
+-        ? "公式データ取得が時間内に完了しませんでした。軽量取得と詳細取得を試しましたが、出走表を取得できませんでした。"
+-        : "競輪公式データを取得できませんでした。",
++      error: "競輪ブラウザサービスの再試行でも出走表を取得できませんでした。",
+       endpointAudit: attempts
+     }
+   };
+diff --git a/netlify/functions/keirin-predict.mjs b/netlify/functions/keirin-predict.mjs
+index 6a93f59..d102df5 100644
+--- a/netlify/functions/keirin-predict.mjs
++++ b/netlify/functions/keirin-predict.mjs
+@@ -173,40 +173,52 @@ async function requestBrowserService(base, params) {
+     date: params.date,
+     venueCode: params.venueCode,
+     venueName: params.venueName,
+-    raceNo: String(params.raceNo)
++    raceNo: String(params.raceNo),
++    ...(params.raceCardUrl ? { raceCardUrl: params.raceCardUrl } : {})
+   });
+ 
+-  const endpoints = [
+-    `${base}/keirin/preview?${query}`,
+-    `${base}/keirin/race?${query}`
+-  ];
++  // 個別予想は公式Rページの取得が本体。previewを先に挟むと、
++  // preview側で薄い応答/タイムアウトになった時点で本予想まで到達しない。
++  // screening-batch/result と同じく、RailwayのChromium取得に十分な時間を与える。
++  const endpoint = `${base}/keirin/race?${query}`;
+   const attempts = [];
+   const startedAt = Date.now();
+-  // 一次選別用previewを先に使い、重いrace取得を必要な場合だけフォールバックする。
+-  // Netlify Function内で外部ブラウザサービスを長時間待ち続けない。
+-  const totalBudgetMs = 28000;
++  const totalBudgetMs = 56000;
+ 
+-  for (let endpointIndex = 0; endpointIndex < endpoints.length; endpointIndex += 1) {
+-    const endpoint = endpoints[endpointIndex];
++  for (let attempt = 1; attempt <= 2; attempt += 1) {
+     const remaining = totalBudgetMs - (Date.now() - startedAt);
+-    if (remaining < 5000) break;
++    if (remaining < 6000) break;
++
++    const timeoutMs = Math.min(
++      attempt === 1 ? 30000 : 24000,
++      remaining - 1200
++    );
+ 
+-    const timeoutMs = Math.min(endpointIndex === 0 ? 12000 : 11000, remaining - 1200);
+     try {
+       const response = await fetch(endpoint, {
+-        headers: { accept: "application/json" },
++        headers: {
++          accept: "application/json",
++          "cache-control": "no-cache"
++        },
+         signal: AbortSignal.timeout(Math.max(5000, timeoutMs))
+       });
++
+       const text = await response.text();
+       let data = null;
+       try { data = JSON.parse(text); } catch {}
+ 
+       const officialData = data?.officialData || {};
+-      const participantCount = Array.isArray(officialData.participants) ? officialData.participants.length : 0;
+-      const hasUsableRaceData = participantCount >= 5 && officialData.basic;
++      const participantCount = Array.isArray(officialData.participants)
++        ? officialData.participants.length
++        : 0;
++      const hasUsableRaceData = Boolean(
++        officialData.basic &&
++        participantCount >= 5
++      );
++
+       attempts.push({
+-        endpoint: endpoint.replace(base, ""),
+-        endpointType: endpointIndex === 0 ? "preview" : "race",
++        endpoint: "/keirin/race",
++        attempt,
+         status: response.status,
+         parsed: data !== null,
+         participantCount,
+@@ -219,38 +231,80 @@ async function requestBrowserService(base, params) {
+         return {
+           ok: true,
+           status: response.status,
+-          data: { ...data, endpointAudit: attempts }
++          data: {
++            ...data,
++            endpointAudit: attempts,
++            diagnostics: {
++              ...(data.diagnostics || {}),
++              predictionFetchPath: "/keirin/race",
++              fallbackUsed: false
++            }
++          }
+         };
+       }
+ 
+-      const retryable = response.status >= 500 || response.status === 429 || /page crashed|target closed|browser|navigation|timeout|timed out|execution context|temporar|upstream/i.test(String(data?.error || ""));
+-      if (!retryable && response.ok && !hasUsableRaceData) {
+-        // 200だが予想に必要な出走表がない場合は重いrace取得へ進む。
++      const retryable =
++        response.status >= 500 ||
++        response.status === 429 ||
++        /page crashed|target closed|browser|navigation|timeout|timed out|execution context|temporar|upstream|socket|fetch failed/i
++          .test(String(data?.error || ""));
++
++      if (attempt < 2 && retryable && Date.now() - startedAt < totalBudgetMs - 5000) {
++        await sleep(500);
+         continue;
+       }
+-      if (!retryable && !response.ok) break;
++
++      if (response.ok && !hasUsableRaceData && attempt < 2) {
++        await sleep(500);
++        continue;
++      }
++
++      return {
++        ok: false,
++        status: response.status || 502,
++        data: {
++          ok: false,
++          error: data?.error ||
++            (hasUsableRaceData
++              ? `競輪ブラウザサービスが予想データを返しましたが処理に失敗しました（HTTP ${response.status}）`
++              : `競輪ブラウザサービスから出走表を取得できませんでした（HTTP ${response.status}）`),
++          endpointAudit: attempts
++        }
++      };
+     } catch (error) {
+       const message = error instanceof Error ? error.message : String(error);
+       attempts.push({
+-        endpoint: endpoint.replace(base, ""),
+-        endpointType: endpointIndex === 0 ? "preview" : "race",
++        endpoint: "/keirin/race",
++        attempt,
+         error: message,
+         elapsedMs: Date.now() - startedAt
+       });
+-    }
+ 
+-    if (endpointIndex === 0) await sleep(350);
++      if (attempt < 2 && Date.now() - startedAt < totalBudgetMs - 5000) {
++        await sleep(500);
++        continue;
++      }
++
++      return {
++        ok: false,
++        status: 502,
++        data: {
++          ok: false,
++          error: /timeout|timed out|abort/i.test(message)
++            ? "公式予想データ取得が時間内に完了しませんでした。2回の取得を試しましたが完了しませんでした。"
++            : "競輪ブラウザサービスへ接続できませんでした。",
++          endpointAudit: attempts
++        }
++      };
++    }
+   }
+ 
+-  const timedOut = attempts.some(item => /timeout|timed out|abort/i.test(String(item.error || "")));
+   return {
+     ok: false,
+     status: 502,
+     data: {
+       ok: false,
+-      error: timedOut
+-        ? "公式データ取得が時間内に完了しませんでした。軽量取得と詳細取得を試しましたが、出走表を取得できませんでした。"
+-        : "競輪公式データを取得できませんでした。",
++      error: "競輪ブラウザサービスの再試行でも出走表を取得できませんでした。",
+       endpointAudit: attempts
+     }
+   };
