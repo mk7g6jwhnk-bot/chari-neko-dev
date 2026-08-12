@@ -76,16 +76,9 @@ export default async (req) => {
         continue;
       }
 
-      /*
-       * raceNumbersを正規のレース番号一覧として使用する。
-       *
-       * discover側が
-       *   raceNumbers: [1,2,3,...]
-       *   races: [...]
-       * のどちらか／両方を返しても動くようにする。
-       */
-
-      const raceNumbers = Array.isArray(meeting?.raceNumbers)
+      const raceNumbers = Array.isArray(
+        meeting?.raceNumbers
+      )
         ? meeting.raceNumbers
             .map((value) => Number(value))
             .filter(
@@ -104,7 +97,9 @@ export default async (req) => {
       const raceMap = new Map();
 
       for (const race of races) {
-        const raceNo = Number(race?.raceNo || 0);
+        const raceNo = Number(
+          race?.raceNo || 0
+        );
 
         if (
           Number.isInteger(raceNo) &&
@@ -115,10 +110,7 @@ export default async (req) => {
         }
       }
 
-      /*
-       * raceNumbersが空でもracesが存在する場合は、
-       * races側からレース番号を補完する。
-       */
+      // raceNumbersが空でもracesから補完
       const targetRaceNumbers = [
         ...new Set([
           ...raceNumbers,
@@ -129,11 +121,7 @@ export default async (req) => {
       for (const raceNo of targetRaceNumbers) {
         const race = raceMap.get(raceNo);
 
-        /*
-         * 発走時刻が取得できる場合だけ発走前を除外。
-         * 時刻が無い場合はWorkerへ渡す。
-         * 未確定ならresult-store側で処理する。
-         */
+        // 発走前のレースは除外
         if (!hasStarted(race?.startTime, jst)) {
           continue;
         }
@@ -155,62 +143,101 @@ export default async (req) => {
     const workerUrl =
       `${siteUrl}/.netlify/functions/keirin-result-worker-background`;
 
-    const dispatchResults = await Promise.all(
-      jobs.map(async (job) => {
-        try {
-          const response = await fetch(workerUrl, {
-            method: "POST",
-            headers: {
-              "content-type": "application/json",
-              accept: "application/json"
-            },
-            body: JSON.stringify(job),
-            signal: AbortSignal.timeout(8000)
-          });
+    /*
+     * 重要:
+     * 全レースを一斉にWorkerへ投げない。
+     *
+     * 84Rなど大量開催の場合、
+     * ブラウザサービスへの同時アクセスが集中して
+     * 結果取得がタイムアウトするため、
+     * 8レースずつ投入する。
+     */
+    const BATCH_SIZE = 8;
 
-          if (response.ok) {
-            console.log(
-              `[WORKER DISPATCHED] ${job.date} ${job.venueName} ${job.raceNo}R HTTP ${response.status}`
+    let dispatched = 0;
+    let dispatchFailed = 0;
+
+    for (
+      let start = 0;
+      start < jobs.length;
+      start += BATCH_SIZE
+    ) {
+      const batch = jobs.slice(
+        start,
+        start + BATCH_SIZE
+      );
+
+      console.log(
+        `[WORKER BATCH] ${start + 1}-${start + batch.length}/${jobs.length}`
+      );
+
+      const batchResults = await Promise.all(
+        batch.map(async (job) => {
+          try {
+            const response = await fetch(
+              workerUrl,
+              {
+                method: "POST",
+                headers: {
+                  "content-type": "application/json",
+                  accept: "application/json"
+                },
+                body: JSON.stringify(job),
+                signal: AbortSignal.timeout(8000)
+              }
             );
 
-            return {
-              ok: true,
-              job
-            };
+            if (response.ok) {
+              console.log(
+                `[WORKER DISPATCHED] ${job.date} ${job.venueName} ${job.raceNo}R HTTP ${response.status}`
+              );
+
+              return true;
+            }
+
+            console.error(
+              `[WORKER DISPATCH FAILED] ${job.date} ${job.venueName} ${job.raceNo}R HTTP ${response.status}`
+            );
+
+            return false;
+          } catch (error) {
+            console.error(
+              `[WORKER DISPATCH ERROR] ${job.date} ${job.venueName} ${job.raceNo}R`,
+              error instanceof Error
+                ? error.message
+                : String(error)
+            );
+
+            return false;
           }
+        })
+      );
 
-          console.error(
-            `[WORKER DISPATCH FAILED] ${job.date} ${job.venueName} ${job.raceNo}R HTTP ${response.status}`
-          );
+      const batchDispatched =
+        batchResults.filter(Boolean).length;
 
-          return {
-            ok: false,
-            job
-          };
-        } catch (error) {
-          console.error(
-            `[WORKER DISPATCH ERROR] ${job.date} ${job.venueName} ${job.raceNo}R`,
-            error instanceof Error
-              ? error.message
-              : String(error)
-          );
+      const batchFailed =
+        batchResults.length -
+        batchDispatched;
 
-          return {
-            ok: false,
-            job
-          };
-        }
-      })
-    );
+      dispatched += batchDispatched;
+      dispatchFailed += batchFailed;
 
-    const dispatched = dispatchResults.filter(
-      (result) => result.ok
-    ).length;
+      console.log(
+        `[WORKER BATCH COMPLETE] dispatched=${batchDispatched} failed=${batchFailed}`
+      );
 
-    const dispatchFailed =
-      dispatchResults.length - dispatched;
+      // 次のバッチを少し待ってから投入
+      if (
+        start + BATCH_SIZE <
+        jobs.length
+      ) {
+        await sleep(1000);
+      }
+    }
 
-    const finishedAt = new Date().toISOString();
+    const finishedAt =
+      new Date().toISOString();
 
     console.log(
       JSON.stringify({
@@ -218,6 +245,7 @@ export default async (req) => {
         date,
         meetings: meetings.length,
         jobs: jobs.length,
+        batchSize: BATCH_SIZE,
         dispatched,
         dispatchFailed,
         startedAt,
@@ -248,8 +276,12 @@ export const config = {
   schedule: "@hourly"
 };
 
-function hasStarted(value, jstNow) {
-  const text = String(value || "").trim();
+function hasStarted(
+  value,
+  jstNow
+) {
+  const text =
+    String(value || "").trim();
 
   // 発走時刻が無い場合はWorkerへ渡す
   if (!text) {
@@ -267,7 +299,9 @@ function hasStarted(value, jstNow) {
 
   const hour = Number(match[1]);
   const minute = Number(match[2]);
-  const second = Number(match[3] || 0);
+  const second = Number(
+    match[3] || 0
+  );
 
   if (
     hour < 0 ||
@@ -280,7 +314,8 @@ function hasStarted(value, jstNow) {
     return true;
   }
 
-  const raceTime = new Date(jstNow);
+  const raceTime =
+    new Date(jstNow);
 
   raceTime.setHours(
     hour,
@@ -290,4 +325,10 @@ function hasStarted(value, jstNow) {
   );
 
   return jstNow >= raceTime;
+}
+
+function sleep(ms) {
+  return new Promise(
+    (resolve) => setTimeout(resolve, ms)
+  );
 }
