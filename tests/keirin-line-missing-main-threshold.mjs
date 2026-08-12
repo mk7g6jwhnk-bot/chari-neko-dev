@@ -7,7 +7,7 @@ try{
  assert.equal(pred.audit.chatSpecV1.mainInvariant.mainPurchasedCount,0);
  assert.equal(pred.audit.chatSpecV1.mainInvariant.passed,true);
  assert.equal(pred.noBet,true);
- assert.equal(pred.noBetReason,"LINE_AND_START_EVIDENCE_UNAVAILABLE");
+ assert.equal(pred.noBetReason,"LINE_FALLBACK_INSUFFICIENT_DISCRIMINATION");
  assert.equal(pred.audit.referencePlan,true);
  assert.equal(pred.purchasePlan.length,7);
  assert.equal(pred.purchasePlan.every(x=>x.referenceOnly===true),true);

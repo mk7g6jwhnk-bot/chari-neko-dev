@@ -87,10 +87,9 @@ export function buildLineFallbackDiscriminationAudit({scored=[],terminals=[],lin
   const mechanismSpread=spread(mechanismScores);
 
   // Missing-line mode must have some real rider separation before normal purchase.
-  // This prevents "unknown line" from turning all riders into equally valid MAIN heads.
-  // These are evidence-quality gates, not point-count caps.
+  // Do NOT treat missing start-power/line metadata as an automatic race-wide skip.
+  // The decision is based on independent rider separation that is actually present.
   const sufficient=Boolean(
-    !lineIndependentMainAvailable ||
     firstSpread>=.20 ||
     secondSpread>=.24 ||
     thirdSpread>=.24 ||

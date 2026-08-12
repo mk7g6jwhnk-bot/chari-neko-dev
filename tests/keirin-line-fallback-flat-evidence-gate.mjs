@@ -5,14 +5,14 @@ try{
   const res=await handler(new Request("https://test/.netlify/functions/keirin-predict?date=20260808&venueCode=28&venueName=%E7%AB%8B%E5%B7%9D&raceNo=12&budget=3000"));
   const p=(await res.json()).prediction;
   const d=p.audit.lineFallbackAudit.discriminationAudit;
-  assert.equal(d.sufficient,true);
-  assert.equal(p.audit.lineFallbackAudit.flatEvidencePurchaseBlockApplied,false);
+  assert.equal(d.sufficient,false);
+  assert.equal(p.audit.lineFallbackAudit.flatEvidencePurchaseBlockApplied,true);
   assert.equal(p.noBet,true);
-  assert.equal(p.noBetReason,"LINE_AND_START_EVIDENCE_UNAVAILABLE");
+  assert.equal(p.noBetReason,"LINE_FALLBACK_INSUFFICIENT_DISCRIMINATION");
   assert.ok(p.purchasePlan.length>=1);
   assert.ok(p.purchasePlan.length<44);
   assert.equal(p.audit.referencePlan,true);
   assert.equal(p.purchasePlan.every(x=>x.referenceOnly===true),true);
   assert.ok(p.terminals.length>p.purchasePlan.length);
-  console.log("PASS flat missing-line evidence no longer becomes 44 MAIN bets");
+  console.log("PASS genuinely flat missing-line evidence remains reference-only");
 }finally{globalThis.fetch=originalFetch}
