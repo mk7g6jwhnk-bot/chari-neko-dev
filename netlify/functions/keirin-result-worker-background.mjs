@@ -1,4 +1,4 @@
-const RETRY_DELAYS = [0];
+const RETRY_DELAYS = [0, 5000, 15000];
 
 export default async (req) => {
   try {
@@ -59,8 +59,9 @@ export default async (req) => {
 
       try {
         const response = await fetch(resultUrl, {
+          method: "GET",
           headers,
-          signal: AbortSignal.timeout(22000)
+          signal: AbortSignal.timeout(50000)
         });
 
         let data = null;
@@ -73,28 +74,34 @@ export default async (req) => {
           console.log(
             `[RESULT SAVED] ${date} ${venueName} ${raceNo}R`
           );
+
           return new Response(null, { status: 204 });
         }
+
+        const errorText = String(data?.error || "");
 
         if (
           response.status === 409 ||
-          /未確定|未取得|not.*available/i.test(
-            String(data?.error || "")
-          )
+          /未確定|未取得|not.*available/i.test(errorText)
         ) {
           console.log(
-            `[RESULT NOT READY] ${date} ${venueName} ${raceNo}R`
+            `[RESULT NOT READY] ${date} ${venueName} ${raceNo}R ` +
+            `attempt=${i + 1}/${RETRY_DELAYS.length}`
           );
-          return new Response(null, { status: 204 });
+
+          // まだ結果が出ていない場合は、次の試行へ
+          continue;
         }
 
         console.log(
-          `[RESULT RETRY] ${date} ${venueName} ${raceNo}R`,
-          data?.error || response.status
+          `[RESULT RETRY] ${date} ${venueName} ${raceNo}R ` +
+          `attempt=${i + 1}/${RETRY_DELAYS.length}`,
+          errorText || response.status
         );
       } catch (error) {
         console.log(
-          `[RESULT ERROR] ${date} ${venueName} ${raceNo}R`,
+          `[RESULT ERROR] ${date} ${venueName} ${raceNo}R ` +
+          `attempt=${i + 1}/${RETRY_DELAYS.length}`,
           error instanceof Error
             ? error.message
             : String(error)
