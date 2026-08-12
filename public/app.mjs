@@ -608,7 +608,7 @@ function renderPurchaseScenarioExplanation(snapshot,bets,explanation=null){
   if(main.length)mainSentences.push(`本線 ${main.length}点。予測側の終端を購入エンジンが確率・集中度・オッズで評価して採用しています。`);
   if(cover.length)mainSentences.push(`押さえ ${cover.length}点。主展開の派生または別の有力展開として残した終端です。`);
   if(value.length)mainSentences.push(`買える高配当 ${value.length}点。成立根拠とオッズ妙味の両方が残った終端です。`);
-  const rows=bets.filter(b=>["MAIN","COVER","BUYABLE_HIGH"].includes(b?.category)).map(b=>scenarioBetSentence(b,explanation)).join("");
+  const rows=bets.filter(b=>["MAIN","COVER","BUYABLE_HIGH"].includes(b?.category)).map(b=>{try{return scenarioBetSentence(b,explanation)}catch(error){console.warn("purchase scenario explanation skipped",error);return scenarioBetSentence(b,null)}}).join("");
   return `<details class="predictionAccordion"><summary>購入エンジン：なぜこの買い目を採用したか</summary><div class="accordionBody"><div class="auditCallout">${mainSentences.map(x=>`<p>${esc(x)}</p>`).join("")}</div><div class="detailGroup">${rows}</div></div></details>`;
 }
 
@@ -617,9 +617,10 @@ function scenarioBetSentence(b,explanation=null){
   const [a,c,d]=order;
   const cls=betClassLabel(b?.category);
   const branch=b?.dominantBranchLabel||b?.branchLabel||"展開枝不明";
-  const scenario=(explanation?.axis?.branchId&&String(explanation.axis.branchId)===String(b?.dominantBranchId)
-    ?explanation.axis
-    :(explanation?.alternatives||[]).find(x=>String(x?.branchId)===String(b?.dominantBranchId)))||null;
+  const safeExplanation=explanation&&typeof explanation==="object"?explanation:null;
+  const scenario=(safeExplanation?.axis?.branchId&&String(safeExplanation.axis.branchId)===String(b?.dominantBranchId)
+    ?safeExplanation.axis
+    :(Array.isArray(safeExplanation?.alternatives)?safeExplanation.alternatives:[]).find(x=>String(x?.branchId)===String(b?.dominantBranchId)))||null;
   const convRaw=b?.naturalConvergenceScore;
   const conv=convRaw===null||convRaw===undefined||convRaw===""?null:Number(convRaw);
   const convText=Number.isFinite(conv)?`${Math.round(conv*100)}%`:"不明";
