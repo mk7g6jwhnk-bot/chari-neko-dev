@@ -1,32 +1,27 @@
-# チャリ猫予想 3競技統合DEV本体1.1
+# KEIRIN v0.16.0 audit patch
 
-ボート・競輪・オートを1つのホーム画面から利用する開発版です。
+対象: current `main` of `mk7g6jwhnk-bot/chari-neko-dev`.
 
-## 収録
-- ボート DEV統合版0.6
-- 競輪 統合版0.4
-- オート 統合版0.3
-- 共通ホーム・競技選択UI
-- 共通結果表示
-- 共通資金配分表示
+変更:
+1. `scored -> initiativeAssessment -> branches` を固定。
+2. `officialScore` を field-relative evidence として scored に接続。ハード順位ではなく±3点を意味のある差、±8点で最大補正。
+3. `initiativeAssessment` は購入判断をしない。候補を削除しない。
+4. browser取得を `/keirin/preview -> /keirin/race` の順にし、全体24秒予算。
+5. ChatSpecの `sameScenarioMainSibling` によるMAIN昇格を禁止。
+6. `NATURAL_PRECEDENCE_PROMOTION` による後段MAIN/COVER昇格を禁止。
+7. 最終購入点数は最大8点に制限。ただし候補が1点しかない場合に無理やり2点へ水増ししない。
+8. engineVersionを `KEIRIN-0.16.0-initiative-purchase-separation` に更新。
+9. initiative audit testを追加。
 
-## 更新先
-GitHubの `chari-neko-dev` に、このZIPを解凍した中身を上書きします。
-安定版 `chari-neko` は変更しません。
+適用:
+`node tools/apply-keirin-v016.mjs`
 
-## 初回確認
-1. ボート開催一覧
-2. 競輪開催リンク発見
-3. オート開催場
-4. 各競技1レースずつ取得診断
-5. エラーがあれば診断JSONを保存してパーサー調整
+その後:
+`node --check keirin/engine/initiative-assessment.mjs`
+`node --check keirin/engine/keirin-engine.mjs`
+`node --check keirin/sports/keirin-scoring.mjs`
+`node --check keirin/engine/chat-spec-v1-policy.mjs`
+`node --check netlify/functions/keirin-predict.mjs`
+`node tests/initiative-assessment.audit.mjs`
 
-
-## 1.1追加機能
-- レース横断検索モジュール
-- 逆算展開木研究モジュール
-- ホーム画面から横断検索への導線
-- `UPLOAD_GUIDE.md`
-
-## v41 予想評価UI
-予想済みレースでは「信頼度」「展開集中度」「コロがし適性」「見送り判定」を表示します。これは既存の監査情報から作る表示専用評価で、買い目の生成・採否ロジックには影響しません。
+このパッチはUIを変更しない。
