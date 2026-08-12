@@ -1,307 +1,436 @@
-export default async (req) => {
+import { jsonResponse } from "../../keirin/parser/utils.mjs";
+import { normalizeResult } from "./keirin-result.mjs";
+
+const env = (name) => String(process.env[name] || "").trim();
+
+const BROWSER_TIMEOUT_MS = 60_000;
+const SUPABASE_TIMEOUT_MS = 15_000;
+
+const raceId = (p) =>
+  `keirin:${p.date}:${p.venueCode}:${p.raceNo}`;
+
+async function fetchWithTimeout(url, options = {}, timeoutMs) {
+  const controller = new AbortController();
+
+  const timer = setTimeout(() => {
+    controller.abort();
+  }, timeoutMs);
+
   try {
-    const p =
-      await req.json();
+    return await fetch(url, {
+      ...options,
+      signal: controller.signal
+    });
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
-    const date =
-      String(
-        p?.date || ""
-      );
+async function supabaseFetch(path, options = {}) {
+  const url = env("SUPABASE_URL").replace(/\/$/, "");
+  const key = env("SUPABASE_SERVICE_ROLE_KEY");
 
-    const jobs =
-      Array.isArray(
-        p?.jobs
-      )
-        ? p.jobs
-        : [];
-
-    if (
-      !/^\d{8}$/.test(
-        date
-      ) ||
-      jobs.length === 0
-    ) {
-      throw new Error(
-        "結果Workerの入力が不正です"
-      );
-    }
-
-    console.log(
-      `[keirin-result-worker-background] ` +
-      `start date=${date} ` +
-      `jobs=${jobs.length}`
+  if (!url || !key) {
+    throw new Error(
+      "SUPABASE_URL または SUPABASE_SERVICE_ROLE_KEY が未設定です"
     );
+  }
 
-    let saved = 0;
-    let unavailable = 0;
-    let failed = 0;
-
-    /*
-     * 重要:
-     *
-     * Promise.allは禁止。
-     * 複数Worker起動も禁止。
-     *
-     * 1R完了
-     * ↓
-     * 次の1R
-     *
-     * の完全逐次処理。
-     */
-    for (
-      let index = 0;
-      index < jobs.length;
-      index++
-    ) {
-      const job =
-        jobs[index];
-
-      const venueCode =
-        String(
-          job?.venueCode ||
-          ""
-        ).padStart(2, "0");
-
-      const venueName =
-        String(
-          job?.venueName ||
-          ""
-        ).trim();
-
-      const raceNo =
-        Number(
-          job?.raceNo ||
-          0
-        );
-
-      if (
-        !/^\d{2}$/.test(
-          venueCode
-        ) ||
-        !venueName ||
-        !Number.isInteger(
-          raceNo
-        ) ||
-        raceNo < 1 ||
-        raceNo > 12
-      ) {
-        failed++;
-
-        console.error(
-          `[RESULT INVALID] ` +
-          `${date} ${venueName} ` +
-          `${raceNo}R`
-        );
-
-        continue;
+  return fetchWithTimeout(
+    `${url}/rest/v1/${path}`,
+    {
+      ...options,
+      headers: {
+        apikey: key,
+        Authorization: `Bearer ${key}`,
+        "Content-Type": "application/json",
+        ...(options.headers || {})
       }
+    },
+    SUPABASE_TIMEOUT_MS
+  );
+}
 
-      const siteUrl =
-        String(
-          process.env.URL ||
-          process.env.DEPLOY_PRIME_URL ||
-          ""
-        ).replace(
-          /\/$/,
-          ""
-        );
-
-      if (!siteUrl) {
-        throw new Error(
-          "NetlifyサイトURLが取得できません"
-        );
-      }
-
-      const params =
-        new URLSearchParams({
-          date,
-          venueCode,
-          venueName,
-          raceNo:
-            String(raceNo)
-        });
-
-      const resultUrl =
-        `${siteUrl}/.netlify/functions/` +
-        `keirin-result-store?${params}`;
-
-      const headers = {
-        accept:
-          "application/json"
-      };
-
-      const secret =
-        String(
-          process.env.RESULT_STORE_SECRET ||
-          ""
-        ).trim();
-
-      if (secret) {
-        headers[
-          "x-result-store-secret"
-        ] = secret;
-      }
-
-      let completed =
-        false;
-
-      try {
-        const response =
-          await fetch(
-            resultUrl,
-            {
-              method: "GET",
-              headers,
-
-              /*
-               * result-store側の
-               * ブラウザ取得時間を考慮。
-               */
-              signal:
-                AbortSignal.timeout(
-                  30000
-                )
-            }
-          );
-
-        let data = null;
-
-        try {
-          data =
-            await response.json();
-        } catch {}
-
-        if (
-          response.ok &&
-          data?.ok === true
-        ) {
-          saved++;
-          completed =
-            true;
-
-          console.log(
-            `[RESULT SAVED] ` +
-            `${index + 1}/${jobs.length} ` +
-            `${date} ` +
-            `${venueName} ` +
-            `${raceNo}R`
-          );
-        } else {
-          const errorText =
-            String(
-              data?.error ||
-              ""
-            );
-
-          if (
-            response.status === 409 ||
-            /未確定|未取得|not.*available/i.test(
-              errorText
-            )
-          ) {
-            unavailable++;
-            completed =
-              true;
-
-            console.log(
-              `[RESULT NOT READY] ` +
-              `${index + 1}/${jobs.length} ` +
-              `${date} ` +
-              `${venueName} ` +
-              `${raceNo}R`
-            );
-          } else {
-            failed++;
-
-            console.error(
-              `[RESULT FAILED RESPONSE] ` +
-              `${date} ` +
-              `${venueName} ` +
-              `${raceNo}R ` +
-              `HTTP ${response.status}`,
-              errorText
-            );
-          }
-        }
-
-      } catch (error) {
-        failed++;
-
-        console.error(
-          `[RESULT ERROR] ` +
-          `${index + 1}/${jobs.length} ` +
-          `${date} ` +
-          `${venueName} ` +
-          `${raceNo}R`,
-          error instanceof Error
-            ? error.message
-            : String(error)
-        );
-      }
-
-      if (!completed) {
-        console.error(
-          `[RESULT FAILED] ` +
-          `${index + 1}/${jobs.length} ` +
-          `${date} ` +
-          `${venueName} ` +
-          `${raceNo}R`
-        );
-      }
-
-      /*
-       * ブラウザサービスへの連続アクセスを
-       * 少しだけ間隔を空ける。
-       */
-      await sleep(1000);
-    }
-
-    console.log(
-      JSON.stringify({
-        ok: true,
-        date,
-        jobs:
-          jobs.length,
-        saved,
-        unavailable,
-        failed
-      })
-    );
-
-    return new Response(
-      null,
-      {
-        status: 204
-      }
-    );
-
+async function logFetch(row) {
+  try {
+    await supabaseFetch("result_fetch_logs", {
+      method: "POST",
+      headers: {
+        Prefer: "return=minimal"
+      },
+      body: JSON.stringify(row)
+    });
   } catch (error) {
     console.error(
-      "[keirin-result-worker-background] fatal",
+      "[RESULT LOG ERROR]",
       error instanceof Error
         ? error.message
         : String(error)
     );
+  }
+}
 
-    return new Response(
-      null,
-      {
-        status: 204
-      }
+function normalizeRacePayload(body) {
+  const date = String(body?.date || "");
+
+  const venueCode = String(
+    body?.venueCode || ""
+  ).padStart(2, "0");
+
+  const venueName = String(
+    body?.venueName || ""
+  ).trim();
+
+  const raceNo = Number(
+    body?.raceNo || 0
+  );
+
+  if (
+    !/^\d{8}$/.test(date) ||
+    !/^\d{2}$/.test(venueCode) ||
+    !venueName ||
+    !Number.isInteger(raceNo) ||
+    raceNo < 1 ||
+    raceNo > 12
+  ) {
+    throw new Error(
+      "結果ワーカーのレース情報が不正です"
     );
   }
-};
+
+  return {
+    date,
+    venueCode,
+    venueName,
+    raceNo
+  };
+}
+
+async function fetchOfficialResult(p) {
+  const base = env(
+    "KEIRIN_BROWSER_SERVICE_URL"
+  ).replace(/\/$/, "");
+
+  if (!base) {
+    throw new Error(
+      "KEIRIN_BROWSER_SERVICE_URLが未設定です"
+    );
+  }
+
+  const q = new URLSearchParams({
+    date: p.date,
+    venueCode: p.venueCode,
+    venueName: p.venueName,
+    raceNo: String(p.raceNo)
+  });
+
+  const url =
+    `${base}/keirin/result?${q.toString()}`;
+
+  const response = await fetchWithTimeout(
+    url,
+    {
+      headers: {
+        accept: "application/json"
+      }
+    },
+    BROWSER_TIMEOUT_MS
+  );
+
+  let data = null;
+
+  try {
+    data = await response.json();
+  } catch {
+    data = null;
+  }
+
+  return {
+    response,
+    data
+  };
+}
+
+async function saveResult(p, result) {
+  const id = raceId(p);
+
+  const now = new Date().toISOString();
+
+  const saved = await supabaseFetch(
+    "race_results?on_conflict=race_id",
+    {
+      method: "POST",
+      headers: {
+        Prefer:
+          "resolution=merge-duplicates,return=representation"
+      },
+      body: JSON.stringify({
+        race_id: id,
+        competition: "keirin",
+        venue: p.venueName,
+        race_date:
+          `${p.date.slice(0, 4)}-` +
+          `${p.date.slice(4, 6)}-` +
+          `${p.date.slice(6, 8)}`,
+        race_number: p.raceNo,
+        result_status:
+          result.status || "confirmed",
+        finishing_order:
+          result.finishOrder || [],
+        official_decision:
+          result.winningMethod || null,
+        payout:
+          result.payout == null
+            ? null
+            : {
+                trifecta: result.payout
+              },
+        raw_result: result,
+        source:
+          result.source || "official",
+        fetched_at: now,
+        updated_at: now
+      })
+    }
+  );
+
+  if (!saved.ok) {
+    const text = await saved.text();
+
+    throw new Error(
+      `Supabase保存失敗: HTTP ${saved.status} ${text}`
+    );
+  }
+
+  let rows = [];
+
+  try {
+    rows = await saved.json();
+  } catch {
+    rows = [];
+  }
+
+  return rows?.[0] || null;
+}
+
+export default async function handler(req) {
+  let p = null;
+
+  const startedAt = Date.now();
+
+  try {
+    let body = null;
+
+    try {
+      body = await req.json();
+    } catch {
+      throw new Error(
+        "結果ワーカーのJSONを読み取れません"
+      );
+    }
+
+    p = normalizeRacePayload(body);
+
+    const id = raceId(p);
+
+    console.log(
+      `[RESULT START] ${p.date} ${p.venueName} ${p.raceNo}R`
+    );
+
+    /*
+     * ここが今回の重要変更点。
+     *
+     * 以前:
+     *
+     * background worker
+     *   ↓
+     * keirin-result-store
+     *   ↓
+     * browser service
+     *
+     * だったため、同期Functionのタイムアウトで
+     * HTTP 500 が発生していた。
+     *
+     * 今回:
+     *
+     * background worker
+     *   ↓
+     * browser service
+     *   ↓
+     * normalize
+     *   ↓
+     * Supabase
+     *
+     * として中間Functionを完全に外す。
+     */
+
+    let official;
+
+    try {
+      official = await fetchOfficialResult(p);
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : String(error);
+
+      const timeout =
+        error?.name === "AbortError" ||
+        /timeout|aborted/i.test(message);
+
+      await logFetch({
+        race_id: id,
+        status: "failed",
+        http_status: null,
+        retry_count: 0,
+        error_code: timeout
+          ? "BROWSER_TIMEOUT"
+          : "BROWSER_FETCH_ERROR",
+        error_message: message,
+        source: "keirin-browser"
+      });
+
+      console.error(
+        `[RESULT FAILED] ${p.date} ${p.venueName} ${p.raceNo}R ${message}`
+      );
+
+      return new Response(null, {
+        status: 204
+      });
+    }
+
+    const {
+      response,
+      data
+    } = official;
+
+    const result = normalizeResult(
+      data?.result ||
+      data?.officialData?.result ||
+      data?.officialResult
+    );
+
+    /*
+     * 公式結果がまだ存在しない場合。
+     *
+     * これはシステム障害ではないので
+     * ERROR扱いにしない。
+     */
+
+    if (!response.ok || !result) {
+      const message =
+        data?.error ||
+        "公式結果が未確定です";
+
+      await logFetch({
+        race_id: id,
+        status: "not_ready",
+        http_status: response.status,
+        retry_count: 0,
+        error_code: "RESULT_UNAVAILABLE",
+        error_message: message,
+        source: "keirin-browser"
+      });
+
+      console.log(
+        `[RESULT NOT READY] ${p.date} ${p.venueName} ${p.raceNo}R`
+      );
+
+      return new Response(null, {
+        status: 204
+      });
+    }
+
+    /*
+     * 結果が取得できたら、このWorker自身が
+     * Supabaseへ保存する。
+     */
+
+    let saved;
+
+    try {
+      saved = await saveResult(p, result);
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : String(error);
+
+      await logFetch({
+        race_id: id,
+        status: "error",
+        http_status: response.status,
+        retry_count: 0,
+        error_code: "STORE_ERROR",
+        error_message: message,
+        source: "keirin-result-worker-background"
+      });
+
+      console.error(
+        `[RESULT SAVE FAILED] ${p.date} ${p.venueName} ${p.raceNo}R ${message}`
+      );
+
+      return new Response(null, {
+        status: 204
+      });
+    }
+
+    await logFetch({
+      race_id: id,
+      status: "success",
+      http_status: response.status,
+      retry_count: 0,
+      error_code: null,
+      error_message: null,
+      source: "keirin-browser"
+    });
+
+    console.log(
+      `[RESULT SAVED] ${p.date} ${p.venueName} ${p.raceNo}R`
+    );
+
+    console.log(
+      `[RESULT COMPLETE] ${p.date} ${p.venueName} ${p.raceNo}R ` +
+      `duration=${Date.now() - startedAt}ms`
+    );
+
+    return new Response(null, {
+      status: 204
+    });
+
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : String(error);
+
+    if (p) {
+      await logFetch({
+        race_id: raceId(p),
+        status: "error",
+        http_status: null,
+        retry_count: 0,
+        error_code: "WORKER_ERROR",
+        error_message: message,
+        source: "keirin-result-worker-background"
+      });
+    }
+
+    console.error(
+      "[keirin-result-worker-background] fatal",
+      message
+    );
+
+    /*
+     * Background Functionは、個別レースの失敗で
+     * Scheduler側まで失敗扱いにしない。
+     */
+    return new Response(null, {
+      status: 204
+    });
+  }
+}
 
 export const config = {
   background: true
 };
-
-function sleep(ms) {
-  return new Promise(
-    resolve =>
-      setTimeout(
-        resolve,
-        ms
-      )
-  );
-}
