@@ -9,5 +9,5 @@ assert.ok(src.includes("dominantBranchId"),"per-buy explanation is not branch-li
 assert.ok(!src.includes('「主展開から自然に残った組み合わせ」'),"old generic explanation must not remain");
 assert.ok(src.includes('snapshot?.predictionExplanation||snapshot?.prediction?.explanation'),"saved prediction explanation is not passed to per-buy UI");
 const version=JSON.parse(fs.readFileSync(new URL("../public/version.json",import.meta.url),"utf8"));
-assert.equal(version.label,"v244-causal-scenario-linkage");
+assert.equal(version.label,"v245-no-blanket-skip");
 console.log("PASS v241 causal per-buy explanation UI");

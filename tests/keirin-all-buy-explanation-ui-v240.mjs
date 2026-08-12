@@ -7,5 +7,5 @@ assert.ok(src.includes("friendlyPurchaseReason(b,explanation=null,snapshot=null)
 const css=fs.readFileSync(new URL("../public/styles.css",import.meta.url),"utf8");
 assert.ok(css.includes(".buyExplanation>summary"), "buy explanation summary style missing");
 const version=JSON.parse(fs.readFileSync(new URL("../public/version.json",import.meta.url),"utf8"));
-assert.equal(version.label,"v244-causal-scenario-linkage");
+assert.equal(version.label,"v245-no-blanket-skip");
 console.log("PASS v240 all buy explanation UI");

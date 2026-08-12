@@ -176,111 +176,81 @@ async function requestBrowserService(base, params) {
     raceNo: String(params.raceNo)
   });
 
-  const attempts = [];
-  const startedAt = Date.now();
-  // 個別予想でも重い /keirin/race を最初に叩かない。
-  // 軽量な /keirin/preview で公式カードを取得し、必要な情報が不足した場合だけ /keirin/race を使う。
-  const totalBudgetMs = 18000;
   const endpoints = [
     `${base}/keirin/preview?${query}`,
     `${base}/keirin/race?${query}`
   ];
+  const attempts = [];
+  const startedAt = Date.now();
+  // 一次選別用previewを先に使い、重いrace取得を必要な場合だけフォールバックする。
+  // Netlify Function内で外部ブラウザサービスを長時間待ち続けない。
+  const totalBudgetMs = 28000;
 
-  for (let attempt = 1; attempt <= endpoints.length; attempt += 1) {
-    const elapsed = Date.now() - startedAt;
-    const remaining = totalBudgetMs - elapsed;
-    if (remaining < 2500) break;
-    const endpoint = endpoints[attempt - 1];
-    const timeoutMs = attempt === 1
-      ? Math.min(9000, remaining - 1000)
-      : Math.min(6500, remaining - 500);
+  for (let endpointIndex = 0; endpointIndex < endpoints.length; endpointIndex += 1) {
+    const endpoint = endpoints[endpointIndex];
+    const remaining = totalBudgetMs - (Date.now() - startedAt);
+    if (remaining < 5000) break;
 
+    const timeoutMs = Math.min(endpointIndex === 0 ? 12000 : 11000, remaining - 1200);
     try {
       const response = await fetch(endpoint, {
         headers: { accept: "application/json" },
-        signal: AbortSignal.timeout(Math.max(4500, timeoutMs))
+        signal: AbortSignal.timeout(Math.max(5000, timeoutMs))
       });
       const text = await response.text();
       let data = null;
       try { data = JSON.parse(text); } catch {}
 
+      const officialData = data?.officialData || {};
+      const participantCount = Array.isArray(officialData.participants) ? officialData.participants.length : 0;
+      const hasUsableRaceData = participantCount >= 5 && officialData.basic;
       attempts.push({
         endpoint: endpoint.replace(base, ""),
-        attempt,
+        endpointType: endpointIndex === 0 ? "preview" : "race",
         status: response.status,
         parsed: data !== null,
-        bodyKind: data !== null ? "json" : "non-json",
+        participantCount,
+        hasUsableRaceData,
         error: data?.error || null,
         elapsedMs: Date.now() - startedAt
       });
 
-      if (data && (data.officialData || data.ok === false)) {
-        const ok = response.ok && data.ok !== false;
-        if (ok) {
-          return { ok: true, status: response.status, data: { ...data, endpointAudit: attempts } };
-        }
-
-        const retryable = response.status >= 500 || /page crashed|target closed|browser|navigation|timeout|timed out|execution context|temporar|upstream/i.test(String(data?.error || ""));
-        const canRetry = false;
-        if (canRetry) {
-          await sleep(250);
-          continue;
-        }
-        if (attempt === 1) { continue; }
-        return { ok: false, status: response.status, data: { ...data, endpointAudit: attempts } };
+      if (response.ok && data?.ok !== false && hasUsableRaceData) {
+        return {
+          ok: true,
+          status: response.status,
+          data: { ...data, endpointAudit: attempts }
+        };
       }
 
-      // Railway/Proxyが502のHTMLを返すケース。以前は1回目が15秒を超えると再試行されなかった。
-      // 今回は残り時間がある限り、非JSONの5xxも必ず2回目へ進める。
-      const retryableStatus = response.status >= 500 || response.status === 429;
-      const canRetry = false;
-      if (canRetry) {
-        await sleep(250);
+      const retryable = response.status >= 500 || response.status === 429 || /page crashed|target closed|browser|navigation|timeout|timed out|execution context|temporar|upstream/i.test(String(data?.error || ""));
+      if (!retryable && response.ok && !hasUsableRaceData) {
+        // 200だが予想に必要な出走表がない場合は重いrace取得へ進む。
         continue;
       }
-
-      if (attempt === 1) { continue; }
-      return {
-        ok: false,
-        status: response.status || 502,
-        data: {
-          ok: false,
-          error: `競輪ブラウザサービスの応答をJSONとして確認できません（HTTP ${response.status}）`,
-          endpointAudit: attempts
-        }
-      };
+      if (!retryable && !response.ok) break;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       attempts.push({
         endpoint: endpoint.replace(base, ""),
-        attempt,
+        endpointType: endpointIndex === 0 ? "preview" : "race",
         error: message,
         elapsedMs: Date.now() - startedAt
       });
-
-      const timedOut = /timeout|timed out|abort/i.test(message);
-      if (attempt === 1) { continue; }
-
-      return {
-        ok: false,
-        status: 502,
-        data: {
-          ok: false,
-          error: timedOut
-            ? "公式予想データ取得が時間内に完了しませんでした。競輪ブラウザサービスへ再試行しましたが取得できませんでした。"
-            : "競輪ブラウザサービスへ接続できません",
-          endpointAudit: attempts
-        }
-      };
     }
+
+    if (endpointIndex === 0) await sleep(350);
   }
 
+  const timedOut = attempts.some(item => /timeout|timed out|abort/i.test(String(item.error || "")));
   return {
     ok: false,
     status: 502,
     data: {
       ok: false,
-      error: "公式レースデータをpreview/raceの両経路で取得できませんでした",
+      error: timedOut
+        ? "公式データ取得が時間内に完了しませんでした。軽量取得と詳細取得を試しましたが、出走表を取得できませんでした。"
+        : "競輪公式データを取得できませんでした。",
       endpointAudit: attempts
     }
   };

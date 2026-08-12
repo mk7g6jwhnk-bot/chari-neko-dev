@@ -3,6 +3,8 @@ const finite=v=>v!==null&&v!==undefined&&v!==""&&Number.isFinite(Number(v));
 const valueOrNull=v=>finite(v)?clamp(Number(v)):null;
 
 export function scoreKeirinParticipants({race,venueProfile={}}){
+  const officialScores=(race?.participants||[]).map(p=>Number(p?.officialScore)).filter(Number.isFinite);
+  const officialScoreCenter=median(officialScores);
   return race.participants.map(p=>{
     const recent=valueOrNull(p.recentForm),start=usableStartPowerValue(p),sprint=valueOrNull(p.sprintPower),tracking=valueOrNull(p.trackingSkill),finish=valueOrNull(p.finishPower);
     const stamina=valueOrNull(p.stamina),timing=valueOrNull(p.attackTiming),lineTrust=valueOrNull(p.lineTrust),venue=valueOrNull(p.venueSuitability);
@@ -76,11 +78,13 @@ export function scoreKeirinParticipants({race,venueProfile={}}){
     const contextPriorScores=placementRolePriors(rolePrior);
     const roleCertainty=deriveRoleCertainty(p,role);
     const placement=applyRoleContext({abilityPlacement,contextPriorScores,roleCertainty});
+    const officialScoreContext=buildOfficialScoreContext(p,officialScoreCenter);
+    const strengthAdjustedPlacement=applyOfficialScoreContext({placement,officialScoreContext});
     const roleScores={
-      first:clamp(placement.first.score),
-      second:clamp(placement.second.score),
-      third:clamp(placement.third.score),
-      outside:clamp(10-Math.max(placement.first.score,placement.second.score,placement.third.score))
+      first:clamp(strengthAdjustedPlacement.first.score),
+      second:clamp(strengthAdjustedPlacement.second.score),
+      third:clamp(strengthAdjustedPlacement.third.score),
+      outside:clamp(10-Math.max(strengthAdjustedPlacement.first.score,strengthAdjustedPlacement.second.score,strengthAdjustedPlacement.third.score))
     };
 
     const coreKimarite=[["sprintPower",sprint],["finishPower",finish],["trackingSkill",tracking]];
@@ -108,6 +112,7 @@ export function scoreKeirinParticipants({race,venueProfile={}}){
         third:clamp(abilityPlacement.third.score)
       },
       contextPriorScores,
+      officialScoreContext,
       placementScores:{
         first:roleScores.first,second:roleScores.second,third:roleScores.third
       },
@@ -155,7 +160,12 @@ export function scoreKeirinParticipants({race,venueProfile={}}){
           Math.abs(roleScores.second-clamp(abilityPlacement.second.score)),
           Math.abs(roleScores.third-clamp(abilityPlacement.third.score))
         ),
-        policy:"RAW_ABILITY_FIRST_ROLE_CONTEXT_SECOND"
+        officialScoreAdjustment:{
+          first:Number(strengthAdjustedPlacement.first.score)-Number(placement.first.score),
+          second:Number(strengthAdjustedPlacement.second.score)-Number(placement.second.score),
+          third:Number(strengthAdjustedPlacement.third.score)-Number(placement.third.score)
+        },
+        policy:"RAW_ABILITY_FIRST_ROLE_CONTEXT_SECOND_OFFICIAL_SCORE_GUARD"
       },
       evidence
     };
@@ -203,6 +213,40 @@ function placementRolePriors(rolePrior){
     second:clamp(Math.max(rolePrior.secondLeader??5,rolePrior.secondFollower??5,rolePrior.secondOther??5)),
     third:clamp(Math.max(rolePrior.thirdLine??5,rolePrior.thirdPosition??5,rolePrior.thirdOther??5))
   };
+}
+
+function buildOfficialScoreContext(participant,center){
+  const officialScore=finite(participant?.officialScore)?Number(participant.officialScore):null;
+  if(officialScore===null||!finite(center))return{available:false,officialScore,center:null,gap:null,strengthScore:null,weight:0,adjustment:0,mode:"UNAVAILABLE"};
+  const gap=officialScore-Number(center);
+  const abs=Math.abs(gap);
+  const strengthScore=officialScoreStrengthScore(gap);
+  const weight=abs>=8?.15:abs>3?.08:0;
+  const adjustment=weight?((strengthScore-5)*weight):0;
+  return{available:true,officialScore,center:Number(center),gap,strengthScore,weight,adjustment,mode:weight?"LARGE_GAP_GUARD":"DEAD_ZONE"};
+}
+
+function applyOfficialScoreContext({placement,officialScoreContext}){
+  const adjustment=Number(officialScoreContext?.adjustment)||0;
+  const weight=Number(officialScoreContext?.weight)||0;
+  const merge=(stage)=>{
+    const base=Number(placement?.[stage]?.score);
+    const score=finite(base)?clamp(base+adjustment):5+adjustment;
+    return{
+      ...placement[stage],
+      score,
+      officialScoreAdjustment:score-(finite(base)?base:5),
+      reasons:[...(placement?.[stage]?.reasons||[]),...(weight?[`競走得点差ガード ${officialScoreContext.strengthScore?.toFixed?.(2)??"-"}×${Math.round(weight*100)}%`,`競走得点補正 ${adjustment>=0?"+":""}${adjustment.toFixed(2)}`]:[])]
+    };
+  };
+  return{first:merge("first"),second:merge("second"),third:merge("third")};
+}
+
+function officialScoreStrengthScore(gap){
+  const abs=Math.abs(Number(gap));
+  if(abs<=3)return 5;
+  const scaled=Math.min(5,(abs-3)*(5/7));
+  return clamp(5+Math.sign(gap)*scaled);
 }
 
 function applyRoleContext({abilityPlacement,contextPriorScores,roleCertainty}){
@@ -330,3 +374,5 @@ function aggregateTrace(rows){
   return [...byKey.values()].sort((a,b)=>b.contribution-a.contribution||a.key.localeCompare(b.key,"en"));
 }
 function mapScores(object){return Object.fromEntries(Object.entries(object).map(([k,v])=>[k,v.score]))}
+
+function median(values){const xs=(values||[]).filter(Number.isFinite).sort((a,b)=>a-b);if(!xs.length)return null;const m=Math.floor(xs.length/2);return xs.length%2?xs[m]:(xs[m-1]+xs[m])/2}
