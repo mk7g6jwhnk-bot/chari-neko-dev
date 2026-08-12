@@ -1,0 +1,11 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+const engine=fs.readFileSync(new URL("../modules/keirin/engine/prediction-explanation.mjs",import.meta.url),"utf8");
+const app=fs.readFileSync(new URL("../public/app.mjs",import.meta.url),"utf8");
+assert.ok(engine.includes('source:"PREDICTION_BRANCH_TERMINAL"'));
+assert.ok(engine.includes('narrativeSource:"BRANCH_TIMELINE_WITH_NODE_TRACE"'));
+assert.ok(engine.includes('branchTerminalMatched'));
+assert.ok(app.includes('integrityOk'));
+assert.ok(app.includes('保存枝の終端が一致しないため'));
+assert.ok(app.includes('詳細な成立根拠を見る'));
+console.log("PASS v244 scenario-to-bet linkage guard");

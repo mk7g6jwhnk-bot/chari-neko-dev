@@ -1,13 +1,13 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 const src=fs.readFileSync(new URL("../public/app.mjs",import.meta.url),"utf8");
-assert.ok(src.includes("findFriendlyPurchaseScenario"),"per-buy branch resolver missing");
-assert.ok(src.includes("friendlyNodeCondition"),"per-buy node condition explanation missing");
-assert.ok(src.includes("b?.nodeTrace"),"saved per-buy nodeTrace is not used");
-assert.ok(src.includes("主導権の理由："),"lead reason is not surfaced in per-buy explanation");
+assert.ok(src.includes("scenarioBetSentence"),"per-buy scenario renderer missing");
+assert.ok(src.includes("詳細な成立根拠を見る"),"detailed audit explanation toggle missing");
+assert.ok(src.includes("scenarioIntegrity"),"scenario integrity linkage is not used");
+assert.ok(src.includes("この買い目になるシナリオ"),"causal scenario is not surfaced in per-buy explanation");
 assert.ok(src.includes("dominantBranchId"),"per-buy explanation is not branch-linked");
 assert.ok(!src.includes('「主展開から自然に残った組み合わせ」'),"old generic explanation must not remain");
 assert.ok(src.includes('snapshot?.predictionExplanation||snapshot?.prediction?.explanation'),"saved prediction explanation is not passed to per-buy UI");
 const version=JSON.parse(fs.readFileSync(new URL("../public/version.json",import.meta.url),"utf8"));
-assert.equal(version.label,"v241-causal-buy-explanation-ui");
+assert.equal(version.label,"v244-causal-scenario-linkage");
 console.log("PASS v241 causal per-buy explanation UI");

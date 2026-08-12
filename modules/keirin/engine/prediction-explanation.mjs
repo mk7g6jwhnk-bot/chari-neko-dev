@@ -141,6 +141,17 @@ function buildScenario({branch,index,riderByNumber,lineById,terminals,massByBran
     secondMechanism:mechanismFromNode(contribution.nodeTrace,1),
     thirdMechanism:mechanismFromNode(contribution.nodeTrace,2)
   }));
+  const primaryOrder=order.map(Number);
+  const leaderNumber=branch?.requiredFirstNumber!=null?Number(branch.requiredFirstNumber):null;
+  const scenarioIntegrity={
+    source:"PREDICTION_BRANCH_TERMINAL",
+    branchId:branch.id,
+    terminalOrder:primaryOrder,
+    leaderNumber:Number.isFinite(leaderNumber)?leaderNumber:null,
+    branchTerminalMatched:Boolean(primaryOrder.length>=3 && Number(primaryOrder[0])===Number(branch.requiredFirstNumber)),
+    narrativeSource:"BRANCH_TIMELINE_WITH_NODE_TRACE",
+    postResultDataAllowed:false
+  };
   return{
     rank:index+1,
     branchId:branch.id,
@@ -153,8 +164,9 @@ function buildScenario({branch,index,riderByNumber,lineById,terminals,massByBran
     timeline,
     reasons,
     naturalOrders,
-    primaryOrder:order.map(Number),
-    source:{branchId:branch.id,terminalOrder:order.map(Number),contributionProbability:Number(top?.contribution?.probability)||0}
+    primaryOrder,
+    scenarioIntegrity,
+    source:{branchId:branch.id,terminalOrder:primaryOrder,contributionProbability:Number(top?.contribution?.probability)||0}
   };
 }
 
