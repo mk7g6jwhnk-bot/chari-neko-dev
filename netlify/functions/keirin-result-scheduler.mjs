@@ -56,11 +56,13 @@ export default async (req) => {
       );
     }
 
-    const meetings = Array.isArray(discoverData?.meetings)
+    const meetings = Array.isArray(
+      discoverData?.meetings
+    )
       ? discoverData.meetings
       : [];
 
-    // ② Workerへ渡す対象レースを作成
+    // ② 結果取得対象レースを作成
     const jobs = [];
 
     for (const meeting of meetings) {
@@ -72,28 +74,19 @@ export default async (req) => {
         meeting?.venueName || ""
       ).trim();
 
-      if (!/^\d{2}$/.test(venueCode) || !venueName) {
+      if (
+        !/^\d{2}$/.test(venueCode) ||
+        !venueName
+      ) {
         continue;
       }
 
-      const raceNumbers = Array.isArray(
-        meeting?.raceNumbers
+      const races = Array.isArray(
+        meeting?.races
       )
-        ? meeting.raceNumbers
-            .map((value) => Number(value))
-            .filter(
-              (value) =>
-                Number.isInteger(value) &&
-                value >= 1 &&
-                value <= 12
-            )
-        : [];
-
-      const races = Array.isArray(meeting?.races)
         ? meeting.races
         : [];
 
-      // raceNo → race情報
       const raceMap = new Map();
 
       for (const race of races) {
@@ -110,19 +103,20 @@ export default async (req) => {
         }
       }
 
-      // raceNumbersが空でもracesから補完
-      const targetRaceNumbers = [
-        ...new Set([
-          ...raceNumbers,
-          ...Array.from(raceMap.keys())
-        ])
+      const raceNumbers = [
+        ...raceMap.keys()
       ].sort((a, b) => a - b);
 
-      for (const raceNo of targetRaceNumbers) {
+      for (const raceNo of raceNumbers) {
         const race = raceMap.get(raceNo);
 
-        // 発走前のレースは除外
-        if (!hasStarted(race?.startTime, jst)) {
+        // 発走前は取得しない
+        if (
+          !hasStarted(
+            race?.startTime,
+            jst
+          )
+        ) {
           continue;
         }
 
@@ -139,101 +133,96 @@ export default async (req) => {
       `[keirin-result-scheduler] worker jobs=${jobs.length}`
     );
 
-    // ③ Background Workerへ投入
+    // ③ Worker URL
     const workerUrl =
       `${siteUrl}/.netlify/functions/keirin-result-worker-background`;
-
-    /*
-     * 重要:
-     * 全レースを一斉にWorkerへ投げない。
-     *
-     * 84Rなど大量開催の場合、
-     * ブラウザサービスへの同時アクセスが集中して
-     * 結果取得がタイムアウトするため、
-     * 8レースずつ投入する。
-     */
-    const BATCH_SIZE = 8;
 
     let dispatched = 0;
     let dispatchFailed = 0;
 
-    for (
-      let start = 0;
-      start < jobs.length;
-      start += BATCH_SIZE
-    ) {
-      const batch = jobs.slice(
-        start,
-        start + BATCH_SIZE
-      );
+    /*
+     * 重要
+     *
+     * Workerは同時起動しない。
+     *
+     * 1件ずつ投入することで、
+     *
+     * scheduler
+     *   ↓
+     * worker 1件
+     *   ↓
+     * result-store
+     *   ↓
+     * browser service
+     *
+     * という形にして、
+     * ブラウザサービスへの同時アクセス集中を防ぐ。
+     */
 
-      console.log(
-        `[WORKER BATCH] ${start + 1}-${start + batch.length}/${jobs.length}`
-      );
+    for (const job of jobs) {
+      try {
+        const response = await fetch(
+          workerUrl,
+          {
+            method: "POST",
 
-      const batchResults = await Promise.all(
-        batch.map(async (job) => {
-          try {
-            const response = await fetch(
-              workerUrl,
-              {
-                method: "POST",
-                headers: {
-                  "content-type": "application/json",
-                  accept: "application/json"
-                },
-                body: JSON.stringify(job),
-                signal: AbortSignal.timeout(8000)
-              }
-            );
+            headers: {
+              "content-type":
+                "application/json",
+              accept:
+                "application/json"
+            },
 
-            if (response.ok) {
-              console.log(
-                `[WORKER DISPATCHED] ${job.date} ${job.venueName} ${job.raceNo}R HTTP ${response.status}`
-              );
+            body: JSON.stringify(job),
 
-              return true;
-            }
-
-            console.error(
-              `[WORKER DISPATCH FAILED] ${job.date} ${job.venueName} ${job.raceNo}R HTTP ${response.status}`
-            );
-
-            return false;
-          } catch (error) {
-            console.error(
-              `[WORKER DISPATCH ERROR] ${job.date} ${job.venueName} ${job.raceNo}R`,
-              error instanceof Error
-                ? error.message
-                : String(error)
-            );
-
-            return false;
+            // Background Functionの受付確認だけ。
+            // 結果取得そのものをここでは待たない。
+            signal:
+              AbortSignal.timeout(8000)
           }
-        })
-      );
+        );
 
-      const batchDispatched =
-        batchResults.filter(Boolean).length;
+        if (response.ok) {
+          dispatched++;
 
-      const batchFailed =
-        batchResults.length -
-        batchDispatched;
+          console.log(
+            `[WORKER DISPATCHED] ` +
+            `${job.date} ` +
+            `${job.venueName} ` +
+            `${job.raceNo}R ` +
+            `HTTP ${response.status}`
+          );
+        } else {
+          dispatchFailed++;
 
-      dispatched += batchDispatched;
-      dispatchFailed += batchFailed;
+          console.error(
+            `[WORKER DISPATCH FAILED] ` +
+            `${job.date} ` +
+            `${job.venueName} ` +
+            `${job.raceNo}R ` +
+            `HTTP ${response.status}`
+          );
+        }
 
-      console.log(
-        `[WORKER BATCH COMPLETE] dispatched=${batchDispatched} failed=${batchFailed}`
-      );
+      } catch (error) {
+        dispatchFailed++;
 
-      // 次のバッチを少し待ってから投入
-      if (
-        start + BATCH_SIZE <
-        jobs.length
-      ) {
-        await sleep(1000);
+        console.error(
+          `[WORKER DISPATCH ERROR] ` +
+          `${job.date} ` +
+          `${job.venueName} ` +
+          `${job.raceNo}R`,
+          error instanceof Error
+            ? error.message
+            : String(error)
+        );
       }
+
+      /*
+       * 次のWorkerを投入する前に
+       * 1秒間隔を入れる。
+       */
+      await sleep(1000);
     }
 
     const finishedAt =
@@ -243,9 +232,12 @@ export default async (req) => {
       JSON.stringify({
         ok: true,
         date,
-        meetings: meetings.length,
-        jobs: jobs.length,
-        batchSize: BATCH_SIZE,
+        meetings:
+          meetings.length,
+        jobs:
+          jobs.length,
+        dispatchMode:
+          "sequential",
         dispatched,
         dispatchFailed,
         startedAt,
@@ -253,9 +245,12 @@ export default async (req) => {
       })
     );
 
-    return new Response(null, {
-      status: 204
-    });
+    return new Response(
+      null,
+      {
+        status: 204
+      }
+    );
 
   } catch (error) {
     console.error(
@@ -265,10 +260,19 @@ export default async (req) => {
         : String(error)
     );
 
-    // 次回の毎時実行で再試行
-    return new Response(null, {
-      status: 204
-    });
+    /*
+     * Scheduled Functionなので
+     * 本文は返さない。
+     *
+     * 次回の毎時実行で
+     * 再度確認する。
+     */
+    return new Response(
+      null,
+      {
+        status: 204
+      }
+    );
   }
 };
 
@@ -283,7 +287,10 @@ function hasStarted(
   const text =
     String(value || "").trim();
 
-  // 発走時刻が無い場合はWorkerへ渡す
+  /*
+   * 発走時刻が取得できない場合は
+   * Worker側で結果未確定を判定させる。
+   */
   if (!text) {
     return true;
   }
@@ -292,16 +299,18 @@ function hasStarted(
     /(\d{1,2}):(\d{2})(?::(\d{2}))?/
   );
 
-  // 時刻形式を認識できない場合もWorkerへ渡す
   if (!match) {
     return true;
   }
 
-  const hour = Number(match[1]);
-  const minute = Number(match[2]);
-  const second = Number(
-    match[3] || 0
-  );
+  const hour =
+    Number(match[1]);
+
+  const minute =
+    Number(match[2]);
+
+  const second =
+    Number(match[3] || 0);
 
   if (
     hour < 0 ||
@@ -324,11 +333,14 @@ function hasStarted(
     0
   );
 
-  return jstNow >= raceTime;
+  return (
+    jstNow >= raceTime
+  );
 }
 
 function sleep(ms) {
   return new Promise(
-    (resolve) => setTimeout(resolve, ms)
+    (resolve) =>
+      setTimeout(resolve, ms)
   );
 }
