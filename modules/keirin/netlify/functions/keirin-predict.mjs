@@ -176,83 +176,102 @@ async function requestBrowserService(base, params) {
     raceNo: String(params.raceNo)
   });
 
-  // Netlify Functionsは長時間の外部ブラウザ待ちで502になり得るため、
-  // 予想に必要な軽量previewを最初に使う。previewが不足した場合だけ重いrace取得へ進む。
-  const endpoints = [
-    { path: "/keirin/preview", timeout: 11000 },
-    { path: "/keirin/race", timeout: 11000 },
-    { path: "/keirin/race", timeout: 6000 }
-  ];
+  const endpoint = `${base}/keirin/race?${query}`;
   const attempts = [];
   const startedAt = Date.now();
-  const totalBudgetMs = 24000;
+  // Netlify側で無限待ちにせず、Railwayの一時502/HTML応答には必ずもう一度当てる。
+  const totalBudgetMs = 54000;
 
-  for (let index = 0; index < endpoints.length; index += 1) {
-    const remaining = totalBudgetMs - (Date.now() - startedAt);
-    if (remaining < 3000) break;
-    const target = endpoints[index];
-    const timeoutMs = Math.max(3000, Math.min(target.timeout, remaining - 800));
-    const endpoint = `${base}${target.path}?${query}`;
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    const elapsed = Date.now() - startedAt;
+    const remaining = totalBudgetMs - elapsed;
+    if (remaining < 6500) break;
+
+    // 1回目を長くし過ぎると、一時502の後に再試行する時間が消える。
+    // 1回目30秒、2回目は残り時間を最大22秒使う。
+    const timeoutMs = attempt === 1
+      ? Math.min(30000, remaining - 2500)
+      : Math.min(22000, remaining - 1500);
 
     try {
       const response = await fetch(endpoint, {
         headers: { accept: "application/json" },
-        signal: AbortSignal.timeout(timeoutMs)
+        signal: AbortSignal.timeout(Math.max(5000, timeoutMs))
       });
       const text = await response.text();
       let data = null;
       try { data = JSON.parse(text); } catch {}
-      const officialData = data?.officialData || {};
-      const participantCount = Array.isArray(officialData.participants)
-        ? officialData.participants.length : 0;
-      const hasUsableRaceData = participantCount >= 5 && officialData.basic;
+
       attempts.push({
-        endpoint: target.path,
-        attempt: index + 1,
+        endpoint: endpoint.replace(base, ""),
+        attempt,
         status: response.status,
         parsed: data !== null,
-        participantCount,
+        bodyKind: data !== null ? "json" : "non-json",
         error: data?.error || null,
         elapsedMs: Date.now() - startedAt
       });
 
-      if (response.ok && data && data.ok !== false && hasUsableRaceData) {
-        return {
-          ok: true,
-          status: response.status,
-          data: {
-            ...data,
-            endpointAudit: attempts,
-            diagnostics: {
-              ...(data.diagnostics || {}),
-              predictionFetchPath: target.path,
-              fallbackUsed: target.path !== "/keirin/race",
-              lightweightPredictionInput: target.path === "/keirin/preview"
-            }
-          }
-        };
-      }
+      if (data && (data.officialData || data.ok === false)) {
+        const ok = response.ok && data.ok !== false;
+        if (ok) {
+          return { ok: true, status: response.status, data: { ...data, endpointAudit: attempts } };
+        }
 
-      const retryable = response.status >= 500 || response.status === 429 ||
-        /page crashed|target closed|browser|navigation|timeout|timed out|execution context|temporar|upstream|socket|fetch failed/i.test(String(data?.error || ""));
-      if (index < endpoints.length - 1 && (retryable || target.path === "/keirin/preview")) {
-        await sleep(350);
-        continue;
-      }
-      if (response.status && response.status < 500 && data?.error) {
+        const retryable = response.status >= 500 || /page crashed|target closed|browser|navigation|timeout|timed out|execution context|temporar|upstream/i.test(String(data?.error || ""));
+        const canRetry = attempt < 2 && retryable && (totalBudgetMs - (Date.now() - startedAt)) >= 6500;
+        if (canRetry) {
+          await sleep(900);
+          continue;
+        }
         return { ok: false, status: response.status, data: { ...data, endpointAudit: attempts } };
       }
-    } catch (error) {
-      attempts.push({
-        endpoint: target.path,
-        attempt: index + 1,
-        error: error instanceof Error ? error.message : String(error),
-        elapsedMs: Date.now() - startedAt
-      });
-      if (index < endpoints.length - 1) {
-        await sleep(350);
+
+      // Railway/Proxyが502のHTMLを返すケース。以前は1回目が15秒を超えると再試行されなかった。
+      // 今回は残り時間がある限り、非JSONの5xxも必ず2回目へ進める。
+      const retryableStatus = response.status >= 500 || response.status === 429;
+      const canRetry = attempt < 2 && retryableStatus && (totalBudgetMs - (Date.now() - startedAt)) >= 6500;
+      if (canRetry) {
+        await sleep(900);
         continue;
       }
+
+      return {
+        ok: false,
+        status: response.status || 502,
+        data: {
+          ok: false,
+          error: `競輪ブラウザサービスの応答をJSONとして確認できません（HTTP ${response.status}）`,
+          endpointAudit: attempts
+        }
+      };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      attempts.push({
+        endpoint: endpoint.replace(base, ""),
+        attempt,
+        error: message,
+        elapsedMs: Date.now() - startedAt
+      });
+
+      const timedOut = /timeout|timed out|abort/i.test(message);
+      const canRetry = attempt < 2 && (totalBudgetMs - (Date.now() - startedAt)) >= 6500;
+      if (canRetry) {
+        await sleep(900);
+        continue;
+      }
+
+      return {
+        ok: false,
+        status: 502,
+        data: {
+          ok: false,
+          error: timedOut
+            ? "公式予想データ取得が時間内に完了しませんでした。競輪ブラウザサービスへ再試行しましたが取得できませんでした。"
+            : "競輪ブラウザサービスへ接続できません",
+          endpointAudit: attempts
+        }
+      };
     }
   }
 
@@ -261,13 +280,14 @@ async function requestBrowserService(base, params) {
     status: 502,
     data: {
       ok: false,
-      error: "競輪データ取得サービスが応答しませんでした。",
+      error: "競輪ブラウザサービスの再試行でも取得できませんでした",
       endpointAudit: attempts
     }
   };
 }
 
 function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
 
 export function hydrateParticipantEvidence(items, officialData = {}, browserData = {}) {
   const profileIndex = buildEvidenceIndex([
