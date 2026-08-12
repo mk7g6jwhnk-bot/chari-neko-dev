@@ -39,3 +39,19 @@ assert.ok(adapted.some(x=>Math.abs(x.trackingSkill-5)>.05),'kimarite container m
 const mismatch=hydrateParticipantEvidence([{number:1,registration:'015001',identityPassed:true}],{profiles:[{registration:'999999',identityPassed:true,recent4MonthScore:99}]},{});
 assert.equal(mismatch[0].officialProfile,null,'mismatched evidence must not bind');
 console.log('keirin browser evidence adapter PASS');
+
+const inlineParticipants=participants.map((p,i)=>({
+  ...p,
+  officialTotalStarts:20+i,
+  backCount:i+1,
+  homeCount:i+2,
+  currentScore:91+i,
+  recent4MonthScore:90+i,
+  ridingStyle:i%2?'逃':'追'
+}));
+const inlineHydrated=hydrateParticipantEvidence(inlineParticipants,{},{ });
+assert.equal(inlineHydrated[0].officialProfile.identityPassed,true,'inline official participant evidence must bind');
+assert.equal(inlineHydrated[0].officialProfile.backCount,1);
+const inlineAdapted=adaptParticipantsForPrediction(inlineHydrated,context);
+assert.ok(inlineAdapted.some(x=>Math.abs(x.startPower-5)>.05),'inline official profile fields must affect startPower');
+console.log('inline official participant evidence PASS');

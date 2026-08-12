@@ -302,8 +302,9 @@ export function hydrateParticipantEvidence(items, officialData = {}, browserData
   return (Array.isArray(items) ? items : []).map(item => {
     const registration = normalizeRegistration(item.registration);
     const profile = firstEvidence([
-      item.officialProfile, item.profile, item.profileEvidence, item.racerProfile,
-      profileIndex.get(registration)
+      item.officialProfile, item.profile, item.profileEvidence, item.officialProfileEvidence, item.racerProfile,
+      profileIndex.get(registration),
+      inlineParticipantProfile(item, registration)
     ]);
     const kimarite = firstEvidence([
       item.officialKimariteCounts, item.kimariteCounts, item.kimariteEvidence, item.jsj068,
@@ -337,6 +338,33 @@ function buildEvidenceIndex(containers) {
     }
   }
   return index;
+}
+
+function inlineParticipantProfile(item, registration) {
+  if (!item || typeof item !== "object" || item.identityPassed !== true) return null;
+  const hasProfileField = [
+    item.officialTotalStarts, item.backCount, item.homeCount, item.currentScore,
+    item.recent4MonthScore, item.winningStyleRates, item.ridingStyle
+  ].some(value => value !== null && value !== undefined);
+  if (!hasProfileField) return null;
+  return {
+    registration: normalizeRegistration(item.registration ?? registration),
+    requestedRegistration: normalizeRegistration(item.requestedRegistration ?? registration),
+    identityPassed: true,
+    fetchedAt: item.fetchedAt ?? item.profileFetchedAt ?? null,
+    sourceType: item.sourceType || "official-race-participant",
+    sourcePath: item.sourcePath || null,
+    ridingStyle: item.ridingStyle ?? item.style ?? null,
+    currentScore: item.currentScore ?? item.score ?? null,
+    recent4MonthScore: item.recent4MonthScore ?? null,
+    officialTotalStarts: item.officialTotalStarts ?? null,
+    backCount: item.backCount ?? null,
+    homeCount: item.homeCount ?? null,
+    winRate: item.winRate ?? null,
+    quinellaRate: item.quinellaRate ?? null,
+    trioRate: item.trioRate ?? null,
+    winningStyleRates: item.winningStyleRates ?? null
+  };
 }
 
 function firstEvidence(candidates) {
