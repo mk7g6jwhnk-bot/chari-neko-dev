@@ -54,4 +54,5 @@ assert.equal(inlineHydrated[0].officialProfile.identityPassed,true,'inline offic
 assert.equal(inlineHydrated[0].officialProfile.backCount,1);
 const inlineAdapted=adaptParticipantsForPrediction(inlineHydrated,context);
 assert.ok(inlineAdapted.some(x=>Math.abs(x.startPower-5)>.05),'inline official profile fields must affect startPower');
+assert.equal(inlineAdapted[0].officialScore,91,'inline currentScore must reach prediction officialScore');
 console.log('inline official participant evidence PASS');

@@ -437,7 +437,13 @@ export function adaptParticipant(item, context = {}) {
     className: item.className || "",
     style: item.style || "",
     raceCategory: context.raceCategory || "unknown",
-    officialScore: nullableNumber(item.score),
+    officialScore: nullableNumber(
+      item.score ??
+      item.officialScore ??
+      item.currentScore ??
+      item.officialProfileEvidence?.currentScore ??
+      item.officialProfile?.currentScore
+    ),
     officialProfileEvidence,
     officialKimariteEvidence,
     officialTotalStarts: nullableNumber(item.officialTotalStarts ?? item.officialProfile?.officialTotalStarts),
