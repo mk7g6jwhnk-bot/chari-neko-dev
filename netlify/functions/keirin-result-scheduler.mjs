@@ -12,7 +12,7 @@ export default async (req) => {
       throw new Error("NetlifyサイトURLが取得できません");
     }
 
-    // 日本時間の今日
+    // 日本時間の現在時刻
     const now = new Date();
 
     const jst = new Date(
@@ -70,28 +70,70 @@ export default async (req) => {
 
       const venueName = String(
         meeting?.venueName || ""
-      );
-
-      const races = Array.isArray(meeting?.races)
-        ? meeting.races
-        : [];
+      ).trim();
 
       if (!/^\d{2}$/.test(venueCode) || !venueName) {
         continue;
       }
 
+      /*
+       * raceNumbersを正規のレース番号一覧として使用する。
+       *
+       * discover側が
+       *   raceNumbers: [1,2,3,...]
+       *   races: [...]
+       * のどちらか／両方を返しても動くようにする。
+       */
+
+      const raceNumbers = Array.isArray(meeting?.raceNumbers)
+        ? meeting.raceNumbers
+            .map((value) => Number(value))
+            .filter(
+              (value) =>
+                Number.isInteger(value) &&
+                value >= 1 &&
+                value <= 12
+            )
+        : [];
+
+      const races = Array.isArray(meeting?.races)
+        ? meeting.races
+        : [];
+
+      // raceNo → race情報
+      const raceMap = new Map();
+
       for (const race of races) {
         const raceNo = Number(race?.raceNo || 0);
 
         if (
-          !Number.isInteger(raceNo) ||
-          raceNo < 1 ||
-          raceNo > 12
+          Number.isInteger(raceNo) &&
+          raceNo >= 1 &&
+          raceNo <= 12
         ) {
-          continue;
+          raceMap.set(raceNo, race);
         }
+      }
 
-        // 発走前レースは対象外
+      /*
+       * raceNumbersが空でもracesが存在する場合は、
+       * races側からレース番号を補完する。
+       */
+      const targetRaceNumbers = [
+        ...new Set([
+          ...raceNumbers,
+          ...Array.from(raceMap.keys())
+        ])
+      ].sort((a, b) => a - b);
+
+      for (const raceNo of targetRaceNumbers) {
+        const race = raceMap.get(raceNo);
+
+        /*
+         * 発走時刻が取得できる場合だけ発走前を除外。
+         * 時刻が無い場合はWorkerへ渡す。
+         * 未確定ならresult-store側で処理する。
+         */
         if (!hasStarted(race?.startTime, jst)) {
           continue;
         }
@@ -110,9 +152,6 @@ export default async (req) => {
     );
 
     // ③ Background Workerへ投入
-    //
-    // Background Functionは呼び出し直後に202を返し、
-    // 実処理はバックグラウンドで継続する。
     const workerUrl =
       `${siteUrl}/.netlify/functions/keirin-result-worker-background`;
 
@@ -168,7 +207,8 @@ export default async (req) => {
       (result) => result.ok
     ).length;
 
-    const dispatchFailed = dispatchResults.length - dispatched;
+    const dispatchFailed =
+      dispatchResults.length - dispatched;
 
     const finishedAt = new Date().toISOString();
 
@@ -197,8 +237,7 @@ export default async (req) => {
         : String(error)
     );
 
-    // Scheduled Functionなので本文は不要。
-    // 次回の毎時実行で再試行する。
+    // 次回の毎時実行で再試行
     return new Response(null, {
       status: 204
     });
@@ -212,9 +251,8 @@ export const config = {
 function hasStarted(value, jstNow) {
   const text = String(value || "").trim();
 
+  // 発走時刻が無い場合はWorkerへ渡す
   if (!text) {
-    // 発走時刻が取れない場合はWorkerへ渡す。
-    // 結果未確定ならWorker側で処理する。
     return true;
   }
 
@@ -222,6 +260,7 @@ function hasStarted(value, jstNow) {
     /(\d{1,2}):(\d{2})(?::(\d{2}))?/
   );
 
+  // 時刻形式を認識できない場合もWorkerへ渡す
   if (!match) {
     return true;
   }
@@ -234,7 +273,9 @@ function hasStarted(value, jstNow) {
     hour < 0 ||
     hour > 23 ||
     minute < 0 ||
-    minute > 59
+    minute > 59 ||
+    second < 0 ||
+    second > 59
   ) {
     return true;
   }
