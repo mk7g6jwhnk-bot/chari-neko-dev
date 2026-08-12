@@ -1,4 +1,4 @@
-export default async (req) => {
+export default async () => {
   const startedAt = new Date().toISOString();
 
   try {
@@ -9,10 +9,11 @@ export default async (req) => {
     ).replace(/\/$/, "");
 
     if (!siteUrl) {
-      throw new Error("NetlifyサイトURLが取得できません");
+      throw new Error(
+        "NetlifyサイトURLが取得できません"
+      );
     }
 
-    // 日本時間の現在時刻
     const now = new Date();
 
     const jst = new Date(
@@ -22,98 +23,173 @@ export default async (req) => {
     );
 
     const yyyy = jst.getFullYear();
-    const mm = String(jst.getMonth() + 1).padStart(2, "0");
-    const dd = String(jst.getDate()).padStart(2, "0");
+    const mm = String(
+      jst.getMonth() + 1
+    ).padStart(2, "0");
+    const dd = String(
+      jst.getDate()
+    ).padStart(2, "0");
 
-    const date = `${yyyy}${mm}${dd}`;
+    const date =
+      `${yyyy}${mm}${dd}`;
 
     console.log(
       `[keirin-result-scheduler] start ${date} ${startedAt}`
     );
 
-    // ① 今日の開催を取得
+    // 今日の開催を取得
     const discoverUrl =
       `${siteUrl}/.netlify/functions/keirin-discover?` +
-      new URLSearchParams({ date });
+      new URLSearchParams({
+        date
+      });
 
-    const discoverResponse = await fetch(discoverUrl, {
-      headers: {
-        accept: "application/json"
-      },
-      signal: AbortSignal.timeout(12000)
-    });
+    const discoverResponse =
+      await fetch(
+        discoverUrl,
+        {
+          headers: {
+            accept:
+              "application/json"
+          },
+          signal:
+            AbortSignal.timeout(
+              120000
+            )
+        }
+      );
 
     let discoverData = null;
 
     try {
-      discoverData = await discoverResponse.json();
+      discoverData =
+        await discoverResponse.json();
     } catch {}
 
-    if (!discoverResponse.ok || discoverData?.ok === false) {
+    if (
+      !discoverResponse.ok ||
+      discoverData?.ok !== true
+    ) {
       throw new Error(
         discoverData?.error ||
         `開催取得失敗 HTTP ${discoverResponse.status}`
       );
     }
 
-    const meetings = Array.isArray(
-      discoverData?.meetings
-    )
-      ? discoverData.meetings
-      : [];
+    const meetings =
+      Array.isArray(
+        discoverData?.meetings
+      )
+        ? discoverData.meetings
+        : [];
 
-    // ② 結果取得対象レースを作成
     const jobs = [];
 
+    /*
+     * keirin-discover の正本は
+     * meeting.raceNumbers。
+     *
+     * races は詳細情報として扱い、
+     * raceNumbersを対象レースの基準にする。
+     */
     for (const meeting of meetings) {
-      const venueCode = String(
-        meeting?.venueCode || ""
-      ).padStart(2, "0");
+      const venueCode =
+        String(
+          meeting?.venueCode ||
+          ""
+        ).padStart(2, "0");
 
-      const venueName = String(
-        meeting?.venueName || ""
-      ).trim();
+      const venueName =
+        String(
+          meeting?.venueName ||
+          ""
+        ).trim();
 
       if (
-        !/^\d{2}$/.test(venueCode) ||
+        !/^\d{2}$/.test(
+          venueCode
+        ) ||
         !venueName
       ) {
         continue;
       }
 
-      const races = Array.isArray(
-        meeting?.races
-      )
-        ? meeting.races
-        : [];
+      const raceNumbers =
+        Array.isArray(
+          meeting?.raceNumbers
+        )
+          ? meeting.raceNumbers
+              .map(Number)
+              .filter(
+                (n) =>
+                  Number.isInteger(n) &&
+                  n >= 1 &&
+                  n <= 12
+              )
+          : [];
 
-      const raceMap = new Map();
+      const races =
+        Array.isArray(
+          meeting?.races
+        )
+          ? meeting.races
+          : [];
+
+      const raceMap =
+        new Map();
 
       for (const race of races) {
-        const raceNo = Number(
-          race?.raceNo || 0
-        );
+        const raceNo =
+          Number(
+            race?.raceNo ||
+            race?.number ||
+            0
+          );
 
         if (
-          Number.isInteger(raceNo) &&
+          Number.isInteger(
+            raceNo
+          ) &&
           raceNo >= 1 &&
           raceNo <= 12
         ) {
-          raceMap.set(raceNo, race);
+          raceMap.set(
+            raceNo,
+            race
+          );
         }
       }
 
-      const raceNumbers = [
-        ...raceMap.keys()
-      ].sort((a, b) => a - b);
+      const uniqueRaceNumbers =
+        [
+          ...new Set(
+            raceNumbers
+          )
+        ].sort(
+          (a, b) => a - b
+        );
 
-      for (const raceNo of raceNumbers) {
-        const race = raceMap.get(raceNo);
+      for (
+        const raceNo
+        of uniqueRaceNumbers
+      ) {
+        const race =
+          raceMap.get(
+            raceNo
+          );
 
-        // 発走前は取得しない
+        /*
+         * race詳細が存在する場合だけ
+         * 発走時刻を確認。
+         *
+         * 詳細が無い場合でも
+         * raceNumbersが正本なので
+         * Workerへ渡す。
+         */
         if (
+          race &&
           !hasStarted(
-            race?.startTime,
+            race.startTime,
             jst
           )
         ) {
@@ -130,100 +206,85 @@ export default async (req) => {
     }
 
     console.log(
-      `[keirin-result-scheduler] worker jobs=${jobs.length}`
+      `[keirin-result-scheduler] ` +
+      `meetings=${meetings.length} ` +
+      `jobs=${jobs.length}`
     );
 
-    // ③ Worker URL
-    const workerUrl =
-      `${siteUrl}/.netlify/functions/keirin-result-worker-background`;
+    if (
+      jobs.length === 0
+    ) {
+      console.error(
+        "[keirin-result-scheduler] " +
+        "結果取得対象レースが0件です"
+      );
 
-    let dispatched = 0;
-    let dispatchFailed = 0;
+      return new Response(
+        null,
+        {
+          status: 204
+        }
+      );
+    }
 
     /*
-     * 重要
+     * Workerは1回だけ起動する。
      *
-     * Workerは同時起動しない。
-     *
-     * 1件ずつ投入することで、
-     *
-     * scheduler
-     *   ↓
-     * worker 1件
-     *   ↓
-     * result-store
-     *   ↓
-     * browser service
-     *
-     * という形にして、
-     * ブラウザサービスへの同時アクセス集中を防ぐ。
+     * background functionへ
+     * 全jobを渡し、
+     * 実際の結果取得はWorker内部で
+     * 完全逐次処理する。
      */
+    const workerUrl =
+      `${siteUrl}/.netlify/functions/` +
+      `keirin-result-worker-background`;
 
-    for (const job of jobs) {
-      try {
-        const response = await fetch(
-          workerUrl,
-          {
-            method: "POST",
+    const workerResponse =
+      await fetch(
+        workerUrl,
+        {
+          method: "POST",
 
-            headers: {
-              "content-type":
-                "application/json",
-              accept:
-                "application/json"
-            },
+          headers: {
+            "content-type":
+              "application/json",
+            accept:
+              "application/json"
+          },
 
-            body: JSON.stringify(job),
+          body:
+            JSON.stringify({
+              date,
+              jobs
+            }),
 
-            // Background Functionの受付確認だけ。
-            // 結果取得そのものをここでは待たない。
-            signal:
-              AbortSignal.timeout(8000)
-          }
-        );
-
-        if (response.ok) {
-          dispatched++;
-
-          console.log(
-            `[WORKER DISPATCHED] ` +
-            `${job.date} ` +
-            `${job.venueName} ` +
-            `${job.raceNo}R ` +
-            `HTTP ${response.status}`
-          );
-        } else {
-          dispatchFailed++;
-
-          console.error(
-            `[WORKER DISPATCH FAILED] ` +
-            `${job.date} ` +
-            `${job.venueName} ` +
-            `${job.raceNo}R ` +
-            `HTTP ${response.status}`
-          );
+          /*
+           * Background Functionは
+           * 受付時点で202を返すため、
+           * schedulerは実処理完了を待たない。
+           */
+          signal:
+            AbortSignal.timeout(
+              10000
+            )
         }
+      );
 
-      } catch (error) {
-        dispatchFailed++;
-
-        console.error(
-          `[WORKER DISPATCH ERROR] ` +
-          `${job.date} ` +
-          `${job.venueName} ` +
-          `${job.raceNo}R`,
-          error instanceof Error
-            ? error.message
-            : String(error)
-        );
-      }
-
-      /*
-       * 次のWorkerを投入する前に
-       * 1秒間隔を入れる。
-       */
-      await sleep(1000);
+    if (
+      !workerResponse.ok
+    ) {
+      throw new Error(
+        `結果Worker起動失敗 ` +
+        `HTTP ${workerResponse.status}`
+      );
     }
+
+    console.log(
+      `[WORKER DISPATCHED] ` +
+      `date=${date} ` +
+      `jobs=${jobs.length} ` +
+      `HTTP ${workerResponse.status}`
+    );
 
     const finishedAt =
       new Date().toISOString();
@@ -236,10 +297,8 @@ export default async (req) => {
           meetings.length,
         jobs:
           jobs.length,
-        dispatchMode:
-          "sequential",
-        dispatched,
-        dispatchFailed,
+        dispatched:
+          true,
         startedAt,
         finishedAt
       })
@@ -260,13 +319,6 @@ export default async (req) => {
         : String(error)
     );
 
-    /*
-     * Scheduled Functionなので
-     * 本文は返さない。
-     *
-     * 次回の毎時実行で
-     * 再度確認する。
-     */
     return new Response(
       null,
       {
@@ -285,19 +337,18 @@ function hasStarted(
   jstNow
 ) {
   const text =
-    String(value || "").trim();
+    String(
+      value || ""
+    ).trim();
 
-  /*
-   * 発走時刻が取得できない場合は
-   * Worker側で結果未確定を判定させる。
-   */
   if (!text) {
     return true;
   }
 
-  const match = text.match(
-    /(\d{1,2}):(\d{2})(?::(\d{2}))?/
-  );
+  const match =
+    text.match(
+      /(\d{1,2}):(\d{2})(?::(\d{2}))?/
+    );
 
   if (!match) {
     return true;
@@ -335,12 +386,5 @@ function hasStarted(
 
   return (
     jstNow >= raceTime
-  );
-}
-
-function sleep(ms) {
-  return new Promise(
-    (resolve) =>
-      setTimeout(resolve, ms)
   );
 }
