@@ -33,9 +33,17 @@ export function runKeirinPurchaseEngine({prediction,oddsByOrder={},budget=3000})
   });
   const startEvidenceCount=(prediction.scored||[]).filter(item=>isUsableStartPower(item)).length;
   const startEvidenceRequired=Math.max(3,Math.ceil((prediction.scored||[]).length*.5));
-  const lineAndStartEvidenceBlocked=Boolean(generationPassed&&raceMeta.raceCategory!=="girls"&&raceMeta.lineConfidence!=="高"&&startEvidenceCount<startEvidenceRequired);
-  const lineFallbackEvidenceBlocked=Boolean(generationPassed&&raceMeta.raceCategory!=="girls"&&raceMeta.lineConfidence!=="高"&&!lineAndStartEvidenceBlocked&&lineIndependentMainAvailable&&!lineFallbackDiscriminationAudit.sufficient);
-  const lineBlocked=generationPassed&&raceMeta.raceCategory!=="girls"&&raceMeta.lineConfidence!=="高"&&!lineAndStartEvidenceBlocked&&!lineIndependentMainAvailable;
+  // Missing start-power evidence is a warning, not a race-wide purchase kill switch.
+  // When official line data is unavailable, normal purchase is blocked only if the
+  // remaining rider/terminal evidence is genuinely non-discriminative.
+  const lineAndStartEvidenceBlocked=false;
+  const lineFallbackEvidenceBlocked=Boolean(
+    generationPassed&&
+    raceMeta.raceCategory!=="girls"&&
+    raceMeta.lineConfidence!=="高"&&
+    !lineFallbackDiscriminationAudit.sufficient
+  );
+  const lineBlocked=false;
   const girlsEvidenceBlocked=generationPassed&&raceMeta.raceCategory==="girls"&&startEvidenceCount<startEvidenceRequired;
   // v230: MAIN absence is not a race-wide kill switch, but COVER/BUYABLE_HIGH-only
   // standard purchase is forbidden inside classification. Main-scenario natural purchases
@@ -135,7 +143,8 @@ export function runKeirinPurchaseEngine({prediction,oddsByOrder={},budget=3000})
         flatEvidencePurchaseBlockApplied:lineFallbackEvidenceBlocked,
         lineAndStartEvidenceBlockApplied:lineAndStartEvidenceBlocked,
         startEvidenceCount,startEvidenceRequired,
-        referenceBreadthPolicy:(lineFallbackEvidenceBlocked||lineAndStartEvidenceBlocked)?"FLAT_EVIDENCE_POSITION_BALANCED_REFERENCE_SET":"STANDARD_REFERENCE_SELECTION",
+        startEvidenceWarning:Boolean(raceMeta.raceCategory!=="girls"&&raceMeta.lineConfidence!=="高"&&startEvidenceCount<startEvidenceRequired),
+        referenceBreadthPolicy:lineFallbackEvidenceBlocked?"FLAT_EVIDENCE_POSITION_BALANCED_REFERENCE_SET":"STANDARD_REFERENCE_SELECTION",
         referenceToStandardTransitionAudit,
         discriminationAudit:lineFallbackDiscriminationAudit,
         unresolvedRelationPolicy:"UNKNOWN_LINE_RELATION_IS_UNCERTAIN_NOT_OTHER_LINE",
