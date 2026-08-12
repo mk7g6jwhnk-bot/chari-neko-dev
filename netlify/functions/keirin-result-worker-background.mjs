@@ -132,6 +132,49 @@ async function fetchOfficialResult(p) {
   return { response, data };
 }
 
+async function getExistingTerminalResult(race_id) {
+  const query =
+    "race_results?select=race_id,result_status" +
+    `&race_id=eq.${encodeURIComponent(race_id)}` +
+    "&limit=1";
+
+  const response = await supabaseFetch(query, {
+    method: "GET",
+    headers: {
+      Prefer: "return=representation"
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `既存結果確認失敗: HTTP ${response.status} ${await response.text()}`
+    );
+  }
+
+  let rows = [];
+  try {
+    rows = await response.json();
+  } catch {}
+
+  const row = Array.isArray(rows) ? rows[0] : null;
+  if (!row) return null;
+
+  const status = String(
+    row.result_status || ""
+  ).trim().toLowerCase();
+
+  if (
+    status === "confirmed" ||
+    status === "cancelled" ||
+    status === "canceled" ||
+    status === "refund"
+  ) {
+    return row;
+  }
+
+  return null;
+}
+
 async function saveResult(p, result) {
   const now = new Date().toISOString();
 
@@ -213,6 +256,42 @@ export default async function handler(req) {
     console.log(
       `[RESULT START] ${p.date} ${p.venueName} ${p.raceNo}R`
     );
+
+    try {
+      const existing = await getExistingTerminalResult(id);
+
+      if (existing) {
+        console.log(
+          `[RESULT SKIPPED ALREADY STORED] ` +
+          `${p.date} ${p.venueName} ${p.raceNo}R ` +
+          `status=${existing.result_status}`
+        );
+
+        return new Response(null, { status: 204 });
+      }
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : String(error);
+
+      await logFetch({
+        race_id: id,
+        status: "error",
+        http_status: null,
+        retry_count: 0,
+        error_code: "EXISTING_RESULT_CHECK_ERROR",
+        error_message: message,
+        source: "keirin-result-worker-background"
+      });
+
+      console.error(
+        `[RESULT EXISTING CHECK FAILED] ` +
+        `${p.date} ${p.venueName} ${p.raceNo}R ${message}`
+      );
+
+      return new Response(null, { status: 204 });
+    }
 
     let official;
 
