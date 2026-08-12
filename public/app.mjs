@@ -499,7 +499,7 @@ function renderScenarioExplanation(snapshot){
   const explanation=snapshot?.predictionExplanation||snapshot?.prediction?.explanation||null;
   const bets=standardSelections(snapshot);
   const predictionHtml=renderPredictionAxisExplanation(explanation,snapshot?.prediction?.probabilityPathAudit||snapshot?.probabilityPathAudit||null,snapshot?.prediction?.conditionalProbabilityDistributionAudit||snapshot?.conditionalProbabilityDistributionAudit||null);
-  const purchaseHtml=renderPurchaseScenarioExplanation(snapshot,bets);
+  const purchaseHtml=renderPurchaseScenarioExplanation(snapshot,bets,explanation);
   return `${predictionHtml}${purchaseHtml}`;
 }
 
@@ -511,7 +511,7 @@ function renderPredictionAxisExplanation(explanation,probabilityPathAudit=null,c
   const alternatives=(explanation?.alternatives||[]).slice(0,3).map(a=>`<div class="detailBet"><strong>${esc(a.branchLabel||"代替展開")}</strong><p>${esc(a.timeline||"")}</p><p class="muted">枝寄与 ${(Number(a.branchProbabilityMass||0)*100).toFixed(1)}%${a.primaryOrder?.length?` / 代表終端 ${esc(a.primaryOrder.join("-"))}`:""}</p></div>`).join("");
   return `<details class="predictionAccordion" open><summary>軸になった展開と根拠</summary><div class="accordionBody">
     <div class="auditCallout"><strong>軸になった展開</strong><p>${esc(axis.timeline)}</p><p class="muted">予測枝 ${esc(axis.branchLabel||axis.branchId||"")} / 枝寄与 ${(Number(axis.branchProbabilityMass||0)*100).toFixed(1)}%${axis.primaryOrder?.length?` / 代表終端 ${esc(axis.primaryOrder.join("-"))}`:""}</p></div>
-    <div class="auditCallout"><strong>この展開を軸にした根拠</strong>${reasons?`<ul>${reasons}</ul>`:'<p>根拠データなし</p>'}</div>
+    <div class="auditCallout"><strong>この展開を軸にした根拠</strong>${axis.leaderReason?`<p><b>主導権を想定した理由：</b>${esc(axis.leaderReason)}</p>`:""}${reasons?`<ul>${reasons}</ul>`:'<p>根拠データなし</p>'}</div>
     ${renderAxisSelectionAudit(explanation?.axisSelectionAudit,axis)}
     ${renderLeaderHoldComparison(explanation?.leaderHoldComparison,axis)}
     ${orders?`<p class="muted"><b>この展開から自然につながる上位終端</b> ${esc(orders)}</p>`:""}
@@ -591,7 +591,7 @@ function renderConditionalDistributionAudit(audit,primaryOrder=[]){
   return `<details class="predictionAccordion"><summary>条件付き確率の100%監査</summary><div class="accordionBody"><div class="auditCallout"><strong>${esc(status)}</strong><p>${esc(rowText("1着",f))}<br>${esc(rowText("2着",s))}<br>${esc(rowText("3着",t))}</p><p class="muted">全 ${Number(audit.totalGroupCount||0)} 親状態中、100%分布 ${Number(audit.normalizedGroupCount||0)} / 非100%分布 ${Number(audit.nonNormalizedGroupCount||0)}。現在の値は score構成比 × 成立条件負荷 の後に再正規化していません。</p></div></div></details>`;
 }
 
-function renderPurchaseScenarioExplanation(snapshot,bets){
+function renderPurchaseScenarioExplanation(snapshot,bets,explanation=null){
   const branches=Array.isArray(snapshot?.branches)?snapshot.branches:[];
   if(!bets.length)return `<div class="auditCallout"><strong>購入エンジンの判断</strong><p>標準購入候補はありません。上の軸展開は予測として保持されています。</p></div>`;
   const grouped=new Map();
@@ -608,15 +608,18 @@ function renderPurchaseScenarioExplanation(snapshot,bets){
   if(main.length)mainSentences.push(`本線 ${main.length}点。予測側の終端を購入エンジンが確率・集中度・オッズで評価して採用しています。`);
   if(cover.length)mainSentences.push(`押さえ ${cover.length}点。主展開の派生または別の有力展開として残した終端です。`);
   if(value.length)mainSentences.push(`買える高配当 ${value.length}点。成立根拠とオッズ妙味の両方が残った終端です。`);
-  const rows=bets.filter(b=>["MAIN","COVER","BUYABLE_HIGH"].includes(b?.category)).map(b=>scenarioBetSentence(b)).join("");
+  const rows=bets.filter(b=>["MAIN","COVER","BUYABLE_HIGH"].includes(b?.category)).map(b=>scenarioBetSentence(b,explanation)).join("");
   return `<details class="predictionAccordion"><summary>購入エンジン：なぜこの買い目を採用したか</summary><div class="accordionBody"><div class="auditCallout">${mainSentences.map(x=>`<p>${esc(x)}</p>`).join("")}</div><div class="detailGroup">${rows}</div></div></details>`;
 }
 
-function scenarioBetSentence(b){
+function scenarioBetSentence(b,explanation=null){
   const order=Array.isArray(b?.order)?b.order.map(Number):String(b?.order||"").split("-").map(Number);
   const [a,c,d]=order;
   const cls=betClassLabel(b?.category);
   const branch=b?.dominantBranchLabel||b?.branchLabel||"展開枝不明";
+  const scenario=(explanation?.axis?.branchId&&String(explanation.axis.branchId)===String(b?.dominantBranchId)
+    ?explanation.axis
+    :(explanation?.alternatives||[]).find(x=>String(x?.branchId)===String(b?.dominantBranchId)))||null;
   const convRaw=b?.naturalConvergenceScore;
   const conv=convRaw===null||convRaw===undefined||convRaw===""?null:Number(convRaw);
   const convText=Number.isFinite(conv)?`${Math.round(conv*100)}%`:"不明";
@@ -628,6 +631,10 @@ function scenarioBetSentence(b){
   }else{
     sentence=`${a}-${c}-${d}は「${branch}」由来の別展開として成立し、自然さだけで本線には上げず、オッズ妙味が残るため高配当候補にしました。`;
   }
+  const scenarioText=scenario?.timeline||"";
+  const scenarioReason=scenario?.leaderReason||"";
+  if(scenarioReason) sentence=`${scenarioReason}${sentence}`;
+  else if(scenarioText) sentence=`予測側では「${scenarioText}」という保存済みシナリオから、${sentence}`;
   const reason=b?.purchaseReason?` ${b.purchaseReason}`:"";
   const extraDetails=Array.isArray(b?.extraConditionDetails)?b.extraConditionDetails:[];
   const extraText=extraDetails.length?extraDetails.map(x=>{const p=Number(x?.probability);const prob=Number.isFinite(p)?`${(p*100).toFixed(1)}%`:"未校正";const mech=x?.mechanism?.label?`・${x.mechanism.label}`:"";return `${x?.stage||"構造"}:${x?.label||x?.id||"追加条件"}${mech} ${prob}${x?.critical===true?" 必須":""}`}).join(" ｜ "):"";

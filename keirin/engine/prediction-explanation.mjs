@@ -82,7 +82,8 @@ function buildScenario({branch,index,riderByNumber,lineById,terminals,massByBran
   const top=supported[0]||null;
   const order=top?.terminal?.order||[];
   const line=branch.primaryLineId!=null?lineById.get(String(branch.primaryLineId)):null;
-  const timeline=buildTimeline({branch,line,order,riderByNumber,top,lines:[...lineById.values()]});
+  const leaderReason=buildLeaderReason({branch,line,riderByNumber});
+  const timeline=buildTimeline({branch,line,order,riderByNumber,top,lines:[...lineById.values()],leaderReason});
   const reasons=buildReasons({branch,line,order,riderByNumber,top,mass:Number(massByBranch.get(String(branch.id)))||0});
   const naturalOrders=supported.slice(0,4).map(({terminal,contribution})=>({
     order:(terminal.order||[]).map(Number),
@@ -108,7 +109,43 @@ function buildScenario({branch,index,riderByNumber,lineById,terminals,massByBran
   };
 }
 
-function buildTimeline({branch,line,order,riderByNumber,top,lines}){
+function buildLeaderReason({branch,line,riderByNumber}){
+  if(!branch?.requiredFirstNumber)return null;
+  const leaderNumber=Number(branch.requiredFirstNumber);
+  const leader=line?.leader&&Number(line.leader.number)===leaderNumber?line.leader:null;
+  const evidence=leader?.startPowerEvidence||{};
+  const initiative=branch?.initiative||null;
+  const ev=initiative?.evidence||{};
+  const parts=[];
+  if(Number.isFinite(Number(ev.backCount))&&Number.isFinite(Number(ev.officialTotalStarts))){
+    parts.push(`B実績${Number(ev.backCount)}回/${Number(ev.officialTotalStarts)}走`);
+  }else if(Number.isFinite(Number(evidence.rawBackCount))&&Number.isFinite(Number(evidence.officialTotalStarts))){
+    parts.push(`B実績${Number(evidence.rawBackCount)}回/${Number(evidence.officialTotalStarts)}走`);
+  }
+  if(Number.isFinite(Number(ev.bFrequency)))parts.push(`B率${(Number(ev.bFrequency)*100).toFixed(1)}%`);
+  if(Number.isFinite(Number(ev.hFrequency)))parts.push(`H率${(Number(ev.hFrequency)*100).toFixed(1)}%`);
+  if(Number.isFinite(Number(ev.officialScore)))parts.push(`競走得点${Number(ev.officialScore).toFixed(2)}`);
+  if(Number.isFinite(Number(ev.lineLength)))parts.push(`${Number(ev.lineLength)}車ライン`);
+  const scoreTrace=(branch.scoreTrace||[]).filter(x=>Number.isFinite(Number(x.value))).slice(0,3);
+  const traceText=scoreTrace.map(x=>`${factorLabel(x.key)}${Number(x.value).toFixed(2)}`).join("、");
+  const name=riderLabel(leaderNumber,riderByNumber);
+  if(branch.branchType==="LEADER_HOLD"){
+    const evidenceText=parts.length?parts.join("、"):traceText;
+    return evidenceText
+      ? `${name}は${evidenceText}などの先行根拠を踏まえ、主導権を取る枝を想定。`
+      : `${name}を主導権候補とする保存済みの先行枝に基づき、主導権を取る想定。`;
+  }
+  if(branch.branchType==="BANTE_SASHI"&&line?.leader){
+    const leadName=riderLabel(Number(line.leader.number),riderByNumber);
+    const evidenceText=parts.length?parts.join("、"):traceText;
+    return evidenceText
+      ? `${leadName}が主導権を取る条件を前提に、${name}が番手を確保する枝を想定。`
+      : `${leadName}主導権の保存済み枝を前提に、${name}が番手を確保する想定。`;
+  }
+  return null;
+}
+
+function buildTimeline({branch,line,order,riderByNumber,top,lines,leaderReason}){
   const [first,second,third]=order.map(Number);
   const firstText=riderLabel(first,riderByNumber),secondText=riderLabel(second,riderByNumber),thirdText=riderLabel(third,riderByNumber);
   const leader=line?.leader?numberLabel(line.leader):null;
@@ -120,12 +157,12 @@ function buildTimeline({branch,line,order,riderByNumber,top,lines}){
 
   if(branch.branchType==="BANTE_SASHI"&&leaderText&&banteText){
     const tail=finishTail({first,second,third,leader,bante,firstText,secondText,thirdText,secondMech,thirdMech});
-    return `${leaderText}が先行して主導権。${banteText}が番手で追走し、直線で${banteText}が${leaderText}を差す。${tail}`;
+    return `${leaderReason||`${leaderText}が先行して主導権を取る想定。`}${banteText}が番手で追走し、直線で${banteText}が${leaderText}を差す。${tail}`;
   }
   if(branch.branchType==="LEADER_HOLD"&&leaderText){
     const follow=banteText?`${banteText}が番手で追走。`:"";
     const tail=finishTail({first,second,third,leader,bante,firstText,secondText,thirdText,secondMech,thirdMech});
-    return `${leaderText}が主導権を取って先行。${follow}${leaderText}が直線まで粘って押し切る。${tail}`;
+    return `${leaderReason||`${leaderText}が主導権を取って先行する想定。`}${follow}${leaderText}が直線まで粘って押し切る。${tail}`;
   }
   if(branch.branchType==="MAKURI_SUCCESS"){
     const attacker=firstText||riderLabel(branch.requiredFirstNumber,riderByNumber);
