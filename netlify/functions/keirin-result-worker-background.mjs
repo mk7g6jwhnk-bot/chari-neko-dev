@@ -1,4 +1,4 @@
-const RETRY_DELAYS = [0, 3000, 8000];
+const RETRY_DELAYS = [0];
 
 export default async (req) => {
   try {
