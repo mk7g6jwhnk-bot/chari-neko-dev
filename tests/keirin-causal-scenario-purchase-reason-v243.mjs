@@ -1,0 +1,11 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+const src=fs.readFileSync(new URL("../public/app.mjs",import.meta.url),"utf8");
+assert.ok(src.includes("const scenario=findFriendlyPurchaseScenario(b,explanation);"));
+assert.ok(src.includes("if(scenario?.timeline){"));
+assert.ok(src.includes("// Only append the classification explanation here."));
+assert.ok(src.includes("Do not append FIRST/SECOND/THIRD"));
+assert.ok(!src.includes('pieces.push(friendlyNodeCondition(b,"FIRST",1,snapshot));'));
+assert.ok(!src.includes('pieces.push(friendlyNodeCondition(b,"SECOND",2,snapshot));'));
+assert.ok(!src.includes('pieces.push(friendlyNodeCondition(b,"THIRD",3,snapshot));'));
+console.log("PASS v243 causal scenario purchase reason");
