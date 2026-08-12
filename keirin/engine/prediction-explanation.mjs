@@ -5,11 +5,17 @@ export function buildPredictionExplanation({scored=[],lines=[],branches=[],termi
   const massByBranch=aggregateBranchMass(terminals);
   const center=(branches||[]).filter(branch=>["CENTER","CENTER_SIBLING"].includes(branch?.forecastRole)||branch?.priority==="main");
   const pool=center.length?center:(branches||[]);
-  const ranked=[...pool].sort((a,b)=>(massByBranch.get(String(b.id))||0)-(massByBranch.get(String(a.id))||0)||(Number(b.score)||0)-(Number(a.score)||0)||String(a.id).localeCompare(String(b.id),"ja"));
+  // The prediction engine must decide the principal scenario in this order:
+  // (1) initiative line first, (2) outcome branch within that line,
+  // (3) terminal mass/branch score only as a tie-break inside the same line.
+  // Terminal probability mass must never move a weaker initiative line ahead of
+  // the line selected by the initiative assessment.
+  const selection=rankBranchesInitiativeFirst({pool,massByBranch});
+  const ranked=selection.ranked;
   const scenarios=ranked.slice(0,4).map((branch,index)=>buildScenario({branch,index,riderByNumber,lineById,terminals,massByBranch})).filter(Boolean);
   const axis=scenarios[0]||null;
   const alternatives=scenarios.slice(1);
-  const axisSelectionAudit=buildAxisSelectionAudit({pool,ranked,massByBranch,axis});
+  const axisSelectionAudit=buildAxisSelectionAudit({pool,ranked,massByBranch,axis,selection});
   const axisBranch=axis?.branchId?branchById.get(String(axis.branchId)):null;
   const comparisonAxisBranch=axisBranch?.branchType==="BANTE_SASHI"
     ?(branches||[]).find(branch=>branch?.branchType==="LEADER_HOLD"&&String(branch?.primaryLineId)===String(axisBranch?.primaryLineId))||null
@@ -39,32 +45,75 @@ export function buildPredictionExplanation({scored=[],lines=[],branches=[],termi
   };
 }
 
-function buildAxisSelectionAudit({pool=[],ranked=[],massByBranch=new Map(),axis=null}={}){
-  const rows=(ranked||[]).map((branch,index)=>({
+function rankBranchesInitiativeFirst({pool=[],massByBranch=new Map()}={}){
+  const source=(pool||[]).filter(Boolean);
+  const structured=source.filter(branch=>["LEADER_HOLD","BANTE_SASHI"].includes(branch?.branchType)&&branch?.primaryLineId);
+  const initiativeRanks=structured.map(branch=>Number(branch?.initiativeRank)).filter(Number.isFinite);
+  const topRank=initiativeRanks.length?Math.min(...initiativeRanks):null;
+  const topInitiativeLineIds=new Set(
+    structured
+      .filter(branch=>topRank!==null&&Number(branch?.initiativeRank)===topRank)
+      .map(branch=>String(branch.primaryLineId))
+  );
+  const initiativePool=topInitiativeLineIds.size
+    ?source.filter(branch=>branch?.primaryLineId!=null&&topInitiativeLineIds.has(String(branch.primaryLineId)))
+    :[];
+  const effectivePool=initiativePool.length?initiativePool:source;
+  const ranked=[...effectivePool].sort((a,b)=>
+    (Number(a?.initiativeRank||999)-Number(b?.initiativeRank||999))
+    ||((massByBranch.get(String(b?.id))||0)-(massByBranch.get(String(a?.id))||0))
+    ||((Number(b?.score)||0)-(Number(a?.score)||0))
+    ||String(a?.id||"").localeCompare(String(b?.id||""),"ja")
+  );
+  return{
+    ranked,
+    mode:initiativePool.length?"INITIATIVE_LINE_FIRST":"FALLBACK_NO_INITIATIVE_LINE",
+    topInitiativeRank:topRank,
+    topInitiativeLineIds:[...topInitiativeLineIds],
+    initiativePoolCount:initiativePool.length
+  };
+}
+
+function buildAxisSelectionAudit({pool=[],ranked=[],massByBranch=new Map(),axis=null,selection=null}={}){
+  const makeRow=(branch,index)=>({
     rank:index+1,
     branchId:branch?.id||null,
     branchLabel:branch?.label||null,
     branchType:branch?.branchType||null,
     primaryLineId:branch?.primaryLineId??null,
     requiredFirstNumber:branch?.requiredFirstNumber??null,
+    initiativeRank:Number.isFinite(Number(branch?.initiativeRank))?Number(branch.initiativeRank):null,
+    initiativeScore:Number.isFinite(Number(branch?.initiativeScore))?Number(branch.initiativeScore):null,
+    initiativePrimaryLine:Boolean(branch?.initiativePrimaryLine),
     branchProbabilityMass:Number(massByBranch.get(String(branch?.id)))||0,
     branchScore:Number(branch?.score)||0,
     forecastRole:branch?.forecastRole||null,
     priority:branch?.priority||null
-  }));
+  });
+  const poolRows=(pool||[]).map((branch,index)=>makeRow(branch,index));
+  const rows=(ranked||[]).map((branch,index)=>makeRow(branch,index));
   const selected=rows[0]||null;
   const axisId=axis?.branchId||null;
   const consistent=Boolean(!axisId||String(selected?.branchId)===String(axisId));
-  const scoreLeader=[...rows].sort((a,b)=>b.branchScore-a.branchScore||String(a.branchId).localeCompare(String(b.branchId),'en'))[0]||null;
+  const scoreLeader=[...poolRows].sort((a,b)=>b.branchScore-a.branchScore||String(a.branchId).localeCompare(String(b.branchId),'en'))[0]||null;
+  const massLeader=[...poolRows].sort((a,b)=>b.branchProbabilityMass-a.branchProbabilityMass||b.branchScore-a.branchScore||String(a.branchId).localeCompare(String(b.branchId),'en'))[0]||null;
   return{
-    version:'AXIS-SELECTION-AUDIT-1.0',
-    policy:'CENTER_POOL_FIRST; THEN BRANCH_TERMINAL_PROBABILITY_MASS DESC; THEN BRANCH_SCORE DESC; THEN BRANCH_ID',
+    version:'AXIS-SELECTION-AUDIT-1.1',
+    policy:'INITIATIVE_LINE_FIRST; THEN SAME_LINE_TERMINAL_PROBABILITY_MASS; THEN BRANCH_SCORE; THEN BRANCH_ID',
     poolMode:(pool||[]).some(b=>['CENTER','CENTER_SIBLING'].includes(b?.forecastRole)||b?.priority==='main')?'CENTER_OR_MAIN_ONLY':'ALL_BRANCHES',
+    selectionMode:selection?.mode||'UNKNOWN',
+    topInitiativeRank:selection?.topInitiativeRank??null,
+    topInitiativeLineIds:selection?.topInitiativeLineIds||[],
+    initiativePoolCount:Number(selection?.initiativePoolCount)||0,
     selectedBranchId:selected?.branchId||null,
     selectedBranchMass:selected?.branchProbabilityMass||0,
     selectedBranchScore:selected?.branchScore||0,
     highestScoreBranchId:scoreLeader?.branchId||null,
     highestScore:Number(scoreLeader?.branchScore)||0,
+    highestMassBranchId:massLeader?.branchId||null,
+    highestMass:Number(massLeader?.branchProbabilityMass)||0,
+    highestMassIsDifferentLine:Boolean(massLeader&&selected&&String(massLeader.primaryLineId)!==String(selected.primaryLineId)),
+    selectionDrivenByInitiativeLine:Boolean(selected?.initiativePrimaryLine),
     selectionDrivenByMass:Boolean(selected&&scoreLeader&&String(selected.branchId)!==String(scoreLeader.branchId)&&selected.branchProbabilityMass>scoreLeader.branchProbabilityMass),
     rows:rows.slice(0,8),
     audit:{axisMatchesSelection:consistent,passed:consistent}
@@ -284,6 +333,8 @@ function buildLeaderHoldComparison({scored=[],lines=[],branches=[],axisBranchId=
       officialLineLeader:Boolean(leaderInfo),lineId:leaderInfo?.lineId??null,
       branchGenerated:Boolean(branch),branchId:branch?.id||null,
       branchLabel:branch?.label||null,branchScore:valueOf(branch?.score),
+      initiativeRank:valueOf(branch?.initiativeRank),initiativeScore:valueOf(branch?.initiativeScore),
+      initiativePrimaryLine:Boolean(branch?.initiativePrimaryLine),
       forecastRole:branch?.forecastRole||null,priority:branch?.priority||null,
       isAxisBranch:Boolean(branch&&String(branch.id)===String(axisBranchId)),
       exclusionReason,raw,factors
@@ -334,18 +385,33 @@ function buildLeaderHoldUserFacingComparison(axis,rival,factors=[]){
   const topAxis=axisAdvantages.slice(0,3).map(x=>`${x.label} +${x.delta.toFixed(3)}`);
   const topRival=rivalAdvantages.slice(0,3).map(x=>`${x.label} ${x.delta.toFixed(3)}`);
   const decisiveReasons=axisAdvantages.slice(0,3).map(x=>({label:x.label,delta:x.delta,axisValue:x.axisValue,rivalValue:x.rivalValue}));
+  const axisInitiativeRank=valueOf(axis.initiativeRank);
+  const rivalInitiativeRank=valueOf(rival.initiativeRank);
+  const initiativeAxis=axisInitiativeRank!==null;
+  const initiativeRival=rivalInitiativeRank!==null;
+  const initiativeReason=initiativeAxis&&initiativeRival
+    ?(axisInitiativeRank<rivalInitiativeRank
+      ?`${axis.number}番は主導権評価で${axisInitiativeRank}位、${rival.number}番は${rivalInitiativeRank}位。主導権ラインの選択を先に確定するため、${axis.number}番側を主展開に採用します。`
+      :axisInitiativeRank>rivalInitiativeRank
+        ?`${rival.number}番の方が主導権評価で上位ですが、${axis.number}番側を軸にした理由はこの比較だけでは説明できません。`
+        :`両者の主導権順位は同順位のため、同一基準内で枝scoreと終端評価を比較します。`)
+    :"主導権順位が取得できないため、主導権順位による優先理由は確定できません。";
   const summary=[
     `${rival.number}番が優勢だった項目は${topRival.length?topRival.join("・"):"なし"}。`,
     `${axis.number}番が優勢だった項目は${topAxis.length?topAxis.join("・"):"なし"}。`,
     `重み付け後の先行押し切り枝scoreは${axis.number}番 ${fmt10(axis.branchScore)}、${rival.number}番 ${fmt10(rival.branchScore)}で、差は${scoreDelta>=0?"+":""}${scoreDelta.toFixed(3)}。`,
+    initiativeReason,
     scoreDelta>=0
-      ?(axisAdvantages.length?`先行押し切り枝scoreで${axis.number}番を押し上げた主因は${axisAdvantages.slice(0,2).map(x=>x.label).join("と")}です。`:"先行押し切り枝score上は軸側に明確な加点優位はありません。")
-      :`${rival.number}番の先行押し切り枝scoreの方が高いため、この比較だけでは${axis.number}番を軸にした理由を説明できません。実際の軸選択は終端確率質量を先に比較します。`
+      ?(axisAdvantages.length?`先行押し切り枝scoreで${axis.number}番を押し上げた主因は${axisAdvantages.slice(0,2).map(x=>x.label).join("と")}です。`:`先行押し切り枝score上は軸側に明確な加点優位はありません。`)
+      :initiativeAxis&&initiativeRival&&axisInitiativeRank<rivalInitiativeRank
+        ?`先行押し切り枝scoreだけでは${rival.number}番が上ですが、主導権ラインの順位を優先しているため、${axis.number}番を主展開側に残します。`
+        :`${rival.number}番の先行押し切り枝scoreが上回っているため、${axis.number}番を軸にした理由は主導権順位を含めて確認する必要があります。`
   ].join(" ");
   return{
     mode:"HEAD_TO_HEAD",axisNumber:axis.number,rivalNumber:rival.number,
     headline:`軸候補比較：${axis.number}番 vs ${rival.number}番`,
-    summary,scoreDelta,axisAdvantages,rivalAdvantages,decisiveReasons
+    summary,scoreDelta,axisAdvantages,rivalAdvantages,decisiveReasons,
+    initiative:{axisRank:axis.initiativeRank,axisScore:axis.initiativeScore,rivalRank:rival.initiativeRank,rivalScore:rival.initiativeScore,axisPrimaryLine:Boolean(axis.initiativePrimaryLine)}
   };
 }
 

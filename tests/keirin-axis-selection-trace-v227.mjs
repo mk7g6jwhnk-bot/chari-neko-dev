@@ -17,5 +17,5 @@ assert.equal(ex.axis.branchId,'BANTE-A');
 assert.equal(ex.axisSelectionAudit.selectedBranchId,'BANTE-A');
 assert.equal(ex.axisSelectionAudit.audit.passed,true);
 assert.equal(ex.axisSelectionAudit.selectionDrivenByMass,true);
-assert.ok(ex.leaderHoldComparison.userFacingComparison.summary.includes('この比較だけでは2番を軸にした理由を説明できません'));
+assert.ok(ex.leaderHoldComparison.userFacingComparison.summary.includes('主導権順位が取得できないため'));
 console.log('PASS v227 axis selection trace uses mass before score and forbids false leader-score explanation');

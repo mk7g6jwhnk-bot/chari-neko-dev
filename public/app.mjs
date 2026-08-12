@@ -13,7 +13,7 @@ const ODDS_CACHE_KEY="chari-neko:keirin-odds-cache:v1";
 const RACE_META_CACHE_KEY="chari-neko:keirin-race-meta-cache:v1";
 const RESULT_CACHE_KEY="chari-neko:keirin-result-cache:v1";
 const MEETING_CACHE_KEY="chari-neko:keirin-meeting-cache:v1";
-const APP_RELEASE="KEIRIN-0.19.1-b-led-initiative-strength-guard";
+const APP_RELEASE="KEIRIN-0.19.3-initiative-first-axis";
 const APP_UPDATE_CHECK_INTERVAL_MS=5*60*1000;
 let lastAppUpdateCheckAt=0,appUpdateCheckBusy=false;
 const VENUE_CODES={函館:"11",青森:"12",いわき平:"13",弥彦:"21",前橋:"22",取手:"23",宇都宮:"24",大宮:"25",西武園:"26",京王閣:"27",立川:"28",松戸:"31",千葉:"32",川崎:"34",平塚:"35",小田原:"36",伊東:"37",静岡:"38",名古屋:"42",岐阜:"43",大垣:"44",豊橋:"45",富山:"46",松阪:"47",四日市:"48",福井:"51",奈良:"53",向日町:"54",和歌山:"55",岸和田:"56",玉野:"61",広島:"62",防府:"63",高松:"71",小松島:"73",高知:"74",松山:"75",小倉:"81",久留米:"83",武雄:"84",佐世保:"85",別府:"86",熊本:"87"};
@@ -528,8 +528,8 @@ function renderAxisSelectionAudit(audit,axis){
   if(!audit?.rows?.length)return "";
   const rows=audit.rows.slice(0,5).map(r=>`<li>${r.rank}位 ${esc(r.branchLabel||r.branchId||"")} / 終端確率質量 ${(Number(r.branchProbabilityMass||0)*100).toFixed(2)}% / branch score ${Number(r.branchScore||0).toFixed(3)}</li>`).join("");
   const mismatch=!audit?.audit?.axisMatchesSelection;
-  const scoreNote=audit.selectionDrivenByMass?`<p><b>注意:</b> branch score最大の枝ではなく、終端確率質量が大きい枝が軸に選ばれています。</p>`:"";
-  return `<details class="predictionAccordion" open><summary>実際の軸選択順位</summary><div class="accordionBody"><div class="auditCallout"><p>軸選択順: <b>終端確率質量 → branch score → ID</b>。比較対象は先にCENTER/main候補へ限定されます。</p><ul>${rows}</ul>${scoreNote}${mismatch?`<p><b>整合性エラー:</b> 保存された軸branchと再計算した1位branchが一致しません。</p>`:""}</div></div></details>`;
+  const scoreNote=audit.selectionDrivenByInitiativeLine?`<p><b>主導権優先:</b> まず主導権評価で上位のラインを主展開として固定し、その同一ライン内で終端確率質量・branch scoreを比較しています。別ラインの終端確率だけで逆転させません。</p>`:"";
+  return `<details class="predictionAccordion" open><summary>実際の軸選択順位</summary><div class="accordionBody"><div class="auditCallout"><p>軸選択順: <b>主導権ライン → 同一ライン内の終端確率質量 → branch score → ID</b>。比較対象は先にCENTER/main候補へ限定されます。</p><ul>${rows}</ul>${scoreNote}${mismatch?`<p><b>整合性エラー:</b> 保存された軸branchと再計算した1位branchが一致しません。</p>`:""}</div></div></details>`;
 }
 
 function renderLeaderHoldComparison(audit,axis){
