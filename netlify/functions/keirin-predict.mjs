@@ -175,103 +175,95 @@ async function requestBrowserService(base, params) {
     venueName: params.venueName,
     raceNo: String(params.raceNo)
   });
-
-  const endpoint = `${base}/keirin/race?${query}`;
   const attempts = [];
   const startedAt = Date.now();
-  // Netlify側で無限待ちにせず、Railwayの一時502/HTML応答には必ずもう一度当てる。
   const totalBudgetMs = 54000;
 
-  for (let attempt = 1; attempt <= 2; attempt += 1) {
+  // 本番の /keirin/race はブラウザを使う重い取得経路。Railway側が一時的に502/タイムアウトした場合でも、
+  // 軽量な /keirin/preview へ切り替えて予想を止めない。preview が officialData を返す場合はそのまま予想入力に使える。
+  const endpoints = [
+    { path: "/keirin/race", timeout: 26000 },
+    { path: "/keirin/race", timeout: 16000 },
+    { path: "/keirin/preview", timeout: 10000 }
+  ];
+
+  for (let index = 0; index < endpoints.length; index += 1) {
     const elapsed = Date.now() - startedAt;
     const remaining = totalBudgetMs - elapsed;
-    if (remaining < 6500) break;
+    if (remaining < 3500) break;
 
-    // 1回目を長くし過ぎると、一時502の後に再試行する時間が消える。
-    // 1回目30秒、2回目は残り時間を最大22秒使う。
-    const timeoutMs = attempt === 1
-      ? Math.min(30000, remaining - 2500)
-      : Math.min(22000, remaining - 1500);
+    const target = endpoints[index];
+    const timeoutMs = Math.max(5000, Math.min(target.timeout, remaining - 1200));
+    const endpoint = `${base}${target.path}?${query}`;
 
     try {
       const response = await fetch(endpoint, {
         headers: { accept: "application/json" },
-        signal: AbortSignal.timeout(Math.max(5000, timeoutMs))
+        signal: AbortSignal.timeout(timeoutMs)
       });
       const text = await response.text();
       let data = null;
       try { data = JSON.parse(text); } catch {}
 
-      attempts.push({
-        endpoint: endpoint.replace(base, ""),
-        attempt,
+      const attempt = {
+        endpoint: target.path,
+        attempt: index + 1,
         status: response.status,
         parsed: data !== null,
         bodyKind: data !== null ? "json" : "non-json",
         error: data?.error || null,
         elapsedMs: Date.now() - startedAt
-      });
-
-      if (data && (data.officialData || data.ok === false)) {
-        const ok = response.ok && data.ok !== false;
-        if (ok) {
-          return { ok: true, status: response.status, data: { ...data, endpointAudit: attempts } };
-        }
-
-        const retryable = response.status >= 500 || /page crashed|target closed|browser|navigation|timeout|timed out|execution context|temporar|upstream/i.test(String(data?.error || ""));
-        const canRetry = attempt < 2 && retryable && (totalBudgetMs - (Date.now() - startedAt)) >= 6500;
-        if (canRetry) {
-          await sleep(900);
-          continue;
-        }
-        return { ok: false, status: response.status, data: { ...data, endpointAudit: attempts } };
-      }
-
-      // Railway/Proxyが502のHTMLを返すケース。以前は1回目が15秒を超えると再試行されなかった。
-      // 今回は残り時間がある限り、非JSONの5xxも必ず2回目へ進める。
-      const retryableStatus = response.status >= 500 || response.status === 429;
-      const canRetry = attempt < 2 && retryableStatus && (totalBudgetMs - (Date.now() - startedAt)) >= 6500;
-      if (canRetry) {
-        await sleep(900);
-        continue;
-      }
-
-      return {
-        ok: false,
-        status: response.status || 502,
-        data: {
-          ok: false,
-          error: `競輪ブラウザサービスの応答をJSONとして確認できません（HTTP ${response.status}）`,
-          endpointAudit: attempts
-        }
       };
+      attempts.push(attempt);
+
+      const officialData = data?.officialData || {};
+      const participantCount = Array.isArray(officialData?.participants) ? officialData.participants.length : 0;
+      const hasUsableRaceData = participantCount >= 5 && officialData?.basic;
+
+      if (response.ok && data && data.ok !== false && hasUsableRaceData) {
+        return {
+          ok: true,
+          status: response.status,
+          data: {
+            ...data,
+            endpointAudit: attempts,
+            diagnostics: {
+              ...(data.diagnostics || {}),
+              predictionFetchPath: target.path,
+              fallbackUsed: target.path !== "/keirin/race"
+            }
+          }
+        };
+      }
+
+      // /preview が200でも「一次選別用の薄い応答」でofficialDataが足りない場合は、成功扱いにしない。
+      // 次の経路が残っていれば続行する。
+      const retryable = response.status >= 500 || response.status === 429 ||
+        /page crashed|target closed|browser|navigation|timeout|timed out|execution context|temporar|upstream|socket|fetch failed/i.test(String(data?.error || ""));
+      const hasNext = index < endpoints.length - 1;
+      if (!hasNext || (!retryable && target.path === "/keirin/preview")) {
+        return {
+          ok: false,
+          status: response.status || 502,
+          data: {
+            ok: false,
+            error: data?.error || `競輪ブラウザサービスから予想に必要なデータを取得できませんでした（HTTP ${response.status}）`,
+            endpointAudit: attempts
+          }
+        };
+      }
+
+      await sleep(700);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       attempts.push({
-        endpoint: endpoint.replace(base, ""),
-        attempt,
+        endpoint: target.path,
+        attempt: index + 1,
         error: message,
         elapsedMs: Date.now() - startedAt
       });
-
-      const timedOut = /timeout|timed out|abort/i.test(message);
-      const canRetry = attempt < 2 && (totalBudgetMs - (Date.now() - startedAt)) >= 6500;
-      if (canRetry) {
-        await sleep(900);
-        continue;
-      }
-
-      return {
-        ok: false,
-        status: 502,
-        data: {
-          ok: false,
-          error: timedOut
-            ? "公式予想データ取得が時間内に完了しませんでした。競輪ブラウザサービスへ再試行しましたが取得できませんでした。"
-            : "競輪ブラウザサービスへ接続できません",
-          endpointAudit: attempts
-        }
-      };
+      if (index >= endpoints.length - 1 || (totalBudgetMs - (Date.now() - startedAt)) < 3500) break;
+      await sleep(700);
     }
   }
 
@@ -280,7 +272,7 @@ async function requestBrowserService(base, params) {
     status: 502,
     data: {
       ok: false,
-      error: "競輪ブラウザサービスの再試行でも取得できませんでした",
+      error: "競輪ブラウザサービスが応答しませんでした。再試行してください。",
       endpointAudit: attempts
     }
   };
