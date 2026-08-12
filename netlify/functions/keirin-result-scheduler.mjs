@@ -1,5 +1,3 @@
-const RETRY_DELAYS = [0, 3000, 8000];
-
 export default async (req) => {
   const startedAt = new Date().toISOString();
 
@@ -16,6 +14,7 @@ export default async (req) => {
 
     // 日本時間の今日
     const now = new Date();
+
     const jst = new Date(
       now.toLocaleString("en-US", {
         timeZone: "Asia/Tokyo"
@@ -25,6 +24,7 @@ export default async (req) => {
     const yyyy = jst.getFullYear();
     const mm = String(jst.getMonth() + 1).padStart(2, "0");
     const dd = String(jst.getDate()).padStart(2, "0");
+
     const date = `${yyyy}${mm}${dd}`;
 
     console.log(
@@ -60,12 +60,9 @@ export default async (req) => {
       ? discoverData.meetings
       : [];
 
-    let attempted = 0;
-    let saved = 0;
-    let unavailable = 0;
-    let failed = 0;
+    // ② Workerへ渡す対象レースを作成
+    const jobs = [];
 
-    // ② 開催場ごとに確認
     for (const meeting of meetings) {
       const venueCode = String(
         meeting?.venueCode || ""
@@ -83,7 +80,6 @@ export default async (req) => {
         continue;
       }
 
-      // ③ レースごとに確認
       for (const race of races) {
         const raceNo = Number(race?.raceNo || 0);
 
@@ -95,105 +91,84 @@ export default async (req) => {
           continue;
         }
 
-        // 発走時刻が取得できる場合、
-        // まだ発走していないレースは結果取得しない
+        // 発走前レースは対象外
         if (!hasStarted(race?.startTime, jst)) {
           continue;
         }
 
-        attempted++;
-
-        let completed = false;
-
-        // ④ 結果取得
-        for (let i = 0; i < RETRY_DELAYS.length; i++) {
-          if (RETRY_DELAYS[i]) {
-            await sleep(RETRY_DELAYS[i]);
-          }
-
-          try {
-            const params = new URLSearchParams({
-              date,
-              venueCode,
-              venueName,
-              raceNo: String(raceNo)
-            });
-
-            const headers = {
-              accept: "application/json"
-            };
-
-            const secret = String(
-              process.env.RESULT_STORE_SECRET || ""
-            ).trim();
-
-            if (secret) {
-              headers["x-result-store-secret"] = secret;
-            }
-
-            const resultUrl =
-              `${siteUrl}/.netlify/functions/keirin-result-store?${params}`;
-
-            const response = await fetch(resultUrl, {
-              headers,
-              signal: AbortSignal.timeout(22000)
-            });
-
-            let data = null;
-
-            try {
-              data = await response.json();
-            } catch {}
-
-            // 結果取得成功
-            if (response.ok && data?.ok === true) {
-              saved++;
-              completed = true;
-
-              console.log(
-                `[RESULT SAVED] ${date} ${venueName} ${raceNo}R`
-              );
-
-              break;
-            }
-
-            // まだ結果が確定していない
-            if (
-              response.status === 409 ||
-              /未確定|未取得|not.*available/i.test(
-                String(data?.error || "")
-              )
-            ) {
-              unavailable++;
-
-              console.log(
-                `[RESULT NOT READY] ${date} ${venueName} ${raceNo}R`
-              );
-
-              completed = true;
-              break;
-            }
-
-            // その他のエラー
-            console.log(
-              `[RESULT RETRY] ${date} ${venueName} ${raceNo}R`,
-              data?.error || response.status
-            );
-          } catch (error) {
-            console.log(
-              `[RESULT ERROR] ${date} ${venueName} ${raceNo}R`,
-              error instanceof Error
-                ? error.message
-                : String(error)
-            );
-          }
-        }
-
-        if (!completed) {
-          failed++;
-        }
+        jobs.push({
+          date,
+          venueCode,
+          venueName,
+          raceNo
+        });
       }
     }
+
+    console.log(
+      `[keirin-result-scheduler] worker jobs=${jobs.length}`
+    );
+
+    // ③ Background Workerへ投入
+    //
+    // Background Functionは呼び出し直後に202を返し、
+    // 実処理はバックグラウンドで継続する。
+    const workerUrl =
+      `${siteUrl}/.netlify/functions/keirin-result-worker-background`;
+
+    const dispatchResults = await Promise.all(
+      jobs.map(async (job) => {
+        try {
+          const response = await fetch(workerUrl, {
+            method: "POST",
+            headers: {
+              "content-type": "application/json",
+              accept: "application/json"
+            },
+            body: JSON.stringify(job),
+            signal: AbortSignal.timeout(8000)
+          });
+
+          if (response.ok) {
+            console.log(
+              `[WORKER DISPATCHED] ${job.date} ${job.venueName} ${job.raceNo}R HTTP ${response.status}`
+            );
+
+            return {
+              ok: true,
+              job
+            };
+          }
+
+          console.error(
+            `[WORKER DISPATCH FAILED] ${job.date} ${job.venueName} ${job.raceNo}R HTTP ${response.status}`
+          );
+
+          return {
+            ok: false,
+            job
+          };
+        } catch (error) {
+          console.error(
+            `[WORKER DISPATCH ERROR] ${job.date} ${job.venueName} ${job.raceNo}R`,
+            error instanceof Error
+              ? error.message
+              : String(error)
+          );
+
+          return {
+            ok: false,
+            job
+          };
+        }
+      })
+    );
+
+    const dispatched = dispatchResults.filter(
+      (result) => result.ok
+    ).length;
+
+    const dispatchFailed = dispatchResults.length - dispatched;
 
     const finishedAt = new Date().toISOString();
 
@@ -202,16 +177,17 @@ export default async (req) => {
         ok: true,
         date,
         meetings: meetings.length,
-        attempted,
-        saved,
-        unavailable,
-        failed,
+        jobs: jobs.length,
+        dispatched,
+        dispatchFailed,
         startedAt,
         finishedAt
       })
     );
 
-    return new Response(null, { status: 204 });
+    return new Response(null, {
+      status: 204
+    });
 
   } catch (error) {
     console.error(
@@ -221,31 +197,27 @@ export default async (req) => {
         : String(error)
     );
 
-    // Scheduled Functionなのでレスポンス本文は不要。
-    // ログに残して次回実行で再試行する。
-    return new Response(null, { status: 204 });
+    // Scheduled Functionなので本文は不要。
+    // 次回の毎時実行で再試行する。
+    return new Response(null, {
+      status: 204
+    });
   }
 };
-
 
 export const config = {
   schedule: "@hourly"
 };
 
-
 function hasStarted(value, jstNow) {
   const text = String(value || "").trim();
 
   if (!text) {
-    // 発走時刻が取れない場合は結果取得を試みる。
-    // 結果未確定ならresult-store側で409になる。
+    // 発走時刻が取れない場合はWorkerへ渡す。
+    // 結果未確定ならWorker側で処理する。
     return true;
   }
 
-  // 例:
-  // "09:06"
-  // "9:06"
-  // "09:06:00"
   const match = text.match(
     /(\d{1,2}):(\d{2})(?::(\d{2}))?/
   );
@@ -268,12 +240,13 @@ function hasStarted(value, jstNow) {
   }
 
   const raceTime = new Date(jstNow);
-  raceTime.setHours(hour, minute, second, 0);
+
+  raceTime.setHours(
+    hour,
+    minute,
+    second,
+    0
+  );
 
   return jstNow >= raceTime;
-}
-
-
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
 }
