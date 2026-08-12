@@ -1,5 +1,5 @@
 # Chari-Neko version
 
-- Version: `KEIRIN-0.19.5-all-buy-explanation-ui`
-- Label: `v240-all-buy-explanation-ui`
-- Scope: purchase-explanation UI only; every displayed buy candidate can be opened individually to read its Japanese rationale and judgment materials. Prediction, purchase classification, probability, and funding logic are unchanged.
+- Version: `KEIRIN-0.19.6-causal-buy-explanation-ui`
+- Label: `v241-causal-buy-explanation-ui`
+- Scope: per-buy explanation UI only. Each buy candidate now resolves its saved dominant prediction branch and exact node conditions before explaining why the 1st/2nd/3rd positions are expected. Prediction, purchase classification, probability, and funding logic are unchanged.

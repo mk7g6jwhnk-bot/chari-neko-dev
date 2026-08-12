@@ -13,7 +13,7 @@ const ODDS_CACHE_KEY="chari-neko:keirin-odds-cache:v1";
 const RACE_META_CACHE_KEY="chari-neko:keirin-race-meta-cache:v1";
 const RESULT_CACHE_KEY="chari-neko:keirin-result-cache:v1";
 const MEETING_CACHE_KEY="chari-neko:keirin-meeting-cache:v1";
-const APP_RELEASE="KEIRIN-0.19.5-all-buy-explanation-ui";
+const APP_RELEASE="KEIRIN-0.19.6-causal-buy-explanation-ui";
 const APP_UPDATE_CHECK_INTERVAL_MS=5*60*1000;
 let lastAppUpdateCheckAt=0,appUpdateCheckBusy=false;
 const VENUE_CODES={函館:"11",青森:"12",いわき平:"13",弥彦:"21",前橋:"22",取手:"23",宇都宮:"24",大宮:"25",西武園:"26",京王閣:"27",立川:"28",松戸:"31",千葉:"32",川崎:"34",平塚:"35",小田原:"36",伊東:"37",静岡:"38",名古屋:"42",岐阜:"43",大垣:"44",豊橋:"45",富山:"46",松阪:"47",四日市:"48",福井:"51",奈良:"53",向日町:"54",和歌山:"55",岸和田:"56",玉野:"61",広島:"62",防府:"63",高松:"71",小松島:"73",高知:"74",松山:"75",小倉:"81",久留米:"83",武雄:"84",佐世保:"85",別府:"86",熊本:"87"};
@@ -369,21 +369,62 @@ function renderPurchaseFamilyAudit(audit){
 }
 function renderAdoptedTerminalAudit(audit){const rows=Array.isArray(audit?.adoptedTerminalAudit)?audit.adoptedTerminalAudit:[];if(!rows.length)return"";const priorityLabel={main:"本命展開",contender:"有力展開",sub:"別展開",risk:"リスク枝",unknown:"不明"};const tierCounts=audit.adoptedBranchTierCounts||{};const tierSummary=["main","contender","sub","risk"].filter(key=>Number(tierCounts[key]||0)>0).map(key=>`${priorityLabel[key]} ${tierCounts[key]}点`).join(" / ");const branchRows=Object.entries(audit.adoptedBranchCounts||{}).sort((a,b)=>b[1]-a[1]).map(([label,count])=>`<div class="abilityRow"><strong>${esc(label)}</strong><span>${count}件</span></div>`).join("");const terminalRows=rows.map(item=>{const r=item.decisionRatios||{};const ratios=`1着 ${fmtRatio(r.first)} / 2着 ${fmtRatio(r.second)} / 3着 ${fmtRatio(r.third)}`;const supportBranches=Array.isArray(item.supportBranches)?item.supportBranches:[];const supportPreview=supportBranches.slice(0,8),supportRows=supportPreview.map((branch,index)=>`<div class="abilityRow"><strong>${index+1}. ${esc(branch.branchLabel||branch.branchId||"不明")}</strong><span>${esc(priorityLabel[branch.branchPriority]||branch.branchPriority||"-")} / 寄与 ${fmtRatio(branch.probability)} / 枝内適合 ${fmtRatio(branch.withinBranchFit)} / 枝強度 ${fmtRatio(branch.branchStrengthRatio)} / 加重 ${fmtRatio(branch.weightedSupport)}</span></div>`).join("");const dup=Array.isArray(item.duplicateSupportLabels)&&item.duplicateSupportLabels.length?`<p class="auditWarn">重複ラベル: ${item.duplicateSupportLabels.map(x=>`${esc(x.label)}×${x.count}`).join(" / ")}</p>`:"";const value=Number(item.expectedValueIndex);const probability=Number(item.probability);const auditLine=`終端確率 ${Number.isFinite(probability)?fmtPct(probability):"-"} / 全${audit.generatedTerminalCount||"-"}終端中 ${item.globalRank??"-"}位 / ${item.firstFamilyNumber??"-"}番頭内 ${item.familyRank??"-"}位 / 同1-2着内 ${item.pairRank??"-"}位${Number.isFinite(Number(item.odds))?` / オッズ ${Number(item.odds).toFixed(1)}倍`:""}${Number.isFinite(value)?` / 確率×オッズ ${value.toFixed(2)}`:""}`;const familyAudit=item.firstFamilyNumber?`<p class="muted">1着ファミリー: ${item.firstFamilyNumber}番頭 / ${esc(item.firstFamilyTier||"-")} / 頭確率 ${fmtPct(item.firstFamilyProbability)}${Number.isFinite(Number(item.firstFamilyProbabilityShare))?`（全体${fmtPct(item.firstFamilyProbabilityShare)}）`:""} / 2着首位比 ${fmtRatio(item.secondFamilyRelativeToBest)} / 3着首位比 ${fmtRatio(item.thirdFamilyRelativeToBest)}${Number.isFinite(Number(item.subValueIndex))?` / 別展開妙味指数 ${Number(item.subValueIndex).toFixed(2)}`:""}</p>`:"";const thirdAudit=item.thirdVariantGroupSize?`<p class="muted">旧枝内3着監査: 群${item.thirdVariantGroupSize}件 / 首位比 ${fmtRatio(item.thirdVariantRelativeToBest)} / 群内確率質量 ${fmtRatio(item.thirdVariantConditionalShare)}${item.thirdVariantNaturalCutDetected?` / 自然境界差 ${fmtRatio(item.thirdVariantCutGap)}`:" / 明確な自然境界なし"}</p>`:"";const oddsAudit=item.highPayoutAttribute?`<p class="muted">高配当属性: ${esc(item.highPayoutAttributeLabel||"高配当")}（実オッズ評価済み・展開ランクは変更しない）</p>`:item.highPayoutCandidate?`<p class="muted">高配当候補: ${item.oddsEvaluationStatus==="ODDS_AVAILABLE"?"実オッズ評価済み":"オッズ待ち（買える高配当には未昇格）"}</p>`:"";const tier=item.dominantBranchTierLabel||priorityLabel[item.dominantBranchPriority]||"不明";return `<div class="detailBet"><strong>${esc(item.order)}　${esc(item.betClass||"")}</strong><p><b>採用監査</b> ${auditLine}</p><p><b>採用理由</b> ${esc(item.purchaseReason||"-")}</p><p><b>展開ランク ${esc(tier)}</b> / ${esc(item.dominantBranchLabel||"由来枝不明")} / 枝適合 ${fmtRatio(item.branchFit)} / 枝内${item.branchRank??"-"}位 / 由来枝${item.branchSupport??0}（固有${item.uniqueSupportBranchCount??item.branchSupport??0}） / 加重支持 ${fmtRatio(item.weightedBranchSupport)}</p><p class="muted">${ratios}</p>${familyAudit}${thirdAudit}${oddsAudit}${supportRows?`<details class="supportBranchAudit"><summary>支持枝を見る（${supportBranches.length}本）</summary><div class="abilityList">${supportRows}</div>${supportBranches.length>supportPreview.length?`<p class="muted">表示負荷を抑えるため先頭${supportPreview.length}本を表示。残り${supportBranches.length-supportPreview.length}本は保存データ内に保持しています。</p>`:""}${dup}</details>`:""}</div>`}).join("");return `<h3>採用終端の購入監査</h3>${tierSummary?`<div class="auditCallout"><strong>採用買い目の展開ランク内訳</strong><p>${esc(tierSummary)}</p><p class="muted">各買い目について、終端確率・全体順位・1着ファミリー順位・オッズ妙味・採用理由を同時に確認します。</p></div>`:""}${branchRows?`<div class="abilityList">${branchRows}</div>`:""}<div class="detailGroup">${terminalRows}</div>`}
 function betClassLabel(category){return({MAIN:"本線",COVER:"押さえ",BUYABLE_HIGH:"買える高配当",REFERENCE:"参考買い目"})[category]||"購入候補"}
-function friendlyPurchaseReason(b){
+function findFriendlyPurchaseScenario(b,explanation){
+  if(!b||!explanation)return null;
+  const id=String(b?.dominantBranchId||"");
+  if(!id)return null;
+  if(String(explanation?.axis?.branchId||"")===id)return explanation.axis;
+  return (Array.isArray(explanation?.alternatives)?explanation.alternatives:[]).find(x=>String(x?.branchId||"")===id)||null;
+}
+function friendlyParticipantName(snapshot,number){
+  const n=Number(number);
+  if(!Number.isFinite(n))return `${number||"該当選手"}番`;
+  const p=(Array.isArray(snapshot?.participants)?snapshot.participants:[]).find(x=>Number(x?.number)===n);
+  return `${n}番${p?.name?` ${p.name}`:""}`;
+}
+function friendlyNodeCondition(b,stage,position,snapshot){
+  const trace=Array.isArray(b?.nodeTrace)?b.nodeTrace:[];
+  const node=trace.find(x=>String(x?.stage||"")===stage);
+  const labels=Array.isArray(node?.newRequiredConditions)?node.newRequiredConditions.map(x=>x?.label).filter(Boolean).slice(0,2):[];
+  const n=Array.isArray(b?.order)?Number(b.order[position-1]):null;
+  const name=friendlyParticipantName(snapshot,n);
+  if(labels.length)return `${name}は「${labels.join(" / ")}」を満たして${position}着になる想定です。`;
+  if(stage==="FIRST")return `${name}がこの枝の1着候補として成立する想定です。`;
+  if(stage==="SECOND")return `${name}がこの枝の2着位置に残る想定です。`;
+  return `${name}がこの枝の3着位置に残る想定です。`;
+}
+function friendlyPurchaseReason(b,explanation=null,snapshot=null){
   const order=Array.isArray(b?.order)?b.order.map(Number):[];
   const [first,second,third]=order;
   const category=b?.category||"";
-  const familyTier=String(b?.firstFamilyTier||"").toLowerCase();
+  const scenario=findFriendlyPurchaseScenario(b,explanation);
+  const branchLabel=b?.dominantBranchLabel||scenario?.branchLabel||"保存された展開枝";
   const pieces=[];
-  if(category==="MAIN")pieces.push(`${first||"この選手"}番を1着とする主展開から自然に残った組み合わせ`);
-  else if(category==="COVER")pieces.push(`${first||"この選手"}番を1着とする有力な補完展開として残った組み合わせ`);
-  else if(category==="BUYABLE_HIGH")pieces.push(`別展開でも成立可能性があり、実オッズまで確認して購入価値が残った組み合わせ`);
-  else pieces.push(`展開と着順評価から購入候補に残った組み合わせ`);
-  if(second&&third)pieces.push(`${second}番の2着評価と${third}番の3着評価を個別に確認`);
-  const famProb=Number(b?.firstFamilyProbabilityShare ?? b?.firstFamilyProbability);
-  if(Number.isFinite(famProb)&&famProb>0)pieces.push(`${first}番頭の全体確率は約${(famProb*100).toFixed(1)}%`);
-  if(Number.isFinite(Number(b?.familyRank)))pieces.push(`${first}番頭の中で${Number(b.familyRank)}位`);
-  return pieces.join("。")+"。";
+
+  // The explanation is tied to the exact dominant branch used by this buy candidate.
+  // Never fall back to the old "自然に残った組み合わせ" wording when a saved branch exists.
+  if(scenario?.leaderReason)pieces.push(`主導権の理由：${scenario.leaderReason}`);
+  else if(scenario?.timeline)pieces.push(`想定展開：${scenario.timeline}`);
+  else pieces.push(`想定展開は「${branchLabel}」です。`);
+
+  if(order.length>=1)pieces.push(friendlyNodeCondition(b,"FIRST",1,snapshot));
+  if(order.length>=2)pieces.push(friendlyNodeCondition(b,"SECOND",2,snapshot));
+  if(order.length>=3)pieces.push(friendlyNodeCondition(b,"THIRD",3,snapshot));
+
+  if(scenario?.timeline && !pieces.some(x=>x===scenario.timeline)){
+    const sameOrder=Array.isArray(scenario.primaryOrder)&&scenario.primaryOrder.map(Number).join("-")===order.join("-");
+    if(sameOrder)pieces.splice(1,0,`展開の流れ：${scenario.timeline}`);
+  }
+
+  const classText=category==="MAIN"
+    ?`この終端は主展開「${branchLabel}」から直接つながるため本線です。`
+    :category==="COVER"
+      ?`この終端は「${branchLabel}」から成立する有力な別終端で、本線とは別の残り方を補うため押さえです。`
+      :category==="BUYABLE_HIGH"
+        ?`この終端は「${branchLabel}」から成立する別終端です。展開成立の根拠を維持したうえで、実オッズ妙味があるため買える高配当としています。`
+        :`この終端は「${branchLabel}」から成立する購入候補です。`;
+  pieces.push(classText);
+  return pieces.join(" ");
 }
 function friendlyPurchaseChecks(b){
   const rows=[];
@@ -403,18 +444,18 @@ function friendlyPurchaseCaution(b){
   if(b?.category==="COVER")return "本線とは別の有力な残り方を補う買い目です。";
   return "";
 }
-function renderFriendlyBetReason(b){
+function renderFriendlyBetReason(b,explanation=null,snapshot=null){
   const order=Array.isArray(b?.order)?b.order.join("-"):esc(b?.order||"-");
   const label=betClassLabel(b?.category);
   const checks=friendlyPurchaseChecks(b);
   const caution=friendlyPurchaseCaution(b);
   const rawReason=b?.reason||"";
   const rawBranch=b?.branchLabel||"";
-  const explanation=friendlyPurchaseReason(b);
+  const userExplanation=friendlyPurchaseReason(b,explanation,snapshot);
   const hasAudit=Boolean(rawReason||rawBranch||b?.evidenceSummary);
-  return `<details class="buyExplanation"><summary><span><b>${esc(order)}</b>　${esc(label)}</span><small>理由を見る</small></summary><div class="buyExplanationBody"><p><b>なぜ買う？</b> ${esc(explanation)}</p>${checks.length?`<p class="muted"><b>判断材料</b> ${checks.map(esc).join(" / ")}</p>`:""}${caution?`<p class="auditWarn"><b>分類チェック</b> ${esc(caution)}</p>`:""}${hasAudit?`<details class="supportBranchAudit"><summary>詳しい監査情報</summary>${rawReason?`<p><b>内部の採用理由</b> ${esc(rawReason)}</p>`:""}${rawBranch?`<p class="muted"><b>保存された展開ラベル</b> ${esc(rawBranch)}</p>`:""}${b?.evidenceSummary?`<p class="muted"><b>根拠データ</b> ${esc(b.evidenceSummary)}</p>`:""}<p class="muted">内部コードや枝ラベルは開発・監査用です。通常判断は上の日本語説明を基準にします。</p></details>`:""}</div></details>`;
+  return `<details class="buyExplanation"><summary><span><b>${esc(order)}</b>　${esc(label)}</span><small>理由を見る</small></summary><div class="buyExplanationBody"><p><b>なぜ買う？</b> ${esc(userExplanation)}</p>${checks.length?`<p class="muted"><b>判断材料</b> ${checks.map(esc).join(" / ")}</p>`:""}${caution?`<p class="auditWarn"><b>分類チェック</b> ${esc(caution)}</p>`:""}${hasAudit?`<details class="supportBranchAudit"><summary>詳しい監査情報</summary>${rawReason?`<p><b>内部の採用理由</b> ${esc(rawReason)}</p>`:""}${rawBranch?`<p class="muted"><b>保存された展開ラベル</b> ${esc(rawBranch)}</p>`:""}${b?.evidenceSummary?`<p class="muted"><b>根拠データ</b> ${esc(b.evidenceSummary)}</p>`:""}<p class="muted">内部コードや枝ラベルは開発・監査用です。通常判断は上の日本語説明を基準にします。</p></details>`:""}</div></details>`;
 }
-function safeFriendlyBetReason(b){try{return renderFriendlyBetReason(b)}catch(error){console.error("friendly purchase reason render failed",error);const order=Array.isArray(b?.order)?b.order.join("-"):String(b?.order||"-");return `<div class="detailBet"><strong>${esc(order)}　${esc(betClassLabel(b?.category))}</strong><p class="muted">買い目の理由表示だけ読み込めませんでした。保存済み買い目は保持されています。</p></div>`}}
+function safeFriendlyBetReason(b,explanation=null,snapshot=null){try{return renderFriendlyBetReason(b,explanation,snapshot)}catch(error){console.error("friendly purchase reason render failed",error);const order=Array.isArray(b?.order)?b.order.join("-"):String(b?.order||"-");return `<div class="detailBet"><strong>${esc(order)}　${esc(betClassLabel(b?.category))}</strong><p class="muted">買い目の理由表示だけ読み込めませんでした。保存済み買い目は保持されています。</p></div>`}}
 function renderChatPredictionImport(){
   const panel=$("chatPredictionImport");if(!panel||!state.race)return;
   const saved=findChatPrediction(localStorage,state.race);
@@ -474,7 +515,7 @@ function renderPredictionDetail(snapshot){
     const betDetail=groups.map(([label,key])=>{
       const bets=selections.filter(b=>b?.category===key);
       if(!bets.length)return"";
-      return `<div class="detailGroup"><h3>${label}</h3>${bets.map(safeFriendlyBetReason).join("")}</div>`
+      return `<div class="detailGroup"><h3>${label}</h3>${bets.map(b=>safeFriendlyBetReason(b,snapshot?.predictionExplanation||snapshot?.prediction?.explanation||null,snapshot)).join("")}</div>`
     }).join("");
     const participantMap=new Map((Array.isArray(snapshot?.participants)?snapshot.participants:[]).map(p=>[Number(p.number),p]));
     const abilities=abilitiesUsed.map(a=>{const p=participantMap.get(Number(a?.number))||{},v2=a?.riderEvaluationV2||{},fm=v2?.firstMechanisms||{},sm=v2?.secondMechanisms||{},tm=v2?.thirdMechanisms||{},rs=a?.roleScores||{};return `<div class="abilityRow"><strong>${a?.number??"-"}番</strong><span><b>${esc(p?.name||"")}</b>　1着 ${fmtAbility(rs.first)} / 2着 ${fmtAbility(rs.second)} / 3着 ${fmtAbility(rs.third)} / 信頼 ${esc(v2?.confidence||"不明")}<br><small>選手評価v2: 逃げ ${fmtAbility(fm.escape)} / 捲り ${fmtAbility(fm.makuri)} / 差し ${fmtAbility(fm.sashi)} / 番手差し ${fmtAbility(fm.banteSashi)} / 2着追走 ${fmtAbility(sm.lineFollower)} / 先行残り ${fmtAbility(sm.leaderRemain)} / 3着位置残り ${fmtAbility(tm.positionRemain)}</small><br><small>基礎: 近況 ${fmtAbility(a?.recentForm)} / 主導権 ${fmtAbility(a?.startPower)} / まくり ${fmtAbility(a?.sprintPower)} / 差し ${fmtAbility(a?.finishPower)} / 追走 ${fmtAbility(a?.trackingSkill)}</small></span></div>`}).join("");
