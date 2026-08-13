@@ -7,7 +7,7 @@ export function scoreKeirinParticipants({race,venueProfile={}}){
   const officialScoreCenter=median(officialScores);
   return race.participants.map(p=>{
     const recent=valueOrNull(p.recentForm),start=usableStartPowerValue(p),sprint=valueOrNull(p.sprintPower),tracking=valueOrNull(p.trackingSkill),finish=valueOrNull(p.finishPower);
-    const stamina=valueOrNull(p.stamina),timing=valueOrNull(p.attackTiming),lineTrust=valueOrNull(p.lineTrust),venue=valueOrNull(p.venueSuitability);
+    const stamina=valueOrNull(p.stamina),timing=valueOrNull(p.attackTiming),lineTrust=valueOrNull(p.lineTrust),venue=valueOrNull(resolveVenueSuitability(p,venueProfile));
 
     const role=normalizeRole(p);
     const rolePrior=rolePriors(role);
@@ -113,6 +113,7 @@ export function scoreKeirinParticipants({race,venueProfile={}}){
       },
       contextPriorScores,
       officialScoreContext,
+      venueContext:{source:resolveVenueSuitability(p,venueProfile)!==null?"VENUE_PROFILE_OR_PARTICIPANT":"UNAVAILABLE",value:resolveVenueSuitability(p,venueProfile)},
       placementScores:{
         first:roleScores.first,second:roleScores.second,third:roleScores.third
       },
@@ -179,6 +180,22 @@ function usableStartPowerValue(participant){
   if(Array.isArray(evidence?.missingInputs)&&evidence.missingInputs.length)return null;
   if(Number(evidence?.officialTotalStarts)===0)return null;
   return valueOrNull(participant?.startPower);
+}
+
+function resolveVenueSuitability(participant, venueProfile = {}) {
+  const direct = participant?.venueSuitability;
+  if (finite(direct)) return direct;
+  const registration = String(participant?.registration ?? participant?.riderId ?? participant?.id ?? "").replace(/\D/g, "").padStart(6, "0");
+  const byRegistration = venueProfile?.riderSuitabilityByRegistration ?? venueProfile?.byRegistration ?? venueProfile?.riders ?? null;
+  if (byRegistration && typeof byRegistration === "object") {
+    const entry = byRegistration[registration] ?? byRegistration[participant?.number];
+    if (entry && typeof entry === "object") {
+      const value = entry.venueSuitability ?? entry.score ?? entry.value;
+      if (finite(value)) return value;
+    } else if (finite(entry)) return entry;
+  }
+  const value = venueProfile?.venueSuitability ?? venueProfile?.defaultSuitability ?? null;
+  return finite(value) ? value : null;
 }
 
 function normalizeRole(p){

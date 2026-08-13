@@ -4,7 +4,6 @@ import { applyRecentFormEvidence } from "../../keirin/recent-form/recent-form.mj
 import { applyStartPowerEvidence } from "../../keirin/start-power/start-power.mjs";
 import { applyKimariteAbilities } from "../../keirin/kimarite/kimarite-abilities.mjs";
 import { jsonResponse } from "../../keirin/parser/utils.mjs";
-import { buildRaceRiderDB } from "../../keirin/sports/rider-db-provider.mjs";
 
 const VENUE_CODE_BY_NAME = {
   函館: "11", 青森: "12", いわき平: "13", 弥彦: "21", 前橋: "22",
@@ -105,7 +104,6 @@ export default async function handler(req) {
       : resolveOfficialLines({ participants, officialLines, lineText });
     let riderDb;
     try {
-      riderDb = buildRaceRiderDB(line.participants);
     } catch (error) {
       return jsonResponse(503, {
         ok: false,
@@ -130,13 +128,13 @@ export default async function handler(req) {
       startTime: basic.startTime || "",
       lineConfidence: line.confidence,
       participants: line.participants.map(p => ({...p,riderId:String(p.registration||p.riderId||"")})),
-      riderDb,
-      riderDbRequired: true
     };
 
     const odds = normalizeOfficialOdds(officialData.odds, participants.length);
+    const venueProfile = officialData.venueProfile || basic.venueProfile || {};
     const prediction = runKeirinEngine({
       race,
+      venueProfile,
       oddsByOrder: odds.complete ? odds.odds : {},
       budget
     });
@@ -433,18 +431,16 @@ function firstEvidence(candidates) {
 }
 
 function pickEnvelope(value) {
-  const envelope = {};
-  if (value?.identityPassed !== undefined) envelope.identityPassed = value.identityPassed;
-  if (value?.targetIdentityPassed !== undefined) envelope.targetIdentityPassed = value.targetIdentityPassed;
-  if (value?.registration !== undefined || value?.requestedRegistration !== undefined) {
-    envelope.registration = value.registration ?? value.requestedRegistration;
-  }
-  if (value?.requestedRegistration !== undefined) envelope.requestedRegistration = value.requestedRegistration;
-  if (value?.fetchedAt !== undefined) envelope.fetchedAt = value.fetchedAt;
-  if (value?.sourceType !== undefined) envelope.sourceType = value.sourceType;
-  if (value?.sourcePath !== undefined) envelope.sourcePath = value.sourcePath;
-  if (value?.target !== undefined) envelope.target = value.target;
-  return envelope;
+  return {
+    identityPassed: value.identityPassed,
+    targetIdentityPassed: value.targetIdentityPassed,
+    registration: value.registration ?? value.requestedRegistration,
+    requestedRegistration: value.requestedRegistration,
+    fetchedAt: value.fetchedAt,
+    sourceType: value.sourceType,
+    sourcePath: value.sourcePath,
+    target: value.target
+  };
 }
 
 function canonicalProfileEnvelope(profile, participant, registration) {
