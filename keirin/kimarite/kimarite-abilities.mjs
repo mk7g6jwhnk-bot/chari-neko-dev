@@ -20,9 +20,9 @@ export function applyKimariteAbilities(participant) {
   const category = participant?.raceCategory === "girls" ? "girls" : participant?.raceCategory === "standard" ? "standard" : null;
   const evidence = participant?.officialKimariteEvidence;
   const neutral = {
-    sprintPower: null,
-    finishPower: null,
-    trackingSkill: null,
+    sprintPower: 5,
+    finishPower: 5,
+    trackingSkill: 5,
     kimariteAbilityEvidence: {
       adopted: false,
       reason: !category ? "category-unavailable" : "kimarite-evidence-unavailable"
@@ -47,8 +47,8 @@ export function applyKimariteAbilities(participant) {
   for (const [ability, cfg] of Object.entries(CONFIG[category])) {
     const count = integer(evidence?.[cfg.key]?.Sum_Cnt ?? evidence?.[cfg.key]?.sum ?? evidence?.[cfg.key]?.total);
     if (count === null || count < 0 || count > n) {
-      result[ability] = null;
-      details[ability] = { value: null, adopted: false, missing: true, reason: `${cfg.key}-count-invalid`, count, n };
+      result[ability] = 5;
+      details[ability] = { value: 5, adopted: false, reason: `${cfg.key}-count-invalid`, count, n };
       continue;
     }
     const posterior = (count + PRIOR_STRENGTH * cfg.baseline) / (n + PRIOR_STRENGTH);
@@ -103,8 +103,8 @@ function fromOfficialProfileRates(participant, category) {
   for (const [ability, cfg] of Object.entries(CONFIG[category])) {
     const share = normalizeProfileShare(rates?.[cfg.profileKey]);
     if (share === null) {
-      result[ability] = null;
-      details[ability] = { value: null, adopted: false, missing: true, reason: `${cfg.profileKey}-rate-missing` };
+      result[ability] = 5;
+      details[ability] = { value: 5, adopted: false, reason: `${cfg.profileKey}-rate-missing` };
       continue;
     }
     const scale = Math.max(cfg.iqr / IQR_TO_SIGMA, MIN_SCALE);

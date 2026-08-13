@@ -1,4 +1,5 @@
-# Version
+# KEIRIN-0.5.25-browser-retry
 
-- Version: `KEIRIN-0.16.42-merged-v163-app-v206-research`
-- Label: `v207-merged-v163-app-v206-research`
+- Railwayが一時的にHTTP 502や非JSON応答を返した場合、短時間で失敗したケースだけNetlify側から1回再試行。
+- 長時間タイムアウト時は二重実行せず終了。
+- v47のガールズ証拠ゲート、v46の50秒待機、自動更新安全装置、ライン順序、一次選別を維持。

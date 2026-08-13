@@ -1,4 +1,3 @@
-import { jsonResponse } from "../../keirin/parser/utils.mjs";
 import { normalizeResult } from "./keirin-result.mjs";
 
 const env = (name) => String(process.env[name] || "").trim();
@@ -11,10 +10,7 @@ const raceId = (p) =>
 
 async function fetchWithTimeout(url, options = {}, timeoutMs) {
   const controller = new AbortController();
-
-  const timer = setTimeout(() => {
-    controller.abort();
-  }, timeoutMs);
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
     return await fetch(url, {
@@ -63,27 +59,20 @@ async function logFetch(row) {
   } catch (error) {
     console.error(
       "[RESULT LOG ERROR]",
-      error instanceof Error
-        ? error.message
-        : String(error)
+      error instanceof Error ? error.message : String(error)
     );
   }
 }
 
 function normalizeRacePayload(body) {
-  const date = String(body?.date || "");
-
+  const date = String(body?.date || "").trim();
   const venueCode = String(
     body?.venueCode || ""
   ).padStart(2, "0");
-
   const venueName = String(
     body?.venueName || ""
   ).trim();
-
-  const raceNo = Number(
-    body?.raceNo || 0
-  );
+  const raceNo = Number(body?.raceNo || 0);
 
   if (
     !/^\d{8}$/.test(date) ||
@@ -124,11 +113,8 @@ async function fetchOfficialResult(p) {
     raceNo: String(p.raceNo)
   });
 
-  const url =
-    `${base}/keirin/result?${q.toString()}`;
-
   const response = await fetchWithTimeout(
-    url,
+    `${base}/keirin/result?${q}`,
     {
       headers: {
         accept: "application/json"
@@ -141,19 +127,12 @@ async function fetchOfficialResult(p) {
 
   try {
     data = await response.json();
-  } catch {
-    data = null;
-  }
+  } catch {}
 
-  return {
-    response,
-    data
-  };
+  return { response, data };
 }
 
 async function saveResult(p, result) {
-  const id = raceId(p);
-
   const now = new Date().toISOString();
 
   const saved = await supabaseFetch(
@@ -165,7 +144,7 @@ async function saveResult(p, result) {
           "resolution=merge-duplicates,return=representation"
       },
       body: JSON.stringify({
-        race_id: id,
+        race_id: raceId(p),
         competition: "keirin",
         venue: p.venueName,
         race_date:
@@ -173,21 +152,16 @@ async function saveResult(p, result) {
           `${p.date.slice(4, 6)}-` +
           `${p.date.slice(6, 8)}`,
         race_number: p.raceNo,
-        result_status:
-          result.status || "confirmed",
-        finishing_order:
-          result.finishOrder || [],
+        result_status: result.status || "confirmed",
+        finishing_order: result.finishOrder || [],
         official_decision:
           result.winningMethod || null,
         payout:
           result.payout == null
             ? null
-            : {
-                trifecta: result.payout
-              },
+            : { trifecta: result.payout },
         raw_result: result,
-        source:
-          result.source || "official",
+        source: result.source || "official",
         fetched_at: now,
         updated_at: now
       })
@@ -195,20 +169,15 @@ async function saveResult(p, result) {
   );
 
   if (!saved.ok) {
-    const text = await saved.text();
-
     throw new Error(
-      `Supabase保存失敗: HTTP ${saved.status} ${text}`
+      `Supabase保存失敗: HTTP ${saved.status} ${await saved.text()}`
     );
   }
 
   let rows = [];
-
   try {
     rows = await saved.json();
-  } catch {
-    rows = [];
-  }
+  } catch {}
 
   return rows?.[0] || null;
 }
@@ -216,10 +185,17 @@ async function saveResult(p, result) {
 export default async function handler(req) {
   let p = null;
 
-  const startedAt = Date.now();
-
   try {
-    let body = null;
+    const secret = env("RESULT_STORE_SECRET");
+
+    if (
+      secret &&
+      req.headers.get("x-result-store-secret") !== secret
+    ) {
+      return new Response(null, { status: 401 });
+    }
+
+    let body;
 
     try {
       body = await req.json();
@@ -232,37 +208,11 @@ export default async function handler(req) {
     p = normalizeRacePayload(body);
 
     const id = raceId(p);
+    const startedAt = Date.now();
 
     console.log(
       `[RESULT START] ${p.date} ${p.venueName} ${p.raceNo}R`
     );
-
-    /*
-     * ここが今回の重要変更点。
-     *
-     * 以前:
-     *
-     * background worker
-     *   ↓
-     * keirin-result-store
-     *   ↓
-     * browser service
-     *
-     * だったため、同期Functionのタイムアウトで
-     * HTTP 500 が発生していた。
-     *
-     * 今回:
-     *
-     * background worker
-     *   ↓
-     * browser service
-     *   ↓
-     * normalize
-     *   ↓
-     * Supabase
-     *
-     * として中間Functionを完全に外す。
-     */
 
     let official;
 
@@ -294,28 +244,16 @@ export default async function handler(req) {
         `[RESULT FAILED] ${p.date} ${p.venueName} ${p.raceNo}R ${message}`
       );
 
-      return new Response(null, {
-        status: 204
-      });
+      return new Response(null, { status: 204 });
     }
 
-    const {
-      response,
-      data
-    } = official;
+    const { response, data } = official;
 
     const result = normalizeResult(
       data?.result ||
       data?.officialData?.result ||
       data?.officialResult
     );
-
-    /*
-     * 公式結果がまだ存在しない場合。
-     *
-     * これはシステム障害ではないので
-     * ERROR扱いにしない。
-     */
 
     if (!response.ok || !result) {
       const message =
@@ -336,20 +274,11 @@ export default async function handler(req) {
         `[RESULT NOT READY] ${p.date} ${p.venueName} ${p.raceNo}R`
       );
 
-      return new Response(null, {
-        status: 204
-      });
+      return new Response(null, { status: 204 });
     }
 
-    /*
-     * 結果が取得できたら、このWorker自身が
-     * Supabaseへ保存する。
-     */
-
-    let saved;
-
     try {
-      saved = await saveResult(p, result);
+      await saveResult(p, result);
     } catch (error) {
       const message =
         error instanceof Error
@@ -370,9 +299,7 @@ export default async function handler(req) {
         `[RESULT SAVE FAILED] ${p.date} ${p.venueName} ${p.raceNo}R ${message}`
       );
 
-      return new Response(null, {
-        status: 204
-      });
+      return new Response(null, { status: 204 });
     }
 
     await logFetch({
@@ -386,18 +313,11 @@ export default async function handler(req) {
     });
 
     console.log(
-      `[RESULT SAVED] ${p.date} ${p.venueName} ${p.raceNo}R`
-    );
-
-    console.log(
-      `[RESULT COMPLETE] ${p.date} ${p.venueName} ${p.raceNo}R ` +
+      `[RESULT SAVED] ${p.date} ${p.venueName} ${p.raceNo}R ` +
       `duration=${Date.now() - startedAt}ms`
     );
 
-    return new Response(null, {
-      status: 204
-    });
-
+    return new Response(null, { status: 204 });
   } catch (error) {
     const message =
       error instanceof Error
@@ -421,13 +341,7 @@ export default async function handler(req) {
       message
     );
 
-    /*
-     * Background Functionは、個別レースの失敗で
-     * Scheduler側まで失敗扱いにしない。
-     */
-    return new Response(null, {
-      status: 204
-    });
+    return new Response(null, { status: 204 });
   }
 }
 

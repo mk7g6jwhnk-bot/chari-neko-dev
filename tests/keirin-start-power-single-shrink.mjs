@@ -28,12 +28,14 @@ assert.ok(high.value - low.value > 5, "empirical mapping should preserve meaning
 assert.equal(sparse.confidence, "low", "small-sample uncertainty must remain visible as confidence");
 assert.ok(sparse.inputsUsed.includes("startsQualityConfidenceDiagnostic"));
 assert.ok(sparse.inputsUsed.includes("standard.shrunkFrequencyEmpiricalQuantiles"));
+assert.ok(sparse.inputsUsed.includes("standard.rawFrequencyEmpiricalQuantilesForAbility"));
+assert.ok(sparse.inputsUsed.includes("empiricalBayesDiagnosticOnly"));
 assert.ok(!sparse.inputsUsed.includes("startsQualityNeutralShrinkage"));
 
 // Regression cases from the live audit after officialTotalStarts was fixed.
-// They must no longer bunch at 9.1-9.5 merely because the skewed B/H
-// distribution was forced through a normal CDF.
-assert.ok(screenshotZero.value >= 3 && screenshotZero.value <= 4.5, `0/18 should remain low but not pathological: ${screenshotZero.value}`);
+// A demonstrated 0/0 remains an observed zero rate irrespective of sample
+// size.  The sample size is shown through confidence/startsQuality only.
+assert.ok(screenshotZero.value >= 2.6 && screenshotZero.value <= 2.7, `0/18 must use the observed-zero mid-rank: ${screenshotZero.value}`);
 assert.ok(screenshotActive.value >= 7 && screenshotActive.value <= 8.5, `5B/6H over 18 starts should be strong but not saturated: ${screenshotActive.value}`);
 assert.ok(screenshotFront.value >= 8.5 && screenshotFront.value < 9.5, `11B/11H over 22 starts should be elite but below hard saturation: ${screenshotFront.value}`);
 assert.ok(screenshotFront.value > screenshotActive.value && screenshotActive.value > screenshotZero.value);

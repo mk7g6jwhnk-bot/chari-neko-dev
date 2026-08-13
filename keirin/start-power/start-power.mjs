@@ -20,8 +20,8 @@ export function buildStartPowerEvidence(participant, baseline = KEIRIN_START_POW
   const categoryBaseline = raceCategory ? baseline.categories?.[raceCategory] : null;
   const profileIdentityPassed = profile?.identityPassed === true;
   const officialTotalStarts = nullableNonNegativeInteger(profile?.officialTotalStarts);
-  const rawBackCount = nullableNonNegativeNumber(profile?.backCount);
-  const rawHomeCount = nullableNonNegativeNumber(profile?.homeCount);
+  const rawBackCount = nullableNonNegativeInteger(profile?.backCount);
+  const rawHomeCount = nullableNonNegativeInteger(profile?.homeCount);
   const ridingStyle = nullableText(profile?.ridingStyle);
   const escapeRate = nullableNonNegativeNumber(profile?.winningStyleRates?.escape);
   const foreignFlag = participant?.officialForeignFlag === true;
@@ -33,6 +33,10 @@ export function buildStartPowerEvidence(participant, baseline = KEIRIN_START_POW
     rawHomeCount === null ? "homeCount" : null,
     !categoryBaseline ? "raceCategoryBaseline" : null
   ].filter(Boolean);
+  const invalidInputs = officialTotalStarts !== null && (
+    (rawBackCount !== null && rawBackCount > officialTotalStarts) ||
+    (rawHomeCount !== null && rawHomeCount > officialTotalStarts)
+  ) ? ["B/H count exceeds officialTotalStarts"] : [];
 
   const neutral = overrides => ({
     value: 5,
@@ -42,6 +46,8 @@ export function buildStartPowerEvidence(participant, baseline = KEIRIN_START_POW
     rawHomeCount,
     bFrequency: null,
     hFrequency: null,
+    rawBPercentileScore: null,
+    rawHPercentileScore: null,
     shrunkBFrequency: null,
     shrunkHFrequency: null,
     latentScore: 5,
@@ -59,11 +65,11 @@ export function buildStartPowerEvidence(participant, baseline = KEIRIN_START_POW
     baselineVersion: baseline.baselineVersion,
     baselineSchemaVersion: baseline.schemaVersion,
     inputsUsed: [],
-    missingInputs,
+    missingInputs: [...missingInputs, ...invalidInputs],
     ...overrides
   });
 
-  if (missingInputs.length > 0) return neutral();
+  if (missingInputs.length > 0 || invalidInputs.length > 0) return neutral();
   if (officialTotalStarts === 0) {
     return neutral({
       inputsUsed: ["officialTotalStarts.actualZero"],
@@ -86,12 +92,21 @@ export function buildStartPowerEvidence(participant, baseline = KEIRIN_START_POW
     priorStrength,
     categoryBaseline.hFrequency.mean
   );
-  // Convert each shrunk B/H frequency against the actual active-racer census
-  // rather than assuming the distribution is normal.  The previous robust-Z
-  // + normal-CDF mapping saturated too quickly: a rider only a little above
-  // the empirical p75 could jump into the 9.x range.  Piecewise empirical
-  // quantile mapping keeps the score interpretable (roughly population
-  // percentile / 10) and preserves the observed skew of B/H frequencies.
+  // The empirical-Bayes estimate is retained for auditability, but it must not
+  // determine ability.  With a zero observed B/H record it made a 3-start
+  // rider look *stronger* than the same 0/0 record over 24 starts, solely
+  // because the prior dominated the smaller sample.  Starts measure certainty,
+  // not demonstrated initiative; the score therefore maps observed rates.
+  const rawBPercentileScore = empiricalQuantileScore(
+    bFrequency,
+    categoryBaseline.bFrequency
+  );
+  const rawHPercentileScore = empiricalQuantileScore(
+    hFrequency,
+    categoryBaseline.hFrequency
+  );
+  // These describe the counterfactual prior-smoothed estimate only.  They are
+  // deliberately not fed into latentScore or any race branch.
   const bPercentileScore = empiricalQuantileScore(
     shrunkBFrequency,
     categoryBaseline.shrunkBFrequency
@@ -100,14 +115,12 @@ export function buildStartPowerEvidence(participant, baseline = KEIRIN_START_POW
     shrunkHFrequency,
     categoryBaseline.shrunkHFrequency
   );
-  const latentScore = clamp((bPercentileScore + hPercentileScore) / 2, 0.5, 9.5);
+  const latentScore = clamp((rawBPercentileScore + rawHPercentileScore), 0, 20) / 2;
   const startsQuality = officialTotalStarts / (officialTotalStarts + priorStrength);
-  // Sample-size uncertainty is already handled once by the empirical-Bayes
-  // shrinkFrequency() step above. Do not pull the resulting latent ability
-  // toward neutral 5 a second time; that double shrink was collapsing most
-  // riders into a narrow 5.x band. Keep startsQuality as diagnostics/confidence
-  // metadata only.
-  const value = clamp(latentScore, 0.5, 9.5);
+  // Sample-size uncertainty is deliberately kept out of the ability value.
+  // It is exposed as confidence/startsQuality so downstream consumers can
+  // judge reliability without turning few starts into artificial initiative.
+  const value = clamp(latentScore, 0, 10);
 
   return {
     value: round(value),
@@ -117,6 +130,8 @@ export function buildStartPowerEvidence(participant, baseline = KEIRIN_START_POW
     rawHomeCount,
     bFrequency: round(bFrequency),
     hFrequency: round(hFrequency),
+    rawBPercentileScore: round(rawBPercentileScore),
+    rawHPercentileScore: round(rawHPercentileScore),
     shrunkBFrequency: round(shrunkBFrequency),
     shrunkHFrequency: round(shrunkHFrequency),
     latentScore: round(latentScore),
@@ -144,8 +159,10 @@ export function buildStartPowerEvidence(participant, baseline = KEIRIN_START_POW
       "officialProfileEvidence.homeCount",
       `${raceCategory}.bFrequencyPriorMean`,
       `${raceCategory}.hFrequencyPriorMean`,
+      `${raceCategory}.rawFrequencyEmpiricalQuantilesForAbility`,
       `${raceCategory}.shrunkFrequencyEmpiricalQuantiles`,
-      `${raceCategory}.bhEmpiricalPercentileLatent`,
+      `${raceCategory}.bhObservedFrequencyPercentileLatent`,
+      "empiricalBayesDiagnosticOnly",
       "startsQualityConfidenceDiagnostic"
     ],
     missingInputs: []
@@ -157,6 +174,11 @@ function shrinkFrequency(count, starts, priorStrength, priorMean) {
 }
 
 function empiricalQuantileScore(value, distribution) {
+  // B/H contains a real point mass at zero.  The percentile of a tied value
+  // is its empirical mid-rank, not the lowest endpoint.  zeroRate comes from
+  // the official census, so observed 0/0 receives a data-derived score rather
+  // than an arbitrary 0.5 (or an artificial score of 0).
+  if (value === 0 && Number.isFinite(distribution.zeroRate)) return distribution.zeroRate * 5;
   const anchors = [
     [distribution.min, 0],
     [distribution.p10, 1],

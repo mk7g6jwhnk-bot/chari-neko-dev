@@ -1,0 +1,6 @@
+チャリ猫 Main 丸ごと上書き用
+作成日: 2026-08-13
+用途: GitHub Desktopで使用しているMainリポジトリの作業ツリーへ上書き展開するためのZIP
+注意: .git は含めていません。既存リポジトリのGit管理情報は保持してください。
+検査: keirin-discover.mjs / keirin-predict.mjs / public/app.mjs の構文検査 PASS
+検査: app-version-consistency PASS (KEIRIN-0.5.25-browser-retry)
