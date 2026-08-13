@@ -4,6 +4,7 @@ import { applyRecentFormEvidence } from "../../keirin/recent-form/recent-form.mj
 import { applyStartPowerEvidence } from "../../keirin/start-power/start-power.mjs";
 import { applyKimariteAbilities } from "../../keirin/kimarite/kimarite-abilities.mjs";
 import { jsonResponse } from "../../keirin/parser/utils.mjs";
+import { buildRaceRiderDB } from "../../keirin/sports/rider-db-provider.mjs";
 
 const VENUE_CODE_BY_NAME = {
   函館: "11", 青森: "12", いわき平: "13", 弥彦: "21", 前橋: "22",
@@ -102,6 +103,18 @@ export default async function handler(req) {
     const line = raceCategory === "girls"
       ? resolveGirlsDynamicPositions({ participants })
       : resolveOfficialLines({ participants, officialLines, lineText });
+    let riderDb;
+    try {
+      riderDb = buildRaceRiderDB(line.participants);
+    } catch (error) {
+      return jsonResponse(503, {
+        ok: false,
+        error: error instanceof Error ? error.message : String(error),
+        riderDbGate: true,
+        requestAudit: { date, venueName, venueCode, raceNo }
+      });
+    }
+
     const race = {
       id: `${date}-${basic.venueName || venueName}-${basic.raceNo || raceNo}`,
       venue: basic.venueName || venueName,
@@ -116,13 +129,15 @@ export default async function handler(req) {
       deadline: basic.deadline || "",
       startTime: basic.startTime || "",
       lineConfidence: line.confidence,
-      participants: line.participants
+      participants: line.participants.map(p => ({...p,riderId:String(p.registration||p.riderId||"")})),
+      riderDb,
+      riderDbRequired: true
     };
 
-    const odds = normalizeOfficialOdds(officialData.odds);
+    const odds = normalizeOfficialOdds(officialData.odds, participants.length);
     const prediction = runKeirinEngine({
       race,
-      oddsByOrder: odds.odds,
+      oddsByOrder: odds.complete ? odds.odds : {},
       budget
     });
 
@@ -166,6 +181,19 @@ export default async function handler(req) {
       requestAudit: { date, venueName, venueCode, raceNo }
     });
   }
+}
+
+export function validateOfficialRaceIdentity(basic = {}, params = {}) {
+  const returnedDate = normalizeDate(basic.date);
+  const rawVenue = basic.venueCode || basic.jocd || basic.jcd || "";
+  const returnedVenue = rawVenue ? String(rawVenue).padStart(2, "0") : "";
+  const returnedRaceNo = Number(basic.raceNo);
+  const checks = {
+    date: !returnedDate || returnedDate === normalizeDate(params.date),
+    venueCode: !returnedVenue || returnedVenue === String(params.venueCode || "").padStart(2, "0"),
+    raceNo: !Number.isFinite(returnedRaceNo) || returnedRaceNo === Number(params.raceNo)
+  };
+  return { passed: Object.values(checks).every(Boolean), checks };
 }
 
 async function requestBrowserService(base, params) {
@@ -213,7 +241,8 @@ async function requestBrowserService(base, params) {
         : 0;
       const hasUsableRaceData = Boolean(
         officialData.basic &&
-        participantCount >= 5
+        participantCount >= 7 && participantCount <= 9 &&
+        validateOfficialRaceIdentity(officialData.basic, params).passed
       );
 
       attempts.push({
@@ -223,6 +252,7 @@ async function requestBrowserService(base, params) {
         parsed: data !== null,
         participantCount,
         hasUsableRaceData,
+        raceIdentityAudit: validateOfficialRaceIdentity(officialData.basic, params),
         error: data?.error || null,
         elapsedMs: Date.now() - startedAt
       });
@@ -419,11 +449,11 @@ function canonicalProfileEnvelope(profile, participant, registration) {
   if (!profile || typeof profile !== "object") return null;
   const returnedRegistration = normalizeRegistration(profile.registration ?? profile.requestedRegistration ?? profile.snum ?? registration);
   if (registration && returnedRegistration !== registration) return null;
-  const participantIdentityPassed = participant.identityPassed === true || participant.profileIdentityPassed === true;
+  
   return {
     ...profile,
     registration: returnedRegistration,
-    identityPassed: profile.identityPassed === true || (profile.identityPassed == null && participantIdentityPassed)
+    identityPassed: profile.identityPassed === true
   };
 }
 
@@ -431,12 +461,12 @@ function canonicalKimariteEnvelope(evidence, participant, registration) {
   if (!evidence || typeof evidence !== "object") return null;
   const returnedRegistration = normalizeRegistration(evidence.registration ?? evidence.requestedRegistration ?? evidence.snum ?? registration);
   if (registration && returnedRegistration !== registration) return null;
-  const participantIdentityPassed = participant.identityPassed === true || participant.kimariteIdentityPassed === true;
-  const targetIdentityPassed = evidence.targetIdentityPassed === true || (evidence.targetIdentityPassed == null && participant.targetIdentityPassed === true);
+  
+  const targetIdentityPassed = evidence.targetIdentityPassed === true;
   return {
     ...evidence,
     registration: returnedRegistration,
-    identityPassed: evidence.identityPassed === true || (evidence.identityPassed == null && participantIdentityPassed),
+    identityPassed: evidence.identityPassed === true,
     targetIdentityPassed
   };
 }
@@ -502,6 +532,7 @@ export function detectRaceCategory({ basic = {}, participants = [] } = {}) {
 function normalizeOfficialProfileEvidence(profile, registration, context) {
   if (!profile || typeof profile !== "object") return null;
   if (profile.identityPassed !== true) return null;
+  if (profile.registration != null && !/^\d{6}$/.test(String(profile.registration).trim())) return null;
   if (registration && normalizeRegistration(profile.registration) !== registration) return null;
   if (!notAfterTarget(profile.fetchedAt, context)) return null;
   return {
@@ -533,7 +564,9 @@ function normalizeOfficialProfileEvidence(profile, registration, context) {
 function normalizeOfficialKimariteEvidence(evidence, registration, context) {
   if (!evidence || typeof evidence !== "object") return null;
   if (evidence.identityPassed !== true || evidence.targetIdentityPassed !== true) return null;
-  if (registration && normalizeRegistration(evidence.registration ?? evidence.requestedRegistration) !== registration) return null;
+  const evidenceRegistration = evidence.registration ?? evidence.requestedRegistration;
+  if (evidenceRegistration != null && !/^\d{6}$/.test(String(evidenceRegistration).trim())) return null;
+  if (registration && normalizeRegistration(evidenceRegistration) !== registration) return null;
   const target = evidence.target || {};
   if (target.date && normalizeDate(target.date) !== normalizeDate(context.raceDate)) return null;
   if (target.venueCode && String(target.venueCode).padStart(2, "0") !== String(context.venueCode).padStart(2, "0")) return null;
@@ -562,7 +595,7 @@ function normalizeOfficialKimariteEvidence(evidence, registration, context) {
 }
 
 function notAfterTarget(fetchedAt, context) {
-  if (!fetchedAt) return true;
+  if (!fetchedAt) return false;
   const fetched = Date.parse(fetchedAt);
   if (!Number.isFinite(fetched)) return false;
   const date = normalizeDate(context.raceDate);
@@ -663,10 +696,11 @@ function groupOfficialLineItems(items) {
 }
 
 function lineIdentity(item) {
-  const raw = String(item?.lineId || item?.groupId || item?.className || "").trim();
-  if (!raw) return null;
-  if (/^(?:line|group)[-_ ]?\d+$/i.test(raw)) return raw.toLowerCase().replace(/[ _]+/g, "-");
-  if (/^\d+$/.test(raw)) return `line-${raw}`;
+  const explicit = String(item?.lineId ?? item?.groupId ?? "").trim();
+  if (explicit) return explicit.toLowerCase().replace(/\s+/g, "-");
+  const className = String(item?.className ?? "").trim();
+  if (/^(?:line|group)[-_ ]?\d+$/i.test(className)) return className.toLowerCase().replace(/[ _]+/g, "-");
+  if (/^\d+$/.test(className)) return `line-${className}`;
   return null;
 }
 
@@ -730,7 +764,7 @@ export function buildLineText(lines) {
     .join(" ") || null;
 }
 
-function normalizeOfficialOdds(raw) {
+function normalizeOfficialOdds(raw, participantCount = 7) {
   if (!raw || typeof raw !== "object") return { ok: false, odds: {}, diagnostics: { source: "未取得" } };
   const source = raw.odds && typeof raw.odds === "object" ? raw.odds : raw.oddsByOrder && typeof raw.oddsByOrder === "object" ? raw.oddsByOrder : {};
   const odds = {};
@@ -739,7 +773,20 @@ function normalizeOfficialOdds(raw) {
     const numeric = Number(value);
     if (/^[1-9]-[1-9]-[1-9]$/.test(normalizedKey) && Number.isFinite(numeric) && numeric > 1) odds[normalizedKey] = numeric;
   }
-  return { ok: Object.keys(odds).length > 0, odds, diagnostics: raw.diagnostics || { source: raw.sourceType || "officialData.odds" } };
+  const n = Number(participantCount);
+  const expectedCombinationCount = Number.isInteger(n) && n >= 3 ? n * (n - 1) * (n - 2) : 0;
+  const complete = Object.keys(odds).length === expectedCombinationCount;
+  return {
+    ok: complete,
+    complete,
+    odds: complete ? odds : {},
+    diagnostics: {
+      ...(raw.diagnostics || { source: raw.sourceType || "officialData.odds" }),
+      validCount: Object.keys(odds).length,
+      expectedCombinationCount,
+      complete
+    }
+  };
 }
 
 function readVenueCode(value) {
