@@ -8,8 +8,8 @@ export function loadRiderDB(){
   const configured=String(process.env.RIDER_DB_PATH||"").trim();
   const candidates=[
     configured,
-    new URL("../../../data/rider-db.json", import.meta.url).pathname,
-    new URL("../../../../data/rider-db.json", import.meta.url).pathname
+    new URL("../../data/rider-db.json", import.meta.url).pathname,
+    new URL("../../../data/rider-db.json", import.meta.url).pathname
   ].filter(Boolean);
   if(raw){
     cached=normalizeDB(JSON.parse(raw));
