@@ -77,6 +77,14 @@ export function buildStartPowerEvidence(participant, baseline = KEIRIN_START_POW
   const bFrequency = rawBackCount / officialTotalStarts;
   const hFrequency = rawHomeCount / officialTotalStarts;
   const priorStrength = baseline.priorStrength;
+
+  // No observed B/H events is not evidence of either high or low initiative.
+  // The empirical-Bayes prior is useful for sparse non-zero samples, but when
+  // both observed counts are exactly zero it can move a short sample toward
+  // the population mean and, after percentile mapping, create a falsely high
+  // "ability" score (e.g. 0/0 over 3 starts > 0/0 over 24 starts).
+  // Keep this case neutral and expose the condition in the audit trail.
+  const noObservedBH = rawBackCount === 0 && rawHomeCount === 0;
   const shrunkBFrequency = shrinkFrequency(
     rawBackCount,
     officialTotalStarts,
@@ -95,15 +103,21 @@ export function buildStartPowerEvidence(participant, baseline = KEIRIN_START_POW
   // the empirical p75 could jump into the 9.x range.  Piecewise empirical
   // quantile mapping keeps the score interpretable (roughly population
   // percentile / 10) and preserves the observed skew of B/H frequencies.
-  const bPercentileScore = empiricalQuantileScore(
-    shrunkBFrequency,
-    categoryBaseline.shrunkBFrequency
-  );
-  const hPercentileScore = empiricalQuantileScore(
-    shrunkHFrequency,
-    categoryBaseline.shrunkHFrequency
-  );
-  const latentScore = clamp((bPercentileScore + hPercentileScore) / 2, 0.5, 9.5);
+  const bPercentileScore = noObservedBH
+    ? 5
+    : empiricalQuantileScore(
+        shrunkBFrequency,
+        categoryBaseline.shrunkBFrequency
+      );
+  const hPercentileScore = noObservedBH
+    ? 5
+    : empiricalQuantileScore(
+        shrunkHFrequency,
+        categoryBaseline.shrunkHFrequency
+      );
+  const latentScore = noObservedBH
+    ? 5
+    : clamp((bPercentileScore + hPercentileScore) / 2, 0.5, 9.5);
   const startsQuality = officialTotalStarts / (officialTotalStarts + priorStrength);
   // Sample-size uncertainty is already handled once by the empirical-Bayes
   // shrinkFrequency() step above. Do not pull the resulting latent ability
@@ -143,6 +157,8 @@ export function buildStartPowerEvidence(participant, baseline = KEIRIN_START_POW
     priorStrength,
     baselineVersion: baseline.baselineVersion,
     baselineSchemaVersion: baseline.schemaVersion,
+    noObservedBH,
+    bhEvidenceStatus: noObservedBH ? "NO_OBSERVED_BH_NEUTRAL" : "OBSERVED_BH",
     inputsUsed: [
       "officialProfileEvidence.officialTotalStarts",
       "officialProfileEvidence.backCount",
