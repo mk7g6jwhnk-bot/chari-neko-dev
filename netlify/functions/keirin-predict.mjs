@@ -390,7 +390,7 @@ export function adaptParticipant(item, context = {}) {
     officialForeignFlag: item.officialForeignFlag === true || item.officialProfile?.officialForeignFlag === true,
     recentForm: 5,
     recentFormEvidence: { value: 5, confidence: "low", inputsUsed: [], missingInputs: ["official-profile"] },
-    startPower: 5,
+    startPower: null,
     startPowerEvidence: null,
     sprintPower: 5,
     stamina: 5,

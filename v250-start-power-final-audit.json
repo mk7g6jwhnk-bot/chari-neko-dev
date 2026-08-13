@@ -1,0 +1,12 @@
+{
+  "status": "PASS_LOCAL_REGRESSION",
+  "old_5_00_startpower_placeholder_removed": true,
+  "observed_zero_standard": 2.649,
+  "observed_zero_girls": 1.531,
+  "zero_starts_3_17_21_24_27_same": 2.649,
+  "missing_is_null": true,
+  "invalid_bh_gt_starts_is_null": true,
+  "db_free_predictor_retained": true,
+  "syntax_check": "PASS",
+  "regression_test": "PASS start-power zero-midrank regression { zero3: \u001b[33m2.649\u001b[39m, zero24: \u001b[33m2.649\u001b[39m, one24: \u001b[33m5.417\u001b[39m, girlsZero: \u001b[33m1.531\u001b[39m }"
+}
