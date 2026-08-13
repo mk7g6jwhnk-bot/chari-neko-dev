@@ -4,6 +4,7 @@ import{
   buildReferenceToStandardTransitionAudit,buildLineFallbackDiscriminationAudit,buildNonZeroReferencePlan,
   buildReferencePositionBalanceAudit,buildTerminalLifecycleAudit,isUsableStartPower
 }from"./engine-support.mjs";
+import{PREDICTION_ENGINE_VERSION,PURCHASE_ENGINE_VERSION,ENGINE_PAIR_ID,buildEnginePairAudit}from"./engine-version.mjs";
 
 export function resolvePurchaseBlock({lineBlocked=false,lineAndStartEvidenceBlocked=false,lineFallbackEvidenceBlocked=false,girlsEvidenceBlocked=false,mainInvariantFailed=false}={}){
   const blocked=Boolean(lineBlocked||lineAndStartEvidenceBlocked||lineFallbackEvidenceBlocked||girlsEvidenceBlocked);
@@ -12,6 +13,13 @@ export function resolvePurchaseBlock({lineBlocked=false,lineAndStartEvidenceBloc
 
 export function runKeirinPurchaseEngine({prediction,oddsByOrder={},budget=3000}){
   if(!prediction||!Array.isArray(prediction.terminals))throw new Error("prediction snapshot is required");
+  const enginePairAudit=buildEnginePairAudit();
+  if(prediction.audit?.enginePairAudit?.predictionEngineVersion && prediction.audit.enginePairAudit.predictionEngineVersion!==PREDICTION_ENGINE_VERSION){
+    throw new Error(`ENGINE_PAIR_MISMATCH: prediction=${prediction.audit.enginePairAudit.predictionEngineVersion} expected=${PREDICTION_ENGINE_VERSION}`);
+  }
+  if(prediction.audit?.enginePairAudit?.enginePairId && prediction.audit.enginePairAudit.enginePairId!==ENGINE_PAIR_ID){
+    throw new Error(`ENGINE_PAIR_MISMATCH: pair=${prediction.audit.enginePairAudit.enginePairId} expected=${ENGINE_PAIR_ID}`);
+  }
   const raceMeta={
     id:prediction.raceId,
     lineConfidence:prediction.lineConfidence,
@@ -120,7 +128,7 @@ export function runKeirinPurchaseEngine({prediction,oddsByOrder={},budget=3000})
   };
 
   return{
-    purchaseVersion:"KEIRIN-PURCHASE-1.1",
+    purchaseVersion:PURCHASE_ENGINE_VERSION,
     terminals:classified,
     recommendations:{
       main:classified.filter(item=>item.betClass==="MAIN"&&item.purchaseStatus==="購入採用"),
@@ -152,6 +160,7 @@ export function runKeirinPurchaseEngine({prediction,oddsByOrder={},budget=3000})
       },
       terminalLifecycleAudit,
       predictionPurchaseBoundaryAudit:boundaryAudit,
+      enginePairAudit,
       selectionBoundaryAudit:{version:"STANDARD-REFERENCE-SELECTION-1.0",standardBetCount:standardPurchasePlan.length,referenceBetCount:referencePurchasePlan.length,referenceExcludedFromFunding:true,referenceExcludedFromStandardPurchase:true,passed:standardPurchasePlan.every(x=>x.betClass!=="REFERENCE")&&referencePurchasePlan.every(x=>x.betClass==="REFERENCE")}
     }
   };

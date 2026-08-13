@@ -1,0 +1,23 @@
+{
+  "release": "KEIRIN-0.5.20-girls-evidence-gate + v250",
+  "enginePair": {
+    "predictionEngineVersion": "KEIRIN-0.5.20-girls-evidence-gate",
+    "purchaseEngineVersion": "v250",
+    "enginePairId": "KEIRIN-0.5.20-girls-evidence-gate__v250",
+    "pairFixed": true
+  },
+  "changes": [
+    "prediction/purchase engine versions are recorded together at runtime",
+    "runtime rejects prediction snapshots with a mismatched engine pair",
+    "purchase audit stores the engine pair",
+    "top-level result stores the immutable engine pair",
+    "purchase logic remains separated from prediction terminals",
+    "lineId-less participant input is normalized to unknown-{number/id} instead of crashing"
+  ],
+  "tests": {
+    "npm_test": "PASS",
+    "engine_pair_gate": "PASS",
+    "line_order_regression": "PASS"
+  },
+  "scope_note": "This release is based on the uploaded chari-neko-dev-new source tree. It does not claim that every historical production issue is solved; only the changes and tests listed here are verified."
+}

@@ -11,6 +11,7 @@ import{buildBranchSelectionAudit,buildRiderAbilityEvaluationAudit,buildStartPowe
 import{buildPredictionExplanation}from"./prediction-explanation.mjs";
 import{buildProbabilityPathAudit}from"./probability-path-audit.mjs";
 import{buildConditionalProbabilityDistributionAudit}from"./conditional-probability-distribution-audit.mjs";
+import{PREDICTION_ENGINE_VERSION,buildEnginePairAudit}from"./engine-version.mjs";
 
 export function runKeirinPredictionEngine({race,venueProfile={}}){
   const scored=scoreKeirinParticipants({race,venueProfile});
@@ -28,13 +29,14 @@ export function runKeirinPredictionEngine({race,venueProfile={}}){
   const probabilityPathAudit=buildProbabilityPathAudit(terminals);
   const conditionalProbabilityDistributionAudit=buildConditionalProbabilityDistributionAudit(terminals);
   return{
-    predictionVersion:"KEIRIN-PREDICTION-1.5-INITIATIVE-SCORE-VERIFIED",
+    predictionVersion:PREDICTION_ENGINE_VERSION,
     raceId:race.id,
     lineConfidence:race.lineConfidence,
     raceCategory:race.raceCategory||"standard",
     scored,lines,initiativeAssessment,branches,terminals,explanation,probabilityPathAudit,conditionalProbabilityDistributionAudit,
     audit:{
       ...generationAudit,
+      enginePairAudit:buildEnginePairAudit(),
       branchSelectionAudit:buildBranchSelectionAudit(branches),
       branchCount:branches.length,
       completedBranchCount:branches.filter(branch=>terminals.some(terminal=>terminal.contributingBranches.includes(branch.id))).length,
