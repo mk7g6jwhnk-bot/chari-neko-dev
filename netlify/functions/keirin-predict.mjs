@@ -433,16 +433,18 @@ function firstEvidence(candidates) {
 }
 
 function pickEnvelope(value) {
-  return {
-    identityPassed: value.identityPassed,
-    targetIdentityPassed: value.targetIdentityPassed,
-    registration: value.registration ?? value.requestedRegistration,
-    requestedRegistration: value.requestedRegistration,
-    fetchedAt: value.fetchedAt,
-    sourceType: value.sourceType,
-    sourcePath: value.sourcePath,
-    target: value.target
-  };
+  const envelope = {};
+  if (value?.identityPassed !== undefined) envelope.identityPassed = value.identityPassed;
+  if (value?.targetIdentityPassed !== undefined) envelope.targetIdentityPassed = value.targetIdentityPassed;
+  if (value?.registration !== undefined || value?.requestedRegistration !== undefined) {
+    envelope.registration = value.registration ?? value.requestedRegistration;
+  }
+  if (value?.requestedRegistration !== undefined) envelope.requestedRegistration = value.requestedRegistration;
+  if (value?.fetchedAt !== undefined) envelope.fetchedAt = value.fetchedAt;
+  if (value?.sourceType !== undefined) envelope.sourceType = value.sourceType;
+  if (value?.sourcePath !== undefined) envelope.sourcePath = value.sourcePath;
+  if (value?.target !== undefined) envelope.target = value.target;
+  return envelope;
 }
 
 function canonicalProfileEnvelope(profile, participant, registration) {
