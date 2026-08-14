@@ -1,46 +1,48 @@
 import assert from "node:assert/strict";
-import { buildStartPowerEvidence } from "../keirin/start-power/start-power.mjs";
+import { calculateStartPower } from "../keirin/start-power/start-power.mjs";
 
 function participant(starts, backCount, homeCount) {
   return {
     raceCategory: "standard",
-    officialForeignFlag: false,
     officialProfileEvidence: {
       identityPassed: true,
       officialTotalStarts: starts,
       backCount,
-      homeCount,
-      winningStyleRates: {}
+      homeCount
     }
   };
 }
 
-const low = buildStartPowerEvidence(participant(28, 0, 0));
-const mid = buildStartPowerEvidence(participant(28, 2, 2));
-const high = buildStartPowerEvidence(participant(28, 8, 8));
-const sparse = buildStartPowerEvidence(participant(8, 4, 4));
-const screenshotZero = buildStartPowerEvidence(participant(18, 0, 0));
-const screenshotFront = buildStartPowerEvidence(participant(22, 11, 11));
-const screenshotActive = buildStartPowerEvidence(participant(18, 5, 6));
+const low = calculateStartPower(participant(28, 0, 0));
+const mid = calculateStartPower(participant(28, 2, 2));
+const high = calculateStartPower(participant(28, 8, 8));
+const sparse = calculateStartPower(participant(8, 4, 4));
+const screenshotZero = calculateStartPower(participant(18, 0, 0));
+const screenshotFront = calculateStartPower(participant(22, 11, 11));
+const screenshotActive = calculateStartPower(participant(18, 5, 6));
 
-assert.ok(high.value > mid.value && mid.value > low.value, "B/H evidence ordering must remain monotonic");
-assert.ok(high.value - low.value > 5, "empirical mapping should preserve meaningful rider separation");
-assert.equal(sparse.confidence, "low", "small-sample uncertainty must remain visible as confidence");
-assert.ok(sparse.inputsUsed.includes("startsQualityConfidenceDiagnostic"));
-assert.ok(sparse.inputsUsed.includes("standard.shrunkFrequencyEmpiricalQuantiles"));
-assert.ok(!sparse.inputsUsed.includes("startsQualityNeutralShrinkage"));
+assert.equal(low.startPower, 2.649);
+assert.equal(screenshotZero.startPower, 2.649);
+assert.ok(high.startPower > mid.startPower && mid.startPower > low.startPower);
+assert.ok(high.startPower - low.startPower > 5);
+assert.equal(sparse.startPowerEvidence.confidence, "low");
+assert.equal(sparse.startPowerEvidence.status, "VERIFIED");
+assert.deepEqual(screenshotZero.startPowerEvidence.missingInputs, []);
+assert.equal(screenshotZero.startPowerEvidence.rawBackCount, 0);
+assert.equal(screenshotZero.startPowerEvidence.rawHomeCount, 0);
+assert.equal(screenshotZero.startPowerEvidence.officialTotalStarts, 18);
+assert.ok(screenshotActive.startPower >= 7 && screenshotActive.startPower <= 8.5);
+assert.ok(screenshotFront.startPower >= 8.5 && screenshotFront.startPower < 9.5);
+assert.ok(screenshotFront.startPower > screenshotActive.startPower);
+assert.ok(Number.isFinite(screenshotActive.startPowerEvidence.bPercentileScore));
+assert.ok(Number.isFinite(screenshotActive.startPowerEvidence.hPercentileScore));
 
-// Regression cases from the live audit after officialTotalStarts was fixed.
-// They must no longer bunch at 9.1-9.5 merely because the skewed B/H
-// distribution was forced through a normal CDF.
-assert.ok(screenshotZero.value >= 3 && screenshotZero.value <= 4.5, `0/18 should remain low but not pathological: ${screenshotZero.value}`);
-assert.ok(screenshotActive.value >= 7 && screenshotActive.value <= 8.5, `5B/6H over 18 starts should be strong but not saturated: ${screenshotActive.value}`);
-assert.ok(screenshotFront.value >= 8.5 && screenshotFront.value < 9.5, `11B/11H over 22 starts should be elite but below hard saturation: ${screenshotFront.value}`);
-assert.ok(screenshotFront.value > screenshotActive.value && screenshotActive.value > screenshotZero.value);
-assert.ok(Number.isFinite(screenshotActive.bPercentileScore));
-assert.ok(Number.isFinite(screenshotActive.hPercentileScore));
+const missing = calculateStartPower(participant(null, 0, 0));
+assert.equal(missing.startPower, null);
+assert.equal(missing.startPowerEvidence.status, "MISSING_INPUTS");
 
-console.log("keirin startPower empirical-quantile test passed", {
-  low: low.value, mid: mid.value, high: high.value, sparse: sparse.value,
-  zero18: screenshotZero.value, active18: screenshotActive.value, front22: screenshotFront.value
+console.log("keirin startPower current-calibration test passed", {
+  zero18: screenshotZero.startPower,
+  active18: screenshotActive.startPower,
+  front22: screenshotFront.startPower
 });
