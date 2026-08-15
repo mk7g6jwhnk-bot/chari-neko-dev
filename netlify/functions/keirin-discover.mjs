@@ -192,9 +192,22 @@ async function fetchPublicScheduleFallback(date) {
           .filter(Number.isFinite);
         const end = nextPositions.length ? Math.min(...nextPositions) : Math.min(text.length,start+4000);
         const section = text.slice(start,end);
-        const raceNumbers = [...new Set(
-          [...section.matchAll(/(?:^|\s)(1[0-2]|[1-9])R(?:\s|$)/g)].map(m=>Number(m[1]))
-        )].sort((a,b)=>a-b);
+        const knownTwelveRaceVenues = new Set([
+          "函館","青森","いわき平","弥彦","前橋","取手","宇都宮","大宮",
+          "西武園","京王閣","立川","松戸","川崎","平塚","小田原","伊東",
+          "静岡","名古屋","岐阜","大垣","豊橋","富山","松阪","四日市",
+          "福井","奈良","向日町","和歌山","岸和田","玉野","広島","防府",
+          "高松","小松島","高知","松山","小倉","久留米","武雄","佐世保",
+          "別府","熊本"
+        ]);
+
+        // 公開日程HTMLはレイアウト上、本文解析だけだと偶数Rが落ちる。
+        // 開催の存在確認は公式R取得側で行うため、通常開催は12Rを候補として返す。
+        const raceNumbers = knownTwelveRaceVenues.has(venueName)
+          ? Array.from({length:12},(_,i)=>i+1)
+          : [...new Set(
+              [...section.matchAll(/(?:^|\s)(1[0-2]|[1-9])R(?:\s|$)/g)].map(m=>Number(m[1]))
+            )].sort((a,b)=>a-b);
 
         meetings.push({
           date,
