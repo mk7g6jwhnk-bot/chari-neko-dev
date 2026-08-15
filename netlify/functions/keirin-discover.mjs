@@ -1,5 +1,6 @@
 const DISCOVER_CACHE = new Map();
-const RETRY_DELAYS = [0, 700, 1600];
+const RETRY_DELAYS = [0, 700];
+const DISCOVER_TIMEOUT_MS = 11000;
 
 export default async function handler(req) {
   const url = new URL(req.url);
@@ -29,8 +30,11 @@ export default async function handler(req) {
       const response = await fetch(
         `${base}/keirin/discover?${new URLSearchParams({ date })}`,
         {
-          headers: { accept: "application/json" },
-          signal: AbortSignal.timeout(90000),
+          headers: {
+            accept: "application/json",
+            "cache-control": "no-cache",
+          },
+          signal: AbortSignal.timeout(DISCOVER_TIMEOUT_MS),
         },
       );
 
@@ -132,11 +136,22 @@ export default async function handler(req) {
     });
   }
 
-  return jsonResponse(502, {
-    ok: false,
-    error:
-      "開催情報取得サービスが一時的に停止しています。数秒後に再試行してください。",
-    attempts,
+  // Discover service failure must not turn the mobile app into a full-screen error.
+  // The browser already has its own localStorage meeting-cache fallback.
+  // Returning 200 lets the Meetings screen remain usable on a cold function instance.
+  return jsonResponse(200, {
+    ok: true,
+    date,
+    meetings: [],
+    stale: true,
+    warning:
+      "開催情報取得サービスに接続できませんでした。保存済みの開催情報があれば表示します。",
+    diagnostics: {
+      source: "fallback-empty",
+      fallback: "graceful-degraded",
+      attempts,
+    },
+    checkedAt: new Date().toISOString(),
   });
 }
 
