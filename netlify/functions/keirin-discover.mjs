@@ -1,229 +1,115 @@
-import { load as loadHtml } from "cheerio";
-
 const CACHE = new Map();
 const RETRIES = [0, 700, 1600];
-const VERSION = "keirin-discover-v8-official-schedule-race-probe";
-
-const VENUE_CODES = {
-  函館:"11", 青森:"12", いわき平:"13", 弥彦:"21", 前橋:"22", 取手:"23", 宇都宮:"24",
-  大宮:"25", 西武園:"26", 京王閣:"27", 立川:"28", 松戸:"31", 千葉:"32", 川崎:"34",
-  平塚:"35", 小田原:"36", 伊東:"37", 静岡:"38", 名古屋:"42", 岐阜:"43", 大垣:"44",
-  豊橋:"45", 富山:"46", 松阪:"47", 四日市:"48", 福井:"51", 奈良:"53", 向日町:"54",
-  和歌山:"55", 岸和田:"56", 玉野:"61", 広島:"62", 防府:"63", 高松:"71",
-  小松島:"73", 高知:"74", 松山:"75", 小倉:"81", 久留米:"83", 武雄:"84",
-  佐世保:"85", 別府:"86", 熊本:"87"
-};
+const VERSION = "keirin-discover-v9-fast";
+const TIMEOUT_MS = 30000;
 
 export default async function handler(req) {
   const url = new URL(req.url);
   const date = url.searchParams.get("date") || "";
 
   if (!/^\d{8}$/.test(date)) {
-    return jsonResponse(400, { ok: false, error: "日付形式不正" });
+    return json(400, { ok: false, error: "日付形式不正" });
   }
 
   const base = String(process.env.KEIRIN_BROWSER_SERVICE_URL || "")
     .trim()
     .replace(/\/$/, "");
 
+  if (!base) {
+    return json(500, { ok: false, error: "KEIRIN_BROWSER_SERVICE_URLが設定されていません" });
+  }
+
   const attempts = [];
   let railwayMeetings = [];
 
-  if (base) {
-    for (let i = 0; i < RETRIES.length; i += 1) {
-      if (RETRIES[i]) await sleep(RETRIES[i]);
+  for (let i = 0; i < RETRIES.length; i++) {
+    if (RETRIES[i]) await sleep(RETRIES[i]);
 
-      try {
-        const response = await fetch(
-          `${base}/keirin/discover?${new URLSearchParams({ date })}`,
-          {
-            headers: { accept: "application/json", "cache-control": "no-cache" },
-            signal: AbortSignal.timeout(90000)
-          }
-        );
-
-        const payload = await response.json().catch(() => null);
-        railwayMeetings = Array.isArray(payload?.meetings) ? payload.meetings : [];
-
-        attempts.push({
-          stage: "railway-discover",
-          attempt: i + 1,
-          status: response.status,
-          meetingCount: railwayMeetings.length,
-          error: payload?.error || null
-        });
-
-        if (
-          response.ok &&
-          payload?.ok !== false &&
-          String(payload?.date || date) === date
-        ) {
-          break;
-        }
-
-        if (i < RETRIES.length - 1 && isRetryable(response.status, payload?.error)) {
-          continue;
-        }
-      } catch (error) {
-        attempts.push({
-          stage: "railway-discover",
-          attempt: i + 1,
-          error: error instanceof Error ? error.message : String(error)
-        });
-      }
-    }
-  } else {
-    attempts.push({ stage: "railway-discover", error: "KEIRIN_BROWSER_SERVICE_URL未設定" });
-  }
-
-  /*
-   * Railway discoverが「200だが0件」でも、ここで終了しない。
-   * KEIRIN.JP公式開催日程から開催会場を再取得する。
-   */
-  let source = normalizeMeetings(date, railwayMeetings);
-  let sourceName = "railway-discover";
-
-  if (!source.length) {
     try {
-      source = await discoverOfficialSchedule(date, attempts);
-      sourceName = "keirin-jp-official-schedule";
+      const response = await fetch(
+        `${base}/keirin/discover?${new URLSearchParams({ date })}`,
+        {
+          headers: { accept: "application/json", "cache-control": "no-cache" },
+          signal: AbortSignal.timeout(TIMEOUT_MS)
+        }
+      );
+
+      const payload = await response.json().catch(() => null);
+      railwayMeetings = Array.isArray(payload?.meetings) ? payload.meetings : [];
+
+      attempts.push({
+        stage: "railway-discover",
+        attempt: i + 1,
+        status: response.status,
+        meetingCount: railwayMeetings.length
+      });
+
+      if (response.ok && payload?.ok !== false) break;
+      if (i < RETRIES.length - 1 && retryable(response.status, payload?.error)) continue;
     } catch (error) {
       attempts.push({
-        stage: "official-schedule",
+        stage: "railway-discover",
+        attempt: i + 1,
         error: error instanceof Error ? error.message : String(error)
       });
+      if (i < RETRIES.length - 1) continue;
     }
   }
 
   /*
-   * R番号がRailway discoverから来ていない場合は、
-   * /keirin/race を実際に叩いてRの存在を確認する。
-   * 1〜12を無条件で採用しない。
+   * 開催一覧取得では /keirin/race を大量に叩かない。
+   * Railway discover が返した開催情報を第一候補として即返す。
    */
-  const meetings = [];
-
-  for (const meeting of source) {
-    let raceNumbers = normalizeRaceNumbers(meeting.raceNumbers);
-
-    if (!raceNumbers.length && base) {
-      raceNumbers = [];
-      for (let raceNo = 1; raceNo <= 12; raceNo += 1) {
-        const confirmed = await probeRace(
-          base,
-          date,
-          meeting.venueCode,
-          meeting.venueName,
-          raceNo,
-          attempts
-        );
-        if (confirmed) raceNumbers.push(raceNo);
-      }
-    }
-
-    if (!raceNumbers.length) continue;
-
-    meetings.push({
-      date,
-      venueCode: meeting.venueCode,
-      venueName: meeting.venueName,
-      raceNumbers,
-      races: Array.isArray(meeting.races) && meeting.races.length
-        ? meeting.races
-            .map((race) => ({
-              raceNo: Number(race?.raceNo),
-              deadline: String(race?.deadline || ""),
-              startTime: String(race?.startTime || "")
-            }))
-            .filter((race) => Number.isInteger(race.raceNo))
-        : raceNumbers.map((raceNo) => ({
-            raceNo,
-            deadline: "",
-            startTime: ""
-          })),
-      identityPassed: true,
-      verifiedMeeting: true,
-      discoveredUrl: `${base}/keirin/race?${new URLSearchParams({
-        date,
-        venueCode: meeting.venueCode,
-        venueName: meeting.venueName,
-        raceNo: String(raceNumbers[0])
-      })}`,
-      discovery: {
-        ok: true,
-        source: VERSION,
-        sourceName,
-        links: {
-          raceCards: [],
-          odds: [],
-          results: [],
-          other: [{
-            text: "公式出走表",
-            context: `${meeting.venueName} ${date}`,
-            url: `${base}/keirin/race?${new URLSearchParams({
-              date,
-              venueCode: meeting.venueCode,
-              venueName: meeting.venueName,
-              raceNo: String(raceNumbers[0])
-            })}`
-          }]
-        }
-      }
-    });
-  }
+  const meetings = normalizeMeetings(date, railwayMeetings);
 
   if (meetings.length) {
-    const result = {
-      ok: true,
-      date,
-      meetings,
-      stale: false,
-      diagnostics: {
-        source: VERSION,
-        sourceName,
-        railwayMeetingCount: railwayMeetings.length,
-        meetingCount: meetings.length,
-        raceCount: meetings.reduce((sum, meeting) => sum + meeting.raceNumbers.length, 0),
-        attempts
-      },
-      checkedAt: new Date().toISOString()
-    };
+    return saveAndReturn(date, meetings, "railway-discover", attempts);
+  }
 
-    CACHE.set(date, { savedAt: Date.now(), result });
-    return jsonResponse(200, result);
+  /*
+   * Railway discover が0件の場合だけ、公式日程の軽量フォールバック。
+   * R確認はここでは行わない。会場一覧を返すことを優先する。
+   */
+  try {
+    const official = await officialScheduleFallback(date, attempts);
+    if (official.length) {
+      return saveAndReturn(date, official, "official-schedule-fallback", attempts);
+    }
+  } catch (error) {
+    attempts.push({
+      stage: "official-schedule",
+      error: error instanceof Error ? error.message : String(error)
+    });
   }
 
   const cached = CACHE.get(date);
   if (cached && Date.now() - cached.savedAt < 6 * 60 * 60 * 1000) {
-    return jsonResponse(200, {
+    return json(200, {
       ...cached.result,
       stale: true,
-      warning: "開催取得に失敗したため、直近の取得結果を表示しています。",
+      warning: "開催取得に失敗したため直近の取得結果を表示しています。",
       diagnostics: {
-        ...(cached.result.diagnostics || {}),
+        ...cached.result.diagnostics,
         fallback: "warm-cache",
         attempts
       }
     });
   }
 
-  return jsonResponse(200, {
+  return json(200, {
     ok: true,
     date,
     meetings: [],
     stale: true,
-    warning: "指定日の開催を確認できませんでした。",
-    diagnostics: {
-      source: VERSION,
-      railwayMeetingCount: railwayMeetings.length,
-      attempts
-    },
+    warning: "指定日の開催情報を取得できませんでした。",
+    diagnostics: { source: VERSION, attempts },
     checkedAt: new Date().toISOString()
   });
 }
 
 function normalizeMeetings(date, items) {
   const seen = new Set();
-  const meetings = [];
+  const result = [];
 
   for (const item of Array.isArray(items) ? items : []) {
     const itemDate = String(item?.date || date).replace(/\D/g, "").slice(0, 8);
@@ -232,169 +118,116 @@ function normalizeMeetings(date, items) {
       .padStart(2, "0");
     const venueName = String(item?.venueName || item?.name || "").trim();
 
-    if (itemDate !== date) continue;
-    if (!/^\d{2}$/.test(venueCode)) continue;
-    if (venueCode === "32") continue;
-    if (!venueName || seen.has(venueCode)) continue;
+    if (itemDate !== date || !/^\d{2}$/.test(venueCode)) continue;
+    if (venueCode === "32" || !venueName || seen.has(venueCode)) continue;
 
-    meetings.push({
+    const raceNumbers = normalizeRaceNumbers(item?.raceNumbers);
+
+    result.push({
       date,
       venueCode,
       venueName,
-      raceNumbers: normalizeRaceNumbers(item?.raceNumbers),
-      races: Array.isArray(item?.races) ? item.races : []
+      raceNumbers,
+      races: Array.isArray(item?.races)
+        ? item.races
+            .map(r => ({
+              raceNo: Number(r?.raceNo),
+              deadline: String(r?.deadline || ""),
+              startTime: String(r?.startTime || "")
+            }))
+            .filter(r => Number.isInteger(r.raceNo) && r.raceNo >= 1 && r.raceNo <= 12)
+        : raceNumbers.map(raceNo => ({ raceNo, deadline: "", startTime: "" })),
+      identityPassed: item?.identityPassed !== false,
+      verifiedMeeting: item?.verifiedMeeting !== false,
+      discoveredUrl: item?.discoveredUrl || "",
+      discovery: item?.discovery || {
+        ok: true,
+        source: VERSION,
+        links: { raceCards: [], odds: [], results: [], other: [] }
+      }
     });
 
     seen.add(venueCode);
   }
 
-  return meetings;
+  return result;
 }
 
-async function discoverOfficialSchedule(date, attempts) {
-  const year = date.slice(0, 4);
-  const month = date.slice(4, 6);
-  const day = Number(date.slice(6, 8));
-
-  const scheduleUrl = `https://www.keirin.jp/pc/raceschedule?${new URLSearchParams({
-    scym: month,
-    scyy: year
-  })}`;
-
-  const response = await fetch(scheduleUrl, {
-    headers: {
-      accept: "text/html,application/xhtml+xml",
-      "user-agent": "ChariNeko/keirin-discover-v8"
-    },
-    signal: AbortSignal.timeout(20000)
-  });
-
-  if (!response.ok) {
-    throw new Error(`KEIRIN.JP開催日程 HTTP ${response.status}`);
+async function officialScheduleFallback(date, attempts) {
+  /*
+   * 外部HTMLを重いブラウザ経由で取得しない。
+   * Railway側がすでにdiscoverを実装しているため、
+   * ここは設定された公式日程URLが存在する場合のみ軽量取得する。
+   */
+  const officialUrl = String(process.env.KEIRIN_OFFICIAL_SCHEDULE_URL || "").trim();
+  if (!officialUrl) {
+    attempts.push({
+      stage: "official-schedule",
+      skipped: true,
+      reason: "KEIRIN_OFFICIAL_SCHEDULE_URL未設定"
+    });
+    return [];
   }
 
-  const html = await response.text();
-  const $ = loadHtml(html);
-  const meetings = [];
-  const seen = new Set();
+  const response = await fetch(
+    `${officialUrl}${officialUrl.includes("?") ? "&" : "?"}${new URLSearchParams({ date })}`,
+    {
+      headers: { accept: "application/json", "cache-control": "no-cache" },
+      signal: AbortSignal.timeout(10000)
+    }
+  );
 
-  $("tr").each((_index, tr) => {
-    const cells = $(tr).children("th,td");
-    if (cells.length < day + 1) return;
-
-    const rawName = $(cells[0]).text().replace(/\s+/g, "").trim();
-    const venueName = Object.keys(VENUE_CODES).find(
-      (name) =>
-        rawName === name ||
-        rawName === `${name}競輪場` ||
-        rawName.includes(name)
-    );
-
-    if (!venueName) return;
-
-    const target = cells.eq(day);
-    const active =
-      target.find("img,a").length > 0 ||
-      target.text().replace(/\s+/g, "").length > 0;
-
-    if (!active) return;
-
-    const venueCode = VENUE_CODES[venueName];
-    if (venueCode === "32" || seen.has(venueCode)) return;
-
-    meetings.push({
-      date,
-      venueCode,
-      venueName,
-      raceNumbers: [],
-      races: []
-    });
-
-    seen.add(venueCode);
-  });
+  const payload = await response.json().catch(() => null);
 
   attempts.push({
     stage: "official-schedule",
-    status: 200,
-    venueCount: meetings.length,
-    scheduleUrl
+    status: response.status,
+    meetingCount: Array.isArray(payload?.meetings) ? payload.meetings.length : 0
   });
 
-  return meetings;
-}
-
-async function probeRace(base, date, venueCode, venueName, raceNo, attempts) {
-  try {
-    const response = await fetch(
-      `${base}/keirin/race?${new URLSearchParams({
-        date,
-        venueCode,
-        venueName,
-        raceNo: String(raceNo)
-      })}`,
-      {
-        headers: { accept: "application/json", "cache-control": "no-cache" },
-        signal: AbortSignal.timeout(25000)
-      }
-    );
-
-    const data = await response.json().catch(() => null);
-    const participants = Array.isArray(data?.officialData?.participants)
-      ? data.officialData.participants.length
-      : 0;
-
-    const ok =
-      response.ok &&
-      data?.ok !== false &&
-      participants >= 5;
-
-    attempts.push({
-      stage: "race-probe",
-      venueCode,
-      raceNo,
-      status: response.status,
-      participantCount: participants,
-      confirmed: ok
-    });
-
-    return ok;
-  } catch (error) {
-    attempts.push({
-      stage: "race-probe",
-      venueCode,
-      raceNo,
-      error: error instanceof Error ? error.message : String(error)
-    });
-    return false;
-  }
+  return normalizeMeetings(date, payload?.meetings);
 }
 
 function normalizeRaceNumbers(values) {
   return [...new Set(
     (Array.isArray(values) ? values : [])
       .map(Number)
-      .filter((n) => Number.isInteger(n) && n >= 1 && n <= 12)
+      .filter(n => Number.isInteger(n) && n >= 1 && n <= 12)
   )].sort((a, b) => a - b);
 }
 
-function isRetryable(status, message) {
-  return (
-    status === 0 ||
-    status === 408 ||
-    status === 425 ||
-    status === 429 ||
-    status >= 500 ||
-    /timeout|timed out|socket|fetch failed|target closed|browser|navigation|temporar/i.test(
-      String(message || "")
-    )
-  );
+function saveAndReturn(date, meetings, source, attempts) {
+  const result = {
+    ok: true,
+    date,
+    meetings,
+    stale: false,
+    diagnostics: {
+      source: VERSION,
+      sourceName: source,
+      meetingCount: meetings.length,
+      raceCount: meetings.reduce((sum, m) => sum + m.raceNumbers.length, 0),
+      raceProbeCount: 0,
+      raceProbeMode: "disabled-in-discover",
+      attempts
+    },
+    checkedAt: new Date().toISOString()
+  };
+
+  CACHE.set(date, { savedAt: Date.now(), result });
+  return json(200, result);
+}
+
+function retryable(status, message) {
+  return status === 0 || status === 408 || status === 425 || status === 429 ||
+    status >= 500 || /timeout|socket|fetch failed|temporar/i.test(String(message || ""));
 }
 
 function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function jsonResponse(status, body) {
+function json(status, body) {
   return new Response(JSON.stringify(body), {
     status,
     headers: {
