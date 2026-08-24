@@ -160,12 +160,24 @@ async function fetchOfficialSchedule(date, attempts) {
     const venueCode = VENUE_CODES[venueName];
     if (!venueCode || venueCode === "32" || seen.has(venueCode)) return;
 
+    const raceUrl = `https://keirin.jp/pc/race/race_list?jyo_cd=${venueCode}&hd=${date}`;
     result.push({
       date,
       venueCode,
       venueName,
       raceNumbers: [],
-      races: []
+      races: [],
+      identityPassed: true,
+      verifiedMeeting: true,
+      discoveredUrl: raceUrl,
+      discovery: {
+        ok: true,
+        source: VERSION,
+        links: {
+          raceCards: [{ text: "公式出走表", context: `${venueName} ${date}`, url: raceUrl }],
+          odds: [], results: [], other: []
+        }
+      }
     });
     seen.add(venueCode);
   });
