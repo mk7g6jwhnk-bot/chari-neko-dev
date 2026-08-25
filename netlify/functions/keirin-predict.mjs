@@ -25,6 +25,8 @@ export default async function handler(req) {
   const venueName = url.searchParams.get("venueName") || "競輪場";
   const raceNo = Number(url.searchParams.get("raceNo") || 0);
   const budget = Number(url.searchParams.get("budget") || 3000);
+  const autoResearch = url.searchParams.get("autoResearch") === "1";
+  const requestedScheduledStartAt = url.searchParams.get("scheduledStartAt") || "";
   const raceCardUrl = url.searchParams.get("raceCardUrl") || "";
   const venueCode =
     url.searchParams.get("venueCode") ||
@@ -101,9 +103,9 @@ export default async function handler(req) {
         requestAudit: { date, venueName, venueCode, raceNo }
       });
     }
-    const predictionSealedAt = new Date().toISOString();
+    const predictionInputCutoffAt = new Date().toISOString();
     const selectedLineObservedAt = browserResult.data.lineSnapshotAudit?.observedAt;
-    if (selectedLineObservedAt && Date.parse(selectedLineObservedAt) > Date.parse(predictionSealedAt)) {
+    if (selectedLineObservedAt && Date.parse(selectedLineObservedAt) > Date.parse(predictionInputCutoffAt)) {
       throw new Error("公式ラインsnapshotの取得時刻が予想seal時刻を超えています");
     }
     const evidenceParticipants = attachRiderDbEvidence(officialParticipants, riderDb, participantContext);
@@ -140,6 +142,21 @@ export default async function handler(req) {
 
     const odds = normalizeOfficialOdds(officialData.odds, participants.length);
     const venueProfile = officialData.venueProfile || basic.venueProfile || {};
+    const officialDataObservedAt = browserResult.data.checkedAt || new Date().toISOString();
+    const scheduledStartAt = requestedScheduledStartAt || scheduledAt(date, basic.startTime);
+    const preSeal = autoResearch ? {
+      raceKey: `${date}-${String(venueCode).padStart(2, "0")}-${raceNo}`,
+      scheduledStartAt,
+      predictionStartedAt: predictionRequestedAt,
+      inputCutoffAt: officialDataObservedAt,
+      participantIdentifiers: officialParticipants.map(item => ({ number:Number(item.number), registration:String(item.registration || item.riderId || "") })),
+      lineSource: browserResult.data.lineSnapshotAudit?.lineSource || "unknown",
+      lineSnapshotObservedAt: browserResult.data.lineSnapshotAudit?.lineSnapshotObservedAt || null,
+      riderDbVersion: riderDb.schema_version || riderDb.version || null,
+      riderDbGeneratedAt: riderDb.generated_at || riderDb.generatedAt || null,
+      officialDataObservedAt
+    } : null;
+    if (preSeal) await persistPreSeal(serviceBase, preSeal);
     const prediction = runKeirinEngine({
       race,
       venueProfile,
@@ -160,6 +177,7 @@ export default async function handler(req) {
       lineSnapshotRaceKey: `${date}-${venueCode}-${raceNo}`,
       lineSnapshotConfidence: null
     };
+    const predictionSealedAt = new Date().toISOString();
 
     return jsonResponse(200, {
       ok: prediction.audit.passed,
@@ -168,6 +186,7 @@ export default async function handler(req) {
       prediction,
       predictionRequestedAt,
       predictionSealedAt,
+      preSeal,
       lineSnapshotAudit,
       officialData,
       browserAudit: browserResult.data.audit || null,
@@ -204,6 +223,21 @@ export default async function handler(req) {
       requestAudit: { date, venueName, venueCode, raceNo }
     });
   }
+}
+
+async function persistPreSeal(serviceBase, preSeal) {
+  const response = await fetch(`${serviceBase}/keirin/auto-research/preseal`, {
+    method:"POST",
+    headers:{"content-type":"application/json",...(process.env.AUTO_RESEARCH_CALLBACK_SECRET?{"x-auto-research-secret":process.env.AUTO_RESEARCH_CALLBACK_SECRET}:{})},
+    body:JSON.stringify(preSeal),
+    signal:AbortSignal.timeout(10000)
+  });
+  if(!response.ok)throw new Error(`PRE_SEALED persistence failed: HTTP ${response.status}`);
+}
+
+function scheduledAt(date, startTime) {
+  const day=String(date||"").replace(/\D/g,"");const match=String(startTime||"").match(/(\d{1,2}):(\d{2})/);
+  return /^\d{8}$/.test(day)&&match?`${day.slice(0,4)}-${day.slice(4,6)}-${day.slice(6,8)}T${match[1].padStart(2,"0")}:${match[2]}:00+09:00`:null;
 }
 
 export function validateOfficialRaceIdentity(basic = {}, params = {}) {
