@@ -1,7 +1,4 @@
-import { createRequire } from "node:module";
-
-const require = createRequire(import.meta.url);
-const RIDER_DB = require("../../data/rider-db.json");
+import RIDER_DB from "../../data/rider-db.json" with { type: "json" };
 
 function registration(value) {
   const digits = String(value ?? "").replace(/\D/g, "");
