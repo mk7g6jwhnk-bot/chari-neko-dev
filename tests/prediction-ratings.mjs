@@ -15,7 +15,7 @@ const focused=snapshot({shares:[.159,.142,.134,.130,.129,.07],scores:[7.687,6.87
 const d=derivePredictionRatings(diffuse),f=derivePredictionRatings(focused);
 assert.equal(d.concentration,1,"diffuse race should show minimum concentration");
 assert.equal(d.rollover,1,"diffuse high-point race should not be rollover suitable");
-assert.equal(d.verdict,"見送り推奨");
+assert.equal(d.verdict,"見送り寄り");
 assert.ok(f.concentration>=3,"focused race should rank above diffuse concentration");
 assert.ok(f.confidence>d.confidence,"focused race should have higher confidence");
 assert.ok(f.rollover>d.rollover,"focused race should have higher rollover suitability");

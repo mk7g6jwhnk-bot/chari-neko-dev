@@ -81,19 +81,19 @@ export function generateKeirinTerminals({scored,branches}){
 
 function positionScore(branch,p,target,first,second){
   const e=p.evidence||{}, r=p.roleScores||{};
-  const base=.24*(r.first||5)+.18*(r.second||5)+.18*(r.third||5)+
-    .14*(e.finish||5)+.12*(e.tracking||5)+.08*(e.recent||5)+.06*(e.stamina||5);
-  const relation=relationScore(branch,p,first,second);
-  return Math.max(.01,base*(.75+.25*relation));
+  const role=Math.max(.01,Number(r[target])||5);
+  const axes=target==="first"
+    ?[e.recent,e.start,e.sprint,e.timing,e.stamina]
+    :target==="second"
+      ?[e.recent,e.finish,e.tracking,e.sprint,e.timing]
+      :[e.recent,e.finish,e.tracking,e.stamina,e.lineTrust];
+  const available=axes.map(Number).filter(Number.isFinite);
+  const ability=available.length?geometricMean(available):role;
+  // Branch probability already represents the scenario hypothesis. Do not add a
+  // second template bonus merely for being on the initiative line or in bante.
+  return Math.max(.01,role*.72+ability*.28);
 }
-function relationScore(branch,p,first,second){
-  let v=1;
-  if(branch.primaryLineId && p.lineId===branch.primaryLineId)v+=.05;
-  if(branch.branchType==="SOLO_RISE" && p.role==="単騎")v+=.12;
-  if(branch.branchType==="LINE_SEPARATION" && first && p.lineId!==first.lineId)v+=.06;
-  if(branch.branchType==="BANTE_SASHI" && first && p.lineId===first.lineId && p.role==="番手")v+=.06;
-  return v;
-}
+function geometricMean(values){return Math.exp(values.reduce((sum,value)=>sum+Math.log(Math.max(.01,value)),0)/values.length)}
 function evidence(p,target){
   const e=p.evidence||{}, r=p.roleScores||{};
   return {number:p.number,id:p.id,role:p.role,target,

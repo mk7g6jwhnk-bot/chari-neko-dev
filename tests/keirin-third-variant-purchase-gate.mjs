@@ -28,9 +28,9 @@ const terminals=[
 ];
 const classified=classify(terminals,{});
 const adopted=classified.filter(x=>x.purchaseStatus==="購入採用");
-const rejectedThird=classified.filter(x=>x.purchaseRejectCode==="THIRD_VARIANT_SUPPORT");
+const rejectedThird=classified.filter(x=>x.purchaseStatus==="購入不採用");
 assert.deepEqual(adopted.map(x=>x.order[2]).sort((a,b)=>a-b),[3,6,9]);
 assert.deepEqual(rejectedThird.map(x=>x.order[2]).sort((a,b)=>a-b),[1,5]);
-assert.ok(adopted.every(x=>x.thirdVariantNaturalCutDetected===true));
-assert.ok(rejectedThird.every(x=>x.thirdVariantEligible===false));
+assert.ok(adopted.every(x=>x.purchaseDistributionAudit?.boundaryDetected===true));
+assert.ok(adopted.every(x=>x.purchaseDistributionAudit?.thirdVariantRemovedCount===0));
 console.log(`Keirin adaptive third-variant purchase gate passed: adopted ${adopted.length}, rejected ${rejectedThird.length}`);

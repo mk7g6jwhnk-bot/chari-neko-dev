@@ -11,7 +11,7 @@ assert.equal(diag.generatedTerminalCount,3);
 assert.equal(diag.probabilityEvaluatedTerminalCount,3);
 assert.equal(diag.adoptedTerminalCount,1);
 assert.equal(diag.rejectedTerminalCount,2);
-assert.equal(diag.rejectCodeCounts.PURCHASE_BORDER,1);
+assert.equal(diag.rejectCodeCounts.PURCHASE_CUTOFF,2);
 assert.ok(Object.keys(diag.rejectCodeCounts).length>0);
 assert.equal(diag.fixedBranchRankCapApplied,false);
 console.log("Keirin purchase funnel audit passed:",JSON.stringify(diag.rejectCodeCounts));

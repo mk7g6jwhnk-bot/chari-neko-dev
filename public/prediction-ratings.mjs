@@ -103,7 +103,7 @@ export function derivePredictionRatings(snapshot={}){
 
   let provisionalVerdict;
   if(snapshot?.noBet||betCount===0)provisionalVerdict={label:"見送り",tone:"stop",reason:"購入対象なし"};
-  else if(concentration===1||confidence===1)provisionalVerdict={label:"見送り推奨",tone:"stop",reason:"予想の集中または信頼が低い"};
+  else if(concentration===1||confidence===1)provisionalVerdict={label:"見送り寄り",tone:"caution",reason:"標準候補はあるが予想の集中または信頼が低い"};
   else if(allOddsEvaluated&&maxExpectedValue!=null&&maxExpectedValue<1)provisionalVerdict={label:"妙味なし",tone:"caution",reason:"採用候補の確率×オッズが全て損益分岐未満"};
   else if(["UNDER_COVERED","INEFFICIENT","OVER_SPREAD"].includes(massStatus))provisionalVerdict={label:"見送り寄り",tone:"caution",reason:`購入質量監査が${massStatus}`};
   else if(concentration<=2||confidence<=2)provisionalVerdict={label:"見送り寄り",tone:"caution",reason:"予想集中または入力信頼が低い"};

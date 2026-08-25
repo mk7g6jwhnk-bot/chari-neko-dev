@@ -49,7 +49,7 @@ export function classify(terminals,odds={}){
       Number(ratios.second)||0,
       Number(ratios.third)||0
     ];
-    const ratioMean=sum(ratioValues)/3;
+    const ratioFit=geometricMean(ratioValues.filter(value=>value>0));
 
     const evidenceCount=terminal.positionEvidence
       ?["first","second","third"].filter(key=>terminal.positionEvidence[key]).length
@@ -59,18 +59,19 @@ export function classify(terminals,odds={}){
       ?Object.values(dominant.positionScores).map(value=>Number(value)||0)
       :[];
 
-    const positionScoreMean=positionScoreValues.length
-      ?sum(positionScoreValues)/positionScoreValues.length
+    const positionFit=geometricMean(positionScoreValues.map(value=>Math.min(1,Math.max(0,value/10))));
+    const positionBalance=positionScoreValues.length
+      ?Math.min(...positionScoreValues)/Math.max(...positionScoreValues,1e-9)
       :0;
 
     const evidenceScore=Math.max(
       0,
       Math.min(
         1,
-        ratioMean*0.45+
-        Math.min(1,evidenceCount/3)*0.25+
-        Math.min(1,positionScoreMean/10)*0.20+
-        Math.min(1,uniqueSupportBranchCount/3)*0.10
+        positionFit*0.55+
+        positionBalance*0.20+
+        ratioFit*0.15+
+        Math.min(1,evidenceCount/3)*0.10
       )
     );
 
@@ -85,10 +86,8 @@ export function classify(terminals,odds={}){
      * 終端そのものの確率・着順評価・根拠・独立支持をまとめて評価する。
      */
     const terminalScore=
-      relativeProbability*0.55+
-      evidenceScore*0.30+
-      Math.min(1,weightedBranchSupport)*0.10+
-      Math.min(1,uniqueSupportBranchCount/3)*0.05;
+      relativeProbability*0.65+
+      evidenceScore*0.35;
 
     return{
       ...terminal,
@@ -96,6 +95,8 @@ export function classify(terminals,odds={}){
       terminalScore,
       relativeProbability,
       evidenceScore,
+      positionFit,
+      positionBalance,
       evidenceCount,
       uniqueSupportBranchCount,
       branchSupport:contributions.length,
@@ -138,65 +139,9 @@ export function classify(terminals,odds={}){
 
   const topScore=positive[0]?.terminalScore||0;
   const topProbability=positive[0]?.probability||0;
-
-  /*
-   * 動的な購入上限:
-   * - 強い候補がある: 最大6点
-   * - 全体が拮抗: 最大3点
-   * - ただし候補が存在する限り、最上位を理由なく0件にはしない
-   */
-  const scoreSpread=positive.length>1
-    ?topScore/(positive[1]?.terminalScore||topScore)
-    :2;
-
-  const maxAdopt=
-    topScore>=0.72||scoreSpread>=1.12 ? 6 :
-    topScore>=0.55 ? 4 :
-    topScore>=0.35 ? 3 : 2;
-
-  /*
-   * 点数固定化を防ぐ。
-   * maxAdopt は「上限」であり、そこまで必ず埋めない。
-   * 上位終端との相対スコア・相対確率・累積確率質量で自然に打ち切る。
-   */
-  const probabilityMass=sum(positive.map(item=>Number(item.probability)||0));
-  let cumulativeMass=0;
-  const selected=[];
-
-  for(const item of positive){
-    if(selected.length>=maxAdopt)break;
-
-    const relativeScore=topScore>0
-      ?item.terminalScore/topScore
-      :0;
-    const relativeToTopProbability=topProbability>0
-      ?(Number(item.probability)||0)/topProbability
-      :0;
-    const nextMass=probabilityMass>0
-      ?cumulativeMass+(Number(item.probability)||0)/probabilityMass
-      :0;
-
-    const rank=selected.length+1;
-
-    // 1位は有効終端なら採用。2位以下は「上位と十分競っている」場合だけ残す。
-    const competitive=
-      rank===1 ||
-      (
-        relativeScore>=0.86 &&
-        relativeToTopProbability>=0.58 &&
-        cumulativeMass<0.78
-      ) ||
-      (
-        rank<=3 &&
-        relativeScore>=0.92 &&
-        relativeToTopProbability>=0.72
-      );
-
-    if(!competitive)break;
-
-    selected.push(item);
-    cumulativeMass=nextMass;
-  }
+  const distributionSelection=selectNaturalTerminalCluster(positive);
+  const pairAdjusted=limitUnseparatedThirdVariants(distributionSelection.selected,positive);
+  const selected=pairAdjusted.selected;
 
   const selectedKeys=new Set(selected.map(item=>item.order.join("-")));
 
@@ -207,7 +152,7 @@ export function classify(terminals,odds={}){
 
     let betClass="NONE";
     if(adopted){
-      betClass=rank===1?"MAIN":rank<=3?"COVER":"BUYABLE_HIGH";
+      betClass=rank===1?"MAIN":"COVER";
     }
 
     let purchaseReason="終端総合評価が購入候補順位に届かない";
@@ -219,6 +164,8 @@ export function classify(terminals,odds={}){
 
     const purchaseRejectCode=adopted
       ?"ADOPTED"
+      :distributionSelection.audit.selectionMode==="DIFFUSE_NO_NATURAL_BOUNDARY"
+        ?"DIFFUSE_NO_NATURAL_BOUNDARY"
       :positive.length===0
         ?"NO_VALID_TERMINAL"
         :rank===-1
@@ -233,10 +180,11 @@ export function classify(terminals,odds={}){
       purchaseRejectCode,
       representativeTerminal:rank===1,
       purchaseRank:rank>0?rank:null,
-      purchaseCandidateCount:positive.length,
-      purchaseCutoff:maxAdopt,
+      purchaseCandidateCount:selected.length,
+      purchaseCutoff:selected.length,
       purchaseScoreTop:topScore,
       purchaseProbabilityTop:topProbability,
+      purchaseDistributionAudit:{...distributionSelection.audit,...pairAdjusted.audit},
       rawBranchCountUsedForAdoption:false
     };
   });
@@ -381,9 +329,7 @@ export function purchaseDiagnostics(classified,plan,budget){
     top3Mass:sum(probabilities.slice(0,3)),
     top5Mass:sum(probabilities.slice(0,5)),
     top10Mass:sum(probabilities.slice(0,10)),
-    purchaseCandidateCountBeforeCompression:classified.filter(
-      item=>item.purchaseCandidateCount>0
-    ).length,
+    purchaseCandidateCountBeforeCompression:natural.length,
     purchaseCandidateCountAfterCompression:natural.length,
     finalBetCount:natural.length,
     fixedBranchRankCapApplied:false,
@@ -396,17 +342,17 @@ export function purchaseDiagnostics(classified,plan,budget){
     adoptedTerminalCount:natural.length,
     rejectedTerminalCount:classified.length-natural.length,
     rejectCodeCounts,
+    purchaseDistributionAudit:classified[0]?.purchaseDistributionAudit||null,
     purchaseThresholds:{
       branchPriorityGate:false,
       oddsSelectionGate:false,
       thirdVariantSelectionGate:false,
       concentrationRatioGate:false,
-      dynamicPurchaseCutoff:true,
-      dynamicCountByTerminalCompetition:true,
-      relativeScoreFloor:0.86,
-      relativeProbabilityFloor:0.58,
-      cumulativeMassStop:0.78,
-      maxPurchasePoints:6
+      branchPriorityGate:false,
+      oddsSelectionGate:false,
+      naturalDistributionBoundary:true,
+      fixedTopN:false,
+      maximumPurchasePoints:null
     },
     adoptedTerminalAudit:natural.map(item=>({
       order:item.order.join("-"),
@@ -448,7 +394,9 @@ export function purchaseDiagnostics(classified,plan,budget){
     noBetReason:noBet
       ?classified.length===0
         ?"NO_TERMINALS"
-        :"NO_VALID_TERMINAL"
+        :classified.every(item=>item.purchaseRejectCode==="DIFFUSE_NO_NATURAL_BOUNDARY")
+          ?"DIFFUSE_NO_NATURAL_BOUNDARY"
+          :"NO_VALID_TERMINAL"
       :null
   };
 }
@@ -489,6 +437,73 @@ function comparePurchase(a,b){
     (b.probability-a.probability)||
     a.order.join("-").localeCompare(b.order.join("-"),"en")
   );
+}
+
+function selectNaturalTerminalCluster(items){
+  const rows=[...(items||[])].sort((a,b)=>b.terminalScore-a.terminalScore||b.probability-a.probability);
+  if(!rows.length)return{selected:[],audit:{selectionMode:"NO_VALID_TERMINAL",boundaryRank:null}};
+  if(rows.length===1)return{selected:rows,audit:{selectionMode:"SINGLE_TERMINAL",boundaryRank:1,boundaryDetected:true}};
+  let pool=rows;
+  const levels=[];
+  while(pool.length>1){
+    const boundary=detectNaturalBoundary(pool);
+    if(!boundary.detected){
+      if(!levels.length)return{selected:[],audit:{selectionMode:"DIFFUSE_NO_NATURAL_BOUNDARY",boundaryRank:null,boundaryDetected:false,...boundary}};
+      break;
+    }
+    const next=pool.slice(0,boundary.index+1);
+    levels.push({...boundary,inputCount:pool.length,selectedCount:next.length});
+    if(next.length===pool.length)break;
+    pool=next;
+  }
+  return{selected:pool,audit:{selectionMode:"HIERARCHICAL_NATURAL_SCORE_DISCONTINUITY",boundaryRank:pool.length,boundaryDetected:true,boundaryLevels:levels,selectedMass:sum(pool.map(item=>Number(item.probability)||0))}};
+}
+
+function detectNaturalBoundary(rows){
+  const top=Math.max(Number(rows[0]?.terminalScore)||0,1e-12);
+  const values=rows.map(item=>(Number(item.terminalScore)||0)/top);
+  const gaps=values.slice(0,-1).map((value,index)=>Math.max(0,value-values[index+1]));
+  const medianGap=median(gaps);
+  const mad=median(gaps.map(gap=>Math.abs(gap-medianGap)));
+  const noiseScale=Math.max(medianGap,1.4826*mad,Number.EPSILON);
+  const best=gaps.map((gap,index)=>({index,gap,strength:(gap-medianGap)/noiseScale,relativeDrop:values[index]>0?gap/values[index]:0}))
+    .sort((a,b)=>b.strength-a.strength||b.gap-a.gap||a.index-b.index)[0];
+  const orderedGaps=[...gaps].sort((a,b)=>b-a);
+  const smallSampleSeparation=rows.length<=4&&best?.gap>0&&best.gap>(orderedGaps[1]||0)*1.8;
+  const detected=Boolean(best&&(smallSampleSeparation||best.gap>medianGap+2.5*1.4826*mad));
+  return{detected,index:best?.index??-1,medianGap,mad,bestGap:best?.gap||0,bestStrength:best?.strength||0,relativeDrop:best?.relativeDrop||0};
+}
+
+function limitUnseparatedThirdVariants(selected,allItems){
+  const selectedKeys=new Set(selected.map(item=>item.order.join("-")));
+  const byPair=new Map();
+  for(const item of allItems){
+    const pair=`${item.order?.[0]}-${item.order?.[1]}`;
+    if(!byPair.has(pair))byPair.set(pair,[]);
+    byPair.get(pair).push(item);
+  }
+  const removed=[];
+  for(const [pair,rows] of byPair){
+    const chosen=rows.filter(item=>selectedKeys.has(item.order.join("-")));
+    if(chosen.length<=1)continue;
+    const thirdBoundary=selectNaturalTerminalCluster(rows);
+    const supported=new Set(thirdBoundary.selected.map(item=>item.order.join("-")));
+    const keep=supported.size?supported:new Set([chosen.sort((a,b)=>b.terminalScore-a.terminalScore)[0].order.join("-")]);
+    for(const item of chosen)if(!keep.has(item.order.join("-"))){selectedKeys.delete(item.order.join("-"));removed.push({pair,order:item.order.join("-"),reason:thirdBoundary.audit.selectionMode});}
+  }
+  return{selected:selected.filter(item=>selectedKeys.has(item.order.join("-"))),audit:{thirdVariantRemovedCount:removed.length,thirdVariantRemovals:removed}};
+}
+
+function median(values){
+  const rows=[...(values||[])].map(Number).filter(Number.isFinite).sort((a,b)=>a-b);
+  if(!rows.length)return 0;
+  const middle=Math.floor(rows.length/2);
+  return rows.length%2?rows[middle]:(rows[middle-1]+rows[middle])/2;
+}
+
+function geometricMean(values){
+  const rows=(values||[]).map(Number).filter(value=>Number.isFinite(value)&&value>0);
+  return rows.length?Math.exp(sum(rows.map(value=>Math.log(value)))/rows.length):0;
 }
 
 function sum(values){

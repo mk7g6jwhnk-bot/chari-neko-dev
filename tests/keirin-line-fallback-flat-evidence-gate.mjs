@@ -11,12 +11,11 @@ try{
   assert.equal(p.terminals.length,504);
   assert.equal(p.audit.lineFallbackAudit.flatEvidenceWarning,true);
   assert.equal(p.audit.lineFallbackAudit.flatEvidencePurchaseBlockApplied,false);
-  assert.equal(p.noBet,false);
-  assert.equal(p.noBetReason,null);
-  assert.ok(p.standardPurchasePlan.length>=1);
-  assert.equal(p.referencePurchasePlan.length,0);
-  assert.equal(p.purchasePlan.length,p.standardPurchasePlan.length);
-  assert.equal(p.audit.purchaseCandidateCountAfterCompression,p.standardPurchasePlan.length);
-  assert.equal(p.purchasePlan.every(x=>x.referenceOnly!==true),true);
-  console.log(`PASS 504 terminals -> ${p.audit.purchaseCandidateCountAfterCompression} purchase candidates -> ${p.standardPurchasePlan.length} standard bets`);
+  assert.equal(p.noBet,true);
+  assert.equal(p.noBetReason,"DIFFUSE_NO_NATURAL_BOUNDARY");
+  assert.equal(p.standardPurchasePlan.length,0);
+  assert.ok(p.referencePurchasePlan.length>=1);
+  assert.equal(p.audit.purchaseCandidateCountAfterCompression,p.referencePurchasePlan.length);
+  assert.equal(p.purchasePlan.every(x=>x.referenceOnly===true),true);
+  console.log(`PASS diffuse 504 terminals -> 0 natural candidates -> 0 standard bets -> ${p.referencePurchasePlan.length} references`);
 }finally{globalThis.fetch=originalFetch}
