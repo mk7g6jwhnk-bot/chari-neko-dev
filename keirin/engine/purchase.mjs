@@ -142,6 +142,7 @@ export function classify(terminals,odds={}){
   const distributionSelection=selectNaturalTerminalCluster(positive);
   const pairAdjusted=limitUnseparatedThirdVariants(distributionSelection.selected,positive);
   const selected=pairAdjusted.selected;
+  const purchaseDistributionAudit={...distributionSelection.audit,...pairAdjusted.audit};
 
   const selectedKeys=new Set(selected.map(item=>item.order.join("-")));
 
@@ -186,7 +187,10 @@ export function classify(terminals,odds={}){
       purchaseCutoff:selected.length,
       purchaseScoreTop:topScore,
       purchaseProbabilityTop:topProbability,
-      purchaseDistributionAudit:{...distributionSelection.audit,...pairAdjusted.audit},
+      // This is a race-level decision audit. Keeping a full copy (including
+      // third-variant removal/ambiguity arrays) on every terminal made 504-row
+      // Function responses exceed the platform response-size limit.
+      ...(rank===1?{purchaseDistributionAudit}:{}),
       rawBranchCountUsedForAdoption:false
     };
   });
@@ -344,7 +348,7 @@ export function purchaseDiagnostics(classified,plan,budget){
     adoptedTerminalCount:natural.length,
     rejectedTerminalCount:classified.length-natural.length,
     rejectCodeCounts,
-    purchaseDistributionAudit:classified[0]?.purchaseDistributionAudit||null,
+    purchaseDistributionAudit:classified.find(item=>item.purchaseDistributionAudit)?.purchaseDistributionAudit||null,
     purchaseThresholds:{
       branchPriorityGate:false,
       oddsSelectionGate:false,

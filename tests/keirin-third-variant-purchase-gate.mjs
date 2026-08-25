@@ -31,8 +31,9 @@ const adopted=classified.filter(x=>x.purchaseStatus==="購入採用");
 const rejectedThird=classified.filter(x=>x.purchaseStatus==="購入不採用");
 assert.deepEqual(adopted.map(x=>x.order[2]).sort((a,b)=>a-b),[3,6,9]);
 assert.deepEqual(rejectedThird.map(x=>x.order[2]).sort((a,b)=>a-b),[1,5]);
-assert.ok(adopted.every(x=>x.purchaseDistributionAudit?.boundaryDetected===true));
-assert.ok(adopted.every(x=>x.purchaseDistributionAudit?.thirdVariantRemovedCount===0));
+const distributionAudit=classified.find(x=>x.purchaseDistributionAudit)?.purchaseDistributionAudit;
+assert.equal(distributionAudit?.boundaryDetected,true);
+assert.equal(distributionAudit?.thirdVariantRemovedCount,0);
 console.log(`Keirin adaptive third-variant purchase gate passed: adopted ${adopted.length}, rejected ${rejectedThird.length}`);
 
 // Global distribution supports three terminals, while the same-pair third rows
@@ -45,7 +46,7 @@ const ambiguous=[
 const ambiguousClassified=classify(ambiguous,{});
 const ambiguousAdopted=ambiguousClassified.filter(x=>x.purchaseStatus==="購入採用");
 assert.equal(ambiguousAdopted.length,0);
-const ambiguity=ambiguousClassified[0].purchaseDistributionAudit.thirdVariantAmbiguity;
+const ambiguity=ambiguousClassified.find(x=>x.purchaseDistributionAudit)?.purchaseDistributionAudit.thirdVariantAmbiguity;
 assert.equal(ambiguity.detected,true);
 assert.equal(ambiguity.count,1);
 assert.equal(ambiguity.pairs[0].pair,"2-4");
