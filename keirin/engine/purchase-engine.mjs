@@ -1,4 +1,4 @@
-import{composite,allocate,purchaseDiagnostics}from"./purchase.mjs";
+import{classify,composite,allocate,purchaseDiagnostics}from"./purchase.mjs";
 import{applyChatSpecV1}from"./chat-spec-v1-policy.mjs";
 import{
   buildReferenceToStandardTransitionAudit,buildLineFallbackDiscriminationAudit,buildNonZeroReferencePlan,
@@ -32,7 +32,7 @@ export function runKeirinPurchaseEngine({prediction,oddsByOrder={},budget=3000})
     scored:prediction.scored||[],lines:prediction.lines||[],branches:prediction.branches||[],terminals:purchaseInput,oddsByOrder
   }):null;
   const rawClassified=generationPassed
-    ?chatSpec.terminals
+    ?classify(chatSpec.terminals,oddsByOrder)
     :purchaseInput.map(item=>({...item,betClass:"NONE",purchaseStatus:"購入不採用",purchaseReason:`エンジン生成監査不通過: ${(prediction.audit?.errors||[]).slice(0,3).join(" / ")||"原因未記録"}`,purchaseRejectCode:"ENGINE_AUDIT_FAILED",lifecycle:{generated:true,probabilityEvaluated:true,terminalDeleted:false,purchaseDecision:"REJECTED",purchaseDecisionCode:"ENGINE_AUDIT_FAILED",purchaseDecisionReason:`エンジン生成監査不通過: ${(prediction.audit?.errors||[]).slice(0,3).join(" / ")||"原因未記録"}`}}));
 
   const lineIndependentMainAvailable=(prediction.branches||[]).some(branch=>branch.lineIndependentFallback===true&&branch.priority==="main");
@@ -45,12 +45,16 @@ export function runKeirinPurchaseEngine({prediction,oddsByOrder={},budget=3000})
   // When official line data is unavailable, normal purchase is blocked only if the
   // remaining rider/terminal evidence is genuinely non-discriminative.
   const lineAndStartEvidenceBlocked=false;
-  const lineFallbackEvidenceBlocked=Boolean(
+  const lineFallbackEvidenceInsufficient=Boolean(
     generationPassed&&
     raceMeta.raceCategory!=="girls"&&
     raceMeta.lineConfidence!=="高"&&
     !lineFallbackDiscriminationAudit.sufficient
   );
+  // Missing/flat line-fallback evidence is diagnostic only. applyChatSpecV1 has
+  // already classified every generated terminal from the available rider and
+  // scenario evidence; do not overwrite those purchase decisions race-wide.
+  const lineFallbackEvidenceBlocked=false;
   const lineBlocked=false;
   const girlsEvidenceBlocked=generationPassed&&raceMeta.raceCategory==="girls"&&startEvidenceCount<startEvidenceRequired;
   // v230: MAIN absence is not a race-wide kill switch, but COVER/BUYABLE_HIGH-only
@@ -148,6 +152,7 @@ export function runKeirinPurchaseEngine({prediction,oddsByOrder={},budget=3000})
         lineIndependentFallbackBranchCount:(prediction.branches||[]).filter(branch=>branch.lineIndependentFallback===true).length,
         lineIndependentMainAvailable,
         blanketLinePurchaseBlockApplied:lineBlocked,
+        flatEvidenceWarning:lineFallbackEvidenceInsufficient,
         flatEvidencePurchaseBlockApplied:lineFallbackEvidenceBlocked,
         lineAndStartEvidenceBlockApplied:lineAndStartEvidenceBlocked,
         startEvidenceCount,startEvidenceRequired,
