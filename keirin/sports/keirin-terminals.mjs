@@ -87,7 +87,7 @@ function positionScore(branch,p,target,first,second){
     :target==="second"
       ?[e.recent,e.finish,e.tracking,e.sprint,e.timing]
       :[e.recent,e.finish,e.tracking,e.stamina,e.lineTrust];
-  const available=axes.map(Number).filter(Number.isFinite);
+  const available=axes.filter(value=>value!==null&&value!==undefined&&value!=="").map(Number).filter(Number.isFinite);
   const ability=available.length?geometricMean(available):role;
   // Branch probability already represents the scenario hypothesis. Do not add a
   // second template bonus merely for being on the initiative line or in bante.

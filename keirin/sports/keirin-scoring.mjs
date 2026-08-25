@@ -75,15 +75,15 @@ export function scoreKeirinParticipants({race,venueProfile={}}){
         ],p)
       },
       evidence:{
-        recent:Number(p.recentForm),
-        start:Number(p.startPower),
-        sprint:Number(p.sprintPower),
-        stamina:clamp(p.stamina??5),
-        timing:clamp(p.attackTiming??5),
-        tracking:Number(p.trackingSkill),
-        finish:Number(p.finishPower),
-        lineTrust:clamp(p.lineTrust??5),
-        venue:clamp(p.venueSuitability??5)
+        recent:evidenceAvailable(p,"recentForm")?Number(p.recentForm):null,
+        start:evidenceAvailable(p,"startPower")?Number(p.startPower):null,
+        sprint:evidenceAvailable(p,"sprintPower")?Number(p.sprintPower):null,
+        stamina:null,
+        timing:null,
+        tracking:evidenceAvailable(p,"trackingSkill")?Number(p.trackingSkill):null,
+        finish:evidenceAvailable(p,"finishPower")?Number(p.finishPower):null,
+        lineTrust:null,
+        venue:null
       },
       precisionAudit:{
         availableAxes:["recentForm","startPower","sprintPower","finishPower","trackingSkill"]

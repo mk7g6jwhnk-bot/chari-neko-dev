@@ -3,6 +3,7 @@ import { runKeirinEngine } from "../../keirin/engine/keirin-engine.mjs";
 import { applyRecentFormEvidence } from "../../keirin/recent-form/recent-form.mjs";
 import { applyStartPowerEvidence } from "../../keirin/start-power/start-power.mjs";
 import { applyKimariteAbilities } from "../../keirin/kimarite/kimarite-abilities.mjs";
+import { attachRiderDbEvidence, loadRiderDB } from "../../keirin/sports/rider-db-provider.mjs";
 import { jsonResponse } from "../../keirin/parser/utils.mjs";
 
 const VENUE_CODE_BY_NAME = {
@@ -88,7 +89,19 @@ export default async function handler(req) {
       raceNo: Number(basic.raceNo || raceNo),
       raceCategory
     };
-    const participants = adaptParticipantsForPrediction(officialParticipants, participantContext);
+    let riderDb;
+    try {
+      riderDb = loadRiderDB();
+    } catch (error) {
+      return jsonResponse(503, {
+        ok: false,
+        error: error instanceof Error ? error.message : String(error),
+        riderDbGate: true,
+        requestAudit: { date, venueName, venueCode, raceNo }
+      });
+    }
+    const evidenceParticipants = attachRiderDbEvidence(officialParticipants, riderDb, participantContext);
+    const participants = adaptParticipantsForPrediction(evidenceParticipants, participantContext);
     if (participants.length < 5) {
       return jsonResponse(422, {
         ok: false,
@@ -102,17 +115,6 @@ export default async function handler(req) {
     const line = raceCategory === "girls"
       ? resolveGirlsDynamicPositions({ participants })
       : resolveOfficialLines({ participants, officialLines, lineText });
-    let riderDb;
-    try {
-    } catch (error) {
-      return jsonResponse(503, {
-        ok: false,
-        error: error instanceof Error ? error.message : String(error),
-        riderDbGate: true,
-        requestAudit: { date, venueName, venueCode, raceNo }
-      });
-    }
-
     const race = {
       id: `${date}-${basic.venueName || venueName}-${basic.raceNo || raceNo}`,
       venue: basic.venueName || venueName,
@@ -501,6 +503,7 @@ export function adaptParticipant(item, context = {}) {
     officialTotalStarts: nullableNumber(item.officialTotalStarts ?? item.officialProfile?.officialTotalStarts),
     sparseSampleFlag: Number(item.officialTotalStarts ?? item.officialProfile?.officialTotalStarts) <= 10,
     officialForeignFlag: item.officialForeignFlag === true || item.officialProfile?.officialForeignFlag === true,
+    riderDbAudit: item.riderDbAudit || null,
     recentForm: 5,
     recentFormEvidence: { value: 5, confidence: "low", inputsUsed: [], missingInputs: ["official-profile"] },
     startPower: null,

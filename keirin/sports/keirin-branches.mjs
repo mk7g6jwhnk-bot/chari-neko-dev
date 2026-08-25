@@ -44,8 +44,8 @@ export function generateKeirinBranches({scored,lines,lineConfidence,raceCategory
   if(solo.length){
     branches.push(makeEvent({
       id:"SOLO",label:"単騎浮上",branchType:"SOLO_RISE",
-      candidates:solo,eventEvidence:Object.fromEntries(scored.map(p=>[
-        p.id, solo.includes(p.id)?1.12:.92
+      candidates:solo,eventEvidence:Object.fromEntries(scored.filter(p=>solo.includes(p.id)).map(p=>[
+        p.id,weightedKnown(p,["first","start","finish","recent","tracking"],[.30,.20,.20,.15,.15])
       ]))
     }));
   }
@@ -87,20 +87,19 @@ function scoreBante(r){
   return {[r.id]:common(r,.20,.25,.30,.15,.10)};
 }
 function common(p,a,b,c,d,e){
-  const x=p.evidence||{}, r=p.roleScores||{};
-  return a*(r.first||5)+b*(x.start||5)+c*(x.finish||5)+d*(x.recent||5)+e*(x.tracking||5);
+  return weightedKnown(p,["first","start","finish","recent","tracking"],[a,b,c,d,e]);
 }
 function scoreBattle(scored){
-  return Object.fromEntries(scored.map(p=>[p.id,
-    .24*(p.roleScores?.first||5)+.24*(p.evidence?.start||5)+
-    .24*(p.evidence?.finish||5)+.18*(p.evidence?.tracking||5)+.10*(p.evidence?.recent||5)
-  ]));
+  return Object.fromEntries(scored.map(p=>[p.id,weightedKnown(p,["first","start","finish","tracking","recent"],[.24,.24,.24,.18,.10])]));
 }
 function scoreSeparation(scored){
-  return Object.fromEntries(scored.map(p=>[p.id,
-    .22*(p.roleScores?.first||5)+.30*(p.evidence?.tracking||5)+
-    .26*(p.evidence?.finish||5)+.14*(p.evidence?.recent||5)+.08*(p.evidence?.lineTrust||5)
-  ]));
+  return Object.fromEntries(scored.map(p=>[p.id,weightedKnown(p,["first","tracking","finish","recent","lineTrust"],[.22,.30,.26,.14,.08])]));
+}
+function weightedKnown(p,keys,weights){
+  const values=keys.map(key=>key==="first"?p.roleScores?.first:p.evidence?.[key]);
+  const available=values.map((value,index)=>({value,index})).filter(({value})=>value!==null&&value!==undefined&&value!==""&&Number.isFinite(Number(value)));
+  const total=available.reduce((sum,{index})=>sum+weights[index],0);
+  return total?available.reduce((sum,{value,index})=>sum+Number(value)*weights[index],0)/total:0;
 }
 function generateGirlsBranches(scored){
   return generateKeirinBranches({scored,lines:[],lineConfidence:"高",raceCategory:"standard"});
