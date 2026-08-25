@@ -10,19 +10,19 @@ export function generateKeirinBranches({scored,lines,lineConfidence,raceCategory
     if(leader){
       branches.push(makeEvent({
         id:`LEAD-${line.id}`, label:`${line.id}主導権`, branchType:"LEADER_HOLD",
-        primaryLineId:line.id, candidates:scored.map(p=>p.id),
+        primaryLineId:line.id, candidates:[leader.id],
         eventEvidence:scoreLeader(leader)
       }));
       branches.push(makeEvent({
         id:`MAKURI-${line.id}`, label:`${line.id}仕掛け成功`, branchType:"MAKURI_SUCCESS",
-        primaryLineId:line.id, candidates:scored.map(p=>p.id),
+        primaryLineId:line.id, candidates:[leader.id],
         eventEvidence:scoreAttack(leader)
       }));
     }
     if(bante){
       branches.push(makeEvent({
         id:`BANTE-${line.id}`, label:`${line.id}番手優位`, branchType:"BANTE_SASHI",
-        primaryLineId:line.id, candidates:scored.map(p=>p.id),
+        primaryLineId:line.id, candidates:[bante.id],
         eventEvidence:scoreBante(bante)
       }));
     }
@@ -44,7 +44,7 @@ export function generateKeirinBranches({scored,lines,lineConfidence,raceCategory
   if(solo.length){
     branches.push(makeEvent({
       id:"SOLO",label:"単騎浮上",branchType:"SOLO_RISE",
-      candidates:all,eventEvidence:Object.fromEntries(scored.map(p=>[
+      candidates:solo,eventEvidence:Object.fromEntries(scored.map(p=>[
         p.id, solo.includes(p.id)?1.12:.92
       ]))
     }));

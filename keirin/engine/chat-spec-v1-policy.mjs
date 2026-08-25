@@ -25,10 +25,12 @@ export function applyChatSpecV1({scored=[],lines=[],branches=[],terminals=[],odd
     ]);
     const support=deriveBranchSupport(terminal,branchById);
     const original=Math.max(Number(terminal.probability)||0,1e-12);
-    // Explicit Chat Spec v1 combination:
-    // original branch-conditioned likelihood + independent placing suitability
-    // + forecast-role support. No terminal is cut here.
-    const raw=Math.pow(original,.38)*Math.pow(Math.max(roleQuality,1e-6),.34)*Math.pow(Math.max(support.weight,1e-6),.28);
+    // The prediction engine has already combined branch likelihood, rider
+    // ability and placing suitability. Preserve that completed distribution;
+    // role/support remain audit and purchase-explanation fields only. Reapplying
+    // them here both double-counted role evidence and flattened probability via
+    // the concave original^.38 transform.
+    const raw=original;
     const odds=lookupOdds(order,oddsByOrder);
     return{
       ...terminal,

@@ -25,7 +25,7 @@ export function generateKeirinTerminals({scored,branches}){
             branchId:branch.id,branchLabel:branch.label,
             branchPriority:"hypothesis",branchType:branch.branchType,
             primaryLineId:branch.primaryLineId||null,
-            requiredFirstNumber:null,
+            requiredFirstNumber:first.number,
             branchScore:branch.probability||branch.score,
             pathScore:firstScore*secondScore*thirdScore,
             decisionRatios:{first:1,second:1,third:1},
@@ -47,7 +47,7 @@ export function generateKeirinTerminals({scored,branches}){
     const c={
       branchId:t.branchId,branchLabel:t.branchLabel,branchPriority:"hypothesis",
       branchType:t.branchType,primaryLineId:t.primaryLineId,
-      requiredFirstNumber:null,branchScore:t.branchScore,
+      requiredFirstNumber:t.requiredFirstNumber,branchScore:t.branchScore,
       weightedScore:weighted,pathScore:t.pathScore,
       positionScores:t.positionScores,positionEvidence:t.positionEvidence,
       decisionRatios:t.decisionRatios

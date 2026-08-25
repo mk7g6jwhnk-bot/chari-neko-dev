@@ -51,3 +51,4 @@ assert.equal(ambiguity.count,1);
 assert.equal(ambiguity.pairs[0].pair,"2-4");
 assert.equal(ambiguity.causesNoBet,true);
 assert.ok(ambiguousClassified.every(x=>x.purchaseRejectCode==="THIRD_VARIANT_AMBIGUITY"));
+console.log(`Keirin natural distribution selection case F passed: F=${ambiguousAdopted.length}`);

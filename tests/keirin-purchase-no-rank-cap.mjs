@@ -53,4 +53,4 @@ const reverseOrder=generated.find(item=>item.order.join("-")==="3-2-1");
 assert.ok(naturalOrder.probability>reverseOrder.probability,"independent first/second/third ability did not affect terminal ranking");
 const branchWeights=naturalOrder.branchContributions.map(item=>item.pathScore);
 assert.equal(new Set(branchWeights.map(value=>value.toFixed(12))).size,1,"initiative/bante/solo template changed identical terminal position score");
-console.log(`Keirin natural distribution selection passed: ${counts.join(" -> ")}`);
+console.log(`Keirin natural distribution selection passed: A=${counts[0]}, B=${counts[1]}, C=${counts[2]}, D=${counts[3]}, E=${counts[4]}, G=${counts[5]}`);
