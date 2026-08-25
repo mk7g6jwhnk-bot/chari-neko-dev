@@ -7,9 +7,12 @@ try{
  assert.equal(pred.audit.chatSpecV1.mainInvariant.mainPurchasedCount,0);
  assert.equal(pred.audit.chatSpecV1.mainInvariant.passed,true);
  assert.equal(pred.noBet,true);
- assert.equal(pred.noBetReason,"LINE_FALLBACK_INSUFFICIENT_DISCRIMINATION");
+ assert.equal(pred.noBetReason,"DIFFUSE_NO_NATURAL_BOUNDARY");
+ assert.equal(pred.branches.some(branch=>branch.branchType==="SOLO_RISE"),false);
+ assert.equal(pred.branches.some(branch=>branch.branchType==="LINE_SEPARATION"),false);
+ assert.deepEqual([...new Set(pred.scored.map(item=>item.role))],["判定保留"]);
  assert.equal(pred.audit.referencePlan,true);
- assert.equal(pred.purchasePlan.length,7);
+ assert.equal(pred.purchasePlan.length,1);
  assert.equal(pred.purchasePlan.every(x=>x.referenceOnly===true),true);
- console.log("PASS missing line+start evidence keeps MAIN unresolved and uses 7 reference terminals");
+ console.log("PASS missing official line stays unknown without inferred SOLO/SEPARATION branches");
 }finally{globalThis.fetch=originalFetch}

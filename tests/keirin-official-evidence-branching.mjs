@@ -40,6 +40,14 @@ try{
   assert.ok(plan.some(item=>item.betClass==="MAIN"));
   assert.ok(plan.every(item=>["MAIN","COVER","BUYABLE_HIGH"].includes(item.betClass)));
   assert.ok(plan.every(item=>item.dominantBranchId&&item.dominantBranchLabel));
+  const leading=generated[0];
+  assert.equal(leading.conditionalEvaluation?.model,"SEQUENTIAL-CONDITIONAL-NORMALIZATION-V1");
+  assert.equal(leading.conditionalEvaluation?.second?.factor,1);
+  assert.equal(leading.conditionalEvaluation?.third?.factor,1);
+  assert.equal(leading.conditionalEvaluation?.second?.classification,"NEUTRAL_UNCALIBRATED");
+  assert.ok(leading.branchContributions[0].decisionRatios.second>0&&leading.branchContributions[0].decisionRatios.second<1);
+  assert.ok(leading.branchContributions[0].decisionRatios.third>0&&leading.branchContributions[0].decisionRatios.third<1);
+  assert.ok(Math.abs(generated.reduce((sum,item)=>sum+item.probability,0)-1)<1e-9);
 }finally{globalThis.fetch=originalFetch;}
 console.log("Official evidence + branch-conditioned purchase tests passed.");
 

@@ -34,13 +34,13 @@ export function generateKeirinBranches({scored,lines,lineConfidence,raceCategory
       id:"BATTLE",label:"主導権争い・消耗",branchType:"LEAD_BATTLE",
       candidates:all,eventEvidence:scoreBattle(scored)
     }));
-    branches.push(makeEvent({
+    if(activeLines.length)branches.push(makeEvent({
       id:"SEPARATION",label:"ライン崩れ・番手離れ",branchType:"LINE_SEPARATION",
       candidates:all,eventEvidence:scoreSeparation(scored)
     }));
   }
 
-  const solo=scored.filter(p=>p.role==="単騎").map(p=>p.id);
+  const solo=scored.filter(p=>p.role==="単騎"&&p.lineId==="solo"&&p.lineStatus==="公式並び外").map(p=>p.id);
   if(solo.length){
     branches.push(makeEvent({
       id:"SOLO",label:"単騎浮上",branchType:"SOLO_RISE",

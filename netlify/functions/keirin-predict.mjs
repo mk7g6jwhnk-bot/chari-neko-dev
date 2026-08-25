@@ -19,6 +19,7 @@ const VENUE_CODE_BY_NAME = {
 };
 
 export default async function handler(req) {
+  const predictionRequestedAt = new Date().toISOString();
   const url = new URL(req.url);
   const date = url.searchParams.get("date") || "";
   const venueName = url.searchParams.get("venueName") || "競輪場";
@@ -100,6 +101,11 @@ export default async function handler(req) {
         requestAudit: { date, venueName, venueCode, raceNo }
       });
     }
+    const predictionSealedAt = new Date().toISOString();
+    const selectedLineObservedAt = browserResult.data.lineSnapshotAudit?.observedAt;
+    if (selectedLineObservedAt && Date.parse(selectedLineObservedAt) > Date.parse(predictionSealedAt)) {
+      throw new Error("公式ラインsnapshotの取得時刻が予想seal時刻を超えています");
+    }
     const evidenceParticipants = attachRiderDbEvidence(officialParticipants, riderDb, participantContext);
     const participants = adaptParticipantsForPrediction(evidenceParticipants, participantContext);
     if (participants.length < 5) {
@@ -140,12 +146,29 @@ export default async function handler(req) {
       oddsByOrder: odds.complete ? odds.odds : {},
       budget
     });
+    const lineSnapshotAudit = browserResult.data.lineSnapshotAudit || null;
+    prediction.lineSnapshotAudit = lineSnapshotAudit ? {
+      lineSource: lineSnapshotAudit.lineSource || lineSnapshotAudit.selectedSource || "unknown",
+      lineSnapshotObservedAt: lineSnapshotAudit.lineSnapshotObservedAt || lineSnapshotAudit.observedAt || null,
+      lineSnapshotPersistenceMode: lineSnapshotAudit.lineSnapshotPersistenceMode || "ephemeral",
+      lineSnapshotRaceKey: lineSnapshotAudit.lineSnapshotRaceKey || null,
+      lineSnapshotConfidence: lineSnapshotAudit.lineSnapshotConfidence || null
+    } : {
+      lineSource: "unknown",
+      lineSnapshotObservedAt: null,
+      lineSnapshotPersistenceMode: "ephemeral",
+      lineSnapshotRaceKey: `${date}-${venueCode}-${raceNo}`,
+      lineSnapshotConfidence: null
+    };
 
     return jsonResponse(200, {
       ok: prediction.audit.passed,
       race,
       odds,
       prediction,
+      predictionRequestedAt,
+      predictionSealedAt,
+      lineSnapshotAudit,
       officialData,
       browserAudit: browserResult.data.audit || null,
       dataQuality: {

@@ -16,15 +16,9 @@ export function inferLines({participants,lineText=null}) {
   }
 
   return {
-    participants:participants.map(p=>({...p,role:inferRole(p),lineId:`unknown-${p.number}`,lineOrder:1,lineStatus:"推定・判定保留"})),
-    source:"能力値から役割候補のみ",
+    participants:participants.map(p=>({...p,role:"判定保留",lineId:`unknown-${p.number}`,lineOrder:1,lineStatus:"公式並び未取得・判定保留"})),
+    source:"公式並び未取得",
     confidence:"低",
     warnings:["公式ライン情報未取得。ライン依存枝は判定保留。"]
   };
-}
-
-function inferRole(p){
-  if((p.attackTiming??5)>=7||(p.stamina??5)>=7)return"自力";
-  if((p.trackingSkill??5)>=7||(p.finishPower??5)>=7)return"番手";
-  return"単騎";
 }

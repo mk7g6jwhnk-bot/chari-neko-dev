@@ -6,20 +6,29 @@ export function generateKeirinTerminals({scored,branches}){
   for(const branch of branches){
     const firstPool=branch.firstCandidates
       .map(id=>byId.get(id)).filter(Boolean)
-      .map(first=>({first,score:positionScore(branch,first,"first")}))
-      .filter(x=>x.score>0);
+      .map(first=>conditionalRow(branch,first,"first"))
+      .filter(x=>x.conditionalScore>0);
+    const firstTotal=sumConditional(firstPool);
 
-    for(const {first,score:firstScore} of firstPool){
+    for(const firstRow of firstPool){
+      const {participant:first,baseScore:firstScore,conditionalScore:firstConditionalScore}=firstRow;
+      const firstRatio=firstConditionalScore/firstTotal;
       const secondPool=scored.filter(p=>p.id!==first.id)
-        .map(second=>({second,score:positionScore(branch,second,"second",first)}))
-        .filter(x=>x.score>0);
+        .map(second=>conditionalRow(branch,second,"second",first))
+        .filter(x=>x.conditionalScore>0);
+      const secondTotal=sumConditional(secondPool);
 
-      for(const {second,score:secondScore} of secondPool){
+      for(const secondRow of secondPool){
+        const {participant:second,baseScore:secondScore,conditionalScore:secondConditionalScore}=secondRow;
+        const secondRatio=secondConditionalScore/secondTotal;
         const thirdPool=scored.filter(p=>p.id!==first.id&&p.id!==second.id)
-          .map(third=>({third,score:positionScore(branch,third,"third",first,second)}))
-          .filter(x=>x.score>0);
+          .map(third=>conditionalRow(branch,third,"third",first,second))
+          .filter(x=>x.conditionalScore>0);
+        const thirdTotal=sumConditional(thirdPool);
 
-        for(const {third,score:thirdScore} of thirdPool){
+        for(const thirdRow of thirdPool){
+          const {participant:third,baseScore:thirdScore,conditionalScore:thirdConditionalScore}=thirdRow;
+          const thirdRatio=thirdConditionalScore/thirdTotal;
           raw.push({
             order:[first.number,second.number,third.number],
             branchId:branch.id,branchLabel:branch.label,
@@ -27,9 +36,20 @@ export function generateKeirinTerminals({scored,branches}){
             primaryLineId:branch.primaryLineId||null,
             requiredFirstNumber:first.number,
             branchScore:branch.probability||branch.score,
-            pathScore:firstScore*secondScore*thirdScore,
-            decisionRatios:{first:1,second:1,third:1},
+            pathScore:firstRatio*secondRatio*thirdRatio,
+            decisionRatios:{first:firstRatio,second:secondRatio,third:thirdRatio},
             positionScores:{first:firstScore,second:secondScore,third:thirdScore},
+            conditionalScores:{
+              firstBaseScore:firstScore,firstConditionalScore,
+              secondBaseScore:secondScore,secondConditionalScore,
+              thirdBaseScore:thirdScore,thirdConditionalScore
+            },
+            conditionalEvaluation:{
+              model:"SEQUENTIAL-CONDITIONAL-NORMALIZATION-V1",
+              first:firstRow.compatibility,
+              second:secondRow.compatibility,
+              third:thirdRow.compatibility
+            },
             positionEvidence:{
               first:evidence(first,"first"),second:evidence(second,"second"),third:evidence(third,"third")
             },
@@ -50,6 +70,7 @@ export function generateKeirinTerminals({scored,branches}){
       requiredFirstNumber:t.requiredFirstNumber,branchScore:t.branchScore,
       weightedScore:weighted,pathScore:t.pathScore,
       positionScores:t.positionScores,positionEvidence:t.positionEvidence,
+      conditionalScores:t.conditionalScores,conditionalEvaluation:t.conditionalEvaluation,
       decisionRatios:t.decisionRatios
     };
     if(!map.has(key)){
@@ -75,6 +96,9 @@ export function generateKeirinTerminals({scored,branches}){
     t.branchLabel=d?.branchLabel||t.branchLabel;
     t.branchPriority="hypothesis";
     t.branchType=d?.branchType||t.branchType;
+    t.conditionalScores=d?.conditionalScores||null;
+    t.conditionalEvaluation=d?.conditionalEvaluation||null;
+    t.branchContributions=t.branchContributions.map(({conditionalScores,conditionalEvaluation,...rest})=>rest);
   }
   return terminals.sort((a,b)=>b.probability-a.probability||a.order.join("-").localeCompare(b.order.join("-")));
 }
@@ -93,6 +117,33 @@ function positionScore(branch,p,target,first,second){
   // second template bonus merely for being on the initiative line or in bante.
   return Math.max(.01,role*.72+ability*.28);
 }
+function conditionalRow(branch,participant,target,first=null,second=null){
+  const baseScore=positionScore(branch,participant,target,first,second);
+  const compatibility=conditionalCompatibility(branch,participant,target,first,second);
+  return {participant,baseScore,conditionalScore:baseScore*compatibility.factor,compatibility};
+}
+function conditionalCompatibility(branch,p,target,first,second){
+  const duplicateFirst=Boolean(first&&p.id===first.id);
+  const duplicateSecond=Boolean(second&&p.id===second.id);
+  const branchFirstMismatch=target==="first"&&!branch.firstCandidates.includes(p.id);
+  const contradictions=[];
+  if(duplicateFirst||duplicateSecond)contradictions.push("duplicate-rider-in-terminal");
+  if(branchFirstMismatch)contradictions.push("branch-first-candidate-mismatch");
+  const sameFirst=Boolean(first?.lineId&&p.lineId===first.lineId);
+  const sameSecond=Boolean(second?.lineId&&p.lineId===second.lineId);
+  return {
+    factor:contradictions.length?0:1,
+    classification:contradictions.length?"LOGICALLY_CONTRADICTORY":"NEUTRAL_UNCALIBRATED",
+    branchType:branch.branchType,primaryLineId:branch.primaryLineId||null,
+    relationToFirst:first?(sameFirst?"SAME_LINE":"OTHER_OR_UNKNOWN_LINE"):null,
+    relationToSecond:second?(sameSecond?"SAME_LINE":"OTHER_OR_UNKNOWN_LINE"):null,
+    roles:[first?.role||null,second?.role||null,p.role||null],
+    evidenceCode:"BRANCH_PROVENANCE+LINE_ID+ROLE",
+    contradictions,
+    insufficientEvidenceCode:"NO_EMPIRICAL_CONDITIONAL_LINE_SURVIVAL_OR_TRACKING_RATE"
+  };
+}
+function sumConditional(rows){return rows.reduce((sum,row)=>sum+row.conditionalScore,0)||1}
 function geometricMean(values){return Math.exp(values.reduce((sum,value)=>sum+Math.log(Math.max(.01,value)),0)/values.length)}
 function evidence(p,target){
   const e=p.evidence||{}, r=p.roleScores||{};
