@@ -34,3 +34,20 @@ assert.deepEqual(rejectedThird.map(x=>x.order[2]).sort((a,b)=>a-b),[1,5]);
 assert.ok(adopted.every(x=>x.purchaseDistributionAudit?.boundaryDetected===true));
 assert.ok(adopted.every(x=>x.purchaseDistributionAudit?.thirdVariantRemovedCount===0));
 console.log(`Keirin adaptive third-variant purchase gate passed: adopted ${adopted.length}, rejected ${rejectedThird.length}`);
+
+// Global distribution supports three terminals, while the same-pair third rows
+// themselves are nearly flat. They must remain ambiguous, not collapse to one.
+const ambiguous=[
+  t(9,.300,.96),t(3,.299,.95),t(6,.298,.94),
+  {...t(1,.100,.90),order:[5,1,2]},
+  {...t(5,.090,.89),order:[7,8,1]}
+];
+const ambiguousClassified=classify(ambiguous,{});
+const ambiguousAdopted=ambiguousClassified.filter(x=>x.purchaseStatus==="購入採用");
+assert.equal(ambiguousAdopted.length,0);
+const ambiguity=ambiguousClassified[0].purchaseDistributionAudit.thirdVariantAmbiguity;
+assert.equal(ambiguity.detected,true);
+assert.equal(ambiguity.count,1);
+assert.equal(ambiguity.pairs[0].pair,"2-4");
+assert.equal(ambiguity.causesNoBet,true);
+assert.ok(ambiguousClassified.every(x=>x.purchaseRejectCode==="THIRD_VARIANT_AMBIGUITY"));

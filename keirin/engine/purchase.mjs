@@ -164,6 +164,8 @@ export function classify(terminals,odds={}){
 
     const purchaseRejectCode=adopted
       ?"ADOPTED"
+      :pairAdjusted.audit.thirdVariantAmbiguity?.detected
+        ?"THIRD_VARIANT_AMBIGUITY"
       :distributionSelection.audit.selectionMode==="DIFFUSE_NO_NATURAL_BOUNDARY"
         ?"DIFFUSE_NO_NATURAL_BOUNDARY"
       :positive.length===0
@@ -396,7 +398,9 @@ export function purchaseDiagnostics(classified,plan,budget){
         ?"NO_TERMINALS"
         :classified.every(item=>item.purchaseRejectCode==="DIFFUSE_NO_NATURAL_BOUNDARY")
           ?"DIFFUSE_NO_NATURAL_BOUNDARY"
-          :"NO_VALID_TERMINAL"
+          :classified.every(item=>item.purchaseRejectCode==="THIRD_VARIANT_AMBIGUITY")
+            ?"THIRD_VARIANT_AMBIGUITY"
+            :"NO_VALID_TERMINAL"
       :null
   };
 }
@@ -441,25 +445,30 @@ function comparePurchase(a,b){
 
 function selectNaturalTerminalCluster(items){
   const rows=[...(items||[])].sort((a,b)=>b.terminalScore-a.terminalScore||b.probability-a.probability);
-  if(!rows.length)return{selected:[],audit:{selectionMode:"NO_VALID_TERMINAL",boundaryRank:null}};
-  if(rows.length===1)return{selected:rows,audit:{selectionMode:"SINGLE_TERMINAL",boundaryRank:1,boundaryDetected:true}};
-  let pool=rows;
-  const levels=[];
-  while(pool.length>1){
-    const boundary=detectNaturalBoundary(pool);
-    if(!boundary.detected){
-      if(!levels.length)return{selected:[],audit:{selectionMode:"DIFFUSE_NO_NATURAL_BOUNDARY",boundaryRank:null,boundaryDetected:false,...boundary}};
-      break;
-    }
-    const next=pool.slice(0,boundary.index+1);
-    levels.push({...boundary,inputCount:pool.length,selectedCount:next.length});
-    if(next.length===pool.length)break;
-    pool=next;
+  if(!rows.length)return{selected:[],audit:boundaryAudit({initialTerminalCount:0,selectionMode:"NO_VALID_TERMINAL"})};
+  if(rows.length===1)return{selected:rows,audit:boundaryAudit({initialTerminalCount:1,selectionMode:"ONLY_VALID_TERMINAL",boundaryRank:1,boundaryDetected:true,selectedMass:Number(rows[0].probability)||0,singletonSelection:true,singletonJustification:"ONLY_VALID_TERMINAL"})};
+
+  // The reference distribution is immutable for the whole purchase decision.
+  // Do not re-estimate median/MAD after slicing the upper cluster.
+  const boundary=detectNaturalBoundary(rows,{allowGlobalSmallSample:true});
+  if(!boundary.detected){
+    return{selected:[],audit:boundaryAudit({initialTerminalCount:rows.length,selectionMode:"DIFFUSE_NO_NATURAL_BOUNDARY",boundaryDetected:false,...boundary})};
   }
-  return{selected:pool,audit:{selectionMode:"HIERARCHICAL_NATURAL_SCORE_DISCONTINUITY",boundaryRank:pool.length,boundaryDetected:true,boundaryLevels:levels,selectedMass:sum(pool.map(item=>Number(item.probability)||0))}};
+  const selected=rows.slice(0,boundary.index+1);
+  const singletonSelection=selected.length===1;
+  return{selected,audit:boundaryAudit({
+    initialTerminalCount:rows.length,
+    selectionMode:"GLOBAL_NATURAL_SCORE_DISCONTINUITY",
+    boundaryRank:selected.length,boundaryDetected:true,...boundary,
+    selectedMass:sum(selected.map(item=>Number(item.probability)||0)),
+    singletonSelection,
+    singletonJustification:singletonSelection
+      ?"GLOBAL_TOP_TERMINAL_GAP_EXCEEDS_FULL_DISTRIBUTION_BASELINE"
+      :null
+  })};
 }
 
-function detectNaturalBoundary(rows){
+function detectNaturalBoundary(rows,{allowGlobalSmallSample=false}={}){
   const top=Math.max(Number(rows[0]?.terminalScore)||0,1e-12);
   const values=rows.map(item=>(Number(item.terminalScore)||0)/top);
   const gaps=values.slice(0,-1).map((value,index)=>Math.max(0,value-values[index+1]));
@@ -469,9 +478,9 @@ function detectNaturalBoundary(rows){
   const best=gaps.map((gap,index)=>({index,gap,strength:(gap-medianGap)/noiseScale,relativeDrop:values[index]>0?gap/values[index]:0}))
     .sort((a,b)=>b.strength-a.strength||b.gap-a.gap||a.index-b.index)[0];
   const orderedGaps=[...gaps].sort((a,b)=>b-a);
-  const smallSampleSeparation=rows.length<=4&&best?.gap>0&&best.gap>(orderedGaps[1]||0)*1.8;
+  const smallSampleSeparation=allowGlobalSmallSample&&rows.length<=4&&best?.gap>0&&best.gap>(orderedGaps[1]||0)*1.8;
   const detected=Boolean(best&&(smallSampleSeparation||best.gap>medianGap+2.5*1.4826*mad));
-  return{detected,index:best?.index??-1,medianGap,mad,bestGap:best?.gap||0,bestStrength:best?.strength||0,relativeDrop:best?.relativeDrop||0};
+  return{detected,index:best?.index??-1,medianGap,mad,bestGap:best?.gap||0,bestStrength:best?.strength||0,relativeDrop:best?.relativeDrop||0,globalSmallSampleSeparation:smallSampleSeparation};
 }
 
 function limitUnseparatedThirdVariants(selected,allItems){
@@ -483,15 +492,25 @@ function limitUnseparatedThirdVariants(selected,allItems){
     byPair.get(pair).push(item);
   }
   const removed=[];
+  const ambiguities=[];
   for(const [pair,rows] of byPair){
     const chosen=rows.filter(item=>selectedKeys.has(item.order.join("-")));
     if(chosen.length<=1)continue;
-    const thirdBoundary=selectNaturalTerminalCluster(rows);
-    const supported=new Set(thirdBoundary.selected.map(item=>item.order.join("-")));
-    const keep=supported.size?supported:new Set([chosen.sort((a,b)=>b.terminalScore-a.terminalScore)[0].order.join("-")]);
-    for(const item of chosen)if(!keep.has(item.order.join("-"))){selectedKeys.delete(item.order.join("-"));removed.push({pair,order:item.order.join("-"),reason:thirdBoundary.audit.selectionMode});}
+    const ordered=[...rows].sort((a,b)=>b.terminalScore-a.terminalScore||b.probability-a.probability);
+    const thirdBoundary=detectNaturalBoundary(ordered,{allowGlobalSmallSample:false});
+    if(!thirdBoundary.detected){
+      ambiguities.push({pair,candidateCount:rows.length,selectedCount:chosen.length,reason:"THIRD_VARIANTS_NOT_SEPARABLE",boundaryGap:thirdBoundary.bestGap,boundaryMedianGap:thirdBoundary.medianGap,boundaryMAD:thirdBoundary.mad,boundaryStrength:thirdBoundary.bestStrength});
+      continue;
+    }
+    const supported=new Set(ordered.slice(0,thirdBoundary.index+1).map(item=>item.order.join("-")));
+    for(const item of chosen)if(!supported.has(item.order.join("-"))){selectedKeys.delete(item.order.join("-"));removed.push({pair,order:item.order.join("-"),reason:"THIRD_VARIANT_GLOBAL_PAIR_BOUNDARY"});}
   }
-  return{selected:selected.filter(item=>selectedKeys.has(item.order.join("-"))),audit:{thirdVariantRemovedCount:removed.length,thirdVariantRemovals:removed}};
+  const ambiguityDetected=ambiguities.length>0;
+  return{selected:ambiguityDetected?[]:selected.filter(item=>selectedKeys.has(item.order.join("-"))),audit:{thirdVariantRemovedCount:removed.length,thirdVariantRemovals:removed,thirdVariantAmbiguity:{detected:ambiguityDetected,count:ambiguities.length,pairs:ambiguities,causesNoBet:ambiguityDetected}}};
+}
+
+function boundaryAudit({initialTerminalCount=0,selectionMode,boundaryRank=null,boundaryDetected=false,bestGap=0,medianGap=0,mad=0,bestStrength=0,relativeDrop=0,selectedMass=0,singletonSelection=false,singletonJustification=null,...rest}){
+  return{initialTerminalCount,selectionMode,boundaryDetected,boundaryRank,boundaryGap:bestGap,boundaryMedianGap:medianGap,boundaryMAD:mad,boundaryStrength:bestStrength,boundaryRelativeDrop:relativeDrop,selectedMass,singletonSelection,singletonJustification,thirdVariantAmbiguity:{detected:false,count:0,pairs:[]},...rest};
 }
 
 function median(values){

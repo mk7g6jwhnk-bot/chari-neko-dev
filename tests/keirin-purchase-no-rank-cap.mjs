@@ -16,15 +16,23 @@ const cases=[
   {name:"strong",probabilities:[.50,.18,.12,.10,.06,.04],expected:1},
   {name:"medium",probabilities:[.30,.29,.28,.06,.04,.03],expected:3},
   {name:"multiple",probabilities:[.20,.195,.19,.185,.18,.05],expected:5},
-  {name:"diffuse",probabilities:[.20,.195,.19,.185,.18,.175],expected:0}
+  {name:"diffuse",probabilities:[.20,.195,.19,.185,.18,.175],expected:0},
+  {name:"global-five-with-internal-small-gap",probabilities:[.30,.27,.269,.268,.267,.05,.04,.03],expected:5},
+  {name:"globally-dominant-singleton",probabilities:[.70,.08,.07,.06,.05,.04],expected:1}
 ];
 const counts=[];
 for(const testCase of cases){
   const classified=classify(terminals(testCase.probabilities),{});
   const adopted=classified.filter(item=>item.purchaseStatus==="購入採用");
   assert.equal(adopted.length,testCase.expected,`${testCase.name} distribution boundary mismatch`);
+  const audit=classified[0]?.purchaseDistributionAudit;
+  assert.equal(audit.initialTerminalCount,testCase.probabilities.length);
+  for(const key of ["boundaryRank","boundaryGap","boundaryMedianGap","boundaryMAD","boundaryStrength","boundaryRelativeDrop","selectedMass","singletonSelection","singletonJustification","thirdVariantAmbiguity"])assert.ok(Object.hasOwn(audit,key),`missing audit ${key}`);
   counts.push(adopted.length);
 }
+const singletonAudit=classify(terminals(cases.at(-1).probabilities),{})[0].purchaseDistributionAudit;
+assert.equal(singletonAudit.singletonSelection,true);
+assert.equal(singletonAudit.singletonJustification,"GLOBAL_TOP_TERMINAL_GAP_EXCEEDS_FULL_DISTRIBUTION_BASELINE");
 const many=classify(terminals(cases[2].probabilities),{}).filter(item=>item.purchaseStatus==="購入採用");
 assert.ok(many.some(item=>item.branchRank>=4),"自然競合している枝内4位以下が固定順位上限で落とされている");
 const withoutOdds=classify(terminals(cases[1].probabilities),{}).map(item=>[item.order.join("-"),item.purchaseStatus]);
