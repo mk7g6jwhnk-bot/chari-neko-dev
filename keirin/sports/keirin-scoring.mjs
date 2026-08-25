@@ -1,395 +1,108 @@
-const clamp=(v,min=0,max=10)=>Math.min(max,Math.max(min,v));
-const finite=v=>v!==null&&v!==undefined&&v!==""&&Number.isFinite(Number(v));
-const valueOrNull=v=>finite(v)?clamp(Number(v)):null;
+const clamp=(v,min=0,max=10)=>Math.min(max,Math.max(min,Number(v)));
+
+function evidenceAvailable(p,key){
+  if(key==="recentForm") return p?.recentFormEvidence?.selectedMetric!=null && p?.recentFormEvidence?.confidence!=="low";
+  if(key==="startPower") return p?.startPowerEvidence?.usable===true && Number.isFinite(Number(p?.startPower));
+  if(["sprintPower","finishPower","trackingSkill"].includes(key)){
+    return p?.kimariteAbilityEvidence?.adopted===true && Number.isFinite(Number(p?.[key]));
+  }
+  return Number.isFinite(Number(p?.[key]));
+}
+
+function weightedAvailable(items){
+  const available=items.filter(item=>evidenceAvailable(item.participant,item.key));
+  const total=available.reduce((sum,item)=>sum+item.weight,0);
+  if(total<=0)return 0;
+  return available.reduce((sum,item)=>sum+Number(item.participant[item.key])*item.weight,0)/total;
+}
+
+function roleScore(p, target, roleValue, weights){
+  const items=[
+    {key:"recentForm",weight:weights.recent},
+    {key:"sprintPower",weight:weights.sprint},
+    {key:"finishPower",weight:weights.finish},
+    {key:"startPower",weight:weights.start},
+    {key:"trackingSkill",weight:weights.tracking},
+  ];
+  const dynamic=weightedAvailable(items.map(item=>({ ...item, participant:p })));
+  const availableRole=Number.isFinite(Number(roleValue))?roleValue:5;
+  const baseWeights=Object.values(weights).reduce((a,b)=>a+b,0);
+  const roleWeight=weights.role;
+  const evidenceWeight=baseWeights-roleWeight;
+  const evidenceItems=items.filter(item=>evidenceAvailable(p,item.key));
+  const evidenceWeightUsed=evidenceItems.reduce((sum,item)=>sum+item.weight,0);
+  if(evidenceWeightUsed<=0)return clamp(availableRole);
+  return clamp((dynamic*(evidenceWeightUsed)+availableRole*roleWeight)/(evidenceWeightUsed+roleWeight));
+}
 
 export function scoreKeirinParticipants({race,venueProfile={}}){
-  const officialScores=(race?.participants||[]).map(p=>Number(p?.officialScore)).filter(Number.isFinite);
-  const officialScoreCenter=median(officialScores);
   return race.participants.map(p=>{
-    const recent=valueOrNull(p.recentForm),start=usableStartPowerValue(p),sprint=valueOrNull(p.sprintPower),tracking=valueOrNull(p.trackingSkill),finish=valueOrNull(p.finishPower);
-    const stamina=valueOrNull(p.stamina),timing=valueOrNull(p.attackTiming),lineTrust=valueOrNull(p.lineTrust),venue=valueOrNull(resolveVenueSuitability(p,venueProfile));
+    const roleBonus={自力:{f:8.5,s:5.8,t:5.0},番手:{f:7.2,s:8.6,t:7.4},三番手:{f:4.6,s:6.4,t:8.4},単騎:{f:6.0,s:5.8,t:6.8}}[p.role]||{f:5,s:5,t:5};
 
-    const role=normalizeRole(p);
-    const rolePrior=rolePriors(role);
-    const evidence={recent,start,sprint,stamina,timing,tracking,finish,lineTrust,venue};
+    const first=roleScore(p,"first",roleBonus.f,{recent:.28,sprint:.20,finish:.15,start:.14,tracking:.08,role:.15});
+    const second=roleScore(p,"second",roleBonus.s,{recent:.24,sprint:.10,finish:.18,start:.10,tracking:.22,role:.16});
+    const third=roleScore(p,"third",roleBonus.t,{recent:.20,sprint:.08,finish:.14,start:.08,tracking:.30,role:.20});
 
-    // Rider Evaluation v2:
-    // 1着 / 2着 / 3着 are built independently from mechanism-specific abilities.
-    // Missing inputs are excluded and remaining verified weights are renormalized.
-    const firstMechanisms={
-      escape:scoreMechanism([
-        item("startPower",start,.27),item("stamina",stamina,.21),item("recentForm",recent,.17),
-        item("attackTiming",timing,.14),item("sprintPower",sprint,.09),item("finishPower",finish,.05),
-        item("venueSuitability",venue,.03)
-      ]),
-      makuri:scoreMechanism([
-        item("sprintPower",sprint,.28),item("attackTiming",timing,.18),item("recentForm",recent,.16),
-        item("finishPower",finish,.14),item("startPower",start,.08),item("stamina",stamina,.07),
-        item("venueSuitability",venue,.04)
-      ]),
-      sashi:scoreMechanism([
-        item("finishPower",finish,.27),item("trackingSkill",tracking,.20),item("recentForm",recent,.16),
-        item("attackTiming",timing,.12),item("lineTrust",lineTrust,.09),item("stamina",stamina,.05),
-        item("venueSuitability",venue,.04)
-      ]),
-      banteSashi:scoreMechanism([
-        item("finishPower",finish,.25),item("trackingSkill",tracking,.22),item("lineTrust",lineTrust,.13),
-        item("recentForm",recent,.14),item("attackTiming",timing,.10),item("stamina",stamina,.05),
-        item("venueSuitability",venue,.04)
-      ])
-    };
-
-    const secondMechanisms={
-      leaderRemain:scoreMechanism([
-        item("stamina",stamina,.23),item("recentForm",recent,.18),item("startPower",start,.15),
-        item("finishPower",finish,.12),item("sprintPower",sprint,.09),item("attackTiming",timing,.07),
-        item("venueSuitability",venue,.04)
-      ]),
-      lineFollower:scoreMechanism([
-        item("trackingSkill",tracking,.28),item("finishPower",finish,.19),item("lineTrust",lineTrust,.15),
-        item("recentForm",recent,.15),item("stamina",stamina,.07),item("attackTiming",timing,.05),
-        item("venueSuitability",venue,.03)
-      ]),
-      otherLineRemain:scoreMechanism([
-        item("recentForm",recent,.20),item("finishPower",finish,.18),item("trackingSkill",tracking,.17),
-        item("sprintPower",sprint,.14),item("stamina",stamina,.10),item("attackTiming",timing,.07),
-        item("venueSuitability",venue,.04)
-      ])
-    };
-
-    const thirdMechanisms={
-      lineThird:scoreMechanism([
-        item("trackingSkill",tracking,.29),item("lineTrust",lineTrust,.17),item("recentForm",recent,.14),
-        item("finishPower",finish,.12),item("stamina",stamina,.08),item("venueSuitability",venue,.04)
-      ]),
-      positionRemain:scoreMechanism([
-        item("trackingSkill",tracking,.23),item("recentForm",recent,.17),item("finishPower",finish,.15),
-        item("stamina",stamina,.11),item("lineTrust",lineTrust,.09),item("sprintPower",sprint,.07),
-        item("venueSuitability",venue,.04)
-      ]),
-      otherLineRemain:scoreMechanism([
-        item("recentForm",recent,.19),item("trackingSkill",tracking,.19),item("finishPower",finish,.15),
-        item("sprintPower",sprint,.12),item("stamina",stamina,.10),item("attackTiming",timing,.06),
-        item("venueSuitability",venue,.04)
-      ])
-    };
-
-    const abilityPlacement=derivePlacementScores({role,firstMechanisms,secondMechanisms,thirdMechanisms});
-    const contextPriorScores=placementRolePriors(rolePrior);
-    const roleCertainty=deriveRoleCertainty(p,role);
-    const placement=applyRoleContext({abilityPlacement,contextPriorScores,roleCertainty});
-    const officialScoreContext=buildOfficialScoreContext(p,officialScoreCenter);
-    const strengthAdjustedPlacement=applyOfficialScoreContext({placement,officialScoreContext});
-    const roleScores={
-      first:clamp(strengthAdjustedPlacement.first.score),
-      second:clamp(strengthAdjustedPlacement.second.score),
-      third:clamp(strengthAdjustedPlacement.third.score),
-      outside:clamp(10-Math.max(strengthAdjustedPlacement.first.score,strengthAdjustedPlacement.second.score,strengthAdjustedPlacement.third.score))
-    };
-
-    const coreKimarite=[["sprintPower",sprint],["finishPower",finish],["trackingSkill",tracking]];
-    const missingCoreAbilities=coreKimarite.filter(([,v])=>v===null).map(([k])=>k);
-    const extendedInputs=[["sprintPower",sprint],["finishPower",finish],["trackingSkill",tracking],["stamina",stamina],["attackTiming",timing],["lineTrust",lineTrust]];
-    const missingAbilities=extendedInputs.filter(([,v])=>v===null).map(([k])=>k);
-    const availableCore=extendedInputs.length-missingAbilities.length;
-    const evaluationConfidence=availableCore>=5?"high":availableCore>=3?"medium":"low";
-
-    const riderEvaluationV2={
-      version:"RIDER-EVAL-3.0-ABILITY-CONTEXT-SEPARATED",
-      role,
-      roleCertainty,
-      rawAbilityMechanisms:{
-        first:mapScores(firstMechanisms),
-        second:mapScores(secondMechanisms),
-        third:mapScores(thirdMechanisms)
-      },
-      firstMechanisms:mapScores(firstMechanisms),
-      secondMechanisms:mapScores(secondMechanisms),
-      thirdMechanisms:mapScores(thirdMechanisms),
-      rawAbilityPlacementScores:{
-        first:clamp(abilityPlacement.first.score),
-        second:clamp(abilityPlacement.second.score),
-        third:clamp(abilityPlacement.third.score)
-      },
-      contextPriorScores,
-      officialScoreContext,
-      venueContext:{source:resolveVenueSuitability(p,venueProfile)!==null?"VENUE_PROFILE_OR_PARTICIPANT":"UNAVAILABLE",value:resolveVenueSuitability(p,venueProfile)},
-      placementScores:{
-        first:roleScores.first,second:roleScores.second,third:roleScores.third
-      },
-      contextAdjustment:{
-        first:roleScores.first-clamp(abilityPlacement.first.score),
-        second:roleScores.second-clamp(abilityPlacement.second.score),
-        third:roleScores.third-clamp(abilityPlacement.third.score)
-      },
-      selectedMechanisms:{
-        first:abilityPlacement.first.mechanisms,
-        second:abilityPlacement.second.mechanisms,
-        third:abilityPlacement.third.mechanisms
-      },
-      reasons:{
-        first:placement.first.reasons,
-        second:placement.second.reasons,
-        third:placement.third.reasons
-      },
-      confidence:evaluationConfidence,
-      missingAbilities
-    };
+    const roleScores={first:clamp(first),second:clamp(second),third:clamp(third),outside:clamp(10-Math.max(first,second,third))};
 
     return {
       ...p,
       roleScores,
       scoreTrace:{
-        first:aggregateTrace(abilityPlacement.first.trace),
-        second:aggregateTrace(abilityPlacement.second.trace),
-        third:aggregateTrace(abilityPlacement.third.trace)
+        first:trace([
+          {key:"recentForm",value:p.recentForm,weight:.28},
+          {key:"sprintPower",value:p.sprintPower,weight:.20},
+          {key:"finishPower",value:p.finishPower,weight:.15},
+          {key:"startPower",value:p.startPower,weight:.14},
+          {key:"trackingSkill",value:p.trackingSkill,weight:.08},
+          {key:"role",value:roleBonus.f,weight:.15}
+        ],p),
+        second:trace([
+          {key:"recentForm",value:p.recentForm,weight:.24},
+          {key:"finishPower",value:p.finishPower,weight:.18},
+          {key:"trackingSkill",value:p.trackingSkill,weight:.22},
+          {key:"sprintPower",value:p.sprintPower,weight:.10},
+          {key:"startPower",value:p.startPower,weight:.10},
+          {key:"role",value:roleBonus.s,weight:.16}
+        ],p),
+        third:trace([
+          {key:"recentForm",value:p.recentForm,weight:.20},
+          {key:"finishPower",value:p.finishPower,weight:.14},
+          {key:"trackingSkill",value:p.trackingSkill,weight:.30},
+          {key:"sprintPower",value:p.sprintPower,weight:.08},
+          {key:"startPower",value:p.startPower,weight:.08},
+          {key:"role",value:roleBonus.t,weight:.20}
+        ],p)
       },
-      riderEvaluationV2,
-      abilityMissingAudit:{
-        missingAbilities:missingCoreAbilities,
-        missingCount:missingCoreAbilities.length,
-        evaluationConfidence,
-        kimariteEvidenceConfidence:p?.kimariteAbilityEvidence?.confidence||null
+      evidence:{
+        recent:Number(p.recentForm),
+        start:Number(p.startPower),
+        sprint:Number(p.sprintPower),
+        stamina:clamp(p.stamina??5),
+        timing:clamp(p.attackTiming??5),
+        tracking:Number(p.trackingSkill),
+        finish:Number(p.finishPower),
+        lineTrust:clamp(p.lineTrust??5),
+        venue:clamp(p.venueSuitability??5)
       },
-      abilityContextAudit:{
-        version:"ABILITY-CONTEXT-SEPARATION-1.0",
-        rawAbilityIndependentOfRolePrior:true,
-        roleCertainty,
-        roleContextWeight:roleCertainty.contextWeight,
-        maxAbsoluteContextAdjustment:Math.max(
-          Math.abs(roleScores.first-clamp(abilityPlacement.first.score)),
-          Math.abs(roleScores.second-clamp(abilityPlacement.second.score)),
-          Math.abs(roleScores.third-clamp(abilityPlacement.third.score))
-        ),
-        officialScoreAdjustment:{
-          first:Number(strengthAdjustedPlacement.first.score)-Number(placement.first.score),
-          second:Number(strengthAdjustedPlacement.second.score)-Number(placement.second.score),
-          third:Number(strengthAdjustedPlacement.third.score)-Number(placement.third.score)
-        },
-        policy:"RAW_ABILITY_FIRST_ROLE_CONTEXT_SECOND_OFFICIAL_SCORE_GUARD"
-      },
-      evidence
+      precisionAudit:{
+        availableAxes:["recentForm","startPower","sprintPower","finishPower","trackingSkill"]
+          .filter(key=>evidenceAvailable(p,key)),
+        unavailableAxes:["recentForm","startPower","sprintPower","finishPower","trackingSkill"]
+          .filter(key=>!evidenceAvailable(p,key)),
+        scoringMode:"EVIDENCE_WEIGHTED_RENORMALIZATION_V1"
+      }
     };
   });
 }
 
-function usableStartPowerValue(participant){
-  const evidence=participant?.startPowerEvidence;
-  if(!evidence)return valueOrNull(participant?.startPower);
-  if(evidence?.usable===false)return null;
-  if(Array.isArray(evidence?.missingInputs)&&evidence.missingInputs.length)return null;
-  if(Number(evidence?.officialTotalStarts)===0)return null;
-  return valueOrNull(participant?.startPower);
-}
-
-function resolveVenueSuitability(participant, venueProfile = {}) {
-  const direct = participant?.venueSuitability;
-  if (finite(direct)) return direct;
-  const registration = String(participant?.registration ?? participant?.riderId ?? participant?.id ?? "").replace(/\D/g, "").padStart(6, "0");
-  const byRegistration = venueProfile?.riderSuitabilityByRegistration ?? venueProfile?.byRegistration ?? venueProfile?.riders ?? null;
-  if (byRegistration && typeof byRegistration === "object") {
-    const entry = byRegistration[registration] ?? byRegistration[participant?.number];
-    if (entry && typeof entry === "object") {
-      const value = entry.venueSuitability ?? entry.score ?? entry.value;
-      if (finite(value)) return value;
-    } else if (finite(entry)) return entry;
-  }
-  const value = venueProfile?.venueSuitability ?? venueProfile?.defaultSuitability ?? null;
-  return finite(value) ? value : null;
-}
-
-function normalizeRole(p){
-  const raw=String(p?.role||"").trim();
-  if(["自力","番手","三番手","単騎"].includes(raw))return raw;
-  const pos=Number(p?.lineOrder??p?.linePosition);
-  if(Number.isFinite(pos)){
-    if(pos===1)return"自力";
-    if(pos===2)return"番手";
-    if(pos>=3)return"三番手";
-  }
-  return p?.lineId?"自力":"単騎";
-}
-
-function deriveRoleCertainty(p,role){
-  const lineId=String(p?.lineId||"");
-  const rawRole=String(p?.role||"").trim();
-  const lineUnknown=!lineId||lineId.startsWith("unknown-");
-  const explicitRole=["自力","番手","三番手","単騎"].includes(rawRole);
-  const position=Number(p?.lineOrder??p?.linePosition);
-  const positionKnown=Number.isFinite(position)&&position>=1;
-  let level="low",contextWeight=.08;
-  if(explicitRole&&!lineUnknown){level="high";contextWeight=.22}
-  else if(positionKnown&&!lineUnknown){level="medium";contextWeight=.16}
-  else if(explicitRole){level="medium";contextWeight=.12}
-  return{level,contextWeight,lineUnknown,explicitRole,positionKnown,normalizedRole:role};
-}
-
-function placementRolePriors(rolePrior){
-  return{
-    first:clamp(Math.max(rolePrior.firstEscape??5,rolePrior.firstMakuri??5,rolePrior.firstSashi??5,rolePrior.firstBante??5)),
-    second:clamp(Math.max(rolePrior.secondLeader??5,rolePrior.secondFollower??5,rolePrior.secondOther??5)),
-    third:clamp(Math.max(rolePrior.thirdLine??5,rolePrior.thirdPosition??5,rolePrior.thirdOther??5))
-  };
-}
-
-function buildOfficialScoreContext(participant,center){
-  const officialScore=finite(participant?.officialScore)?Number(participant.officialScore):null;
-  if(officialScore===null||!finite(center))return{available:false,officialScore,center:null,gap:null,strengthScore:null,weight:0,adjustment:0,mode:"UNAVAILABLE"};
-  const gap=officialScore-Number(center);
-  const abs=Math.abs(gap);
-  const strengthScore=officialScoreStrengthScore(gap);
-  const weight=abs>=8?.15:abs>3?.08:0;
-  const adjustment=weight?((strengthScore-5)*weight):0;
-  return{available:true,officialScore,center:Number(center),gap,strengthScore,weight,adjustment,mode:weight?"LARGE_GAP_GUARD":"DEAD_ZONE"};
-}
-
-function applyOfficialScoreContext({placement,officialScoreContext}){
-  const adjustment=Number(officialScoreContext?.adjustment)||0;
-  const weight=Number(officialScoreContext?.weight)||0;
-  const merge=(stage)=>{
-    const base=Number(placement?.[stage]?.score);
-    const score=finite(base)?clamp(base+adjustment):5+adjustment;
-    return{
-      ...placement[stage],
-      score,
-      officialScoreAdjustment:score-(finite(base)?base:5),
-      reasons:[...(placement?.[stage]?.reasons||[]),...(weight?[`競走得点差ガード ${officialScoreContext.strengthScore?.toFixed?.(2)??"-"}×${Math.round(weight*100)}%`,`競走得点補正 ${adjustment>=0?"+":""}${adjustment.toFixed(2)}`]:[])]
+function trace(items,p){
+  return items.map(item=>{
+    const available=item.key==="role" || evidenceAvailable(p,item.key);
+    return {
+      ...item,
+      available,
+      contribution:available?Number(item.value)*item.weight:0
     };
-  };
-  return{first:merge("first"),second:merge("second"),third:merge("third")};
+  }).sort((a,b)=>b.contribution-a.contribution||a.key.localeCompare(b.key,"en"));
 }
-
-function officialScoreStrengthScore(gap){
-  const abs=Math.abs(Number(gap));
-  if(abs<=3)return 5;
-  const scaled=Math.min(5,(abs-3)*(5/7));
-  return clamp(5+Math.sign(gap)*scaled);
-}
-
-function applyRoleContext({abilityPlacement,contextPriorScores,roleCertainty}){
-  const weight=Number(roleCertainty?.contextWeight)||0;
-  const merge=(stage)=>{
-    const base=Number(abilityPlacement?.[stage]?.score);
-    const prior=Number(contextPriorScores?.[stage]);
-    const score=finite(base)&&finite(prior)?base*(1-weight)+prior*weight:finite(base)?base:finite(prior)?prior:5;
-    const delta=score-(finite(base)?base:5);
-    return{
-      ...abilityPlacement[stage],
-      score:clamp(score),
-      reasons:[
-        ...(abilityPlacement?.[stage]?.reasons||[]),
-        `役割文脈 ${prior.toFixed(2)}×${Math.round(weight*100)}%`,
-        `能力→文脈補正 ${delta>=0?"+":""}${delta.toFixed(2)}`
-      ],
-      contextPrior:prior,
-      contextWeight:weight,
-      rawAbilityScore:finite(base)?base:null
-    };
-  };
-  return{first:merge("first"),second:merge("second"),third:merge("third")};
-}
-
-function rolePriors(role){
-  const table={
-    自力:{
-      firstEscape:8.6,firstMakuri:8.5,firstSashi:5.8,firstBante:4.8,
-      secondLeader:7.7,secondFollower:5.1,secondOther:6.6,
-      thirdLine:5.4,thirdPosition:6.7,thirdOther:6.6
-    },
-    番手:{
-      firstEscape:4.8,firstMakuri:5.8,firstSashi:7.9,firstBante:8.5,
-      secondLeader:5.4,secondFollower:8.7,secondOther:7.1,
-      thirdLine:7.8,thirdPosition:8.0,thirdOther:7.2
-    },
-    三番手:{
-      firstEscape:3.8,firstMakuri:4.7,firstSashi:6.1,firstBante:5.3,
-      secondLeader:4.7,secondFollower:7.0,secondOther:6.6,
-      thirdLine:8.7,thirdPosition:8.5,thirdOther:7.4
-    },
-    単騎:{
-      firstEscape:5.6,firstMakuri:6.8,firstSashi:6.3,firstBante:4.5,
-      secondLeader:5.8,secondFollower:5.5,secondOther:6.6,
-      thirdLine:5.8,thirdPosition:6.9,thirdOther:7.0
-    }
-  };
-  return table[role]||table.単騎;
-}
-
-function derivePlacementScores({role,firstMechanisms,secondMechanisms,thirdMechanisms}){
-  const firstChoice=role==="自力"
-    ?blend([["逃げ",firstMechanisms.escape,.48],["捲り",firstMechanisms.makuri,.44],["差し",firstMechanisms.sashi,.08]])
-    :role==="番手"
-      ?blend([["番手差し",firstMechanisms.banteSashi,.62],["差し",firstMechanisms.sashi,.28],["捲り",firstMechanisms.makuri,.10]])
-      :role==="三番手"
-        ?blend([["差し",firstMechanisms.sashi,.58],["捲り",firstMechanisms.makuri,.27],["番手差し",firstMechanisms.banteSashi,.15]])
-        :blend([["捲り",firstMechanisms.makuri,.52],["差し",firstMechanisms.sashi,.34],["逃げ",firstMechanisms.escape,.14]]);
-
-  const secondChoice=role==="自力"
-    ?blend([["先行残り",secondMechanisms.leaderRemain,.58],["別線残り",secondMechanisms.otherLineRemain,.42]])
-    :role==="番手"
-      ?blend([["追走残り",secondMechanisms.lineFollower,.72],["別線残り",secondMechanisms.otherLineRemain,.28]])
-      :role==="三番手"
-        ?blend([["追走残り",secondMechanisms.lineFollower,.63],["別線残り",secondMechanisms.otherLineRemain,.37]])
-        :blend([["別線残り",secondMechanisms.otherLineRemain,.72],["先行残り",secondMechanisms.leaderRemain,.28]]);
-
-  const thirdChoice=role==="三番手"
-    ?blend([["ライン3番手残り",thirdMechanisms.lineThird,.62],["位置残り",thirdMechanisms.positionRemain,.28],["別線残り",thirdMechanisms.otherLineRemain,.10]])
-    :role==="番手"
-      ?blend([["位置残り",thirdMechanisms.positionRemain,.54],["ライン残り",thirdMechanisms.lineThird,.28],["別線残り",thirdMechanisms.otherLineRemain,.18]])
-      :role==="自力"
-        ?blend([["位置残り",thirdMechanisms.positionRemain,.55],["別線残り",thirdMechanisms.otherLineRemain,.45]])
-        :blend([["別線残り",thirdMechanisms.otherLineRemain,.60],["位置残り",thirdMechanisms.positionRemain,.40]]);
-
-  return{first:firstChoice,second:secondChoice,third:thirdChoice};
-}
-
-function blend(entries){
-  const valid=entries.filter(([,m,w])=>m&&finite(m.score)&&w>0);
-  const total=valid.reduce((s,[,,w])=>s+w,0);
-  const score=total?valid.reduce((s,[,m,w])=>s+Number(m.score)*w,0)/total:5;
-  const mechanisms=valid.map(([name,m,w])=>({name,score:Number(m.score),weight:w/total}));
-  const reasons=mechanisms
-    .sort((a,b)=>b.weight-a.weight||b.score-a.score)
-    .slice(0,3)
-    .map(x=>`${x.name} ${x.score.toFixed(2)}×${Math.round(x.weight*100)}%`);
-  const trace=valid.flatMap(([name,m,w])=>(m.trace||[]).map(t=>({
-    ...t,
-    mechanism:name,
-    mechanismWeight:w/total,
-    effectiveWeight:(t.effectiveWeight||0)*(w/total),
-    contribution:(t.contribution||0)*(w/total)
-  }))).sort((a,b)=>b.contribution-a.contribution);
-  return{score,mechanisms,reasons,trace};
-}
-
-function item(key,value,weight){return{key,value,weight,available:finite(value)}}
-function scoreMechanism(items){
-  const available=items.filter(x=>x.available&&x.weight>0);
-  const total=available.reduce((s,x)=>s+x.weight,0);
-  const score=total>0?available.reduce((s,x)=>s+Number(x.value)*x.weight,0)/total:5;
-  return{
-    score:clamp(score),
-    trace:items.map(x=>({
-      key:x.key,value:x.available?Number(x.value):null,weight:x.weight,
-      effectiveWeight:x.available&&total>0?x.weight/total:0,
-      contribution:x.available&&total>0?Number(x.value)*(x.weight/total):0,
-      missing:!x.available
-    })).sort((a,b)=>b.contribution-a.contribution||a.key.localeCompare(b.key,"en"))
-  };
-}
-function aggregateTrace(rows){
-  const byKey=new Map();
-  for(const row of rows||[]){
-    const key=row.key;
-    const cur=byKey.get(key)||{key,value:row.value??null,weight:0,effectiveWeight:0,contribution:0,missing:true};
-    cur.weight+=Number(row.weight||0)*Number(row.mechanismWeight||1);
-    cur.effectiveWeight+=Number(row.effectiveWeight||0);
-    cur.contribution+=Number(row.contribution||0);
-    if(row.missing===false){cur.missing=false;cur.value=row.value}
-    byKey.set(key,cur);
-  }
-  return [...byKey.values()].sort((a,b)=>b.contribution-a.contribution||a.key.localeCompare(b.key,"en"));
-}
-function mapScores(object){return Object.fromEntries(Object.entries(object).map(([k,v])=>[k,v.score]))}
-
-function median(values){const xs=(values||[]).filter(Number.isFinite).sort((a,b)=>a-b);if(!xs.length)return null;const m=Math.floor(xs.length/2);return xs.length%2?xs[m]:(xs[m-1]+xs[m])/2}
