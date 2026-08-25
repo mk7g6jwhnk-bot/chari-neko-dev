@@ -154,7 +154,49 @@ export function classify(terminals,odds={}){
     topScore>=0.55 ? 4 :
     topScore>=0.35 ? 3 : 2;
 
-  const selected=positive.slice(0,maxAdopt);
+  /*
+   * 点数固定化を防ぐ。
+   * maxAdopt は「上限」であり、そこまで必ず埋めない。
+   * 上位終端との相対スコア・相対確率・累積確率質量で自然に打ち切る。
+   */
+  const probabilityMass=sum(positive.map(item=>Number(item.probability)||0));
+  let cumulativeMass=0;
+  const selected=[];
+
+  for(const item of positive){
+    if(selected.length>=maxAdopt)break;
+
+    const relativeScore=topScore>0
+      ?item.terminalScore/topScore
+      :0;
+    const relativeToTopProbability=topProbability>0
+      ?(Number(item.probability)||0)/topProbability
+      :0;
+    const nextMass=probabilityMass>0
+      ?cumulativeMass+(Number(item.probability)||0)/probabilityMass
+      :0;
+
+    const rank=selected.length+1;
+
+    // 1位は有効終端なら採用。2位以下は「上位と十分競っている」場合だけ残す。
+    const competitive=
+      rank===1 ||
+      (
+        relativeScore>=0.86 &&
+        relativeToTopProbability>=0.58 &&
+        cumulativeMass<0.78
+      ) ||
+      (
+        rank<=3 &&
+        relativeScore>=0.92 &&
+        relativeToTopProbability>=0.72
+      );
+
+    if(!competitive)break;
+
+    selected.push(item);
+    cumulativeMass=nextMass;
+  }
 
   const selectedKeys=new Set(selected.map(item=>item.order.join("-")));
 
@@ -360,6 +402,10 @@ export function purchaseDiagnostics(classified,plan,budget){
       thirdVariantSelectionGate:false,
       concentrationRatioGate:false,
       dynamicPurchaseCutoff:true,
+      dynamicCountByTerminalCompetition:true,
+      relativeScoreFloor:0.86,
+      relativeProbabilityFloor:0.58,
+      cumulativeMassStop:0.78,
       maxPurchasePoints:6
     },
     adoptedTerminalAudit:natural.map(item=>({
@@ -416,7 +462,8 @@ function summarizeEvidence(evidence){
   ]
     .filter(Boolean)
     .map(item=>{
-      const top=(item.drivers||[])
+      const drivers=Array.isArray(item.drivers)?item.drivers:[];
+      const top=drivers
         .filter(driver=>driver.key!=="roleScore")
         .slice(0,2)
         .map(driver=>`${driver.key} ${Number(driver.value).toFixed(2)}`)
