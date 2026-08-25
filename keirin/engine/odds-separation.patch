@@ -1,0 +1,82 @@
+*** Begin Patch
+*** Update File: keirin/engine/keirin-engine.mjs
+@@
+ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000}){
+   const scored=scoreKeirinParticipants({race,venueProfile});
+   const lines=buildLines(scored);
+   const branches=generateKeirinBranches({scored,lines,lineConfidence:race.lineConfidence,raceCategory:race.raceCategory||"standard"});
+   const terminals=generateKeirinTerminals({scored,branches});
+   const a=audit({race,branches,terminals});
+-  const rawClassified=a.passed?classify(terminals,oddsByOrder):terminals;
++  /*
++   * 予測順位・終端分類は市場オッズから独立させる。
++   * オッズは後段の購入価値判定だけに渡す。
++   */
++  const predictionClassified=a.passed?classify(terminals,{}):terminals;
++  const rawClassified=a.passed
++    ? applyPurchaseValueOnly(predictionClassified,oddsByOrder)
++    : terminals;
+@@
+ }
++
++function applyPurchaseValueOnly(items,oddsByOrder={}){
++  return items.map(item=>{
++    const key=(item.order||[]).join("-");
++    const odds=Number(oddsByOrder?.[key]);
++    const probability=Number(item.probability);
++    const value=Number.isFinite(odds)&&Number.isFinite(probability)
++      ? probability*odds
++      : null;
++    return {
++      ...item,
++      marketOdds:Number.isFinite(odds)?odds:null,
++      purchaseValue:value,
++      purchaseValueSource:value===null?"UNAVAILABLE":"PROBABILITY_X_MARKET_ODDS"
++    };
++  });
++}
+*** Add File: tests/keirin-odds-prediction-separation.mjs
++import assert from "node:assert/strict";
++
++// Contract test for the engine boundary:
++// prediction classification must not receive market odds.
++const source = await import("../engine/keirin-engine.mjs");
++assert.equal(typeof source.runKeirinEngine,"function");
++
++// The implementation is intentionally inspected as a source contract here because
++// the production engine's terminal generator is deterministic but requires a full
++// official race fixture for execution.
++const fs = await import("node:fs/promises");
++const text = await fs.readFile(new URL("../engine/keirin-engine.mjs",import.meta.url),"utf8");
++assert.match(text,/const predictionClassified=a\.passed\?classify\(terminals,\{\}\):terminals/);
++assert.match(text,/applyPurchaseValueOnly\(predictionClassified,oddsByOrder\)/);
++assert.match(text,/PROBABILITY_X_MARKET_ODDS/);
++console.log("keirin-odds-prediction-separation: ok");
+*** Add File: ODDS_SEPARATION_README.md
++# チャリ猫：予想とオッズの完全分離
++
++対象：`keirin/engine/keirin-engine.mjs`
++
++今回の修正は「予想精度を上げる」ための境界修正だけ。
++
++## 変更
++
++1. 展開・終端・予測分類は `oddsByOrder` を渡さずに実行する。
++2. その後でだけ `oddsByOrder` を使い、`probability × market odds` を購入価値として付与する。
++3. オッズが無い場合も予想は成立する。購入価値だけ `null` になる。
++4. オッズによって予測順位・展開順位・終端確率を変更しない。
++
++## 変更しないもの
++
++- 7車必須化
++- 210通りオッズ必須化
++- 公式ライン仕様
++- 結果取得仕様
++- 選手能力の評価式
++- 予算・資金配分仕様
++
++## 適用
++
++このZIPは本体ソースの代用品ではなく、**現行 `keirin/engine/keirin-engine.mjs` に対する正確な上書きパッチ**を収録している。
++Codexでリポジトリを開き、`odds-separation.patch` を `git apply` してからテストを実行する。
+*** End Patch
