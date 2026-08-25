@@ -129,10 +129,7 @@ export function classify(terminals,odds={}){
    * 有効な終端が無い場合だけ0件にする。
    */
   const positive=evaluated
-    .filter(item=>
-      (Number(item.probability)||0)>0 &&
-      (item.dominantBranchId||item.positionEvidence||item.branchSupport>0)
-    )
+    .filter(item=>(Number(item.probability)||0)>0)
     .sort((a,b)=>
       (b.terminalScore-a.terminalScore)||
       ((b.probability||0)-(a.probability||0))||
