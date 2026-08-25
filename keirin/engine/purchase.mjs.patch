@@ -1,0 +1,34 @@
+*** Begin Patch
+*** Update File: keirin/engine/purchase.mjs
+@@
+-    const highPayoutCandidate=Boolean(dominant&&dominant.branchPriority==="sub"&&credibleVariant&&thirdVariantEligible);
++    const highPayoutCandidate=Boolean(
++      dominant&&
++      dominant.branchPriority==="sub"&&
++      credibleVariant&&
++      thirdVariantEligible
++    );
+     const highPayoutAttribute=Boolean(hasOdds&&odd>=100);
+@@
+-      const highValue=isSubBranch&&highPayoutAttribute&&highPayoutCandidate;
++      /*
++       * 予測順位・採用可否はオッズで変更しない。
++       * highPayoutAttribute は表示/購入価値判定用の属性だけ。
++       * 「高オッズだから別展開を採用する」は禁止。
++       */
++      const highValue=isSubBranch&&highPayoutCandidate;
+@@
+-      }else if(highValue){
++      }else if(highValue&&hasOdds){
+         betClass="BUYABLE_HIGH";
+         adopted=true;
+         purchaseReason=`${dominant.branchLabel}の別展開＋実オッズ${odd.toFixed(1)}倍で買える高配当`;
+-      }else if(isSubBranch&&highPayoutCandidate&&!hasOdds){
+-        purchaseReason=`${dominant.branchLabel}の別展開高配当候補・実オッズ待ち`;
++      }else if(highValue&&!hasOdds){
++        purchaseReason=`${dominant.branchLabel}の別展開高配当候補・実オッズ確認待ち`;
+@@
+-              :dominant?.branchPriority==="sub"&&highPayoutCandidate&&!hasOdds
++              :dominant?.branchPriority==="sub"&&highPayoutCandidate&&!hasOdds
+                 ?"SUB_ODDS_PENDING"
+*** End Patch
