@@ -58,7 +58,9 @@ export default async function handler(req) {
       date,
       venueCode,
       venueName,
-      raceNo
+      raceNo,
+      requestType: autoResearch ? "auto_prediction" : "manual_prediction",
+      requestId: `predict-${date}-${venueCode}-${raceNo}-${Date.now()}`
     });
 
     if (!browserResult.ok) {
@@ -259,6 +261,8 @@ async function requestBrowserService(base, params) {
     venueCode: params.venueCode,
     venueName: params.venueName,
     raceNo: String(params.raceNo),
+    requestType: params.requestType || "manual_prediction",
+    requestId: params.requestId || "",
     ...(params.raceCardUrl ? { raceCardUrl: params.raceCardUrl } : {})
   });
 

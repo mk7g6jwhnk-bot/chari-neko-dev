@@ -460,6 +460,49 @@ function selectNaturalTerminalCluster(items){
   }
   const selected=rows.slice(0,boundary.index+1);
   const singletonSelection=selected.length===1;
+  if(singletonSelection){
+    // A singleton must also be visible in the actual terminal probability
+    // distribution. positionScore and decisionRatios already contributed to
+    // that probability, so a score-only split would count the same evidence a
+    // second time at the purchase boundary.
+    const probabilityBoundary=detectNaturalBoundary(
+      rows.map(item=>({...item,terminalScore:Number(item.probability)||0})),
+      {allowGlobalSmallSample:true}
+    );
+    if(probabilityBoundary.detected&&probabilityBoundary.index>0){
+      const probabilitySelected=rows.slice(0,probabilityBoundary.index+1);
+      return{selected:probabilitySelected,audit:boundaryAudit({
+        initialTerminalCount:rows.length,
+        selectionMode:"TERMINAL_PROBABILITY_BOUNDARY_OVERRIDES_UNCONFIRMED_SCORE_SINGLETON",
+        boundaryDetected:true,
+        boundaryRank:probabilitySelected.length,
+        bestGap:probabilityBoundary.bestGap,
+        medianGap:probabilityBoundary.medianGap,
+        mad:probabilityBoundary.mad,
+        bestStrength:probabilityBoundary.bestStrength,
+        relativeDrop:probabilityBoundary.relativeDrop,
+        selectedMass:sum(probabilitySelected.map(item=>Number(item.probability)||0)),
+        singletonSelection:false,
+        singletonJustification:null,
+        scoreBoundaryRank:1,
+        probabilityBoundaryRank:probabilitySelected.length
+      })};
+    }
+    if(!probabilityBoundary.detected){
+      return{selected:[],audit:boundaryAudit({
+        initialTerminalCount:rows.length,
+        selectionMode:"SINGLETON_NOT_CONFIRMED_BY_TERMINAL_PROBABILITY",
+        boundaryDetected:false,
+        ...boundary,
+        singletonSelection:false,
+        singletonJustification:null,
+        scoreBoundaryRank:1,
+        probabilityBoundaryRank:probabilityBoundary.detected?probabilityBoundary.index+1:null,
+        probabilityBoundaryGap:probabilityBoundary.bestGap,
+        probabilityBoundaryStrength:probabilityBoundary.bestStrength
+      })};
+    }
+  }
   return{selected,audit:boundaryAudit({
     initialTerminalCount:rows.length,
     selectionMode:"GLOBAL_NATURAL_SCORE_DISCONTINUITY",
