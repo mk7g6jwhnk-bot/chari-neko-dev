@@ -150,6 +150,7 @@ export function classify(terminals,odds={}){
     const key=item.order.join("-");
     const rank=positive.findIndex(candidate=>candidate.order.join("-")===key)+1;
     const adopted=selectedKeys.has(key);
+    const thirdVariantDecision=pairAdjusted.decisionsByOrder.get(key)||null;
 
     let betClass="NONE";
     if(adopted){
@@ -165,8 +166,10 @@ export function classify(terminals,odds={}){
 
     const purchaseRejectCode=adopted
       ?"ADOPTED"
-      :pairAdjusted.audit.thirdVariantAmbiguity?.detected
+      :thirdVariantDecision?.localRejected
         ?"THIRD_VARIANT_AMBIGUITY"
+      :thirdVariantDecision?.boundaryRejected
+        ?"THIRD_VARIANT_BOUNDARY"
       :distributionSelection.audit.selectionMode==="DIFFUSE_NO_NATURAL_BOUNDARY"
         ?"DIFFUSE_NO_NATURAL_BOUNDARY"
       :positive.length===0
@@ -181,6 +184,9 @@ export function classify(terminals,odds={}){
       purchaseStatus:adopted?PURCHASED:"購入不採用",
       purchaseReason,
       purchaseRejectCode,
+      thirdVariantAmbiguityPair:thirdVariantDecision?.ambiguityPair||null,
+      thirdVariantLocalRejected:Boolean(thirdVariantDecision?.localRejected),
+      thirdVariantBoundaryRejected:Boolean(thirdVariantDecision?.boundaryRejected),
       representativeTerminal:rank===1,
       purchaseRank:rank>0?rank:null,
       purchaseCandidateCount:selected.length,
@@ -319,6 +325,7 @@ export function purchaseDiagnostics(classified,plan,budget){
   const natural=classified.filter(item=>item.purchaseStatus===PURCHASED);
   const rejected=classified.filter(item=>item.purchaseStatus!==PURCHASED);
   const noBet=natural.length===0;
+  const purchaseDistributionAudit=classified.find(item=>item.purchaseDistributionAudit)?.purchaseDistributionAudit||null;
 
   const rejectCodeCounts=rejected.reduce((counts,item)=>{
     const code=item.purchaseRejectCode||"UNKNOWN";
@@ -348,7 +355,7 @@ export function purchaseDiagnostics(classified,plan,budget){
     adoptedTerminalCount:natural.length,
     rejectedTerminalCount:classified.length-natural.length,
     rejectCodeCounts,
-    purchaseDistributionAudit:classified.find(item=>item.purchaseDistributionAudit)?.purchaseDistributionAudit||null,
+    purchaseDistributionAudit,
     purchaseThresholds:{
       branchPriorityGate:false,
       oddsSelectionGate:false,
@@ -402,7 +409,7 @@ export function purchaseDiagnostics(classified,plan,budget){
         ?"NO_TERMINALS"
         :classified.every(item=>item.purchaseRejectCode==="DIFFUSE_NO_NATURAL_BOUNDARY")
           ?"DIFFUSE_NO_NATURAL_BOUNDARY"
-          :classified.every(item=>item.purchaseRejectCode==="THIRD_VARIANT_AMBIGUITY")
+          :purchaseDistributionAudit?.thirdVariantAmbiguity?.causesNoBet
             ?"THIRD_VARIANT_AMBIGUITY"
             :"NO_VALID_TERMINAL"
       :null
@@ -532,6 +539,7 @@ function detectNaturalBoundary(rows,{allowGlobalSmallSample=false}={}){
 
 function limitUnseparatedThirdVariants(selected,allItems){
   const selectedKeys=new Set(selected.map(item=>item.order.join("-")));
+  const decisionsByOrder=new Map();
   const byPair=new Map();
   for(const item of allItems){
     const pair=`${item.order?.[0]}-${item.order?.[1]}`;
@@ -547,13 +555,34 @@ function limitUnseparatedThirdVariants(selected,allItems){
     const thirdBoundary=detectNaturalBoundary(ordered,{allowGlobalSmallSample:false});
     if(!thirdBoundary.detected){
       ambiguities.push({pair,candidateCount:rows.length,selectedCount:chosen.length,reason:"THIRD_VARIANTS_NOT_SEPARABLE",boundaryGap:thirdBoundary.bestGap,boundaryMedianGap:thirdBoundary.medianGap,boundaryMAD:thirdBoundary.mad,boundaryStrength:thirdBoundary.bestStrength});
+      for(const item of rows){
+        const order=item.order.join("-");
+        decisionsByOrder.set(order,{ambiguityPair:pair,localRejected:selectedKeys.has(order),boundaryRejected:false});
+        selectedKeys.delete(order);
+      }
       continue;
     }
     const supported=new Set(ordered.slice(0,thirdBoundary.index+1).map(item=>item.order.join("-")));
-    for(const item of chosen)if(!supported.has(item.order.join("-"))){selectedKeys.delete(item.order.join("-"));removed.push({pair,order:item.order.join("-"),reason:"THIRD_VARIANT_GLOBAL_PAIR_BOUNDARY"});}
+    for(const item of chosen)if(!supported.has(item.order.join("-"))){
+      const order=item.order.join("-");
+      selectedKeys.delete(order);
+      decisionsByOrder.set(order,{ambiguityPair:null,localRejected:false,boundaryRejected:true});
+      removed.push({pair,order,reason:"THIRD_VARIANT_GLOBAL_PAIR_BOUNDARY"});
+    }
   }
   const ambiguityDetected=ambiguities.length>0;
-  return{selected:ambiguityDetected?[]:selected.filter(item=>selectedKeys.has(item.order.join("-"))),audit:{thirdVariantRemovedCount:removed.length,thirdVariantRemovals:removed,thirdVariantAmbiguity:{detected:ambiguityDetected,count:ambiguities.length,pairs:ambiguities,causesNoBet:ambiguityDetected}}};
+  const locallyRejectedCount=[...decisionsByOrder.values()].filter(item=>item.localRejected).length;
+  const causesNoBet=selected.length>0&&locallyRejectedCount===selected.length;
+  return{
+    selected:selected.filter(item=>selectedKeys.has(item.order.join("-"))),
+    decisionsByOrder,
+    audit:{
+      thirdVariantRemovedCount:removed.length,
+      thirdVariantRemovals:removed,
+      thirdVariantLocalRejectedCount:locallyRejectedCount,
+      thirdVariantAmbiguity:{detected:ambiguityDetected,count:ambiguities.length,pairs:ambiguities,causesNoBet}
+    }
+  };
 }
 
 function boundaryAudit({initialTerminalCount=0,selectionMode,boundaryRank=null,boundaryDetected=false,bestGap=0,medianGap=0,mad=0,bestStrength=0,relativeDrop=0,selectedMass=0,singletonSelection=false,singletonJustification=null,...rest}){
