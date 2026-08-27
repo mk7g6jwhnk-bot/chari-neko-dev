@@ -272,14 +272,20 @@ async function requestBrowserService(base, params) {
   const endpoint = `${base}/keirin/race?${query}`;
   const attempts = [];
   const startedAt = Date.now();
-  const totalBudgetMs = 56000;
+  // Netlify's production function is terminated at about 55 seconds.  A
+  // healthy Railway browser job can legitimately take more than 30 seconds
+  // while another browser job finishes.  Aborting that request at 30 seconds
+  // starts a duplicate job and consumes the rest of the function lifetime.
+  // Give the original job one continuous window and only retry responses that
+  // fail early enough to leave useful time inside the same function request.
+  const totalBudgetMs = 50000;
 
   for (let attempt = 1; attempt <= 2; attempt += 1) {
     const remaining = totalBudgetMs - (Date.now() - startedAt);
     if (remaining < 6000) break;
 
     const timeoutMs = Math.min(
-      attempt === 1 ? 30000 : 24000,
+      attempt === 1 ? 46000 : 12000,
       remaining - 1200
     );
 
@@ -382,7 +388,7 @@ async function requestBrowserService(base, params) {
         data: {
           ok: false,
           error: /timeout|timed out|abort/i.test(message)
-            ? "公式予想データ取得が時間内に完了しませんでした。2回の取得を試しましたが完了しませんでした。"
+            ? "公式予想データ取得が時間内に完了しませんでした。"
             : "競輪ブラウザサービスへ接続できませんでした。",
           endpointAudit: attempts
         }
