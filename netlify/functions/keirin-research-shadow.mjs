@@ -1,0 +1,42 @@
+import crypto from"node:crypto";
+import predictHandler from"./keirin-predict.mjs";
+import{runResearchStateGraph}from"../../research/state-engine/state-engine.mjs";
+import{generateResearchTerminals}from"../../research/state-engine/terminal-generator.mjs";
+import{jsonResponse}from"../../keirin/parser/utils.mjs";
+
+export default async function handler(req){
+  if(!authorized(req))return jsonResponse(403,{ok:false,error:"forbidden"});
+  const url=new URL(req.url);url.searchParams.delete("autoResearch");url.searchParams.delete("budget");url.searchParams.set("budget","0");
+  const response=await predictHandler(new Request(url,{headers:{accept:"application/json"}}));
+  const payload=await response.json();
+  if(!response.ok||!payload?.ok)return jsonResponse(response.status||502,{ok:false,error:payload?.error||"current prediction failed",stage:"CURRENT_ENGINE_FAILED"});
+  try{return jsonResponse(200,buildResearchShadowPayload({predictionPayload:payload,requestedScheduledStartAt:new URL(req.url).searchParams.get("scheduledStartAt")||null,now:new Date()}));}
+  catch(error){return jsonResponse(422,{ok:false,error:String(error?.message||error),stage:error?.stage||"RESEARCH_ENGINE_FAILED"});}
+}
+
+export function buildResearchShadowPayload({predictionPayload,requestedScheduledStartAt=null,now=new Date()}){
+  const race=structuredClone(predictionPayload?.race||{});
+  if(!Array.isArray(race.participants)||race.participants.length<3)throw stageError("normalized race input missing","PRE_RACE_INPUT_FETCH_FAILED");
+  if(hasConfirmedResult(race)||hasConfirmedResult(predictionPayload?.officialData?.result))throw stageError("RESULT_DATA_FORBIDDEN_IN_SHADOW_SEAL_INPUT","RESULT_DATA_FORBIDDEN_IN_SHADOW_SEAL_INPUT");
+  const inputObservedAt=predictionPayload?.checkedAt||predictionPayload?.predictionRequestedAt;
+  const predictionSealedAt=now.toISOString();
+  const scheduledStartAt=requestedScheduledStartAt||scheduledAt(race.date,race.startTime);
+  if(!Number.isFinite(Date.parse(scheduledStartAt))||Date.parse(predictionSealedAt)>=Date.parse(scheduledStartAt))throw stageError("PREDICTION_SEAL_NOT_BEFORE_START","PREDICTION_SEAL_NOT_BEFORE_START");
+  if(Date.parse(inputObservedAt)>Date.parse(predictionSealedAt))throw stageError("INPUT_AFTER_PREDICTION_SEAL","INPUT_AFTER_PREDICTION_SEAL");
+  const immutableInput=deepFreeze({race,venueProfile:predictionPayload?.officialData?.venueProfile||predictionPayload?.officialData?.basic?.venueProfile||{}});
+  const inputHash=hash(immutableInput);
+  let graph;try{graph=runResearchStateGraph(immutableInput)}catch(error){throw stageError(String(error?.message||error),"RESEARCH_ENGINE_FAILED")}
+  const research=generateResearchTerminals(graph);
+  const currentTerminals=(predictionPayload?.prediction?.prediction?.terminals||predictionPayload?.prediction?.terminals||[]).map(row=>({order:row.order.map(Number),probability:Number(row.probability)||0}));
+  return{ok:true,version:"RESEARCH-SHADOW-COMPUTE-1.0",raceKey:raceKey(race),scheduledStartAt,inputObservedAt,predictionSealedAt,currentInputHash:inputHash,researchInputHash:inputHash,preRaceInput:immutableInput,current:{predictionVersion:predictionPayload.prediction?.prediction?.predictionVersion||predictionPayload.prediction?.engineVersion||null,terminals:currentTerminals},research:compactResearch(graph,research),audit:{sameImmutableInput:inputHash===inputHash,purchaseOutputStored:false,oddsUsedForResearch:false,calibratedProbability:null,calibrationStatus:research.calibrationStatus,apiResponseIsolation:"NEW_RESEARCH_ONLY_FUNCTION"}};
+}
+
+function compactResearch(graph,output){return{version:graph.version,calibrationStatus:graph.calibrationStatus,calibratedProbability:null,paths:graph.paths.map(path=>({pathId:path.pathId,scenarioProbability:path.probability,states:path.nodes.map(node=>({stateType:node.stateType,outcomeCode:node.outcomeCode,status:node.status,conditionalTransitionProbability:node.conditionalTransitionProbability,calibratedProbability:null,supportingEvidence:node.supportingEvidence,counterEvidence:node.counterEvidence,unknownEvidence:node.unknownEvidence}))})),terminals:output.terminals.map(row=>({order:row.order,terminalProbability:row.terminalProbability,calibratedProbability:null,pathIds:row.contributions.map(item=>item.pathId)})),audit:output.audit}}
+function authorized(req){const secret=String(process.env.AUTO_RESEARCH_CALLBACK_SECRET||"");return Boolean(secret)&&req.headers.get("x-auto-research-secret")===secret}
+function scheduledAt(date,time){const day=String(date||"").replace(/\D/g,""),m=String(time||"").match(/(\d{1,2}):(\d{2})/);return/^\d{8}$/.test(day)&&m?`${day.slice(0,4)}-${day.slice(4,6)}-${day.slice(6,8)}T${m[1].padStart(2,"0")}:${m[2]}:00+09:00`:null}
+function raceKey(race){return`${String(race.date||"").replace(/\D/g,"")}-${String(race.venueCode||"").padStart(2,"0")}-${Number(race.raceNo)}`}
+function hash(value){return crypto.createHash("sha256").update(stable(value)).digest("hex")}
+function stable(v){if(Array.isArray(v))return`[${v.map(stable).join(",")}]`;if(v&&typeof v==="object")return`{${Object.keys(v).sort().map(k=>`${JSON.stringify(k)}:${stable(v[k])}`).join(",")}}`;return JSON.stringify(v)}
+function deepFreeze(v){if(!v||typeof v!=="object"||Object.isFrozen(v))return v;Object.values(v).forEach(deepFreeze);return Object.freeze(v)}
+function hasConfirmedResult(value){if(!value||typeof value!=="object")return false;if(value.status==="confirmed"||value.confirmed===true)return true;if(Array.isArray(value.finishOrder)&&value.finishOrder.length>=3)return true;return hasConfirmedResult(value.result)||hasConfirmedResult(value.officialResult)}
+function stageError(message,stage){const error=new Error(message);error.stage=stage;return error}
