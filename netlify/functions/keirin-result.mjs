@@ -24,6 +24,8 @@ export default async function handler(req) {
     venueName,
     raceNo: String(raceNo),
     resultOnly: "1",
+    requestType: "result_collector",
+    requestId: `result-${date}-${venueCode}-${raceNo}-${Date.now()}`,
   });
 
   const attempts = [];
