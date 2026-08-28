@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import handler from "../netlify/functions/keirin-sealed-result.mjs";
-import { sealedResultSummary, validateSealedResult } from "../public/sealed-result-client.mjs";
+import { createSealedResultController, sealedResultSummary, validateSealedResult } from "../public/sealed-result-client.mjs";
 import fs from "node:fs";
 
 const snapshot={targetRace:{date:"20260828",venueCode:"61",raceNo:7},sealedPrediction:{predictionHash:"hash",predictionSealedAt:"2026-08-28T01:00:00.000Z"}};
@@ -17,4 +17,5 @@ try{
   globalThis.fetch=async()=>new Response("<html>bad gateway</html>",{status:502,headers:{"content-type":"text/html"}});const nonJson=await handler(new Request("https://app.test/.netlify/functions/keirin-sealed-result?raceKey=20260828-61-7"));assert.equal(nonJson.status,502);assert.equal((await nonJson.json()).code,"UPSTREAM_NON_JSON");
   globalThis.fetch=async()=>new Response(JSON.stringify({ok:false,code:"RESULT_NOT_READY"}),{status:409,headers:{"content-type":"application/json"}});assert.equal((await handler(new Request("https://app.test/.netlify/functions/keirin-sealed-result?raceKey=20260828-61-7"))).status,409);
 }finally{globalThis.fetch=original.fetch;for(const [name,value] of [["KEIRIN_BROWSER_SERVICE_URL",original.base],["AUTO_RESEARCH_CALLBACK_SECRET",original.secret]])value===undefined?delete process.env[name]:process.env[name]=value}
+let requestedUrl="";globalThis.fetch=async url=>{requestedUrl=String(url);return new Response(JSON.stringify({ok:false,code:"RESULT_NOT_READY"}),{status:409})};const fakePanel={classList:{add(){},remove(){}},innerHTML:"",querySelector(){return null}},controller=createSealedResultController({elementById:()=>fakePanel,raceKey:()=>"legacy-wrong-key",metas:()=>"",escapeHtml:String}),formattedSnapshot=structuredClone(snapshot);formattedSnapshot.targetRace.date="2026-08-28";await controller.load(formattedSnapshot);assert.match(requestedUrl,/raceKey=20260828-61-7$/);globalThis.fetch=original.fetch;
 console.log("OK sealed result proxy/client tests");
