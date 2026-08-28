@@ -5,4 +5,5 @@ export{comparePredictionLedgers,summarizeRankComparisons}from"./comparator.mjs";
 export{assertTemporalIntegrity}from"./temporal-guard.mjs";
 export{inventorySealedSnapshots}from"./snapshot-inventory.mjs";
 export{MemoryResearchShadowSealStore,createResearchShadowSealWriter,assertShadowSealUnchanged}from"./shadow-seal-store.mjs";
+export{RESEARCH_CANDIDATES,runIsolatedResearchCandidates}from"./candidates.mjs";
 export{RESEARCH_STATE_VERSION,CALIBRATION_STATUS,STATE_TYPES,createResearchStateNode}from"./schema.mjs";

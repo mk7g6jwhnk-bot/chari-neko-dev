@@ -3,7 +3,7 @@ import { runKeirinEngine } from "../../keirin/engine/keirin-engine.mjs";
 import { applyRecentFormEvidence } from "../../keirin/recent-form/recent-form.mjs";
 import { applyStartPowerEvidence } from "../../keirin/start-power/start-power.mjs";
 import { applyKimariteAbilities } from "../../keirin/kimarite/kimarite-abilities.mjs";
-import { attachRiderDbEvidence, loadRiderDB } from "../../keirin/sports/rider-db-provider.mjs";
+import { attachRiderDbEvidence, loadRiderDB, summarizeRiderDbUsage } from "../../keirin/sports/rider-db-provider.mjs";
 import { jsonResponse } from "../../keirin/parser/utils.mjs";
 
 const VENUE_CODE_BY_NAME = {
@@ -112,6 +112,7 @@ export default async function handler(req) {
     }
     const evidenceParticipants = attachRiderDbEvidence(officialParticipants, riderDb, participantContext);
     const participants = adaptParticipantsForPrediction(evidenceParticipants, participantContext);
+    const riderDbUsageAudit = summarizeRiderDbUsage(participants);
     if (participants.length < 5) {
       return jsonResponse(422, {
         ok: false,
@@ -189,6 +190,7 @@ export default async function handler(req) {
       predictionRequestedAt,
       predictionSealedAt,
       preSeal,
+      riderDbUsageAudit,
       lineSnapshotAudit,
       officialData,
       browserAudit: browserResult.data.audit || null,

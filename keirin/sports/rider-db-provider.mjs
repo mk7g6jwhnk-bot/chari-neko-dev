@@ -24,6 +24,7 @@ export function attachRiderDbEvidence(participants = [], riderDb = RIDER_DB, con
   return (Array.isArray(participants) ? participants : []).map(participant => {
     const id = registration(participant?.registration ?? participant?.riderId);
     const record = riders[id];
+    const freshnessAudit = evaluateRiderDbFreshness(record, context);
     const audit = {
       registration: id,
       matched: Boolean(record),
@@ -32,6 +33,10 @@ export function attachRiderDbEvidence(participants = [], riderDb = RIDER_DB, con
       sampleSize: Number(record?.metadata?.sample_size ?? record?.recent_4_months?.starts) || 0,
       period: record?.metadata?.period || null,
       retrievedAt: record?.metadata?.retrieved_at || null,
+      confidence: record?.metadata?.confidence || null,
+      qualityStatus: record?.metadata?.quality_status || null,
+      missingFields: record?.metadata?.missing_fields || [],
+      freshnessAudit,
       adopted: false,
       reason: !record ? "registration-not-found" : !eligible(record) ? "record-not-production-eligible" : null
     };
@@ -84,6 +89,22 @@ export function attachRiderDbEvidence(participants = [], riderDb = RIDER_DB, con
     };
   });
 }
+
+export function evaluateRiderDbFreshness(record, context = {}, policy = { maxAgeDays: 30 }) {
+  const raceDate = String(context.raceDate || "").replace(/\D/g, "").slice(0, 8);
+  const raceAt = /^\d{8}$/.test(raceDate) ? Date.parse(`${raceDate.slice(0,4)}-${raceDate.slice(4,6)}-${raceDate.slice(6,8)}T23:59:59+09:00`) : Number.NaN;
+  const observedAt = parseSourceTime(record?.metadata?.recent_updated_at) || parseSourceTime(record?.metadata?.retrieved_at);
+  const ageDays = Number.isFinite(raceAt) && Number.isFinite(observedAt) ? (raceAt-observedAt)/86400000 : null;
+  const shadowStale = ageDays === null ? null : ageDays > policy.maxAgeDays;
+  return { mode:"SHADOW_AUDIT_ONLY", sourceObservedAt:Number.isFinite(observedAt)?new Date(observedAt).toISOString():null, coveragePeriodEnd:record?.metadata?.recent_updated_at||null, raceDate:raceDate||null, freshnessPolicy:{...policy}, ageDays:ageDays===null?null:Number(ageDays.toFixed(3)), shadowStale, staleReason:shadowStale?`SOURCE_OLDER_THAN_${policy.maxAgeDays}_DAYS`:ageDays===null?"SOURCE_TIMESTAMP_UNAVAILABLE":null, productionEligibilityChanged:false };
+}
+
+export function summarizeRiderDbUsage(participants = []) {
+  const audits=participants.map(x=>x?.riderDbAudit).filter(Boolean),rejected=audits.filter(x=>x.matched&&!x.adopted&&x.reason!=="current-race-official-profile-preferred");
+  return { type:"RIDER_DB_USAGE_AUDIT",participantsCount:participants.length,registrationMatchCount:audits.filter(x=>x.matched).length,liveOfficialProfileUsedCount:audits.filter(x=>x.reason==="current-race-official-profile-preferred").length,dbFallbackUsedCount:audits.filter(x=>x.adopted).length,dbRejectedCount:rejected.length,rejectReasons:Object.fromEntries([...new Set(rejected.map(x=>x.reason))].map(reason=>[reason,rejected.filter(x=>x.reason===reason).length])),staleRejectionCount:rejected.filter(x=>x.stale).length,partialOrMediumConfidenceRejectionCount:rejected.filter(x=>x.qualityStatus==="partial"||x.confidence==="medium").length,sampleInsufficientCount:rejected.filter(x=>x.sampleSize<=0).length,missingFieldCount:audits.filter(x=>x.missingFields?.length).length,identityMismatchCount:rejected.filter(x=>!x.identityPassed).length,shadowFreshnessWouldRejectCount:audits.filter(x=>x.freshnessAudit?.shadowStale===true).length,productionEligibilityChanged:false };
+}
+
+function parseSourceTime(value){if(!value)return Number.NaN;const normalized=String(value).replace(/^(\d{4})\/(\d{2})\/(\d{2})\s+(\d{2}:\d{2})$/,"$1-$2-$3T$4:00+09:00");return Date.parse(normalized)}
 
 export function buildRaceRiderDB(participants = []) {
   const out = {};
