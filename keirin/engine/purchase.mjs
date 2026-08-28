@@ -142,7 +142,9 @@ export function classify(terminals,odds={}){
   const distributionSelection=selectNaturalTerminalCluster(positive);
   const pairAdjusted=limitUnseparatedThirdVariants(distributionSelection.selected,positive);
   const selected=pairAdjusted.selected;
-  const purchaseDistributionAudit={...distributionSelection.audit,...pairAdjusted.audit};
+  const purchaseFunnel=buildPurchaseFunnel({generated:positive,natural:distributionSelection.selected,pairPassed:selected,final:selected});
+  const purchaseConcentrationAudit=buildPurchaseConcentrationAudit(positive,selected,distributionSelection.audit);
+  const purchaseDistributionAudit={...distributionSelection.audit,...pairAdjusted.audit,purchaseFunnel,purchaseConcentrationAudit};
 
   const selectedKeys=new Set(selected.map(item=>item.order.join("-")));
 
@@ -587,6 +589,74 @@ function limitUnseparatedThirdVariants(selected,allItems){
 
 function boundaryAudit({initialTerminalCount=0,selectionMode,boundaryRank=null,boundaryDetected=false,bestGap=0,medianGap=0,mad=0,bestStrength=0,relativeDrop=0,selectedMass=0,singletonSelection=false,singletonJustification=null,...rest}){
   return{initialTerminalCount,selectionMode,boundaryDetected,boundaryRank,boundaryGap:bestGap,boundaryMedianGap:medianGap,boundaryMAD:mad,boundaryStrength:bestStrength,boundaryRelativeDrop:relativeDrop,selectedMass,singletonSelection,singletonJustification,thirdVariantAmbiguity:{detected:false,count:0,pairs:[]},...rest};
+}
+
+function buildPurchaseFunnel({generated,natural,pairPassed,final}){
+  const stages=[
+    ["GENERATED_TERMINALS",generated],
+    ["NATURAL_CANDIDATES",natural],
+    ["PURCHASE_BORDER_PASS",natural],
+    ["INITIAL_ADOPTED",pairPassed],
+    ["FAMILY_RECOVERY",pairPassed],
+    ["MASS_RECOVERY",pairPassed],
+    ["VALUE_ADDITION",pairPassed],
+    ["FINAL_PURCHASE",final]
+  ];
+  let previous=null;
+  return stages.map(([stage,rows])=>{
+    const audit=summarizeFunnelRows(rows);
+    const row={stage,...audit,addedCount:previous?Math.max(0,audit.count-previous.count):audit.count,removedCount:previous?Math.max(0,previous.count-audit.count):0};
+    previous=audit;
+    return row;
+  });
+}
+
+function summarizeFunnelRows(rows){
+  const values=[...(rows||[])];
+  const families=new Set(values.map(item=>String(item.order?.[0]??"")));
+  const pairs=new Map();
+  for(const item of values){
+    const pair=`${item.order?.[0]}-${item.order?.[1]}`;
+    if(!pairs.has(pair))pairs.set(pair,new Set());
+    pairs.get(pair).add(String(item.order?.[2]??""));
+  }
+  return{
+    count:values.length,
+    probabilityMass:sum(values.map(item=>Number(item.probability)||0)),
+    familyCount:families.size,
+    pairCount:pairs.size,
+    thirdVariantCount:[...pairs.values()].reduce((total,set)=>total+set.size,0)
+  };
+}
+
+function buildPurchaseConcentrationAudit(generated,selected,boundary){
+  const rows=[...(generated||[])];
+  const total=sum(rows.map(item=>Number(item.probability)||0));
+  const shares=rows.map(item=>total>0?(Number(item.probability)||0)/total:0).filter(value=>value>0);
+  const aggregate=(keyOf)=>{
+    const grouped=new Map();
+    for(const item of rows){const key=keyOf(item);grouped.set(key,(grouped.get(key)||0)+(Number(item.probability)||0));}
+    return total>0?Math.max(0,...grouped.values())/total:0;
+  };
+  const branchTotals=new Map();
+  for(const item of rows)for(const contribution of item.branchContributions||[]){const key=contribution.branchId||"UNKNOWN";branchTotals.set(key,(branchTotals.get(key)||0)+(Number(contribution.probability)||0));}
+  const branchTotal=sum([...branchTotals.values()]);
+  const entropy=-sum(shares.map(value=>value*Math.log(value)));
+  return{
+    classification:"UNCALIBRATED",
+    adoptedCount:selected.length,
+    candidateProbabilityMass:sum(selected.map(item=>Number(item.probability)||0)),
+    topTerminalShare:shares[0]||0,
+    topFamilyShare:aggregate(item=>String(item.order?.[0]??"")),
+    topPairShare:aggregate(item=>`${item.order?.[0]}-${item.order?.[1]}`),
+    branchConcentration:branchTotal>0?Math.max(0,...branchTotals.values())/branchTotal:0,
+    entropy,
+    normalizedEntropy:shares.length>1?entropy/Math.log(shares.length):0,
+    familyCount:new Set(selected.map(item=>String(item.order?.[0]??""))).size,
+    pairCount:new Set(selected.map(item=>`${item.order?.[0]}-${item.order?.[1]}`)).size,
+    naturalBoundaryStrength:Number(boundary?.boundaryStrength)||0,
+    policy:"AUDIT_ONLY_UNTIL_MULTI_RACE_CALIBRATION"
+  };
 }
 
 function median(values){

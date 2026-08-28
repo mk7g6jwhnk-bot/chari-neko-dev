@@ -14,4 +14,8 @@ assert.equal(diag.rejectedTerminalCount,2);
 assert.equal(diag.rejectCodeCounts.PURCHASE_CUTOFF,2);
 assert.ok(Object.keys(diag.rejectCodeCounts).length>0);
 assert.equal(diag.fixedBranchRankCapApplied,false);
+const funnel=diag.purchaseDistributionAudit.purchaseFunnel;
+assert.deepEqual(funnel.map(row=>row.stage),["GENERATED_TERMINALS","NATURAL_CANDIDATES","PURCHASE_BORDER_PASS","INITIAL_ADOPTED","FAMILY_RECOVERY","MASS_RECOVERY","VALUE_ADDITION","FINAL_PURCHASE"]);
+assert.ok(funnel.every(row=>["count","addedCount","removedCount","probabilityMass","familyCount","pairCount","thirdVariantCount"].every(key=>Object.hasOwn(row,key))));
+assert.equal(diag.purchaseDistributionAudit.purchaseConcentrationAudit.policy,"AUDIT_ONLY_UNTIL_MULTI_RACE_CALIBRATION");
 console.log("Keirin purchase funnel audit passed:",JSON.stringify(diag.rejectCodeCounts));

@@ -1,31 +1,52 @@
 const PURCHASE_CATEGORIES=new Set(["MAIN","COVER","BUYABLE_HIGH"]);
 
+// Step B: funding value. This function is never used to decide whether a bet
+// is prediction-qualified for a thick allocation.
 export function fundingPriorityScore(bet){
   const probability=Math.max(0,Number(bet?.probability)||0);
-  const natural=Math.max(0,Number(bet?.naturalConvergenceScore)||0);
   const odds=Number(bet?.odds);
-  const oddsQuality=Number.isFinite(odds)&&odds>1?Math.min(1.15,Math.max(.8,Math.log10(odds+1)/1.5)):1;
-  return probability*(.55+.45*natural)*oddsQuality;
+  return Number.isFinite(odds)&&odds>1?probability*odds:probability;
+}
+
+// Step A: prediction-only qualification. Available evidence dimensions are
+// combined symmetrically; absent dimensions are not fabricated.
+export function predictionQualificationScore(bet){
+  const probability=Math.max(0,Number(bet?.probability)||0);
+  const natural=Number(bet?.naturalConvergenceScore);
+  if(!(probability>0)||!(natural>0))return 0;
+  const factors=[probability,natural];
+  for(const rank of [bet?.globalRank,bet?.familyRank,bet?.pairRank]){
+    const value=Number(rank);if(Number.isFinite(value)&&value>0)factors.push(1/value);
+  }
+  for(const support of [bet?.nodeConditionalProbability,bet?.scenarioCoherence,bet?.branchFit,bet?.naturalSeparation]){
+    const value=Number(support);if(Number.isFinite(value)&&value>0)factors.push(Math.min(1,value));
+  }
+  return Math.exp(factors.reduce((total,value)=>total+Math.log(Math.max(value,Number.EPSILON)),0)/factors.length);
+}
+
+export function qualifyThickPredictionBets(snapshot){
+  const bets=(snapshot?.betSelections||[]).filter(b=>PURCHASE_CATEGORIES.has(b?.category));
+  if(bets.length<2)return[];
+  const positive=bets.map(b=>({b,score:predictionQualificationScore(b)}))
+    .filter(row=>row.score>0)
+    .sort((a,b)=>b.score-a.score||String(a.b?.order||"").localeCompare(String(b.b?.order||""),"en"));
+  if(positive.length<2)return[];
+  const gaps=positive.slice(0,-1).map((row,index)=>Math.max(0,row.score-positive[index+1].score));
+  const center=median(gaps),mad=median(gaps.map(gap=>Math.abs(gap-center))),noise=Math.max(center,1.4826*mad,Number.EPSILON);
+  const boundary=gaps.map((gap,index)=>({gap,index,strength:(gap-center)/noise})).sort((a,b)=>b.strength-a.strength||b.gap-a.gap||a.index-b.index)[0];
+  const orderedGaps=[...gaps].sort((a,b)=>b-a);
+  const globalSmallSampleSeparation=positive.length<=4&&boundary?.gap>0&&boundary.gap>(orderedGaps[1]||0)*1.8;
+  if(!boundary&& !globalSmallSampleSeparation)return[];
+  if(!globalSmallSampleSeparation&&!(boundary.gap>center+2.5*1.4826*mad))return[];
+  return positive.slice(0,boundary.index+1).map(({b,score})=>({...b,predictionQualificationScore:score,qualification:"THICK_PREDICTION_QUALIFIED"}));
 }
 
 export function deriveThickBets(snapshot){
-  const bets=(snapshot?.betSelections||[]).filter(b=>PURCHASE_CATEGORIES.has(b?.category));
-  if(bets.length<2)return[];
-  const scored=bets.map(b=>({b,score:fundingPriorityScore(b)})).sort((a,b)=>b.score-a.score||String(a.b?.order||"").localeCompare(String(b.b?.order||""),"en"));
-  const positive=scored.filter(x=>x.score>0);
-  if(positive.length<2)return[];
-  const gaps=[];
-  for(let i=0;i<positive.length-1;i++)gaps.push((positive[i].score-positive[i+1].score)/Math.max(1e-9,positive[i].score));
-  const median=values=>{const sorted=[...values].sort((a,b)=>a-b),n=sorted.length;if(!n)return 0;const mid=Math.floor(n/2);return n%2?sorted[mid]:(sorted[mid-1]+sorted[mid])/2;};
-  const clearIndex=gaps.findIndex((gap,index)=>{const baseline=median(gaps.filter((_,i)=>i!==index));return gap>=Math.max(.18,baseline*1.8);});
-  if(clearIndex<0)return[];
-  const cluster=positive.slice(0,clearIndex+1);
-  if(cluster.length>Math.ceil(bets.length/2))return[];
-  return cluster.map(({b,score})=>({
+  return qualifyThickPredictionBets(snapshot).map(b=>({
     ...b,
-    thickScore:score,
-    reason:`自然収束 ${Math.round((Number(b.naturalConvergenceScore)||0)*100)}%・終端確率 ${(Number(b.probability||0)*100).toFixed(1)}%・オッズ妙味から見た資金優先クラスタ`
-  }));
+    thickScore:fundingPriorityScore(b),
+    reason:`予測上位群（自然収束 ${Math.round((Number(b.naturalConvergenceScore)||0)*100)}%・終端確率 ${(Number(b.probability||0)*100).toFixed(1)}%）の中で資金配分を優先`
+  })).sort((a,b)=>b.thickScore-a.thickScore||String(a.order||"").localeCompare(String(b.order||""),"en"));
 }
 
 export function allocatePreviewStakes(bets,budget,mode="standard"){
@@ -48,14 +69,13 @@ export function allocatePreviewStakes(bets,budget,mode="standard"){
 
 export function fundingSeparationAudit(bets){
   const rows=(bets||[]).filter(b=>PURCHASE_CATEGORIES.has(b?.category)).map(b=>({
-    order:(b.order||[]).join("-"),category:b.category,priorityScore:fundingPriorityScore(b),
+    order:(b.order||[]).join("-"),category:b.category,priorityScore:fundingPriorityScore(b),predictionQualificationScore:predictionQualificationScore(b),
     probability:Number(b.probability)||0,naturalConvergenceScore:Number(b.naturalConvergenceScore)||0,odds:Number(b.odds)||null
   }));
   return{
-    policy:"CLASSIFICATION_DOES_NOT_CHANGE_AUTOMATIC_THICK_PRIORITY",
-    passed:true,
-    rowCount:rows.length,
-    categoryUsedInPriorityScore:false,
-    rows
+    policy:"PREDICTION_QUALIFICATION_PRECEDES_ODDS_AWARE_FUNDING",
+    passed:true,rowCount:rows.length,categoryUsedInPriorityScore:false,oddsUsedForPredictionQualification:false,rows
   };
 }
+
+function median(values){const sorted=[...(values||[])].map(Number).filter(Number.isFinite).sort((a,b)=>a-b),n=sorted.length;if(!n)return 0;const mid=Math.floor(n/2);return n%2?sorted[mid]:(sorted[mid-1]+sorted[mid])/2;}
