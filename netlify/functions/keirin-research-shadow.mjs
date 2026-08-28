@@ -1,17 +1,31 @@
 import crypto from"node:crypto";
-import predictHandler from"./keirin-predict.mjs";
 import{runResearchStateGraph}from"../../research/state-engine/state-engine.mjs";
 import{generateResearchTerminals}from"../../research/state-engine/terminal-generator.mjs";
 import{jsonResponse}from"../../keirin/parser/utils.mjs";
 
 export default async function handler(req){
   if(!authorized(req))return jsonResponse(403,{ok:false,error:"forbidden"});
-  const url=new URL(req.url);url.searchParams.delete("autoResearch");url.searchParams.delete("budget");url.searchParams.set("budget","0");
-  const response=await predictHandler(new Request(url,{headers:{accept:"application/json"}}));
-  const payload=await response.json();
-  if(!response.ok||!payload?.ok)return jsonResponse(response.status||502,{ok:false,error:payload?.error||"current prediction failed",stage:"CURRENT_ENGINE_FAILED"});
+  const url=new URL(req.url);
+  let payload;
+  try{payload=await readAutoSealedPrediction(url)}
+  catch(error){return jsonResponse(error?.status||502,{ok:false,error:String(error?.message||error),stage:error?.stage||"SEALED_PREDICTION_READ_FAILED"})}
   try{return jsonResponse(200,buildResearchShadowPayload({predictionPayload:payload,requestedScheduledStartAt:new URL(req.url).searchParams.get("scheduledStartAt")||null,now:new Date()}));}
   catch(error){return jsonResponse(422,{ok:false,error:String(error?.message||error),stage:error?.stage||"RESEARCH_ENGINE_FAILED"});}
+}
+
+export async function readAutoSealedPrediction(url,fetchImpl=fetch,env=process.env){
+  const base=String(env.KEIRIN_BROWSER_SERVICE_URL||"").trim().replace(/\/$/,"");
+  if(!base)throw httpError("KEIRIN_BROWSER_SERVICE_URL is not configured",500,"SEALED_PREDICTION_READ_FAILED");
+  const query=new URLSearchParams({date:url.searchParams.get("date")||"",venueCode:url.searchParams.get("venueCode")||"",raceNo:url.searchParams.get("raceNo")||""});
+  const response=await fetchImpl(`${base}/keirin/research/shadow/prediction?${query}`,{headers:{accept:"application/json"},signal:AbortSignal.timeout(12000)});
+  const contentType=String(response.headers?.get?.("content-type")||"");
+  const body=await response.text();
+  let data=null;try{data=JSON.parse(body)}catch{}
+  if(!response.ok||!data?.ok||!data?.predictionPayload){
+    const detail=data?.error||`${contentType||"unknown content-type"}: ${body.slice(0,160)||"empty response"}`;
+    throw httpError(detail,response.status===404?409:(response.status||502),response.status===404?"SEALED_PREDICTION_NOT_READY":"SEALED_PREDICTION_READ_FAILED");
+  }
+  return data.predictionPayload;
 }
 
 export function buildResearchShadowPayload({predictionPayload,requestedScheduledStartAt=null,now=new Date()}){
@@ -41,3 +55,4 @@ function stable(v){if(Array.isArray(v))return`[${v.map(stable).join(",")}]`;if(v
 function deepFreeze(v){if(!v||typeof v!=="object"||Object.isFrozen(v))return v;Object.values(v).forEach(deepFreeze);return Object.freeze(v)}
 function hasConfirmedResult(value){if(!value||typeof value!=="object")return false;if(value.status==="confirmed"||value.confirmed===true)return true;if(Array.isArray(value.finishOrder)&&value.finishOrder.length>=3)return true;return hasConfirmedResult(value.result)||hasConfirmedResult(value.officialResult)}
 function stageError(message,stage){const error=new Error(message);error.stage=stage;return error}
+function httpError(message,status,stage){const error=stageError(message,stage);error.status=status;return error}
