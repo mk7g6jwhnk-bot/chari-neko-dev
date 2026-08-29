@@ -28,11 +28,12 @@ export function buildPurchaseExplanationContext({terminal,classified=[],scored=[
     .sort((a,b)=>(Number(b.probability)||0)-(Number(a.probability)||0)||Number(a.order?.[2])-Number(b.order?.[2]))[0]||null;
   const rejectedRider=rejectedThird?riderByNumber.get(Number(rejectedThird.order?.[2]))||fallbackRider(Number(rejectedThird.order?.[2]),rejectedThird.positionEvidence?.third):null;
   return{
-    version:"PURCHASE-SCENARIO-EXPLANATION-1.0",terminal:[n1,n2,n3],first,second,third,
+    version:"PURCHASE-SCENARIO-EXPLANATION-1.1",terminal:[n1,n2,n3],terminalProbability:Number(terminal.probability)||0,first,second,third,
     firstRole:first.role||null,secondRole:second.role||null,thirdRole:third.role||null,
     primaryBranch,supportingBranches,primaryLine,
     initiativeOwner:initiativeRider?Number(initiativeRider.number):null,
     initiativeAssessment:primaryBranch.initiative||null,attackType:attackType(primaryBranch.branchType),
+    hasLineContext:Boolean(lines.length&&scored.some(rider=>rider.lineId&&!String(rider.lineId).startsWith("unknown-"))),
     lineRelation12:lineRelation(first,second),lineRelation23:lineRelation(second,third),lineRelation13:lineRelation(first,third),
     firstEvidence:evidence(first,"FIRST",terminal),secondConditionalEvidence:evidence(second,"SECOND",terminal),thirdConditionalEvidence:evidence(third,"THIRD",terminal),
     rejectedCompetitors:rejectedRider?[{number:Number(rejectedRider.number),role:rejectedRider.role||null,lineId:rejectedRider.lineId||null,probability:Number(rejectedThird.probability)||0,evidence:evidence(rejectedRider,"THIRD",rejectedThird)}]:[],
@@ -67,7 +68,7 @@ function secondStep(c){
   if(c.primaryBranch.branchType==="BANTE_SASHI"&&same&&c.second.role==="自力")return `${first}が差し切った後も、先行した${second}は前で踏み続け、${mechanism}で2着に残る形です。`;
   if(c.primaryBranch.branchType==="MAKURI_SUCCESS")return `${first}のまくりが決まった後、${second}は${same?"同じ仕掛けに続き":"前団の直後を確保し"}、${mechanism}で2着を取る想定です。`;
   if(same)return `${first}が先頭へ出た後は、同じラインの${second}が追走し、${mechanism}で2着へ続く想定です。`;
-  return `${first}が抜け出した後、${second}は別線から前団の直後を確保し、${mechanism}で2着争いを上回る想定です。`;
+  return `${first}が抜け出した後、${second}は${c.hasLineContext?"別線から":"別の位置から"}前団の直後を確保し、${mechanism}で2着争いを上回る想定です。`;
 }
 
 function thirdStep(c){
@@ -78,7 +79,7 @@ function thirdStep(c){
 function counterEvidence(c){
   const rival=c.rejectedCompetitors[0];
   if(!rival)return `同じ1-2着から別の3着へ続く終端は保存されておらず、この3着条件が崩れれば買い目全体も崩れます。`;
-  return `${number(rival.number)}も同じ1-2着からの3着候補ですが、そちらは${conditionPhrase(rival.evidence,"3着")}を追加で必要とする別終端です。この買い目では${label(c.third)}の条件付き支持を上に取っています。`;
+  return `${number(rival.number)}も同じ1-2着からの3着候補で、そちらは${conditionPhrase(rival.evidence,"3着")}を根拠とする別終端です。その競合条件が前面に出ると3着が入れ替わるため、この買い目では${label(c.third)}の条件が保たれることを前提にしています。`;
 }
 
 function supportingEvidence(c){
@@ -104,7 +105,7 @@ function evidence(rider,stage,terminal){
   const node=(terminal.nodeTrace||[]).find(item=>item.stage===stage);
   const conditions=(node?.newRequiredConditions||[]).map(item=>({label:item.label||item.mechanism?.label||null,probability:numeric(item.probability),kind:item.kind||null})).filter(item=>item.label);
   const e=rider.evidence||{},keys=stage==="FIRST"?["start","sprint","finish","recent"]:["tracking","finish","recent"];
-  const drivers=keys.map(key=>({key,value:numeric(e[key])})).filter(item=>item.value!==null).sort((a,b)=>b.value-a.value||a.key.localeCompare(b.key,"en"));
+  const drivers=keys.map(key=>({key,value:numeric(e[key])})).filter(item=>item.value!==null&&item.value>0).sort((a,b)=>b.value-a.value||a.key.localeCompare(b.key,"en"));
   return{stage,conditions,drivers,conditionalProbability:numeric(node?.conditionalProbability)};
 }
 function conditionPhrase(evidence,position){const condition=evidence?.conditions?.[0]?.label;if(condition)return `「${condition}」`;const driver=driverPhrase(evidence);return driver||`${position}の着順別評価`}
