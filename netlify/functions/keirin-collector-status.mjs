@@ -1,0 +1,15 @@
+import { jsonResponse } from "../../keirin/parser/utils.mjs";
+
+export default async function handler(req){
+  if(req.method!=="GET")return jsonResponse(405,{ok:false,code:"METHOD_NOT_ALLOWED"});
+  const base=String(process.env.KEIRIN_BROWSER_SERVICE_URL||"").trim().replace(/\/$/,"");
+  if(!base)return jsonResponse(500,{ok:false,code:"COLLECTOR_STATUS_NOT_CONFIGURED"});
+  try{
+    const started=Date.now(),response=await fetch(`${base}/keirin/auto-research/status`,{headers:{accept:"application/json"},signal:AbortSignal.timeout(12000)}),contentType=String(response.headers.get("content-type")||""),text=await response.text(),bodyLength=text.length;
+    if(!contentType.toLowerCase().includes("json")||!bodyLength)return jsonResponse(502,{ok:false,code:"UPSTREAM_NON_JSON",stage:"collector_status",upstreamStatus:response.status,contentType,bodyLength,emptyBody:bodyLength===0,bodyPreview:text.slice(0,160),retryable:true});
+    let data;try{data=JSON.parse(text)}catch{return jsonResponse(502,{ok:false,code:"JSON_PARSE_FAILED",stage:"collector_status",upstreamStatus:response.status,contentType,bodyLength,bodyPreview:text.slice(0,160),retryable:true})}
+    if(!response.ok)return jsonResponse(502,{ok:false,code:"UPSTREAM_ERROR",stage:"collector_status",upstreamStatus:response.status,retryable:response.status>=500});
+    const failures=Array.isArray(data.recentErrors)?data.recentErrors:[];
+    return jsonResponse(200,{ok:true,collectorHealthy:Boolean(data.autoPredictionEnabled&&data.resultCollectorEnabled&&!data.mutationDetectedCount),todayRaceCount:Number(data.todayRaceCount||0),sealedPredictionCount:Number(data.sealedPredictionCount||0),resultLoadedCount:Number(data.resultLoadedCount||0),verifiedCount:Number(data.verifiedCount||0),waitingPredictionCount:Number(data.waitingPredictionCount||0),pendingResultCount:Math.max(0,Number(data.todayRaceCount||0)-Number(data.resultLoadedCount||0)),failureCount:failures.length,retryingCount:failures.filter(x=>x?.retryable&&x?.finalOutcome==="RETRY_PENDING").length,lastPredictionRunAt:data.lastPredictionRunAt||null,lastResultRunAt:data.lastResultRunAt||null,lastError:data.lastError||null,recentErrors:failures.slice(-5),storageMode:data.persistence?.storageMode||null,serverReadMs:Date.now()-started});
+  }catch(error){return jsonResponse(502,{ok:false,code:"COLLECTOR_STATUS_UPSTREAM_FAILED",stage:"collector_status",retryable:true,error:String(error?.message||error)})}
+}

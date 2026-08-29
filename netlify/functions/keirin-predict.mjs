@@ -19,6 +19,7 @@ const VENUE_CODE_BY_NAME = {
 };
 
 export default async function handler(req) {
+  const totalStarted=performance.now(),timing={requestStartedAt:new Date().toISOString()};
   const predictionRequestedAt = new Date().toISOString();
   const url = new URL(req.url);
   const date = url.searchParams.get("date") || "";
@@ -54,7 +55,7 @@ export default async function handler(req) {
   }
 
   try {
-    const browserResult = await requestBrowserService(serviceBase, {
+    const officialStarted=performance.now(),browserResult = await requestBrowserService(serviceBase, {
       date,
       venueCode,
       venueName,
@@ -62,6 +63,9 @@ export default async function handler(req) {
       requestType: autoResearch ? "auto_prediction" : "manual_prediction",
       requestId: `predict-${date}-${venueCode}-${raceNo}-${Date.now()}`
     });
+    timing.officialFetchMs=roundMs(performance.now()-officialStarted);
+    timing.queueWaitMs=Number(browserResult.data?.audit?.queueWaitMs??browserResult.data?.diagnostics?.queueWaitMs??0);
+    timing.browserUsed=Boolean(browserResult.data?.diagnostics?.browserUsed??true);
 
     if (!browserResult.ok) {
       return jsonResponse(browserResult.status || 502, {
@@ -110,8 +114,9 @@ export default async function handler(req) {
     if (selectedLineObservedAt && Date.parse(selectedLineObservedAt) > Date.parse(predictionInputCutoffAt)) {
       throw new Error("公式ラインsnapshotの取得時刻が予想seal時刻を超えています");
     }
-    const evidenceParticipants = attachRiderDbEvidence(officialParticipants, riderDb, participantContext);
+    const hydrationStarted=performance.now(),evidenceParticipants = attachRiderDbEvidence(officialParticipants, riderDb, participantContext);
     const participants = adaptParticipantsForPrediction(evidenceParticipants, participantContext);
+    timing.participantHydrationMs=roundMs(performance.now()-hydrationStarted);
     const riderDbUsageAudit = summarizeRiderDbUsage(participants);
     if (participants.length < 5) {
       return jsonResponse(422, {
@@ -160,12 +165,19 @@ export default async function handler(req) {
       officialDataObservedAt
     } : null;
     if (preSeal) await persistPreSeal(serviceBase, preSeal);
-    const prediction = runKeirinEngine({
+    const engineStarted=performance.now(),prediction = runKeirinEngine({
       race,
       venueProfile,
       oddsByOrder: odds.complete ? odds.odds : {},
       budget
     });
+    timing.engineTotalMs=roundMs(performance.now()-engineStarted);
+    timing.riderScoringMs=Number(prediction.audit?.durationBreakdown?.riderScoringMs??null);
+    timing.initiativeMs=Number(prediction.audit?.durationBreakdown?.initiativeMs??null);
+    timing.branchesMs=Number(prediction.audit?.durationBreakdown?.branchesMs??null);
+    timing.terminalsMs=Number(prediction.audit?.durationBreakdown?.terminalsMs??null);
+    timing.purchaseMs=Number(prediction.audit?.durationBreakdown?.purchaseMs??null);
+    timing.explanationMs=Number(prediction.audit?.durationBreakdown?.explanationMs??null);
     const lineSnapshotAudit = browserResult.data.lineSnapshotAudit || null;
     prediction.lineSnapshotAudit = lineSnapshotAudit ? {
       lineSource: lineSnapshotAudit.lineSource || lineSnapshotAudit.selectedSource || "unknown",
@@ -182,6 +194,7 @@ export default async function handler(req) {
     };
     const predictionSealedAt = new Date().toISOString();
 
+    timing.totalBeforeSerializationMs=roundMs(performance.now()-totalStarted);
     return jsonResponse(200, {
       ok: prediction.audit.passed,
       race,
@@ -219,6 +232,7 @@ export default async function handler(req) {
         Object.keys(odds.odds).length ? null : "オッズ未取得・高配当判定保留"
       ].filter(Boolean),
       checkedAt: new Date().toISOString()
+      ,durationBreakdown:timing
     });
   } catch (error) {
     return jsonResponse(500, {
@@ -228,6 +242,7 @@ export default async function handler(req) {
     });
   }
 }
+function roundMs(value){return Math.round(Number(value||0)*100)/100}
 
 async function persistPreSeal(serviceBase, preSeal) {
   const response = await fetch(`${serviceBase}/keirin/auto-research/preseal`, {

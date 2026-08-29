@@ -7,6 +7,17 @@ export default async function handler(req){
   const base=String(process.env.KEIRIN_BROWSER_SERVICE_URL||"").trim().replace(/\/$/,"");
   if(!base)return jsonResponse(500,{ok:false,error:"KEIRIN_BROWSER_SERVICE_URLが設定されていません"});
   const attempts=[];
+  try{
+    const active=await fetch(`${base}/keirin/active-races?${new URLSearchParams({date})}`,{headers:{accept:"application/json"},signal:AbortSignal.timeout(18000)}),text=await active.text();
+    let payload=null;try{payload=JSON.parse(text)}catch{}
+    attempts.push({endpoint:"active-races",status:active.status,parsed:Boolean(payload),bodyLength:text.length});
+    if(active.ok&&payload?.ok&&Array.isArray(payload.venues)){
+      const meetings=payload.venues.filter(v=>String(v.venueCode||"").padStart(2,"0")!=="32").map(venue=>adaptStatusMeeting(base,date,venue));
+      const result={ok:true,date,meetings,checkedAt:payload.checkedAt||new Date().toISOString(),cacheHit:Boolean(payload.cacheHit),cacheStatus:payload.cacheStatus||"MISS",cacheAgeMs:payload.cacheAgeMs??null,diagnostics:{source:"collector_lifecycle_snapshot",serverReadMs:payload.serverReadMs??null,attempts}};
+      if(meetings.length)DISCOVER_CACHE.set(date,{savedAt:Date.now(),result});
+      return jsonResponse(200,result,{cacheStatus:result.cacheStatus});
+    }
+  }catch(error){attempts.push({endpoint:"active-races",error:String(error?.message||error)})}
   for(let i=0;i<RETRY_DELAYS.length;i++){
     if(RETRY_DELAYS[i])await sleep(RETRY_DELAYS[i]);
     try{
@@ -64,6 +75,9 @@ export default async function handler(req){
   return jsonResponse(502,{ok:false,error:"開催情報取得サービスが一時的に停止しています。数秒後に再試行してください。",attempts});
 }
 
+function adaptStatusMeeting(base,date,venue){
+  return adaptMeeting(base,date,{...venue,identityPassed:true,raceNumbers:venue.raceNumbers||venue.races?.map(r=>r.raceNo)||[],races:venue.races||[]});
+}
 function adaptMeeting(base,date,meeting){
   const venueCode=String(meeting.venueCode||"").padStart(2,"0"),venueName=String(meeting.venueName||"");
   const raceUrl=`${base}/keirin/race?${new URLSearchParams({date,venueCode,venueName,raceNo:"1"})}`;
@@ -71,7 +85,13 @@ function adaptMeeting(base,date,meeting){
     ?meeting.races.map(r=>({
         raceNo:Number(r.raceNo),
         deadline:String(r.deadline||""),
-        startTime:String(r.startTime||"")
+        startTime:String(r.startTime||""),
+        officialStatus:r.officialStatus||"OFFICIAL_STATUS_UNKNOWN",
+        resultStatus:r.resultStatus||"OFFICIAL_STATUS_UNKNOWN",
+        autoStatus:r.autoStatus||"NOT_COLLECTED",
+        predictionSealed:Boolean(r.predictionSealed),
+        resultConfirmed:Boolean(r.resultConfirmed),
+        compared:Boolean(r.compared)
       })).filter(r=>Number.isInteger(r.raceNo))
     :[];
   const raceNumbers=Array.from(new Set([
@@ -87,6 +107,11 @@ function adaptMeeting(base,date,meeting){
     races,
     identityPassed:meeting?.identityPassed===true,
     verifiedMeeting:meeting?.identityPassed===true,
+    finishedRaceCount:Number(meeting.finishedRaceCount||0),
+    totalRaceCount:Number(meeting.totalRaceCount||races.length),
+    nextRaceNo:Number(meeting.nextRaceNo)||null,
+    allResultsConfirmed:meeting.allResultsConfirmed===true,
+    statusLabel:meeting.statusLabel||"状態未確認",
     discoveredUrl:raceUrl,
     discovery:{
       ok:true,
@@ -106,4 +131,4 @@ function adaptMeeting(base,date,meeting){
 
 function isRetryable(status,message){return status===0||status===408||status===425||status===429||status>=500||/page crashed|target closed|browser|navigation|timeout|timed out|socket|fetch failed/i.test(String(message||""))}
 function sleep(ms){return new Promise(resolve=>setTimeout(resolve,ms))}
-function jsonResponse(status,body){return new Response(JSON.stringify(body),{status,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store"}})}
+function jsonResponse(status,body,{cacheStatus=null}={}){const response=new Response(JSON.stringify(body),{status,headers:{"content-type":"application/json; charset=utf-8","cache-control":"public, max-age=30, stale-while-revalidate=120"}});if(cacheStatus)response.headers.set("x-chari-cache",cacheStatus);return response}
