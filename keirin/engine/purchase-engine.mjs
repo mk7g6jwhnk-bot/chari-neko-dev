@@ -85,7 +85,9 @@ export function runKeirinPurchaseEngine({prediction,oddsByOrder={},budget=3000})
   const classified=purchaseBlocked
     ?rawClassified.map(item=>({...item,betClass:"NONE",purchaseStatus:"購入不採用",purchaseReason:blockedReason,purchaseRejectCode:blockCode,lifecycle:{...(item.lifecycle||{}),generated:true,probabilityEvaluated:true,terminalDeleted:false,purchaseDecision:"REJECTED",purchaseDecisionCode:blockCode,purchaseDecisionReason:blockedReason}}))
     :rawClassified;
-  const normalPlan=generationPassed&&!purchaseBlocked?allocate(classified,budget):[];
+  const naturalCandidateCount=classified.filter(item=>["MAIN","COVER","BUYABLE_HIGH"].includes(item.betClass)).length;
+  const budgetInsufficientForNaturalCluster=naturalCandidateCount>0&&Number(budget||0)<naturalCandidateCount*100;
+  const normalPlan=generationPassed&&!purchaseBlocked&&!budgetInsufficientForNaturalCluster?allocate(classified,budget):[];
   const fallbackPlan=generationPassed&&normalPlan.length===0&&prediction.terminals.length
     ?buildNonZeroReferencePlan({rawClassified,classified,budget,blockedReason:purchaseBlocked?blockedReason:"通常購入条件で採用0件",blockCode:purchaseBlocked?blockCode:"NO_STANDARD_PURCHASE_CANDIDATE",lineFallbackDiscriminationAudit,allocator:allocate})
     :[];
@@ -106,6 +108,10 @@ export function runKeirinPurchaseEngine({prediction,oddsByOrder={},budget=3000})
     purchase.minimumRequired=fallbackPlan.length*100;
   }
   if(purchaseBlocked){purchase.noBet=true;purchase.noBetReason=blockCode;}
+  if(budgetInsufficientForNaturalCluster){purchase.noBet=true;purchase.noBetReason="DIFFUSE_CLUSTER_EXCEEDS_BUDGET";purchase.purchaseRegime="EXTREMELY_DIFFUSE";purchase.purchaseRegimeReason="NATURAL_CLUSTER_CANNOT_BE_FUNDED_WITHOUT_ARBITRARY_SLICING";purchase.requiredNaturalClusterBudget=naturalCandidateCount*100;purchase.purchaseCandidateCountAfterCompression=0;purchase.finalBetCount=0;purchase.adoptedTerminalCount=0;}
+  else if(purchase.noBet)purchase.purchaseRegime="DIFFUSE";
+  else if(standardPurchasePlan.length===1)purchase.purchaseRegime="CONCENTRATED";
+  else purchase.purchaseRegime="NORMAL";
   purchase.girlsStartEvidenceCount=startEvidenceCount;
   purchase.girlsStartEvidenceRequired=raceMeta.raceCategory==="girls"?startEvidenceRequired:null;
   purchase.mainInvariantAudit={

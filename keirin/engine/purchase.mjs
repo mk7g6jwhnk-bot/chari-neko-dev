@@ -262,6 +262,7 @@ export function allocate(items,budget){
 
   if(numericBudget<minimum){
     return natural.map(item=>({
+      ...thickQualificationFields(item),
       order:item.order,
       betClass:item.betClass,
       stake:null,
@@ -298,6 +299,7 @@ export function allocate(items,budget){
   }
 
   return natural.map((item,i)=>({
+    ...thickQualificationFields(item),
     order:item.order,
     betClass:item.betClass,
     stake:stakes[i],
@@ -590,6 +592,8 @@ function limitUnseparatedThirdVariants(selected,allItems){
 function boundaryAudit({initialTerminalCount=0,selectionMode,boundaryRank=null,boundaryDetected=false,bestGap=0,medianGap=0,mad=0,bestStrength=0,relativeDrop=0,selectedMass=0,singletonSelection=false,singletonJustification=null,...rest}){
   return{initialTerminalCount,selectionMode,boundaryDetected,boundaryRank,boundaryGap:bestGap,boundaryMedianGap:medianGap,boundaryMAD:mad,boundaryStrength:bestStrength,boundaryRelativeDrop:relativeDrop,selectedMass,singletonSelection,singletonJustification,thirdVariantAmbiguity:{detected:false,count:0,pairs:[]},...rest};
 }
+
+function thickQualificationFields(item){return{naturalConvergenceScore:item.naturalConvergenceScore??null,globalRank:item.globalRank??item.terminalGlobalRank??null,familyRank:item.familyRank??item.terminalFamilyRank??null,pairRank:item.pairRank??item.terminalPairRank??null,nodeConditionalProbability:item.nodeConditionalProbability??null,scenarioCoherence:item.scenarioCoherence??null,branchFit:item.branchFit??null,naturalSeparation:item.naturalSeparation??null}}
 
 function buildPurchaseFunnel({generated,natural,pairPassed,final}){
   const stages=[
