@@ -35,7 +35,7 @@ for(const fixture of cases){
 const girlsScored=scored.slice(0,5).map(rider=>({...rider,lineId:null,role:null,evidence:{...rider.evidence,finish:rider.number===5?0:rider.evidence.finish}}));
 const girlsBranch={id:"BATTLE",label:"主導権争い・消耗",branchType:"LEAD_BATTLE",requiredFirstNumber:2};
 const girlsTerminal={order:[2,1,5],probability:.02,nodeTrace:[],branchContributions:[contribution(girlsBranch,.02)]};
-const [girlsResult]=attachPurchaseScenarioExplanations({plans:[{order:[2,1,5],betClass:"MAIN",probability:.02}],classified:[girlsTerminal,{order:[2,1,3],probability:.019,nodeTrace:[],branchContributions:[contribution(girlsBranch,.019)]}],scored:girlsScored,lines:[],branches:[girlsBranch]});
+const [girlsResult]=attachPurchaseScenarioExplanations({plans:[{order:[2,1,5],betClass:"MAIN",probability:.02}],classified:[girlsTerminal,{order:[2,1,3],probability:.019,nodeTrace:[],branchContributions:[contribution(girlsBranch,.019)]}],scored:girlsScored,lines:[{id:"provisional",type:"仮ライン"}],branches:[girlsBranch]});
 assert.equal(girlsResult.scenarioExplanation.includes("別線から"),false,"ライン入力なしで別線を創作しない");
 assert.equal(girlsResult.scenarioExplanation.includes("0.00"),false,"欠損相当のゼロ値を根拠表示しない");
 assert.ok(girlsResult.scenarioExplanation.includes("競合条件が前面に出ると3着が入れ替わる"));

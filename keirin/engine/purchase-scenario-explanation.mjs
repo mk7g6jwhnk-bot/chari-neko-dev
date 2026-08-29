@@ -33,7 +33,7 @@ export function buildPurchaseExplanationContext({terminal,classified=[],scored=[
     primaryBranch,supportingBranches,primaryLine,
     initiativeOwner:initiativeRider?Number(initiativeRider.number):null,
     initiativeAssessment:primaryBranch.initiative||null,attackType:attackType(primaryBranch.branchType),
-    hasLineContext:Boolean(lines.length&&scored.some(rider=>rider.lineId&&!String(rider.lineId).startsWith("unknown-"))),
+    hasLineContext:Boolean(primaryLine),
     lineRelation12:lineRelation(first,second),lineRelation23:lineRelation(second,third),lineRelation13:lineRelation(first,third),
     firstEvidence:evidence(first,"FIRST",terminal),secondConditionalEvidence:evidence(second,"SECOND",terminal),thirdConditionalEvidence:evidence(third,"THIRD",terminal),
     rejectedCompetitors:rejectedRider?[{number:Number(rejectedRider.number),role:rejectedRider.role||null,lineId:rejectedRider.lineId||null,probability:Number(rejectedThird.probability)||0,evidence:evidence(rejectedRider,"THIRD",rejectedThird)}]:[],
@@ -106,10 +106,11 @@ function evidence(rider,stage,terminal){
   const conditions=(node?.newRequiredConditions||[]).map(item=>({label:item.label||item.mechanism?.label||null,probability:numeric(item.probability),kind:item.kind||null})).filter(item=>item.label);
   const e=rider.evidence||{},keys=stage==="FIRST"?["start","sprint","finish","recent"]:["tracking","finish","recent"];
   const drivers=keys.map(key=>({key,value:numeric(e[key])})).filter(item=>item.value!==null&&item.value>0).sort((a,b)=>b.value-a.value||a.key.localeCompare(b.key,"en"));
+  if(!drivers.length){const positionValue=numeric(rider.roleScores?.[stage==="FIRST"?"first":stage==="SECOND"?"second":"third"]);if(positionValue!==null&&positionValue>0)drivers.push({key:stage==="FIRST"?"positionFirst":stage==="SECOND"?"positionSecond":"positionThird",value:positionValue})}
   return{stage,conditions,drivers,conditionalProbability:numeric(node?.conditionalProbability)};
 }
 function conditionPhrase(evidence,position){const condition=evidence?.conditions?.[0]?.label;if(condition)return `「${condition}」`;const driver=driverPhrase(evidence);return driver||`${position}の着順別評価`}
-function driverPhrase(evidence){const labels={start:"主導権評価",sprint:"まくり評価",finish:"終盤評価",tracking:"追走評価",recent:"近況評価"},top=evidence?.drivers?.[0];return top?`${labels[top.key]||top.key} ${top.value.toFixed(2)}`:"予測時点の着順別評価"}
+function driverPhrase(evidence){const labels={start:"主導権評価",sprint:"まくり評価",finish:"終盤評価",tracking:"追走評価",recent:"近況評価",positionFirst:"1着評価",positionSecond:"2着評価",positionThird:"3着評価"},top=evidence?.drivers?.[0];return top?`${labels[top.key]||top.key} ${top.value.toFixed(2)}`:"保存された着順条件"}
 function lineRelation(a,b){return a?.lineId&&b?.lineId&&!String(a.lineId).startsWith("unknown-")&&String(a.lineId)===String(b.lineId)?"same-line":"different-line"}
 function attackType(type){return({LEADER_HOLD:"逃げ",BANTE_SASHI:"差し",MAKURI_SUCCESS:"まくり",SOLO_RISE:"単騎浮上",LINE_SEPARATION:"ライン分断",LEAD_BATTLE:"踏み合い"})[type]||"展開競合"}
 function mergeBranch(contribution,branch,terminal){return{...(branch||{}),...(contribution||{}),id:contribution?.branchId||branch?.id||terminal.dominantBranchId||terminal.branchId||null,label:contribution?.branchLabel||branch?.label||terminal.dominantBranchLabel||terminal.branchLabel||"保存された展開枝",branchType:contribution?.branchType||branch?.branchType||terminal.branchType||"LEAD_BATTLE"}}
