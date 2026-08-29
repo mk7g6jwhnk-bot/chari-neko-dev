@@ -26,6 +26,7 @@ export default async function handler(req) {
   const venueName = url.searchParams.get("venueName") || "競輪場";
   const raceNo = Number(url.searchParams.get("raceNo") || 0);
   const budget = Number(url.searchParams.get("budget") || 3000);
+  const displayOnly = url.searchParams.get("display") === "1";
   const autoResearch = url.searchParams.get("autoResearch") === "1";
   const requestedScheduledStartAt = url.searchParams.get("scheduledStartAt") || "";
   const raceCardUrl = url.searchParams.get("raceCardUrl") || "";
@@ -66,6 +67,10 @@ export default async function handler(req) {
     timing.officialFetchMs=roundMs(performance.now()-officialStarted);
     timing.queueWaitMs=Number(browserResult.data?.audit?.queueWaitMs??browserResult.data?.diagnostics?.queueWaitMs??0);
     timing.browserUsed=Boolean(browserResult.data?.diagnostics?.browserUsed??true);
+    timing.officialCacheState=browserResult.data?.cacheAudit?.state||"MISS";
+    timing.officialCacheAgeMs=browserResult.data?.cacheAudit?.ageMs??null;
+    timing.officialStages=Object.fromEntries((browserResult.data?.diagnostics?.steps||[]).filter(step=>step?.step).map(step=>[step.step,Number(step.elapsedMs||0)]));
+    timing.browserTotalMs=Number(browserResult.data?.diagnostics?.elapsedMs??browserResult.data?.audit?.elapsedMs??timing.officialFetchMs);
 
     if (!browserResult.ok) {
       return jsonResponse(browserResult.status || 502, {
@@ -195,7 +200,7 @@ export default async function handler(req) {
     const predictionSealedAt = new Date().toISOString();
 
     timing.totalBeforeSerializationMs=roundMs(performance.now()-totalStarted);
-    return jsonResponse(200, {
+    const fullPayload = {
       ok: prediction.audit.passed,
       race,
       odds,
@@ -233,7 +238,15 @@ export default async function handler(req) {
       ].filter(Boolean),
       checkedAt: new Date().toISOString()
       ,durationBreakdown:timing
-    });
+    };
+    if(!displayOnly)return jsonResponse(200,fullPayload);
+    const serializationStarted=performance.now(),displayPayload=buildDisplayPredictionPayload(fullPayload);
+    timing.serializationMs=roundMs(performance.now()-serializationStarted);
+    displayPayload.durationBreakdown=timing;
+    displayPayload.payloadMode="DISPLAY_PREDICTION_PAYLOAD";
+    displayPayload.fullAuditAvailable=Boolean(autoResearch);
+    displayPayload.displayPayloadHash=await sha256Json(displayPayload);
+    return jsonResponse(200,displayPayload);
   } catch (error) {
     return jsonResponse(500, {
       ok: false,
@@ -243,6 +256,16 @@ export default async function handler(req) {
   }
 }
 function roundMs(value){return Math.round(Number(value||0)*100)/100}
+
+export function buildDisplayPredictionPayload(payload={}){
+  const prediction=payload.prediction||{},selected=[...(prediction.purchasePlan||[])];
+  const selectedOrders=new Set(selected.map(item=>normalizeOrderKey(item?.order||item?.combination)));
+  const compactTerminals=(prediction.terminals||[]).filter(item=>selectedOrders.has(normalizeOrderKey(item?.order||item?.combination))).map(item=>({order:item.order||item.combination,probability:item.probability??null,betClass:item.betClass||null,purchaseStatus:item.purchaseStatus||null,dominantBranchId:item.dominantBranchId||item.branchId||null,dominantBranchLabel:item.dominantBranchLabel||item.branchLabel||null,naturalConvergenceScore:item.naturalConvergenceScore??null,nodeConditionalProbability:item.nodeConditionalProbability??null,terminalGlobalRank:item.terminalGlobalRank??null,terminalFamilyRank:item.terminalFamilyRank??null,terminalPairRank:item.terminalPairRank??null}));
+  const compactAudit={passed:prediction.audit?.passed!==false,probabilitySum:prediction.audit?.probabilitySum??null,terminalCount:prediction.audit?.terminalCount??null,lineFallbackAudit:prediction.audit?.lineFallbackAudit||null,predictionBoundaryAudit:prediction.audit?.predictionBoundaryAudit||null,predictionPurchaseBoundaryAudit:prediction.audit?.predictionPurchaseBoundaryAudit||null,selectionBoundaryAudit:prediction.audit?.selectionBoundaryAudit||null,purchaseDistributionAudit:prediction.audit?.purchaseDistributionAudit||null,purchaseRegime:prediction.audit?.purchaseRegime||null};
+  return {ok:payload.ok,race:payload.race,odds:payload.odds,prediction:{engineVersion:prediction.engineVersion,lineConfidence:prediction.lineConfidence,scored:prediction.scored||[],predictionExplanation:prediction.predictionExplanation||prediction.prediction?.explanation||null,terminals:compactTerminals,purchasePlan:selected,standardPurchasePlan:prediction.standardPurchasePlan||[],referencePurchasePlan:prediction.referencePurchasePlan||[],recommendationLabel:prediction.recommendationLabel||"",noBet:Boolean(prediction.noBet),noBetReason:prediction.noBetReason||null,audit:compactAudit,lineSnapshotAudit:prediction.lineSnapshotAudit||null},predictionRequestedAt:payload.predictionRequestedAt,predictionSealedAt:payload.predictionSealedAt,preSeal:payload.preSeal||null,riderDbUsageAudit:payload.riderDbUsageAudit||null,lineSnapshotAudit:payload.lineSnapshotAudit||null,dataQuality:payload.dataQuality||null,warnings:payload.warnings||[],checkedAt:payload.checkedAt,durationBreakdown:payload.durationBreakdown};
+}
+function normalizeOrderKey(value){return(Array.isArray(value)?value:String(value||"").match(/\d+/g)||[]).map(Number).slice(0,3).join("-")}
+async function sha256Json(value){const bytes=new TextEncoder().encode(JSON.stringify(value));const digest=await crypto.subtle.digest("SHA-256",bytes);return[...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,"0")).join("")}
 
 async function persistPreSeal(serviceBase, preSeal) {
   const response = await fetch(`${serviceBase}/keirin/auto-research/preseal`, {
