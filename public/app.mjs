@@ -402,6 +402,8 @@ function friendlyNodeCondition(b,stage,position,snapshot){
 function friendlyPurchaseReason(b,explanation=null,snapshot=null){
   const order=Array.isArray(b?.order)?b.order.map(Number):[];
   const category=b?.category||"";
+  if(b?.scenarioExplanation)return b.scenarioExplanation;
+  if(snapshot?.sealedPrediction?.immutable)return "OLD_SEAL_NO_SCENARIO_EXPLANATION";
   const scenario=findFriendlyPurchaseScenario(b,explanation);
   const branchLabel=b?.dominantBranchLabel||scenario?.branchLabel||"保存された展開枝";
   const pieces=[];

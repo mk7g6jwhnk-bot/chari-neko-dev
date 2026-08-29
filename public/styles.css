@@ -229,4 +229,5 @@
 .buyExplanation>summary small{font-size:.72rem;font-weight:700;color:var(--muted);margin-left:auto}
 .buyExplanationBody{padding:0 12px 12px;border-top:1px solid rgba(255,255,255,.06)}
 .buyExplanationBody>p{margin:9px 0 0;font-size:.8rem;line-height:1.5}
+.buyExplanationBody>p:first-child{white-space:pre-line}
 .buyExplanationBody .supportBranchAudit{margin-top:10px}

@@ -5,6 +5,7 @@ import{
   buildReferencePositionBalanceAudit,buildTerminalLifecycleAudit,isUsableStartPower
 }from"./engine-support.mjs";
 import{PREDICTION_ENGINE_VERSION,PURCHASE_ENGINE_VERSION,ENGINE_PAIR_ID,buildEnginePairAudit}from"./engine-version.mjs";
+import{attachPurchaseScenarioExplanations}from"./purchase-scenario-explanation.mjs";
 
 export function resolvePurchaseBlock({lineBlocked=false,lineAndStartEvidenceBlocked=false,lineFallbackEvidenceBlocked=false,girlsEvidenceBlocked=false,mainInvariantFailed=false}={}){
   const blocked=Boolean(lineBlocked||lineAndStartEvidenceBlocked||lineFallbackEvidenceBlocked||girlsEvidenceBlocked);
@@ -88,8 +89,9 @@ export function runKeirinPurchaseEngine({prediction,oddsByOrder={},budget=3000})
   const fallbackPlan=generationPassed&&normalPlan.length===0&&prediction.terminals.length
     ?buildNonZeroReferencePlan({rawClassified,classified,budget,blockedReason:purchaseBlocked?blockedReason:"通常購入条件で採用0件",blockCode:purchaseBlocked?blockCode:"NO_STANDARD_PURCHASE_CANDIDATE",lineFallbackDiscriminationAudit,allocator:allocate})
     :[];
-  const standardPurchasePlan=normalPlan;
-  const referencePurchasePlan=fallbackPlan;
+  const explanationSources={classified,scored:prediction.scored||[],lines:prediction.lines||[],branches:prediction.branches||[]};
+  const standardPurchasePlan=attachPurchaseScenarioExplanations({plans:normalPlan,...explanationSources});
+  const referencePurchasePlan=attachPurchaseScenarioExplanations({plans:fallbackPlan,...explanationSources});
   const plan=standardPurchasePlan.length?standardPurchasePlan:referencePurchasePlan;
   const purchase=purchaseDiagnostics(classified,plan,budget);
   const terminalLifecycleAudit=buildTerminalLifecycleAudit({sourceTerminals:prediction.terminals,classified,terminalGenerationAudit:prediction.audit?.terminalGenerationAudit||null});
