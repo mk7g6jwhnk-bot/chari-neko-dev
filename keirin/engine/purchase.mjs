@@ -279,6 +279,9 @@ export function allocate(items,budget){
       evidenceSummary:item.evidenceSummary||null,
       highPayoutAttribute:Boolean(item.highPayoutAttribute),
       highPayoutAttributeLabel:item.highPayoutAttributeLabel||null,
+      coverParentOrder:item.coverParentOrder||null,
+      coverParentType:item.coverParentType||null,
+      orphanCover:Boolean(item.orphanCover),
       fundingStatus:"予算不足",
       minimumRequired:minimum
     }));
@@ -316,6 +319,9 @@ export function allocate(items,budget){
     evidenceSummary:item.evidenceSummary||null,
     highPayoutAttribute:Boolean(item.highPayoutAttribute),
     highPayoutAttributeLabel:item.highPayoutAttributeLabel||null,
+    coverParentOrder:item.coverParentOrder||null,
+    coverParentType:item.coverParentType||null,
+    orphanCover:Boolean(item.orphanCover),
     fundingStatus:"配分済み",
     minimumRequired:minimum
   }));
@@ -404,6 +410,7 @@ export function purchaseDiagnostics(classified,plan,budget){
       cover:natural.filter(item=>item.betClass==="COVER").length,
       buyableHigh:natural.filter(item=>item.betClass==="BUYABLE_HIGH").length
     },
+    orphanCoverCount:natural.filter(item=>item.betClass==="COVER"&&item.orphanCover===true).length,
     minimumRequired:natural.length*100,
     budget:Number(budget||0),
     budgetSufficient:Number(budget||0)>=natural.length*100,

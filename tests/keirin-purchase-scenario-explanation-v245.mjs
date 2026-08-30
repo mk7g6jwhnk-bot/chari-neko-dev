@@ -26,6 +26,7 @@ for(const fixture of cases){
   const text=result.scenarioExplanation;
   for(const phrase of fixture.need)assert.ok(text.includes(phrase),`${fixture.name}: ${phrase}`);
   assert.ok(text.includes("まで成立すると"));assert.ok(text.includes("も同じ1-2着からの3着候補"));assert.ok(text.includes("この目が崩れるのは"));
+  assert.equal(/評価\s*\d+(?:\.\d+)?/.test(text),false,"raw score must not be the user-facing reason");
   assert.ok(text.split("\n\n").length>=3&&text.split("\n\n").length<=4);
   for(const banned of["自然な並びです","確率上位なので有力です","番手なので2着です","3着として自然です","オッズ妙味があります","この組み合わせが成立しやすいです"]){assert.equal(text.includes(banned),false)}
   for(const key of["order","betClass","probability","purchaseStatus","stake"])assert.deepEqual(result[key],original[key],`${key} changed`);
@@ -39,6 +40,13 @@ const [girlsResult]=attachPurchaseScenarioExplanations({plans:[{order:[2,1,5],be
 assert.equal(girlsResult.scenarioExplanation.includes("別線から"),false,"ライン入力なしで別線を創作しない");
 assert.equal(girlsResult.scenarioExplanation.includes("0.00"),false,"欠損相当のゼロ値を根拠表示しない");
 assert.ok(girlsResult.scenarioExplanation.includes("競合条件が前面に出ると3着が入れ替わる"));
+assert.equal(girlsResult.scenarioExplanation.includes("ライン同士"),false,"girls/no-line explanation must not invent line relations");
+
+const splitBranch={id:"SPLIT",label:"ライン分断",branchType:"LINE_SEPARATION",primaryLineId:"A",requiredFirstNumber:1};
+const [missingBante]=attachPurchaseScenarioExplanations({plans:[{order:[1,4,3],betClass:"MAIN"}],classified:[{order:[1,4,3],betClass:"MAIN",purchaseStatus:"購入採用",representativeTerminal:true,nodeTrace:trace(1,4,3),branchContributions:[contribution(splitBranch,.2)]}],scored,lines,branches:[splitBranch]});
+assert.ok(missingBante.scenarioExplanation.includes("2番 選手2（番手）が着外になるのは"));assert.equal(missingBante.scenarioExplanation.includes("EVIDENCE_INSUFFICIENT"),false);
+const [unsupportedMissingBante]=attachPurchaseScenarioExplanations({plans:[{order:[1,4,3],betClass:"MAIN"}],classified:[{order:[1,4,3],betClass:"MAIN",purchaseStatus:"購入採用",representativeTerminal:true,nodeTrace:[],branchContributions:[contribution({...splitBranch,branchType:"LEADER_HOLD"},.2)]}],scored,lines,branches:[]});
+assert.ok(unsupportedMissingBante.scenarioExplanation.includes("EVIDENCE_INSUFFICIENT"),"unsupported bante exclusion must be explicit");
 
 const [sealedPlan]=attachPurchaseScenarioExplanations({plans:[{order:[1,2,4],betClass:"MAIN",probability:.16}],classified:[{order:[1,2,4],probability:.16,nodeTrace:trace(1,2,4),branchContributions:[{branchId:"L",branchLabel:"A先行押し切り",branchType:"LEADER_HOLD",primaryLineId:"A",requiredFirstNumber:1,probability:.16}]}],scored,lines,branches:[]});
 const snapshot=createSnapshot({race:{date:"20260829",venueCode:"24",venue:"宇都宮",raceNo:1,participants:scored},prediction:{engineVersion:"TEST",standardPurchasePlan:[sealedPlan],purchasePlan:[sealedPlan]}},new Date("2026-08-29T00:00:00Z"));
