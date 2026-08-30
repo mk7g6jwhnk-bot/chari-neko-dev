@@ -1,0 +1,13 @@
+import assert from "node:assert/strict";
+import {buildDisplayPredictionPayload,validateDisplayPredictionPayload,validateOfficialRaceIdentity} from "../netlify/functions/keirin-predict.mjs";
+const participants=Array.from({length:7},(_,i)=>({number:i+1,name:`選手${i+1}`,registration:`10${i+1}00`,className:"A1",lineId:1,role:"先行"}));
+const requested={date:"20260830",venueCode:"55",raceNo:1};
+assert.equal(validateOfficialRaceIdentity({date:"20260830",venueCode:"55",raceNo:1},requested).passed,true);
+assert.equal(validateOfficialRaceIdentity({date:"",venueCode:"55",raceNo:1},requested).passed,false);
+assert.equal(validateOfficialRaceIdentity({date:"20260830",venueCode:"55",raceNo:2},requested).passed,false);
+const display=buildDisplayPredictionPayload({ok:true,race:{date:"20260830",venueCode:"55",raceNo:1,participants},prediction:{purchasePlan:[],terminals:[]}});
+assert.equal(validateDisplayPredictionPayload(display,requested).passed,true);
+assert.deepEqual(Object.keys(display.race.participants[0]).sort(),["className","lineId","name","number","registration","role"].sort());
+delete display.race.participants[0].registration;
+assert.equal(validateDisplayPredictionPayload(display,requested).validationFailedField,"race.participants.summary");
+console.log("PASS official payload + display summary validation");

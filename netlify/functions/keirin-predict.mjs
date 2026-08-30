@@ -73,8 +73,11 @@ export default async function handler(req) {
     timing.browserTotalMs=Number(browserResult.data?.diagnostics?.elapsedMs??browserResult.data?.audit?.elapsedMs??timing.officialFetchMs);
 
     if (!browserResult.ok) {
+      console.log(JSON.stringify({event:"prediction_official_payload_rejected",raceKey:`${date}-${String(venueCode).padStart(2,"0")}-${raceNo}`,requestType:autoResearch?"auto_prediction":"manual_prediction",requestStartedAt:timing.requestStartedAt,source:browserResult.data?.source||browserResult.data?.cacheAudit?.source||null,cacheHit:browserResult.data?.cacheAudit?.state==="HIT",appErrorCode:browserResult.data?.errorCode||"OFFICIAL_RACE_FETCH_FAILED",endpointAudit:browserResult.data?.endpointAudit||[]}));
       return jsonResponse(browserResult.status || 502, {
         ok: false,
+        errorCode: browserResult.data?.errorCode || "OFFICIAL_RACE_FETCH_FAILED",
+        validationFailedField: browserResult.data?.validationFailedField || null,
         error: browserResult.data?.error || "競輪公式データ取得失敗",
         browserService: browserResult.data,
         requestAudit: { date, venueName, venueCode, raceNo }
@@ -246,6 +249,8 @@ export default async function handler(req) {
     displayPayload.payloadMode="DISPLAY_PREDICTION_PAYLOAD";
     displayPayload.fullAuditAvailable=Boolean(autoResearch);
     displayPayload.displayPayloadHash=await sha256Json(displayPayload);
+    const displayValidation=validateDisplayPredictionPayload(displayPayload,{date,venueCode,raceNo});
+    if(!displayValidation.passed)return jsonResponse(500,{ok:false,error:"DISPLAY_PREDICTION_PAYLOAD_INCOMPLETE",errorCode:"DISPLAY_PREDICTION_PAYLOAD_INCOMPLETE",validationFailedField:displayValidation.validationFailedField,requestAudit:{date,venueName,venueCode,raceNo,payloadMode:displayPayload.payloadMode,participantCount:displayValidation.participantCount}});
     return jsonResponse(200,displayPayload);
   } catch (error) {
     return jsonResponse(500, {
@@ -267,6 +272,7 @@ export function buildDisplayPredictionPayload(payload={}){
 }
 function compactPurchaseRow(item={}){const keys=["order","combination","betClass","stake","odds","purchaseStatus","purchaseReason","reason","probability","probabilityShare","expectedValueIndex","globalRank","familyRank","pairRank","firstFamilyNumber","firstFamilyTier","firstFamilyProbability","firstFamilyProbabilityShare","secondFamilyRelativeToBest","thirdFamilyRelativeToBest","decisionRatios","evidenceSummary","highPayoutAttribute","highPayoutAttributeLabel","chatForecastRole","directMainBranchSupport","branchHeadMatched","naturalConvergenceScore","naturalConvergenceLevel","naturalConvergenceReasons","extraConditionCount","relativeConditionCount","relativeConditionPenalty","relativeConditionTrace","probabilitySeparationPolicy","scenarioCoherence","nodeConditionalProbability","dominantBranchId","dominantBranchLabel","dominantBranchPriority","branchLabel","scenarioExplanation","explanationContext","thickQualified","predictionQualificationScore","fundingPriorityScore"];return Object.fromEntries(keys.filter(key=>item[key]!==undefined).map(key=>[key,item[key]]))}
 function compactParticipant(item={}){const keys=["number","name","registration","riderId","sourceType","sourcePath","className","prefecture","lineId","line","linePosition","lineOrder","role","lineStatus"];return Object.fromEntries(keys.filter(key=>item[key]!==undefined).map(key=>[key,item[key]]))}
+export function validateDisplayPredictionPayload(payload={},requested={}){const race=payload.race||{},participants=Array.isArray(race.participants)?race.participants:[],identity=validateOfficialRaceIdentity({date:race.date,venueCode:race.venueCode,raceNo:race.raceNo},requested),complete=participants.length>=5&&participants.every(x=>Number.isInteger(Number(x.number))&&String(x.name||"").trim()&&String(x.registration||x.riderId||"").trim());return{passed:identity.passed&&complete,participantCount:participants.length,validationFailedField:!identity.passed?`race.${Object.entries(identity.checks).find(([,v])=>!v)?.[0]||"identity"}`:!complete?"race.participants.summary":null}}
 function compactScoredRider(item={}){const keys=["number","recentForm","startPower","startPowerEvidence","sprintPower","finishPower","trackingSkill","kimariteAbilityEvidence","abilityMissingAudit","roleScores","riderEvaluationV2"];return Object.fromEntries(keys.filter(key=>item[key]!==undefined).map(key=>[key,item[key]]))}
 function normalizeOrderKey(value){return(Array.isArray(value)?value:String(value||"").match(/\d+/g)||[]).map(Number).slice(0,3).join("-")}
 async function sha256Json(value){const bytes=new TextEncoder().encode(JSON.stringify(value));const digest=await crypto.subtle.digest("SHA-256",bytes);return[...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,"0")).join("")}
@@ -292,9 +298,9 @@ export function validateOfficialRaceIdentity(basic = {}, params = {}) {
   const returnedVenue = rawVenue ? String(rawVenue).padStart(2, "0") : "";
   const returnedRaceNo = Number(basic.raceNo);
   const checks = {
-    date: !returnedDate || returnedDate === normalizeDate(params.date),
-    venueCode: !returnedVenue || returnedVenue === String(params.venueCode || "").padStart(2, "0"),
-    raceNo: !Number.isFinite(returnedRaceNo) || returnedRaceNo === Number(params.raceNo)
+    date: Boolean(returnedDate) && returnedDate === normalizeDate(params.date),
+    venueCode: Boolean(returnedVenue) && returnedVenue === String(params.venueCode || "").padStart(2, "0"),
+    raceNo: Number.isFinite(returnedRaceNo) && returnedRaceNo === Number(params.raceNo)
   };
   return { passed: Object.values(checks).every(Boolean), checks };
 }
@@ -350,20 +356,29 @@ async function requestBrowserService(base, params) {
       const participantCount = Array.isArray(officialData.participants)
         ? officialData.participants.length
         : 0;
+      const raceIdentityAudit = validateOfficialRaceIdentity(officialData.basic, params);
       const hasUsableRaceData = Boolean(
         officialData.basic &&
-        participantCount >= 7 && participantCount <= 9 &&
-        validateOfficialRaceIdentity(officialData.basic, params).passed
+        participantCount >= 5 && participantCount <= 9 &&
+        raceIdentityAudit.passed
       );
 
       attempts.push({
         endpoint: "/keirin/race",
         attempt,
         status: response.status,
+        contentType: response.headers.get("content-type") || null,
+        bodyLength: new TextEncoder().encode(text).byteLength,
         parsed: data !== null,
+        topLevelKeys: data && typeof data === "object" ? Object.keys(data) : [],
         participantCount,
         hasUsableRaceData,
-        raceIdentityAudit: validateOfficialRaceIdentity(officialData.basic, params),
+        officialProfileEvidenceCount: Array.isArray(officialData.participants) ? officialData.participants.filter(x => x?.officialProfile?.identityPassed === true || x?.officialProfileEvidence?.identityPassed === true).length : 0,
+        lineDataCount: Array.isArray(officialData.lines) ? officialData.lines.length : 0,
+        raceIdentityAudit,
+        source: data?.cacheAudit?.source || null,
+        cacheHit: data?.cacheAudit?.state === "HIT",
+        payloadMode: data?.payloadMode || null,
         error: data?.error || null,
         elapsedMs: Date.now() - startedAt
       });
@@ -405,6 +420,8 @@ async function requestBrowserService(base, params) {
         status: response.status || 502,
         data: {
           ok: false,
+          errorCode: !raceIdentityAudit.passed ? "RACE_IDENTITY_MISMATCH" : "OFFICIAL_RACE_PAYLOAD_INCOMPLETE",
+          validationFailedField: !raceIdentityAudit.passed ? Object.entries(raceIdentityAudit.checks).find(([, value]) => !value)?.[0] || "raceIdentity" : "officialData.participants",
           error: data?.error ||
             (hasUsableRaceData
               ? `競輪ブラウザサービスが予想データを返しましたが処理に失敗しました（HTTP ${response.status}）`
