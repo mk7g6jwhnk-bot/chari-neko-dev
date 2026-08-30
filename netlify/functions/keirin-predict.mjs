@@ -297,9 +297,13 @@ export function validateOfficialRaceIdentity(basic = {}, params = {}) {
   const rawVenue = basic.venueCode || basic.jocd || basic.jcd || "";
   const returnedVenue = rawVenue ? String(rawVenue).padStart(2, "0") : "";
   const returnedRaceNo = Number(basic.raceNo);
+  const returnedVenueName = String(basic.venueName || "").replace(/[\s　]/g, "");
+  const requestedVenueName = String(params.venueName || "").replace(/[\s　]/g, "");
   const checks = {
     date: Boolean(returnedDate) && returnedDate === normalizeDate(params.date),
-    venueCode: Boolean(returnedVenue) && returnedVenue === String(params.venueCode || "").padStart(2, "0"),
+    venueCode: returnedVenue
+      ? returnedVenue === String(params.venueCode || "").padStart(2, "0")
+      : Boolean(returnedVenueName && requestedVenueName && returnedVenueName === requestedVenueName),
     raceNo: Number.isFinite(returnedRaceNo) && returnedRaceNo === Number(params.raceNo)
   };
   return { passed: Object.values(checks).every(Boolean), checks };

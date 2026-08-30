@@ -5,6 +5,8 @@ const requested={date:"20260830",venueCode:"55",raceNo:1};
 assert.equal(validateOfficialRaceIdentity({date:"20260830",venueCode:"55",raceNo:1},requested).passed,true);
 assert.equal(validateOfficialRaceIdentity({date:"",venueCode:"55",raceNo:1},requested).passed,false);
 assert.equal(validateOfficialRaceIdentity({date:"20260830",venueCode:"55",raceNo:2},requested).passed,false);
+assert.equal(validateOfficialRaceIdentity({date:"20260830",venueName:"和歌山",raceNo:1},{...requested,venueName:"和歌山"}).passed,true);
+assert.equal(validateOfficialRaceIdentity({date:"20260830",venueName:"別府",raceNo:1},{...requested,venueName:"和歌山"}).passed,false);
 const display=buildDisplayPredictionPayload({ok:true,race:{date:"20260830",venueCode:"55",raceNo:1,participants},prediction:{purchasePlan:[],terminals:[]}});
 assert.equal(validateDisplayPredictionPayload(display,requested).passed,true);
 assert.deepEqual(Object.keys(display.race.participants[0]).sort(),["className","lineId","name","number","registration","role"].sort());
