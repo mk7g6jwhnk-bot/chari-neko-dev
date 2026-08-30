@@ -1,11 +1,14 @@
 import assert from "node:assert/strict";
-import {collectorStatusViewModel,loadCachedCollectorStatus,saveCachedCollectorStatus} from "../public/collector-status-view.mjs";
+import {COLLECTOR_STATUS_SCHEMA_VERSION,collectorStatusViewModel,loadCachedCollectorStatus,saveCachedCollectorStatus} from "../public/collector-status-view.mjs";
 class MemoryStorage{constructor(){this.map=new Map()}getItem(k){return this.map.get(k)||null}setItem(k,v){this.map.set(k,String(v))}}
-const healthy={ok:true,collectorHealthy:true,checkedAt:"2026-08-30T08:15:00+09:00"},unhealthy={...healthy,collectorHealthy:false};
-assert.equal(collectorStatusViewModel(healthy).mode,"LIVE_HEALTHY");
-assert.equal(collectorStatusViewModel({...healthy,statusReadFailed:true},healthy).mode,"STALE_HEALTHY");
-assert.equal(collectorStatusViewModel({ok:false,statusReadFailed:true},null).mode,"STATUS_UNAVAILABLE");
-assert.equal(collectorStatusViewModel(unhealthy).mode,"COLLECTOR_ERROR");
-assert.equal(collectorStatusViewModel({...unhealthy,statusReadFailed:true},unhealthy).mode,"STALE_COLLECTOR_ERROR");
-const storage=new MemoryStorage();saveCachedCollectorStatus(storage,healthy);assert.deepEqual(loadCachedCollectorStatus(storage,Date.parse("2026-08-30T08:16:00+09:00")),healthy);assert.equal(loadCachedCollectorStatus(storage,Date.parse("2026-09-01T08:16:00+09:00")),null);
-console.log("PASS collector status live/stale/no-cache/actual-error separation");
+const checkedAt="2026-08-30T08:15:00Z",daily={ok:true,schemaVersion:COLLECTOR_STATUS_SCHEMA_VERSION,dailyDate:"20260830",autoStatusAvailable:true,researchStatusAvailable:false,collectorHealthy:true,sealedPredictionCount:4,resultLoadedCount:2,verifiedCount:2,pendingResultCount:2,retryingCount:1,autoObservedAt:checkedAt,checkedAt},research={ok:true,schemaVersion:COLLECTOR_STATUS_SCHEMA_VERSION,autoStatusAvailable:false,researchStatusAvailable:true,researchObservedAt:checkedAt,checkedAt,researchProgress:{comparableTotal:23,progress50:23,target50:50,progress100:23,target100:100,cohort:"COHORT_A_DIAGNOSIS",reportStatus:"BUILDING"}},both={...daily,researchStatusAvailable:true,researchObservedAt:checkedAt,researchProgress:research.researchProgress};
+const storage=new MemoryStorage();saveCachedCollectorStatus(storage,both);const cached=loadCachedCollectorStatus(storage,Date.parse("2026-08-30T08:16:00Z"),"20260830");
+
+let view=collectorStatusViewModel(both,cached);assert.equal(view.autoMode,"LIVE_HEALTHY");assert.equal(view.researchMode,"LIVE");assert.equal(view.status.sealedPredictionCount,4);assert.equal(view.status.researchProgress.progress50,23);console.log("A PASS auto/research current");
+view=collectorStatusViewModel({...research,statusReadFailed:true},cached);assert.equal(view.autoMode,"STALE_HEALTHY");assert.equal(view.researchMode,"LIVE");assert.equal(view.status.sealedPredictionCount,4);assert.equal(view.status.researchProgress.progress50,23);console.log("B PASS auto failed, research current");
+view=collectorStatusViewModel({...daily,statusReadFailed:true},cached);assert.equal(view.autoMode,"LIVE_HEALTHY");assert.equal(view.researchMode,"STALE");assert.equal(view.status.sealedPredictionCount,4);assert.equal(view.status.researchProgress.progress50,23);console.log("C PASS auto current, research failed");
+view=collectorStatusViewModel({ok:false,statusReadFailed:true},cached);assert.equal(view.autoMode,"STALE_HEALTHY");assert.equal(view.researchMode,"STALE");assert.equal(view.status.pendingResultCount,2);assert.equal(view.status.researchProgress.progress100,23);console.log("D PASS both failed, atomic last-known components");
+view=collectorStatusViewModel({ok:false,statusReadFailed:true},null);assert.equal(view.mode,"STATUS_UNAVAILABLE");assert.equal(view.status,null);console.log("E PASS both failed, no cache");
+
+const nextDay=loadCachedCollectorStatus(storage,Date.parse("2026-08-31T08:16:00Z"),"20260831");assert.equal(nextDay.autoStatusAvailable,false);assert.equal(nextDay.researchStatusAvailable,true);assert.equal(nextDay.researchProgress.progress50,23);console.log("PASS date rollover preserves cumulative research only");
+const oldStorage=new MemoryStorage();oldStorage.setItem("chari-neko:collector-status:v1",JSON.stringify({ok:true,checkedAt,sealedPredictionCount:0,researchProgress:{progress50:0}}));assert.equal(loadCachedCollectorStatus(oldStorage,Date.parse("2026-08-30T08:16:00Z"),"20260830"),null);console.log("PASS old mixed schema is not reused");
