@@ -1,5 +1,6 @@
 export function derivePredictionRatings(snapshot={}){
   const purchaseEligibility=snapshot?.purchaseEligibility||snapshot?.predictionOutput?.purchaseEligibility||null;
+  const displayInputs=snapshot?.predictionOutput?.displayRatingInputs||null;
   const audit=snapshot?.predictionOutput?.audit||{};
   const branchAudit=audit.branchSelectionAudit||{};
   const rows=normalizeBranchRows(branchAudit,snapshot?.branches||[]);
@@ -16,7 +17,7 @@ export function derivePredictionRatings(snapshot={}){
   const eligibleCoverage=finiteOrNull(massAudit?.eligibleCoverage);
   const weightedCoverageTarget=finiteOrNull(massAudit?.weightedCoverageTarget);
   const massEfficiency=finiteOrNull(massAudit?.massEfficiency);
-  const massStatus=String(massAudit?.status||"");
+  const massStatus=String(displayInputs?.massStatus??massAudit?.status??"");
   const coverageTargetRatio=eligibleCoverage!=null&&weightedCoverageTarget>0?Math.max(0,Math.min(1,eligibleCoverage/weightedCoverageTarget)):null;
   const purchaseStructureQuality=[coverageTargetRatio,massEfficiency].filter(Number.isFinite);
   const purchaseQuality=purchaseStructureQuality.length?purchaseStructureQuality.reduce((a,b)=>a+b,0)/purchaseStructureQuality.length:.65;
@@ -38,20 +39,22 @@ export function derivePredictionRatings(snapshot={}){
   })[0]||null;
   const topFamilyCoverage=topFamilyRow?(Number.isFinite(Number(topFamilyRow?.adoptedCoverage))?Number(topFamilyRow.adoptedCoverage):(Number(topFamilyRow?.probability)>0?(Number(topFamilyRow?.adoptedProbability)||0)/Number(topFamilyRow.probability):null)):null;
 
-  const branchConcentrationRaw=
+  const computedBranchConcentrationRaw=
     .34*scale(topShare,.07,.22)+
     .28*scale(top3Share,.22,.55)+
     .18*scale(topGapRatio,0,.18)+
     .20*scale(cutGapRatio,0,.25);
 
+  const branchConcentrationRaw=finiteOrNull(displayInputs?.branchConcentrationRaw)??computedBranchConcentrationRaw;
   const hasTerminalStructure=terminalTop3Share>0||terminalTop5Share>0||topFamilyShare>0;
-  const terminalConcentrationRaw=hasTerminalStructure?(
+  const computedTerminalConcentrationRaw=hasTerminalStructure?(
     .30*scale(topFamilyShare,.25,.58)+
     .18*scale(top2FamilyShare,.48,.82)+
     .22*scale(terminalTop3Share,.08,.28)+
     .18*scale(terminalTop5Share,.14,.42)+
     .12*purchaseQuality
   ):branchConcentrationRaw;
+  const terminalConcentrationRaw=finiteOrNull(displayInputs?.terminalConcentrationRaw)??computedTerminalConcentrationRaw;
 
   const concentrationRaw=.46*branchConcentrationRaw+.54*terminalConcentrationRaw;
   const rawConcentration=starsFrom(concentrationRaw,[.20,.38,.58,.78]);
@@ -99,8 +102,9 @@ export function derivePredictionRatings(snapshot={}){
   const availableValueRows=adoptedAudit
     .map(item=>Number(item?.expectedValueIndex??item?.valueIndex))
     .filter(value=>Number.isFinite(value)&&value>0);
-  const maxExpectedValue=availableValueRows.length?Math.max(...availableValueRows):null;
-  const allOddsEvaluated=betCount>0&&adoptedAudit.length>=betCount&&availableValueRows.length===betCount;
+  const inputOdds=displayInputs?.oddsEvaluation||null;
+  const maxExpectedValue=finiteOrNull(inputOdds?.maxExpectedValueIndex)??(availableValueRows.length?Math.max(...availableValueRows):null);
+  const allOddsEvaluated=typeof inputOdds?.allOddsEvaluated==="boolean"?inputOdds.allOddsEvaluated:betCount>0&&adoptedAudit.length>=betCount&&availableValueRows.length===betCount;
 
   let provisionalVerdict;
   if(snapshot?.noBet||purchaseEligibility?.canPurchase===false||betCount===0)provisionalVerdict={label:"見送り",tone:"stop",reason:"purchaseEligibilityが購入停止"};
@@ -222,7 +226,7 @@ function starsFrom(value,thresholds){
   for(const threshold of thresholds)if(n>=threshold)stars+=1;
   return Math.max(1,Math.min(5,stars));
 }
-function finiteOrNull(value){const n=Number(value);return Number.isFinite(n)?n:null}
+function finiteOrNull(value){if(value===null||value===undefined||value==="")return null;const n=Number(value);return Number.isFinite(n)?n:null}
 function positiveOrNull(value){const n=Number(value);return Number.isFinite(n)&&n>0?n:null}
 function normalizedMass(value,total){const n=Number(value);return total&&Number.isFinite(n)?Math.max(0,n)/total:0}
 function formatPct(value){return `${(Number(value)*100).toFixed(1)}%`}

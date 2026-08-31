@@ -11,12 +11,13 @@ export function collectorLocalDate(now=Date.now()){
 export function loadCachedCollectorStatus(storage,now=Date.now(),date=collectorLocalDate(now)){
   const daily=read(storage,`${COLLECTOR_DAILY_CACHE_PREFIX}:${date}`,now,COLLECTOR_STATUS_MAX_AGE_MS),research=read(storage,COLLECTOR_RESEARCH_CACHE_KEY,now,COLLECTOR_RESEARCH_MAX_AGE_MS);
   if(!daily&&!research)return null;
-  return compose(daily,research,{statusReadFailed:true,localCache:true,checkedAt:latest(daily?.observedAt,research?.observedAt)});
+  return compose(daily,research,{statusReadFailed:true,localCache:true,checkedAt:latest(daily?.observedAt,research?.observedAt),meetingCount:daily?.meetingCount??null,prefetchedRaceCount:daily?.prefetchedRaceCount??null,purchasePerformance:daily?.purchasePerformance||null,races:daily?.races||null});
 }
 
 export function saveCachedCollectorStatus(storage,value){
   if(value?.schemaVersion!==COLLECTOR_STATUS_SCHEMA_VERSION)return value;
   if(value.autoStatusAvailable&&/^\d{8}$/.test(value.dailyDate||""))storage.setItem(`${COLLECTOR_DAILY_CACHE_PREFIX}:${value.dailyDate}`,JSON.stringify({schemaVersion:COLLECTOR_STATUS_SCHEMA_VERSION,source:value.autoSource||"auto_lifecycle",observedAt:value.autoObservedAt||value.checkedAt,dailyDate:value.dailyDate,collectorProcessHealthy:value.collectorProcessHealthy,collectorHealthy:value.collectorHealthy,collectorOperational:value.collectorOperational,storageWritable:value.storageWritable,storageHealthy:value.storageHealthy,storageWarning:value.storageWarning,browserConnected:value.browserConnected,todayRaceCount:value.todayRaceCount,sealedPredictionCount:value.sealedPredictionCount,resultLoadedCount:value.resultLoadedCount,verifiedCount:value.verifiedCount,waitingPredictionCount:value.waitingPredictionCount,pendingResultCount:value.pendingResultCount,failureCount:value.failureCount,retryingCount:value.retryingCount,lastPredictionRunAt:value.lastPredictionRunAt,lastResultRunAt:value.lastResultRunAt,lastSuccessfulCollectorUpdate:value.lastSuccessfulCollectorUpdate,lastError:value.lastError,recentErrors:value.recentErrors,storageMode:value.storageMode}));
+  if(value.autoStatusAvailable&&/^\d{8}$/.test(value.dailyDate||"")){const saved=JSON.parse(storage.getItem(`${COLLECTOR_DAILY_CACHE_PREFIX}:${value.dailyDate}`)||"{}");Object.assign(saved,{meetingCount:value.meetingCount,prefetchedRaceCount:value.prefetchedRaceCount,purchasePerformance:value.purchasePerformance,races:value.races});storage.setItem(`${COLLECTOR_DAILY_CACHE_PREFIX}:${value.dailyDate}`,JSON.stringify(saved))}
   if(value.researchStatusAvailable&&value.researchProgress)storage.setItem(COLLECTOR_RESEARCH_CACHE_KEY,JSON.stringify({schemaVersion:COLLECTOR_STATUS_SCHEMA_VERSION,source:value.researchSource||"research_shadow",observedAt:value.researchObservedAt||value.checkedAt,researchProgress:value.researchProgress}));
   return value;
 }
@@ -26,7 +27,7 @@ export function collectorStatusViewModel(current,cached=null){
   const cachedAuto=cached?.autoStatusAvailable?cached:null,cachedResearch=cached?.researchStatusAvailable?cached:null;
   const auto=currentAuto||cachedAuto,research=currentResearch||cachedResearch;
   if(!auto&&!research)return{mode:"STATUS_UNAVAILABLE",status:null,autoMode:"UNAVAILABLE",researchMode:"UNAVAILABLE"};
-  const status=compose(auto,research,{statusReadFailed:!currentAuto||!currentResearch,checkedAt:latest(auto?.autoObservedAt||auto?.checkedAt,research?.researchObservedAt||research?.checkedAt)});
+  const status=compose(auto,research,{statusReadFailed:!currentAuto||!currentResearch,checkedAt:latest(auto?.autoObservedAt||auto?.checkedAt,research?.researchObservedAt||research?.checkedAt),meetingCount:auto?.meetingCount??null,prefetchedRaceCount:auto?.prefetchedRaceCount??null,purchasePerformance:auto?.purchasePerformance||null,races:auto?.races||null});
   const blocked=status.storageHealthy===false||status.storageWritable===false||status.storageWarning==="STORAGE_FULL",autoMode=currentAuto?(blocked?"STORAGE_BLOCKED":status.collectorHealthy?"LIVE_HEALTHY":"COLLECTOR_ERROR"):(cachedAuto?(blocked?"STALE_STORAGE_BLOCKED":status.collectorHealthy?"STALE_HEALTHY":"STALE_COLLECTOR_ERROR"):"UNAVAILABLE");
   const researchMode=currentResearch?"LIVE":cachedResearch?"STALE":"UNAVAILABLE";
   return{mode:autoMode,status,autoMode,researchMode,notice:status.statusReadFailed?"現在の状態取得に失敗":""};
