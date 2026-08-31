@@ -10,7 +10,7 @@ assert.equal(more.verdict,"購入可");
 assert.equal(many.concentration,more.concentration,"買い目点数だけで集中度を変えている");
 assert.equal(many.confidence,more.confidence,"買い目点数だけで信頼度を変えている");
 const under=derivePredictionRatings(snap({bets:6,massStatus:"UNDER_COVERED"}));
-assert.equal(under.verdict,"見送り寄り","少点数でも購入質量不足は注意扱いにする");
+assert.equal(under.verdict,"注意","少点数でも購入質量不足は注意扱いにする");
 const ref=derivePredictionRatings(snap({bets:7,noBet:true}));
 assert.equal(ref.verdict,"見送り","参考買い目/noBetを通常購入扱いしている");
 assert.equal(ref.confidence,1);

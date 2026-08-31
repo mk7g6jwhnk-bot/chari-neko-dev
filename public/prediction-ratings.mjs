@@ -1,4 +1,5 @@
 export function derivePredictionRatings(snapshot={}){
+  const purchaseEligibility=snapshot?.purchaseEligibility||snapshot?.predictionOutput?.purchaseEligibility||null;
   const audit=snapshot?.predictionOutput?.audit||{};
   const branchAudit=audit.branchSelectionAudit||{};
   const rows=normalizeBranchRows(branchAudit,snapshot?.branches||[]);
@@ -102,11 +103,11 @@ export function derivePredictionRatings(snapshot={}){
   const allOddsEvaluated=betCount>0&&adoptedAudit.length>=betCount&&availableValueRows.length===betCount;
 
   let provisionalVerdict;
-  if(snapshot?.noBet||betCount===0)provisionalVerdict={label:"見送り",tone:"stop",reason:"購入対象なし"};
-  else if(concentration===1||confidence===1)provisionalVerdict={label:"見送り寄り",tone:"caution",reason:"標準候補はあるが予想の集中または信頼が低い"};
+  if(snapshot?.noBet||purchaseEligibility?.canPurchase===false||betCount===0)provisionalVerdict={label:"見送り",tone:"stop",reason:"purchaseEligibilityが購入停止"};
+  else if(concentration===1||confidence===1)provisionalVerdict={label:"注意",tone:"caution",reason:"購入停止ではないが、予想の集中または信頼が低い"};
   else if(allOddsEvaluated&&maxExpectedValue!=null&&maxExpectedValue<1)provisionalVerdict={label:"妙味なし",tone:"caution",reason:"採用候補の確率×オッズが全て損益分岐未満"};
-  else if(["UNDER_COVERED","INEFFICIENT","OVER_SPREAD"].includes(massStatus))provisionalVerdict={label:"見送り寄り",tone:"caution",reason:`購入質量監査が${massStatus}`};
-  else if(concentration<=2||confidence<=2)provisionalVerdict={label:"見送り寄り",tone:"caution",reason:"予想集中または入力信頼が低い"};
+  else if(["UNDER_COVERED","INEFFICIENT","OVER_SPREAD"].includes(massStatus))provisionalVerdict={label:"注意",tone:"caution",reason:`購入停止ではないが、購入質量監査が${massStatus}`};
+  else if(concentration<=2||confidence<=2)provisionalVerdict={label:"注意",tone:"caution",reason:"購入停止ではないが、予想集中または入力信頼が低い"};
   else provisionalVerdict={label:"購入可",tone:"go",reason:"評価整合条件を満たす"};
 
   let rollover,rolloverRaw;
@@ -159,6 +160,7 @@ export function derivePredictionRatings(snapshot={}){
     rollover,
     verdict:provisionalVerdict.label,
     verdictTone:provisionalVerdict.tone,
+    purchaseEligibility:purchaseEligibility||{state:snapshot?.noBet?"PURCHASE_BLOCKED":"PURCHASE_ALLOWED",canPurchase:!snapshot?.noBet},
     reason:reasonParts.join(" ・ "),
     calibrationStatus:"UNVALIDATED",
     calibrationLabel:"未校正・検証対象",

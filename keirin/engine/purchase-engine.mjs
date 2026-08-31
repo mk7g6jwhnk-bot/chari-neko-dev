@@ -124,6 +124,8 @@ export function runKeirinPurchaseEngine({prediction,oddsByOrder={},budget=3000})
     raceWidePurchaseBlockedByMainInvariant:false,
     policy:"STANDARD_PURCHASE_REQUIRES_MAIN; MAIN_ABSENCE_DOES_NOT_RACE_WIDE_KILL_PREDICTION"
   };
+  const purchaseEligibility=buildPurchaseEligibility({purchase,standardPurchasePlan,referencePurchasePlan,budget});
+  purchase.purchaseEligibility=purchaseEligibility;
 
   const afterFingerprint=fingerprintPrediction(prediction.terminals);
   const boundaryAudit={
@@ -148,7 +150,7 @@ export function runKeirinPurchaseEngine({prediction,oddsByOrder={},budget=3000})
       value:classified.filter(item=>item.betClass==="BUYABLE_HIGH"&&item.purchaseStatus==="購入採用"),
       strong:[]
     },
-    compositeOdds:composite(standardPurchasePlan),purchasePlan:plan,standardPurchasePlan,referencePurchasePlan,noBet:purchase.noBet,noBetReason:purchase.noBetReason,
+    compositeOdds:composite(standardPurchasePlan),purchasePlan:plan,standardPurchasePlan,referencePurchasePlan,noBet:!purchaseEligibility.canPurchase,noBetReason:purchaseEligibility.reasonCode,purchaseEligibility,
     audit:{
       ...purchase,
       chatSpecV1:chatSpec?.audit||null,
@@ -177,6 +179,14 @@ export function runKeirinPurchaseEngine({prediction,oddsByOrder={},budget=3000})
       selectionBoundaryAudit:{version:"STANDARD-REFERENCE-SELECTION-1.0",standardBetCount:standardPurchasePlan.length,referenceBetCount:referencePurchasePlan.length,referenceExcludedFromFunding:true,referenceExcludedFromStandardPurchase:true,passed:standardPurchasePlan.every(x=>x.betClass!=="REFERENCE")&&referencePurchasePlan.every(x=>x.betClass==="REFERENCE")}
     }
   };
+}
+
+export function buildPurchaseEligibility({purchase={},standardPurchasePlan=[],referencePurchasePlan=[],budget=0}={}){
+  const standardBetCount=standardPurchasePlan.length,minimumRequired=standardBetCount*100;
+  const budgetSufficient=Number(budget||0)>=minimumRequired;
+  const canPurchase=!purchase.noBet&&standardBetCount>0&&budgetSufficient;
+  const reasonCode=canPurchase?null:(purchase.noBetReason||(!standardBetCount&&referencePurchasePlan.length?"REFERENCE_ONLY":!standardBetCount?"NO_STANDARD_PURCHASE_CANDIDATE":"BUDGET_INSUFFICIENT"));
+  return{version:"PURCHASE-ELIGIBILITY-1.0",state:canPurchase?"PURCHASE_ALLOWED":"PURCHASE_BLOCKED",canPurchase,noBet:!canPurchase,reasonCode,standardBetCount,referenceBetCount:referencePurchasePlan.length,budget:Number(budget||0),minimumRequired,budgetSufficient,allowMainCoverPurchase:canPurchase,allowThick:canPurchase,allowFunding:canPurchase,showPurchasePanel:canPurchase};
 }
 
 function deepClone(value){return JSON.parse(JSON.stringify(value));}

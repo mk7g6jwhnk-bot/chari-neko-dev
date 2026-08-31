@@ -25,7 +25,9 @@ export function predictionQualificationScore(bet){
 }
 
 export function qualifyThickPredictionBets(snapshot){
-  const bets=(snapshot?.betSelections||[]).filter(b=>PURCHASE_CATEGORIES.has(b?.category));
+  const eligibility=snapshot?.purchaseEligibility||snapshot?.predictionOutput?.purchaseEligibility;
+  if(snapshot?.noBet||eligibility?.allowThick===false||eligibility?.canPurchase===false)return[];
+  const bets=(snapshot?.betSelections||[]).filter(b=>b?.category==="MAIN");
   if(bets.length<2)return[];
   const positive=bets.map(b=>({b,score:predictionQualificationScore(b)}))
     .filter(row=>row.score>0)

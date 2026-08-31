@@ -46,6 +46,7 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
     referencePurchasePlan:purchase.referencePurchasePlan,
     noBet:purchase.noBet,
     noBetReason:purchase.noBetReason,
+    purchaseEligibility:purchase.purchaseEligibility,
     generatedAt:new Date().toISOString()
   };
 }

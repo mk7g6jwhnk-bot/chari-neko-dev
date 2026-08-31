@@ -147,6 +147,7 @@ export function classify(terminals,odds={}){
   const purchaseDistributionAudit={...distributionSelection.audit,...pairAdjusted.audit,purchaseFunnel,purchaseConcentrationAudit};
 
   const selectedKeys=new Set(selected.map(item=>item.order.join("-")));
+  const scenarioFamilies=buildScenarioFamilies(evaluated);
 
   return evaluated.map(item=>{
     const key=item.order.join("-");
@@ -154,10 +155,10 @@ export function classify(terminals,odds={}){
     const adopted=selectedKeys.has(key);
     const thirdVariantDecision=pairAdjusted.decisionsByOrder.get(key)||null;
 
+    const scenarioFamilyId=scenarioFamilyIdOf(item);
+    const scenarioFamily=scenarioFamilies.get(scenarioFamilyId)||null;
     let betClass="NONE";
-    if(adopted){
-      betClass=rank===1?"MAIN":"COVER";
-    }
+    if(adopted)betClass=scenarioFamily?.isMainFamily?"MAIN":"COVER";
 
     let purchaseReason="終端総合評価が購入候補順位に届かない";
     if(adopted){
@@ -182,6 +183,19 @@ export function classify(terminals,odds={}){
 
     return{
       ...item,
+      terminal:key,
+      originatingScenarioFamily:scenarioFamilyId,
+      scenarioFamilyLabel:scenarioFamily?.label||item.dominantBranchLabel||null,
+      primaryBranch:item.dominantBranchId||scenarioFamilyId,
+      supportingBranches:[...(item.branchContributions||[])].map(x=>x.branchId).filter(Boolean),
+      head:Number(item.order?.[0])||null,
+      second:Number(item.order?.[1])||null,
+      third:Number(item.order?.[2])||null,
+      scenarioFamilyRank:scenarioFamily?.rank??null,
+      scenarioFamilySupport:scenarioFamily?.support??0,
+      scenarioFamilyProbability:scenarioFamily?.probability??0,
+      mainCoverClassification:betClass,
+      mainDifferenceReason:betClass==="COVER"?`中心展開familyとは異なる ${scenarioFamily?.label||item.dominantBranchLabel||"別展開"} 由来`:null,
       betClass,
       purchaseStatus:adopted?PURCHASED:"購入不採用",
       purchaseReason,
@@ -202,6 +216,22 @@ export function classify(terminals,odds={}){
       rawBranchCountUsedForAdoption:false
     };
   });
+}
+
+function scenarioFamilyIdOf(item){return String(item?.dominantBranchId||item?.branchId||"UNRESOLVED_SCENARIO");}
+function buildScenarioFamilies(items){
+  const families=new Map();
+  for(const item of items){
+    const id=scenarioFamilyIdOf(item),row=families.get(id)||{id,label:item.dominantBranchLabel||item.branchLabel||id,probability:0,support:0,isMainFamily:false};
+    row.probability+=Number(item.probability)||0;
+    row.support+=Number(item.dominantBranchContribution)||Number(item.probability)||0;
+    row.isMainFamily ||= item.dominantBranchPriority==="main"||item.chatForecastRole==="main"||item.directMainBranchSupport===true;
+    families.set(id,row);
+  }
+  const ordered=[...families.values()].sort((a,b)=>b.probability-a.probability||a.id.localeCompare(b.id,"en"));
+  if(ordered.length&&!ordered.some(row=>row.isMainFamily))ordered[0].isMainFamily=true;
+  ordered.forEach((row,index)=>{row.rank=index+1;});
+  return new Map(ordered.map(row=>[row.id,row]));
 }
 
 function contributionMatchesTerminal(contribution,order){
@@ -370,6 +400,8 @@ export function purchaseDiagnostics(classified,plan,budget){
       naturalDistributionBoundary:true,
       fixedTopN:false,
       maximumPurchasePoints:null
+      ,rawBranchCountUsedForAdoption:false
+      ,weightedMultiBranchSupportEquivalentMin:2
     },
     adoptedTerminalAudit:natural.map(item=>({
       order:item.order.join("-"),
@@ -379,14 +411,25 @@ export function purchaseDiagnostics(classified,plan,budget){
       dominantBranchId:item.dominantBranchId,
       dominantBranchLabel:item.dominantBranchLabel,
       dominantBranchPriority:item.dominantBranchPriority,
+      dominantBranchTierLabel:branchPriorityLabel(item.dominantBranchPriority),
       branchFit:item.branchFit,
       branchRank:item.branchRank,
       branchSupport:item.branchSupport,
       weightedBranchSupport:item.weightedBranchSupport,
       uniqueSupportBranchCount:item.uniqueSupportBranchCount,
+      supportBranches:auditSupportBranches(classified,item),
+      duplicateSupportLabels:Object.entries([...(item.branchContributions||[])].filter(x=>contributionMatchesTerminal(x,item.order)).reduce((counts,x)=>{const label=x.branchLabel||"不明";counts[label]=(counts[label]||0)+1;return counts;},{})).filter(([,count])=>count>1).map(([label,count])=>({label,count})),
       representativeTerminal:item.representativeTerminal,
       evidenceScore:item.evidenceScore,
       purchaseRank:item.purchaseRank,
+      originatingScenarioFamily:item.originatingScenarioFamily,
+      scenarioFamilyLabel:item.scenarioFamilyLabel,
+      scenarioFamilyRank:item.scenarioFamilyRank,
+      scenarioFamilySupport:item.scenarioFamilySupport,
+      scenarioFamilyProbability:item.scenarioFamilyProbability,
+      primaryBranch:item.primaryBranch,
+      supportingBranches:item.supportingBranches,
+      mainDifferenceReason:item.mainDifferenceReason,
       purchaseReason:item.purchaseReason
     })),
     adoptedBranchCounts:natural.reduce((counts,item)=>{
@@ -404,6 +447,7 @@ export function purchaseDiagnostics(classified,plan,budget){
       cover:natural.filter(item=>item.betClass==="COVER").length,
       buyableHigh:natural.filter(item=>item.betClass==="BUYABLE_HIGH").length
     },
+    orphanCoverCount:natural.filter(item=>item.betClass==="COVER"&&(!item.originatingScenarioFamily||!item.primaryBranch||!item.mainDifferenceReason)).length,
     minimumRequired:natural.length*100,
     budget:Number(budget||0),
     budgetSufficient:Number(budget||0)>=natural.length*100,
@@ -418,6 +462,12 @@ export function purchaseDiagnostics(classified,plan,budget){
             :"NO_VALID_TERMINAL"
       :null
   };
+}
+
+function branchPriorityLabel(priority){return({main:"本命展開",contender:"有力展開",sub:"別展開",risk:"リスク枝"})[priority]||"不明";}
+function auditSupportBranches(classified,item){
+  const stats=buildBranchStats(classified),maxTotal=Math.max(...[...stats.values()].map(x=>x.total),0);
+  return[...(item.branchContributions||[])].filter(x=>contributionMatchesTerminal(x,item.order)).map(x=>{const row=stats.get(x.branchId),withinBranchFit=row?.best>0?(Number(x.probability)||0)/row.best:0,branchStrengthRatio=maxTotal>0?(row?.total||0)/maxTotal:0;return{branchId:x.branchId||null,branchLabel:x.branchLabel||null,branchPriority:x.branchPriority||null,probability:x.probability||0,withinBranchFit,branchStrengthRatio,weightedSupport:withinBranchFit*branchStrengthRatio};});
 }
 
 function summarizeEvidence(evidence){
@@ -593,7 +643,7 @@ function boundaryAudit({initialTerminalCount=0,selectionMode,boundaryRank=null,b
   return{initialTerminalCount,selectionMode,boundaryDetected,boundaryRank,boundaryGap:bestGap,boundaryMedianGap:medianGap,boundaryMAD:mad,boundaryStrength:bestStrength,boundaryRelativeDrop:relativeDrop,selectedMass,singletonSelection,singletonJustification,thirdVariantAmbiguity:{detected:false,count:0,pairs:[]},...rest};
 }
 
-function thickQualificationFields(item){return{naturalConvergenceScore:item.naturalConvergenceScore??null,globalRank:item.globalRank??item.terminalGlobalRank??null,familyRank:item.familyRank??item.terminalFamilyRank??null,pairRank:item.pairRank??item.terminalPairRank??null,nodeConditionalProbability:item.nodeConditionalProbability??null,scenarioCoherence:item.scenarioCoherence??null,branchFit:item.branchFit??null,naturalSeparation:item.naturalSeparation??null}}
+function thickQualificationFields(item){return{naturalConvergenceScore:item.naturalConvergenceScore??null,globalRank:item.globalRank??item.terminalGlobalRank??null,familyRank:item.familyRank??item.terminalFamilyRank??null,pairRank:item.pairRank??item.terminalPairRank??null,nodeConditionalProbability:item.nodeConditionalProbability??null,scenarioCoherence:item.scenarioCoherence??null,branchFit:item.branchFit??null,naturalSeparation:item.naturalSeparation??null,originatingScenarioFamily:item.originatingScenarioFamily||null,scenarioFamilyLabel:item.scenarioFamilyLabel||null,scenarioFamilyRank:item.scenarioFamilyRank??null,scenarioFamilySupport:item.scenarioFamilySupport??null,scenarioFamilyProbability:item.scenarioFamilyProbability??null,primaryBranch:item.primaryBranch||null,supportingBranches:item.supportingBranches||[],head:item.head??item.order?.[0]??null,second:item.second??item.order?.[1]??null,third:item.third??item.order?.[2]??null,mainCoverClassification:item.mainCoverClassification||item.betClass||null,mainDifferenceReason:item.mainDifferenceReason||null}}
 
 function buildPurchaseFunnel({generated,natural,pairPassed,final}){
   const stages=[

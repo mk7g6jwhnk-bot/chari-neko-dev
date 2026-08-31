@@ -15,7 +15,7 @@ const focused=snapshot({shares:[.159,.142,.134,.130,.129,.07],scores:[7.687,6.87
 const d=derivePredictionRatings(diffuse),f=derivePredictionRatings(focused);
 assert.equal(d.concentration,1,"diffuse race should show minimum concentration");
 assert.equal(d.rollover,1,"diffuse high-point race should not be rollover suitable");
-assert.equal(d.verdict,"見送り寄り");
+assert.equal(d.verdict,"注意");
 assert.ok(f.concentration>=3,"focused race should rank above diffuse concentration");
 assert.ok(f.confidence>d.confidence,"focused race should have higher confidence");
 assert.ok(f.rollover>d.rollover,"focused race should have higher rollover suitability");
@@ -44,7 +44,7 @@ assert.equal(broadMoreRating.concentration,broadButRawStrong.concentration,"点�
 const massWarn=snapshot({shares:[.20,.17,.15,.12,.10],scores:[9,8,7,5,4],bets:6,cutGap:2.5});
 massWarn.predictionOutput.audit.purchaseMassAudit={eligibleCoverage:.48,weightedCoverageTarget:.75,massEfficiency:.92,status:"UNDER_COVERED"};
 const massWarnRating=derivePredictionRatings(massWarn);
-assert.equal(massWarnRating.verdict,"見送り寄り","点数が少なくても購入質量不足は注意判定にする");
+assert.equal(massWarnRating.verdict,"注意","点数が少なくても購入質量不足は注意判定にする");
 assert.ok(massWarnRating.consistencyAudit.invariantChecks.every(x=>x.passed),"質量不足による注意判定を矛盾扱いしている");
 
 const lowHeadCoverageSnapshot=snapshot({shares:[.18,.15,.12,.10],scores:[8,7,6,5],bets:4,generated:210,cutGap:1.2});
