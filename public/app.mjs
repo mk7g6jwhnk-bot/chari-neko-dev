@@ -325,7 +325,7 @@ function renderOfficial(p){const race=p?.race;if(race){state.race={...state.race
 async function predict(){if(state.busy)return;const fixed={...state.race,key:raceKey(state.race)};state.busy=true;$("predictBtn").disabled=true;setLoading("予想を作成中","出走選手・公式ライン・3連単オッズを取得しています。");try{const result=await fetchAndSavePredictionForRace(fixed);state.payload=result.payload;state.race=result.race;state.snapshot=result.snapshot;renderOfficial(result.payload);renderHomeRecommendations();renderPrediction(result.snapshot)}catch(e){fail("予想の取得・保存に失敗",e,predict)}finally{state.busy=false;$("predictBtn").disabled=false}}
 
 function purchaseEligibilityOf(snapshot){return snapshot?.purchaseEligibility||snapshot?.predictionOutput?.purchaseEligibility||{state:snapshot?.noBet?"PURCHASE_BLOCKED":"PURCHASE_ALLOWED",canPurchase:!snapshot?.noBet,allowThick:!snapshot?.noBet,allowFunding:!snapshot?.noBet,showPurchasePanel:!snapshot?.noBet};}
-function standardSelections(snapshot){return purchaseEligibilityOf(snapshot).canPurchase?(Array.isArray(snapshot?.betSelections)?snapshot.betSelections:[]).filter(b=>b?.category!=="REFERENCE"):[];}
+function standardSelections(snapshot){const rows=(Array.isArray(snapshot?.betSelections)?snapshot.betSelections:[]).filter(b=>b?.category!=="REFERENCE");return purchaseEligibilityOf(snapshot).canPurchase&&rows.some(b=>b?.category==="MAIN")?rows:[];}
 function referenceSelections(snapshot){const explicit=Array.isArray(snapshot?.referenceBetSelections)?snapshot.referenceBetSelections:[];if(explicit.length)return explicit;return (Array.isArray(snapshot?.betSelections)?snapshot.betSelections:[]).filter(b=>b?.category==="REFERENCE");}
 function displaySelections(snapshot){return [...standardSelections(snapshot),...referenceSelections(snapshot)];}
 

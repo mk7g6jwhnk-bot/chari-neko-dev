@@ -32,9 +32,13 @@ export function runKeirinPurchaseEngine({prediction,oddsByOrder={},budget=3000})
   const chatSpec=generationPassed?applyChatSpecV1({
     scored:prediction.scored||[],lines:prediction.lines||[],branches:prediction.branches||[],terminals:purchaseInput,oddsByOrder
   }):null;
-  const rawClassified=generationPassed
+  const initiallyClassified=generationPassed
     ?classify(chatSpec.terminals,oddsByOrder)
     :purchaseInput.map(item=>({...item,betClass:"NONE",purchaseStatus:"購入不採用",purchaseReason:`エンジン生成監査不通過: ${(prediction.audit?.errors||[]).slice(0,3).join(" / ")||"原因未記録"}`,purchaseRejectCode:"ENGINE_AUDIT_FAILED",lifecycle:{generated:true,probabilityEvaluated:true,terminalDeleted:false,purchaseDecision:"REJECTED",purchaseDecisionCode:"ENGINE_AUDIT_FAILED",purchaseDecisionReason:`エンジン生成監査不通過: ${(prediction.audit?.errors||[]).slice(0,3).join(" / ")||"原因未記録"}`}}));
+  const postClassificationMainAudit=generationPassed
+    ?enforcePostClassificationMainInvariant(initiallyClassified)
+    :{terminals:initiallyClassified,passed:true,orphanCoverRejectedCount:0,parentLinkedCoverCount:0};
+  const rawClassified=postClassificationMainAudit.terminals;
 
   const lineIndependentMainAvailable=(prediction.branches||[]).some(branch=>branch.lineIndependentFallback===true&&branch.priority==="main");
   const lineFallbackDiscriminationAudit=buildLineFallbackDiscriminationAudit({
@@ -58,9 +62,9 @@ export function runKeirinPurchaseEngine({prediction,oddsByOrder={},budget=3000})
   const lineFallbackEvidenceBlocked=false;
   const lineBlocked=false;
   const girlsEvidenceBlocked=generationPassed&&raceMeta.raceCategory==="girls"&&startEvidenceCount<startEvidenceRequired;
-  // v230: MAIN absence is not a race-wide kill switch, but COVER/BUYABLE_HIGH-only
-  // standard purchase is forbidden inside classification. Main-scenario natural purchases
-  // are normalized to MAIN before this diagnostic is evaluated.
+  // MAIN absence does not erase the prediction distribution. It does make the
+  // standard purchase set ineligible: COVER is meaningful only with a MAIN parent.
+  // Main-scenario natural purchases are normalized after final classification.
   const mainInvariantDiagnostic=Boolean(generationPassed&&chatSpec&&!chatSpec.audit?.mainInvariant?.passed);
   const blockDecision=resolvePurchaseBlock({lineBlocked,lineAndStartEvidenceBlocked,lineFallbackEvidenceBlocked,girlsEvidenceBlocked,mainInvariantFailed:mainInvariantDiagnostic});
   const purchaseBlocked=blockDecision.blocked;
@@ -115,14 +119,16 @@ export function runKeirinPurchaseEngine({prediction,oddsByOrder={},budget=3000})
   purchase.girlsStartEvidenceCount=startEvidenceCount;
   purchase.girlsStartEvidenceRequired=raceMeta.raceCategory==="girls"?startEvidenceRequired:null;
   purchase.mainInvariantAudit={
-    diagnosticOnly:true,
-    failed:mainInvariantDiagnostic,
-    error:chatSpec?.audit?.mainInvariant?.error||null,
+    diagnosticOnly:false,
+    failed:!postClassificationMainAudit.passed,
+    error:postClassificationMainAudit.error||null,
     centerScenarioCount:Number(chatSpec?.audit?.mainInvariant?.centerScenarioCount)||0,
     mainCandidateCount:Number(chatSpec?.audit?.mainInvariant?.mainCandidateCount)||0,
     mainPurchasedCount:Number(chatSpec?.audit?.mainInvariant?.mainPurchasedCount)||0,
     raceWidePurchaseBlockedByMainInvariant:false,
-    policy:"STANDARD_PURCHASE_REQUIRES_MAIN; MAIN_ABSENCE_DOES_NOT_RACE_WIDE_KILL_PREDICTION"
+    orphanCoverRejectedCount:postClassificationMainAudit.orphanCoverRejectedCount,
+    parentLinkedCoverCount:postClassificationMainAudit.parentLinkedCoverCount,
+    policy:"STANDARD_PURCHASE_REQUIRES_MAIN; COVER_MUST_REFERENCE_MAIN_OR_CENTER_SCENARIO"
   };
   const purchaseEligibility=buildPurchaseEligibility({purchase,standardPurchasePlan,referencePurchasePlan,budget});
   purchase.purchaseEligibility=purchaseEligibility;
@@ -188,6 +194,26 @@ export function buildPurchaseEligibility({purchase={},standardPurchasePlan=[],re
   const reasonCode=canPurchase?null:(purchase.noBetReason||(!standardBetCount&&referencePurchasePlan.length?"REFERENCE_ONLY":!standardBetCount?"NO_STANDARD_PURCHASE_CANDIDATE":"BUDGET_INSUFFICIENT"));
   return{version:"PURCHASE-ELIGIBILITY-1.0",state:canPurchase?"PURCHASE_ALLOWED":"PURCHASE_BLOCKED",canPurchase,noBet:!canPurchase,reasonCode,standardBetCount,referenceBetCount:referencePurchasePlan.length,budget:Number(budget||0),minimumRequired,budgetSufficient,allowMainCoverPurchase:canPurchase,allowThick:canPurchase,allowFunding:canPurchase,showPurchasePanel:canPurchase};
 }
+
+export function enforcePostClassificationMainInvariant(terminals=[]){
+  const rows=terminals.map(item=>({...item}));
+  const purchased=()=>rows.filter(item=>item.purchaseStatus==="購入採用"&&["MAIN","COVER","BUYABLE_HIGH"].includes(item.betClass));
+  for(const item of purchased())if(item.chatForecastRole==="main"&&item.branchHeadMatched===true&&item.pairNaturalPositionEligible===true&&Number(item.naturalConvergenceScore)>=.46)item.betClass="MAIN";
+  const main=purchased().filter(item=>item.betClass==="MAIN");
+  let orphanCoverRejectedCount=0,parentLinkedCoverCount=0;
+  if(purchased().length&&main.length===0){
+    for(const item of purchased()){item.betClass="NONE";item.purchaseStatus="購入不採用";item.purchaseRejectCode="ORPHAN_COVER";item.purchaseReason="本線または中心シナリオとの対応が取れないため標準購入から除外";item.orphanCover=true;orphanCoverRejectedCount++}
+  }else if(main.length){
+    for(const item of purchased().filter(row=>row.betClass==="COVER")){
+      const parent=[...main].sort((a,b)=>coverParentDistance(item,a)-coverParentDistance(item,b)||compareFinalClassification(a,b))[0];
+      item.coverParentOrder=parent?.order?.join("-")||null;item.coverParentType=parent?(String(parent.dominantBranchId||"")===String(item.dominantBranchId||"")?"SAME_SCENARIO":Number(parent.order?.[0])===Number(item.order?.[0])?"SAME_FIRST_FAMILY":"CENTER_SCENARIO"):null;item.orphanCover=!parent;if(parent)parentLinkedCoverCount++;
+    }
+  }
+  return{terminals:rows,passed:purchased().length===0||purchased().some(item=>item.betClass==="MAIN"),error:purchased().length&&!purchased().some(item=>item.betClass==="MAIN")?"STANDARD_PURCHASE_WITHOUT_MAIN_FORBIDDEN":null,recoveredOrder:null,orphanCoverRejectedCount,parentLinkedCoverCount};
+}
+
+function coverParentDistance(cover,main){return(String(cover.dominantBranchId||"")===String(main.dominantBranchId||"")?0:4)+(Number(cover.order?.[0])===Number(main.order?.[0])?0:2)+(Number(cover.order?.[1])===Number(main.order?.[1])?0:1)+(Number(cover.order?.[2])===Number(main.order?.[2])?0:.5)}
+function compareFinalClassification(a,b){return(Number(b.terminalScore)||0)-(Number(a.terminalScore)||0)||(Number(b.probability)||0)-(Number(a.probability)||0)||String(a.order||"").localeCompare(String(b.order||""),"en")}
 
 function deepClone(value){return JSON.parse(JSON.stringify(value));}
 function fingerprintPrediction(terminals=[]){

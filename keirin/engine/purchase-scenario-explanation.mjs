@@ -27,8 +27,13 @@ export function buildPurchaseExplanationContext({terminal,classified=[],scored=[
   const rejectedThird=classified.filter(candidate=>Number(candidate.order?.[0])===n1&&Number(candidate.order?.[1])===n2&&Number(candidate.order?.[2])!==n3)
     .sort((a,b)=>(Number(b.probability)||0)-(Number(a.probability)||0)||Number(a.order?.[2])-Number(b.order?.[2]))[0]||null;
   const rejectedRider=rejectedThird?riderByNumber.get(Number(rejectedThird.order?.[2]))||fallbackRider(Number(rejectedThird.order?.[2]),rejectedThird.positionEvidence?.third):null;
+  const purchasedMain=classified.filter(candidate=>candidate.purchaseStatus==="購入採用"&&candidate.betClass==="MAIN");
+  const parentMain=terminal.betClass==="COVER"?findParentMain(terminal,purchasedMain):null;
+  const representative=classified.find(candidate=>candidate.representativeTerminal===true)||null;
+  const firstLineKnown=knownLineId(first?.lineId),excludedLineFollowers=firstLineKnown?scored.filter(rider=>String(rider.lineId)===String(first.lineId)&&Number(rider.number)!==n1&&![n2,n3].includes(Number(rider.number))&&["番手","3番手"].includes(rider.role)):[];
+  const provenanceLabels=(terminal.nodeTrace||[]).flatMap(node=>(node.newRequiredConditions||[]).map(item=>item?.label).filter(Boolean));
   return{
-    version:"PURCHASE-SCENARIO-EXPLANATION-1.1",terminal:[n1,n2,n3],terminalProbability:Number(terminal.probability)||0,first,second,third,
+    version:"PURCHASE-SCENARIO-EXPLANATION-1.2",terminal:[n1,n2,n3],terminalProbability:Number(terminal.probability)||0,first,second,third,
     firstRole:first.role||null,secondRole:second.role||null,thirdRole:third.role||null,
     primaryBranch,supportingBranches,primaryLine,
     initiativeOwner:initiativeRider?Number(initiativeRider.number):null,
@@ -37,15 +42,19 @@ export function buildPurchaseExplanationContext({terminal,classified=[],scored=[
     lineRelation12:lineRelation(first,second),lineRelation23:lineRelation(second,third),lineRelation13:lineRelation(first,third),
     firstEvidence:evidence(first,"FIRST",terminal),secondConditionalEvidence:evidence(second,"SECOND",terminal),thirdConditionalEvidence:evidence(third,"THIRD",terminal),
     rejectedCompetitors:rejectedRider?[{number:Number(rejectedRider.number),role:rejectedRider.role||null,lineId:rejectedRider.lineId||null,probability:Number(rejectedThird.probability)||0,evidence:evidence(rejectedRider,"THIRD",rejectedThird)}]:[],
+    parentMain:parentMain?{order:parentMain.order,type:terminal.coverParentType||parentType(terminal,parentMain)}:null,
+    representativeContrast:representative&&representative.order?.join("-")!==terminal.order?.join("-")?{order:representative.order,purchaseStatus:representative.purchaseStatus,rejectCode:representative.purchaseRejectCode||null}:null,
+    excludedLineFollowers:excludedLineFollowers.map(rider=>({number:Number(rider.number),name:rider.name||"",role:rider.role,lineId:rider.lineId})),provenanceLabels,
     failureConditions:failureConditions(primaryBranch,first,second,initiativeRider,scored)
   };
 }
 
 export function renderPurchaseScenario(context,betClass="MAIN"){
-  const lead=betClass==="BUYABLE_HIGH"?"この穴目は、":betClass==="COVER"?"本線の流れが一部変わり、":"";
+  const lead=betClass==="BUYABLE_HIGH"?"この穴目は、":betClass==="COVER"?coverLead(context):"";
   return[
     `${lead}${opening(context)} ${secondStep(context)}`,
-    `${thirdStep(context)} ${counterEvidence(context)}`.trim(),
+    `${thirdStep(context)} ${counterEvidence(context)} ${lineFollowerExclusion(context)}`.trim(),
+    representativeContrast(context),
     supportingEvidence(context),
     `この目が崩れるのは、${context.failureConditions.join("、または")}場合です。`
   ].filter(Boolean).join("\n\n");
@@ -57,7 +66,7 @@ function opening(c){
     case"LEADER_HOLD":return `${first}が先に主導権を取り、${driver}を根拠に最終バックまで先頭を保って押し切る展開です。`;
     case"BANTE_SASHI":return `${owner}が主導権を取る流れから、番手の${first}が追走し、${driver}を生かして直線で交わす展開です。`;
     case"MAKURI_SUCCESS":return `${first}が前団を射程に置いてまくりを仕掛け、${driver}を根拠に先頭まで届く展開です。`;
-    case"SOLO_RISE":return `ライン同士の先頭争いを見ながら単騎の${first}が仕掛け、${driver}によって前団を捉える展開です。`;
+    case"SOLO_RISE":return c.hasLineContext?`ライン同士の先頭争いを見ながら単騎の${first}が仕掛け、${driver}によって前団を捉える展開です。`:`前団と中団の動きを見ながら${first}が仕掛け、${driver}によって前の位置を捉える展開です。`;
     case"LINE_SEPARATION":return `前位の追走が崩れて隊列が乱れ、${first}が空いた位置へ進出し、${driver}を生かして先頭へ出る展開です。`;
     default:return `複数の先行候補が主導権争いで脚を使う流れから、${first}が${driver}を生かして抜け出す展開です。`;
   }
@@ -109,8 +118,8 @@ function evidence(rider,stage,terminal){
   if(!drivers.length){const positionValue=numeric(rider.roleScores?.[stage==="FIRST"?"first":stage==="SECOND"?"second":"third"]);if(positionValue!==null&&positionValue>0)drivers.push({key:stage==="FIRST"?"positionFirst":stage==="SECOND"?"positionSecond":"positionThird",value:positionValue})}
   return{stage,conditions,drivers,conditionalProbability:numeric(node?.conditionalProbability)};
 }
-function conditionPhrase(evidence,position){const condition=evidence?.conditions?.[0]?.label;if(condition)return `「${condition}」`;const driver=driverPhrase(evidence);return driver||`${position}の着順別評価`}
-function driverPhrase(evidence){const labels={start:"主導権評価",sprint:"まくり評価",finish:"終盤評価",tracking:"追走評価",recent:"近況評価",positionFirst:"1着評価",positionSecond:"2着評価",positionThird:"3着評価"},top=evidence?.drivers?.[0];return top?`${labels[top.key]||top.key} ${top.value.toFixed(2)}`:"保存された着順条件"}
+function conditionPhrase(evidence,position){const condition=evidence?.conditions?.[0]?.label;if(condition)return `「${condition}」を保つこと`;const driver=driverPhrase(evidence);return driver||`EVIDENCE_INSUFFICIENT（${position}になる具体的な位置根拠が不足）`}
+function driverPhrase(evidence){const labels={start:"早めに踏み出して前の位置を取り切る力",sprint:"前団との間合いを詰める加速",finish:"終盤まで速度を保って踏み切る力",tracking:"前の動きに続いて位置を保つ力",recent:"直近の走りで終盤まで崩れにくいこと",positionFirst:"1着位置まで進出する適性",positionSecond:"前団直後を保つ適性",positionThird:"混戦後も残る位置適性"},top=evidence?.drivers?.[0];return top?labels[top.key]||null:null}
 function lineRelation(a,b){return a?.lineId&&b?.lineId&&!String(a.lineId).startsWith("unknown-")&&String(a.lineId)===String(b.lineId)?"same-line":"different-line"}
 function attackType(type){return({LEADER_HOLD:"逃げ",BANTE_SASHI:"差し",MAKURI_SUCCESS:"まくり",SOLO_RISE:"単騎浮上",LINE_SEPARATION:"ライン分断",LEAD_BATTLE:"踏み合い"})[type]||"展開競合"}
 function mergeBranch(contribution,branch,terminal){return{...(branch||{}),...(contribution||{}),id:contribution?.branchId||branch?.id||terminal.dominantBranchId||terminal.branchId||null,label:contribution?.branchLabel||branch?.label||terminal.dominantBranchLabel||terminal.branchLabel||"保存された展開枝",branchType:contribution?.branchType||branch?.branchType||terminal.branchType||"LEAD_BATTLE"}}
@@ -120,3 +129,11 @@ function label(rider){return `${number(rider?.number)}${rider?.name?` ${rider.na
 function number(value){return `${Number(value)}番`}
 function numeric(value){return Number.isFinite(Number(value))?Number(value):null}
 function positive(value){return numeric(value)!==null&&Number(value)>0}
+function knownLineId(value){return value&&!String(value).startsWith("unknown-")&&!String(value).startsWith("girls-")}
+function findParentMain(cover,mains){return [...mains].sort((a,b)=>parentDistance(cover,a)-parentDistance(cover,b)||(Number(b.probability)||0)-(Number(a.probability)||0))[0]||null}
+function parentDistance(a,b){return(String(a.dominantBranchId||"")===String(b.dominantBranchId||"")?0:4)+(Number(a.order?.[0])===Number(b.order?.[0])?0:2)+(Number(a.order?.[1])===Number(b.order?.[1])?0:1)+(Number(a.order?.[2])===Number(b.order?.[2])?0:.5)}
+function parentType(a,b){return String(a.dominantBranchId||"")===String(b.dominantBranchId||"")?"SAME_SCENARIO":Number(a.order?.[0])===Number(b.order?.[0])?"SAME_FIRST_FAMILY":"CENTER_SCENARIO"}
+function coverLead(c){return c.parentMain?`本線${c.parentMain.order.join("-")}の中心シナリオから、着順または残り方が変わる場合を補う押さえです。 `:"EVIDENCE_INSUFFICIENT（対応する本線・中心シナリオを特定できない押さえ） "}
+function lineFollowerExclusion(c){if(!c.excludedLineFollowers?.length)return"";const followers=c.excludedLineFollowers.map(r=>`${r.number}番${r.name?` ${r.name}`:""}（${r.role}）`).join("、"),explicit=c.primaryBranch.branchType==="LINE_SEPARATION"||c.provenanceLabels.some(label=>/離れ|分断|追走失敗|割り込/.test(label));return explicit?`${followers}が着外になるのは、保存された展開枝に追走崩れ・ライン分断の根拠があるためです。`:`${followers}が残らない具体的根拠は EVIDENCE_INSUFFICIENT で、このterminalは説明上の監査対象です。`}
+function representativeContrast(c){if(!c.representativeContrast)return"";const x=c.representativeContrast,reason=x.purchaseStatus==="購入採用"?"代表終端とは別に、この終端も中心シナリオから購入条件を通過しました":`代表終端は${friendlyReject(x.rejectCode)}で購入条件を通らず、この終端が残りました`;return `分布上の代表終端${x.order.join("-")}とこの買い目${c.terminal.join("-")}が異なる理由は、${reason}。代表順位だけで購入本線を決めていません。`}
+function friendlyReject(code){return({THIRD_VARIANT_AMBIGUITY:"3着候補を十分に分離できなかったため",THIRD_VARIANT_BOUNDARY:"同じ1-2着内の自然境界を通らなかったため",PURCHASE_CUTOFF:"全体の自然境界を通らなかったため",ORPHAN_COVER:"中心シナリオとの対応が取れなかったため"})[code]||"購入条件を満たさなかったため"}

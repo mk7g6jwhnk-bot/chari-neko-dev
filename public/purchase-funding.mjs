@@ -28,6 +28,7 @@ export function qualifyThickPredictionBets(snapshot){
   const eligibility=snapshot?.purchaseEligibility||snapshot?.predictionOutput?.purchaseEligibility;
   if(snapshot?.noBet||eligibility?.allowThick===false||eligibility?.canPurchase===false)return[];
   const bets=(snapshot?.betSelections||[]).filter(b=>b?.category==="MAIN");
+  if(!bets.length)return[];
   if(bets.length<2)return[];
   const positive=bets.map(b=>({b,score:predictionQualificationScore(b)}))
     .filter(row=>row.score>0)
@@ -53,7 +54,7 @@ export function deriveThickBets(snapshot){
 
 export function allocatePreviewStakes(bets,budget,mode="standard"){
   const n=bets.length,min=n*100;
-  if(!n||budget<min)return null;
+  if(!n||!bets.some(b=>b?.category==="MAIN")||budget<min)return null;
   const normalizedMode=mode==="main"?"thick":mode;
   const base=bets.map(b=>Math.max(1,Number(b.stake)||100));
   const thickSet=normalizedMode==="thick"?new Set(deriveThickBets({betSelections:bets}).map(x=>x.order.join("-"))):new Set();
@@ -67,6 +68,11 @@ export function allocatePreviewStakes(bets,budget,mode="standard"){
   const order=weights.map((w,i)=>({w,i})).sort((a,b)=>b.w-a.w||a.i-b.i);
   for(let k=0;k<remain;k++)out[order[k%order.length].i]+=100;
   return out;
+}
+
+export function purchaseEligibility(snapshot){
+  const bets=(snapshot?.betSelections||[]).filter(b=>PURCHASE_CATEGORIES.has(b?.category)),hasMain=bets.some(b=>b?.category==="MAIN");
+  return{eligible:Boolean(!snapshot?.noBet&&bets.length&&hasMain),hasMain,standardCount:bets.length,reason:snapshot?.noBet?snapshot.noBetReason||"NO_BET":!bets.length?"NO_STANDARD_PURCHASE":!hasMain?"ORPHAN_COVER":"ELIGIBLE"};
 }
 
 export function fundingSeparationAudit(bets){
