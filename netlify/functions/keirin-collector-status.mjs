@@ -18,6 +18,8 @@ export default async function handler(req){
   payload.prefetchedRaceCount=numberOrNull(auto?.prefetchedRaceCount);
   payload.purchasePerformance=auto?.purchasePerformance||null;
   payload.races=races;
+  payload.fieldAudits=Array.isArray(auto?.fieldAudits)?auto.fieldAudits:null;
+  for(const key of ["eligibleForPreRaceSeal","preRaceSealSucceeded","preRaceSealFailed","missedBeforeStart","preRaceSealRate"])payload[key]=key.endsWith("Rate")?numberOrNull(auto?.[key]):numberOrNull(auto?.[key]);
   return jsonResponse(200,payload);
 }
 
