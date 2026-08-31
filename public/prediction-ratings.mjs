@@ -25,11 +25,18 @@ export function derivePredictionRatings(snapshot={}){
   const probabilitySum=positiveOrNull(audit.terminalProbabilitySum);
   const terminalTop3Share=normalizedMass(audit.top3Mass,probabilitySum);
   const terminalTop5Share=normalizedMass(audit.top5Mass,probabilitySum);
+  const familySummary=normalizeFamilyConcentrationSummary(
+    displayInputs?.familyConcentration,
+    bets,
+    probabilitySum
+  );
   const familyRows=Array.isArray(audit?.purchaseFamilyAudit?.rows)?audit.purchaseFamilyAudit.rows:[];
-  const familyShares=familyRows
-    .map(row=>probabilitySum?Math.max(0,Number(row?.probability)||0)/probabilitySum:0)
-    .filter(value=>value>0)
-    .sort((a,b)=>b-a);
+  const familyShares=familySummary.familyCount>0
+    ?familySummary.familyShares
+    :familyRows
+      .map(row=>probabilitySum?Math.max(0,Number(row?.probability)||0)/probabilitySum:0)
+      .filter(value=>value>0)
+      .sort((a,b)=>b-a);
   const topFamilyShare=familyShares[0]||0;
   const top2FamilyShare=(familyShares[0]||0)+(familyShares[1]||0);
   const topFamilyRow=[...familyRows].sort((a,b)=>{
@@ -124,9 +131,12 @@ export function derivePredictionRatings(snapshot={}){
 
   const confidenceContinuousCap=confidence<=1?.29:confidence===2?.47:confidence===3?.63:confidence===4?.79:1;
   const effectiveConfidence=Math.min(confidenceRaw,confidenceContinuousCap);
-  let evaluationIndex=Math.max(0,Math.min(100,100*(.40*effectiveConfidence+.35*concentrationRaw+.25*(rolloverRaw??.10))));
-  if(provisionalVerdict.tone==="stop")evaluationIndex=Math.min(evaluationIndex,35);
-  else if(provisionalVerdict.tone==="caution")evaluationIndex=Math.min(evaluationIndex,65);
+  const rawEvaluationIndex=Math.max(0,Math.min(100,100*(.40*confidenceRaw+.35*concentrationRaw+.25*(rolloverRaw??.10))));
+  const confidenceAdjustedEvaluationIndex=Math.max(0,Math.min(100,100*(.40*effectiveConfidence+.35*concentrationRaw+.25*(rolloverRaw??.10))));
+  let verdictCappedEvaluationIndex=confidenceAdjustedEvaluationIndex;
+  if(provisionalVerdict.tone==="stop")verdictCappedEvaluationIndex=Math.min(verdictCappedEvaluationIndex,35);
+  else if(provisionalVerdict.tone==="caution")verdictCappedEvaluationIndex=Math.min(verdictCappedEvaluationIndex,65);
+  const evaluationIndex=verdictCappedEvaluationIndex;
 
   const invariantChecks=[
     {id:"BET_COUNT_NOT_DIRECT_SKIP_FACTOR",passed:true,label:"買い目点数だけで見送り・信頼度・集中度を下げない"},
@@ -179,7 +189,9 @@ export function derivePredictionRatings(snapshot={}){
       topShare,top3Share,topGapRatio,cutGapRatio,betCount,dataQuality,purchaseQuality,
       branchConcentrationRaw,terminalConcentrationRaw,concentrationRaw,rawConcentration,
       terminalTop3Share,terminalTop5Share,topFamilyShare,top2FamilyShare,topFamilyCoverage,
-      confidenceRaw,rawConfidence,effectiveConfidence,rolloverRaw:rolloverRaw??.10,evaluationIndex,
+      familyConcentration:familyConcentrationDiagnostics(familySummary),
+      confidenceRaw,rawConfidence,effectiveConfidence,rolloverRaw:rolloverRaw??.10,
+      rawEvaluationIndex,confidenceAdjustedEvaluationIndex,verdictCappedEvaluationIndex,evaluationIndex,
       maxExpectedValue,allOddsEvaluated,eligibleCoverage,weightedCoverageTarget,massEfficiency,massStatus
     }
   };
@@ -230,3 +242,23 @@ function finiteOrNull(value){if(value===null||value===undefined||value==="")retu
 function positiveOrNull(value){const n=Number(value);return Number.isFinite(n)&&n>0?n:null}
 function normalizedMass(value,total){const n=Number(value);return total&&Number.isFinite(n)?Math.max(0,n)/total:0}
 function formatPct(value){return `${(Number(value)*100).toFixed(1)}%`}
+function familyConcentrationDiagnostics(value={}){const{familyShares,...summary}=value;return summary}
+
+function normalizeFamilyConcentrationSummary(input,bets,probabilitySum){
+  if(input&&typeof input==="object"&&Number.isFinite(Number(input.topFamilyShare))){
+    const top=Math.max(0,Number(input.topFamilyShare)||0),top2=Math.max(top,Number(input.top2FamilyShare)||top);
+    return{familyCount:Number(input.familyCount)||0,mainFamilyCount:Number(input.mainFamilyCount)||0,coverFamilyCount:Number(input.coverFamilyCount)||0,topFamilyShare:top,top2FamilyShare:top2,mainFamilyShare:Math.max(0,Number(input.mainFamilyShare)||0),familySupportTop:finiteOrNull(input.familySupportTop),familySupportTop2:finiteOrNull(input.familySupportTop2),familyShares:Array.isArray(input.familyShares)?input.familyShares.map(Number).filter(Number.isFinite).sort((a,b)=>b-a):[top,Math.max(0,top2-top)].filter(x=>x>0)};
+  }
+  const families=new Map();
+  for(const bet of Array.isArray(bets)?bets:[]){
+    const id=String(bet?.scenarioFamilyId||bet?.originatingScenarioFamily||"").trim();
+    const probability=finiteOrNull(bet?.scenarioFamilyProbability);
+    if(!id||probability==null)continue;
+    const existing=families.get(id),classification=String(bet?.mainCoverClassification||bet?.category||bet?.betClass||"").toUpperCase();
+    if(!existing)families.set(id,{id,probability:Math.max(0,probability),support:Math.max(0,Number(bet?.scenarioFamilySupport)||0),classification});
+    else if(existing.classification!=="MAIN"&&classification==="MAIN")existing.classification="MAIN";
+  }
+  const rows=[...families.values()].sort((a,b)=>b.probability-a.probability||a.id.localeCompare(b.id,"en"));
+  const denominator=probabilitySum||1,shares=rows.map(row=>row.probability/denominator),supports=rows.map(row=>row.support).sort((a,b)=>b-a);
+  return{familyCount:rows.length,mainFamilyCount:rows.filter(row=>row.classification==="MAIN").length,coverFamilyCount:rows.filter(row=>row.classification==="COVER").length,topFamilyShare:shares[0]||0,top2FamilyShare:(shares[0]||0)+(shares[1]||0),mainFamilyShare:rows.filter(row=>row.classification==="MAIN").reduce((sum,row)=>sum+row.probability/denominator,0),familySupportTop:supports[0]??null,familySupportTop2:(supports[0]||0)+(supports[1]||0),familyShares:shares};
+}
