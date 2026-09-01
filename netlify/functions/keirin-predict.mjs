@@ -141,6 +141,13 @@ export default async function handler(req) {
     const line = raceCategory === "girls"
       ? resolveGirlsDynamicPositions({ participants })
       : resolveOfficialLines({ participants, officialLines, lineText });
+    const lineAvailability = deriveLineAvailability({
+      raceCategory,
+      participants,
+      officialLines,
+      resolvedLine: line,
+      browserAudit: browserResult.data.lineSnapshotAudit
+    });
     const race = {
       id: `${date}-${basic.venueName || venueName}-${basic.raceNo || raceNo}`,
       venue: basic.venueName || venueName,
@@ -196,12 +203,18 @@ export default async function handler(req) {
       lineSnapshotPersistenceMode: lineSnapshotAudit.lineSnapshotPersistenceMode || "ephemeral",
       lineSnapshotRaceKey: lineSnapshotAudit.lineSnapshotRaceKey || null,
       lineSnapshotConfidence: lineSnapshotAudit.lineSnapshotConfidence || null
+      ,lineAvailabilityStatus: lineSnapshotAudit.lineAvailabilityStatus || lineAvailability.status
+      ,lineDataAvailable: lineSnapshotAudit.lineDataAvailable ?? lineAvailability.lineDataAvailable
+      ,failureReason: lineSnapshotAudit.failureReason || lineAvailability.reason
     } : {
       lineSource: "unknown",
       lineSnapshotObservedAt: null,
       lineSnapshotPersistenceMode: "ephemeral",
       lineSnapshotRaceKey: `${date}-${venueCode}-${raceNo}`,
-      lineSnapshotConfidence: null
+      lineSnapshotConfidence: null,
+      lineAvailabilityStatus: lineAvailability.status,
+      lineDataAvailable: lineAvailability.lineDataAvailable,
+      failureReason: lineAvailability.reason
     };
     const predictionSealedAt = new Date().toISOString();
 
@@ -222,6 +235,9 @@ export default async function handler(req) {
         lineConfidence: line.confidence,
         lineMode: raceCategory === "girls" ? "girls_dynamic" : "official_line",
         lineSource: line.source || null,
+        lineAvailabilityStatus: lineAvailability.status,
+        lineDataAvailable: lineAvailability.lineDataAvailable,
+        lineAvailabilityReason: lineAvailability.reason,
         officialLineItemCount: officialLines.length,
         officialLineText: lineText,
         oddsAvailable: Object.keys(odds.odds).length > 0,
@@ -815,6 +831,20 @@ export function resolveOfficialLines({ participants, officialLines, lineText }) 
   }
 
   return inferLines({ participants, lineText });
+}
+
+export function deriveLineAvailability({ raceCategory, participants = [], officialLines = [], resolvedLine = null, browserAudit = null } = {}) {
+  if (raceCategory === "girls") return { status: "LINE_LESS", lineDataAvailable: false, reason: "GIRLS_FIXED_LINE_NOT_APPLICABLE" };
+  if (browserAudit?.lineAvailabilityStatus) return {
+    status: browserAudit.lineAvailabilityStatus,
+    lineDataAvailable: browserAudit.lineDataAvailable === true,
+    reason: browserAudit.failureReason || null
+  };
+  const officialCount = new Set((Array.isArray(officialLines) ? officialLines : []).map(item => Number(item?.number)).filter(Number.isInteger)).size;
+  const participantCount = (Array.isArray(participants) ? participants : []).length;
+  if (resolvedLine?.confidence === "高" && officialCount >= Math.max(3, participantCount - 2)) return { status: "OFFICIAL_CONFIRMED", lineDataAvailable: true, reason: null };
+  if (officialCount > 0) return { status: resolvedLine?.confidence === "高" ? "OFFICIAL_PARTIAL" : "PARSE_FAILED", lineDataAvailable: false, reason: resolvedLine?.confidence === "高" ? "OFFICIAL_LINE_PARTICIPANT_COVERAGE_INCOMPLETE" : "OFFICIAL_LINE_PRESENT_BUT_NOT_RESOLVED" };
+  return { status: "OFFICIAL_UNAVAILABLE", lineDataAvailable: false, reason: "OFFICIAL_LINE_NOT_PUBLISHED_OR_NOT_FETCHED" };
 }
 
 function groupOfficialLineItems(items) {
