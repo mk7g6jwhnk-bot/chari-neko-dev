@@ -19,6 +19,7 @@
 .predictionAccordion .detailBet p{margin:4px 0 0}
 .predictionAccordion .abilityRow{display:grid;grid-template-columns:48px 1fr;gap:8px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.07)}
 .predictionAccordion .abilityRow:last-child{border-bottom:0}
+.betStory{background:var(--inset);border:1px solid var(--line);border-radius:12px;overflow:hidden}.betStory>summary{cursor:pointer;list-style:none;padding:11px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:start}.betStory>summary::-webkit-details-marker{display:none}.betStory>summary span{display:grid;gap:3px}.betStory>summary strong{font-size:1.05rem}.betStory>summary small{color:var(--accent);font-weight:800}.betStory>summary em{color:var(--muted);font-size:.78rem;font-style:normal;line-height:1.45}.betStory>summary>b{font-size:.76rem;text-align:right}.betStoryBody{border-top:1px solid var(--line);padding:12px}.betStoryBody h5{margin:10px 0 4px;color:var(--accent)}.betStoryBody h5:first-child{margin-top:0}.betStoryBody p,.betStoryBody li{margin:0;font-size:.85rem;font-weight:500;line-height:1.65}.betStoryBody ul{margin:0;padding-left:1.2rem}.betStoryMetrics{display:flex;flex-wrap:wrap;gap:6px}.betStoryMetrics span{border:1px solid var(--line);border-radius:999px;padding:5px 8px;color:var(--muted);font-size:.72rem}@media(max-width:520px){.betStory>summary{grid-template-columns:1fr}.betStory>summary>b{text-align:left}}
 
 /* v13 home recommendations */
 .homeHero{display:flex;align-items:flex-end;justify-content:space-between;gap:18px}
