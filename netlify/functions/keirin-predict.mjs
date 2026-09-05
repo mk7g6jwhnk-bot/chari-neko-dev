@@ -260,11 +260,15 @@ export default async function handler(req) {
       ].filter(Boolean),
       checkedAt: new Date().toISOString()
       ,durationBreakdown:timing
+      ,timing:buildLatencyTrace(timing,totalStarted)
+      ,prefetch:buildPrefetchTrace(timing)
     };
     if(!displayOnly)return jsonResponse(200,fullPayload);
     const serializationStarted=performance.now(),displayPayload=buildDisplayPredictionPayload(fullPayload);
     timing.serializationMs=roundMs(performance.now()-serializationStarted);
     displayPayload.durationBreakdown=timing;
+    displayPayload.timing=buildLatencyTrace(timing,totalStarted);
+    displayPayload.prefetch=buildPrefetchTrace(timing);
     displayPayload.payloadMode="DISPLAY_PREDICTION_PAYLOAD";
     displayPayload.fullAuditAvailable=Boolean(autoResearch);
     displayPayload.displayPayloadHash=await sha256Json(displayPayload);
@@ -281,6 +285,23 @@ export default async function handler(req) {
 }
 function roundMs(value){return Math.round(Number(value||0)*100)/100}
 
+export function buildLatencyTrace(source={},startedAt=performance.now()){
+  const stages=source.officialStages||{},sum=(...names)=>roundMs(names.reduce((total,name)=>total+(Number(stages[name])||0),0));
+  return{
+    queueWaitMs:roundMs(source.queueWaitMs),
+    raceFetchMs:sum("resolve-schedule-static","open-schedule","open-schedule-cell","move-mobile","select-requested-date","select-race","select-race-fallback","fetch-official-json"),
+    lineFetchMs:sum("post-selection-ui","read-token","freeze-selected-race-token"),
+    profileFetchMs:sum("load-official-profiles"),
+    oddsFetchMs:sum("fetch-odds"),
+    validationMs:sum("validation"),
+    predictionMs:roundMs(source.engineTotalMs),
+    purchaseMs:roundMs(source.purchaseMs),
+    displayBuildMs:roundMs(source.serializationMs),
+    totalMs:roundMs(performance.now()-startedAt)
+  };
+}
+export function buildPrefetchTrace(source={}){return{hit:source.officialCacheState==="HIT",ageMs:Number.isFinite(Number(source.officialCacheAgeMs))?Number(source.officialCacheAgeMs):null}}
+
 export function buildDisplayPredictionPayload(payload={}){
   const prediction=payload.prediction||{},selected=[...(prediction.purchasePlan||[])].map(compactPurchaseRow);
   const displayRatingInputs=buildDisplayRatingInputs(payload);
@@ -288,7 +309,7 @@ export function buildDisplayPredictionPayload(payload={}){
   const compactTerminals=(prediction.terminals||[]).filter(item=>selectedOrders.has(normalizeOrderKey(item?.order||item?.combination))).map(item=>({order:item.order||item.combination,probability:item.probability??null,betClass:item.betClass||null,purchaseStatus:item.purchaseStatus||null,dominantBranchId:item.dominantBranchId||item.branchId||null,dominantBranchLabel:item.dominantBranchLabel||item.branchLabel||null,naturalConvergenceScore:item.naturalConvergenceScore??null,nodeConditionalProbability:item.nodeConditionalProbability??null,terminalGlobalRank:item.terminalGlobalRank??null,terminalFamilyRank:item.terminalFamilyRank??null,terminalPairRank:item.terminalPairRank??null}));
   const compactAudit={passed:prediction.audit?.passed!==false,probabilitySum:prediction.audit?.probabilitySum??null,terminalCount:prediction.audit?.terminalCount??null,lineFallbackAudit:prediction.audit?.lineFallbackAudit||null,predictionBoundaryAudit:prediction.audit?.predictionBoundaryAudit||null,predictionPurchaseBoundaryAudit:prediction.audit?.predictionPurchaseBoundaryAudit||null,selectionBoundaryAudit:prediction.audit?.selectionBoundaryAudit||null,purchaseDistributionAudit:prediction.audit?.purchaseDistributionAudit||null,purchaseRegime:prediction.audit?.purchaseRegime||null};
   const compactRace={...(payload.race||{}),participants:(payload.race?.participants||[]).map(compactParticipant)};
-  return {ok:payload.ok,race:compactRace,odds:payload.odds,prediction:{engineVersion:prediction.engineVersion,lineConfidence:prediction.lineConfidence,scored:(prediction.scored||[]).map(compactScoredRider),predictionExplanation:prediction.predictionExplanation||prediction.prediction?.explanation||null,terminals:compactTerminals,purchasePlan:selected,standardPurchasePlan:(prediction.standardPurchasePlan||[]).map(compactPurchaseRow),referencePurchasePlan:(prediction.referencePurchasePlan||[]).map(compactPurchaseRow),recommendationLabel:prediction.recommendationLabel||"",noBet:Boolean(prediction.noBet),noBetReason:prediction.noBetReason||null,purchaseEligibility:prediction.purchaseEligibility||prediction.audit?.purchaseEligibility||null,displayRatingInputs,audit:compactAudit,lineSnapshotAudit:prediction.lineSnapshotAudit||null},predictionRequestedAt:payload.predictionRequestedAt,predictionSealedAt:payload.predictionSealedAt,preSeal:payload.preSeal||null,riderDbUsageAudit:payload.riderDbUsageAudit||null,lineSnapshotAudit:payload.lineSnapshotAudit||null,dataQuality:payload.dataQuality||null,warnings:payload.warnings||[],checkedAt:payload.checkedAt,durationBreakdown:payload.durationBreakdown};
+  return {ok:payload.ok,race:compactRace,odds:payload.odds,prediction:{engineVersion:prediction.engineVersion,lineConfidence:prediction.lineConfidence,scored:(prediction.scored||[]).map(compactScoredRider),predictionExplanation:prediction.predictionExplanation||prediction.prediction?.explanation||null,terminals:compactTerminals,purchasePlan:selected,standardPurchasePlan:(prediction.standardPurchasePlan||[]).map(compactPurchaseRow),referencePurchasePlan:(prediction.referencePurchasePlan||[]).map(compactPurchaseRow),recommendationLabel:prediction.recommendationLabel||"",noBet:Boolean(prediction.noBet),noBetReason:prediction.noBetReason||null,purchaseEligibility:prediction.purchaseEligibility||prediction.audit?.purchaseEligibility||null,displayRatingInputs,audit:compactAudit,lineSnapshotAudit:prediction.lineSnapshotAudit||null},predictionRequestedAt:payload.predictionRequestedAt,predictionSealedAt:payload.predictionSealedAt,preSeal:payload.preSeal||null,riderDbUsageAudit:payload.riderDbUsageAudit||null,lineSnapshotAudit:payload.lineSnapshotAudit||null,dataQuality:payload.dataQuality||null,warnings:payload.warnings||[],checkedAt:payload.checkedAt,durationBreakdown:payload.durationBreakdown,timing:payload.timing||null,prefetch:payload.prefetch||null};
 }
 
 function buildDisplayRatingInputs(payload={}){

@@ -35,7 +35,18 @@
       <div id="todayRecommendations" class="recommendationList"></div>
       <p class="muted recommendationFootnote">現在は競輪のみ接続済み。今後、同じ欄で競技を横断して絞り込めます。</p>
     </section>
+    <section id="homePredictionStatus" class="card compact"><div class="sectionHead"><h2>今日の予想状況</h2><span class="pill">確認中</span></div></section>
+    <section id="homeHighlights" class="card compact"><div class="sectionHead"><h2>注目レース</h2><span class="pill">集計中</span></div><p class="muted">購入可・注意・高配当・荒れ気配を整理します。</p></section>
+    <section id="homeRecentResults" class="card compact"><div class="sectionHead"><h2>最近の結果</h2><button id="openPredictionHistory" class="secondary" type="button">予想履歴を開く</button></div><p class="muted">保存済みの自動予想と公式結果を読み取ります。</p></section>
+    <section id="homeSystemStatus" class="card compact"><div class="sectionHead"><h2>研究・システム状態</h2><span class="pill">確認中</span></div><p class="muted">保存済み状態を読み取っています。</p><details><summary>運用詳細</summary><div id="homeOperationalDetails" class="metaGrid"></div></details></section>
     <section class="card compact"><div class="sectionHead"><h2>保存済み予想</h2><span id="savedCount" class="pill">0件</span></div><div id="savedList" class="stack"></div></section>
+  </section>
+
+  <section id="history" class="screen">
+    <div class="pageTitle"><div><small>REMOTE / READ ONLY</small><h1>予想履歴</h1></div><span id="historyCount" class="pill">0件</span></div>
+    <section class="card compact historyFilters"><label>開始日<input id="historyFrom" type="date"></label><label>終了日<input id="historyTo" type="date"></label><label>場<input id="historyVenue" type="search" placeholder="すべて"></label><label>状態<select id="historyStatus"><option value="all">すべて</option><option value="hit">的中</option><option value="miss">不的中</option><option value="waiting">結果待ち</option><option value="allowed">購入可</option><option value="caution">注意</option><option value="blocked">見送り</option></select></label><button id="reloadHistory" class="primary" type="button">表示</button></section>
+    <p id="historyNotice" class="muted">Railwayの保存済み予想を読み取っています。</p>
+    <div id="historyList" class="stack"></div>
   </section>
 
   <section id="meetings" class="screen">

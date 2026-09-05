@@ -6,6 +6,7 @@ const auto={ok:true,statusGeneratedAt:"2026-08-30T08:00:00Z",collectorProcessHea
 const research={ok:true,statusGeneratedAt:"2026-08-30T07:59:00Z",comparedCount:23,researchAudit:{progressTo50:{count:23},activeEvaluationCohort:"COHORT_A_DIAGNOSIS"}};
 let researchFails=false;
 globalThis.fetch=async url=>{
+  if(String(url).endsWith("/keirin/status/snapshot"))return new Response("warming",{status:503,headers:{"content-type":"text/plain"}});
   if(String(url).endsWith("/keirin/auto-research/status"))return Response.json(auto);
   if(researchFails)return new Response("upstream unavailable",{status:502,headers:{"content-type":"text/plain"}});
   return Response.json(research);

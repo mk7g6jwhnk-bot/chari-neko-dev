@@ -75,6 +75,14 @@ export function purchaseEligibility(snapshot){
   return{eligible:Boolean(!snapshot?.noBet&&bets.length&&hasMain),hasMain,standardCount:bets.length,reason:snapshot?.noBet?snapshot.noBetReason||"NO_BET":!bets.length?"NO_STANDARD_PURCHASE":!hasMain?"ORPHAN_COVER":"ELIGIBLE"};
 }
 
+export function purchaseDisplayState(snapshot,rating={}){
+  const eligibility=purchaseEligibility(snapshot);
+  const confidence=Number(rating?.confidence),concentration=Number(rating?.concentration);
+  const quality=confidence>=4&&concentration>=4?"高":confidence<=2||concentration<=2?"低":"中";
+  const thick=eligibility.eligible&&deriveThickBets(snapshot).length>0;
+  return{quality,purchase:eligibility.eligible?"購入可":"購入不可",funding:eligibility.eligible?(thick?"厚め候補":"通常"):"なし",label:eligibility.eligible?(quality==="高"?"購入可":"注意"):"見送り",eligible:eligibility.eligible,thick};
+}
+
 export function fundingSeparationAudit(bets){
   const rows=(bets||[]).filter(b=>PURCHASE_CATEGORIES.has(b?.category)).map(b=>({
     order:(b.order||[]).join("-"),category:b.category,priorityScore:fundingPriorityScore(b),predictionQualificationScore:predictionQualificationScore(b),
