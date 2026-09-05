@@ -1,0 +1,29 @@
+{
+  "type": "RESEARCH_CANDIDATE_COHORT_RESERVATION",
+  "candidateId": "RESEARCH-TERMINAL-CALIBRATION-SHADOW-1.0",
+  "createdAt": "2026-09-05T23:44:18.6698103+09:00",
+  "ordering": "immutable COMPARED chronological order by comparedAt, then raceKey(en)",
+  "developmentCutoff": { "endIndex": 302, "lastRaceKey": "20260905-12-2" },
+  "validation": {
+    "cohortId": "CANDIDATE_VALIDATION_100",
+    "startIndex": 303,
+    "endIndex": 402,
+    "sampleTarget": 100,
+    "status": "PRE_REGISTERED_AWAITING_FUTURE_RECORDS",
+    "weightsLocked": true,
+    "calibrationLocked": true,
+    "candidateReselectionAllowed": false,
+    "trainingUseAllowed": false
+  },
+  "finalTest": {
+    "cohortId": "CANDIDATE_FINAL_TEST_100",
+    "startIndex": 403,
+    "endIndex": 502,
+    "sampleTarget": 100,
+    "status": "RESERVED_ACTIVATE_ONLY_AFTER_VALIDATION_PASS",
+    "evaluateOnce": true,
+    "trainingUseAllowed": false
+  },
+  "productionWriteAllowed": false,
+  "autoPromotion": false
+}
