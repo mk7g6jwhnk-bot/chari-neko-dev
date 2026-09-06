@@ -16,9 +16,12 @@ export function loadCachedCollectorStatus(storage,now=Date.now(),date=collectorL
 
 export function saveCachedCollectorStatus(storage,value){
   if(value?.schemaVersion!==COLLECTOR_STATUS_SCHEMA_VERSION)return value;
+  if(!storage?.getItem||!storage?.setItem)return value;
+  try{
   if(value.autoStatusAvailable&&/^\d{8}$/.test(value.dailyDate||""))storage.setItem(`${COLLECTOR_DAILY_CACHE_PREFIX}:${value.dailyDate}`,JSON.stringify({schemaVersion:COLLECTOR_STATUS_SCHEMA_VERSION,source:value.autoSource||"auto_lifecycle",observedAt:value.autoObservedAt||value.checkedAt,dailyDate:value.dailyDate,collectorProcessHealthy:value.collectorProcessHealthy,collectorHealthy:value.collectorHealthy,collectorOperational:value.collectorOperational,storageWritable:value.storageWritable,storageHealthy:value.storageHealthy,storageWarning:value.storageWarning,browserConnected:value.browserConnected,todayRaceCount:value.todayRaceCount,sealedPredictionCount:value.sealedPredictionCount,resultLoadedCount:value.resultLoadedCount,verifiedCount:value.verifiedCount,waitingPredictionCount:value.waitingPredictionCount,pendingResultCount:value.pendingResultCount,failureCount:value.failureCount,retryingCount:value.retryingCount,lastPredictionRunAt:value.lastPredictionRunAt,lastResultRunAt:value.lastResultRunAt,lastSuccessfulCollectorUpdate:value.lastSuccessfulCollectorUpdate,lastError:value.lastError,recentErrors:value.recentErrors,storageMode:value.storageMode}));
   if(value.autoStatusAvailable&&/^\d{8}$/.test(value.dailyDate||"")){const saved=JSON.parse(storage.getItem(`${COLLECTOR_DAILY_CACHE_PREFIX}:${value.dailyDate}`)||"{}");Object.assign(saved,{meetingCount:value.meetingCount,prefetchedRaceCount:value.prefetchedRaceCount,eligibleForPreRaceSeal:value.eligibleForPreRaceSeal,preRaceSealSucceeded:value.preRaceSealSucceeded,preRaceSealFailed:value.preRaceSealFailed,missedBeforeStart:value.missedBeforeStart,preRaceSealRate:value.preRaceSealRate,purchasePerformance:value.purchasePerformance,races:value.races});storage.setItem(`${COLLECTOR_DAILY_CACHE_PREFIX}:${value.dailyDate}`,JSON.stringify(saved))}
   if(value.researchStatusAvailable&&value.researchProgress)storage.setItem(COLLECTOR_RESEARCH_CACHE_KEY,JSON.stringify({schemaVersion:COLLECTOR_STATUS_SCHEMA_VERSION,source:value.researchSource||"research_shadow",observedAt:value.researchObservedAt||value.checkedAt,researchProgress:value.researchProgress}));
+  }catch{}
   return value;
 }
 
