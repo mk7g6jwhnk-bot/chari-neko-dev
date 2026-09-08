@@ -7,6 +7,7 @@ const db={riders:{"000123":{officialIdConfirmed:true,recent_4_months:{race_point
 const participant={number:1,id:"1",registration:"123",officialScore:94,recentForm:7,role:"自力",lineId:"A",roleScores:{first:5,second:5,third:5}};
 const base=buildDbBaseline(participant,{riderDb:db,raceDate:"20260820"});
 assert.equal(base.matched,true);assert.ok(base.baseAbility.firstAbility>0);assert.equal(base.baseAbility.stamina,null);assert.equal(base.behaviorTraits.blockTendency.verifiedLevel,"UNVERIFIED");
+assert.equal(buildDbBaseline(participant,{riderDb:db,raceDate:"20261020"}).reliability.stale,true);
 const adjustments=buildTodayAdjustments(participant,base);assert.equal(adjustments.length,5);assert.ok(adjustments.every(x=>x.appliedValue>=.94&&x.appliedValue<=1.06||x.name==="lineRoleAdjustment"));
 assert.deepEqual(classifyBehaviorTraitSources([{nodeType:"FIRST"},{nodeType:"BLOCK",requiresMedia:true},{nodeType:"OTHER"}]).map(x=>x.derivability),["AUTO_DERIVABLE","MEDIA_REQUIRED","UNVERIFIED"]);
 const race={date:"20260820",participants:[participant,{...participant,number:2,id:"2",registration:"124",role:"番手",roleScores:{first:6,second:6,third:6}},{...participant,number:3,id:"3",registration:"125",lineId:"B",roleScores:{first:7,second:7,third:7}}]};

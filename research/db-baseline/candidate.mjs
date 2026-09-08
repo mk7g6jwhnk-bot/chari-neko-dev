@@ -78,7 +78,7 @@ export function buildCandidateTerminals({race,existingGraph,variant="C4",riderDb
 
 export function trainingHash(raceKeys){return crypto.createHash("sha256").update([...raceKeys].join("\n")).digest("hex");}
 
-function axis(rider,base,rules,target,useDb){if(!useDb||!base?.matched)return Math.max(.001,Number(rider.roleScores?.[target])||.001);const raw=target==="first"?base.baseAbility.firstAbility:base.baseAbility.secondAbility;if(raw===null)return Math.max(.001,Number(rider.roleScores?.[target])||.001);return Math.max(.001,raw*rules.reduce((v,x)=>v*x.appliedValue,1));}
+function axis(rider,base,rules,target,useDb){if(!useDb||!base?.matched||base.reliability.stale||base.reliability.sampleCount<=0||base.reliability.qualityStatus!=="success")return Math.max(.001,Number(rider.roleScores?.[target])||.001);const raw=target==="first"?base.baseAbility.firstAbility:base.baseAbility.secondAbility;if(raw===null)return Math.max(.001,Number(rider.roleScores?.[target])||.001);return Math.max(.001,raw*rules.reduce((v,x)=>v*x.appliedValue,1));}
 function pairFactor(first,second){let value=1;if(first.lineId&&first.lineId===second.lineId)value*=second.role==="番手"?1.12:1.05;if(second.role==="番手")value*=1.04;return clamp(value,.9,1.16);}
 function position(rider,index,count){const i=index.has(Number(rider.number))?index.get(Number(rider.number)):count-1;return Math.max(1,count-i)/Math.max(1,count);}
 function normalize(rows){const total=rows.reduce((n,x)=>n+x.weight,0)||1;return rows.map(x=>({...x,probability:x.weight/total}));}
