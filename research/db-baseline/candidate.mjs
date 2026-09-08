@@ -58,13 +58,13 @@ export function classifyBehaviorTraitSources(observations=[]){
 export function buildCandidateTerminals({race,existingGraph,variant="C4",riderDb=RIDER_DB}){
   const baselines=new Map((race?.participants||[]).map(p=>[Number(p.number),buildDbBaseline(p,{riderDb,raceDate:race?.date})]));
   const adjustments=new Map((race?.participants||[]).map(p=>[Number(p.number),buildTodayAdjustments(p,baselines.get(Number(p.number)),{apply:["C2","C3","C4","C5"].includes(variant)})]));
-  const useFirst=["C3","C4","C5"].includes(variant),usePair=["C4","C5"].includes(variant);
+  const useFirst=["C1","C2","C3","C4","C5"].includes(variant),usePair=["C1","C2","C4","C5"].includes(variant),useConditionalPair=["C4","C5"].includes(variant);
   const map=new Map(),riders=existingGraph.scored,paths=existingGraph.paths;
   for(const path of paths){
     const pos=new Map((path.state.fourthCornerOrder||[]).map((n,i)=>[Number(n),i]));
     const first=normalize(riders.map(r=>({r,weight:position(r,pos,riders.length)*axis(r,baselines.get(Number(r.number)),adjustments.get(Number(r.number)),"first",useFirst)})));
     for(const a of first){
-      const second=normalize(riders.filter(r=>r.id!==a.r.id).map(r=>({r,weight:position(r,pos,riders.length)*axis(r,baselines.get(Number(r.number)),adjustments.get(Number(r.number)),"second",usePair)*pairFactor(a.r,r)})));
+      const second=normalize(riders.filter(r=>r.id!==a.r.id).map(r=>({r,weight:position(r,pos,riders.length)*axis(r,baselines.get(Number(r.number)),adjustments.get(Number(r.number)),"second",usePair)*(useConditionalPair?pairFactor(a.r,r):1)})));
       for(const b of second){
         const third=normalize(riders.filter(r=>r.id!==a.r.id&&r.id!==b.r.id).map(r=>({r,weight:position(r,pos,riders.length)*Math.max(.001,Number(r.roleScores?.third)||.001)})));
         for(const c of third){const order=[a.r.number,b.r.number,c.r.number].map(Number),key=order.join("-"),mass=path.probability*a.probability*b.probability*c.probability;map.set(key,{order,terminalProbability:(map.get(key)?.terminalProbability||0)+mass});}
