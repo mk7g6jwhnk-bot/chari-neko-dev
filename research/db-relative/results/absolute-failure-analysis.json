@@ -1,0 +1,608 @@
+{
+  "counts": {
+    "worsening30Plus": 51,
+    "worsening50Plus": 19,
+    "worsening100Plus": 3,
+    "worstDelta": 183
+  },
+  "causes": {
+    "firstWorse": {
+      "all30": 41,
+      "all50": 16,
+      "all100": 3
+    },
+    "pairWorse": {
+      "all30": 51,
+      "all50": 19,
+      "all100": 3
+    },
+    "stale": {
+      "all30": 3,
+      "all50": 1,
+      "all100": 0
+    },
+    "sampleInsufficient": {
+      "all30": 12,
+      "all50": 5,
+      "all100": 2
+    },
+    "lineRoleMismatch": {
+      "all30": 41,
+      "all50": 16,
+      "all100": 3
+    },
+    "largeRacePointSpread": {
+      "all30": 3,
+      "all50": 1,
+      "all100": 0
+    },
+    "largeHBSpread": {
+      "all30": 48,
+      "all50": 19,
+      "all100": 3
+    }
+  },
+  "tailCases": [
+    {
+      "raceKey": "20260829-73-1",
+      "delta": 183,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": true,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260902-31-2",
+      "delta": 155,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": true,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260829-48-7",
+      "delta": 101,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260829-56-7",
+      "delta": 85,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260903-12-4",
+      "delta": 84,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260901-24-8",
+      "delta": 81,
+      "firstWorse": false,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": true,
+      "lineRoleMismatch": false,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260828-53-8",
+      "delta": 78,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260901-75-10",
+      "delta": 75,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260903-28-3",
+      "delta": 73,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260828-56-6",
+      "delta": 68,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260904-21-2",
+      "delta": 64,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": true,
+      "sampleInsufficient": true,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260902-61-7",
+      "delta": 61,
+      "firstWorse": false,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": false,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260902-75-5",
+      "delta": 56,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260829-81-10",
+      "delta": 54,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260904-61-7",
+      "delta": 53,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": true,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260905-28-1",
+      "delta": 53,
+      "firstWorse": false,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": false,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260831-75-10",
+      "delta": 52,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260903-12-5",
+      "delta": 50,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": true,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260904-28-10",
+      "delta": 50,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260829-56-1",
+      "delta": 48,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": true,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": false
+    },
+    {
+      "raceKey": "20260902-47-3",
+      "delta": 48,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260903-84-10",
+      "delta": 46,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260902-75-4",
+      "delta": 45,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260829-81-4",
+      "delta": 44,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260904-37-7",
+      "delta": 44,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": true,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260830-81-7",
+      "delta": 43,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": true,
+      "sampleInsufficient": true,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260831-34-3",
+      "delta": 43,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260902-21-2",
+      "delta": 43,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260903-28-8",
+      "delta": 42,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260904-84-8",
+      "delta": 41,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260828-53-4",
+      "delta": 40,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260831-34-11",
+      "delta": 40,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": true,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260831-13-5",
+      "delta": 40,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260903-28-2",
+      "delta": 38,
+      "firstWorse": false,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": false,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260901-34-3",
+      "delta": 37,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260902-75-3",
+      "delta": 36,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260904-45-10",
+      "delta": 36,
+      "firstWorse": false,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": false,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260901-34-2",
+      "delta": 35,
+      "firstWorse": false,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": false,
+      "largeRacePointSpread": true,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260901-34-10",
+      "delta": 35,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260903-31-4",
+      "delta": 35,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": false
+    },
+    {
+      "raceKey": "20260828-37-5",
+      "delta": 34,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": true,
+      "sampleInsufficient": true,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260831-48-5",
+      "delta": 34,
+      "firstWorse": false,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": false,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260831-43-6",
+      "delta": 33,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": true,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260904-12-9",
+      "delta": 33,
+      "firstWorse": false,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": false,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260827-56-2",
+      "delta": 32,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": true,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260904-28-7",
+      "delta": 32,
+      "firstWorse": false,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": false,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260904-61-1",
+      "delta": 32,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": true,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260831-34-9",
+      "delta": 31,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260831-38-4",
+      "delta": 31,
+      "firstWorse": false,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": false,
+      "largeRacePointSpread": false,
+      "largeHBSpread": false
+    },
+    {
+      "raceKey": "20260901-24-7",
+      "delta": 31,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    },
+    {
+      "raceKey": "20260904-84-9",
+      "delta": 30,
+      "firstWorse": true,
+      "pairWorse": true,
+      "stale": false,
+      "sampleInsufficient": false,
+      "lineRoleMismatch": true,
+      "largeRacePointSpread": false,
+      "largeHBSpread": true
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "candidateId": "DB-RELATIVE-FIRST-PAIR-1.0",
+  "sourceBaseCommit": "e0b2ec9",
+  "status": "ACCEPTED_FOR_SHADOW",
+  "classification": "SHADOW_CANDIDATE_ONLY",
+  "baseline": {
+    "name": "Existing Research",
+    "temperature": 0.5,
+    "terminalGenerationChanged": false,
+    "thirdModelChanged": false
+  },
+  "weights": {
+    "racePointDiff": 0.25,
+    "sameLineRole": 0.25,
+    "winRateDiff": 0,
+    "HBDiff": 0,
+    "sprintFinishDiff": 0,
+    "trackingDiff": 0
+  },
+  "reliabilityGate": {
+    "minimumSample": 10,
+    "requireNotStale": true,
+    "requireQualitySuccess": true,
+    "requireTargetFeaturePresentForBoth": true,
+    "bothRidersComparable": true
+  },
+  "development": {
+    "count": 302,
+    "firstRaceKey": "20260827-61-5",
+    "lastRaceKey": "20260905-12-2",
+    "trainingHash": "9b03ece2410c4f0cd8d79e2c3858e3564b395b8cdfb6e4dc4c02c95b3f38bf9b",
+    "resultFile": "results/development-302.json"
+  },
+  "holdouts": {
+    "validation303To402Touched": false,
+    "final403To502Touched": false
+  },
+  "behaviorTraitStatus": "BEHAVIOR_TRAITS_NOT_ENOUGH_DATA",
+  "productionWriteAllowed": false,
+  "autoPromotion": false
+}
