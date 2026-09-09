@@ -45,10 +45,16 @@ export function qualifyThickPredictionBets(snapshot){
 }
 
 export function deriveThickBets(snapshot){
-  return qualifyThickPredictionBets(snapshot).map(b=>({
+  const eligibility=snapshot?.purchaseEligibility||snapshot?.predictionOutput?.purchaseEligibility;
+  if(snapshot?.noBet||eligibility?.allowThick===false||eligibility?.canPurchase===false)return[];
+  // Display/funding consumes the saved purchase decision. Missing legacy flags
+  // are unavailable, never an invitation to rerun prediction qualification.
+  return (snapshot?.betSelections||[]).filter(b=>b?.category==="MAIN"&&
+    (b.thickQualified===true||(b.thickQualified==null&&b.qualification==="THICK_PREDICTION_QUALIFIED"))).map(b=>({
     ...b,
     thickScore:fundingPriorityScore(b),
-    reason:`予測上位群（自然収束 ${Math.round((Number(b.naturalConvergenceScore)||0)*100)}%・終端確率 ${(Number(b.probability||0)*100).toFixed(1)}%）の中で資金配分を優先`
+    thickDecisionSource:"SAVED_PURCHASE_DECISION",
+    reason:"保存済み購入判定で資金配分の優先対象"
   })).sort((a,b)=>b.thickScore-a.thickScore||String(a.order||"").localeCompare(String(b.order||""),"en"));
 }
 

@@ -50,7 +50,15 @@ export function createSnapshot(payload,now=new Date()){
   snapshot.noBetReason=snapshot.purchaseEligibility.reasonCode||snapshot.noBetReason;
   const scenarioByOrder=new Map([...standardPurchasePlanOf(prediction),...referencePurchasePlanOf(prediction)].map(item=>[(item.order||[]).join("-"),item]));
   const attachScenario=selection=>{const source=scenarioByOrder.get((selection.order||[]).join("-"));return{...selection,scenarioExplanation:source?.scenarioExplanation||null,explanationContext:source?.explanationContext||null,originatingScenarioFamily:source?.originatingScenarioFamily||null,scenarioFamilyLabel:source?.scenarioFamilyLabel||source?.dominantBranchLabel||null,scenarioFamilyRank:source?.scenarioFamilyRank??null,scenarioFamilySupport:source?.scenarioFamilySupport??null,scenarioFamilyProbability:source?.scenarioFamilyProbability??null,primaryBranch:source?.primaryBranch||source?.dominantBranchId||null,supportingBranches:source?.supportingBranches||[],head:source?.head??selection.order?.[0]??null,second:source?.second??selection.order?.[1]??null,third:source?.third??selection.order?.[2]??null,mainCoverClassification:source?.mainCoverClassification||selection.category||null,mainDifferenceReason:source?.mainDifferenceReason||null}};
-  snapshot.betSelections=snapshot.betSelections.map(attachScenario);
+  const savedDecisionRows=prediction.canonicalPurchasePlan?.standardTickets||standardPurchasePlanOf(prediction);
+  const savedDecisions=new Map(savedDecisionRows.map(row=>[(row.order||[]).join("-"),row]));
+  snapshot.betSelections=snapshot.betSelections.map(attachScenario).map(row=>{
+    const saved=savedDecisions.get(row.order.join("-"));
+    const known=typeof saved?.thickQualified==="boolean"||saved?.qualification==="THICK_PREDICTION_QUALIFIED";
+    return{...row,thickQualified:known?(typeof saved.thickQualified==="boolean"?saved.thickQualified:true):null,
+      predictionQualificationScore:saved?.predictionQualificationScore??null,
+      thickDecisionSource:known?"SAVED_PURCHASE_DECISION":"UNAVAILABLE_LEGACY"};
+  });
   snapshot.referenceBetSelections=snapshot.referenceBetSelections.map(attachScenario);
   snapshot.displayRatings=derivePredictionRatings(snapshot);snapshot.riderMarks=deriveRiderMarks(snapshot);
   return snapshot;
@@ -1555,7 +1563,7 @@ function compactSnapshot(s,aggressive){
     predictionOutput:{recommendationLabel:s.predictionOutput?.recommendationLabel||"",lineConfidence:s.predictionOutput?.lineConfidence??null,lineMode:s.predictionOutput?.lineMode||null,noBet:Boolean(s.predictionOutput?.noBet),noBetReason:s.predictionOutput?.noBetReason||null},
     branches:aggressive?[]:(s.branches||[]).map(b=>({id:b.id||b.branchId||null,label:b.label||b.name||null,priority:b.priority||b.forecastClass||null,probability:b.probability??null})),
     terminalLedger,
-    betSelections:(s.betSelections||[]).map(b=>({order:b.order,category:b.category,stake:b.stake??null,odds:b.odds??null,probability:b.probability??null,globalRank:b.globalRank??null,familyRank:b.familyRank??null,reason:aggressive?null:(b.reason||null)})),
+    betSelections:(s.betSelections||[]).map(b=>({order:b.order,category:b.category,thickQualified:b.thickQualified??(b.qualification==="THICK_PREDICTION_QUALIFIED"?true:null),predictionQualificationScore:b.predictionQualificationScore??null,thickDecisionSource:b.thickDecisionSource||"UNAVAILABLE_LEGACY",stake:b.stake??null,odds:b.odds??null,probability:b.probability??null,globalRank:b.globalRank??null,familyRank:b.familyRank??null,reason:aggressive?null:(b.reason||null)})),
     referenceBetSelections:(s.referenceBetSelections||[]).map(b=>({order:b.order,category:"REFERENCE",stake:null,odds:b.odds??null,probability:b.probability??null,globalRank:b.globalRank??null,familyRank:b.familyRank??null,reason:aggressive?null:(b.reason||null)})),
     standardBetCount:(s.betSelections||[]).length,referenceBetCount:(s.referenceBetSelections||[]).length,
     oddsSnapshot:aggressive?null:s.oddsSnapshot,

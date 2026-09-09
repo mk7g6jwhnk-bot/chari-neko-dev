@@ -16,7 +16,7 @@ const noCluster=[
 assert.equal(deriveThickBets({betSelections:noCluster}).length,0,"near-flat candidates must not invent a thick cluster");
 assert.deepEqual(allocatePreviewStakes(noCluster,1200,"thick"),allocatePreviewStakes(noCluster,1200,"standard"),"thick mode must not fall back to category-only MAIN boosting");
 const clear=[
- {...main,probability:.42,naturalConvergenceScore:.93},
+ {...main,probability:.42,naturalConvergenceScore:.93,thickQualified:true},
  {...cover,probability:.17,naturalConvergenceScore:.78},
  {...high,probability:.16,naturalConvergenceScore:.76}
 ];
@@ -26,5 +26,5 @@ const standard=allocatePreviewStakes(clear,1200,"standard"),priority=allocatePre
 assert.ok(priority[0]>standard[0],"detected thick cluster should receive more stake only when user selects thick priority");
 const highOddsOnly=clear.map((row,index)=>({...row,probability:.2-index*.01,naturalConvergenceScore:.8,odds:index===2?999:2}));
 assert.equal(qualifyThickPredictionBets({betSelections:highOddsOnly}).some(x=>x.order.join("-")==="1-2-5"),false,"odds must not create prediction qualification");
-assert.equal(deriveThickBets({betSelections:clear.map(row=>({...row,naturalConvergenceScore:0}))}).length,0,"zero natural convergence must not be called thick");
+assert.equal(deriveThickBets({betSelections:clear.map(row=>({...row,naturalConvergenceScore:0}))}).length,1,"display must preserve the saved decision even when evidence is missing");
 console.log("PASS funding/classification separation",thick.map(x=>x.order.join("-")).join(","));
