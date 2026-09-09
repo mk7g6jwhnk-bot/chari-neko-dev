@@ -1,0 +1,70 @@
+{
+  "type": "RESEARCH_SHADOW_CANDIDATE",
+  "candidateId": "RESEARCH-TERMINAL-CALIBRATION-SHADOW-1.0",
+  "candidateVersion": "RESEARCH-TERMINAL-CALIBRATION-SHADOW-1.0",
+  "baselineVersion": "RESEARCH-TERMINALS-MVP-1.0",
+  "classification": "SHADOW_CANDIDATE_ONLY",
+  "createdAt": "2026-09-05T23:44:18.6698103+09:00",
+  "codeVersion": "bcaa00227f1865237ff98e87df84a80d1e977b10",
+  "productionWriteAllowed": false,
+  "autoPromotion": false,
+  "rankingCandidate": {
+    "accepted": false,
+    "reason": "Best non-zero mean-rank candidate regressed MRR, median rank and Top20; existing aggregation retained.",
+    "learnedWeights": {
+      "initiativeFamilyLogWeight": 0,
+      "fourthCornerFitLogWeight": 0
+    },
+    "bestRejectedWeights": {
+      "initiativeFamilyLogWeight": 0,
+      "fourthCornerFitLogWeight": -0.25
+    }
+  },
+  "calibrationLayer": {
+    "acceptedForShadowValidation": true,
+    "method": "temperature_scaling",
+    "temperature": 0.5,
+    "rankPreserving": true,
+    "fitCohort": "chronological development indices 1-213",
+    "validationCohort": "chronological development indices 214-302"
+  },
+  "trainingCohort": {
+    "sampleCount": 302,
+    "firstRaceKey": "20260827-61-5",
+    "lastRaceKey": "20260905-12-2",
+    "raceKeySelector": "first 302 immutable COMPARED records ordered by comparedAt, then raceKey(en)",
+    "raceKeyManifestSha256": "b0c730d3bba6334e459b6373ef611c63f5ac22ad15ce0a068f4809a5fc8d8bee",
+    "period": "2026-08-27 through 2026-09-05",
+    "randomSplit": false,
+    "previouslyInspected": true,
+    "unseenQualificationForThisCandidate": false
+  },
+  "features": [
+    "terminalProbability",
+    "initiative family scenarioProbability mass",
+    "fourth-corner ordinal fit from existing supportingEvidence"
+  ],
+  "objective": "exact terminal ranking quality with MRR, Top10/20/30 and catastrophic-regression guards",
+  "developmentMetrics": {
+    "existingResearch": { "meanRank": 45.28145695364238, "medianRank": 25, "mrr": 0.16347176557260223, "top10": 30.794701986754966, "top20": 46.026490066225165, "top30": 55.629139072847686 },
+    "shadowCandidate": { "meanRank": 45.28145695364238, "medianRank": 25, "mrr": 0.16347176557260223, "top10": 30.794701986754966, "top20": 46.026490066225165, "top30": 55.629139072847686 }
+  },
+  "calibrationMetrics": {
+    "existingResearch": { "brier": 0.9872841508833462, "logLoss": 4.800706386706618, "ece": 0.07085453177351181 },
+    "shadowCandidate": { "brier": 0.981843271622969, "logLoss": 4.680287748961402, "ece": 0.04388442111021414 },
+    "chronologicalValidation89": {
+      "existingResearch": { "brier": 0.9878026783499391, "logLoss": 4.871420882413675, "ece": 0.08369679802934721 },
+      "shadowCandidate": { "brier": 0.9812070769607847, "logLoss": 4.768035156406268, "ece": 0.06386725928796529 }
+    }
+  },
+  "tailRisk": {
+    "currentToExistingResearch30PlusWorsening": 48,
+    "currentToCandidate30PlusWorsening": 48,
+    "currentToExistingResearch50PlusWorsening": 25,
+    "currentToCandidate50PlusWorsening": 25,
+    "worstCurrentToResearchDelta": -133,
+    "worstCandidateRegressionFromExistingResearch": 0,
+    "candidateP10DeltaFromExistingResearch": 0
+  },
+  "immutableRawRecordsMutated": 0
+}
