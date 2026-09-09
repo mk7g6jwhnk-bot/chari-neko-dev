@@ -1,0 +1,167 @@
+{
+  "id": "THICK-V2-EXPLORATORY-1",
+  "frozenAt": "2026-09-09T23:13:52.872Z",
+  "status": "PREREGISTERED_EXPLORATORY_NOT_CALIBRATED",
+  "productionWriteAllowed": false,
+  "autoPromotion": false,
+  "thresholdOrigin": "Fixed round-number support hypotheses before reading allowed-cohort hit/miss outcomes. No grid search, quantile fitting, outcome-derived cutoffs or tuning.",
+  "scope": "Purchase-eligible MAIN only. A/B may relabel existing MAIN, C is a subset of saved CONTROL. No ticket/ranking mutation.",
+  "candidates": {
+    "V2-A": {
+      "name": "Absolute model support",
+      "all": [
+        [
+          "terminalModelScore",
+          ">=",
+          0.02
+        ],
+        [
+          "naturalConvergence",
+          ">=",
+          0.5
+        ]
+      ]
+    },
+    "V2-B": {
+      "name": "Multiple independent support",
+      "atLeast": 2,
+      "of": [
+        [
+          "firstSupport",
+          ">=",
+          0.5
+        ],
+        [
+          "pairSupport",
+          ">=",
+          0.5
+        ],
+        [
+          "scenarioSupport",
+          ">=",
+          0.5
+        ]
+      ]
+    },
+    "V2-C": {
+      "name": "Relative plus model floor",
+      "requireControl": true,
+      "all": [
+        [
+          "terminalModelScore",
+          ">=",
+          0.02
+        ]
+      ]
+    }
+  },
+  "unknownPolicy": "UNKNOWN never passes a condition; distinguish missing evidence from failed support.",
+  "univariateThresholds": {
+    "terminalModelScore": [
+      ">=",
+      0.02
+    ],
+    "normalizedTerminalMass": [
+      ">=",
+      0.02
+    ],
+    "mainRank": [
+      "<=",
+      1
+    ],
+    "mainQualificationGap": [
+      ">=",
+      0.05
+    ],
+    "mainModelGap": [
+      ">=",
+      0.005
+    ],
+    "scenarioMass": [
+      ">=",
+      0.5
+    ],
+    "scenarioRank": [
+      "<=",
+      1
+    ],
+    "scenarioSupport": [
+      ">=",
+      0.5
+    ],
+    "concentration": [
+      "==",
+      "HIGH"
+    ],
+    "firstRank": [
+      "<=",
+      1
+    ],
+    "firstSupport": [
+      ">=",
+      0.5
+    ],
+    "pairRank": [
+      "<=",
+      1
+    ],
+    "pairMassRank": [
+      "<=",
+      1
+    ],
+    "pairSupport": [
+      ">=",
+      0.5
+    ],
+    "branchFit": [
+      ">=",
+      0.8
+    ],
+    "branchSupportCount": [
+      ">=",
+      2
+    ],
+    "naturalBoundaryRank": [
+      "<=",
+      3
+    ],
+    "naturalConvergence": [
+      ">=",
+      0.5
+    ],
+    "thirdVariantStatus": [
+      "==",
+      "NONE"
+    ],
+    "ambiguityRescue": [
+      "==",
+      false
+    ],
+    "quality": [
+      "==",
+      "HIGH"
+    ],
+    "display": [
+      "==",
+      "通常"
+    ],
+    "mainTicketCount": [
+      "<=",
+      3
+    ],
+    "raceTicketCount": [
+      "<=",
+      6
+    ]
+  },
+  "highPayoutYen": 10000,
+  "acceptance": {
+    "minimumRetainedControlHitFraction": 0.8,
+    "minimumRetainedControlPayoutFraction": 0.8,
+    "roiMustNotDecrease": true,
+    "highPayoutControlHitsMayNotBeRemoved": true,
+    "reductionAloneIsNeverSuccess": true,
+    "shadowLiveRequiresNewUntouchedEvidence": true,
+    "calibratedProbabilityClaimAllowed": false
+  }
+}
