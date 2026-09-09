@@ -7,6 +7,7 @@ import { applyStartPowerEvidence } from "../../keirin/start-power/start-power.mj
 import { applyKimariteAbilities } from "../../keirin/kimarite/kimarite-abilities.mjs";
 import { attachRiderDbEvidence, loadRiderDB, summarizeRiderDbUsage } from "../../keirin/sports/rider-db-provider.mjs";
 import { jsonResponse } from "../../keirin/parser/utils.mjs";
+import { attachScenarioProvenance } from "../../keirin/scenario-provenance.mjs";
 
 const VENUE_CODE_BY_NAME = {
   函館: "11", 青森: "12", いわき平: "13", 弥彦: "21", 前橋: "22",
@@ -217,6 +218,7 @@ export default async function handler(req) {
       failureReason: lineAvailability.reason
     };
     const predictionSealedAt = new Date().toISOString();
+    attachScenarioProvenance(prediction,race);
 
     timing.totalBeforeSerializationMs=roundMs(performance.now()-totalStarted);
     const fullPayload = {
