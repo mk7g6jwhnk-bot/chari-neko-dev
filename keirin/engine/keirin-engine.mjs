@@ -1,10 +1,13 @@
 import{runKeirinPredictionEngine}from"./prediction-engine.mjs";
 import{runKeirinPurchaseEngine}from"./purchase-engine.mjs";
 import{PREDICTION_ENGINE_VERSION,PURCHASE_ENGINE_VERSION,ENGINE_PAIR_ID,buildEnginePairAudit}from"./engine-version.mjs";
+import{attachScenarioProvenanceId,buildScenarioProvenance}from"./scenario-provenance.mjs";
 
 export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000}){
   const prediction=runKeirinPredictionEngine({race,venueProfile});
   const purchase=runKeirinPurchaseEngine({prediction,oddsByOrder,budget});
+  const provenance=buildScenarioProvenance({terminals:purchase.terminals,branches:prediction.branches,lines:prediction.lines,scored:prediction.scored});
+  const apiTerminals=purchase.terminals.map(item=>attachScenarioProvenanceId(item,provenance.terminalScenarioIds));
   return{
     engineVersion:PREDICTION_ENGINE_VERSION,
     raceId:race.id,
@@ -13,14 +16,18 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
     lines:prediction.lines,
     branches:prediction.branches,
     predictionExplanation:prediction.explanation,
-    terminals:purchase.terminals.map(compactApiTerminal),
+    terminals:apiTerminals.map(compactApiTerminal),
+    scenarioProvenanceSchemaVersion:provenance.scenarioProvenanceSchemaVersion,
+    scenarioProvenanceStatus:provenance.scenarioProvenanceStatus,
+    scenarioProvenances:provenance.scenarioProvenances,
+    scenarioProvenanceAudit:provenance.audit,
     prediction:{
       predictionVersion:prediction.predictionVersion,
       // The classified ledger above is the canonical API terminal list. Keep
       // only the immutable prediction identity here; returning the complete
       // branch/evidence tree twice can push a 504-terminal Function response
       // over the platform limit.
-      terminals:prediction.terminals.map(compactPredictionTerminal),
+      terminals:prediction.terminals.map(item=>compactPredictionTerminal(attachScenarioProvenanceId(item,provenance.terminalScenarioIds))),
       audit:prediction.audit,
       explanation:prediction.explanation,
       generatedAt:prediction.generatedAt
@@ -58,7 +65,8 @@ function compactPredictionTerminal(item){
     score:Number(item.score)||0,
     branchId:item.branchId||null,
     branchLabel:item.branchLabel||null,
-    branchType:item.branchType||null
+    branchType:item.branchType||null,
+    scenarioProvenanceId:item.scenarioProvenanceId||null
   };
 }
 
@@ -92,6 +100,7 @@ function compactApiTerminal(item){
     firstFamilyNumber:item.firstFamilyNumber??item.order?.[0]??null,
     naturalConvergenceScore:item.naturalConvergenceScore??null,
     naturalConvergenceLevel:item.naturalConvergenceLevel||null,
-    lifecycle:item.lifecycle||null
+    lifecycle:item.lifecycle||null,
+    scenarioProvenanceId:item.scenarioProvenanceId||null
   };
 }
