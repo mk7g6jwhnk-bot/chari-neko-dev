@@ -1,0 +1,130 @@
+{
+  "readOnly": true,
+  "before": {
+    "observedAt": "2026-09-10T08:29:07.578Z",
+    "periods": {
+      "today": {
+        "evaluatedRaces": 0,
+        "betRaces": 0
+      },
+      "recent7": {
+        "evaluatedRaces": 0,
+        "betRaces": 0
+      },
+      "recent30": {
+        "evaluatedRaces": 0,
+        "betRaces": 0
+      },
+      "cumulative": {
+        "evaluatedRaces": 0,
+        "betRaces": 0
+      }
+    }
+  },
+  "after": {
+    "observedAt": "2026-09-10T08:40:34.136Z",
+    "cohort": {
+      "storedV2Records": 282,
+      "resultComplete": 141,
+      "explicitPurchaseTrue": 223,
+      "explicitPurchaseFalse": 59,
+      "eligibilityUnknown": 0,
+      "canonicalPlanPresent": 282,
+      "payoutValid": 141,
+      "evaluatedRecords": 141,
+      "purchaseEligibleRecords": 111,
+      "excluded": {
+        "RESULT_INCOMPLETE": 141
+      }
+    },
+    "periods": {
+      "today": {
+        "evaluatedRaces": 27,
+        "betRaces": 18
+      },
+      "recent7": {
+        "evaluatedRaces": 141,
+        "betRaces": 111
+      },
+      "recent30": {
+        "evaluatedRaces": 141,
+        "betRaces": 111
+      },
+      "cumulative": {
+        "evaluatedRaces": 141,
+        "betRaces": 111
+      }
+    }
+  },
+  "resumed": {
+    "observedAt": "2026-09-10T22:41:46.604Z",
+    "cohort": {
+      "storedV2Records": 365,
+      "resultComplete": 161,
+      "explicitPurchaseTrue": 285,
+      "explicitPurchaseFalse": 80,
+      "eligibilityUnknown": 0,
+      "canonicalPlanPresent": 365,
+      "payoutValid": 161,
+      "evaluatedRecords": 161,
+      "purchaseEligibleRecords": 130,
+      "excluded": {
+        "RESULT_INCOMPLETE": 204
+      }
+    },
+    "periods": {
+      "today": {
+        "evaluatedRaces": 0,
+        "betRaces": 0
+      },
+      "recent7": {
+        "evaluatedRaces": 161,
+        "betRaces": 130
+      },
+      "recent30": {
+        "evaluatedRaces": 161,
+        "betRaces": 130
+      },
+      "cumulative": {
+        "evaluatedRaces": 161,
+        "betRaces": 130
+      }
+    }
+  },
+  "predictionHashes": {
+    "compared": 83,
+    "unchanged": 83
+  },
+  "deploy": {
+    "frontendCommit": "1c2af456978ec30a688ad1c7aaed3ec8c45c98e7",
+    "netlify": "6aa26cbeed9fbc00073d5487",
+    "backendCommit": "3fda678",
+    "railway": "22f5e98b-f444-4bb3-9e1d-bcf6fe068c1d"
+  },
+  "e2e": {
+    "production": {
+      "desktop": "1280x720",
+      "mobile": "390x844",
+      "performancePeriods": "PASS",
+      "preRace": "PASS",
+      "completed": "PASS",
+      "jsErrors": 0
+    },
+    "fixedFixture": {
+      "desktop": "1280x720",
+      "mobile": "390x844",
+      "preRace": "PASS",
+      "resultPending": "PASS",
+      "completed": "PASS",
+      "jsErrors": 0
+    },
+    "limitation": "At resumed live verification there were no result-pending races; pending is verified separately with the deployed renderer and fixed synthetic clock."
+  },
+  "safety": {
+    "predictionChanged": false,
+    "purchaseChanged": false,
+    "researchChanged": false,
+    "historicalMutation": 0,
+    "tuning403to502": false
+  }
+}
