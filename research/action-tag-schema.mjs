@@ -9,8 +9,9 @@ export const STATE_VALUES = Object.freeze({
   ENERGY_STATE: ["RESERVED", "NORMAL", "DEPLETED", "UNKNOWN"],
   BANTE_RESPONSE: ["SUPPORT_FRONT", "HOLD_POSITION", "SELF_LAUNCH", "SWITCH", "SEPARATED", "UNKNOWN"],
   LINE_TRACKING: ["SUCCESS", "FAILURE", "UNKNOWN"],
-  ATTACK_OUTCOME: ["MAKURI_SUCCESS", "OVERTAKEN_BY_MAKURI", "UNKNOWN"],
-  LINE_STATE: ["COLLAPSED", "PRESERVED", "UNKNOWN"]
+  ATTACK_OUTCOME: ["MAKURI_SUCCESS", "MAKURI_FAILED", "OVERTAKEN_BY_MAKURI", "UNKNOWN"],
+  LINE_STATE: ["COLLAPSED", "PRESERVED", "UNKNOWN"],
+  OTHER_LINE_SURVIVAL: ["SURVIVED", "DID_NOT_SURVIVE", "UNKNOWN"]
 });
 
 export function createActionTag(input = {}) {
@@ -41,6 +42,7 @@ export function createActionTag(input = {}) {
     confidence: unit(input.confidence), reviewer: String(input.reviewer), verificationStatus,
     sourceHash: evidenceHash, evidenceHash, createdAt, collectionLane: lane, observationPhase: phase,
     predictionSealedAt, resultObservedAt,
+    context: normalizeContext(input.context),
     trainingEligibility: Object.freeze({
       eligible: !finalTest && phase === "PRE_RESULT_OBSERVATION" && ["CONFIRMED", "STRONGLY_SUPPORTED"].includes(verificationStatus),
       finalTestExcluded: finalTest, postResultExcluded: phase === "POST_RESULT_OBSERVATION",
@@ -73,7 +75,12 @@ export function transitionActionTag(tag, transition = {}) {
 export function hashEvidence(value) { return crypto.createHash("sha256").update(String(value)).digest("hex"); }
 export function isFinalTest(input) { return [input?.sequence, input?.recordNumber, input?.comparisonNumber, input?.validationIndex].some(value => Number(value) >= 403 && Number(value) <= 502); }
 function deterministicTagId(input) { return `AT1-${hashEvidence([input.raceKey, input.riderId, input.stateType, input.stateValue, input.observationTime, input.lane, input.evidenceHash].join("|")) .slice(0, 20)}`; }
-function directEvidence(value) { return ["OFFICIAL_RACE_TELEMETRY", "OFFICIAL_VIDEO_TAG", "VALIDATED_DUAL_REVIEW"].includes(String(value).toUpperCase()); }
+function directEvidence(value) { return ["OFFICIAL_RACE_TELEMETRY", "OFFICIAL_VIDEO_TAG", "OFFICIAL_RESULT_EVENT", "OFFICIAL_RACE_MARKER", "VALIDATED_DUAL_REVIEW"].includes(String(value).toUpperCase()); }
+function normalizeContext(value) {
+  if (!value || typeof value !== "object") return null;
+  const allowed = ["riderNumber", "lineId", "linePosition", "lineSize", "role", "finishPosition", "resultStatus", "sourceRecordId", "conditionalCells", "evidenceCount"];
+  return Object.freeze(Object.fromEntries(allowed.filter(key => value[key] !== undefined).map(key => [key, Array.isArray(value[key]) ? Object.freeze(value[key].map(String)) : value[key]])));
+}
 function unit(value) { const number = Number(value); return Number.isFinite(number) ? Math.max(0, Math.min(1, number)) : 0; }
 function iso(value) { const time = new Date(value); if (!Number.isFinite(time.getTime())) throw new Error("ACTION_TAG_TIME_INVALID"); return time.toISOString(); }
 function optionalIso(value) { return value ? iso(value) : null; }

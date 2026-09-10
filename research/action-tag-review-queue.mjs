@@ -23,7 +23,7 @@ export class ActionTagReviewQueue {
     const normalized = createActionTag(tag);
     if (this.#items.has(normalized.tagId)) return this.#items.get(normalized.tagId);
     if (this.#items.size >= this.maxSize) throw new Error("ACTION_TAG_QUEUE_BOUNDED_CAPACITY");
-    const item = Object.freeze({ queueId: `Q-${normalized.tagId}`, tagId: normalized.tagId, raceKey: normalized.raceKey, riderId: normalized.riderId, stateType: normalized.stateType, candidateStateValue: normalized.stateValue, evidenceType: normalized.evidenceType, evidenceSource: normalized.evidenceSource, observationTime: normalized.observationTime, verificationStatus: normalized.verificationStatus, reviewerNote: normalized.reviewerNote });
+    const item = Object.freeze({ queueId: `Q-${normalized.tagId}`, tagId: normalized.tagId, raceKey: normalized.raceKey, riderId: normalized.riderId, stateType: normalized.stateType, candidateStateValue: normalized.stateValue, evidenceType: normalized.evidenceType, evidenceSource: normalized.evidenceSource, observationTime: normalized.observationTime, verificationStatus: normalized.verificationStatus, confidence: normalized.confidence, context: normalized.context, reviewerNote: normalized.reviewerNote });
     this.#items.set(normalized.tagId, item); return item;
   }
   pending({ raceKey = null } = {}) { return [...this.#items.values()].filter(item => (!raceKey || item.raceKey === raceKey) && ["PENDING", "POSSIBLE", "UNKNOWN"].includes(item.verificationStatus)); }
