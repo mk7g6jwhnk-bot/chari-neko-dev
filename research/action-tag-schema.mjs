@@ -10,7 +10,7 @@ export const STATE_VALUES = Object.freeze({
   BANTE_RESPONSE: ["SUPPORT_FRONT", "HOLD_POSITION", "SELF_LAUNCH", "SWITCH", "SEPARATED", "UNKNOWN"],
   LINE_TRACKING: ["SUCCESS", "FAILURE", "UNKNOWN"],
   ATTACK_OUTCOME: ["MAKURI_SUCCESS", "MAKURI_FAILED", "OVERTAKEN_BY_MAKURI", "UNKNOWN"],
-  LINE_STATE: ["COLLAPSED", "PRESERVED", "UNKNOWN"],
+  LINE_STATE: ["COLLAPSED", "PARTIAL_BREAK", "PRESERVED", "UNKNOWN"],
   OTHER_LINE_SURVIVAL: ["SURVIVED", "DID_NOT_SURVIVE", "UNKNOWN"]
 });
 
@@ -75,7 +75,7 @@ export function transitionActionTag(tag, transition = {}) {
 export function hashEvidence(value) { return crypto.createHash("sha256").update(String(value)).digest("hex"); }
 export function isFinalTest(input) { return [input?.sequence, input?.recordNumber, input?.comparisonNumber, input?.validationIndex].some(value => Number(value) >= 403 && Number(value) <= 502); }
 function deterministicTagId(input) { return `AT1-${hashEvidence([input.raceKey, input.riderId, input.stateType, input.stateValue, input.observationTime, input.lane, input.evidenceHash].join("|")) .slice(0, 20)}`; }
-function directEvidence(value) { return ["OFFICIAL_RACE_TELEMETRY", "OFFICIAL_VIDEO_TAG", "OFFICIAL_RESULT_EVENT", "OFFICIAL_RACE_MARKER", "VALIDATED_DUAL_REVIEW"].includes(String(value).toUpperCase()); }
+function directEvidence(value) { return ["OFFICIAL_RACE_TELEMETRY", "OFFICIAL_VIDEO_TAG", "OFFICIAL_RESULT_EVENT", "OFFICIAL_RACE_MARKER", "VALIDATED_MANUAL_OBSERVATION", "VALIDATED_DUAL_REVIEW"].includes(String(value).toUpperCase()); }
 function normalizeContext(value) {
   if (!value || typeof value !== "object") return null;
   const allowed = ["riderNumber", "lineId", "linePosition", "lineSize", "role", "finishPosition", "resultStatus", "sourceRecordId", "conditionalCells", "evidenceCount"];
