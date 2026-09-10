@@ -1,0 +1,15 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+import{raceLifecycleView as view,raceTime,japanClock}from '../public/race-lifecycle-view.mjs';
+const race={date:'20260910',scheduledStart:'17:00',deadline:'16:57'},now=Date.parse('2026-09-10T16:58:00+09:00');
+assert.equal(view(race,null,now).label,'締切済み・発走前');
+assert.equal(view(race,null,raceTime(race.date,'17:00')).phase,'result-pending');
+assert.equal(view(race,{state:'VERIFIED',resultObservedAt:'2026-09-10T08:10:00Z'},now).phase,'completed');
+assert.equal(view({...race,scheduledStart:'08:00'},{scheduledStartTime:'2026-09-10T08:00:00Z',collectionState:'PRE_SEALED'},now).phase,'pre-race');
+assert.equal(view({date:'20260910',deadline:'16:57'},null,now).label,'状態未確認','deadline alone does not establish start');
+assert.equal(view({date:'20260910',scheduledStart:'broken'},null,now).phase,'unknown');
+assert.equal(japanClock('2026-09-10T08:00:00Z'),'17:00');assert.equal(japanClock('2026-09-10T17:00:00+09:00'),'17:00');assert.equal(japanClock('17:00'),'17:00');
+const source=fs.readFileSync(new URL('../public/app.mjs',import.meta.url),'utf8');
+assert.match(source,/shown=\[\.\.\.upcoming,\.\.\.pending,\.\.\.finished\]/);assert.match(source,/finishedOffset=upcoming.length\+pending.length/);
+assert.match(source,/raceLifecycleView\(r,savedLifecycle\(r\)\)/);
+console.log('PASS pre-race / deadline / pending / confirmed / saved precedence / UTC / list index mapping');

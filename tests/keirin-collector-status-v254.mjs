@@ -33,3 +33,8 @@ assert.equal(body.researchProgress.progress50,23,"partial failure must not synth
 assert.equal(body.researchObservedAt,"2026-08-30T07:59:00Z","stale component must retain original observation time");
 assert.equal(body.pendingResultCount,1);
 console.log("PASS collector status proxy actual-zero/partial-failure/observation-time separation");
+
+const snapshotAuto={date:'20260910',races:[{raceKey:'20260910-84-1',state:'VERIFIED',resultObservedAt:'2026-09-10T00:00:00Z'}],purchasePerformance:{version:'PURCHASE_PERFORMANCE_V2',periods:{cumulative:{evaluatedRaces:114,betRaces:93}}}};
+globalThis.fetch=async()=>Response.json({auto:snapshotAuto,research:{},components:{autoCurrent:true,researchCurrent:true}});
+const snapshotBody=await(await handler({method:'GET'})).json();assert.deepEqual(snapshotBody.races,snapshotAuto.races);assert.deepEqual(snapshotBody.purchasePerformance,snapshotAuto.purchasePerformance);
+console.log('PASS compact snapshot keeps canonical lifecycle and V2 counts');
