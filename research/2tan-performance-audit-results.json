@@ -1,0 +1,664 @@
+{
+  "schemaVersion": "2TAN_READ_ONLY_AUDIT_V1",
+  "decision": "MORE_DATA_REQUIRED",
+  "inputs": 114,
+  "resultComplete": 114,
+  "formalCohort": 0,
+  "statusCleanDescriptiveCohort": 93,
+  "formalBlockers": [
+    "Canonical 2車単 payout is absent from every sealed result.",
+    "Independent incident/失格 metadata is not exposed by the sealed-result read API; confirmed status alone cannot prove a race normal."
+  ],
+  "excluded": {
+    "abnormal": [],
+    "abnormalAuditUnknown": 93,
+    "notPurchaseEligible": 21,
+    "missingTrifectaPayout": 0,
+    "missingCanonicalExactaPayout": 93
+  },
+  "descriptivePeriods": {
+    "recent7": {
+      "races": 93,
+      "trifecta": {
+        "targetRaces": 93,
+        "purchaseCandidateRaces": 93,
+        "tickets": 518,
+        "averageTicketsPerRace": 5.56989247311828,
+        "hitRaces": 15,
+        "hitRate": 0.16129032258064516,
+        "ticketHitRate": 0.02895752895752896,
+        "investment": 51800,
+        "return": 79250,
+        "roi": 1.52992277992278,
+        "payoutKnownRaces": 93,
+        "monetaryComplete": true
+      },
+      "exacta": {
+        "targetRaces": 93,
+        "purchaseCandidateRaces": 93,
+        "tickets": 325,
+        "averageTicketsPerRace": 3.4946236559139785,
+        "hitRaces": 30,
+        "hitRate": 0.3225806451612903,
+        "ticketHitRate": 0.09230769230769231,
+        "investment": null,
+        "return": null,
+        "roi": null,
+        "payoutKnownRaces": 0,
+        "monetaryComplete": false
+      }
+    },
+    "recent30": {
+      "races": 93,
+      "trifecta": {
+        "targetRaces": 93,
+        "purchaseCandidateRaces": 93,
+        "tickets": 518,
+        "averageTicketsPerRace": 5.56989247311828,
+        "hitRaces": 15,
+        "hitRate": 0.16129032258064516,
+        "ticketHitRate": 0.02895752895752896,
+        "investment": 51800,
+        "return": 79250,
+        "roi": 1.52992277992278,
+        "payoutKnownRaces": 93,
+        "monetaryComplete": true
+      },
+      "exacta": {
+        "targetRaces": 93,
+        "purchaseCandidateRaces": 93,
+        "tickets": 325,
+        "averageTicketsPerRace": 3.4946236559139785,
+        "hitRaces": 30,
+        "hitRate": 0.3225806451612903,
+        "ticketHitRate": 0.09230769230769231,
+        "investment": null,
+        "return": null,
+        "roi": null,
+        "payoutKnownRaces": 0,
+        "monetaryComplete": false
+      }
+    },
+    "cumulative": {
+      "races": 93,
+      "trifecta": {
+        "targetRaces": 93,
+        "purchaseCandidateRaces": 93,
+        "tickets": 518,
+        "averageTicketsPerRace": 5.56989247311828,
+        "hitRaces": 15,
+        "hitRate": 0.16129032258064516,
+        "ticketHitRate": 0.02895752895752896,
+        "investment": 51800,
+        "return": 79250,
+        "roi": 1.52992277992278,
+        "payoutKnownRaces": 93,
+        "monetaryComplete": true
+      },
+      "exacta": {
+        "targetRaces": 93,
+        "purchaseCandidateRaces": 93,
+        "tickets": 325,
+        "averageTicketsPerRace": 3.4946236559139785,
+        "hitRaces": 30,
+        "hitRate": 0.3225806451612903,
+        "ticketHitRate": 0.09230769230769231,
+        "investment": null,
+        "return": null,
+        "roi": null,
+        "payoutKnownRaces": 0,
+        "monetaryComplete": false
+      }
+    }
+  },
+  "headToHeadDescriptive": {
+    "both": 15,
+    "pairOnly": 15,
+    "trifectaOnly": 0,
+    "neither": 63,
+    "pairRightThirdWrong": 15
+  },
+  "pairTrackingDescriptive": {
+    "generated": 93,
+    "natural": 45,
+    "main": 26,
+    "cover": 4,
+    "purchased": 30,
+    "rankKnown": 0,
+    "meanRank": null
+  },
+  "thirdDropsDescriptive": [
+    {
+      "raceKey": "20260909-61-7",
+      "correctPair": "2-5",
+      "correctTerminal": "2-5-3",
+      "generated": true,
+      "minimumFixedThirdSpread": 2,
+      "dropStage": "STANDARD_PURCHASE"
+    },
+    {
+      "raceKey": "20260909-27-7",
+      "correctPair": "3-1",
+      "correctTerminal": "3-1-5",
+      "generated": true,
+      "minimumFixedThirdSpread": 2,
+      "dropStage": "STANDARD_PURCHASE"
+    },
+    {
+      "raceKey": "20260909-27-4",
+      "correctPair": "1-2",
+      "correctTerminal": "1-2-6",
+      "generated": true,
+      "minimumFixedThirdSpread": 5,
+      "dropStage": "STANDARD_PURCHASE"
+    },
+    {
+      "raceKey": "20260909-13-8",
+      "correctPair": "5-3",
+      "correctTerminal": "5-3-2",
+      "generated": true,
+      "minimumFixedThirdSpread": 4,
+      "dropStage": "STANDARD_PURCHASE"
+    },
+    {
+      "raceKey": "20260909-48-6",
+      "correctPair": "3-7",
+      "correctTerminal": "3-7-1",
+      "generated": true,
+      "minimumFixedThirdSpread": 2,
+      "dropStage": "STANDARD_PURCHASE"
+    },
+    {
+      "raceKey": "20260909-44-6",
+      "correctPair": "1-4",
+      "correctTerminal": "1-4-2",
+      "generated": true,
+      "minimumFixedThirdSpread": 3,
+      "dropStage": "STANDARD_PURCHASE"
+    },
+    {
+      "raceKey": "20260909-84-1",
+      "correctPair": "3-5",
+      "correctTerminal": "3-5-6",
+      "generated": true,
+      "minimumFixedThirdSpread": 5,
+      "dropStage": "STANDARD_PURCHASE"
+    },
+    {
+      "raceKey": "20260908-27-6",
+      "correctPair": "2-1",
+      "correctTerminal": "2-1-7",
+      "generated": true,
+      "minimumFixedThirdSpread": 5,
+      "dropStage": "STANDARD_PURCHASE"
+    },
+    {
+      "raceKey": "20260908-61-5",
+      "correctPair": "1-4",
+      "correctTerminal": "1-4-7",
+      "generated": true,
+      "minimumFixedThirdSpread": 4,
+      "dropStage": "THIRD_VARIANT"
+    },
+    {
+      "raceKey": "20260908-13-9",
+      "correctPair": "5-7",
+      "correctTerminal": "5-7-3",
+      "generated": true,
+      "minimumFixedThirdSpread": 3,
+      "dropStage": "STANDARD_PURCHASE"
+    },
+    {
+      "raceKey": "20260908-26-6",
+      "correctPair": "3-7",
+      "correctTerminal": "3-7-6",
+      "generated": true,
+      "minimumFixedThirdSpread": 3,
+      "dropStage": "STANDARD_PURCHASE"
+    },
+    {
+      "raceKey": "20260908-44-12",
+      "correctPair": "3-1",
+      "correctTerminal": "3-1-7",
+      "generated": true,
+      "minimumFixedThirdSpread": 5,
+      "dropStage": "STANDARD_PURCHASE"
+    },
+    {
+      "raceKey": "20260908-13-2",
+      "correctPair": "2-7",
+      "correctTerminal": "2-7-6",
+      "generated": true,
+      "minimumFixedThirdSpread": 5,
+      "dropStage": "STANDARD_PURCHASE"
+    },
+    {
+      "raceKey": "20260908-21-5",
+      "correctPair": "5-3",
+      "correctTerminal": "5-3-2",
+      "generated": true,
+      "minimumFixedThirdSpread": 3,
+      "dropStage": "STANDARD_PURCHASE"
+    },
+    {
+      "raceKey": "20260908-37-7",
+      "correctPair": "2-4",
+      "correctTerminal": "2-4-6",
+      "generated": true,
+      "minimumFixedThirdSpread": 4,
+      "dropStage": "THIRD_VARIANT"
+    }
+  ],
+  "thirdSpreadDescriptive": {
+    "top1": {
+      "eligiblePairHitRaces": 15,
+      "hitRaces": 0,
+      "additionalTickets": 15,
+      "investment": 1500,
+      "return": null,
+      "roi": null,
+      "reason": "No canonical exacta/conditional-third payout is stored; result-derived monetary claims are prohibited."
+    },
+    "top2": {
+      "eligiblePairHitRaces": 15,
+      "hitRaces": 3,
+      "additionalTickets": 30,
+      "investment": 3000,
+      "return": null,
+      "roi": null,
+      "reason": "No canonical exacta/conditional-third payout is stored; result-derived monetary claims are prohibited."
+    },
+    "top3": {
+      "eligiblePairHitRaces": 15,
+      "hitRaces": 7,
+      "additionalTickets": 45,
+      "investment": 4500,
+      "return": null,
+      "roi": null,
+      "reason": "No canonical exacta/conditional-third payout is stored; result-derived monetary claims are prohibited."
+    },
+    "top4": {
+      "eligiblePairHitRaces": 15,
+      "hitRaces": 10,
+      "additionalTickets": 60,
+      "investment": 6000,
+      "return": null,
+      "roi": null,
+      "reason": "No canonical exacta/conditional-third payout is stored; result-derived monetary claims are prohibited."
+    },
+    "top5": {
+      "eligiblePairHitRaces": 15,
+      "hitRaces": 15,
+      "additionalTickets": 75,
+      "investment": 7500,
+      "return": null,
+      "roi": null,
+      "reason": "No canonical exacta/conditional-third payout is stored; result-derived monetary claims are prohibited."
+    }
+  },
+  "venueDescriptive": {
+    "13": {
+      "races": 15,
+      "trifecta": {
+        "targetRaces": 15,
+        "purchaseCandidateRaces": 15,
+        "tickets": 102,
+        "averageTicketsPerRace": 6.8,
+        "hitRaces": 3,
+        "hitRate": 0.2,
+        "ticketHitRate": 0.029411764705882353,
+        "investment": 10200,
+        "return": 9820,
+        "roi": 0.9627450980392157,
+        "payoutKnownRaces": 15,
+        "monetaryComplete": true
+      },
+      "exacta": {
+        "targetRaces": 15,
+        "purchaseCandidateRaces": 15,
+        "tickets": 72,
+        "averageTicketsPerRace": 4.8,
+        "hitRaces": 6,
+        "hitRate": 0.4,
+        "ticketHitRate": 0.08333333333333333,
+        "investment": null,
+        "return": null,
+        "roi": null,
+        "payoutKnownRaces": 0,
+        "monetaryComplete": false
+      },
+      "smallSample": true
+    },
+    "21": {
+      "races": 10,
+      "trifecta": {
+        "targetRaces": 10,
+        "purchaseCandidateRaces": 10,
+        "tickets": 50,
+        "averageTicketsPerRace": 5,
+        "hitRaces": 1,
+        "hitRate": 0.1,
+        "ticketHitRate": 0.02,
+        "investment": 5000,
+        "return": 620,
+        "roi": 0.124,
+        "payoutKnownRaces": 10,
+        "monetaryComplete": true
+      },
+      "exacta": {
+        "targetRaces": 10,
+        "purchaseCandidateRaces": 10,
+        "tickets": 28,
+        "averageTicketsPerRace": 2.8,
+        "hitRaces": 2,
+        "hitRate": 0.2,
+        "ticketHitRate": 0.07142857142857142,
+        "investment": null,
+        "return": null,
+        "roi": null,
+        "payoutKnownRaces": 0,
+        "monetaryComplete": false
+      },
+      "smallSample": true
+    },
+    "26": {
+      "races": 7,
+      "trifecta": {
+        "targetRaces": 7,
+        "purchaseCandidateRaces": 7,
+        "tickets": 69,
+        "averageTicketsPerRace": 9.857142857142858,
+        "hitRaces": 1,
+        "hitRate": 0.14285714285714285,
+        "ticketHitRate": 0.014492753623188406,
+        "investment": 6900,
+        "return": 5320,
+        "roi": 0.7710144927536232,
+        "payoutKnownRaces": 7,
+        "monetaryComplete": true
+      },
+      "exacta": {
+        "targetRaces": 7,
+        "purchaseCandidateRaces": 7,
+        "tickets": 28,
+        "averageTicketsPerRace": 4,
+        "hitRaces": 2,
+        "hitRate": 0.2857142857142857,
+        "ticketHitRate": 0.07142857142857142,
+        "investment": null,
+        "return": null,
+        "roi": null,
+        "payoutKnownRaces": 0,
+        "monetaryComplete": false
+      },
+      "smallSample": true
+    },
+    "27": {
+      "races": 9,
+      "trifecta": {
+        "targetRaces": 9,
+        "purchaseCandidateRaces": 9,
+        "tickets": 22,
+        "averageTicketsPerRace": 2.4444444444444446,
+        "hitRaces": 0,
+        "hitRate": 0,
+        "ticketHitRate": 0,
+        "investment": 2200,
+        "return": 0,
+        "roi": 0,
+        "payoutKnownRaces": 9,
+        "monetaryComplete": true
+      },
+      "exacta": {
+        "targetRaces": 9,
+        "purchaseCandidateRaces": 9,
+        "tickets": 19,
+        "averageTicketsPerRace": 2.111111111111111,
+        "hitRaces": 3,
+        "hitRate": 0.3333333333333333,
+        "ticketHitRate": 0.15789473684210525,
+        "investment": null,
+        "return": null,
+        "roi": null,
+        "payoutKnownRaces": 0,
+        "monetaryComplete": false
+      },
+      "smallSample": true
+    },
+    "37": {
+      "races": 10,
+      "trifecta": {
+        "targetRaces": 10,
+        "purchaseCandidateRaces": 10,
+        "tickets": 117,
+        "averageTicketsPerRace": 11.7,
+        "hitRaces": 2,
+        "hitRate": 0.2,
+        "ticketHitRate": 0.017094017094017096,
+        "investment": 11700,
+        "return": 7230,
+        "roi": 0.617948717948718,
+        "payoutKnownRaces": 10,
+        "monetaryComplete": true
+      },
+      "exacta": {
+        "targetRaces": 10,
+        "purchaseCandidateRaces": 10,
+        "tickets": 55,
+        "averageTicketsPerRace": 5.5,
+        "hitRaces": 3,
+        "hitRate": 0.3,
+        "ticketHitRate": 0.05454545454545454,
+        "investment": null,
+        "return": null,
+        "roi": null,
+        "payoutKnownRaces": 0,
+        "monetaryComplete": false
+      },
+      "smallSample": true
+    },
+    "44": {
+      "races": 17,
+      "trifecta": {
+        "targetRaces": 17,
+        "purchaseCandidateRaces": 17,
+        "tickets": 49,
+        "averageTicketsPerRace": 2.8823529411764706,
+        "hitRaces": 1,
+        "hitRate": 0.058823529411764705,
+        "ticketHitRate": 0.02040816326530612,
+        "investment": 4900,
+        "return": 1240,
+        "roi": 0.2530612244897959,
+        "payoutKnownRaces": 17,
+        "monetaryComplete": true
+      },
+      "exacta": {
+        "targetRaces": 17,
+        "purchaseCandidateRaces": 17,
+        "tickets": 42,
+        "averageTicketsPerRace": 2.4705882352941178,
+        "hitRaces": 3,
+        "hitRate": 0.17647058823529413,
+        "ticketHitRate": 0.07142857142857142,
+        "investment": null,
+        "return": null,
+        "roi": null,
+        "payoutKnownRaces": 0,
+        "monetaryComplete": false
+      },
+      "smallSample": true
+    },
+    "48": {
+      "races": 3,
+      "trifecta": {
+        "targetRaces": 3,
+        "purchaseCandidateRaces": 3,
+        "tickets": 6,
+        "averageTicketsPerRace": 2,
+        "hitRaces": 0,
+        "hitRate": 0,
+        "ticketHitRate": 0,
+        "investment": 600,
+        "return": 0,
+        "roi": 0,
+        "payoutKnownRaces": 3,
+        "monetaryComplete": true
+      },
+      "exacta": {
+        "targetRaces": 3,
+        "purchaseCandidateRaces": 3,
+        "tickets": 6,
+        "averageTicketsPerRace": 2,
+        "hitRaces": 1,
+        "hitRate": 0.3333333333333333,
+        "ticketHitRate": 0.16666666666666666,
+        "investment": null,
+        "return": null,
+        "roi": null,
+        "payoutKnownRaces": 0,
+        "monetaryComplete": false
+      },
+      "smallSample": true
+    },
+    "61": {
+      "races": 17,
+      "trifecta": {
+        "targetRaces": 17,
+        "purchaseCandidateRaces": 17,
+        "tickets": 76,
+        "averageTicketsPerRace": 4.470588235294118,
+        "hitRaces": 5,
+        "hitRate": 0.29411764705882354,
+        "ticketHitRate": 0.06578947368421052,
+        "investment": 7600,
+        "return": 49920,
+        "roi": 6.568421052631579,
+        "payoutKnownRaces": 17,
+        "monetaryComplete": true
+      },
+      "exacta": {
+        "targetRaces": 17,
+        "purchaseCandidateRaces": 17,
+        "tickets": 56,
+        "averageTicketsPerRace": 3.2941176470588234,
+        "hitRaces": 7,
+        "hitRate": 0.4117647058823529,
+        "ticketHitRate": 0.125,
+        "investment": null,
+        "return": null,
+        "roi": null,
+        "payoutKnownRaces": 0,
+        "monetaryComplete": false
+      },
+      "smallSample": true
+    },
+    "74": {
+      "races": 1,
+      "trifecta": {
+        "targetRaces": 1,
+        "purchaseCandidateRaces": 1,
+        "tickets": 10,
+        "averageTicketsPerRace": 10,
+        "hitRaces": 0,
+        "hitRate": 0,
+        "ticketHitRate": 0,
+        "investment": 1000,
+        "return": 0,
+        "roi": 0,
+        "payoutKnownRaces": 1,
+        "monetaryComplete": true
+      },
+      "exacta": {
+        "targetRaces": 1,
+        "purchaseCandidateRaces": 1,
+        "tickets": 4,
+        "averageTicketsPerRace": 4,
+        "hitRaces": 0,
+        "hitRate": 0,
+        "ticketHitRate": 0,
+        "investment": null,
+        "return": null,
+        "roi": null,
+        "payoutKnownRaces": 0,
+        "monetaryComplete": false
+      },
+      "smallSample": true
+    },
+    "84": {
+      "races": 4,
+      "trifecta": {
+        "targetRaces": 4,
+        "purchaseCandidateRaces": 4,
+        "tickets": 17,
+        "averageTicketsPerRace": 4.25,
+        "hitRaces": 2,
+        "hitRate": 0.5,
+        "ticketHitRate": 0.11764705882352941,
+        "investment": 1700,
+        "return": 5100,
+        "roi": 3,
+        "payoutKnownRaces": 4,
+        "monetaryComplete": true
+      },
+      "exacta": {
+        "targetRaces": 4,
+        "purchaseCandidateRaces": 4,
+        "tickets": 15,
+        "averageTicketsPerRace": 3.75,
+        "hitRaces": 3,
+        "hitRate": 0.75,
+        "ticketHitRate": 0.2,
+        "investment": null,
+        "return": null,
+        "roi": null,
+        "payoutKnownRaces": 0,
+        "monetaryComplete": false
+      },
+      "smallSample": true
+    }
+  },
+  "classBreakdown": {
+    "UNKNOWN": {
+      "races": 93,
+      "reason": "Race class was not retained by the sealed read projection."
+    }
+  },
+  "highPayout": {
+    "formalStatus": "NOT_EVALUABLE_WITHOUT_SAVED_PRE_RESULT_EXACTA_ODDS_AND_CANONICAL_EXACTA_PAYOUT",
+    "caseStudies": []
+  },
+  "strategies": {
+    "P1": {
+      "name": "2車単単独",
+      "status": "HIT_RATE_ONLY"
+    },
+    "P2": {
+      "name": "Hybrid",
+      "status": "NOT_EVALUABLE_NO_CALIBRATED_PAIR_CONFIDENCE"
+    },
+    "P3": {
+      "name": "Pair + fixed third spread",
+      "status": "HIT_COVERAGE_ONLY",
+      "fixed": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    }
+  },
+  "safety": {
+    "predictionRankingChanged": false,
+    "productionPurchaseChanged": false,
+    "researchBaselineChanged": false,
+    "historicalMutation": 0,
+    "abnormalRaceIncludedInFormalKpi": false,
+    "finalTest403To502TuningUse": false,
+    "productionWrite": 0
+  },
+  "readFailures": [],
+  "source": "existing sealed prediction/result read endpoints",
+  "readOnly": true
+}
