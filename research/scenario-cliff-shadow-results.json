@@ -1,0 +1,4036 @@
+{
+  "version": "SCENARIO_CLIFF_PURCHASE_SHADOW_V1",
+  "readOnly": true,
+  "productionWriteAllowed": false,
+  "protectedExcluded": 0,
+  "cohortSize": 114,
+  "control": {
+    "raceCount": 114,
+    "confirmedRaceCount": 114,
+    "purchaseableRaceCount": 93,
+    "ineligibleRaceCount": 0,
+    "ticketDistribution": {
+      "mean": 4.543859649122807,
+      "median": 2,
+      "p90": 12.700000000000003,
+      "max": 27,
+      "sixOrLess": 92,
+      "sevenTo10": 7,
+      "elevenTo15": 5,
+      "sixteenTo20": 3,
+      "over20": 7
+    },
+    "exactHits": 15,
+    "generatedCorrectTerminal": 114,
+    "naturalBoundaryCorrectTerminal": 47,
+    "correctTerminalSurvived": 15,
+    "investment": 51800,
+    "return": 79250,
+    "roi": 1.52992277992278,
+    "highPayoutCapture": {
+      "hitsAtLeast10000": 1,
+      "returnAtLeast10000": 40920,
+      "topPayout": 40920
+    },
+    "mainHits": null,
+    "coverHits": null,
+    "thickHits": null,
+    "categories": {},
+    "thickTickets": null,
+    "scenarioCount": null,
+    "confidence": null,
+    "over20Ineligible": null
+  },
+  "candidate": {
+    "raceCount": 114,
+    "confirmedRaceCount": 114,
+    "purchaseableRaceCount": 80,
+    "ineligibleRaceCount": 34,
+    "ticketDistribution": {
+      "mean": 2.6666666666666665,
+      "median": 2,
+      "p90": 6,
+      "max": 18,
+      "sixOrLess": 105,
+      "sevenTo10": 5,
+      "elevenTo15": 2,
+      "sixteenTo20": 2,
+      "over20": 0
+    },
+    "exactHits": 14,
+    "generatedCorrectTerminal": 114,
+    "naturalBoundaryCorrectTerminal": 47,
+    "correctTerminalSurvived": 14,
+    "investment": 30400,
+    "return": 69650,
+    "roi": 2.2911184210526314,
+    "highPayoutCapture": {
+      "hitsAtLeast10000": 1,
+      "returnAtLeast10000": 40920,
+      "topPayout": 40920
+    },
+    "mainHits": 14,
+    "coverHits": 0,
+    "thickHits": 0,
+    "categories": {
+      "MAIN": 279,
+      "COVER": 25
+    },
+    "thickTickets": 0,
+    "scenarioCount": {
+      "mean": 2.3947368421052633,
+      "median": 1,
+      "p90": 6,
+      "max": 6,
+      "sixOrLess": 114,
+      "sevenTo10": 0,
+      "elevenTo15": 0,
+      "sixteenTo20": 0,
+      "over20": 0
+    },
+    "confidence": {
+      "1": 24,
+      "2": 14,
+      "5": 76
+    },
+    "over20Ineligible": 34
+  },
+  "warnings": {
+    "PARTIAL_DATA_MISSING": 80,
+    "MANY_TICKETS": 2
+  },
+  "ineligibleReasons": {
+    "NATURAL_SELECTION_EXCEEDS_CAP": 34
+  },
+  "duplicateScenarioSupportDetected": 4347,
+  "races": [
+    {
+      "raceKey": "20260909-61-7",
+      "controlTickets": 12,
+      "candidateTickets": 12,
+      "naturalTicketCount": 12,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 6130,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 12,
+        "technicalScenarioDuplicates": 3,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-48-11",
+      "controlTickets": 2,
+      "candidateTickets": 4,
+      "naturalTicketCount": 4,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 42750,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 4,
+        "technicalScenarioDuplicates": 1,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-61-9",
+      "controlTickets": 1,
+      "candidateTickets": 1,
+      "naturalTicketCount": 1,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": true,
+      "exactHitCandidate": true,
+      "payout": 7250,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 1,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-61-8",
+      "controlTickets": 6,
+      "candidateTickets": 8,
+      "naturalTicketCount": 8,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 15190,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 8,
+        "technicalScenarioDuplicates": 3,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-27-7",
+      "controlTickets": 2,
+      "candidateTickets": 2,
+      "naturalTicketCount": 2,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 2490,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 2,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-61-6",
+      "controlTickets": 4,
+      "candidateTickets": 4,
+      "naturalTicketCount": 4,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 1350,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 4,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-27-6",
+      "controlTickets": 2,
+      "candidateTickets": 2,
+      "naturalTicketCount": 2,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 8600,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 2,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-61-5",
+      "controlTickets": 10,
+      "candidateTickets": 14,
+      "naturalTicketCount": 14,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 5190,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 14,
+        "technicalScenarioDuplicates": 4,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-27-5",
+      "controlTickets": 1,
+      "candidateTickets": 6,
+      "naturalTicketCount": 6,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 1980,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 6,
+        "technicalScenarioDuplicates": 3,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-61-4",
+      "controlTickets": 2,
+      "candidateTickets": 2,
+      "naturalTicketCount": 2,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 4590,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 2,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-27-4",
+      "controlTickets": 1,
+      "candidateTickets": 1,
+      "naturalTicketCount": 1,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 940,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 1,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-61-3",
+      "controlTickets": 4,
+      "candidateTickets": 4,
+      "naturalTicketCount": 4,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 1020,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 4,
+        "technicalScenarioDuplicates": 1,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-61-2",
+      "controlTickets": 2,
+      "candidateTickets": 2,
+      "naturalTicketCount": 2,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": true,
+      "exactHitCandidate": true,
+      "payout": 1000,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 2,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-27-2",
+      "controlTickets": 2,
+      "candidateTickets": 2,
+      "naturalTicketCount": 2,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 290,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 2,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-61-1",
+      "controlTickets": 0,
+      "candidateTickets": 2,
+      "naturalTicketCount": 2,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 2550,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 2,
+        "technicalScenarioDuplicates": 1,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-13-12",
+      "controlTickets": 2,
+      "candidateTickets": 2,
+      "naturalTicketCount": 2,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": true,
+      "exactHitCandidate": true,
+      "payout": 4030,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 2,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-13-11",
+      "controlTickets": 0,
+      "candidateTickets": 0,
+      "naturalTicketCount": 50,
+      "purchaseEligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "warnings": [],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 5890,
+      "scenarioCount": 6,
+      "confidence": {
+        "level": 2,
+        "raw": 0.44000000000000006,
+        "components": {
+          "firstAgreement": 0.5,
+          "pairAgreement": 0.5,
+          "thirdAgreement": 1,
+          "scenarioStability": 0.6000000000000001,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 180,
+        "technicalScenarioDuplicates": 144,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-13-10",
+      "controlTickets": 1,
+      "candidateTickets": 1,
+      "naturalTicketCount": 1,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 46370,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 1,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-13-9",
+      "controlTickets": 0,
+      "candidateTickets": 0,
+      "naturalTicketCount": 90,
+      "purchaseEligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "warnings": [],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 5550,
+      "scenarioCount": 6,
+      "confidence": {
+        "level": 1,
+        "raw": 0.30666666666666664,
+        "components": {
+          "firstAgreement": 0.3333333333333333,
+          "pairAgreement": 0.3333333333333333,
+          "thirdAgreement": 1,
+          "scenarioStability": 0.4666666666666667,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 180,
+        "technicalScenarioDuplicates": 144,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-13-8",
+      "controlTickets": 3,
+      "candidateTickets": 5,
+      "naturalTicketCount": 5,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 3020,
+      "scenarioCount": 2,
+      "confidence": {
+        "level": 2,
+        "raw": 0.44000000000000006,
+        "components": {
+          "firstAgreement": 0.5,
+          "pairAgreement": 0.5,
+          "thirdAgreement": 1,
+          "scenarioStability": 0.6000000000000001,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 5,
+        "technicalScenarioDuplicates": 1,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-13-7",
+      "controlTickets": 8,
+      "candidateTickets": 0,
+      "naturalTicketCount": 60,
+      "purchaseEligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "warnings": [],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 4100,
+      "scenarioCount": 5,
+      "confidence": {
+        "level": 2,
+        "raw": 0.44000000000000006,
+        "components": {
+          "firstAgreement": 0.5,
+          "pairAgreement": 0.5,
+          "thirdAgreement": 1,
+          "scenarioStability": 0.6000000000000001,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 150,
+        "technicalScenarioDuplicates": 120,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-48-6",
+      "controlTickets": 2,
+      "candidateTickets": 2,
+      "naturalTicketCount": 2,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 770,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 2,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-48-5",
+      "controlTickets": 0,
+      "candidateTickets": 0,
+      "naturalTicketCount": 106,
+      "purchaseEligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "warnings": [],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 5210,
+      "scenarioCount": 6,
+      "confidence": {
+        "level": 1,
+        "raw": 0.30666666666666664,
+        "components": {
+          "firstAgreement": 0.3333333333333333,
+          "pairAgreement": 0.3333333333333333,
+          "thirdAgreement": 1,
+          "scenarioStability": 0.4666666666666667,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 160,
+        "technicalScenarioDuplicates": 124,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-48-3",
+      "controlTickets": 2,
+      "candidateTickets": 2,
+      "naturalTicketCount": 2,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 15020,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 2,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-13-6",
+      "controlTickets": 0,
+      "candidateTickets": 6,
+      "naturalTicketCount": 6,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 17850,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 6,
+        "technicalScenarioDuplicates": 3,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-13-5",
+      "controlTickets": 2,
+      "candidateTickets": 2,
+      "naturalTicketCount": 2,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 10120,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 2,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-13-4",
+      "controlTickets": 0,
+      "candidateTickets": 0,
+      "naturalTicketCount": 90,
+      "purchaseEligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "warnings": [],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 4580,
+      "scenarioCount": 5,
+      "confidence": {
+        "level": 1,
+        "raw": 0.24000000000000002,
+        "components": {
+          "firstAgreement": 0.3333333333333333,
+          "pairAgreement": 0.3333333333333333,
+          "thirdAgreement": 0.6666666666666666,
+          "scenarioStability": 0.4,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 150,
+        "technicalScenarioDuplicates": 120,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-13-3",
+      "controlTickets": 1,
+      "candidateTickets": 1,
+      "naturalTicketCount": 1,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 1580,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 1,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-13-2",
+      "controlTickets": 10,
+      "candidateTickets": 10,
+      "naturalTicketCount": 10,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 1070,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 10,
+        "technicalScenarioDuplicates": 6,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-44-10",
+      "controlTickets": 5,
+      "candidateTickets": 5,
+      "naturalTicketCount": 5,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 90580,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 5,
+        "technicalScenarioDuplicates": 2,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-84-7",
+      "controlTickets": 13,
+      "candidateTickets": 0,
+      "naturalTicketCount": 180,
+      "purchaseEligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "warnings": [],
+      "exactHitControl": true,
+      "exactHitCandidate": false,
+      "payout": 1200,
+      "scenarioCount": 6,
+      "confidence": {
+        "level": 1,
+        "raw": 0.24000000000000002,
+        "components": {
+          "firstAgreement": 0.3333333333333333,
+          "pairAgreement": 0.3333333333333333,
+          "thirdAgreement": 0.6666666666666666,
+          "scenarioStability": 0.4,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 180,
+        "technicalScenarioDuplicates": 144,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-44-12",
+      "controlTickets": 2,
+      "candidateTickets": 2,
+      "naturalTicketCount": 2,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 630,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 2,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-13-1",
+      "controlTickets": 1,
+      "candidateTickets": 1,
+      "naturalTicketCount": 1,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 6370,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 1,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-21-11",
+      "controlTickets": 12,
+      "candidateTickets": 0,
+      "naturalTicketCount": 122,
+      "purchaseEligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "warnings": [],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 20470,
+      "scenarioCount": 6,
+      "confidence": {
+        "level": 1,
+        "raw": 0.30666666666666664,
+        "components": {
+          "firstAgreement": 0.3333333333333333,
+          "pairAgreement": 0.3333333333333333,
+          "thirdAgreement": 1,
+          "scenarioStability": 0.4666666666666667,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 180,
+        "technicalScenarioDuplicates": 144,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-44-11",
+      "controlTickets": 1,
+      "candidateTickets": 1,
+      "naturalTicketCount": 1,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 4420,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 1,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-21-10",
+      "controlTickets": 1,
+      "candidateTickets": 9,
+      "naturalTicketCount": 9,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": true,
+      "payout": 500,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 9,
+        "technicalScenarioDuplicates": 4,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-21-9",
+      "controlTickets": 15,
+      "candidateTickets": 0,
+      "naturalTicketCount": 90,
+      "purchaseEligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "warnings": [],
+      "exactHitControl": true,
+      "exactHitCandidate": false,
+      "payout": 620,
+      "scenarioCount": 6,
+      "confidence": {
+        "level": 1,
+        "raw": 0.30666666666666664,
+        "components": {
+          "firstAgreement": 0.3333333333333333,
+          "pairAgreement": 0.3333333333333333,
+          "thirdAgreement": 1,
+          "scenarioStability": 0.4666666666666667,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 180,
+        "technicalScenarioDuplicates": 144,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-74-5",
+      "controlTickets": 10,
+      "candidateTickets": 0,
+      "naturalTicketCount": 64,
+      "purchaseEligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "warnings": [],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 9960,
+      "scenarioCount": 6,
+      "confidence": {
+        "level": 1,
+        "raw": 0.24000000000000002,
+        "components": {
+          "firstAgreement": 0.3333333333333333,
+          "pairAgreement": 0.3333333333333333,
+          "thirdAgreement": 0.6666666666666666,
+          "scenarioStability": 0.4,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 180,
+        "technicalScenarioDuplicates": 144,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-44-8",
+      "controlTickets": 3,
+      "candidateTickets": 3,
+      "naturalTicketCount": 3,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 20660,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 3,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-21-7",
+      "controlTickets": 6,
+      "candidateTickets": 6,
+      "naturalTicketCount": 6,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 2160,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 6,
+        "technicalScenarioDuplicates": 3,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-44-7",
+      "controlTickets": 1,
+      "candidateTickets": 5,
+      "naturalTicketCount": 5,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 101980,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 5,
+        "technicalScenarioDuplicates": 2,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-21-6",
+      "controlTickets": 3,
+      "candidateTickets": 3,
+      "naturalTicketCount": 3,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 150,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 3,
+        "technicalScenarioDuplicates": 2,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-37-7",
+      "controlTickets": 1,
+      "candidateTickets": 1,
+      "naturalTicketCount": 1,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 7490,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 1,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-44-6",
+      "controlTickets": 2,
+      "candidateTickets": 5,
+      "naturalTicketCount": 5,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 21530,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 5,
+        "technicalScenarioDuplicates": 2,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-44-5",
+      "controlTickets": 3,
+      "candidateTickets": 3,
+      "naturalTicketCount": 3,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 660,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 3,
+        "technicalScenarioDuplicates": 1,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-21-4",
+      "controlTickets": 1,
+      "candidateTickets": 1,
+      "naturalTicketCount": 1,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 9150,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 1,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-44-3",
+      "controlTickets": 2,
+      "candidateTickets": 2,
+      "naturalTicketCount": 2,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 1810,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 2,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-44-1",
+      "controlTickets": 2,
+      "candidateTickets": 2,
+      "naturalTicketCount": 2,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 4430,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 2,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-37-6",
+      "controlTickets": 26,
+      "candidateTickets": 0,
+      "naturalTicketCount": 43,
+      "purchaseEligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "warnings": [],
+      "exactHitControl": true,
+      "exactHitCandidate": false,
+      "payout": 2490,
+      "scenarioCount": 3,
+      "confidence": {
+        "level": 2,
+        "raw": 0.33999999999999997,
+        "components": {
+          "firstAgreement": 0.5,
+          "pairAgreement": 0.5,
+          "thirdAgreement": 0.5,
+          "scenarioStability": 0.5,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 44,
+        "technicalScenarioDuplicates": 32,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-84-6",
+      "controlTickets": 0,
+      "candidateTickets": 0,
+      "naturalTicketCount": 90,
+      "purchaseEligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "warnings": [],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 650,
+      "scenarioCount": 6,
+      "confidence": {
+        "level": 1,
+        "raw": 0.30666666666666664,
+        "components": {
+          "firstAgreement": 0.3333333333333333,
+          "pairAgreement": 0.3333333333333333,
+          "thirdAgreement": 1,
+          "scenarioStability": 0.4666666666666667,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 180,
+        "technicalScenarioDuplicates": 144,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-37-5",
+      "controlTickets": 12,
+      "candidateTickets": 0,
+      "naturalTicketCount": 90,
+      "purchaseEligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "warnings": [],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 9040,
+      "scenarioCount": 6,
+      "confidence": {
+        "level": 1,
+        "raw": 0.24000000000000002,
+        "components": {
+          "firstAgreement": 0.3333333333333333,
+          "pairAgreement": 0.3333333333333333,
+          "thirdAgreement": 0.6666666666666666,
+          "scenarioStability": 0.4,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 180,
+        "technicalScenarioDuplicates": 144,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-84-5",
+      "controlTickets": 2,
+      "candidateTickets": 2,
+      "naturalTicketCount": 2,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": true,
+      "exactHitCandidate": true,
+      "payout": 3900,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 2,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-37-4",
+      "controlTickets": 3,
+      "candidateTickets": 3,
+      "naturalTicketCount": 3,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 36300,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 3,
+        "technicalScenarioDuplicates": 1,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-84-4",
+      "controlTickets": 1,
+      "candidateTickets": 3,
+      "naturalTicketCount": 3,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": true,
+      "payout": 820,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 3,
+        "technicalScenarioDuplicates": 1,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-37-3",
+      "controlTickets": 0,
+      "candidateTickets": 18,
+      "naturalTicketCount": 18,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "MANY_TICKETS",
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 1120,
+      "scenarioCount": 2,
+      "confidence": {
+        "level": 2,
+        "raw": 0.44000000000000006,
+        "components": {
+          "firstAgreement": 0.5,
+          "pairAgreement": 0.5,
+          "thirdAgreement": 1,
+          "scenarioStability": 0.6000000000000001,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 33,
+        "technicalScenarioDuplicates": 23,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-84-3",
+      "controlTickets": 0,
+      "candidateTickets": 0,
+      "naturalTicketCount": 90,
+      "purchaseEligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "warnings": [],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 900,
+      "scenarioCount": 6,
+      "confidence": {
+        "level": 1,
+        "raw": 0.30666666666666664,
+        "components": {
+          "firstAgreement": 0.3333333333333333,
+          "pairAgreement": 0.3333333333333333,
+          "thirdAgreement": 1,
+          "scenarioStability": 0.4666666666666667,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 180,
+        "technicalScenarioDuplicates": 144,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-37-2",
+      "controlTickets": 0,
+      "candidateTickets": 0,
+      "naturalTicketCount": 56,
+      "purchaseEligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "warnings": [],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 34730,
+      "scenarioCount": 5,
+      "confidence": {
+        "level": 2,
+        "raw": 0.44000000000000006,
+        "components": {
+          "firstAgreement": 0.5,
+          "pairAgreement": 0.5,
+          "thirdAgreement": 1,
+          "scenarioStability": 0.6000000000000001,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 124,
+        "technicalScenarioDuplicates": 94,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-37-1",
+      "controlTickets": 25,
+      "candidateTickets": 0,
+      "naturalTicketCount": 60,
+      "purchaseEligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "warnings": [],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 660,
+      "scenarioCount": 5,
+      "confidence": {
+        "level": 2,
+        "raw": 0.44000000000000006,
+        "components": {
+          "firstAgreement": 0.5,
+          "pairAgreement": 0.5,
+          "thirdAgreement": 1,
+          "scenarioStability": 0.6000000000000001,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 150,
+        "technicalScenarioDuplicates": 120,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260909-84-1",
+      "controlTickets": 1,
+      "candidateTickets": 1,
+      "naturalTicketCount": 1,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 2690,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 1,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-61-9",
+      "controlTickets": 16,
+      "candidateTickets": 0,
+      "naturalTicketCount": 90,
+      "purchaseEligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "warnings": [],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 2610,
+      "scenarioCount": 6,
+      "confidence": {
+        "level": 1,
+        "raw": 0.30666666666666664,
+        "components": {
+          "firstAgreement": 0.3333333333333333,
+          "pairAgreement": 0.3333333333333333,
+          "thirdAgreement": 1,
+          "scenarioStability": 0.4666666666666667,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 180,
+        "technicalScenarioDuplicates": 144,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-27-9",
+      "controlTickets": 2,
+      "candidateTickets": 2,
+      "naturalTicketCount": 2,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 1620,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 2,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-61-8",
+      "controlTickets": 2,
+      "candidateTickets": 2,
+      "naturalTicketCount": 2,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 420,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 2,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-27-8",
+      "controlTickets": 0,
+      "candidateTickets": 0,
+      "naturalTicketCount": 65,
+      "purchaseEligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "warnings": [],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 2640,
+      "scenarioCount": 6,
+      "confidence": {
+        "level": 1,
+        "raw": 0.30666666666666664,
+        "components": {
+          "firstAgreement": 0.3333333333333333,
+          "pairAgreement": 0.3333333333333333,
+          "thirdAgreement": 1,
+          "scenarioStability": 0.4666666666666667,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 174,
+        "technicalScenarioDuplicates": 138,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-61-7",
+      "controlTickets": 1,
+      "candidateTickets": 1,
+      "naturalTicketCount": 1,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 9040,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 1,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-61-6",
+      "controlTickets": 3,
+      "candidateTickets": 6,
+      "naturalTicketCount": 6,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": true,
+      "exactHitCandidate": true,
+      "payout": 40920,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 6,
+        "technicalScenarioDuplicates": 2,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-27-6",
+      "controlTickets": 2,
+      "candidateTickets": 2,
+      "naturalTicketCount": 2,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 7280,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 2,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-61-5",
+      "controlTickets": 5,
+      "candidateTickets": 7,
+      "naturalTicketCount": 7,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 890,
+      "scenarioCount": 2,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 12,
+        "technicalScenarioDuplicates": 5,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-61-4",
+      "controlTickets": 2,
+      "candidateTickets": 2,
+      "naturalTicketCount": 2,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 8620,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 2,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-27-4",
+      "controlTickets": 1,
+      "candidateTickets": 3,
+      "naturalTicketCount": 3,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": true,
+      "payout": 410,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 3,
+        "technicalScenarioDuplicates": 1,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-61-3",
+      "controlTickets": 3,
+      "candidateTickets": 3,
+      "naturalTicketCount": 3,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 170,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 3,
+        "technicalScenarioDuplicates": 1,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-61-2",
+      "controlTickets": 1,
+      "candidateTickets": 3,
+      "naturalTicketCount": 3,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": true,
+      "exactHitCandidate": true,
+      "payout": 500,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 3,
+        "technicalScenarioDuplicates": 1,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-27-2",
+      "controlTickets": 9,
+      "candidateTickets": 0,
+      "naturalTicketCount": 60,
+      "purchaseEligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "warnings": [],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 750,
+      "scenarioCount": 4,
+      "confidence": {
+        "level": 2,
+        "raw": 0.33999999999999997,
+        "components": {
+          "firstAgreement": 0.5,
+          "pairAgreement": 0.5,
+          "thirdAgreement": 0.5,
+          "scenarioStability": 0.5,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 120,
+        "technicalScenarioDuplicates": 96,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-61-1",
+      "controlTickets": 2,
+      "candidateTickets": 2,
+      "naturalTicketCount": 2,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": true,
+      "exactHitCandidate": true,
+      "payout": 250,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 2,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-13-12",
+      "controlTickets": 0,
+      "candidateTickets": 0,
+      "naturalTicketCount": 66,
+      "purchaseEligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "warnings": [],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 920,
+      "scenarioCount": 6,
+      "confidence": {
+        "level": 1,
+        "raw": 0.30666666666666664,
+        "components": {
+          "firstAgreement": 0.3333333333333333,
+          "pairAgreement": 0.3333333333333333,
+          "thirdAgreement": 1,
+          "scenarioStability": 0.4666666666666667,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 83,
+        "technicalScenarioDuplicates": 56,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-26-11",
+      "controlTickets": 0,
+      "candidateTickets": 0,
+      "naturalTicketCount": 60,
+      "purchaseEligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "warnings": [],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 2940,
+      "scenarioCount": 4,
+      "confidence": {
+        "level": 2,
+        "raw": 0.44000000000000006,
+        "components": {
+          "firstAgreement": 0.5,
+          "pairAgreement": 0.5,
+          "thirdAgreement": 1,
+          "scenarioStability": 0.6000000000000001,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 120,
+        "technicalScenarioDuplicates": 96,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-13-11",
+      "controlTickets": 20,
+      "candidateTickets": 0,
+      "naturalTicketCount": 90,
+      "purchaseEligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "warnings": [],
+      "exactHitControl": true,
+      "exactHitCandidate": false,
+      "payout": 2580,
+      "scenarioCount": 6,
+      "confidence": {
+        "level": 1,
+        "raw": 0.30666666666666664,
+        "components": {
+          "firstAgreement": 0.3333333333333333,
+          "pairAgreement": 0.3333333333333333,
+          "thirdAgreement": 1,
+          "scenarioStability": 0.4666666666666667,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 180,
+        "technicalScenarioDuplicates": 144,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-26-10",
+      "controlTickets": 3,
+      "candidateTickets": 3,
+      "naturalTicketCount": 3,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 3300,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 3,
+        "technicalScenarioDuplicates": 1,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-13-10",
+      "controlTickets": 0,
+      "candidateTickets": 0,
+      "naturalTicketCount": 60,
+      "purchaseEligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "warnings": [],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 24220,
+      "scenarioCount": 6,
+      "confidence": {
+        "level": 2,
+        "raw": 0.44000000000000006,
+        "components": {
+          "firstAgreement": 0.5,
+          "pairAgreement": 0.5,
+          "thirdAgreement": 1,
+          "scenarioStability": 0.6000000000000001,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 180,
+        "technicalScenarioDuplicates": 144,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-13-9",
+      "controlTickets": 6,
+      "candidateTickets": 6,
+      "naturalTicketCount": 6,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 2490,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 6,
+        "technicalScenarioDuplicates": 3,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-26-8",
+      "controlTickets": 2,
+      "candidateTickets": 2,
+      "naturalTicketCount": 2,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 13810,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 2,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-13-8",
+      "controlTickets": 2,
+      "candidateTickets": 2,
+      "naturalTicketCount": 2,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": true,
+      "exactHitCandidate": true,
+      "payout": 3210,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 2,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-26-7",
+      "controlTickets": 24,
+      "candidateTickets": 0,
+      "naturalTicketCount": 60,
+      "purchaseEligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "warnings": [],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 640,
+      "scenarioCount": 6,
+      "confidence": {
+        "level": 2,
+        "raw": 0.44000000000000006,
+        "components": {
+          "firstAgreement": 0.5,
+          "pairAgreement": 0.5,
+          "thirdAgreement": 1,
+          "scenarioStability": 0.6000000000000001,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 180,
+        "technicalScenarioDuplicates": 144,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-26-6",
+      "controlTickets": 1,
+      "candidateTickets": 3,
+      "naturalTicketCount": 3,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 890,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 3,
+        "technicalScenarioDuplicates": 1,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-13-6",
+      "controlTickets": 20,
+      "candidateTickets": 0,
+      "naturalTicketCount": 90,
+      "purchaseEligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "warnings": [],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 1490,
+      "scenarioCount": 6,
+      "confidence": {
+        "level": 1,
+        "raw": 0.24000000000000002,
+        "components": {
+          "firstAgreement": 0.3333333333333333,
+          "pairAgreement": 0.3333333333333333,
+          "thirdAgreement": 0.6666666666666666,
+          "scenarioStability": 0.4,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 180,
+        "technicalScenarioDuplicates": 144,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-26-5",
+      "controlTickets": 2,
+      "candidateTickets": 2,
+      "naturalTicketCount": 2,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 17130,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 2,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-13-5",
+      "controlTickets": 0,
+      "candidateTickets": 0,
+      "naturalTicketCount": 142,
+      "purchaseEligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "warnings": [],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 190,
+      "scenarioCount": 5,
+      "confidence": {
+        "level": 1,
+        "raw": 0.30666666666666664,
+        "components": {
+          "firstAgreement": 0.3333333333333333,
+          "pairAgreement": 0.3333333333333333,
+          "thirdAgreement": 1,
+          "scenarioStability": 0.4666666666666667,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 142,
+        "technicalScenarioDuplicates": 112,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-26-4",
+      "controlTickets": 10,
+      "candidateTickets": 16,
+      "naturalTicketCount": 16,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "MANY_TICKETS",
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": true,
+      "exactHitCandidate": true,
+      "payout": 5320,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 16,
+        "technicalScenarioDuplicates": 10,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-13-4",
+      "controlTickets": 0,
+      "candidateTickets": 6,
+      "naturalTicketCount": 6,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 7190,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 6,
+        "technicalScenarioDuplicates": 3,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-26-3",
+      "controlTickets": 27,
+      "candidateTickets": 0,
+      "naturalTicketCount": 64,
+      "purchaseEligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "warnings": [],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 1420,
+      "scenarioCount": 6,
+      "confidence": {
+        "level": 1,
+        "raw": 0.24000000000000002,
+        "components": {
+          "firstAgreement": 0.3333333333333333,
+          "pairAgreement": 0.3333333333333333,
+          "thirdAgreement": 0.6666666666666666,
+          "scenarioStability": 0.4,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 180,
+        "technicalScenarioDuplicates": 144,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-13-3",
+      "controlTickets": 21,
+      "candidateTickets": 0,
+      "naturalTicketCount": 61,
+      "purchaseEligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "warnings": [],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 1820,
+      "scenarioCount": 6,
+      "confidence": {
+        "level": 1,
+        "raw": 0.24000000000000002,
+        "components": {
+          "firstAgreement": 0.3333333333333333,
+          "pairAgreement": 0.3333333333333333,
+          "thirdAgreement": 0.6666666666666666,
+          "scenarioStability": 0.4,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 180,
+        "technicalScenarioDuplicates": 144,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-26-2",
+      "controlTickets": 0,
+      "candidateTickets": 0,
+      "naturalTicketCount": 23,
+      "purchaseEligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "warnings": [],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 332770,
+      "scenarioCount": 2,
+      "confidence": {
+        "level": 2,
+        "raw": 0.44000000000000006,
+        "components": {
+          "firstAgreement": 0.5,
+          "pairAgreement": 0.5,
+          "thirdAgreement": 1,
+          "scenarioStability": 0.6000000000000001,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 24,
+        "technicalScenarioDuplicates": 16,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-44-12",
+      "controlTickets": 8,
+      "candidateTickets": 8,
+      "naturalTicketCount": 8,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 57160,
+      "scenarioCount": 4,
+      "confidence": {
+        "level": 1,
+        "raw": 0.30666666666666664,
+        "components": {
+          "firstAgreement": 0.3333333333333333,
+          "pairAgreement": 0.3333333333333333,
+          "thirdAgreement": 1,
+          "scenarioStability": 0.4666666666666667,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 8,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-13-2",
+      "controlTickets": 2,
+      "candidateTickets": 2,
+      "naturalTicketCount": 2,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 1940,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 2,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-21-11",
+      "controlTickets": 0,
+      "candidateTickets": 0,
+      "naturalTicketCount": 68,
+      "purchaseEligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "warnings": [],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 38580,
+      "scenarioCount": 6,
+      "confidence": {
+        "level": 1,
+        "raw": 0.24000000000000002,
+        "components": {
+          "firstAgreement": 0.3333333333333333,
+          "pairAgreement": 0.3333333333333333,
+          "thirdAgreement": 0.6666666666666666,
+          "scenarioStability": 0.4,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 180,
+        "technicalScenarioDuplicates": 144,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-13-1",
+      "controlTickets": 3,
+      "candidateTickets": 3,
+      "naturalTicketCount": 3,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 590,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 3,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-44-11",
+      "controlTickets": 2,
+      "candidateTickets": 2,
+      "naturalTicketCount": 2,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 23650,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 2,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-44-9",
+      "controlTickets": 6,
+      "candidateTickets": 6,
+      "naturalTicketCount": 6,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 6440,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 6,
+        "technicalScenarioDuplicates": 2,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-21-8",
+      "controlTickets": 2,
+      "candidateTickets": 2,
+      "naturalTicketCount": 2,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 3600,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 2,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-44-8",
+      "controlTickets": 1,
+      "candidateTickets": 3,
+      "naturalTicketCount": 3,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 850,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 3,
+        "technicalScenarioDuplicates": 1,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-44-7",
+      "controlTickets": 1,
+      "candidateTickets": 1,
+      "naturalTicketCount": 1,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 620,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 1,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-21-6",
+      "controlTickets": 2,
+      "candidateTickets": 5,
+      "naturalTicketCount": 5,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": true,
+      "payout": 300,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 5,
+        "technicalScenarioDuplicates": 2,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-44-6",
+      "controlTickets": 6,
+      "candidateTickets": 6,
+      "naturalTicketCount": 6,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 1570,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 6,
+        "technicalScenarioDuplicates": 2,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-21-5",
+      "controlTickets": 6,
+      "candidateTickets": 6,
+      "naturalTicketCount": 6,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 1200,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 6,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-44-4",
+      "controlTickets": 0,
+      "candidateTickets": 0,
+      "naturalTicketCount": 90,
+      "purchaseEligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "warnings": [],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 5310,
+      "scenarioCount": 6,
+      "confidence": {
+        "level": 1,
+        "raw": 0.24000000000000002,
+        "components": {
+          "firstAgreement": 0.3333333333333333,
+          "pairAgreement": 0.3333333333333333,
+          "thirdAgreement": 0.6666666666666666,
+          "scenarioStability": 0.4,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 180,
+        "technicalScenarioDuplicates": 144,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-21-3",
+      "controlTickets": 2,
+      "candidateTickets": 2,
+      "naturalTicketCount": 2,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 2450,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 2,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-44-2",
+      "controlTickets": 2,
+      "candidateTickets": 2,
+      "naturalTicketCount": 2,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": true,
+      "exactHitCandidate": true,
+      "payout": 1240,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 2,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-44-1",
+      "controlTickets": 2,
+      "candidateTickets": 2,
+      "naturalTicketCount": 2,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 2040,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 2,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-37-7",
+      "controlTickets": 21,
+      "candidateTickets": 0,
+      "naturalTicketCount": 90,
+      "purchaseEligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "warnings": [],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 1880,
+      "scenarioCount": 6,
+      "confidence": {
+        "level": 1,
+        "raw": 0.24000000000000002,
+        "components": {
+          "firstAgreement": 0.3333333333333333,
+          "pairAgreement": 0.3333333333333333,
+          "thirdAgreement": 0.6666666666666666,
+          "scenarioStability": 0.4,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 180,
+        "technicalScenarioDuplicates": 144,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-37-6",
+      "controlTickets": 2,
+      "candidateTickets": 2,
+      "naturalTicketCount": 2,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 22070,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 2,
+        "technicalScenarioDuplicates": 1,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-37-5",
+      "controlTickets": 2,
+      "candidateTickets": 2,
+      "naturalTicketCount": 2,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 460,
+      "scenarioCount": 1,
+      "confidence": {
+        "level": 5,
+        "raw": 0.84,
+        "components": {
+          "firstAgreement": 1,
+          "pairAgreement": 1,
+          "thirdAgreement": 1,
+          "scenarioStability": 1,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 2,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-37-4",
+      "controlTickets": 21,
+      "candidateTickets": 0,
+      "naturalTicketCount": 90,
+      "purchaseEligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "warnings": [],
+      "exactHitControl": true,
+      "exactHitCandidate": false,
+      "payout": 4740,
+      "scenarioCount": 5,
+      "confidence": {
+        "level": 1,
+        "raw": 0.24000000000000002,
+        "components": {
+          "firstAgreement": 0.3333333333333333,
+          "pairAgreement": 0.3333333333333333,
+          "thirdAgreement": 0.6666666666666666,
+          "scenarioStability": 0.4,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 150,
+        "technicalScenarioDuplicates": 120,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-37-3",
+      "controlTickets": 0,
+      "candidateTickets": 0,
+      "naturalTicketCount": 90,
+      "purchaseEligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "warnings": [],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 1590,
+      "scenarioCount": 6,
+      "confidence": {
+        "level": 1,
+        "raw": 0.24000000000000002,
+        "components": {
+          "firstAgreement": 0.3333333333333333,
+          "pairAgreement": 0.3333333333333333,
+          "thirdAgreement": 0.6666666666666666,
+          "scenarioStability": 0.4,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 180,
+        "technicalScenarioDuplicates": 144,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-37-2",
+      "controlTickets": 0,
+      "candidateTickets": 0,
+      "naturalTicketCount": 60,
+      "purchaseEligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "warnings": [],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 6100,
+      "scenarioCount": 5,
+      "confidence": {
+        "level": 2,
+        "raw": 0.44000000000000006,
+        "components": {
+          "firstAgreement": 0.5,
+          "pairAgreement": 0.5,
+          "thirdAgreement": 1,
+          "scenarioStability": 0.6000000000000001,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 150,
+        "technicalScenarioDuplicates": 120,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    },
+    {
+      "raceKey": "20260908-37-1",
+      "controlTickets": 4,
+      "candidateTickets": 4,
+      "naturalTicketCount": 4,
+      "purchaseEligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "warnings": [
+        "PARTIAL_DATA_MISSING"
+      ],
+      "exactHitControl": false,
+      "exactHitCandidate": false,
+      "payout": 3350,
+      "scenarioCount": 2,
+      "confidence": {
+        "level": 2,
+        "raw": 0.44000000000000006,
+        "components": {
+          "firstAgreement": 0.5,
+          "pairAgreement": 0.5,
+          "thirdAgreement": 1,
+          "scenarioStability": 0.6000000000000001,
+          "missingPenalty": 0.16
+        }
+      },
+      "duplicates": {
+        "lifecycleRows": 4,
+        "technicalScenarioDuplicates": 0,
+        "duplicateTicketMerges": 0,
+        "resultFieldsUsed": []
+      }
+    }
+  ],
+  "source": "existing sealed read endpoints",
+  "requested": 114,
+  "readFailures": [],
+  "productionWrite": 0
+}
