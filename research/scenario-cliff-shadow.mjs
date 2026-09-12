@@ -3,6 +3,7 @@ import configJson from "./scenario-cliff-shadow-config.json" with { type: "json"
 export const VERSION = "SCENARIO_CLIFF_PURCHASE_SHADOW_V1";
 export const VERSION_V2 = "SCENARIO_CLIFF_PURCHASE_SHADOW_V2";
 export const VERSION_V3 = "SCENARIO_CLIFF_PURCHASE_SHADOW_V3";
+export const VERSION_V5 = "SCENARIO_CLIFF_PURCHASE_SHADOW_V5";
 export const DEFAULT_CONFIG = Object.freeze(configJson);
 const NATURAL_CODES = new Set(["ADOPTED", "THIRD_VARIANT_AMBIGUITY", "THIRD_VARIANT_BOUNDARY"]);
 const RESULT_KEYS = new Set(["result", "finishOrder", "payout", "hit", "return", "roi", "actual"]);
@@ -139,6 +140,59 @@ export function evaluateScenarioCliffFourWay(records, config = DEFAULT_CONFIG) {
   return { version: VERSION_V3, readOnly: true, productionWriteAllowed: false, cohortSize: races.length, protectedExcluded: (records || []).length - safe.length, control: summarizeThree(races, "control"), candidateV1: summarizeThree(races, "v1"), candidateV2: summarizeThree(races, "v2"), candidateV3: summarizeThree(races, "v3"), v2CapCauses: diagnoseCapCauses(races, "v2"), v3CapCauses: diagnoseCapCauses(races, "v3"), v2SmallCauses: diagnoseSmallCauses(races, "v2"), v3SmallCauses: diagnoseSmallCauses(races, "v3"), v3Warnings: countValues(races.flatMap(row => row.v3.warnings)), v3IneligibleReasons: countValues(races.map(row => row.v3.purchaseEligibility.reason).filter(Boolean)), v3Natural: distribution(races.map(row => row.v3.upstream.naturalTerminalCount)), v3SingleScenarioRaces: races.filter(row => row.v3.upstream.naturalScenarioCount === 1).length, semanticScenarioMerges: races.reduce((sum, row) => sum + row.v3.audit.semanticScenarioMerges, 0), technicalDuplicatesSuppressed: races.reduce((sum, row) => sum + row.v3.audit.technicalDuplicatesSuppressed, 0), technicalDuplicateObservations: races.reduce((sum, row) => sum + row.v3.audit.technicalDuplicateObservations, 0), races: races.map(row => ({ ...compactThreeRace(row), v3Tickets: row.v3.tickets.length, v3Eligibility: row.v3.purchaseEligibility, v3Upstream: row.v3.upstream, v3NaturalCorrect: row.v3NaturalCorrect, exactHitV3: Boolean(row.finish && row.v3.tickets.some(x => ticketKey(x) === row.finish.join("-"))) })) };
 }
 
+export function buildScenarioCliffShadowV5(record, config = DEFAULT_CONFIG) {
+  const prediction = sealedPrediction(record), raw = allLifecycleRows(prediction), upstream = buildSemanticUpstreamV3(raw, lifecycleRows(prediction), prediction, config);
+  const pairLayer = buildPairLayerV5(upstream.rows, prediction, config), rows = upstream.rows.length > config.maximumTickets ? pairLayer.rows : upstream.rows;
+  const audit = prediction?.purchase?.audit || prediction?.audit?.purchaseAudit || prediction?.audit || {};
+  const shadowPrediction = { ...prediction, purchase: { ...(prediction.purchase || {}), audit: { ...audit, terminalLifecycleAudit: rows.map(row => ({ ...row, purchaseRejectCode: "ADOPTED" })) } } };
+  const selected = buildScenarioCliffShadowV2({ raceKey: record?.raceKey, prediction: shadowPrediction }, config);
+  return { ...selected, version: VERSION_V5, pairLayer: pairLayer.audit, upstream: { ...upstream.audit, v3NaturalTerminalCount: upstream.rows.length, naturalTerminalCount: rows.length }, flow: { ...selected.flow, rawTerminalCount: raw.length, naturalTerminalCount: rows.length }, audit: { ...selected.audit, ...pairLayer.counts, resultFieldsUsed: [] } };
+}
+
+export function evaluateScenarioCliffV5(records, config = DEFAULT_CONFIG) {
+  const safe = (records || []).filter(record => !isProtected(record));
+  const races = safe.map(record => {
+    const prediction = sealedPrediction(record), finish = confirmedFinish(record), key = finish?.join("-"), pair = finish?.slice(0, 2).join("-"), v3 = buildScenarioCliffShadowV3(record, config), v5 = buildScenarioCliffShadowV5(record, config);
+    return { raceKey: record.raceKey, control: controlPlan(record), v3, v5, finish, generatedCorrect: Boolean(key && allLifecycleRows(prediction).some(row => ticketKey(row) === key)), naturalCorrect: Boolean(key && lifecycleRows(prediction).some(row => ticketKey(row) === key)), v3NaturalCorrect: Boolean(key && v3.flow.stageOrders.natural.includes(key)), v5NaturalCorrect: Boolean(key && v5.flow.stageOrders.natural.includes(key)), v3PairCorrect: Boolean(pair && new Set(v3.flow.stageOrders.natural.map(order => order.split("-").slice(0, 2).join("-"))).has(pair)), v5PairCorrect: Boolean(pair && v5.pairLayer.selectedPairs.includes(pair)), payout: finish ? finite(record?.result?.result?.payout ?? record?.result?.payout, 0) : null };
+  });
+  return { version: VERSION_V5, readOnly: true, productionWriteAllowed: false, cohortSize: races.length, protectedExcluded: (records || []).length - safe.length, control: summarizeThree(races, "control"), candidateV3: summarizeThree(races, "v3"), candidateV5: summarizeThree(races, "v5"), pairSummary: summarizeV5Pairs(races),
+    races: races.map(row => ({ raceKey: row.raceKey, v3PairCount: row.v5.pairLayer.rawPairCount, v5PairCount: row.v5.pairLayer.selectedPairCount, v3TerminalCount: row.v3.upstream.naturalTerminalCount, v5TerminalCount: row.v5.upstream.naturalTerminalCount, v5Eligibility: row.v5.purchaseEligibility, correctPairV3: row.v3PairCorrect, correctPairV5: row.v5PairCorrect, correctTerminalV3: row.v3NaturalCorrect, correctTerminalV5: row.v5NaturalCorrect, pairReductionReason: row.v5.pairLayer.reductionReason, plateauDiagnosis: row.v5.pairLayer.plateauDiagnosis })) };
+}
+
+function buildPairLayerV5(rows, prediction, config) {
+  const riders = riderMap(prediction), groups = new Map();
+  for (const row of rows) {
+    rejectResultLeakage(row); const order = normalizeOrder(row.order), key = order?.slice(0, 2).join("-"); if (!key) continue;
+    if (!groups.has(key)) groups.set(key, { pair: key, first: order[0], second: order[1], rows: [], scenarios: new Set(), technical: new Set() });
+    const group = groups.get(key); group.rows.push(row); group.scenarios.add(scenarioSemanticKey(row, prediction)); group.technical.add(scenarioTechnicalKey(row, prediction));
+  }
+  const pairs = [...groups.values()].map(group => scorePairV5(group, riders)).sort((a, b) => b.pairRelativeScore - a.pairRelativeScore || a.pair.localeCompare(b.pair, "en"));
+  const decision = selectNaturalBoundary(pairs, config.terminalBoundary, "pairRelativeScore"), selectedPairs = decision.rows, selectedSet = new Set(selectedPairs.map(pair => pair.pair));
+  const values = pairs.map(pair => pair.pairRelativeScore), scoreRange = values.length ? Math.max(...values) - Math.min(...values) : 0, unknownRate = pairs.length ? pairs.filter(pair => pair.unknownComponents.length).length / pairs.length : 0;
+  const plateauDiagnosis = decision.detected ? "CLEAR_PAIR_CLIFF" : scoreRange < .05 ? unknownRate >= .5 ? "UNKNOWN_NEUTRALIZED" : "SCORE_NOT_DISCRIMINATIVE" : "GENUINELY_MULTI_PAIR";
+  const technicalDuplicateSuppression = pairs.reduce((sum, pair) => sum + Math.max(0, pair.technicalSupportCount - pair.scenarioSupportCount), 0);
+  return { rows: rows.filter(row => selectedSet.has(normalizeOrder(row.order)?.slice(0, 2).join("-"))), audit: { rawPairCount: pairs.length, selectedPairCount: selectedPairs.length, rawPairsByFirst: countValues(pairs.map(pair => String(pair.first))), selectedPairs: selectedPairs.map(pair => pair.pair), pairBoundary: stripRows(decision), plateauDiagnosis, unknownHeavy: unknownRate >= .5, unknownPairRate: unknownRate, sameLinePairs: pairs.filter(pair => pair.relation === "SAME_LINE").length, crossLinePairs: pairs.filter(pair => pair.relation === "CROSS_LINE").length, soloPairs: pairs.filter(pair => pair.relation === "SOLO_INDEPENDENT").length, pairScoreDistribution: distribution(values), pairs: pairs.map(({ rows: ignored, ...pair }) => pair), reductionReason: decision.detected ? "PAIR_RELATIVE_CLIFF" : "NO_PAIR_CLIFF" }, counts: { technicalPairSupportDuplicateSuppression: technicalDuplicateSuppression } };
+}
+
+function scorePairV5(group, riders) {
+  const first = riders.get(group.first), second = riders.get(group.second), relation = pairRelation(first, second), unknownComponents = [], counterEvidence = [];
+  const component = (name, value) => { if (!Number.isFinite(value)) unknownComponents.push(name); return Number.isFinite(value) ? clamp(value) : null; };
+  const firstSupport = component("firstCandidateSupport", finite(first?.roleScores?.first) / 10), secondSupport = component("secondCandidateSupport", finite(second?.roleScores?.second) / 10);
+  const scores = [...riders.values()].map(rider => finite(rider.officialScore)).filter(Number.isFinite), low = scores.length ? Math.min(...scores) : null, high = scores.length ? Math.max(...scores) : null;
+  const ability = component("relativeAbility", Number.isFinite(second?.officialScore) && high > low ? (second.officialScore - low) / (high - low) : null);
+  let relationSupport = null, scenarioConsistency = null;
+  if (relation === "SAME_LINE") { const forward = first.lineOrder < second.lineOrder; relationSupport = forward ? .8 : .45; if (!forward) counterEvidence.push("SAME_LINE_ROLE_REVERSE"); scenarioConsistency = group.scenarios.has("UNKNOWN") ? null : .72; }
+  else if (relation === "CROSS_LINE") { relationSupport = .5; scenarioConsistency = [...group.scenarios].some(value => /MAKURI|OTHER_LINE|SEPARATION/.test(value)) ? .75 : .4; if (scenarioConsistency < .5) counterEvidence.push("CROSS_LINE_SCENARIO_CONFLICT"); }
+  else { relationSupport = .4; scenarioConsistency = .4; counterEvidence.push("LINE_RELATION_UNCONFIRMED"); }
+  const components = { firstCandidateSupport: firstSupport, secondCandidateSupport: secondSupport, lineRoleCompatibility: component("lineRoleCompatibility", relationSupport), relativeAbility: ability, scenarioConsistency: component("scenarioConsistency", scenarioConsistency) };
+  const available = Object.values(components).filter(Number.isFinite), base = available.length ? available.reduce((sum, value) => sum + value, 0) / available.length : 0, penalty = Math.min(.3, counterEvidence.length * .12), pairRelativeScore = clamp(base - penalty);
+  return { ...group, relation, positionalRelation: relation === "SAME_LINE" ? `${first?.lineOrder ?? "UNKNOWN"}->${second?.lineOrder ?? "UNKNOWN"}` : relation, pairRelativeScore, pairScoreBreakdown: components, pairSupportEvidence: Object.entries(components).filter(([, value]) => Number.isFinite(value)).map(([key]) => key), pairCounterEvidence: counterEvidence, unknownComponents, scenarioSupportCount: group.scenarios.size, pairScenarioIndependence: [...group.scenarios], technicalSupportCount: group.technical.size, terminalCount: group.rows.length };
+}
+
+function riderMap(prediction) { const map = new Map(); for (const line of prediction?.lines || []) for (const rider of line?.members || []) map.set(Number(rider.number || rider.id), { ...rider, lineId: rider.lineId || line.id, lineOrder: finite(rider.lineOrder) }); return map; }
+function pairRelation(first, second) { if (!first || !second || !first.lineId || !second.lineId) return "SOLO_INDEPENDENT"; return first.lineId === second.lineId ? "SAME_LINE" : "CROSS_LINE"; }
+function summarizeV5Pairs(races) { const cap = races.filter(row => !row.v3.purchaseEligibility.canPurchase), pairRows = races.map(row => row.v5.pairLayer); return { pairCount: distribution(pairRows.map(row => row.selectedPairCount)), pair20OverRaces: pairRows.filter(row => row.selectedPairCount > 20).length, plateauRaces: pairRows.filter(row => row.plateauDiagnosis !== "CLEAR_PAIR_CLIFF").length, unknownHeavyRaces: pairRows.filter(row => row.unknownHeavy).length, sameLinePairs: pairRows.reduce((sum, row) => sum + row.sameLinePairs, 0), crossLinePairs: pairRows.reduce((sum, row) => sum + row.crossLinePairs, 0), soloPairs: pairRows.reduce((sum, row) => sum + row.soloPairs, 0), technicalDuplicateSuppression: races.reduce((sum, row) => sum + row.v5.audit.technicalPairSupportDuplicateSuppression, 0), capCohort: cap.length, capResolved: cap.filter(row => row.v5.purchaseEligibility.canPurchase).length, correctPairV3: races.filter(row => row.v3PairCorrect).length, correctPairV5: races.filter(row => row.v5PairCorrect).length } }
+
 function buildSemanticUpstreamV3(rawRows, currentRows, prediction, config) {
   const valid = rawRows.filter(row => ticketKey(row)), technical = new Set(valid.map(row => scenarioTechnicalKey(row, prediction))), semantic = new Set(valid.map(row => scenarioSemanticKey(row, prediction)));
   const scenarios = scoreScenarios(valid, prediction, config, true, row => scenarioSemanticKey(row, prediction)), scenarioDecision = selectScenarioSetV2(scenarios, config), hierarchical = [];
@@ -241,7 +295,7 @@ function summarizeThree(races, kind) {
   return {
     raceCount: races.length, purchaseable: candidate ? races.filter(row => row[kind].purchaseEligibility.canPurchase).length : races.filter(row => row.control.length).length,
     ineligible: candidate ? races.filter(row => !row[kind].purchaseEligibility.canPurchase).length : 0, ticketDistribution: { ...distribution(counts), oneTo3: counts.filter(x => x >= 1 && x <= 3).length, fourTo6: counts.filter(x => x >= 4 && x <= 6).length },
-    exactHits: hits.length, generatedCorrectTerminal: confirmed.filter(row => row.generatedCorrect).length, naturalCorrectSurvived: confirmed.filter(row => kind === "v3" ? row.v3NaturalCorrect : row.naturalCorrect).length, finalCorrectSurvived: hits.length,
+    exactHits: hits.length, generatedCorrectTerminal: confirmed.filter(row => row.generatedCorrect).length, naturalCorrectSurvived: confirmed.filter(row => kind === "v5" ? row.v5NaturalCorrect : kind === "v3" ? row.v3NaturalCorrect : row.naturalCorrect).length, finalCorrectSurvived: hits.length,
     investment, return: returned, roi: investment ? returned / investment : null,
     mainTickets: candidate ? races.flatMap(row => row[kind].tickets).filter(x => x.category === "MAIN").length : null,
     coverTickets: candidate ? races.flatMap(row => row[kind].tickets).filter(x => x.category === "COVER").length : null,

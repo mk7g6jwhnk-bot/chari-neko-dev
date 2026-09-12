@@ -1,0 +1,2215 @@
+{
+  "version": "SCENARIO_CLIFF_PURCHASE_SHADOW_V5",
+  "readOnly": true,
+  "productionWriteAllowed": false,
+  "cohortSize": 114,
+  "protectedExcluded": 0,
+  "control": {
+    "raceCount": 114,
+    "purchaseable": 93,
+    "ineligible": 0,
+    "ticketDistribution": {
+      "mean": 4.543859649122807,
+      "median": 2,
+      "p90": 12.700000000000003,
+      "max": 27,
+      "sixOrLess": 92,
+      "sevenTo10": 7,
+      "elevenTo15": 5,
+      "sixteenTo20": 3,
+      "over20": 7,
+      "oneTo3": 60,
+      "fourTo6": 11
+    },
+    "exactHits": 15,
+    "generatedCorrectTerminal": 114,
+    "naturalCorrectSurvived": 47,
+    "finalCorrectSurvived": 15,
+    "investment": 51800,
+    "return": 79250,
+    "roi": 1.52992277992278,
+    "mainTickets": null,
+    "coverTickets": null,
+    "thickTickets": null,
+    "mainHits": null,
+    "coverHits": null,
+    "thickHits": null,
+    "capIneligible": null,
+    "warnings": {},
+    "highPayoutCapture": {
+      "hitsAtLeast10000": 1,
+      "returnAtLeast10000": 40920,
+      "largestPayout": 40920
+    },
+    "duplicateMerges": null,
+    "nearDuplicateScenarioMerges": null
+  },
+  "candidateV3": {
+    "raceCount": 114,
+    "purchaseable": 85,
+    "ineligible": 29,
+    "ticketDistribution": {
+      "mean": 4.798245614035087,
+      "median": 3,
+      "p90": 12.700000000000003,
+      "max": 20,
+      "sixOrLess": 86,
+      "sevenTo10": 10,
+      "elevenTo15": 11,
+      "sixteenTo20": 7,
+      "over20": 0,
+      "oneTo3": 35,
+      "fourTo6": 22
+    },
+    "exactHits": 17,
+    "generatedCorrectTerminal": 114,
+    "naturalCorrectSurvived": 47,
+    "finalCorrectSurvived": 17,
+    "investment": 54700,
+    "return": 76430,
+    "roi": 1.397257769652651,
+    "mainTickets": 473,
+    "coverTickets": 74,
+    "thickTickets": 15,
+    "mainHits": 17,
+    "coverHits": 0,
+    "thickHits": 3,
+    "capIneligible": 29,
+    "warnings": {
+      "PARTIAL_DATA_MISSING": 85,
+      "MANY_TICKETS": 9
+    },
+    "highPayoutCapture": {
+      "hitsAtLeast10000": 1,
+      "returnAtLeast10000": 40920,
+      "largestPayout": 40920
+    },
+    "duplicateMerges": 0,
+    "nearDuplicateScenarioMerges": null
+  },
+  "candidateV5": {
+    "raceCount": 114,
+    "purchaseable": 86,
+    "ineligible": 28,
+    "ticketDistribution": {
+      "mean": 4.7368421052631575,
+      "median": 3,
+      "p90": 12,
+      "max": 20,
+      "sixOrLess": 85,
+      "sevenTo10": 11,
+      "elevenTo15": 13,
+      "sixteenTo20": 5,
+      "over20": 0,
+      "oneTo3": 35,
+      "fourTo6": 22
+    },
+    "exactHits": 16,
+    "generatedCorrectTerminal": 114,
+    "naturalCorrectSurvived": 45,
+    "finalCorrectSurvived": 16,
+    "investment": 54000,
+    "return": 75310,
+    "roi": 1.3946296296296297,
+    "mainTickets": 470,
+    "coverTickets": 70,
+    "thickTickets": 12,
+    "mainHits": 16,
+    "coverHits": 0,
+    "thickHits": 3,
+    "capIneligible": 28,
+    "warnings": {
+      "PARTIAL_DATA_MISSING": 86,
+      "MANY_TICKETS": 7
+    },
+    "highPayoutCapture": {
+      "hitsAtLeast10000": 1,
+      "returnAtLeast10000": 40920,
+      "largestPayout": 40920
+    },
+    "duplicateMerges": 0,
+    "nearDuplicateScenarioMerges": null
+  },
+  "pairSummary": {
+    "pairCount": {
+      "mean": 11.008771929824562,
+      "median": 3,
+      "p90": 36,
+      "max": 36,
+      "sixOrLess": 77,
+      "sevenTo10": 4,
+      "elevenTo15": 2,
+      "sixteenTo20": 0,
+      "over20": 31
+    },
+    "pair20OverRaces": 31,
+    "plateauRaces": 62,
+    "unknownHeavyRaces": 0,
+    "sameLinePairs": 322,
+    "crossLinePairs": 1068,
+    "soloPairs": 0,
+    "technicalDuplicateSuppression": 0,
+    "capCohort": 29,
+    "capResolved": 1,
+    "correctPairV3": 62,
+    "correctPairV5": 54
+  },
+  "races": [
+    {
+      "raceKey": "20260909-61-7",
+      "v3PairCount": 9,
+      "v5PairCount": 6,
+      "v3TerminalCount": 12,
+      "v5TerminalCount": 12,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": true,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260909-48-11",
+      "v3PairCount": 3,
+      "v5PairCount": 1,
+      "v3TerminalCount": 4,
+      "v5TerminalCount": 4,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260909-61-9",
+      "v3PairCount": 1,
+      "v5PairCount": 1,
+      "v3TerminalCount": 1,
+      "v5TerminalCount": 1,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "SCORE_NOT_DISCRIMINATIVE"
+    },
+    {
+      "raceKey": "20260909-61-8",
+      "v3PairCount": 5,
+      "v5PairCount": 5,
+      "v3TerminalCount": 8,
+      "v5TerminalCount": 8,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260909-27-7",
+      "v3PairCount": 2,
+      "v5PairCount": 1,
+      "v3TerminalCount": 2,
+      "v5TerminalCount": 2,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260909-61-6",
+      "v3PairCount": 4,
+      "v5PairCount": 2,
+      "v3TerminalCount": 4,
+      "v5TerminalCount": 4,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260909-27-6",
+      "v3PairCount": 2,
+      "v5PairCount": 1,
+      "v3TerminalCount": 2,
+      "v5TerminalCount": 2,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260909-61-5",
+      "v3PairCount": 10,
+      "v5PairCount": 10,
+      "v3TerminalCount": 14,
+      "v5TerminalCount": 14,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260909-27-5",
+      "v3PairCount": 3,
+      "v5PairCount": 2,
+      "v3TerminalCount": 6,
+      "v5TerminalCount": 6,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260909-61-4",
+      "v3PairCount": 2,
+      "v5PairCount": 1,
+      "v3TerminalCount": 2,
+      "v5TerminalCount": 2,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260909-27-4",
+      "v3PairCount": 1,
+      "v5PairCount": 1,
+      "v3TerminalCount": 1,
+      "v5TerminalCount": 1,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "SCORE_NOT_DISCRIMINATIVE"
+    },
+    {
+      "raceKey": "20260909-61-3",
+      "v3PairCount": 3,
+      "v5PairCount": 1,
+      "v3TerminalCount": 4,
+      "v5TerminalCount": 4,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260909-61-2",
+      "v3PairCount": 2,
+      "v5PairCount": 2,
+      "v3TerminalCount": 2,
+      "v5TerminalCount": 2,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "SCORE_NOT_DISCRIMINATIVE"
+    },
+    {
+      "raceKey": "20260909-27-2",
+      "v3PairCount": 2,
+      "v5PairCount": 2,
+      "v3TerminalCount": 2,
+      "v5TerminalCount": 2,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "SCORE_NOT_DISCRIMINATIVE"
+    },
+    {
+      "raceKey": "20260909-61-1",
+      "v3PairCount": 1,
+      "v5PairCount": 1,
+      "v3TerminalCount": 2,
+      "v5TerminalCount": 2,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "SCORE_NOT_DISCRIMINATIVE"
+    },
+    {
+      "raceKey": "20260909-13-12",
+      "v3PairCount": 4,
+      "v5PairCount": 1,
+      "v3TerminalCount": 11,
+      "v5TerminalCount": 11,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": true,
+      "correctPairV5": false,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260909-13-11",
+      "v3PairCount": 36,
+      "v5PairCount": 36,
+      "v3TerminalCount": 180,
+      "v5TerminalCount": 180,
+      "v5Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260909-13-10",
+      "v3PairCount": 6,
+      "v5PairCount": 4,
+      "v3TerminalCount": 15,
+      "v5TerminalCount": 15,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260909-13-9",
+      "v3PairCount": 36,
+      "v5PairCount": 36,
+      "v3TerminalCount": 180,
+      "v5TerminalCount": 180,
+      "v5Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260909-13-8",
+      "v3PairCount": 4,
+      "v5PairCount": 4,
+      "v3TerminalCount": 5,
+      "v5TerminalCount": 5,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260909-13-7",
+      "v3PairCount": 30,
+      "v5PairCount": 30,
+      "v3TerminalCount": 150,
+      "v5TerminalCount": 150,
+      "v5Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260909-48-6",
+      "v3PairCount": 2,
+      "v5PairCount": 2,
+      "v3TerminalCount": 2,
+      "v5TerminalCount": 2,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "SCORE_NOT_DISCRIMINATIVE"
+    },
+    {
+      "raceKey": "20260909-48-5",
+      "v3PairCount": 36,
+      "v5PairCount": 33,
+      "v3TerminalCount": 160,
+      "v5TerminalCount": 145,
+      "v5Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260909-48-3",
+      "v3PairCount": 2,
+      "v5PairCount": 1,
+      "v3TerminalCount": 2,
+      "v5TerminalCount": 2,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260909-13-6",
+      "v3PairCount": 3,
+      "v5PairCount": 3,
+      "v3TerminalCount": 6,
+      "v5TerminalCount": 6,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "SCORE_NOT_DISCRIMINATIVE"
+    },
+    {
+      "raceKey": "20260909-13-5",
+      "v3PairCount": 6,
+      "v5PairCount": 1,
+      "v3TerminalCount": 19,
+      "v5TerminalCount": 19,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260909-13-4",
+      "v3PairCount": 30,
+      "v5PairCount": 30,
+      "v3TerminalCount": 150,
+      "v5TerminalCount": 150,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260909-13-3",
+      "v3PairCount": 2,
+      "v5PairCount": 1,
+      "v3TerminalCount": 2,
+      "v5TerminalCount": 2,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260909-13-2",
+      "v3PairCount": 4,
+      "v5PairCount": 1,
+      "v3TerminalCount": 10,
+      "v5TerminalCount": 10,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260909-44-10",
+      "v3PairCount": 3,
+      "v5PairCount": 1,
+      "v3TerminalCount": 5,
+      "v5TerminalCount": 5,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260909-84-7",
+      "v3PairCount": 36,
+      "v5PairCount": 36,
+      "v3TerminalCount": 180,
+      "v5TerminalCount": 180,
+      "v5Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260909-44-12",
+      "v3PairCount": 4,
+      "v5PairCount": 2,
+      "v3TerminalCount": 5,
+      "v5TerminalCount": 5,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260909-13-1",
+      "v3PairCount": 1,
+      "v5PairCount": 1,
+      "v3TerminalCount": 1,
+      "v5TerminalCount": 1,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "SCORE_NOT_DISCRIMINATIVE"
+    },
+    {
+      "raceKey": "20260909-21-11",
+      "v3PairCount": 36,
+      "v5PairCount": 36,
+      "v3TerminalCount": 180,
+      "v5TerminalCount": 180,
+      "v5Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260909-44-11",
+      "v3PairCount": 1,
+      "v5PairCount": 1,
+      "v3TerminalCount": 1,
+      "v5TerminalCount": 1,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "SCORE_NOT_DISCRIMINATIVE"
+    },
+    {
+      "raceKey": "20260909-21-10",
+      "v3PairCount": 5,
+      "v5PairCount": 5,
+      "v3TerminalCount": 9,
+      "v5TerminalCount": 9,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260909-21-9",
+      "v3PairCount": 36,
+      "v5PairCount": 36,
+      "v3TerminalCount": 180,
+      "v5TerminalCount": 180,
+      "v5Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260909-74-5",
+      "v3PairCount": 36,
+      "v5PairCount": 36,
+      "v3TerminalCount": 180,
+      "v5TerminalCount": 180,
+      "v5Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260909-44-8",
+      "v3PairCount": 7,
+      "v5PairCount": 6,
+      "v3TerminalCount": 11,
+      "v5TerminalCount": 11,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260909-21-7",
+      "v3PairCount": 3,
+      "v5PairCount": 1,
+      "v3TerminalCount": 6,
+      "v5TerminalCount": 6,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260909-44-7",
+      "v3PairCount": 3,
+      "v5PairCount": 3,
+      "v3TerminalCount": 5,
+      "v5TerminalCount": 5,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "SCORE_NOT_DISCRIMINATIVE"
+    },
+    {
+      "raceKey": "20260909-21-6",
+      "v3PairCount": 1,
+      "v5PairCount": 1,
+      "v3TerminalCount": 4,
+      "v5TerminalCount": 4,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "SCORE_NOT_DISCRIMINATIVE"
+    },
+    {
+      "raceKey": "20260909-37-7",
+      "v3PairCount": 2,
+      "v5PairCount": 1,
+      "v3TerminalCount": 2,
+      "v5TerminalCount": 2,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260909-44-6",
+      "v3PairCount": 3,
+      "v5PairCount": 1,
+      "v3TerminalCount": 5,
+      "v5TerminalCount": 5,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": true,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260909-44-5",
+      "v3PairCount": 5,
+      "v5PairCount": 2,
+      "v3TerminalCount": 20,
+      "v5TerminalCount": 20,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260909-21-4",
+      "v3PairCount": 1,
+      "v5PairCount": 1,
+      "v3TerminalCount": 1,
+      "v5TerminalCount": 1,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "SCORE_NOT_DISCRIMINATIVE"
+    },
+    {
+      "raceKey": "20260909-44-3",
+      "v3PairCount": 5,
+      "v5PairCount": 3,
+      "v3TerminalCount": 19,
+      "v5TerminalCount": 19,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260909-44-1",
+      "v3PairCount": 2,
+      "v5PairCount": 2,
+      "v3TerminalCount": 2,
+      "v5TerminalCount": 2,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "SCORE_NOT_DISCRIMINATIVE"
+    },
+    {
+      "raceKey": "20260909-37-6",
+      "v3PairCount": 12,
+      "v5PairCount": 12,
+      "v3TerminalCount": 44,
+      "v5TerminalCount": 44,
+      "v5Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260909-84-6",
+      "v3PairCount": 36,
+      "v5PairCount": 36,
+      "v3TerminalCount": 180,
+      "v5TerminalCount": 180,
+      "v5Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260909-37-5",
+      "v3PairCount": 36,
+      "v5PairCount": 36,
+      "v3TerminalCount": 180,
+      "v5TerminalCount": 180,
+      "v5Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260909-84-5",
+      "v3PairCount": 4,
+      "v5PairCount": 3,
+      "v3TerminalCount": 15,
+      "v5TerminalCount": 15,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260909-37-4",
+      "v3PairCount": 2,
+      "v5PairCount": 1,
+      "v3TerminalCount": 6,
+      "v5TerminalCount": 6,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260909-84-4",
+      "v3PairCount": 2,
+      "v5PairCount": 1,
+      "v3TerminalCount": 3,
+      "v5TerminalCount": 3,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260909-37-3",
+      "v3PairCount": 10,
+      "v5PairCount": 3,
+      "v3TerminalCount": 33,
+      "v5TerminalCount": 13,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": true,
+      "correctPairV5": false,
+      "correctTerminalV3": true,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260909-84-3",
+      "v3PairCount": 36,
+      "v5PairCount": 36,
+      "v3TerminalCount": 180,
+      "v5TerminalCount": 180,
+      "v5Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260909-37-2",
+      "v3PairCount": 30,
+      "v5PairCount": 30,
+      "v3TerminalCount": 124,
+      "v5TerminalCount": 124,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260909-37-1",
+      "v3PairCount": 30,
+      "v5PairCount": 30,
+      "v3TerminalCount": 150,
+      "v5TerminalCount": 150,
+      "v5Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260909-84-1",
+      "v3PairCount": 5,
+      "v5PairCount": 1,
+      "v3TerminalCount": 11,
+      "v5TerminalCount": 11,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260908-61-9",
+      "v3PairCount": 36,
+      "v5PairCount": 36,
+      "v3TerminalCount": 180,
+      "v5TerminalCount": 180,
+      "v5Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260908-27-9",
+      "v3PairCount": 2,
+      "v5PairCount": 1,
+      "v3TerminalCount": 2,
+      "v5TerminalCount": 2,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260908-61-8",
+      "v3PairCount": 6,
+      "v5PairCount": 3,
+      "v3TerminalCount": 10,
+      "v5TerminalCount": 10,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260908-27-8",
+      "v3PairCount": 36,
+      "v5PairCount": 36,
+      "v3TerminalCount": 174,
+      "v5TerminalCount": 174,
+      "v5Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260908-61-7",
+      "v3PairCount": 2,
+      "v5PairCount": 1,
+      "v3TerminalCount": 2,
+      "v5TerminalCount": 2,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260908-61-6",
+      "v3PairCount": 4,
+      "v5PairCount": 1,
+      "v3TerminalCount": 6,
+      "v5TerminalCount": 6,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": true,
+      "correctPairV5": false,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260908-27-6",
+      "v3PairCount": 9,
+      "v5PairCount": 7,
+      "v3TerminalCount": 17,
+      "v5TerminalCount": 17,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260908-61-5",
+      "v3PairCount": 7,
+      "v5PairCount": 6,
+      "v3TerminalCount": 12,
+      "v5TerminalCount": 12,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260908-61-4",
+      "v3PairCount": 4,
+      "v5PairCount": 3,
+      "v3TerminalCount": 14,
+      "v5TerminalCount": 14,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": true,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260908-27-4",
+      "v3PairCount": 2,
+      "v5PairCount": 1,
+      "v3TerminalCount": 3,
+      "v5TerminalCount": 3,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260908-61-3",
+      "v3PairCount": 2,
+      "v5PairCount": 1,
+      "v3TerminalCount": 4,
+      "v5TerminalCount": 4,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260908-61-2",
+      "v3PairCount": 4,
+      "v5PairCount": 4,
+      "v3TerminalCount": 12,
+      "v5TerminalCount": 12,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260908-27-2",
+      "v3PairCount": 24,
+      "v5PairCount": 21,
+      "v3TerminalCount": 120,
+      "v5TerminalCount": 105,
+      "v5Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260908-61-1",
+      "v3PairCount": 2,
+      "v5PairCount": 1,
+      "v3TerminalCount": 2,
+      "v5TerminalCount": 2,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260908-13-12",
+      "v3PairCount": 27,
+      "v5PairCount": 27,
+      "v3TerminalCount": 83,
+      "v5TerminalCount": 83,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260908-26-11",
+      "v3PairCount": 24,
+      "v5PairCount": 24,
+      "v3TerminalCount": 120,
+      "v5TerminalCount": 120,
+      "v5Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260908-13-11",
+      "v3PairCount": 36,
+      "v5PairCount": 6,
+      "v3TerminalCount": 180,
+      "v5TerminalCount": 30,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": true,
+      "correctPairV5": false,
+      "correctTerminalV3": true,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260908-26-10",
+      "v3PairCount": 2,
+      "v5PairCount": 2,
+      "v3TerminalCount": 3,
+      "v5TerminalCount": 3,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "SCORE_NOT_DISCRIMINATIVE"
+    },
+    {
+      "raceKey": "20260908-13-10",
+      "v3PairCount": 36,
+      "v5PairCount": 36,
+      "v3TerminalCount": 180,
+      "v5TerminalCount": 180,
+      "v5Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260908-13-9",
+      "v3PairCount": 3,
+      "v5PairCount": 3,
+      "v3TerminalCount": 6,
+      "v5TerminalCount": 6,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260908-26-8",
+      "v3PairCount": 6,
+      "v5PairCount": 3,
+      "v3TerminalCount": 20,
+      "v5TerminalCount": 20,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260908-13-8",
+      "v3PairCount": 7,
+      "v5PairCount": 7,
+      "v3TerminalCount": 7,
+      "v5TerminalCount": 7,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260908-26-7",
+      "v3PairCount": 36,
+      "v5PairCount": 36,
+      "v3TerminalCount": 180,
+      "v5TerminalCount": 180,
+      "v5Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260908-26-6",
+      "v3PairCount": 2,
+      "v5PairCount": 2,
+      "v3TerminalCount": 3,
+      "v5TerminalCount": 3,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "SCORE_NOT_DISCRIMINATIVE"
+    },
+    {
+      "raceKey": "20260908-13-6",
+      "v3PairCount": 36,
+      "v5PairCount": 36,
+      "v3TerminalCount": 180,
+      "v5TerminalCount": 180,
+      "v5Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260908-26-5",
+      "v3PairCount": 2,
+      "v5PairCount": 2,
+      "v3TerminalCount": 2,
+      "v5TerminalCount": 2,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260908-13-5",
+      "v3PairCount": 30,
+      "v5PairCount": 30,
+      "v3TerminalCount": 142,
+      "v5TerminalCount": 142,
+      "v5Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260908-26-4",
+      "v3PairCount": 6,
+      "v5PairCount": 4,
+      "v3TerminalCount": 16,
+      "v5TerminalCount": 16,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": true,
+      "correctPairV5": false,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260908-13-4",
+      "v3PairCount": 3,
+      "v5PairCount": 3,
+      "v3TerminalCount": 6,
+      "v5TerminalCount": 6,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260908-26-3",
+      "v3PairCount": 36,
+      "v5PairCount": 36,
+      "v3TerminalCount": 180,
+      "v5TerminalCount": 180,
+      "v5Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260908-13-3",
+      "v3PairCount": 36,
+      "v5PairCount": 36,
+      "v3TerminalCount": 180,
+      "v5TerminalCount": 180,
+      "v5Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260908-26-2",
+      "v3PairCount": 8,
+      "v5PairCount": 5,
+      "v3TerminalCount": 24,
+      "v5TerminalCount": 15,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260908-44-12",
+      "v3PairCount": 8,
+      "v5PairCount": 8,
+      "v3TerminalCount": 8,
+      "v5TerminalCount": 8,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260908-13-2",
+      "v3PairCount": 2,
+      "v5PairCount": 2,
+      "v3TerminalCount": 2,
+      "v5TerminalCount": 2,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "SCORE_NOT_DISCRIMINATIVE"
+    },
+    {
+      "raceKey": "20260908-21-11",
+      "v3PairCount": 36,
+      "v5PairCount": 36,
+      "v3TerminalCount": 180,
+      "v5TerminalCount": 180,
+      "v5Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260908-13-1",
+      "v3PairCount": 4,
+      "v5PairCount": 2,
+      "v3TerminalCount": 15,
+      "v5TerminalCount": 15,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260908-44-11",
+      "v3PairCount": 2,
+      "v5PairCount": 2,
+      "v3TerminalCount": 2,
+      "v5TerminalCount": 2,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260908-44-9",
+      "v3PairCount": 4,
+      "v5PairCount": 1,
+      "v3TerminalCount": 6,
+      "v5TerminalCount": 6,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260908-21-8",
+      "v3PairCount": 2,
+      "v5PairCount": 1,
+      "v3TerminalCount": 2,
+      "v5TerminalCount": 2,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260908-44-8",
+      "v3PairCount": 3,
+      "v5PairCount": 1,
+      "v3TerminalCount": 13,
+      "v5TerminalCount": 13,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260908-44-7",
+      "v3PairCount": 1,
+      "v5PairCount": 1,
+      "v3TerminalCount": 1,
+      "v5TerminalCount": 1,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "SCORE_NOT_DISCRIMINATIVE"
+    },
+    {
+      "raceKey": "20260908-21-6",
+      "v3PairCount": 3,
+      "v5PairCount": 1,
+      "v3TerminalCount": 5,
+      "v5TerminalCount": 5,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260908-44-6",
+      "v3PairCount": 4,
+      "v5PairCount": 2,
+      "v3TerminalCount": 6,
+      "v5TerminalCount": 6,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260908-21-5",
+      "v3PairCount": 6,
+      "v5PairCount": 4,
+      "v3TerminalCount": 6,
+      "v5TerminalCount": 6,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260908-44-4",
+      "v3PairCount": 36,
+      "v5PairCount": 36,
+      "v3TerminalCount": 180,
+      "v5TerminalCount": 180,
+      "v5Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260908-21-3",
+      "v3PairCount": 11,
+      "v5PairCount": 11,
+      "v3TerminalCount": 16,
+      "v5TerminalCount": 16,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260908-44-2",
+      "v3PairCount": 3,
+      "v5PairCount": 3,
+      "v3TerminalCount": 6,
+      "v5TerminalCount": 6,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "SCORE_NOT_DISCRIMINATIVE"
+    },
+    {
+      "raceKey": "20260908-44-1",
+      "v3PairCount": 2,
+      "v5PairCount": 1,
+      "v3TerminalCount": 2,
+      "v5TerminalCount": 2,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260908-37-7",
+      "v3PairCount": 36,
+      "v5PairCount": 36,
+      "v3TerminalCount": 180,
+      "v5TerminalCount": 180,
+      "v5Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260908-37-6",
+      "v3PairCount": 5,
+      "v5PairCount": 1,
+      "v3TerminalCount": 20,
+      "v5TerminalCount": 20,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "PAIR_RELATIVE_CLIFF",
+      "plateauDiagnosis": "CLEAR_PAIR_CLIFF"
+    },
+    {
+      "raceKey": "20260908-37-5",
+      "v3PairCount": 2,
+      "v5PairCount": 2,
+      "v3TerminalCount": 2,
+      "v5TerminalCount": 2,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "SCORE_NOT_DISCRIMINATIVE"
+    },
+    {
+      "raceKey": "20260908-37-4",
+      "v3PairCount": 30,
+      "v5PairCount": 30,
+      "v3TerminalCount": 150,
+      "v5TerminalCount": 150,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260908-37-3",
+      "v3PairCount": 36,
+      "v5PairCount": 36,
+      "v3TerminalCount": 180,
+      "v5TerminalCount": 180,
+      "v5Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260908-37-2",
+      "v3PairCount": 30,
+      "v5PairCount": 30,
+      "v3TerminalCount": 150,
+      "v5TerminalCount": 150,
+      "v5Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "correctPairV3": true,
+      "correctPairV5": true,
+      "correctTerminalV3": true,
+      "correctTerminalV5": true,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    },
+    {
+      "raceKey": "20260908-37-1",
+      "v3PairCount": 4,
+      "v5PairCount": 4,
+      "v3TerminalCount": 4,
+      "v5TerminalCount": 4,
+      "v5Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "correctPairV3": false,
+      "correctPairV5": false,
+      "correctTerminalV3": false,
+      "correctTerminalV5": false,
+      "pairReductionReason": "NO_PAIR_CLIFF",
+      "plateauDiagnosis": "GENUINELY_MULTI_PAIR"
+    }
+  ],
+  "source": "existing sealed read endpoints",
+  "requested": 114,
+  "readFailures": [],
+  "productionWrite": 0
+}

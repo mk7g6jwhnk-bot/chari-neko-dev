@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { boundaryScores, buildScenarioCliffShadow, buildScenarioCliffShadowV2, buildScenarioCliffShadowV3, DEFAULT_CONFIG, evaluateScenarioCliffFourWay, evaluateScenarioCliffShadow, evaluateScenarioCliffThreeWay, scenarioSemanticKey, scenarioTechnicalKey, selectNaturalBoundary, VERSION } from "../research/scenario-cliff-shadow.mjs";
+import { boundaryScores, buildScenarioCliffShadow, buildScenarioCliffShadowV2, buildScenarioCliffShadowV3, buildScenarioCliffShadowV5, DEFAULT_CONFIG, evaluateScenarioCliffFourWay, evaluateScenarioCliffShadow, evaluateScenarioCliffThreeWay, evaluateScenarioCliffV5, scenarioSemanticKey, scenarioTechnicalKey, selectNaturalBoundary, VERSION } from "../research/scenario-cliff-shadow.mjs";
 
 const terminal = (order, score, scenario = "LEADER_HOLD", extra = {}) => ({ order, purchaseRejectCode: "ADOPTED", dominantBranchId: scenario, terminalModelWeight: score, naturalConvergenceScore: score, branchFit: score, secondFamilyRelativeToBest: score, thirdFamilyRelativeToBest: score, ...extra });
 const record = rows => ({ raceKey: "20260901-01-1", sealed: { researchPrediction: { performanceSchemaVersion: "PURCHASE_PERFORMANCE_V2", standardPurchasePlan: [{ order: [1, 2, 3], betClass: "MAIN" }], purchase: { audit: { terminalLifecycleAudit: { rows } } } } }, result: { result: { status: "confirmed", finishOrder: [1, 2, 4], payout: 12340 } } });
@@ -118,4 +118,15 @@ assert.equal(flatV3.upstream.source, "EXPLOSION_GUARD_CURRENT_NATURAL", "flat ca
 assert.equal(flatV3.upstream.naturalTerminalCount, broad.length, "guard preserves sealed natural set rather than arbitrary pruning");
 const fourWay = evaluateScenarioCliffFourWay([record([terminal([1, 2, 4], .9)]), protectedRecord]);
 assert.equal(fourWay.cohortSize, 1); assert.equal(fourWay.protectedExcluded, 1); assert.equal(fourWay.candidateV3.exactHits, 1);
+
+const lines = [{ id: "A", members: [{ number: 1, lineId: "A", lineOrder: 1, officialScore: 90, roleScores: { first: 9, second: 4 } }, { number: 2, lineId: "A", lineOrder: 2, officialScore: 88, roleScores: { first: 4, second: 9 } }] }, { id: "B", members: [{ number: 3, lineId: "B", lineOrder: 1, officialScore: 80, roleScores: { first: 6, second: 5 } }] }];
+const v5Record = record([terminal([1, 2, 3], .9, "LEAD-A"), terminal([1, 3, 2], .7, "LEAD-A"), terminal([3, 2, 1], .4, "MAKURI-B")]); v5Record.sealed.researchPrediction.lines = lines;
+const v5 = buildScenarioCliffShadowV5(v5Record);
+assert.equal(v5.version, "SCENARIO_CLIFF_PURCHASE_SHADOW_V5");
+assert.ok(v5.pairLayer.pairs.some(pair => pair.relation === "SAME_LINE") && v5.pairLayer.pairs.some(pair => pair.relation === "CROSS_LINE"));
+assert.ok(v5.pairLayer.pairs.every(pair => pair.pairScoreBreakdown && Array.isArray(pair.pairCounterEvidence)), "pair score and counter evidence are explicit");
+assert.equal(v5.audit.resultFieldsUsed.length, 0);
+assert.throws(() => buildScenarioCliffShadowV5(record([terminal([1, 2, 3], .9, "A", { result: "win" })])), /result-aware/);
+const v5Evaluation = evaluateScenarioCliffV5([v5Record, protectedRecord]);
+assert.equal(v5Evaluation.cohortSize, 1); assert.equal(v5Evaluation.protectedExcluded, 1);
 console.log("PASS scenario relative score / cliff shadow");
