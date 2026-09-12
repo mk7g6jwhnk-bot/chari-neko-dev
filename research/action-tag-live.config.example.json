@@ -1,0 +1,5 @@
+{
+  "port": 8767,
+  "metadataFile": "C:/Research/action-source/cohort-metadata.jsonl",
+  "recordsDirectory": "C:/Research/action-source/records"
+}

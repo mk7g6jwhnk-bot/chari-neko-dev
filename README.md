@@ -1,3 +1,14 @@
+# ローカル Action Research review
+
+1. このフォルダ（`chari-neko-dev-new`）で `npm run research:action-review` を実行。npmがなければ `research-action-review.cmd` をダブルクリック。
+2. ブラウザで http://localhost:8767 を開く。
+3. 確認者IDを入力して「未確認レース」を押す。
+4. 1Rを選び、取得済みの公式映像URLがあれば開く。
+5. 対象選手を確認しQ1〜Q4に回答。分からない項目はUNKNOWN、Q5は必要時のみ。
+6. 映像URL／観測メモを入れて「保存して次へ」。UでUNKNOWN、Ctrl+Enterで保存。再起動後も再開できる。
+
+**現在は自動取得元が未設定で実収集0R。** productionへの接続には403〜502を確実に除外できる固定cohort metadataが必要です。設定・保存形式は [運用手順](research/action-tag-live-operation.md)、今回の到達点は [監査レポート](research/action-tag-live-collection-report.md) を参照。
+
 # KEIRIN v0.16.0 audit patch
 
 対象: current `main` of `mk7g6jwhnk-bot/chari-neko-dev`.

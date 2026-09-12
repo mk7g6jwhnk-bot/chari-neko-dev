@@ -28,12 +28,12 @@ export function submitRaceReview(reviewCase, answers = {}, options = {}) {
     if (!answer) { if (question.optional) continue; throw new Error(`RACE_REVIEW_ANSWER_REQUIRED:${question.id}`); }
     if (!question.values.includes(answer.value)) throw new Error(`RACE_REVIEW_VALUE_INVALID:${question.id}:${answer.value}`);
     const mapping = mapAnswer(question.id, answer.value);
-    const original = reviewCase.automaticCandidates.find(tag => tag.stateType === mapping.stateType) || null;
+    const original = reviewCase.automaticCandidates.find(tag => tag.stateType === mapping.stateType && tag.riderId === question.targetRiderId) || null;
     const status = answer.value === "UNKNOWN" ? "UNKNOWN" : answer.status;
     const disagreement = Boolean(original && original.stateValue !== mapping.stateValue && mapping.stateValue !== "UNKNOWN");
     const targetRiderId = question.targetRiderId || reviewCase.initiativeCandidate?.riderId || `RACE:${reviewCase.raceKey}`;
     const evidenceSource = `${source}#${question.id}`;
-    const tag = createActionTag({ raceKey: reviewCase.raceKey, riderId: targetRiderId, stateType: mapping.stateType, stateValue: mapping.stateValue, observationTime: reviewedAt, evidenceType, evidenceSource, sourceHash: hashEvidence(`${evidenceSource}|${reviewCase.raceKey}`), confidence: STATUS_CONFIDENCE[status], reviewer: reviewerId, verificationStatus: status, collectionLane: "MANUAL_REVIEW", predictionSealedAt: reviewCase.preRace.predictionSealedAt, resultObservedAt: options.resultObservedAt || null, createdAt: reviewedAt, reviewerNote: answer.note || options.reviewerNote || null, context: targetContext(question.id, reviewCase) });
+    const tag = createActionTag({ raceKey: reviewCase.raceKey, riderId: targetRiderId, stateType: mapping.stateType, stateValue: mapping.stateValue, observationTime: reviewedAt, evidenceType, evidenceSource, sourceHash: hashEvidence(`${evidenceSource}|${reviewCase.raceKey}`), confidence: STATUS_CONFIDENCE[status], reviewer: reviewerId, verificationStatus: status, collectionLane: "MANUAL_REVIEW", predictionSealedAt: reviewCase.preRace.predictionSealedAt, resultObservedAt: options.resultObservedAt || null, createdAt: reviewedAt, reviewerNote: answer.note || options.reviewerNote || null, context: question.targetContext || targetContext(question.id, reviewCase) });
     tags.push(tag);
     let contradictionTagId = null;
     if (disagreement) {

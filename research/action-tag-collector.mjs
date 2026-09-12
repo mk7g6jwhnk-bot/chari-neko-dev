@@ -23,6 +23,7 @@ export function createActionTagCollector({ store, reviewQueue, maxBufferedRaces 
 }
 
 export function generateObservationCandidates(record, { now = () => new Date().toISOString() } = {}) {
+  if (!record?.raceKey || isFinalTest(record)) return [];
   const tags = [], createdAt = now(), common = { raceKey: record.raceKey, predictionSealedAt: record.predictionSealedAt || record.sealed?.predictionSealedAt, resultObservedAt: record.resultObservedAt || record.result?.observedAt, createdAt };
   tags.push(...observeActionTags(record, { now }));
   for (const observation of record.directActionObservations || []) {

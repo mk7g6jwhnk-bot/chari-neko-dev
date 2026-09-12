@@ -73,7 +73,10 @@ export function transitionActionTag(tag, transition = {}) {
 }
 
 export function hashEvidence(value) { return crypto.createHash("sha256").update(String(value)).digest("hex"); }
-export function isFinalTest(input) { return [input?.sequence, input?.recordNumber, input?.comparisonNumber, input?.validationIndex].some(value => Number(value) >= 403 && Number(value) <= 502); }
+export function isFinalTest(input) {
+  return [input, input?.sealed, input?.metadata, input?.cohort].some(row =>
+    [row?.sequence, row?.recordNumber, row?.comparisonNumber, row?.validationIndex].some(value => Number(value) >= 403 && Number(value) <= 502));
+}
 function deterministicTagId(input) { return `AT1-${hashEvidence([input.raceKey, input.riderId, input.stateType, input.stateValue, input.observationTime, input.lane, input.evidenceHash].join("|")) .slice(0, 20)}`; }
 function directEvidence(value) { return ["OFFICIAL_RACE_TELEMETRY", "OFFICIAL_VIDEO_TAG", "OFFICIAL_RESULT_EVENT", "OFFICIAL_RACE_MARKER", "VALIDATED_MANUAL_OBSERVATION", "VALIDATED_DUAL_REVIEW"].includes(String(value).toUpperCase()); }
 function normalizeContext(value) {
