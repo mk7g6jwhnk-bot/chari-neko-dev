@@ -2,6 +2,7 @@ import configJson from "./scenario-cliff-shadow-config.json" with { type: "json"
 
 export const VERSION = "SCENARIO_CLIFF_PURCHASE_SHADOW_V1";
 export const VERSION_V2 = "SCENARIO_CLIFF_PURCHASE_SHADOW_V2";
+export const VERSION_V3 = "SCENARIO_CLIFF_PURCHASE_SHADOW_V3";
 export const DEFAULT_CONFIG = Object.freeze(configJson);
 const NATURAL_CODES = new Set(["ADOPTED", "THIRD_VARIANT_AMBIGUITY", "THIRD_VARIANT_BOUNDARY"]);
 const RESULT_KEYS = new Set(["result", "finishOrder", "payout", "hit", "return", "roi", "actual"]);
@@ -112,6 +113,52 @@ export function buildScenarioCliffShadowV2(record, config = DEFAULT_CONFIG) {
   };
 }
 
+export function scenarioTechnicalKey(row, prediction = {}) {
+  const provenance = provenanceFor(row, prediction);
+  return [provenance.branchId, row.dominantBranchId, row.scenarioProvenanceId].filter(Boolean).map(value => String(value).toUpperCase()).join("|") || "UNKNOWN";
+}
+
+export function scenarioSemanticKey(row, prediction = {}) {
+  const provenance = provenanceFor(row, prediction);
+  const field = (...values) => String(values.find(value => value !== null && value !== undefined && value !== "") || "UNKNOWN").toUpperCase();
+  return [semanticBranch(provenance.branchType || row.scenarioFamilyId || row.dominantBranchId), field(provenance.initiativeLineId, provenance.initiativeFamily, row.initiativeFamily), field(provenance.attackOutcome, provenance.attackFamily, row.attackOutcome), field(provenance.banteResponse, row.banteResponse), field(provenance.lineTracking, provenance.lineState, row.lineTracking), field(provenance.otherLineSurvival, row.otherLineSurvival)].join("|");
+}
+
+export function buildScenarioCliffShadowV3(record, config = DEFAULT_CONFIG) {
+  const prediction = sealedPrediction(record), raw = allLifecycleRows(prediction), currentNatural = lifecycleRows(prediction);
+  const upstream = buildSemanticUpstreamV3(raw, currentNatural, prediction, config);
+  const audit = prediction?.purchase?.audit || prediction?.audit?.purchaseAudit || prediction?.audit || {};
+  const shadowPrediction = { ...prediction, purchase: { ...(prediction.purchase || {}), audit: { ...audit, terminalLifecycleAudit: upstream.rows.map(row => ({ ...row, purchaseRejectCode: "ADOPTED" })) } } };
+  const selected = buildScenarioCliffShadowV2({ raceKey: record?.raceKey, prediction: shadowPrediction }, config);
+  return { ...selected, version: VERSION_V3, upstream: { ...upstream.audit, finalSelectorInputCount: upstream.rows.length, finalPurchaseCount: selected.tickets.length }, flow: { ...selected.flow, rawTerminalCount: raw.length, naturalTerminalCount: upstream.rows.length, upstreamNaturalTerminalCount: upstream.rows.length }, audit: { ...selected.audit, ...upstream.duplicates, resultFieldsUsed: [] } };
+}
+
+export function evaluateScenarioCliffFourWay(records, config = DEFAULT_CONFIG) {
+  const safe = (records || []).filter(record => !isProtected(record));
+  const races = safe.map(record => { const prediction = sealedPrediction(record), finish = confirmedFinish(record), v3 = buildScenarioCliffShadowV3(record, config), finishKey = finish?.join("-"); return { raceKey: record.raceKey, control: controlPlan(record), v1: buildScenarioCliffShadow(record, config), v2: buildScenarioCliffShadowV2(record, config), v3, finish, generatedCorrect: Boolean(finishKey && allLifecycleRows(prediction).some(row => ticketKey(row) === finishKey)), naturalCorrect: Boolean(finishKey && lifecycleRows(prediction).some(row => ticketKey(row) === finishKey)), v3NaturalCorrect: Boolean(finishKey && v3.flow.stageOrders.natural.includes(finishKey)), payout: finish ? finite(record?.result?.result?.payout ?? record?.result?.payout, 0) : null }; });
+  return { version: VERSION_V3, readOnly: true, productionWriteAllowed: false, cohortSize: races.length, protectedExcluded: (records || []).length - safe.length, control: summarizeThree(races, "control"), candidateV1: summarizeThree(races, "v1"), candidateV2: summarizeThree(races, "v2"), candidateV3: summarizeThree(races, "v3"), v2CapCauses: diagnoseCapCauses(races, "v2"), v3CapCauses: diagnoseCapCauses(races, "v3"), v2SmallCauses: diagnoseSmallCauses(races, "v2"), v3SmallCauses: diagnoseSmallCauses(races, "v3"), v3Warnings: countValues(races.flatMap(row => row.v3.warnings)), v3IneligibleReasons: countValues(races.map(row => row.v3.purchaseEligibility.reason).filter(Boolean)), v3Natural: distribution(races.map(row => row.v3.upstream.naturalTerminalCount)), v3SingleScenarioRaces: races.filter(row => row.v3.upstream.naturalScenarioCount === 1).length, semanticScenarioMerges: races.reduce((sum, row) => sum + row.v3.audit.semanticScenarioMerges, 0), technicalDuplicatesSuppressed: races.reduce((sum, row) => sum + row.v3.audit.technicalDuplicatesSuppressed, 0), technicalDuplicateObservations: races.reduce((sum, row) => sum + row.v3.audit.technicalDuplicateObservations, 0), races: races.map(row => ({ ...compactThreeRace(row), v3Tickets: row.v3.tickets.length, v3Eligibility: row.v3.purchaseEligibility, v3Upstream: row.v3.upstream, v3NaturalCorrect: row.v3NaturalCorrect, exactHitV3: Boolean(row.finish && row.v3.tickets.some(x => ticketKey(x) === row.finish.join("-"))) })) };
+}
+
+function buildSemanticUpstreamV3(rawRows, currentRows, prediction, config) {
+  const valid = rawRows.filter(row => ticketKey(row)), technical = new Set(valid.map(row => scenarioTechnicalKey(row, prediction))), semantic = new Set(valid.map(row => scenarioSemanticKey(row, prediction)));
+  const scenarios = scoreScenarios(valid, prediction, config, true, row => scenarioSemanticKey(row, prediction)), scenarioDecision = selectScenarioSetV2(scenarios, config), hierarchical = [];
+  for (const scenario of scenarioDecision.rows) {
+    const firsts = groupCandidates(scenario.terminals, row => String(row.order[0]), row => firstKnownFinite(row.firstRelativeScore, row.terminalRelativeScore), config.scenarioBoundary);
+    for (const first of firsts.rows) {
+      const pairs = groupCandidates(first.items, row => row.order.slice(0, 2).join("-"), row => firstKnownFinite(row.pairRelativeScore, row.terminalRelativeScore), config.terminalBoundary);
+      for (const pair of pairs.rows) hierarchical.push(...selectNaturalBoundary(pair.items, config.terminalBoundary, "terminalRelativeScore").rows.map(row => row.original));
+    }
+  }
+  const current = uniqueByTicket(currentRows), hierarchicalRows = uniqueByTicket(hierarchical), proposed = uniqueByTicket([...current, ...hierarchicalRows]);
+  const useProposed = proposed.length > current.length && proposed.length <= config.maximumTickets && current.length <= 3, rows = useProposed ? proposed : current;
+  const firsts = new Set(valid.map(row => normalizeOrder(row.order)?.[0]).filter(Number.isFinite)), pairs = new Set(valid.map(row => normalizeOrder(row.order)?.slice(0, 2).join("-")).filter(Boolean)), thirds = new Set(valid.map(row => normalizeOrder(row.order)?.[2]).filter(Number.isFinite)), byScenario = countValues(rows.map(row => scenarioSemanticKey(row, prediction))), merged = Math.max(0, technical.size - semantic.size);
+  const duplicateObservations = scenarios.reduce((sum, scenario) => sum + scenario.technicalDuplicateCount, 0);
+  return { rows, audit: { rawBranchCount: new Set(valid.map(row => String(row.dominantBranchId || "UNKNOWN"))).size, rawProvenanceCount: new Set(valid.map(row => String(row.scenarioProvenanceId || "UNKNOWN"))).size, technicalScenarioCount: technical.size, semanticScenarioCount: semantic.size, scenarioFamilyCountBefore: technical.size, scenarioFamilyCountAfter: semantic.size, firstCandidateCount: firsts.size, pairCandidateCount: pairs.size, thirdCandidateCount: thirds.size, rawTerminalCount: valid.length, currentNaturalTerminalCount: current.length, proposedNaturalTerminalCount: proposed.length, naturalTerminalCount: rows.length, naturalScenarioCount: Object.keys(byScenario).length, terminalsPerScenario: byScenario, semanticScenarioDiversity: valid.length ? semantic.size / valid.length : 0, technicalDuplicationRatio: technical.size ? merged / technical.size : 0, thirdDispersion: pairs.size ? valid.length / pairs.size : 0, source: useProposed ? "INDEPENDENT_HIERARCHICAL_REEVALUATION" : "EXPLOSION_GUARD_CURRENT_NATURAL", earlyThirdPruning: false }, duplicates: { semanticScenarioMerges: merged, technicalDuplicatesSuppressed: merged, technicalDuplicateObservations: duplicateObservations, technicalDuplicationRatio: technical.size ? merged / technical.size : 0 } };
+}
+
+function groupCandidates(rows, keyFn, scoreFn, rule) { const groups = new Map(); for (const row of rows) { const key = keyFn(row); if (!groups.has(key)) groups.set(key, []); groups.get(key).push(row); } return selectNaturalBoundary([...groups].map(([key, items]) => ({ key, items, score: Math.max(...items.map(item => finite(scoreFn(item), 0))) })), rule, "score"); }
+function semanticBranch(value) { const raw = String(value || "UNKNOWN").toUpperCase(); if (/^LEAD(?:ER)?(?:[-_:]|$)/.test(raw)) return "LEADER_HOLD"; if (/^BANTE(?:[-_:]|$)/.test(raw)) return "BANTE_SASHI"; if (/^MAKURI(?:[-_:]|$)/.test(raw)) return "MAKURI_SUCCESS"; if (/BATTLE/.test(raw)) return "LEAD_BATTLE"; if (/SEPARAT|COLLAPSE/.test(raw)) return "LINE_SEPARATION"; if (/OTHER/.test(raw)) return "OTHER_LINE_SURVIVAL"; return raw; }
+
 export function evaluateScenarioCliffThreeWay(records, config = DEFAULT_CONFIG) {
   const safe = (records || []).filter(record => !isProtected(record));
   const races = safe.map(record => {
@@ -194,7 +241,7 @@ function summarizeThree(races, kind) {
   return {
     raceCount: races.length, purchaseable: candidate ? races.filter(row => row[kind].purchaseEligibility.canPurchase).length : races.filter(row => row.control.length).length,
     ineligible: candidate ? races.filter(row => !row[kind].purchaseEligibility.canPurchase).length : 0, ticketDistribution: { ...distribution(counts), oneTo3: counts.filter(x => x >= 1 && x <= 3).length, fourTo6: counts.filter(x => x >= 4 && x <= 6).length },
-    exactHits: hits.length, generatedCorrectTerminal: confirmed.filter(row => row.generatedCorrect).length, naturalCorrectSurvived: confirmed.filter(row => row.naturalCorrect).length, finalCorrectSurvived: hits.length,
+    exactHits: hits.length, generatedCorrectTerminal: confirmed.filter(row => row.generatedCorrect).length, naturalCorrectSurvived: confirmed.filter(row => kind === "v3" ? row.v3NaturalCorrect : row.naturalCorrect).length, finalCorrectSurvived: hits.length,
     investment, return: returned, roi: investment ? returned / investment : null,
     mainTickets: candidate ? races.flatMap(row => row[kind].tickets).filter(x => x.category === "MAIN").length : null,
     coverTickets: candidate ? races.flatMap(row => row[kind].tickets).filter(x => x.category === "COVER").length : null,
@@ -243,11 +290,11 @@ function diagnoseSmallCauses(races, kind) {
 function summarizeFlows(flows) { const keys = ["rawScenarioCount", "strongScenarioCandidateCount", "scenarioCliffCount", "rawTerminalCount", "naturalTerminalCount", "terminalCliffCount", "preMergeTicketCount", "exactMergeTicketCount", "nearConsolidationTicketCount", "allocatedTicketCount", "mainCount", "coverCount", "finalPurchaseCount"]; return Object.fromEntries(keys.map(key => [key, distribution(flows.map(flow => Number(flow[key] || 0)))])); }
 function compactThreeRace(row) { const survive = candidate => { const key = row.finish?.join("-"); return key ? Object.fromEntries(Object.entries(candidate.flow?.stageOrders || {}).map(([stage, orders]) => [stage, orders.includes(key)])) : {}; }; return { raceKey: row.raceKey, controlTickets: row.control.length, v1Tickets: row.v1.tickets.length, v2Tickets: row.v2.tickets.length, v1Eligibility: row.v1.purchaseEligibility, v2Eligibility: row.v2.purchaseEligibility, v2Flow: { ...row.v2.flow, stageOrders: undefined }, correctSurvivalV2: survive(row.v2), exactHitControl: Boolean(row.finish && row.control.some(x => ticketKey(x) === row.finish.join("-"))), exactHitV1: Boolean(row.finish && row.v1.tickets.some(x => ticketKey(x) === row.finish.join("-"))), exactHitV2: Boolean(row.finish && row.v2.tickets.some(x => ticketKey(x) === row.finish.join("-"))), payout: row.payout }; }
 
-function scoreScenarios(rows, prediction, config, preserveUnknown = false) {
+function scoreScenarios(rows, prediction, config, preserveUnknown = false, identityFn = null) {
   const groups = new Map();
   for (const row of rows) {
     const provenance = provenanceFor(row, prediction);
-    const identity = independentIdentity(row, provenance);
+    const identity = identityFn ? identityFn(row, provenance) : independentIdentity(row, provenance);
     if (!groups.has(identity)) groups.set(identity, { scenarioId: identity, evidenceFingerprint: evidenceFingerprint(row, provenance), rows: [], fingerprints: new Set(), technicalDuplicateCount: 0 });
     const group = groups.get(identity), fingerprint = evidenceFingerprint(row, provenance);
     if (group.fingerprints.has(fingerprint)) group.technicalDuplicateCount += 1;

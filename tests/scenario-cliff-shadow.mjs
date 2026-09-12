@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { boundaryScores, buildScenarioCliffShadow, buildScenarioCliffShadowV2, DEFAULT_CONFIG, evaluateScenarioCliffShadow, evaluateScenarioCliffThreeWay, selectNaturalBoundary, VERSION } from "../research/scenario-cliff-shadow.mjs";
+import { boundaryScores, buildScenarioCliffShadow, buildScenarioCliffShadowV2, buildScenarioCliffShadowV3, DEFAULT_CONFIG, evaluateScenarioCliffFourWay, evaluateScenarioCliffShadow, evaluateScenarioCliffThreeWay, scenarioSemanticKey, scenarioTechnicalKey, selectNaturalBoundary, VERSION } from "../research/scenario-cliff-shadow.mjs";
 
 const terminal = (order, score, scenario = "LEADER_HOLD", extra = {}) => ({ order, purchaseRejectCode: "ADOPTED", dominantBranchId: scenario, terminalModelWeight: score, naturalConvergenceScore: score, branchFit: score, secondFamilyRelativeToBest: score, thirdFamilyRelativeToBest: score, ...extra });
 const record = rows => ({ raceKey: "20260901-01-1", sealed: { researchPrediction: { performanceSchemaVersion: "PURCHASE_PERFORMANCE_V2", standardPurchasePlan: [{ order: [1, 2, 3], betClass: "MAIN" }], purchase: { audit: { terminalLifecycleAudit: { rows } } } } }, result: { result: { status: "confirmed", finishOrder: [1, 2, 4], payout: 12340 } } });
@@ -93,4 +93,29 @@ assert.ok(v2Unknown.scenarios[0].unknownEvidenceCount > 0);
 
 const threeWay = evaluateScenarioCliffThreeWay([record([terminal([1, 2, 4], .9)]), protectedRecord]);
 assert.equal(threeWay.cohortSize, 1); assert.equal(threeWay.protectedExcluded, 1); assert.equal(threeWay.candidateV2.exactHits, 1);
+
+assert.equal(scenarioSemanticKey(terminal([1, 2, 3], .9, "LEAD-A")).split("|")[0], "LEADER_HOLD", "technical suffix is absent from semantic family");
+assert.notEqual(scenarioTechnicalKey(terminal([1, 2, 3], .9, "LEAD-A")), scenarioTechnicalKey(terminal([1, 2, 3], .9, "LEAD-B")), "technical identities remain auditable");
+const v3Rows = [
+  terminal([1, 2, 3], 1, "LEAD-A"),
+  terminal([1, 2, 4], .95, "LEAD-B", { purchaseRejectCode: "THIRD_VARIANT_REJECTED" }),
+  terminal([1, 3, 2], .92, "LEAD-A", { purchaseRejectCode: "TERMINAL_BOUNDARY" }),
+  terminal([4, 5, 1], .9, "MAKURI-A", { purchaseRejectCode: "TERMINAL_BOUNDARY" })
+];
+const v3 = buildScenarioCliffShadowV3(record(v3Rows));
+assert.equal(v3.version, "SCENARIO_CLIFF_PURCHASE_SHADOW_V3");
+assert.ok(v3.upstream.firstCandidateCount > 1 && v3.upstream.pairCandidateCount > 1 && v3.upstream.thirdCandidateCount > 1, "first/pair/third are independently enumerated before natural selection");
+assert.equal(v3.upstream.earlyThirdPruning, false, "third variants are not pruned before pair evaluation");
+assert.equal(v3.audit.semanticScenarioMerges >= 1, true, "semantic scenario merge suppresses technical split support");
+assert.equal(v3.upstream.firstCandidateCount >= 2, true, "all first candidates are independently inspected before natural boundary");
+assert.equal(v3.upstream.pairCandidateCount >= 3, true, "all pairs are independently inspected");
+assert.equal(v3.upstream.thirdCandidateCount >= 3, true, "thirds are inspected before pruning");
+assert.equal(v3.upstream.earlyThirdPruning, false);
+assert.equal(v3.audit.resultFieldsUsed.length, 0);
+assert.throws(() => buildScenarioCliffShadowV3(record([terminal([1, 2, 3], .9, "A", { result: "win" })])), /result-aware/);
+const flatV3 = buildScenarioCliffShadowV3(record(broad));
+assert.equal(flatV3.upstream.source, "EXPLOSION_GUARD_CURRENT_NATURAL", "flat candidate explosion is never force-sliced");
+assert.equal(flatV3.upstream.naturalTerminalCount, broad.length, "guard preserves sealed natural set rather than arbitrary pruning");
+const fourWay = evaluateScenarioCliffFourWay([record([terminal([1, 2, 4], .9)]), protectedRecord]);
+assert.equal(fourWay.cohortSize, 1); assert.equal(fourWay.protectedExcluded, 1); assert.equal(fourWay.candidateV3.exactHits, 1);
 console.log("PASS scenario relative score / cliff shadow");
