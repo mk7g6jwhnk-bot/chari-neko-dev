@@ -1,0 +1,7 @@
+Read-only regression commands run against the existing Priority 1 backend workspace, 2026-09-12 JST.
+node tests/canonical-purchase-eligibility.mjs: PASS
+node tests/purchase-performance.mjs: PASS
+node tests/purchase-performance-v2-envelope.mjs: PASS
+node tests/purchase-performance-audit.mjs: PASS
+node tests/auto-race-lifecycle.mjs: PASS
+No backend source or production Volume modified.

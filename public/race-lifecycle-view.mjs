@@ -1,8 +1,11 @@
 // Presentation only: saved lifecycle takes precedence over browser last-known metadata.
 export function raceLifecycleView(race={},saved=null,now=Date.now()){
+  const resultState=String(saved?.resultLifecycleState||race.resultLifecycleState||saved?.lifecycleStatus||race.lifecycleStatus||saved?.state||race.autoStatus||race.resultStatus||'').toUpperCase();
+  if(resultState==='RESULT_CONFIRMED')return{phase:'completed',label:'終了',className:'danger'};
   const state=String(saved?.state||race.autoStatus||'').toUpperCase(),collection=String(saved?.collectionState||'').toUpperCase();
   const confirmed=Boolean(saved?.resultObservedAt)||['VERIFIED','RESULT_ATTACHED','RESULT_CONFIRMED','COMPARED','RESULT_ONLY_RESEARCH','COMPLETED'].includes(state)||['RESULT_ATTACHED','COMPARISON_COMPLETE'].includes(collection)||race.resultConfirmed===true||race.resultStatus==='RESULT_CONFIRMED';
   if(confirmed)return{phase:'completed',label:'終了',className:'danger'};
+  if(['RESULT_PENDING','RESULT_RETRYING','RESULT_FETCH_FAILED'].includes(resultState))return{phase:'result-pending',label:{RESULT_PENDING:'結果待ち',RESULT_RETRYING:'結果再試行中',RESULT_FETCH_FAILED:'結果取得失敗'}[resultState],className:'warning'};
   const start=raceTime(race.date,saved?.scheduledStartTime||race.scheduledStart||race.startTime),deadline=raceTime(race.date,race.deadline);
   // A passed betting deadline alone does not mean the race has started.
   if(Number.isFinite(start)&&start>now)return{phase:'pre-race',label:Number.isFinite(deadline)&&deadline<=now?'締切済み・発走前':Number.isFinite(deadline)&&deadline-now<=15*60000?'締切間近':'未発走',className:Number.isFinite(deadline)&&deadline-now<=15*60000?'warning':''};

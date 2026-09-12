@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#08111f">
   <title>チャリ猫</title>
   <link rel="manifest" href="manifest.json?v=50">
-  <link rel="stylesheet" href="styles.css?v=50">
+  <link rel="stylesheet" href="styles.css?v=51">
 </head>
 <body>
 <header class="appHeader">
@@ -21,25 +21,19 @@
 <main id="app" aria-live="polite">
   <section id="home" class="screen active">
     <section class="hero card homeHero"><div><small>TODAY'S RACES</small><h1>今日のレース</h1><p>開催確認から予想・保存まで、ここから進めます。</p></div><button id="todayKeirin" class="primary">競輪を開く</button></section>
-    <section class="card compact recommendationPanel">
-      <div class="sectionHead"><div><small>今日のおすすめ</small><h2>おすすめレース</h2></div><span id="recommendationCount" class="pill">0件</span></div>
-      <div class="recommendationControls">
-        <div class="sportChecks" aria-label="競技フィルタ">
-          <label><input id="sportKeirin" type="checkbox" checked>競輪</label>
-          <label class="disabled"><input type="checkbox" disabled>ボート</label>
-          <label class="disabled"><input type="checkbox" disabled>オート</label>
-          <label class="disabled"><input type="checkbox" disabled>競馬</label>
-        </div>
-        <label class="recommendationLimit">表示件数<select id="recommendationLimit"><option value="3">3件</option><option value="5" selected>5件</option><option value="10">10件</option></select></label>
-      </div>
-      <div id="todayRecommendations" class="recommendationList"></div>
-      <p class="muted recommendationFootnote">現在は競輪のみ接続済み。今後、同じ欄で競技を横断して絞り込めます。</p>
-    </section>
-    <section id="homePredictionStatus" class="card compact"><div class="sectionHead"><h2>今日の予想状況</h2><span class="pill">確認中</span></div></section>
-    <section id="homeHighlights" class="card compact"><div class="sectionHead"><h2>注目レース</h2><span class="pill">集計中</span></div><p class="muted">購入可・注意・高配当・荒れ気配を整理します。</p></section>
-    <section id="homeRecentResults" class="card compact"><div class="sectionHead"><h2>最近の結果</h2><button id="openPredictionHistory" class="secondary" type="button">予想履歴を開く</button></div><p class="muted">保存済みの自動予想と公式結果を読み取ります。</p></section>
-    <section id="homeSystemStatus" class="card compact"><div class="sectionHead"><h2>研究・システム状態</h2><span class="pill">確認中</span></div><p class="muted">保存済み状態を読み取っています。</p><details><summary>運用詳細</summary><div id="homeOperationalDetails" class="metaGrid"></div></details></section>
+    <section class="card compact"><div class="sectionHead"><h2>直近レース</h2><span id="recommendationCount" class="pill">確認中</span></div><div id="todayRecommendations" class="stack"></div></section>
+    <section class="card compact"><h2>開催中会場</h2><div id="homeVenues" class="stack"></div></section>
+    <div class="homePageLinks"><button id="openPerformance" class="primary">成績を見る</button><button id="openPredictionHistory" class="secondary">予想履歴を開く</button></div>
     <section class="card compact"><div class="sectionHead"><h2>保存済み予想</h2><span id="savedCount" class="pill">0件</span></div><div id="savedList" class="stack"></div></section>
+  </section>
+
+  <section id="performance" class="screen">
+    <div class="pageTitle"><div><small>PURCHASE PERFORMANCE</small><h1>成績</h1></div><button id="refreshPerformance" class="secondary" type="button">集計を更新</button></div>
+    <div id="predictionPerformance"></div>
+    <h2>収集・研究状況</h2>
+    <p class="muted">production collectorの保存済み状態です。</p>
+    <section id="collectorProgress" class="card compact"><div class="sectionHead"><h2>自動収集</h2><span class="pill">確認中</span></div><p class="muted">保存済みの収集状態を読み取っています。</p></section>
+    <details class="card compact"><summary>稼働・保存状態の詳細</summary><section id="homeSystemStatus"></section></details>
   </section>
 
   <section id="history" class="screen">
@@ -53,15 +47,11 @@
     <div class="pageTitle"><div><small>KEIRIN</small><h1>今日の競輪</h1></div><span id="meetingCount" class="pill">0会場</span></div>
     <nav class="raceTabs" aria-label="競輪表示切替">
       <button id="tabToday" class="raceTab active" type="button">今日のレース</button>
-      <button id="tabScreening" class="raceTab" type="button">一次選別</button>
       <button id="tabBattle" class="raceTab" type="button">勝負レース</button>
       <button id="tabVenues" class="raceTab" type="button">会場一覧</button>
     </nav>
-    <section class="card compact meetingTools"><label>開催日<input id="raceDate" type="date"></label><div class="meetingToolButtons"><button id="bulkRefresh" class="primary" type="button">一括更新</button><button id="runScreening" class="secondary" type="button">次の6Rを一次選別</button><button id="runDeepDiveTop" class="secondary" type="button">上位3Rを深掘り</button><button id="runDirectDeepDive" class="secondary" type="button">5R直接深掘り</button><button id="reloadMeetings" class="secondary" type="button">開催情報を再取得</button></div><small id="bulkRefreshStatus" class="bulkRefreshStatus">全96Rは走査せず、締切が近い3〜6Rで一次選別します。3R揃わない場合は3R直接深掘り比較へ切り替えます。評価表示は現在未校正・検証対象です。</small></section>
-    <section id="collectorProgress" class="card compact"><div class="sectionHead"><h2>自動収集</h2><span class="pill">確認中</span></div><p class="muted">保存済みの収集状態を読み取っています。</p></section>
-    <section id="predictionPerformance" class="card compact"><div class="sectionHead"><h2>予想成績</h2><span class="pill">集計中</span></div><p class="muted">正式な発走前sealと確定結果を集計しています。</p></section>
+    <section class="card compact meetingTools"><label>開催日<input id="raceDate" type="date"></label><div class="meetingToolButtons"><button id="reloadMeetings" class="secondary" type="button">開催情報を再取得</button><button id="meetingsPerformance" class="secondary" type="button">成績・収集状況</button></div><small id="bulkRefreshStatus" class="bulkRefreshStatus">保存済み開催一覧からレースを選べます。</small></section>
     <div id="todayRaceList" class="todayRaceList"></div>
-    <div id="screeningRaceList" class="todayRaceList hidden"></div>
     <div id="battleRaceList" class="todayRaceList hidden"></div>
     <div id="meetingList" class="stack hidden"></div>
   </section>
@@ -78,7 +68,7 @@
     <section class="card compact"><div class="sectionHead"><h2>公式ライン</h2><span id="oddsStatus" class="pill">オッズ未取得</span></div><div id="officialLine" class="lineBox">予想実行時に取得します</div></section>
     <section id="detailRatings" class="card compact hidden"></section>
     <section id="predictionDetail" class="card compact hidden"></section>
-    <section id="chatPredictionImport" class="card compact"></section>
+    <details class="card compact"><summary>チャット比較（手動検証）</summary><section id="chatPredictionImport"></section></details>
     <section id="savedPrediction" class="card compact hidden"></section>
     <section id="sealedVerificationPanel" class="card compact hidden"></section>
     <section id="detailResultPanel" class="card hidden"></section>
@@ -99,5 +89,5 @@
   <section id="loading" class="screen"><section class="card loadingCard"><div class="spinner"></div><h1 id="loadingTitle">取得中</h1><p id="loadingMessage">公式データを確認しています。</p></section></section>
   <section id="error" class="screen"><section class="card errorCard"><div class="errorIcon">!</div><h1 id="errorTitle">取得失敗</h1><p id="errorMessage"></p><button id="retryBtn" class="primary">再試行</button><button id="errorHome" class="secondary">ホームへ</button></section></section>
 </main>
-<script type="module" src="app.mjs?v=62"></script>
+<script type="module" src="app.mjs?v=63"></script>
 </body></html>

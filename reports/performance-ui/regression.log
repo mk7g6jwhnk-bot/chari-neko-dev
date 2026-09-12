@@ -1,0 +1,34 @@
+priority1-production-ui
+PASS Priority 1 UI/manual fetch/lifecycle guards
+
+race-lifecycle-view
+PASS pre-race / deadline / pending / confirmed / saved precedence / UTC / list index mapping
+
+collector-status-view-v253
+A PASS auto/research current
+B PASS auto failed, research current
+C PASS auto current, research failed
+D PASS both failed, atomic last-known components
+E PASS both failed, no cache
+F PASS process health is separated from storage-blocked operation
+G PASS server-side last-known outranks unavailable
+H PASS browser cache is not misclassified as server last-known
+PASS date rollover preserves cumulative research only
+PASS old mixed schema is not reused
+PASS cache write failure never discards current status
+
+keirin-collector-status-v254
+PASS collector status proxy actual-zero/partial-failure/observation-time separation
+PASS compact snapshot keeps canonical lifecycle and V2 counts
+
+keirin-performance-null-ui-v257
+PASS performance unknown/zero UI separation and daily collection fields
+
+keirin-sealed-result-read
+OK sealed result proxy/client tests
+
+keirin-sealed-prediction-reuse
+OK sealed prediction reuse validation tests
+
+performance-page
+PASS performance periods, canonical projection/categories, hit exclusions, lifecycle, last-known/stale, null/zero, removed controls
