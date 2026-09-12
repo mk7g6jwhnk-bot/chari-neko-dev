@@ -1,0 +1,3076 @@
+{
+  "version": "SCENARIO_CLIFF_PURCHASE_SHADOW_V4",
+  "readOnly": true,
+  "productionWriteAllowed": false,
+  "cohortSize": 114,
+  "protectedExcluded": 0,
+  "control": {
+    "raceCount": 114,
+    "purchaseable": 93,
+    "ineligible": 0,
+    "ticketDistribution": {
+      "mean": 4.543859649122807,
+      "median": 2,
+      "p90": 12.700000000000003,
+      "max": 27,
+      "sixOrLess": 92,
+      "sevenTo10": 7,
+      "elevenTo15": 5,
+      "sixteenTo20": 3,
+      "over20": 7,
+      "oneTo3": 60,
+      "fourTo6": 11
+    },
+    "exactHits": 15,
+    "generatedCorrectTerminal": 114,
+    "naturalCorrectSurvived": 47,
+    "finalCorrectSurvived": 15,
+    "investment": 51800,
+    "return": 79250,
+    "roi": 1.52992277992278,
+    "mainTickets": null,
+    "coverTickets": null,
+    "thickTickets": null,
+    "mainHits": null,
+    "coverHits": null,
+    "thickHits": null,
+    "capIneligible": null,
+    "warnings": {},
+    "highPayoutCapture": {
+      "hitsAtLeast10000": 1,
+      "returnAtLeast10000": 40920,
+      "largestPayout": 40920
+    },
+    "duplicateMerges": null,
+    "nearDuplicateScenarioMerges": null
+  },
+  "candidateV2": {
+    "raceCount": 114,
+    "purchaseable": 85,
+    "ineligible": 29,
+    "ticketDistribution": {
+      "mean": 3.43859649122807,
+      "median": 2,
+      "p90": 8.700000000000003,
+      "max": 20,
+      "sixOrLess": 100,
+      "sevenTo10": 5,
+      "elevenTo15": 3,
+      "sixteenTo20": 6,
+      "over20": 0,
+      "oneTo3": 54,
+      "fourTo6": 17
+    },
+    "exactHits": 17,
+    "generatedCorrectTerminal": 114,
+    "naturalCorrectSurvived": 47,
+    "finalCorrectSurvived": 17,
+    "investment": 39200,
+    "return": 76430,
+    "roi": 1.9497448979591836,
+    "mainTickets": 341,
+    "coverTickets": 51,
+    "thickTickets": 11,
+    "mainHits": 17,
+    "coverHits": 0,
+    "thickHits": 1,
+    "capIneligible": 29,
+    "warnings": {
+      "PARTIAL_DATA_MISSING": 85,
+      "MANY_TICKETS": 6
+    },
+    "highPayoutCapture": {
+      "hitsAtLeast10000": 1,
+      "returnAtLeast10000": 40920,
+      "largestPayout": 40920
+    },
+    "duplicateMerges": 0,
+    "nearDuplicateScenarioMerges": 0
+  },
+  "candidateV3": {
+    "raceCount": 114,
+    "purchaseable": 85,
+    "ineligible": 29,
+    "ticketDistribution": {
+      "mean": 4.798245614035087,
+      "median": 3,
+      "p90": 12.700000000000003,
+      "max": 20,
+      "sixOrLess": 86,
+      "sevenTo10": 10,
+      "elevenTo15": 11,
+      "sixteenTo20": 7,
+      "over20": 0,
+      "oneTo3": 35,
+      "fourTo6": 22
+    },
+    "exactHits": 17,
+    "generatedCorrectTerminal": 114,
+    "naturalCorrectSurvived": 47,
+    "finalCorrectSurvived": 17,
+    "investment": 54700,
+    "return": 76430,
+    "roi": 1.397257769652651,
+    "mainTickets": 473,
+    "coverTickets": 74,
+    "thickTickets": 15,
+    "mainHits": 17,
+    "coverHits": 0,
+    "thickHits": 3,
+    "capIneligible": 29,
+    "warnings": {
+      "PARTIAL_DATA_MISSING": 85,
+      "MANY_TICKETS": 9
+    },
+    "highPayoutCapture": {
+      "hitsAtLeast10000": 1,
+      "returnAtLeast10000": 40920,
+      "largestPayout": 40920
+    },
+    "duplicateMerges": 0,
+    "nearDuplicateScenarioMerges": null
+  },
+  "candidateV4": {
+    "raceCount": 114,
+    "purchaseable": 90,
+    "ineligible": 24,
+    "ticketDistribution": {
+      "mean": 5.412280701754386,
+      "median": 3,
+      "p90": 14.700000000000003,
+      "max": 20,
+      "sixOrLess": 81,
+      "sevenTo10": 11,
+      "elevenTo15": 12,
+      "sixteenTo20": 10,
+      "over20": 0,
+      "oneTo3": 35,
+      "fourTo6": 22
+    },
+    "exactHits": 19,
+    "generatedCorrectTerminal": 114,
+    "naturalCorrectSurvived": 34,
+    "finalCorrectSurvived": 19,
+    "investment": 61700,
+    "return": 81730,
+    "roi": 1.3246353322528364,
+    "mainTickets": 498,
+    "coverTickets": 119,
+    "thickTickets": 41,
+    "mainHits": 18,
+    "coverHits": 1,
+    "thickHits": 5,
+    "capIneligible": 24,
+    "warnings": {
+      "PARTIAL_DATA_MISSING": 90,
+      "MANY_TICKETS": 12
+    },
+    "highPayoutCapture": {
+      "hitsAtLeast10000": 1,
+      "returnAtLeast10000": 40920,
+      "largestPayout": 40920
+    },
+    "duplicateMerges": 0,
+    "nearDuplicateScenarioMerges": null
+  },
+  "pairDiagnostics": {
+    "pairCount": {
+      "mean": 12.192982456140351,
+      "median": 4,
+      "p90": 36,
+      "max": 36,
+      "sixOrLess": 71,
+      "sevenTo10": 9,
+      "elevenTo15": 2,
+      "sixteenTo20": 0,
+      "over20": 32
+    },
+    "pairsPerScenario": {
+      "mean": 6.298245614035087,
+      "median": 4,
+      "p90": 12,
+      "max": 18,
+      "sixOrLess": 75,
+      "sevenTo10": 14,
+      "elevenTo15": 14,
+      "sixteenTo20": 11,
+      "over20": 0
+    },
+    "thirdCandidatesPerPair": {
+      "mean": 2.677172518839185,
+      "median": 2,
+      "p90": 5,
+      "max": 5,
+      "sixOrLess": 114,
+      "sevenTo10": 0,
+      "elevenTo15": 0,
+      "sixteenTo20": 0,
+      "over20": 0
+    },
+    "thirdDiffusePairs": 248,
+    "samePairVariationReduction": 2500,
+    "scenarioPairSupportMerges": 0,
+    "trioOrderDiagnostics": 3090,
+    "capCohort": 29,
+    "capResolved": 5
+  },
+  "v4IneligibleReasons": {
+    "NATURAL_SELECTION_EXCEEDS_CAP": 24
+  },
+  "races": [
+    {
+      "raceKey": "20260909-61-7",
+      "v3NaturalTickets": 12,
+      "v4NaturalTickets": 12,
+      "v3Tickets": 12,
+      "v4Tickets": 12,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 9,
+      "diffusePairCount": 1,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 12,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-48-11",
+      "v3NaturalTickets": 4,
+      "v4NaturalTickets": 4,
+      "v3Tickets": 4,
+      "v4Tickets": 4,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 3,
+      "diffusePairCount": 1,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 4,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-61-9",
+      "v3NaturalTickets": 1,
+      "v4NaturalTickets": 1,
+      "v3Tickets": 1,
+      "v4Tickets": 1,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 1,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 0,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": true,
+      "exactHitV4": true
+    },
+    {
+      "raceKey": "20260909-61-8",
+      "v3NaturalTickets": 8,
+      "v4NaturalTickets": 8,
+      "v3Tickets": 8,
+      "v4Tickets": 8,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 5,
+      "diffusePairCount": 3,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 8,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-27-7",
+      "v3NaturalTickets": 2,
+      "v4NaturalTickets": 2,
+      "v3Tickets": 2,
+      "v4Tickets": 2,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 2,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 2,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-61-6",
+      "v3NaturalTickets": 4,
+      "v4NaturalTickets": 4,
+      "v3Tickets": 4,
+      "v4Tickets": 4,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 4,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 4,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-27-6",
+      "v3NaturalTickets": 2,
+      "v4NaturalTickets": 2,
+      "v3Tickets": 2,
+      "v4Tickets": 2,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 2,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 2,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-61-5",
+      "v3NaturalTickets": 14,
+      "v4NaturalTickets": 14,
+      "v3Tickets": 14,
+      "v4Tickets": 14,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 10,
+      "diffusePairCount": 4,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 14,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-27-5",
+      "v3NaturalTickets": 6,
+      "v4NaturalTickets": 6,
+      "v3Tickets": 6,
+      "v4Tickets": 6,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 3,
+      "diffusePairCount": 2,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 4,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-61-4",
+      "v3NaturalTickets": 2,
+      "v4NaturalTickets": 2,
+      "v3Tickets": 2,
+      "v4Tickets": 2,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 2,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 2,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-27-4",
+      "v3NaturalTickets": 1,
+      "v4NaturalTickets": 1,
+      "v3Tickets": 1,
+      "v4Tickets": 1,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 1,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 0,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-61-3",
+      "v3NaturalTickets": 4,
+      "v4NaturalTickets": 4,
+      "v3Tickets": 3,
+      "v4Tickets": 3,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 3,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 1,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 2,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-61-2",
+      "v3NaturalTickets": 2,
+      "v4NaturalTickets": 2,
+      "v3Tickets": 2,
+      "v4Tickets": 2,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 2,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 2,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": true,
+      "exactHitV4": true
+    },
+    {
+      "raceKey": "20260909-27-2",
+      "v3NaturalTickets": 2,
+      "v4NaturalTickets": 2,
+      "v3Tickets": 2,
+      "v4Tickets": 2,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 2,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 2,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-61-1",
+      "v3NaturalTickets": 2,
+      "v4NaturalTickets": 2,
+      "v3Tickets": 2,
+      "v4Tickets": 2,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 1,
+      "diffusePairCount": 1,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 0,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-13-12",
+      "v3NaturalTickets": 11,
+      "v4NaturalTickets": 11,
+      "v3Tickets": 6,
+      "v4Tickets": 6,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 4,
+      "diffusePairCount": 1,
+      "thirdVariationReduction": 5,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 2,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": true,
+      "exactHitV4": true
+    },
+    {
+      "raceKey": "20260909-13-11",
+      "v3NaturalTickets": 180,
+      "v4NaturalTickets": 155,
+      "v3Tickets": 0,
+      "v4Tickets": 0,
+      "v3Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v4Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "pairCount": 36,
+      "diffusePairCount": 11,
+      "thirdVariationReduction": 25,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 155,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": true,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-13-10",
+      "v3NaturalTickets": 15,
+      "v4NaturalTickets": 15,
+      "v3Tickets": 10,
+      "v4Tickets": 10,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 6,
+      "diffusePairCount": 1,
+      "thirdVariationReduction": 5,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 2,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-13-9",
+      "v3NaturalTickets": 180,
+      "v4NaturalTickets": 121,
+      "v3Tickets": 0,
+      "v4Tickets": 0,
+      "v3Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v4Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "pairCount": 36,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 59,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 120,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": true,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-13-8",
+      "v3NaturalTickets": 5,
+      "v4NaturalTickets": 5,
+      "v3Tickets": 5,
+      "v4Tickets": 5,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 4,
+      "diffusePairCount": 1,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 4,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-13-7",
+      "v3NaturalTickets": 150,
+      "v4NaturalTickets": 65,
+      "v3Tickets": 0,
+      "v4Tickets": 14,
+      "v3Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 30,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 85,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 54,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": true,
+      "exactHitV4": true
+    },
+    {
+      "raceKey": "20260909-48-6",
+      "v3NaturalTickets": 2,
+      "v4NaturalTickets": 2,
+      "v3Tickets": 2,
+      "v4Tickets": 2,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 2,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 2,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-48-5",
+      "v3NaturalTickets": 160,
+      "v4NaturalTickets": 123,
+      "v3Tickets": 0,
+      "v4Tickets": 0,
+      "v3Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v4Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "pairCount": 36,
+      "diffusePairCount": 15,
+      "thirdVariationReduction": 37,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 121,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": true,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-48-3",
+      "v3NaturalTickets": 2,
+      "v4NaturalTickets": 2,
+      "v3Tickets": 2,
+      "v4Tickets": 2,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 2,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 2,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-13-6",
+      "v3NaturalTickets": 6,
+      "v4NaturalTickets": 6,
+      "v3Tickets": 5,
+      "v4Tickets": 5,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 3,
+      "diffusePairCount": 2,
+      "thirdVariationReduction": 1,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 4,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-13-5",
+      "v3NaturalTickets": 19,
+      "v4NaturalTickets": 19,
+      "v3Tickets": 3,
+      "v4Tickets": 3,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 6,
+      "diffusePairCount": 4,
+      "thirdVariationReduction": 2,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 10,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-13-4",
+      "v3NaturalTickets": 150,
+      "v4NaturalTickets": 70,
+      "v3Tickets": 20,
+      "v4Tickets": 20,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 30,
+      "diffusePairCount": 10,
+      "thirdVariationReduction": 80,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 70,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-13-3",
+      "v3NaturalTickets": 2,
+      "v4NaturalTickets": 2,
+      "v3Tickets": 2,
+      "v4Tickets": 2,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 2,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 2,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-13-2",
+      "v3NaturalTickets": 10,
+      "v4NaturalTickets": 10,
+      "v3Tickets": 10,
+      "v4Tickets": 10,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 4,
+      "diffusePairCount": 3,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 8,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-44-10",
+      "v3NaturalTickets": 5,
+      "v4NaturalTickets": 5,
+      "v3Tickets": 5,
+      "v4Tickets": 5,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 3,
+      "diffusePairCount": 1,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 4,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-84-7",
+      "v3NaturalTickets": 180,
+      "v4NaturalTickets": 66,
+      "v3Tickets": 0,
+      "v4Tickets": 17,
+      "v3Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 36,
+      "diffusePairCount": 4,
+      "thirdVariationReduction": 114,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 63,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": true,
+      "exactHitV4": true
+    },
+    {
+      "raceKey": "20260909-44-12",
+      "v3NaturalTickets": 5,
+      "v4NaturalTickets": 5,
+      "v3Tickets": 5,
+      "v4Tickets": 5,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 4,
+      "diffusePairCount": 1,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 4,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-13-1",
+      "v3NaturalTickets": 1,
+      "v4NaturalTickets": 1,
+      "v3Tickets": 1,
+      "v4Tickets": 1,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 1,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 0,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-21-11",
+      "v3NaturalTickets": 180,
+      "v4NaturalTickets": 90,
+      "v3Tickets": 0,
+      "v4Tickets": 0,
+      "v3Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v4Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "pairCount": 36,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 90,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 90,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-44-11",
+      "v3NaturalTickets": 1,
+      "v4NaturalTickets": 1,
+      "v3Tickets": 1,
+      "v4Tickets": 1,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 1,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 0,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-21-10",
+      "v3NaturalTickets": 9,
+      "v4NaturalTickets": 9,
+      "v3Tickets": 9,
+      "v4Tickets": 9,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 5,
+      "diffusePairCount": 4,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 9,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": true,
+      "exactHitV4": true
+    },
+    {
+      "raceKey": "20260909-21-9",
+      "v3NaturalTickets": 180,
+      "v4NaturalTickets": 83,
+      "v3Tickets": 0,
+      "v4Tickets": 0,
+      "v3Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v4Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "pairCount": 36,
+      "diffusePairCount": 5,
+      "thirdVariationReduction": 97,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 74,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": true,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-74-5",
+      "v3NaturalTickets": 180,
+      "v4NaturalTickets": 75,
+      "v3Tickets": 0,
+      "v4Tickets": 0,
+      "v3Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v4Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "pairCount": 36,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 105,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 66,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-44-8",
+      "v3NaturalTickets": 11,
+      "v4NaturalTickets": 11,
+      "v3Tickets": 10,
+      "v4Tickets": 10,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 7,
+      "diffusePairCount": 2,
+      "thirdVariationReduction": 1,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 10,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-21-7",
+      "v3NaturalTickets": 6,
+      "v4NaturalTickets": 6,
+      "v3Tickets": 5,
+      "v4Tickets": 5,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 3,
+      "diffusePairCount": 2,
+      "thirdVariationReduction": 1,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 4,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-44-7",
+      "v3NaturalTickets": 5,
+      "v4NaturalTickets": 5,
+      "v3Tickets": 5,
+      "v4Tickets": 5,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 3,
+      "diffusePairCount": 2,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 4,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-21-6",
+      "v3NaturalTickets": 4,
+      "v4NaturalTickets": 4,
+      "v3Tickets": 3,
+      "v4Tickets": 3,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 1,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 1,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 0,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-37-7",
+      "v3NaturalTickets": 2,
+      "v4NaturalTickets": 2,
+      "v3Tickets": 2,
+      "v4Tickets": 2,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 2,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 2,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-44-6",
+      "v3NaturalTickets": 5,
+      "v4NaturalTickets": 5,
+      "v3Tickets": 5,
+      "v4Tickets": 5,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 3,
+      "diffusePairCount": 1,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 4,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-44-5",
+      "v3NaturalTickets": 20,
+      "v4NaturalTickets": 20,
+      "v3Tickets": 15,
+      "v4Tickets": 15,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 5,
+      "diffusePairCount": 3,
+      "thirdVariationReduction": 5,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 10,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-21-4",
+      "v3NaturalTickets": 1,
+      "v4NaturalTickets": 1,
+      "v3Tickets": 1,
+      "v4Tickets": 1,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 1,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 0,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-44-3",
+      "v3NaturalTickets": 19,
+      "v4NaturalTickets": 19,
+      "v3Tickets": 13,
+      "v4Tickets": 13,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 5,
+      "diffusePairCount": 2,
+      "thirdVariationReduction": 6,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 4,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-44-1",
+      "v3NaturalTickets": 2,
+      "v4NaturalTickets": 2,
+      "v3Tickets": 2,
+      "v4Tickets": 2,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 2,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 2,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-37-6",
+      "v3NaturalTickets": 44,
+      "v4NaturalTickets": 28,
+      "v3Tickets": 0,
+      "v4Tickets": 0,
+      "v3Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v4Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "pairCount": 12,
+      "diffusePairCount": 2,
+      "thirdVariationReduction": 16,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 21,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": true,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-84-6",
+      "v3NaturalTickets": 180,
+      "v4NaturalTickets": 129,
+      "v3Tickets": 0,
+      "v4Tickets": 0,
+      "v3Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v4Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "pairCount": 36,
+      "diffusePairCount": 2,
+      "thirdVariationReduction": 51,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 129,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": true,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-37-5",
+      "v3NaturalTickets": 180,
+      "v4NaturalTickets": 52,
+      "v3Tickets": 0,
+      "v4Tickets": 0,
+      "v3Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v4Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "pairCount": 36,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 128,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 50,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-84-5",
+      "v3NaturalTickets": 15,
+      "v4NaturalTickets": 15,
+      "v3Tickets": 12,
+      "v4Tickets": 12,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 4,
+      "diffusePairCount": 2,
+      "thirdVariationReduction": 3,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 4,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": true,
+      "exactHitV4": true
+    },
+    {
+      "raceKey": "20260909-37-4",
+      "v3NaturalTickets": 6,
+      "v4NaturalTickets": 6,
+      "v3Tickets": 4,
+      "v4Tickets": 4,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 2,
+      "diffusePairCount": 1,
+      "thirdVariationReduction": 2,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 2,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-84-4",
+      "v3NaturalTickets": 3,
+      "v4NaturalTickets": 3,
+      "v3Tickets": 3,
+      "v4Tickets": 3,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 2,
+      "diffusePairCount": 1,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 2,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": true,
+      "exactHitV4": true
+    },
+    {
+      "raceKey": "20260909-37-3",
+      "v3NaturalTickets": 33,
+      "v4NaturalTickets": 19,
+      "v3Tickets": 19,
+      "v4Tickets": 16,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 10,
+      "diffusePairCount": 4,
+      "thirdVariationReduction": 14,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 13,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": true,
+      "exactHitV4": true
+    },
+    {
+      "raceKey": "20260909-84-3",
+      "v3NaturalTickets": 180,
+      "v4NaturalTickets": 112,
+      "v3Tickets": 0,
+      "v4Tickets": 0,
+      "v3Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v4Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "pairCount": 36,
+      "diffusePairCount": 9,
+      "thirdVariationReduction": 68,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 106,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-37-2",
+      "v3NaturalTickets": 124,
+      "v4NaturalTickets": 90,
+      "v3Tickets": 20,
+      "v4Tickets": 8,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 30,
+      "diffusePairCount": 6,
+      "thirdVariationReduction": 34,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 84,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": true,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-37-1",
+      "v3NaturalTickets": 150,
+      "v4NaturalTickets": 65,
+      "v3Tickets": 0,
+      "v4Tickets": 0,
+      "v3Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v4Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "pairCount": 30,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 85,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 54,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": true,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260909-84-1",
+      "v3NaturalTickets": 11,
+      "v4NaturalTickets": 11,
+      "v3Tickets": 9,
+      "v4Tickets": 9,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 5,
+      "diffusePairCount": 1,
+      "thirdVariationReduction": 2,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 2,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-61-9",
+      "v3NaturalTickets": 180,
+      "v4NaturalTickets": 105,
+      "v3Tickets": 0,
+      "v4Tickets": 0,
+      "v3Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v4Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "pairCount": 36,
+      "diffusePairCount": 8,
+      "thirdVariationReduction": 75,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 104,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": true,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-27-9",
+      "v3NaturalTickets": 2,
+      "v4NaturalTickets": 2,
+      "v3Tickets": 2,
+      "v4Tickets": 2,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 2,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 2,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-61-8",
+      "v3NaturalTickets": 10,
+      "v4NaturalTickets": 10,
+      "v3Tickets": 10,
+      "v4Tickets": 10,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 6,
+      "diffusePairCount": 4,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 2,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-27-8",
+      "v3NaturalTickets": 174,
+      "v4NaturalTickets": 103,
+      "v3Tickets": 0,
+      "v4Tickets": 20,
+      "v3Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 36,
+      "diffusePairCount": 2,
+      "thirdVariationReduction": 71,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 100,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-61-7",
+      "v3NaturalTickets": 2,
+      "v4NaturalTickets": 2,
+      "v3Tickets": 2,
+      "v4Tickets": 2,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 2,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 2,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-61-6",
+      "v3NaturalTickets": 6,
+      "v4NaturalTickets": 6,
+      "v3Tickets": 4,
+      "v4Tickets": 4,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 4,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 2,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 2,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": true,
+      "exactHitV4": true
+    },
+    {
+      "raceKey": "20260908-27-6",
+      "v3NaturalTickets": 17,
+      "v4NaturalTickets": 17,
+      "v3Tickets": 15,
+      "v4Tickets": 15,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 9,
+      "diffusePairCount": 2,
+      "thirdVariationReduction": 2,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 8,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-61-5",
+      "v3NaturalTickets": 12,
+      "v4NaturalTickets": 12,
+      "v3Tickets": 10,
+      "v4Tickets": 10,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 7,
+      "diffusePairCount": 1,
+      "thirdVariationReduction": 2,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 9,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-61-4",
+      "v3NaturalTickets": 14,
+      "v4NaturalTickets": 14,
+      "v3Tickets": 12,
+      "v4Tickets": 12,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 4,
+      "diffusePairCount": 2,
+      "thirdVariationReduction": 2,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 4,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-27-4",
+      "v3NaturalTickets": 3,
+      "v4NaturalTickets": 3,
+      "v3Tickets": 3,
+      "v4Tickets": 3,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 2,
+      "diffusePairCount": 1,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 2,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": true,
+      "exactHitV4": true
+    },
+    {
+      "raceKey": "20260908-61-3",
+      "v3NaturalTickets": 4,
+      "v4NaturalTickets": 4,
+      "v3Tickets": 3,
+      "v4Tickets": 3,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 2,
+      "diffusePairCount": 1,
+      "thirdVariationReduction": 1,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 2,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-61-2",
+      "v3NaturalTickets": 12,
+      "v4NaturalTickets": 12,
+      "v3Tickets": 11,
+      "v4Tickets": 11,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 4,
+      "diffusePairCount": 3,
+      "thirdVariationReduction": 1,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 10,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": true,
+      "exactHitV4": true
+    },
+    {
+      "raceKey": "20260908-27-2",
+      "v3NaturalTickets": 120,
+      "v4NaturalTickets": 55,
+      "v3Tickets": 0,
+      "v4Tickets": 0,
+      "v3Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v4Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "pairCount": 24,
+      "diffusePairCount": 7,
+      "thirdVariationReduction": 65,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 40,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-61-1",
+      "v3NaturalTickets": 2,
+      "v4NaturalTickets": 2,
+      "v3Tickets": 2,
+      "v4Tickets": 2,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 2,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 2,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": true,
+      "exactHitV4": true
+    },
+    {
+      "raceKey": "20260908-13-12",
+      "v3NaturalTickets": 83,
+      "v4NaturalTickets": 45,
+      "v3Tickets": 14,
+      "v4Tickets": 12,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 27,
+      "diffusePairCount": 6,
+      "thirdVariationReduction": 38,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 40,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": true,
+      "exactHitV4": true
+    },
+    {
+      "raceKey": "20260908-26-11",
+      "v3NaturalTickets": 120,
+      "v4NaturalTickets": 80,
+      "v3Tickets": 0,
+      "v4Tickets": 18,
+      "v3Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 24,
+      "diffusePairCount": 5,
+      "thirdVariationReduction": 40,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 75,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-13-11",
+      "v3NaturalTickets": 180,
+      "v4NaturalTickets": 75,
+      "v3Tickets": 0,
+      "v4Tickets": 0,
+      "v3Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v4Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "pairCount": 36,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 105,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 66,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": true,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-26-10",
+      "v3NaturalTickets": 3,
+      "v4NaturalTickets": 3,
+      "v3Tickets": 3,
+      "v4Tickets": 3,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 2,
+      "diffusePairCount": 1,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 2,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-13-10",
+      "v3NaturalTickets": 180,
+      "v4NaturalTickets": 101,
+      "v3Tickets": 0,
+      "v4Tickets": 18,
+      "v3Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 36,
+      "diffusePairCount": 2,
+      "thirdVariationReduction": 79,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 101,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-13-9",
+      "v3NaturalTickets": 6,
+      "v4NaturalTickets": 6,
+      "v3Tickets": 6,
+      "v4Tickets": 6,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 3,
+      "diffusePairCount": 3,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 6,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-26-8",
+      "v3NaturalTickets": 20,
+      "v4NaturalTickets": 20,
+      "v3Tickets": 19,
+      "v4Tickets": 19,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 6,
+      "diffusePairCount": 4,
+      "thirdVariationReduction": 1,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 10,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-13-8",
+      "v3NaturalTickets": 7,
+      "v4NaturalTickets": 7,
+      "v3Tickets": 2,
+      "v4Tickets": 2,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 7,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 4,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": true,
+      "exactHitV4": true
+    },
+    {
+      "raceKey": "20260908-26-7",
+      "v3NaturalTickets": 180,
+      "v4NaturalTickets": 136,
+      "v3Tickets": 0,
+      "v4Tickets": 0,
+      "v3Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v4Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "pairCount": 36,
+      "diffusePairCount": 13,
+      "thirdVariationReduction": 44,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 133,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": true,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-26-6",
+      "v3NaturalTickets": 3,
+      "v4NaturalTickets": 3,
+      "v3Tickets": 3,
+      "v4Tickets": 3,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 2,
+      "diffusePairCount": 1,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 2,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-13-6",
+      "v3NaturalTickets": 180,
+      "v4NaturalTickets": 70,
+      "v3Tickets": 0,
+      "v4Tickets": 0,
+      "v3Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v4Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "pairCount": 36,
+      "diffusePairCount": 7,
+      "thirdVariationReduction": 110,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 70,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": true,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-26-5",
+      "v3NaturalTickets": 2,
+      "v4NaturalTickets": 2,
+      "v3Tickets": 2,
+      "v4Tickets": 2,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 2,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 2,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-13-5",
+      "v3NaturalTickets": 142,
+      "v4NaturalTickets": 115,
+      "v3Tickets": 0,
+      "v4Tickets": 0,
+      "v3Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v4Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "pairCount": 30,
+      "diffusePairCount": 7,
+      "thirdVariationReduction": 27,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 110,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": true,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-26-4",
+      "v3NaturalTickets": 16,
+      "v4NaturalTickets": 16,
+      "v3Tickets": 16,
+      "v4Tickets": 16,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 6,
+      "diffusePairCount": 5,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 13,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": true,
+      "exactHitV4": true
+    },
+    {
+      "raceKey": "20260908-13-4",
+      "v3NaturalTickets": 6,
+      "v4NaturalTickets": 6,
+      "v3Tickets": 5,
+      "v4Tickets": 5,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 3,
+      "diffusePairCount": 2,
+      "thirdVariationReduction": 1,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 4,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-26-3",
+      "v3NaturalTickets": 180,
+      "v4NaturalTickets": 68,
+      "v3Tickets": 0,
+      "v4Tickets": 0,
+      "v3Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v4Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "pairCount": 36,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 112,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 64,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-13-3",
+      "v3NaturalTickets": 180,
+      "v4NaturalTickets": 75,
+      "v3Tickets": 0,
+      "v4Tickets": 0,
+      "v3Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v4Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "pairCount": 36,
+      "diffusePairCount": 3,
+      "thirdVariationReduction": 105,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 66,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-26-2",
+      "v3NaturalTickets": 24,
+      "v4NaturalTickets": 19,
+      "v3Tickets": 19,
+      "v4Tickets": 19,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 8,
+      "diffusePairCount": 5,
+      "thirdVariationReduction": 5,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 17,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-44-12",
+      "v3NaturalTickets": 8,
+      "v4NaturalTickets": 8,
+      "v3Tickets": 8,
+      "v4Tickets": 8,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 8,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 8,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-13-2",
+      "v3NaturalTickets": 2,
+      "v4NaturalTickets": 2,
+      "v3Tickets": 2,
+      "v4Tickets": 2,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 2,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 2,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-21-11",
+      "v3NaturalTickets": 180,
+      "v4NaturalTickets": 61,
+      "v3Tickets": 0,
+      "v4Tickets": 0,
+      "v3Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v4Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "pairCount": 36,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 119,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 60,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-13-1",
+      "v3NaturalTickets": 15,
+      "v4NaturalTickets": 15,
+      "v3Tickets": 12,
+      "v4Tickets": 12,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 4,
+      "diffusePairCount": 2,
+      "thirdVariationReduction": 3,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 4,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-44-11",
+      "v3NaturalTickets": 2,
+      "v4NaturalTickets": 2,
+      "v3Tickets": 2,
+      "v4Tickets": 2,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 2,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 2,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-44-9",
+      "v3NaturalTickets": 6,
+      "v4NaturalTickets": 6,
+      "v3Tickets": 6,
+      "v4Tickets": 6,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 4,
+      "diffusePairCount": 1,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 6,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-21-8",
+      "v3NaturalTickets": 2,
+      "v4NaturalTickets": 2,
+      "v3Tickets": 2,
+      "v4Tickets": 2,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 2,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 0,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-44-8",
+      "v3NaturalTickets": 13,
+      "v4NaturalTickets": 13,
+      "v3Tickets": 12,
+      "v4Tickets": 12,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 3,
+      "diffusePairCount": 2,
+      "thirdVariationReduction": 1,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 6,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-44-7",
+      "v3NaturalTickets": 1,
+      "v4NaturalTickets": 1,
+      "v3Tickets": 1,
+      "v4Tickets": 1,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 1,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 0,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-21-6",
+      "v3NaturalTickets": 5,
+      "v4NaturalTickets": 5,
+      "v3Tickets": 5,
+      "v4Tickets": 5,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 3,
+      "diffusePairCount": 1,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 4,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": true,
+      "exactHitV4": true
+    },
+    {
+      "raceKey": "20260908-44-6",
+      "v3NaturalTickets": 6,
+      "v4NaturalTickets": 6,
+      "v3Tickets": 6,
+      "v4Tickets": 6,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 4,
+      "diffusePairCount": 1,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 4,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-21-5",
+      "v3NaturalTickets": 6,
+      "v4NaturalTickets": 6,
+      "v3Tickets": 6,
+      "v4Tickets": 6,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 6,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 6,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-44-4",
+      "v3NaturalTickets": 180,
+      "v4NaturalTickets": 151,
+      "v3Tickets": 0,
+      "v4Tickets": 0,
+      "v3Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v4Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "pairCount": 36,
+      "diffusePairCount": 8,
+      "thirdVariationReduction": 29,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 151,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-21-3",
+      "v3NaturalTickets": 16,
+      "v4NaturalTickets": 16,
+      "v3Tickets": 6,
+      "v4Tickets": 6,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 11,
+      "diffusePairCount": 5,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 6,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-44-2",
+      "v3NaturalTickets": 6,
+      "v4NaturalTickets": 6,
+      "v3Tickets": 4,
+      "v4Tickets": 4,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 3,
+      "diffusePairCount": 1,
+      "thirdVariationReduction": 2,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 2,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": true,
+      "exactHitV4": true
+    },
+    {
+      "raceKey": "20260908-44-1",
+      "v3NaturalTickets": 2,
+      "v4NaturalTickets": 2,
+      "v3Tickets": 2,
+      "v4Tickets": 2,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 2,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 2,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-37-7",
+      "v3NaturalTickets": 180,
+      "v4NaturalTickets": 72,
+      "v3Tickets": 0,
+      "v4Tickets": 0,
+      "v3Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v4Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "pairCount": 36,
+      "diffusePairCount": 3,
+      "thirdVariationReduction": 108,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 60,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-37-6",
+      "v3NaturalTickets": 20,
+      "v4NaturalTickets": 20,
+      "v3Tickets": 8,
+      "v4Tickets": 8,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 5,
+      "diffusePairCount": 1,
+      "thirdVariationReduction": 12,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 8,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-37-5",
+      "v3NaturalTickets": 2,
+      "v4NaturalTickets": 2,
+      "v3Tickets": 2,
+      "v4Tickets": 2,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 2,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 2,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-37-4",
+      "v3NaturalTickets": 150,
+      "v4NaturalTickets": 55,
+      "v3Tickets": 17,
+      "v4Tickets": 17,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 30,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 95,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 51,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": true,
+      "exactHitV4": true
+    },
+    {
+      "raceKey": "20260908-37-3",
+      "v3NaturalTickets": 180,
+      "v4NaturalTickets": 145,
+      "v3Tickets": 0,
+      "v4Tickets": 0,
+      "v3Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v4Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "pairCount": 36,
+      "diffusePairCount": 13,
+      "thirdVariationReduction": 35,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 143,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": true,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-37-2",
+      "v3NaturalTickets": 150,
+      "v4NaturalTickets": 65,
+      "v3Tickets": 0,
+      "v4Tickets": 0,
+      "v3Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v4Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "pairCount": 30,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 85,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 54,
+      "v3NaturalCorrect": true,
+      "v4NaturalCorrect": true,
+      "exactHitV4": false
+    },
+    {
+      "raceKey": "20260908-37-1",
+      "v3NaturalTickets": 4,
+      "v4NaturalTickets": 4,
+      "v3Tickets": 4,
+      "v4Tickets": 4,
+      "v3Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v4Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "pairCount": 4,
+      "diffusePairCount": 0,
+      "thirdVariationReduction": 0,
+      "crossScenarioPairMerges": 0,
+      "trioOrderVariationCount": 4,
+      "v3NaturalCorrect": false,
+      "v4NaturalCorrect": false,
+      "exactHitV4": false
+    }
+  ],
+  "source": "existing sealed read endpoints",
+  "requested": 114,
+  "readFailures": [],
+  "productionWrite": 0
+}

@@ -1,6 +1,6 @@
 // Read-only reproduction runner. It only reads already sealed prediction/result records.
 import fs from "node:fs/promises";
-import { evaluateScenarioCliffShadow, evaluateScenarioCliffFourWay } from "./scenario-cliff-shadow.mjs";
+import { evaluateScenarioCliffShadow, evaluateScenarioCliffV4 } from "./scenario-cliff-shadow.mjs";
 
 const base = process.env.AUDIT_BASE_URL || "https://chari-neko-dev.netlify.app/.netlify/functions";
 const keySource = JSON.parse(await fs.readFile(process.argv[2] || "research/thick-readonly-audit-results.json", "utf8"));
@@ -33,7 +33,7 @@ for (let offset = 0; offset < keys.length; offset += 3) {
   }));
   records.push(...rows.filter(Boolean));
 }
-const evaluation = process.env.SCENARIO_CLIFF_V1_ONLY === "1" ? evaluateScenarioCliffShadow(records) : evaluateScenarioCliffFourWay(records);
+const evaluation = process.env.SCENARIO_CLIFF_V1_ONLY === "1" ? evaluateScenarioCliffShadow(records) : evaluateScenarioCliffV4(records);
 const output = { ...evaluation, source: "existing sealed read endpoints", requested: keys.length, readFailures: failures, productionWrite: 0 };
 const serialized = `${JSON.stringify(output, null, 2)}\n`;
 if (process.argv[3]) await fs.writeFile(process.argv[3], serialized); else process.stdout.write(serialized);

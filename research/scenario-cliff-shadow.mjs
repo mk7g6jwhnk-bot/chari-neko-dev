@@ -3,6 +3,7 @@ import configJson from "./scenario-cliff-shadow-config.json" with { type: "json"
 export const VERSION = "SCENARIO_CLIFF_PURCHASE_SHADOW_V1";
 export const VERSION_V2 = "SCENARIO_CLIFF_PURCHASE_SHADOW_V2";
 export const VERSION_V3 = "SCENARIO_CLIFF_PURCHASE_SHADOW_V3";
+export const VERSION_V4 = "SCENARIO_CLIFF_PURCHASE_SHADOW_V4";
 export const DEFAULT_CONFIG = Object.freeze(configJson);
 const NATURAL_CODES = new Set(["ADOPTED", "THIRD_VARIANT_AMBIGUITY", "THIRD_VARIANT_BOUNDARY"]);
 const RESULT_KEYS = new Set(["result", "finishOrder", "payout", "hit", "return", "roi", "actual"]);
@@ -133,6 +134,60 @@ export function buildScenarioCliffShadowV3(record, config = DEFAULT_CONFIG) {
   return { ...selected, version: VERSION_V3, upstream: { ...upstream.audit, finalSelectorInputCount: upstream.rows.length, finalPurchaseCount: selected.tickets.length }, flow: { ...selected.flow, rawTerminalCount: raw.length, naturalTerminalCount: upstream.rows.length, upstreamNaturalTerminalCount: upstream.rows.length }, audit: { ...selected.audit, ...upstream.duplicates, resultFieldsUsed: [] } };
 }
 
+export function buildScenarioCliffShadowV4(record, config = DEFAULT_CONFIG) {
+  const prediction = sealedPrediction(record), raw = allLifecycleRows(prediction), v3Upstream = buildSemanticUpstreamV3(raw, lifecycleRows(prediction), prediction, config);
+  const organized = organizePairThirdV4(v3Upstream.rows, prediction, config);
+  const rows = v3Upstream.rows.length > config.maximumTickets ? organized.rows : v3Upstream.rows;
+  const audit = prediction?.purchase?.audit || prediction?.audit?.purchaseAudit || prediction?.audit || {};
+  const shadowPrediction = { ...prediction, purchase: { ...(prediction.purchase || {}), audit: { ...audit, terminalLifecycleAudit: rows.map(row => ({ ...row, purchaseRejectCode: "ADOPTED" })) } } };
+  const selected = buildScenarioCliffShadowV2({ raceKey: record?.raceKey, prediction: shadowPrediction }, config);
+  return { ...selected, version: VERSION_V4, pairHierarchy: organized.diagnostics, upstream: { ...v3Upstream.audit, v3NaturalTerminalCount: v3Upstream.rows.length, naturalTerminalCount: rows.length, finalSelectorInputCount: rows.length, finalPurchaseCount: selected.tickets.length }, flow: { ...selected.flow, rawTerminalCount: raw.length, naturalTerminalCount: rows.length }, audit: { ...selected.audit, ...v3Upstream.duplicates, ...organized.audit, resultFieldsUsed: [] } };
+}
+
+export function evaluateScenarioCliffV4(records, config = DEFAULT_CONFIG) {
+  const safe = (records || []).filter(record => !isProtected(record));
+  const races = safe.map(record => {
+    const prediction = sealedPrediction(record), finish = confirmedFinish(record), finishKey = finish?.join("-"), v2 = buildScenarioCliffShadowV2(record, config), v3 = buildScenarioCliffShadowV3(record, config), v4 = buildScenarioCliffShadowV4(record, config);
+    return { raceKey: record.raceKey, control: controlPlan(record), v2, v3, v4, finish, generatedCorrect: Boolean(finishKey && allLifecycleRows(prediction).some(row => ticketKey(row) === finishKey)), naturalCorrect: Boolean(finishKey && lifecycleRows(prediction).some(row => ticketKey(row) === finishKey)), v3NaturalCorrect: Boolean(finishKey && v3.flow.stageOrders.natural.includes(finishKey)), v4NaturalCorrect: Boolean(finishKey && v4.flow.stageOrders.natural.includes(finishKey)), payout: finish ? finite(record?.result?.result?.payout ?? record?.result?.payout, 0) : null };
+  });
+  return { version: VERSION_V4, readOnly: true, productionWriteAllowed: false, cohortSize: races.length, protectedExcluded: (records || []).length - safe.length, control: summarizeThree(races, "control"), candidateV2: summarizeThree(races, "v2"), candidateV3: summarizeThree(races, "v3"), candidateV4: summarizeThree(races, "v4"),
+    pairDiagnostics: summarizePairDiagnostics(races), v4IneligibleReasons: countValues(races.map(row => row.v4.purchaseEligibility.reason).filter(Boolean)),
+    races: races.map(row => ({ raceKey: row.raceKey, v3NaturalTickets: row.v3.upstream.naturalTerminalCount, v4NaturalTickets: row.v4.upstream.naturalTerminalCount, v3Tickets: row.v3.tickets.length, v4Tickets: row.v4.tickets.length, v3Eligibility: row.v3.purchaseEligibility, v4Eligibility: row.v4.purchaseEligibility, pairCount: row.v4.pairHierarchy.pairCount, diffusePairCount: row.v4.pairHierarchy.diffusePairCount, thirdVariationReduction: row.v4.audit.samePairVariationReduction, crossScenarioPairMerges: row.v4.audit.crossScenarioPairMerges, trioOrderVariationCount: row.v4.audit.trioOrderVariationCount, v3NaturalCorrect: row.v3NaturalCorrect, v4NaturalCorrect: row.v4NaturalCorrect, exactHitV4: Boolean(finishKeyFor(row) && row.v4.tickets.some(ticket => ticketKey(ticket) === finishKeyFor(row))) })) };
+}
+
+function organizePairThirdV4(rows, prediction, config) {
+  const scenarios = new Map();
+  for (const row of rows) { rejectResultLeakage(row); const scenario = scenarioSemanticKey(row, prediction); if (!scenarios.has(scenario)) scenarios.set(scenario, []); scenarios.get(scenario).push(scoreTerminal(row, config, true)); }
+  const selected = [], pairSupport = new Map(), diagnostics = [];
+  let diffusePairCount = 0, variationBefore = 0, variationAfter = 0;
+  for (const [scenarioId, terminals] of scenarios) {
+    const groups = new Map();
+    for (const terminal of terminals) { const pair = terminal.order.slice(0, 2).join("-"); if (!groups.has(pair)) groups.set(pair, []); groups.get(pair).push(terminal); }
+    const pairs = [...groups].map(([pair, items]) => ({ pair, items, pairRelativeScore: Math.max(...items.map(item => finite(item.pairRelativeScore, item.terminalRelativeScore))), scenarioId }));
+    const pairBoundary = selectNaturalBoundary(pairs, config.terminalBoundary, "pairRelativeScore"), topPairScore = Math.max(0, ...pairs.map(pair => pair.pairRelativeScore));
+    for (const pair of pairBoundary.rows) {
+      const thirdInputs = pair.items.map(item => ({ ...item, thirdSelectionScore: firstKnownFinite(item.thirdConditionalScore, item.terminalRelativeScore) }));
+      const third = selectNaturalBoundary(thirdInputs, config.terminalBoundary, "thirdSelectionScore"), scores = thirdInputs.map(item => item.thirdSelectionScore).filter(Number.isFinite).sort((a, b) => b - a), diffuse = !third.detected && pair.items.length > 1;
+      if (diffuse) diffusePairCount += 1;
+      variationBefore += pair.items.length; variationAfter += third.rows.length;
+      for (const terminal of third.rows) { selected.push(terminal.original); if (!pairSupport.has(pair.pair)) pairSupport.set(pair.pair, new Set()); pairSupport.get(pair.pair).add(scenarioId); }
+      diagnostics.push({ scenarioId, pair: pair.pair, pairRelativeScore: pair.pairRelativeScore, pairBoundaryScore: pairBoundary.boundary?.boundaryScore ?? null, pairSupportSources: unique(pair.items.flatMap(item => supportEvidence(item.original))), pairScenarioSupportCount: 1, pairScenarioIndependence: [scenarioId], thirdCandidateCount: pair.items.length, thirdDispersion: distribution(scores), topThirdScore: scores[0] ?? null, secondThirdScore: scores[1] ?? null, thirdCliffScore: third.boundary?.boundaryScore ?? null, thirdDiffuse: diffuse, pairSupportStrong: pair.pairRelativeScore === topPairScore, researchExactaCandidate: diffuse && pair.pairRelativeScore === topPairScore });
+    }
+  }
+  for (const diagnostic of diagnostics) { const support = pairSupport.get(diagnostic.pair) || new Set(); diagnostic.pairScenarioSupportCount = support.size; diagnostic.pairScenarioIndependence = [...support]; }
+  const uniqueRows = uniqueByTicket(selected), trios = new Map();
+  for (const row of uniqueRows) { const trio = [...normalizeOrder(row.order)].sort((a, b) => a - b).join("-"); if (!trios.has(trio)) trios.set(trio, new Set()); trios.get(trio).add(ticketKey(row)); }
+  const trioOrderVariationCount = [...trios.values()].filter(orders => orders.size > 1).reduce((sum, orders) => sum + orders.size, 0), crossScenarioPairMerges = [...pairSupport.values()].reduce((sum, support) => sum + Math.max(0, support.size - 1), 0);
+  return { rows: uniqueRows, diagnostics: { pairCount: pairSupport.size, pairsPerScenario: scenarios.size ? diagnostics.length / scenarios.size : 0, thirdCandidatesPerPair: diagnostics.length ? diagnostics.reduce((sum, row) => sum + row.thirdCandidateCount, 0) / diagnostics.length : 0, diffusePairCount, pairs: diagnostics, trios: [...trios].map(([trioIdentity, orders]) => ({ trioIdentity, orderVariantCount: orders.size, trioSupportStrength: orders.size, orderDispersion: orders.size > 1 ? "HIGH" : "LOW", researchTrioCandidate: orders.size > 1 })) }, audit: { samePairVariationReduction: variationBefore - variationAfter, crossScenarioPairMerges, trioOrderVariationCount } };
+}
+
+function summarizePairDiagnostics(races) {
+  const cap = races.filter(row => !row.v3.purchaseEligibility.canPurchase), all = races.map(row => row.v4);
+  return { pairCount: distribution(all.map(row => row.pairHierarchy.pairCount)), pairsPerScenario: distribution(all.map(row => row.pairHierarchy.pairsPerScenario)), thirdCandidatesPerPair: distribution(all.map(row => row.pairHierarchy.thirdCandidatesPerPair)), thirdDiffusePairs: all.reduce((sum, row) => sum + row.pairHierarchy.diffusePairCount, 0), samePairVariationReduction: all.reduce((sum, row) => sum + row.audit.samePairVariationReduction, 0), scenarioPairSupportMerges: all.reduce((sum, row) => sum + row.audit.crossScenarioPairMerges, 0), trioOrderDiagnostics: all.reduce((sum, row) => sum + row.audit.trioOrderVariationCount, 0), capCohort: cap.length, capResolved: cap.filter(row => row.v4.purchaseEligibility.canPurchase).length };
+}
+
+function finishKeyFor(row) { return row.finish?.join("-") || null; }
+
 export function evaluateScenarioCliffFourWay(records, config = DEFAULT_CONFIG) {
   const safe = (records || []).filter(record => !isProtected(record));
   const races = safe.map(record => { const prediction = sealedPrediction(record), finish = confirmedFinish(record), v3 = buildScenarioCliffShadowV3(record, config), finishKey = finish?.join("-"); return { raceKey: record.raceKey, control: controlPlan(record), v1: buildScenarioCliffShadow(record, config), v2: buildScenarioCliffShadowV2(record, config), v3, finish, generatedCorrect: Boolean(finishKey && allLifecycleRows(prediction).some(row => ticketKey(row) === finishKey)), naturalCorrect: Boolean(finishKey && lifecycleRows(prediction).some(row => ticketKey(row) === finishKey)), v3NaturalCorrect: Boolean(finishKey && v3.flow.stageOrders.natural.includes(finishKey)), payout: finish ? finite(record?.result?.result?.payout ?? record?.result?.payout, 0) : null }; });
@@ -241,7 +296,7 @@ function summarizeThree(races, kind) {
   return {
     raceCount: races.length, purchaseable: candidate ? races.filter(row => row[kind].purchaseEligibility.canPurchase).length : races.filter(row => row.control.length).length,
     ineligible: candidate ? races.filter(row => !row[kind].purchaseEligibility.canPurchase).length : 0, ticketDistribution: { ...distribution(counts), oneTo3: counts.filter(x => x >= 1 && x <= 3).length, fourTo6: counts.filter(x => x >= 4 && x <= 6).length },
-    exactHits: hits.length, generatedCorrectTerminal: confirmed.filter(row => row.generatedCorrect).length, naturalCorrectSurvived: confirmed.filter(row => kind === "v3" ? row.v3NaturalCorrect : row.naturalCorrect).length, finalCorrectSurvived: hits.length,
+    exactHits: hits.length, generatedCorrectTerminal: confirmed.filter(row => row.generatedCorrect).length, naturalCorrectSurvived: confirmed.filter(row => kind === "v4" ? row.v4NaturalCorrect : kind === "v3" ? row.v3NaturalCorrect : row.naturalCorrect).length, finalCorrectSurvived: hits.length,
     investment, return: returned, roi: investment ? returned / investment : null,
     mainTickets: candidate ? races.flatMap(row => row[kind].tickets).filter(x => x.category === "MAIN").length : null,
     coverTickets: candidate ? races.flatMap(row => row[kind].tickets).filter(x => x.category === "COVER").length : null,
