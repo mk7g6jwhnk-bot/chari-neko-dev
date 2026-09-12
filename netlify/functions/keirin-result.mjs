@@ -29,6 +29,24 @@ export default async function handler(req) {
   });
 
   const attempts = [];
+  const savedResult = async () => {
+    const secret = String(process.env.AUTO_RESEARCH_CALLBACK_SECRET || "");
+    if (!secret) return null;
+    try {
+      const raceKey = `${date}-${venueCode}-${raceNo}`;
+      const response = await fetch(`${base}/keirin/predictions/sealed/${encodeURIComponent(raceKey)}/result`, {
+        headers: { accept: "application/json", "x-auto-research-secret": secret },
+        signal: AbortSignal.timeout(12000),
+      });
+      const data = await response.json().catch(() => null);
+      attempts.push({ path: "/keirin/predictions/sealed/:raceKey/result", status: response.status, error: data?.code || data?.error || null });
+      const result = normalizeResult(data?.officialResult);
+      return response.ok && result ? result : null;
+    } catch (error) {
+      attempts.push({ path: "/keirin/predictions/sealed/:raceKey/result", error: error instanceof Error ? error.message : String(error) });
+      return null;
+    }
+  };
 
   // まず既存Railwayの「結果専用」経路を直接使う。
   // /keirin/result は現在のRailway環境で応答待ちになるため先に使わない。
@@ -62,6 +80,9 @@ export default async function handler(req) {
         checkedAt: data?.checkedAt || new Date().toISOString(),
       });
     }
+
+    const saved = await savedResult();
+    if (saved) return jsonResponse(200, { ok: true, race: { date, venueCode, venueName, raceNo }, result: saved, checkedAt: new Date().toISOString(), source: "saved_sealed_result" });
 
     if (response.status === 404 || response.status === 405) {
       return jsonResponse(409, {
