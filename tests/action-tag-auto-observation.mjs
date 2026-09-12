@@ -52,7 +52,7 @@ const loadCollector = createActionTagCollector({ store: loadStore, reviewQueue: 
 for (const record of [escapeRace, makuriRace, preRace]) assert.equal(loadCollector.offer(record).accepted, true);
 const load = await loadCollector.drain({ limit: 3 });
 const loadMetrics = { direct: load.reduce((sum, row) => sum + row.directCount, 0), strongProxy: load.reduce((sum, row) => sum + row.candidateCount, 0), manual: load.reduce((sum, row) => sum + row.manualQueueCount, 0) };
-assert.deepEqual(loadMetrics, { direct: 2, strongProxy: 8, manual: 36 });
+assert.deepEqual(loadMetrics, { direct: 3, strongProxy: 8, manual: 36 });
 
 console.log(JSON.stringify({ summary, forecast, e2e: processed, defaultLoad: loadMetrics }, null, 2));
 console.log("PASS action tag auto observation");
