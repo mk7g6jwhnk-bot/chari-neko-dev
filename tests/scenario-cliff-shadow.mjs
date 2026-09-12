@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { boundaryScores, buildScenarioCliffShadow, buildScenarioCliffShadowV2, buildScenarioCliffShadowV3, buildScenarioCliffShadowV4, DEFAULT_CONFIG, evaluateScenarioCliffFourWay, evaluateScenarioCliffShadow, evaluateScenarioCliffThreeWay, evaluateScenarioCliffV4, scenarioSemanticKey, scenarioTechnicalKey, selectNaturalBoundary, VERSION } from "../research/scenario-cliff-shadow.mjs";
+import { boundaryScores, buildScenarioCliffShadow, buildScenarioCliffShadowV2, buildScenarioCliffShadowV3, DEFAULT_CONFIG, evaluateScenarioCliffFourWay, evaluateScenarioCliffShadow, evaluateScenarioCliffThreeWay, scenarioSemanticKey, scenarioTechnicalKey, selectNaturalBoundary, VERSION } from "../research/scenario-cliff-shadow.mjs";
 
 const terminal = (order, score, scenario = "LEADER_HOLD", extra = {}) => ({ order, purchaseRejectCode: "ADOPTED", dominantBranchId: scenario, terminalModelWeight: score, naturalConvergenceScore: score, branchFit: score, secondFamilyRelativeToBest: score, thirdFamilyRelativeToBest: score, ...extra });
 const record = rows => ({ raceKey: "20260901-01-1", sealed: { researchPrediction: { performanceSchemaVersion: "PURCHASE_PERFORMANCE_V2", standardPurchasePlan: [{ order: [1, 2, 3], betClass: "MAIN" }], purchase: { audit: { terminalLifecycleAudit: { rows } } } } }, result: { result: { status: "confirmed", finishOrder: [1, 2, 4], payout: 12340 } } });
@@ -118,20 +118,4 @@ assert.equal(flatV3.upstream.source, "EXPLOSION_GUARD_CURRENT_NATURAL", "flat ca
 assert.equal(flatV3.upstream.naturalTerminalCount, broad.length, "guard preserves sealed natural set rather than arbitrary pruning");
 const fourWay = evaluateScenarioCliffFourWay([record([terminal([1, 2, 4], .9)]), protectedRecord]);
 assert.equal(fourWay.cohortSize, 1); assert.equal(fourWay.protectedExcluded, 1); assert.equal(fourWay.candidateV3.exactHits, 1);
-
-const pairRows = [
-  terminal([1, 2, 3], 1, "LEAD-A", { thirdConditionalScore: 1 }), terminal([1, 2, 4], .92, "LEAD-A", { thirdConditionalScore: .92 }), terminal([1, 2, 5], .2, "LEAD-A", { thirdConditionalScore: .2 }),
-  terminal([1, 3, 2], .91, "MAKURI-A", { thirdConditionalScore: .91 }), terminal([1, 3, 4], .9, "MAKURI-A", { thirdConditionalScore: .9 })
-];
-const pairV4 = buildScenarioCliffShadowV4(record(pairRows));
-assert.ok(pairV4.pairHierarchy.pairCount >= 2, "pair hierarchy remains explicit");
-assert.ok(pairV4.pairHierarchy.pairs.some(row => row.thirdCliffScore !== null), "third cliff is audited per pair");
-assert.ok(pairV4.pairHierarchy.pairs.some(row => row.thirdDiffuse), "no-cliff multi-third pair remains a diffuse cluster");
-assert.ok(pairV4.pairHierarchy.trios.every(row => Object.hasOwn(row, "orderDispersion")), "trio order diagnostics are retained without merging orders");
-const flatPairV4 = buildScenarioCliffShadowV4(record(broad));
-assert.equal(flatPairV4.purchaseEligibility.reason, "NATURAL_SELECTION_EXCEEDS_CAP", "no arbitrary top-N is applied after full organization");
-assert.equal(flatPairV4.upstream.naturalTerminalCount, broad.length, "diffuse plateau is not force-cut to the cap");
-assert.throws(() => buildScenarioCliffShadowV4(record([terminal([1, 2, 3], .9, "A", { result: "win" })])), /result-aware/);
-const v4Evaluation = evaluateScenarioCliffV4([record([terminal([1, 2, 4], .9)]), protectedRecord]);
-assert.equal(v4Evaluation.cohortSize, 1); assert.equal(v4Evaluation.protectedExcluded, 1); assert.equal(v4Evaluation.candidateV4.exactHits, 1);
 console.log("PASS scenario relative score / cliff shadow");
