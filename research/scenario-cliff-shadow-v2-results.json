@@ -1,0 +1,5917 @@
+{
+  "version": "SCENARIO_CLIFF_PURCHASE_SHADOW_V2",
+  "readOnly": true,
+  "productionWriteAllowed": false,
+  "cohortSize": 114,
+  "protectedExcluded": 0,
+  "control": {
+    "raceCount": 114,
+    "purchaseable": 93,
+    "ineligible": 0,
+    "ticketDistribution": {
+      "mean": 4.543859649122807,
+      "median": 2,
+      "p90": 12.700000000000003,
+      "max": 27,
+      "sixOrLess": 92,
+      "sevenTo10": 7,
+      "elevenTo15": 5,
+      "sixteenTo20": 3,
+      "over20": 7,
+      "oneTo3": 60,
+      "fourTo6": 11
+    },
+    "exactHits": 15,
+    "generatedCorrectTerminal": 114,
+    "naturalCorrectSurvived": 47,
+    "finalCorrectSurvived": 15,
+    "investment": 51800,
+    "return": 79250,
+    "roi": 1.52992277992278,
+    "mainTickets": null,
+    "coverTickets": null,
+    "thickTickets": null,
+    "mainHits": null,
+    "coverHits": null,
+    "thickHits": null,
+    "capIneligible": null,
+    "warnings": {},
+    "highPayoutCapture": {
+      "hitsAtLeast10000": 1,
+      "returnAtLeast10000": 40920,
+      "largestPayout": 40920
+    },
+    "duplicateMerges": null,
+    "nearDuplicateScenarioMerges": null
+  },
+  "candidateV1": {
+    "raceCount": 114,
+    "purchaseable": 80,
+    "ineligible": 34,
+    "ticketDistribution": {
+      "mean": 2.6666666666666665,
+      "median": 2,
+      "p90": 6,
+      "max": 18,
+      "sixOrLess": 105,
+      "sevenTo10": 5,
+      "elevenTo15": 2,
+      "sixteenTo20": 2,
+      "over20": 0,
+      "oneTo3": 53,
+      "fourTo6": 18
+    },
+    "exactHits": 14,
+    "generatedCorrectTerminal": 114,
+    "naturalCorrectSurvived": 47,
+    "finalCorrectSurvived": 14,
+    "investment": 30400,
+    "return": 69650,
+    "roi": 2.2911184210526314,
+    "mainTickets": 279,
+    "coverTickets": 25,
+    "thickTickets": 0,
+    "mainHits": 14,
+    "coverHits": 0,
+    "thickHits": 0,
+    "capIneligible": 34,
+    "warnings": {
+      "PARTIAL_DATA_MISSING": 80,
+      "MANY_TICKETS": 2
+    },
+    "highPayoutCapture": {
+      "hitsAtLeast10000": 1,
+      "returnAtLeast10000": 40920,
+      "largestPayout": 40920
+    },
+    "duplicateMerges": 0,
+    "nearDuplicateScenarioMerges": null
+  },
+  "candidateV2": {
+    "raceCount": 114,
+    "purchaseable": 85,
+    "ineligible": 29,
+    "ticketDistribution": {
+      "mean": 3.43859649122807,
+      "median": 2,
+      "p90": 8.700000000000003,
+      "max": 20,
+      "sixOrLess": 100,
+      "sevenTo10": 5,
+      "elevenTo15": 3,
+      "sixteenTo20": 6,
+      "over20": 0,
+      "oneTo3": 54,
+      "fourTo6": 17
+    },
+    "exactHits": 17,
+    "generatedCorrectTerminal": 114,
+    "naturalCorrectSurvived": 47,
+    "finalCorrectSurvived": 17,
+    "investment": 39200,
+    "return": 76430,
+    "roi": 1.9497448979591836,
+    "mainTickets": 341,
+    "coverTickets": 51,
+    "thickTickets": 11,
+    "mainHits": 17,
+    "coverHits": 0,
+    "thickHits": 1,
+    "capIneligible": 29,
+    "warnings": {
+      "PARTIAL_DATA_MISSING": 85,
+      "MANY_TICKETS": 6
+    },
+    "highPayoutCapture": {
+      "hitsAtLeast10000": 1,
+      "returnAtLeast10000": 40920,
+      "largestPayout": 40920
+    },
+    "duplicateMerges": 0,
+    "nearDuplicateScenarioMerges": 0
+  },
+  "v1CapCauses": {
+    "MANY_SCENARIOS": 30,
+    "MANY_TERMINALS_PER_SCENARIO": 34,
+    "TECHNICAL_NEAR_DUPLICATES": 34,
+    "PRE_EXACT_MERGE_ONLY": 0,
+    "WEAK_SCENARIO_CLIFF": 6,
+    "WEAK_TERMINAL_CLIFF": 34,
+    "NO_SCENARIO_ALLOCATION": 34,
+    "OTHER": 0
+  },
+  "v2CapCauses": {
+    "MANY_SCENARIOS": 26,
+    "MANY_TERMINALS_PER_SCENARIO": 29,
+    "TECHNICAL_NEAR_DUPLICATES": 29,
+    "PRE_EXACT_MERGE_ONLY": 0,
+    "WEAK_SCENARIO_CLIFF": 9,
+    "WEAK_TERMINAL_CLIFF": 29,
+    "NO_SCENARIO_ALLOCATION": 0,
+    "OTHER": 0
+  },
+  "v1SmallCauses": {
+    "STRONG_SCENARIO_CLIFF": 0,
+    "STRONG_TERMINAL_CLIFF": 0,
+    "STRONGEST_SCENARIO_ONLY": 53,
+    "MAIN_CLASSIFICATION_DROP": 0,
+    "COVER_STRUCTURALLY_ABSENT": 53,
+    "MERGE_CONSOLIDATION": 0,
+    "CAP_PROCESS": 0,
+    "NATURALLY_SMALL": 53
+  },
+  "v2SmallCauses": {
+    "STRONG_SCENARIO_CLIFF": 0,
+    "STRONG_TERMINAL_CLIFF": 0,
+    "STRONGEST_SCENARIO_ONLY": 54,
+    "MAIN_CLASSIFICATION_DROP": 0,
+    "COVER_STRUCTURALLY_ABSENT": 54,
+    "MERGE_CONSOLIDATION": 0,
+    "CAP_PROCESS": 0,
+    "NATURALLY_SMALL": 54
+  },
+  "v2Warnings": {
+    "PARTIAL_DATA_MISSING": 85,
+    "MANY_TICKETS": 6
+  },
+  "v2IneligibleReasons": {
+    "NATURAL_SELECTION_EXCEEDS_CAP": 29
+  },
+  "v2Flow": {
+    "rawScenarioCount": {
+      "mean": 2.3947368421052633,
+      "median": 1,
+      "p90": 6,
+      "max": 6,
+      "sixOrLess": 114,
+      "sevenTo10": 0,
+      "elevenTo15": 0,
+      "sixteenTo20": 0,
+      "over20": 0
+    },
+    "strongScenarioCandidateCount": {
+      "mean": 1.6578947368421053,
+      "median": 1,
+      "p90": 3,
+      "max": 4,
+      "sixOrLess": 114,
+      "sevenTo10": 0,
+      "elevenTo15": 0,
+      "sixteenTo20": 0,
+      "over20": 0
+    },
+    "scenarioCliffCount": {
+      "mean": 1.4736842105263157,
+      "median": 1,
+      "p90": 3,
+      "max": 4,
+      "sixOrLess": 114,
+      "sevenTo10": 0,
+      "elevenTo15": 0,
+      "sixteenTo20": 0,
+      "over20": 0
+    },
+    "rawTerminalCount": {
+      "mean": 210,
+      "median": 210,
+      "p90": 210,
+      "max": 210,
+      "sixOrLess": 0,
+      "sevenTo10": 0,
+      "elevenTo15": 0,
+      "sixteenTo20": 0,
+      "over20": 114
+    },
+    "naturalTerminalCount": {
+      "mean": 49.69298245614035,
+      "median": 4.5,
+      "p90": 180,
+      "max": 180,
+      "sixOrLess": 71,
+      "sevenTo10": 4,
+      "elevenTo15": 3,
+      "sixteenTo20": 1,
+      "over20": 35
+    },
+    "terminalCliffCount": {
+      "mean": 13.842105263157896,
+      "median": 4,
+      "p90": 36,
+      "max": 77,
+      "sixOrLess": 71,
+      "sevenTo10": 5,
+      "elevenTo15": 3,
+      "sixteenTo20": 6,
+      "over20": 29
+    },
+    "preMergeTicketCount": {
+      "mean": 13.842105263157896,
+      "median": 4,
+      "p90": 36,
+      "max": 77,
+      "sixOrLess": 71,
+      "sevenTo10": 5,
+      "elevenTo15": 3,
+      "sixteenTo20": 6,
+      "over20": 29
+    },
+    "exactMergeTicketCount": {
+      "mean": 13.842105263157896,
+      "median": 4,
+      "p90": 36,
+      "max": 77,
+      "sixOrLess": 71,
+      "sevenTo10": 5,
+      "elevenTo15": 3,
+      "sixteenTo20": 6,
+      "over20": 29
+    },
+    "nearConsolidationTicketCount": {
+      "mean": 13.842105263157896,
+      "median": 4,
+      "p90": 36,
+      "max": 77,
+      "sixOrLess": 71,
+      "sevenTo10": 5,
+      "elevenTo15": 3,
+      "sixteenTo20": 6,
+      "over20": 29
+    },
+    "allocatedTicketCount": {
+      "mean": 13.736842105263158,
+      "median": 4,
+      "p90": 36,
+      "max": 77,
+      "sixOrLess": 71,
+      "sevenTo10": 5,
+      "elevenTo15": 3,
+      "sixteenTo20": 6,
+      "over20": 29
+    },
+    "mainCount": {
+      "mean": 2.991228070175439,
+      "median": 2,
+      "p90": 7.400000000000006,
+      "max": 20,
+      "sixOrLess": 102,
+      "sevenTo10": 6,
+      "elevenTo15": 4,
+      "sixteenTo20": 2,
+      "over20": 0
+    },
+    "coverCount": {
+      "mean": 0.4473684210526316,
+      "median": 0,
+      "p90": 0,
+      "max": 10,
+      "sixOrLess": 110,
+      "sevenTo10": 4,
+      "elevenTo15": 0,
+      "sixteenTo20": 0,
+      "over20": 0
+    },
+    "finalPurchaseCount": {
+      "mean": 3.43859649122807,
+      "median": 2,
+      "p90": 8.700000000000003,
+      "max": 20,
+      "sixOrLess": 100,
+      "sevenTo10": 5,
+      "elevenTo15": 3,
+      "sixteenTo20": 6,
+      "over20": 0
+    }
+  },
+  "races": [
+    {
+      "raceKey": "20260909-61-7",
+      "controlTickets": 12,
+      "v1Tickets": 12,
+      "v2Tickets": 12,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 12,
+        "terminalCliffCount": 12,
+        "preMergeTicketCount": 12,
+        "exactMergeTicketCount": 12,
+        "nearConsolidationTicketCount": 12,
+        "allocatedTicketCount": 12,
+        "mainCount": 12,
+        "coverCount": 0,
+        "finalPurchaseCount": 12,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 6130
+    },
+    {
+      "raceKey": "20260909-48-11",
+      "controlTickets": 2,
+      "v1Tickets": 4,
+      "v2Tickets": 4,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 4,
+        "terminalCliffCount": 4,
+        "preMergeTicketCount": 4,
+        "exactMergeTicketCount": 4,
+        "nearConsolidationTicketCount": 4,
+        "allocatedTicketCount": 4,
+        "mainCount": 4,
+        "coverCount": 0,
+        "finalPurchaseCount": 4,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 42750
+    },
+    {
+      "raceKey": "20260909-61-9",
+      "controlTickets": 1,
+      "v1Tickets": 1,
+      "v2Tickets": 1,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 1,
+        "terminalCliffCount": 1,
+        "preMergeTicketCount": 1,
+        "exactMergeTicketCount": 1,
+        "nearConsolidationTicketCount": 1,
+        "allocatedTicketCount": 1,
+        "mainCount": 1,
+        "coverCount": 0,
+        "finalPurchaseCount": 1,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": true,
+        "terminalCliff": true,
+        "mergeBefore": true,
+        "exactMerge": true,
+        "nearConsolidation": true,
+        "allocation": true,
+        "final": true
+      },
+      "exactHitControl": true,
+      "exactHitV1": true,
+      "exactHitV2": true,
+      "payout": 7250
+    },
+    {
+      "raceKey": "20260909-61-8",
+      "controlTickets": 6,
+      "v1Tickets": 8,
+      "v2Tickets": 8,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 8,
+        "terminalCliffCount": 8,
+        "preMergeTicketCount": 8,
+        "exactMergeTicketCount": 8,
+        "nearConsolidationTicketCount": 8,
+        "allocatedTicketCount": 8,
+        "mainCount": 8,
+        "coverCount": 0,
+        "finalPurchaseCount": 8,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 15190
+    },
+    {
+      "raceKey": "20260909-27-7",
+      "controlTickets": 2,
+      "v1Tickets": 2,
+      "v2Tickets": 2,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 2,
+        "terminalCliffCount": 2,
+        "preMergeTicketCount": 2,
+        "exactMergeTicketCount": 2,
+        "nearConsolidationTicketCount": 2,
+        "allocatedTicketCount": 2,
+        "mainCount": 2,
+        "coverCount": 0,
+        "finalPurchaseCount": 2,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 2490
+    },
+    {
+      "raceKey": "20260909-61-6",
+      "controlTickets": 4,
+      "v1Tickets": 4,
+      "v2Tickets": 4,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 4,
+        "terminalCliffCount": 4,
+        "preMergeTicketCount": 4,
+        "exactMergeTicketCount": 4,
+        "nearConsolidationTicketCount": 4,
+        "allocatedTicketCount": 4,
+        "mainCount": 4,
+        "coverCount": 0,
+        "finalPurchaseCount": 4,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 1350
+    },
+    {
+      "raceKey": "20260909-27-6",
+      "controlTickets": 2,
+      "v1Tickets": 2,
+      "v2Tickets": 2,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 2,
+        "terminalCliffCount": 2,
+        "preMergeTicketCount": 2,
+        "exactMergeTicketCount": 2,
+        "nearConsolidationTicketCount": 2,
+        "allocatedTicketCount": 2,
+        "mainCount": 2,
+        "coverCount": 0,
+        "finalPurchaseCount": 2,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 8600
+    },
+    {
+      "raceKey": "20260909-61-5",
+      "controlTickets": 10,
+      "v1Tickets": 14,
+      "v2Tickets": 14,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 14,
+        "terminalCliffCount": 14,
+        "preMergeTicketCount": 14,
+        "exactMergeTicketCount": 14,
+        "nearConsolidationTicketCount": 14,
+        "allocatedTicketCount": 14,
+        "mainCount": 14,
+        "coverCount": 0,
+        "finalPurchaseCount": 14,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 5190
+    },
+    {
+      "raceKey": "20260909-27-5",
+      "controlTickets": 1,
+      "v1Tickets": 6,
+      "v2Tickets": 6,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 6,
+        "terminalCliffCount": 6,
+        "preMergeTicketCount": 6,
+        "exactMergeTicketCount": 6,
+        "nearConsolidationTicketCount": 6,
+        "allocatedTicketCount": 6,
+        "mainCount": 6,
+        "coverCount": 0,
+        "finalPurchaseCount": 6,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 1980
+    },
+    {
+      "raceKey": "20260909-61-4",
+      "controlTickets": 2,
+      "v1Tickets": 2,
+      "v2Tickets": 2,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 2,
+        "terminalCliffCount": 2,
+        "preMergeTicketCount": 2,
+        "exactMergeTicketCount": 2,
+        "nearConsolidationTicketCount": 2,
+        "allocatedTicketCount": 2,
+        "mainCount": 2,
+        "coverCount": 0,
+        "finalPurchaseCount": 2,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 4590
+    },
+    {
+      "raceKey": "20260909-27-4",
+      "controlTickets": 1,
+      "v1Tickets": 1,
+      "v2Tickets": 1,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 1,
+        "terminalCliffCount": 1,
+        "preMergeTicketCount": 1,
+        "exactMergeTicketCount": 1,
+        "nearConsolidationTicketCount": 1,
+        "allocatedTicketCount": 1,
+        "mainCount": 1,
+        "coverCount": 0,
+        "finalPurchaseCount": 1,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 940
+    },
+    {
+      "raceKey": "20260909-61-3",
+      "controlTickets": 4,
+      "v1Tickets": 4,
+      "v2Tickets": 3,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 4,
+        "terminalCliffCount": 3,
+        "preMergeTicketCount": 3,
+        "exactMergeTicketCount": 3,
+        "nearConsolidationTicketCount": 3,
+        "allocatedTicketCount": 3,
+        "mainCount": 3,
+        "coverCount": 0,
+        "finalPurchaseCount": 3,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 1020
+    },
+    {
+      "raceKey": "20260909-61-2",
+      "controlTickets": 2,
+      "v1Tickets": 2,
+      "v2Tickets": 2,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 2,
+        "terminalCliffCount": 2,
+        "preMergeTicketCount": 2,
+        "exactMergeTicketCount": 2,
+        "nearConsolidationTicketCount": 2,
+        "allocatedTicketCount": 2,
+        "mainCount": 2,
+        "coverCount": 0,
+        "finalPurchaseCount": 2,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": true,
+        "terminalCliff": true,
+        "mergeBefore": true,
+        "exactMerge": true,
+        "nearConsolidation": true,
+        "allocation": true,
+        "final": true
+      },
+      "exactHitControl": true,
+      "exactHitV1": true,
+      "exactHitV2": true,
+      "payout": 1000
+    },
+    {
+      "raceKey": "20260909-27-2",
+      "controlTickets": 2,
+      "v1Tickets": 2,
+      "v2Tickets": 2,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 2,
+        "terminalCliffCount": 2,
+        "preMergeTicketCount": 2,
+        "exactMergeTicketCount": 2,
+        "nearConsolidationTicketCount": 2,
+        "allocatedTicketCount": 2,
+        "mainCount": 2,
+        "coverCount": 0,
+        "finalPurchaseCount": 2,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 290
+    },
+    {
+      "raceKey": "20260909-61-1",
+      "controlTickets": 0,
+      "v1Tickets": 2,
+      "v2Tickets": 2,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 2,
+        "terminalCliffCount": 2,
+        "preMergeTicketCount": 2,
+        "exactMergeTicketCount": 2,
+        "nearConsolidationTicketCount": 2,
+        "allocatedTicketCount": 2,
+        "mainCount": 2,
+        "coverCount": 0,
+        "finalPurchaseCount": 2,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 2550
+    },
+    {
+      "raceKey": "20260909-13-12",
+      "controlTickets": 2,
+      "v1Tickets": 2,
+      "v2Tickets": 2,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 2,
+        "terminalCliffCount": 2,
+        "preMergeTicketCount": 2,
+        "exactMergeTicketCount": 2,
+        "nearConsolidationTicketCount": 2,
+        "allocatedTicketCount": 2,
+        "mainCount": 2,
+        "coverCount": 0,
+        "finalPurchaseCount": 2,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": true,
+        "terminalCliff": true,
+        "mergeBefore": true,
+        "exactMerge": true,
+        "nearConsolidation": true,
+        "allocation": true,
+        "final": true
+      },
+      "exactHitControl": true,
+      "exactHitV1": true,
+      "exactHitV2": true,
+      "payout": 4030
+    },
+    {
+      "raceKey": "20260909-13-11",
+      "controlTickets": 0,
+      "v1Tickets": 0,
+      "v2Tickets": 0,
+      "v1Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Flow": {
+        "rawScenarioCount": 6,
+        "strongScenarioCandidateCount": 3,
+        "scenarioCliffCount": 2,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 180,
+        "terminalCliffCount": 50,
+        "preMergeTicketCount": 50,
+        "exactMergeTicketCount": 50,
+        "nearConsolidationTicketCount": 50,
+        "allocatedTicketCount": 50,
+        "mainCount": 0,
+        "coverCount": 0,
+        "finalPurchaseCount": 0,
+        "eligible": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP",
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 5890
+    },
+    {
+      "raceKey": "20260909-13-10",
+      "controlTickets": 1,
+      "v1Tickets": 1,
+      "v2Tickets": 1,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 1,
+        "terminalCliffCount": 1,
+        "preMergeTicketCount": 1,
+        "exactMergeTicketCount": 1,
+        "nearConsolidationTicketCount": 1,
+        "allocatedTicketCount": 1,
+        "mainCount": 1,
+        "coverCount": 0,
+        "finalPurchaseCount": 1,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 46370
+    },
+    {
+      "raceKey": "20260909-13-9",
+      "controlTickets": 0,
+      "v1Tickets": 0,
+      "v2Tickets": 0,
+      "v1Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Flow": {
+        "rawScenarioCount": 6,
+        "strongScenarioCandidateCount": 3,
+        "scenarioCliffCount": 3,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 180,
+        "terminalCliffCount": 61,
+        "preMergeTicketCount": 61,
+        "exactMergeTicketCount": 61,
+        "nearConsolidationTicketCount": 61,
+        "allocatedTicketCount": 61,
+        "mainCount": 0,
+        "coverCount": 0,
+        "finalPurchaseCount": 0,
+        "eligible": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP",
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": true,
+        "terminalCliff": true,
+        "mergeBefore": true,
+        "exactMerge": true,
+        "nearConsolidation": true,
+        "allocation": true,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 5550
+    },
+    {
+      "raceKey": "20260909-13-8",
+      "controlTickets": 3,
+      "v1Tickets": 5,
+      "v2Tickets": 5,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 2,
+        "strongScenarioCandidateCount": 2,
+        "scenarioCliffCount": 2,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 5,
+        "terminalCliffCount": 5,
+        "preMergeTicketCount": 5,
+        "exactMergeTicketCount": 5,
+        "nearConsolidationTicketCount": 5,
+        "allocatedTicketCount": 5,
+        "mainCount": 4,
+        "coverCount": 1,
+        "finalPurchaseCount": 5,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 3020
+    },
+    {
+      "raceKey": "20260909-13-7",
+      "controlTickets": 8,
+      "v1Tickets": 0,
+      "v2Tickets": 0,
+      "v1Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Flow": {
+        "rawScenarioCount": 5,
+        "strongScenarioCandidateCount": 3,
+        "scenarioCliffCount": 2,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 150,
+        "terminalCliffCount": 30,
+        "preMergeTicketCount": 30,
+        "exactMergeTicketCount": 30,
+        "nearConsolidationTicketCount": 30,
+        "allocatedTicketCount": 30,
+        "mainCount": 0,
+        "coverCount": 0,
+        "finalPurchaseCount": 0,
+        "eligible": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP",
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": true,
+        "terminalCliff": true,
+        "mergeBefore": true,
+        "exactMerge": true,
+        "nearConsolidation": true,
+        "allocation": true,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 4100
+    },
+    {
+      "raceKey": "20260909-48-6",
+      "controlTickets": 2,
+      "v1Tickets": 2,
+      "v2Tickets": 2,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 2,
+        "terminalCliffCount": 2,
+        "preMergeTicketCount": 2,
+        "exactMergeTicketCount": 2,
+        "nearConsolidationTicketCount": 2,
+        "allocatedTicketCount": 2,
+        "mainCount": 2,
+        "coverCount": 0,
+        "finalPurchaseCount": 2,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 770
+    },
+    {
+      "raceKey": "20260909-48-5",
+      "controlTickets": 0,
+      "v1Tickets": 0,
+      "v2Tickets": 0,
+      "v1Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Flow": {
+        "rawScenarioCount": 6,
+        "strongScenarioCandidateCount": 4,
+        "scenarioCliffCount": 4,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 160,
+        "terminalCliffCount": 77,
+        "preMergeTicketCount": 77,
+        "exactMergeTicketCount": 77,
+        "nearConsolidationTicketCount": 77,
+        "allocatedTicketCount": 77,
+        "mainCount": 0,
+        "coverCount": 0,
+        "finalPurchaseCount": 0,
+        "eligible": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP",
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": true,
+        "terminalCliff": true,
+        "mergeBefore": true,
+        "exactMerge": true,
+        "nearConsolidation": true,
+        "allocation": true,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 5210
+    },
+    {
+      "raceKey": "20260909-48-3",
+      "controlTickets": 2,
+      "v1Tickets": 2,
+      "v2Tickets": 2,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 2,
+        "terminalCliffCount": 2,
+        "preMergeTicketCount": 2,
+        "exactMergeTicketCount": 2,
+        "nearConsolidationTicketCount": 2,
+        "allocatedTicketCount": 2,
+        "mainCount": 2,
+        "coverCount": 0,
+        "finalPurchaseCount": 2,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 15020
+    },
+    {
+      "raceKey": "20260909-13-6",
+      "controlTickets": 0,
+      "v1Tickets": 6,
+      "v2Tickets": 5,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 6,
+        "terminalCliffCount": 5,
+        "preMergeTicketCount": 5,
+        "exactMergeTicketCount": 5,
+        "nearConsolidationTicketCount": 5,
+        "allocatedTicketCount": 5,
+        "mainCount": 5,
+        "coverCount": 0,
+        "finalPurchaseCount": 5,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 17850
+    },
+    {
+      "raceKey": "20260909-13-5",
+      "controlTickets": 2,
+      "v1Tickets": 2,
+      "v2Tickets": 2,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 2,
+        "terminalCliffCount": 2,
+        "preMergeTicketCount": 2,
+        "exactMergeTicketCount": 2,
+        "nearConsolidationTicketCount": 2,
+        "allocatedTicketCount": 2,
+        "mainCount": 2,
+        "coverCount": 0,
+        "finalPurchaseCount": 2,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 10120
+    },
+    {
+      "raceKey": "20260909-13-4",
+      "controlTickets": 0,
+      "v1Tickets": 0,
+      "v2Tickets": 20,
+      "v1Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 5,
+        "strongScenarioCandidateCount": 3,
+        "scenarioCliffCount": 2,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 150,
+        "terminalCliffCount": 20,
+        "preMergeTicketCount": 20,
+        "exactMergeTicketCount": 20,
+        "nearConsolidationTicketCount": 20,
+        "allocatedTicketCount": 20,
+        "mainCount": 10,
+        "coverCount": 10,
+        "finalPurchaseCount": 20,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 4580
+    },
+    {
+      "raceKey": "20260909-13-3",
+      "controlTickets": 1,
+      "v1Tickets": 1,
+      "v2Tickets": 1,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 1,
+        "terminalCliffCount": 1,
+        "preMergeTicketCount": 1,
+        "exactMergeTicketCount": 1,
+        "nearConsolidationTicketCount": 1,
+        "allocatedTicketCount": 1,
+        "mainCount": 1,
+        "coverCount": 0,
+        "finalPurchaseCount": 1,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 1580
+    },
+    {
+      "raceKey": "20260909-13-2",
+      "controlTickets": 10,
+      "v1Tickets": 10,
+      "v2Tickets": 10,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 10,
+        "terminalCliffCount": 10,
+        "preMergeTicketCount": 10,
+        "exactMergeTicketCount": 10,
+        "nearConsolidationTicketCount": 10,
+        "allocatedTicketCount": 10,
+        "mainCount": 10,
+        "coverCount": 0,
+        "finalPurchaseCount": 10,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 1070
+    },
+    {
+      "raceKey": "20260909-44-10",
+      "controlTickets": 5,
+      "v1Tickets": 5,
+      "v2Tickets": 5,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 5,
+        "terminalCliffCount": 5,
+        "preMergeTicketCount": 5,
+        "exactMergeTicketCount": 5,
+        "nearConsolidationTicketCount": 5,
+        "allocatedTicketCount": 5,
+        "mainCount": 5,
+        "coverCount": 0,
+        "finalPurchaseCount": 5,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 90580
+    },
+    {
+      "raceKey": "20260909-84-7",
+      "controlTickets": 13,
+      "v1Tickets": 0,
+      "v2Tickets": 0,
+      "v1Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Flow": {
+        "rawScenarioCount": 6,
+        "strongScenarioCandidateCount": 3,
+        "scenarioCliffCount": 2,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 180,
+        "terminalCliffCount": 21,
+        "preMergeTicketCount": 21,
+        "exactMergeTicketCount": 21,
+        "nearConsolidationTicketCount": 21,
+        "allocatedTicketCount": 21,
+        "mainCount": 0,
+        "coverCount": 0,
+        "finalPurchaseCount": 0,
+        "eligible": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP",
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": true,
+        "terminalCliff": true,
+        "mergeBefore": true,
+        "exactMerge": true,
+        "nearConsolidation": true,
+        "allocation": true,
+        "final": false
+      },
+      "exactHitControl": true,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 1200
+    },
+    {
+      "raceKey": "20260909-44-12",
+      "controlTickets": 2,
+      "v1Tickets": 2,
+      "v2Tickets": 2,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 2,
+        "terminalCliffCount": 2,
+        "preMergeTicketCount": 2,
+        "exactMergeTicketCount": 2,
+        "nearConsolidationTicketCount": 2,
+        "allocatedTicketCount": 2,
+        "mainCount": 2,
+        "coverCount": 0,
+        "finalPurchaseCount": 2,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 630
+    },
+    {
+      "raceKey": "20260909-13-1",
+      "controlTickets": 1,
+      "v1Tickets": 1,
+      "v2Tickets": 1,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 1,
+        "terminalCliffCount": 1,
+        "preMergeTicketCount": 1,
+        "exactMergeTicketCount": 1,
+        "nearConsolidationTicketCount": 1,
+        "allocatedTicketCount": 1,
+        "mainCount": 1,
+        "coverCount": 0,
+        "finalPurchaseCount": 1,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 6370
+    },
+    {
+      "raceKey": "20260909-21-11",
+      "controlTickets": 12,
+      "v1Tickets": 0,
+      "v2Tickets": 0,
+      "v1Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Flow": {
+        "rawScenarioCount": 6,
+        "strongScenarioCandidateCount": 4,
+        "scenarioCliffCount": 4,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 180,
+        "terminalCliffCount": 63,
+        "preMergeTicketCount": 63,
+        "exactMergeTicketCount": 63,
+        "nearConsolidationTicketCount": 63,
+        "allocatedTicketCount": 51,
+        "mainCount": 0,
+        "coverCount": 0,
+        "finalPurchaseCount": 0,
+        "eligible": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP",
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": true,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 20470
+    },
+    {
+      "raceKey": "20260909-44-11",
+      "controlTickets": 1,
+      "v1Tickets": 1,
+      "v2Tickets": 1,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 1,
+        "terminalCliffCount": 1,
+        "preMergeTicketCount": 1,
+        "exactMergeTicketCount": 1,
+        "nearConsolidationTicketCount": 1,
+        "allocatedTicketCount": 1,
+        "mainCount": 1,
+        "coverCount": 0,
+        "finalPurchaseCount": 1,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 4420
+    },
+    {
+      "raceKey": "20260909-21-10",
+      "controlTickets": 1,
+      "v1Tickets": 9,
+      "v2Tickets": 9,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 9,
+        "terminalCliffCount": 9,
+        "preMergeTicketCount": 9,
+        "exactMergeTicketCount": 9,
+        "nearConsolidationTicketCount": 9,
+        "allocatedTicketCount": 9,
+        "mainCount": 9,
+        "coverCount": 0,
+        "finalPurchaseCount": 9,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": true,
+        "terminalCliff": true,
+        "mergeBefore": true,
+        "exactMerge": true,
+        "nearConsolidation": true,
+        "allocation": true,
+        "final": true
+      },
+      "exactHitControl": false,
+      "exactHitV1": true,
+      "exactHitV2": true,
+      "payout": 500
+    },
+    {
+      "raceKey": "20260909-21-9",
+      "controlTickets": 15,
+      "v1Tickets": 0,
+      "v2Tickets": 0,
+      "v1Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Flow": {
+        "rawScenarioCount": 6,
+        "strongScenarioCandidateCount": 3,
+        "scenarioCliffCount": 2,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 180,
+        "terminalCliffCount": 31,
+        "preMergeTicketCount": 31,
+        "exactMergeTicketCount": 31,
+        "nearConsolidationTicketCount": 31,
+        "allocatedTicketCount": 31,
+        "mainCount": 0,
+        "coverCount": 0,
+        "finalPurchaseCount": 0,
+        "eligible": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP",
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": true,
+        "terminalCliff": true,
+        "mergeBefore": true,
+        "exactMerge": true,
+        "nearConsolidation": true,
+        "allocation": true,
+        "final": false
+      },
+      "exactHitControl": true,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 620
+    },
+    {
+      "raceKey": "20260909-74-5",
+      "controlTickets": 10,
+      "v1Tickets": 0,
+      "v2Tickets": 0,
+      "v1Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Flow": {
+        "rawScenarioCount": 6,
+        "strongScenarioCandidateCount": 4,
+        "scenarioCliffCount": 4,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 180,
+        "terminalCliffCount": 50,
+        "preMergeTicketCount": 50,
+        "exactMergeTicketCount": 50,
+        "nearConsolidationTicketCount": 50,
+        "allocatedTicketCount": 50,
+        "mainCount": 0,
+        "coverCount": 0,
+        "finalPurchaseCount": 0,
+        "eligible": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP",
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": true,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 9960
+    },
+    {
+      "raceKey": "20260909-44-8",
+      "controlTickets": 3,
+      "v1Tickets": 3,
+      "v2Tickets": 3,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 3,
+        "terminalCliffCount": 3,
+        "preMergeTicketCount": 3,
+        "exactMergeTicketCount": 3,
+        "nearConsolidationTicketCount": 3,
+        "allocatedTicketCount": 3,
+        "mainCount": 3,
+        "coverCount": 0,
+        "finalPurchaseCount": 3,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 20660
+    },
+    {
+      "raceKey": "20260909-21-7",
+      "controlTickets": 6,
+      "v1Tickets": 6,
+      "v2Tickets": 5,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 6,
+        "terminalCliffCount": 5,
+        "preMergeTicketCount": 5,
+        "exactMergeTicketCount": 5,
+        "nearConsolidationTicketCount": 5,
+        "allocatedTicketCount": 5,
+        "mainCount": 5,
+        "coverCount": 0,
+        "finalPurchaseCount": 5,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 2160
+    },
+    {
+      "raceKey": "20260909-44-7",
+      "controlTickets": 1,
+      "v1Tickets": 5,
+      "v2Tickets": 5,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 5,
+        "terminalCliffCount": 5,
+        "preMergeTicketCount": 5,
+        "exactMergeTicketCount": 5,
+        "nearConsolidationTicketCount": 5,
+        "allocatedTicketCount": 5,
+        "mainCount": 5,
+        "coverCount": 0,
+        "finalPurchaseCount": 5,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 101980
+    },
+    {
+      "raceKey": "20260909-21-6",
+      "controlTickets": 3,
+      "v1Tickets": 3,
+      "v2Tickets": 3,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 3,
+        "terminalCliffCount": 3,
+        "preMergeTicketCount": 3,
+        "exactMergeTicketCount": 3,
+        "nearConsolidationTicketCount": 3,
+        "allocatedTicketCount": 3,
+        "mainCount": 3,
+        "coverCount": 0,
+        "finalPurchaseCount": 3,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 150
+    },
+    {
+      "raceKey": "20260909-37-7",
+      "controlTickets": 1,
+      "v1Tickets": 1,
+      "v2Tickets": 1,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 1,
+        "terminalCliffCount": 1,
+        "preMergeTicketCount": 1,
+        "exactMergeTicketCount": 1,
+        "nearConsolidationTicketCount": 1,
+        "allocatedTicketCount": 1,
+        "mainCount": 1,
+        "coverCount": 0,
+        "finalPurchaseCount": 1,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 7490
+    },
+    {
+      "raceKey": "20260909-44-6",
+      "controlTickets": 2,
+      "v1Tickets": 5,
+      "v2Tickets": 5,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 5,
+        "terminalCliffCount": 5,
+        "preMergeTicketCount": 5,
+        "exactMergeTicketCount": 5,
+        "nearConsolidationTicketCount": 5,
+        "allocatedTicketCount": 5,
+        "mainCount": 5,
+        "coverCount": 0,
+        "finalPurchaseCount": 5,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 21530
+    },
+    {
+      "raceKey": "20260909-44-5",
+      "controlTickets": 3,
+      "v1Tickets": 3,
+      "v2Tickets": 3,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 3,
+        "terminalCliffCount": 3,
+        "preMergeTicketCount": 3,
+        "exactMergeTicketCount": 3,
+        "nearConsolidationTicketCount": 3,
+        "allocatedTicketCount": 3,
+        "mainCount": 3,
+        "coverCount": 0,
+        "finalPurchaseCount": 3,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 660
+    },
+    {
+      "raceKey": "20260909-21-4",
+      "controlTickets": 1,
+      "v1Tickets": 1,
+      "v2Tickets": 1,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 1,
+        "terminalCliffCount": 1,
+        "preMergeTicketCount": 1,
+        "exactMergeTicketCount": 1,
+        "nearConsolidationTicketCount": 1,
+        "allocatedTicketCount": 1,
+        "mainCount": 1,
+        "coverCount": 0,
+        "finalPurchaseCount": 1,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 9150
+    },
+    {
+      "raceKey": "20260909-44-3",
+      "controlTickets": 2,
+      "v1Tickets": 2,
+      "v2Tickets": 2,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 2,
+        "terminalCliffCount": 2,
+        "preMergeTicketCount": 2,
+        "exactMergeTicketCount": 2,
+        "nearConsolidationTicketCount": 2,
+        "allocatedTicketCount": 2,
+        "mainCount": 2,
+        "coverCount": 0,
+        "finalPurchaseCount": 2,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 1810
+    },
+    {
+      "raceKey": "20260909-44-1",
+      "controlTickets": 2,
+      "v1Tickets": 2,
+      "v2Tickets": 2,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 2,
+        "terminalCliffCount": 2,
+        "preMergeTicketCount": 2,
+        "exactMergeTicketCount": 2,
+        "nearConsolidationTicketCount": 2,
+        "allocatedTicketCount": 2,
+        "mainCount": 2,
+        "coverCount": 0,
+        "finalPurchaseCount": 2,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 4430
+    },
+    {
+      "raceKey": "20260909-37-6",
+      "controlTickets": 26,
+      "v1Tickets": 0,
+      "v2Tickets": 0,
+      "v1Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Flow": {
+        "rawScenarioCount": 3,
+        "strongScenarioCandidateCount": 2,
+        "scenarioCliffCount": 2,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 44,
+        "terminalCliffCount": 27,
+        "preMergeTicketCount": 27,
+        "exactMergeTicketCount": 27,
+        "nearConsolidationTicketCount": 27,
+        "allocatedTicketCount": 27,
+        "mainCount": 0,
+        "coverCount": 0,
+        "finalPurchaseCount": 0,
+        "eligible": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP",
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": true,
+        "terminalCliff": true,
+        "mergeBefore": true,
+        "exactMerge": true,
+        "nearConsolidation": true,
+        "allocation": true,
+        "final": false
+      },
+      "exactHitControl": true,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 2490
+    },
+    {
+      "raceKey": "20260909-84-6",
+      "controlTickets": 0,
+      "v1Tickets": 0,
+      "v2Tickets": 0,
+      "v1Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Flow": {
+        "rawScenarioCount": 6,
+        "strongScenarioCandidateCount": 3,
+        "scenarioCliffCount": 3,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 180,
+        "terminalCliffCount": 69,
+        "preMergeTicketCount": 69,
+        "exactMergeTicketCount": 69,
+        "nearConsolidationTicketCount": 69,
+        "allocatedTicketCount": 69,
+        "mainCount": 0,
+        "coverCount": 0,
+        "finalPurchaseCount": 0,
+        "eligible": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP",
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": true,
+        "terminalCliff": true,
+        "mergeBefore": true,
+        "exactMerge": true,
+        "nearConsolidation": true,
+        "allocation": true,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 650
+    },
+    {
+      "raceKey": "20260909-37-5",
+      "controlTickets": 12,
+      "v1Tickets": 0,
+      "v2Tickets": 0,
+      "v1Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Flow": {
+        "rawScenarioCount": 6,
+        "strongScenarioCandidateCount": 3,
+        "scenarioCliffCount": 3,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 180,
+        "terminalCliffCount": 23,
+        "preMergeTicketCount": 23,
+        "exactMergeTicketCount": 23,
+        "nearConsolidationTicketCount": 23,
+        "allocatedTicketCount": 23,
+        "mainCount": 0,
+        "coverCount": 0,
+        "finalPurchaseCount": 0,
+        "eligible": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP",
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": true,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 9040
+    },
+    {
+      "raceKey": "20260909-84-5",
+      "controlTickets": 2,
+      "v1Tickets": 2,
+      "v2Tickets": 2,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 2,
+        "terminalCliffCount": 2,
+        "preMergeTicketCount": 2,
+        "exactMergeTicketCount": 2,
+        "nearConsolidationTicketCount": 2,
+        "allocatedTicketCount": 2,
+        "mainCount": 2,
+        "coverCount": 0,
+        "finalPurchaseCount": 2,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": true,
+        "terminalCliff": true,
+        "mergeBefore": true,
+        "exactMerge": true,
+        "nearConsolidation": true,
+        "allocation": true,
+        "final": true
+      },
+      "exactHitControl": true,
+      "exactHitV1": true,
+      "exactHitV2": true,
+      "payout": 3900
+    },
+    {
+      "raceKey": "20260909-37-4",
+      "controlTickets": 3,
+      "v1Tickets": 3,
+      "v2Tickets": 3,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 3,
+        "terminalCliffCount": 3,
+        "preMergeTicketCount": 3,
+        "exactMergeTicketCount": 3,
+        "nearConsolidationTicketCount": 3,
+        "allocatedTicketCount": 3,
+        "mainCount": 3,
+        "coverCount": 0,
+        "finalPurchaseCount": 3,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 36300
+    },
+    {
+      "raceKey": "20260909-84-4",
+      "controlTickets": 1,
+      "v1Tickets": 3,
+      "v2Tickets": 3,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 3,
+        "terminalCliffCount": 3,
+        "preMergeTicketCount": 3,
+        "exactMergeTicketCount": 3,
+        "nearConsolidationTicketCount": 3,
+        "allocatedTicketCount": 3,
+        "mainCount": 3,
+        "coverCount": 0,
+        "finalPurchaseCount": 3,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": true,
+        "terminalCliff": true,
+        "mergeBefore": true,
+        "exactMerge": true,
+        "nearConsolidation": true,
+        "allocation": true,
+        "final": true
+      },
+      "exactHitControl": false,
+      "exactHitV1": true,
+      "exactHitV2": true,
+      "payout": 820
+    },
+    {
+      "raceKey": "20260909-37-3",
+      "controlTickets": 0,
+      "v1Tickets": 18,
+      "v2Tickets": 19,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 2,
+        "strongScenarioCandidateCount": 2,
+        "scenarioCliffCount": 2,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 33,
+        "terminalCliffCount": 19,
+        "preMergeTicketCount": 19,
+        "exactMergeTicketCount": 19,
+        "nearConsolidationTicketCount": 19,
+        "allocatedTicketCount": 19,
+        "mainCount": 11,
+        "coverCount": 8,
+        "finalPurchaseCount": 19,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": true,
+        "terminalCliff": true,
+        "mergeBefore": true,
+        "exactMerge": true,
+        "nearConsolidation": true,
+        "allocation": true,
+        "final": true
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": true,
+      "payout": 1120
+    },
+    {
+      "raceKey": "20260909-84-3",
+      "controlTickets": 0,
+      "v1Tickets": 0,
+      "v2Tickets": 0,
+      "v1Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Flow": {
+        "rawScenarioCount": 6,
+        "strongScenarioCandidateCount": 3,
+        "scenarioCliffCount": 2,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 180,
+        "terminalCliffCount": 36,
+        "preMergeTicketCount": 36,
+        "exactMergeTicketCount": 36,
+        "nearConsolidationTicketCount": 36,
+        "allocatedTicketCount": 36,
+        "mainCount": 0,
+        "coverCount": 0,
+        "finalPurchaseCount": 0,
+        "eligible": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP",
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": true,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 900
+    },
+    {
+      "raceKey": "20260909-37-2",
+      "controlTickets": 0,
+      "v1Tickets": 0,
+      "v2Tickets": 20,
+      "v1Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 5,
+        "strongScenarioCandidateCount": 2,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 124,
+        "terminalCliffCount": 20,
+        "preMergeTicketCount": 20,
+        "exactMergeTicketCount": 20,
+        "nearConsolidationTicketCount": 20,
+        "allocatedTicketCount": 20,
+        "mainCount": 20,
+        "coverCount": 0,
+        "finalPurchaseCount": 20,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 34730
+    },
+    {
+      "raceKey": "20260909-37-1",
+      "controlTickets": 25,
+      "v1Tickets": 0,
+      "v2Tickets": 0,
+      "v1Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Flow": {
+        "rawScenarioCount": 5,
+        "strongScenarioCandidateCount": 2,
+        "scenarioCliffCount": 2,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 150,
+        "terminalCliffCount": 30,
+        "preMergeTicketCount": 30,
+        "exactMergeTicketCount": 30,
+        "nearConsolidationTicketCount": 30,
+        "allocatedTicketCount": 30,
+        "mainCount": 0,
+        "coverCount": 0,
+        "finalPurchaseCount": 0,
+        "eligible": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP",
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 660
+    },
+    {
+      "raceKey": "20260909-84-1",
+      "controlTickets": 1,
+      "v1Tickets": 1,
+      "v2Tickets": 1,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 1,
+        "terminalCliffCount": 1,
+        "preMergeTicketCount": 1,
+        "exactMergeTicketCount": 1,
+        "nearConsolidationTicketCount": 1,
+        "allocatedTicketCount": 1,
+        "mainCount": 1,
+        "coverCount": 0,
+        "finalPurchaseCount": 1,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 2690
+    },
+    {
+      "raceKey": "20260908-61-9",
+      "controlTickets": 16,
+      "v1Tickets": 0,
+      "v2Tickets": 0,
+      "v1Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Flow": {
+        "rawScenarioCount": 6,
+        "strongScenarioCandidateCount": 3,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 180,
+        "terminalCliffCount": 24,
+        "preMergeTicketCount": 24,
+        "exactMergeTicketCount": 24,
+        "nearConsolidationTicketCount": 24,
+        "allocatedTicketCount": 24,
+        "mainCount": 0,
+        "coverCount": 0,
+        "finalPurchaseCount": 0,
+        "eligible": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP",
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": true,
+        "terminalCliff": true,
+        "mergeBefore": true,
+        "exactMerge": true,
+        "nearConsolidation": true,
+        "allocation": true,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 2610
+    },
+    {
+      "raceKey": "20260908-27-9",
+      "controlTickets": 2,
+      "v1Tickets": 2,
+      "v2Tickets": 2,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 2,
+        "terminalCliffCount": 2,
+        "preMergeTicketCount": 2,
+        "exactMergeTicketCount": 2,
+        "nearConsolidationTicketCount": 2,
+        "allocatedTicketCount": 2,
+        "mainCount": 2,
+        "coverCount": 0,
+        "finalPurchaseCount": 2,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 1620
+    },
+    {
+      "raceKey": "20260908-61-8",
+      "controlTickets": 2,
+      "v1Tickets": 2,
+      "v2Tickets": 2,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 2,
+        "terminalCliffCount": 2,
+        "preMergeTicketCount": 2,
+        "exactMergeTicketCount": 2,
+        "nearConsolidationTicketCount": 2,
+        "allocatedTicketCount": 2,
+        "mainCount": 2,
+        "coverCount": 0,
+        "finalPurchaseCount": 2,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 420
+    },
+    {
+      "raceKey": "20260908-27-8",
+      "controlTickets": 0,
+      "v1Tickets": 0,
+      "v2Tickets": 0,
+      "v1Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Flow": {
+        "rawScenarioCount": 6,
+        "strongScenarioCandidateCount": 4,
+        "scenarioCliffCount": 2,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 174,
+        "terminalCliffCount": 29,
+        "preMergeTicketCount": 29,
+        "exactMergeTicketCount": 29,
+        "nearConsolidationTicketCount": 29,
+        "allocatedTicketCount": 29,
+        "mainCount": 0,
+        "coverCount": 0,
+        "finalPurchaseCount": 0,
+        "eligible": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP",
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 2640
+    },
+    {
+      "raceKey": "20260908-61-7",
+      "controlTickets": 1,
+      "v1Tickets": 1,
+      "v2Tickets": 1,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 1,
+        "terminalCliffCount": 1,
+        "preMergeTicketCount": 1,
+        "exactMergeTicketCount": 1,
+        "nearConsolidationTicketCount": 1,
+        "allocatedTicketCount": 1,
+        "mainCount": 1,
+        "coverCount": 0,
+        "finalPurchaseCount": 1,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 9040
+    },
+    {
+      "raceKey": "20260908-61-6",
+      "controlTickets": 3,
+      "v1Tickets": 6,
+      "v2Tickets": 4,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 6,
+        "terminalCliffCount": 4,
+        "preMergeTicketCount": 4,
+        "exactMergeTicketCount": 4,
+        "nearConsolidationTicketCount": 4,
+        "allocatedTicketCount": 4,
+        "mainCount": 4,
+        "coverCount": 0,
+        "finalPurchaseCount": 4,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": true,
+        "terminalCliff": true,
+        "mergeBefore": true,
+        "exactMerge": true,
+        "nearConsolidation": true,
+        "allocation": true,
+        "final": true
+      },
+      "exactHitControl": true,
+      "exactHitV1": true,
+      "exactHitV2": true,
+      "payout": 40920
+    },
+    {
+      "raceKey": "20260908-27-6",
+      "controlTickets": 2,
+      "v1Tickets": 2,
+      "v2Tickets": 2,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 2,
+        "terminalCliffCount": 2,
+        "preMergeTicketCount": 2,
+        "exactMergeTicketCount": 2,
+        "nearConsolidationTicketCount": 2,
+        "allocatedTicketCount": 2,
+        "mainCount": 2,
+        "coverCount": 0,
+        "finalPurchaseCount": 2,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 7280
+    },
+    {
+      "raceKey": "20260908-61-5",
+      "controlTickets": 5,
+      "v1Tickets": 7,
+      "v2Tickets": 10,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 2,
+        "strongScenarioCandidateCount": 2,
+        "scenarioCliffCount": 2,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 12,
+        "terminalCliffCount": 10,
+        "preMergeTicketCount": 10,
+        "exactMergeTicketCount": 10,
+        "nearConsolidationTicketCount": 10,
+        "allocatedTicketCount": 10,
+        "mainCount": 5,
+        "coverCount": 5,
+        "finalPurchaseCount": 10,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 890
+    },
+    {
+      "raceKey": "20260908-61-4",
+      "controlTickets": 2,
+      "v1Tickets": 2,
+      "v2Tickets": 2,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 2,
+        "terminalCliffCount": 2,
+        "preMergeTicketCount": 2,
+        "exactMergeTicketCount": 2,
+        "nearConsolidationTicketCount": 2,
+        "allocatedTicketCount": 2,
+        "mainCount": 2,
+        "coverCount": 0,
+        "finalPurchaseCount": 2,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 8620
+    },
+    {
+      "raceKey": "20260908-27-4",
+      "controlTickets": 1,
+      "v1Tickets": 3,
+      "v2Tickets": 3,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 3,
+        "terminalCliffCount": 3,
+        "preMergeTicketCount": 3,
+        "exactMergeTicketCount": 3,
+        "nearConsolidationTicketCount": 3,
+        "allocatedTicketCount": 3,
+        "mainCount": 3,
+        "coverCount": 0,
+        "finalPurchaseCount": 3,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": true,
+        "terminalCliff": true,
+        "mergeBefore": true,
+        "exactMerge": true,
+        "nearConsolidation": true,
+        "allocation": true,
+        "final": true
+      },
+      "exactHitControl": false,
+      "exactHitV1": true,
+      "exactHitV2": true,
+      "payout": 410
+    },
+    {
+      "raceKey": "20260908-61-3",
+      "controlTickets": 3,
+      "v1Tickets": 3,
+      "v2Tickets": 3,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 3,
+        "terminalCliffCount": 3,
+        "preMergeTicketCount": 3,
+        "exactMergeTicketCount": 3,
+        "nearConsolidationTicketCount": 3,
+        "allocatedTicketCount": 3,
+        "mainCount": 3,
+        "coverCount": 0,
+        "finalPurchaseCount": 3,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 170
+    },
+    {
+      "raceKey": "20260908-61-2",
+      "controlTickets": 1,
+      "v1Tickets": 3,
+      "v2Tickets": 3,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 3,
+        "terminalCliffCount": 3,
+        "preMergeTicketCount": 3,
+        "exactMergeTicketCount": 3,
+        "nearConsolidationTicketCount": 3,
+        "allocatedTicketCount": 3,
+        "mainCount": 3,
+        "coverCount": 0,
+        "finalPurchaseCount": 3,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": true,
+        "terminalCliff": true,
+        "mergeBefore": true,
+        "exactMerge": true,
+        "nearConsolidation": true,
+        "allocation": true,
+        "final": true
+      },
+      "exactHitControl": true,
+      "exactHitV1": true,
+      "exactHitV2": true,
+      "payout": 500
+    },
+    {
+      "raceKey": "20260908-27-2",
+      "controlTickets": 9,
+      "v1Tickets": 0,
+      "v2Tickets": 0,
+      "v1Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Flow": {
+        "rawScenarioCount": 4,
+        "strongScenarioCandidateCount": 2,
+        "scenarioCliffCount": 2,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 120,
+        "terminalCliffCount": 35,
+        "preMergeTicketCount": 35,
+        "exactMergeTicketCount": 35,
+        "nearConsolidationTicketCount": 35,
+        "allocatedTicketCount": 35,
+        "mainCount": 0,
+        "coverCount": 0,
+        "finalPurchaseCount": 0,
+        "eligible": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP",
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 750
+    },
+    {
+      "raceKey": "20260908-61-1",
+      "controlTickets": 2,
+      "v1Tickets": 2,
+      "v2Tickets": 2,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 2,
+        "terminalCliffCount": 2,
+        "preMergeTicketCount": 2,
+        "exactMergeTicketCount": 2,
+        "nearConsolidationTicketCount": 2,
+        "allocatedTicketCount": 2,
+        "mainCount": 2,
+        "coverCount": 0,
+        "finalPurchaseCount": 2,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": true,
+        "terminalCliff": true,
+        "mergeBefore": true,
+        "exactMerge": true,
+        "nearConsolidation": true,
+        "allocation": true,
+        "final": true
+      },
+      "exactHitControl": true,
+      "exactHitV1": true,
+      "exactHitV2": true,
+      "payout": 250
+    },
+    {
+      "raceKey": "20260908-13-12",
+      "controlTickets": 0,
+      "v1Tickets": 0,
+      "v2Tickets": 14,
+      "v1Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 6,
+        "strongScenarioCandidateCount": 3,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 83,
+        "terminalCliffCount": 14,
+        "preMergeTicketCount": 14,
+        "exactMergeTicketCount": 14,
+        "nearConsolidationTicketCount": 14,
+        "allocatedTicketCount": 14,
+        "mainCount": 14,
+        "coverCount": 0,
+        "finalPurchaseCount": 14,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": true,
+        "terminalCliff": true,
+        "mergeBefore": true,
+        "exactMerge": true,
+        "nearConsolidation": true,
+        "allocation": true,
+        "final": true
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": true,
+      "payout": 920
+    },
+    {
+      "raceKey": "20260908-26-11",
+      "controlTickets": 0,
+      "v1Tickets": 0,
+      "v2Tickets": 0,
+      "v1Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Flow": {
+        "rawScenarioCount": 4,
+        "strongScenarioCandidateCount": 4,
+        "scenarioCliffCount": 2,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 120,
+        "terminalCliffCount": 33,
+        "preMergeTicketCount": 33,
+        "exactMergeTicketCount": 33,
+        "nearConsolidationTicketCount": 33,
+        "allocatedTicketCount": 33,
+        "mainCount": 0,
+        "coverCount": 0,
+        "finalPurchaseCount": 0,
+        "eligible": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP",
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 2940
+    },
+    {
+      "raceKey": "20260908-13-11",
+      "controlTickets": 20,
+      "v1Tickets": 0,
+      "v2Tickets": 0,
+      "v1Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Flow": {
+        "rawScenarioCount": 6,
+        "strongScenarioCandidateCount": 4,
+        "scenarioCliffCount": 3,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 180,
+        "terminalCliffCount": 45,
+        "preMergeTicketCount": 45,
+        "exactMergeTicketCount": 45,
+        "nearConsolidationTicketCount": 45,
+        "allocatedTicketCount": 45,
+        "mainCount": 0,
+        "coverCount": 0,
+        "finalPurchaseCount": 0,
+        "eligible": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP",
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": true,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 2580
+    },
+    {
+      "raceKey": "20260908-26-10",
+      "controlTickets": 3,
+      "v1Tickets": 3,
+      "v2Tickets": 3,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 3,
+        "terminalCliffCount": 3,
+        "preMergeTicketCount": 3,
+        "exactMergeTicketCount": 3,
+        "nearConsolidationTicketCount": 3,
+        "allocatedTicketCount": 3,
+        "mainCount": 3,
+        "coverCount": 0,
+        "finalPurchaseCount": 3,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 3300
+    },
+    {
+      "raceKey": "20260908-13-10",
+      "controlTickets": 0,
+      "v1Tickets": 0,
+      "v2Tickets": 0,
+      "v1Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Flow": {
+        "rawScenarioCount": 6,
+        "strongScenarioCandidateCount": 3,
+        "scenarioCliffCount": 2,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 180,
+        "terminalCliffCount": 30,
+        "preMergeTicketCount": 30,
+        "exactMergeTicketCount": 30,
+        "nearConsolidationTicketCount": 30,
+        "allocatedTicketCount": 30,
+        "mainCount": 0,
+        "coverCount": 0,
+        "finalPurchaseCount": 0,
+        "eligible": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP",
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 24220
+    },
+    {
+      "raceKey": "20260908-13-9",
+      "controlTickets": 6,
+      "v1Tickets": 6,
+      "v2Tickets": 6,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 6,
+        "terminalCliffCount": 6,
+        "preMergeTicketCount": 6,
+        "exactMergeTicketCount": 6,
+        "nearConsolidationTicketCount": 6,
+        "allocatedTicketCount": 6,
+        "mainCount": 6,
+        "coverCount": 0,
+        "finalPurchaseCount": 6,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 2490
+    },
+    {
+      "raceKey": "20260908-26-8",
+      "controlTickets": 2,
+      "v1Tickets": 2,
+      "v2Tickets": 2,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 2,
+        "terminalCliffCount": 2,
+        "preMergeTicketCount": 2,
+        "exactMergeTicketCount": 2,
+        "nearConsolidationTicketCount": 2,
+        "allocatedTicketCount": 2,
+        "mainCount": 2,
+        "coverCount": 0,
+        "finalPurchaseCount": 2,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 13810
+    },
+    {
+      "raceKey": "20260908-13-8",
+      "controlTickets": 2,
+      "v1Tickets": 2,
+      "v2Tickets": 2,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 2,
+        "terminalCliffCount": 2,
+        "preMergeTicketCount": 2,
+        "exactMergeTicketCount": 2,
+        "nearConsolidationTicketCount": 2,
+        "allocatedTicketCount": 2,
+        "mainCount": 2,
+        "coverCount": 0,
+        "finalPurchaseCount": 2,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": true,
+        "terminalCliff": true,
+        "mergeBefore": true,
+        "exactMerge": true,
+        "nearConsolidation": true,
+        "allocation": true,
+        "final": true
+      },
+      "exactHitControl": true,
+      "exactHitV1": true,
+      "exactHitV2": true,
+      "payout": 3210
+    },
+    {
+      "raceKey": "20260908-26-7",
+      "controlTickets": 24,
+      "v1Tickets": 0,
+      "v2Tickets": 0,
+      "v1Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Flow": {
+        "rawScenarioCount": 6,
+        "strongScenarioCandidateCount": 3,
+        "scenarioCliffCount": 2,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 180,
+        "terminalCliffCount": 49,
+        "preMergeTicketCount": 49,
+        "exactMergeTicketCount": 49,
+        "nearConsolidationTicketCount": 49,
+        "allocatedTicketCount": 49,
+        "mainCount": 0,
+        "coverCount": 0,
+        "finalPurchaseCount": 0,
+        "eligible": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP",
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": true,
+        "terminalCliff": true,
+        "mergeBefore": true,
+        "exactMerge": true,
+        "nearConsolidation": true,
+        "allocation": true,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 640
+    },
+    {
+      "raceKey": "20260908-26-6",
+      "controlTickets": 1,
+      "v1Tickets": 3,
+      "v2Tickets": 3,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 3,
+        "terminalCliffCount": 3,
+        "preMergeTicketCount": 3,
+        "exactMergeTicketCount": 3,
+        "nearConsolidationTicketCount": 3,
+        "allocatedTicketCount": 3,
+        "mainCount": 3,
+        "coverCount": 0,
+        "finalPurchaseCount": 3,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 890
+    },
+    {
+      "raceKey": "20260908-13-6",
+      "controlTickets": 20,
+      "v1Tickets": 0,
+      "v2Tickets": 0,
+      "v1Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Flow": {
+        "rawScenarioCount": 6,
+        "strongScenarioCandidateCount": 3,
+        "scenarioCliffCount": 3,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 180,
+        "terminalCliffCount": 28,
+        "preMergeTicketCount": 28,
+        "exactMergeTicketCount": 28,
+        "nearConsolidationTicketCount": 28,
+        "allocatedTicketCount": 28,
+        "mainCount": 0,
+        "coverCount": 0,
+        "finalPurchaseCount": 0,
+        "eligible": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP",
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 1490
+    },
+    {
+      "raceKey": "20260908-26-5",
+      "controlTickets": 2,
+      "v1Tickets": 2,
+      "v2Tickets": 2,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 2,
+        "terminalCliffCount": 2,
+        "preMergeTicketCount": 2,
+        "exactMergeTicketCount": 2,
+        "nearConsolidationTicketCount": 2,
+        "allocatedTicketCount": 2,
+        "mainCount": 2,
+        "coverCount": 0,
+        "finalPurchaseCount": 2,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 17130
+    },
+    {
+      "raceKey": "20260908-13-5",
+      "controlTickets": 0,
+      "v1Tickets": 0,
+      "v2Tickets": 0,
+      "v1Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Flow": {
+        "rawScenarioCount": 5,
+        "strongScenarioCandidateCount": 3,
+        "scenarioCliffCount": 3,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 142,
+        "terminalCliffCount": 68,
+        "preMergeTicketCount": 68,
+        "exactMergeTicketCount": 68,
+        "nearConsolidationTicketCount": 68,
+        "allocatedTicketCount": 68,
+        "mainCount": 0,
+        "coverCount": 0,
+        "finalPurchaseCount": 0,
+        "eligible": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP",
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 190
+    },
+    {
+      "raceKey": "20260908-26-4",
+      "controlTickets": 10,
+      "v1Tickets": 16,
+      "v2Tickets": 16,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 16,
+        "terminalCliffCount": 16,
+        "preMergeTicketCount": 16,
+        "exactMergeTicketCount": 16,
+        "nearConsolidationTicketCount": 16,
+        "allocatedTicketCount": 16,
+        "mainCount": 16,
+        "coverCount": 0,
+        "finalPurchaseCount": 16,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": true,
+        "terminalCliff": true,
+        "mergeBefore": true,
+        "exactMerge": true,
+        "nearConsolidation": true,
+        "allocation": true,
+        "final": true
+      },
+      "exactHitControl": true,
+      "exactHitV1": true,
+      "exactHitV2": true,
+      "payout": 5320
+    },
+    {
+      "raceKey": "20260908-13-4",
+      "controlTickets": 0,
+      "v1Tickets": 6,
+      "v2Tickets": 5,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 6,
+        "terminalCliffCount": 5,
+        "preMergeTicketCount": 5,
+        "exactMergeTicketCount": 5,
+        "nearConsolidationTicketCount": 5,
+        "allocatedTicketCount": 5,
+        "mainCount": 5,
+        "coverCount": 0,
+        "finalPurchaseCount": 5,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 7190
+    },
+    {
+      "raceKey": "20260908-26-3",
+      "controlTickets": 27,
+      "v1Tickets": 0,
+      "v2Tickets": 0,
+      "v1Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Flow": {
+        "rawScenarioCount": 6,
+        "strongScenarioCandidateCount": 3,
+        "scenarioCliffCount": 3,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 180,
+        "terminalCliffCount": 34,
+        "preMergeTicketCount": 34,
+        "exactMergeTicketCount": 34,
+        "nearConsolidationTicketCount": 34,
+        "allocatedTicketCount": 34,
+        "mainCount": 0,
+        "coverCount": 0,
+        "finalPurchaseCount": 0,
+        "eligible": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP",
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": true,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 1420
+    },
+    {
+      "raceKey": "20260908-13-3",
+      "controlTickets": 21,
+      "v1Tickets": 0,
+      "v2Tickets": 0,
+      "v1Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Flow": {
+        "rawScenarioCount": 6,
+        "strongScenarioCandidateCount": 3,
+        "scenarioCliffCount": 3,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 180,
+        "terminalCliffCount": 36,
+        "preMergeTicketCount": 36,
+        "exactMergeTicketCount": 36,
+        "nearConsolidationTicketCount": 36,
+        "allocatedTicketCount": 36,
+        "mainCount": 0,
+        "coverCount": 0,
+        "finalPurchaseCount": 0,
+        "eligible": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP",
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 1820
+    },
+    {
+      "raceKey": "20260908-26-2",
+      "controlTickets": 0,
+      "v1Tickets": 0,
+      "v2Tickets": 19,
+      "v1Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 2,
+        "strongScenarioCandidateCount": 2,
+        "scenarioCliffCount": 2,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 24,
+        "terminalCliffCount": 19,
+        "preMergeTicketCount": 19,
+        "exactMergeTicketCount": 19,
+        "nearConsolidationTicketCount": 19,
+        "allocatedTicketCount": 19,
+        "mainCount": 9,
+        "coverCount": 10,
+        "finalPurchaseCount": 19,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 332770
+    },
+    {
+      "raceKey": "20260908-44-12",
+      "controlTickets": 8,
+      "v1Tickets": 8,
+      "v2Tickets": 8,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 4,
+        "strongScenarioCandidateCount": 4,
+        "scenarioCliffCount": 4,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 8,
+        "terminalCliffCount": 8,
+        "preMergeTicketCount": 8,
+        "exactMergeTicketCount": 8,
+        "nearConsolidationTicketCount": 8,
+        "allocatedTicketCount": 8,
+        "mainCount": 2,
+        "coverCount": 6,
+        "finalPurchaseCount": 8,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 57160
+    },
+    {
+      "raceKey": "20260908-13-2",
+      "controlTickets": 2,
+      "v1Tickets": 2,
+      "v2Tickets": 2,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 2,
+        "terminalCliffCount": 2,
+        "preMergeTicketCount": 2,
+        "exactMergeTicketCount": 2,
+        "nearConsolidationTicketCount": 2,
+        "allocatedTicketCount": 2,
+        "mainCount": 2,
+        "coverCount": 0,
+        "finalPurchaseCount": 2,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 1940
+    },
+    {
+      "raceKey": "20260908-21-11",
+      "controlTickets": 0,
+      "v1Tickets": 0,
+      "v2Tickets": 0,
+      "v1Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Flow": {
+        "rawScenarioCount": 6,
+        "strongScenarioCandidateCount": 3,
+        "scenarioCliffCount": 3,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 180,
+        "terminalCliffCount": 25,
+        "preMergeTicketCount": 25,
+        "exactMergeTicketCount": 25,
+        "nearConsolidationTicketCount": 25,
+        "allocatedTicketCount": 25,
+        "mainCount": 0,
+        "coverCount": 0,
+        "finalPurchaseCount": 0,
+        "eligible": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP",
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": true,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 38580
+    },
+    {
+      "raceKey": "20260908-13-1",
+      "controlTickets": 3,
+      "v1Tickets": 3,
+      "v2Tickets": 3,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 3,
+        "terminalCliffCount": 3,
+        "preMergeTicketCount": 3,
+        "exactMergeTicketCount": 3,
+        "nearConsolidationTicketCount": 3,
+        "allocatedTicketCount": 3,
+        "mainCount": 3,
+        "coverCount": 0,
+        "finalPurchaseCount": 3,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 590
+    },
+    {
+      "raceKey": "20260908-44-11",
+      "controlTickets": 2,
+      "v1Tickets": 2,
+      "v2Tickets": 2,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 2,
+        "terminalCliffCount": 2,
+        "preMergeTicketCount": 2,
+        "exactMergeTicketCount": 2,
+        "nearConsolidationTicketCount": 2,
+        "allocatedTicketCount": 2,
+        "mainCount": 2,
+        "coverCount": 0,
+        "finalPurchaseCount": 2,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 23650
+    },
+    {
+      "raceKey": "20260908-44-9",
+      "controlTickets": 6,
+      "v1Tickets": 6,
+      "v2Tickets": 6,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 6,
+        "terminalCliffCount": 6,
+        "preMergeTicketCount": 6,
+        "exactMergeTicketCount": 6,
+        "nearConsolidationTicketCount": 6,
+        "allocatedTicketCount": 6,
+        "mainCount": 6,
+        "coverCount": 0,
+        "finalPurchaseCount": 6,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 6440
+    },
+    {
+      "raceKey": "20260908-21-8",
+      "controlTickets": 2,
+      "v1Tickets": 2,
+      "v2Tickets": 2,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 2,
+        "terminalCliffCount": 2,
+        "preMergeTicketCount": 2,
+        "exactMergeTicketCount": 2,
+        "nearConsolidationTicketCount": 2,
+        "allocatedTicketCount": 2,
+        "mainCount": 2,
+        "coverCount": 0,
+        "finalPurchaseCount": 2,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 3600
+    },
+    {
+      "raceKey": "20260908-44-8",
+      "controlTickets": 1,
+      "v1Tickets": 3,
+      "v2Tickets": 3,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 3,
+        "terminalCliffCount": 3,
+        "preMergeTicketCount": 3,
+        "exactMergeTicketCount": 3,
+        "nearConsolidationTicketCount": 3,
+        "allocatedTicketCount": 3,
+        "mainCount": 3,
+        "coverCount": 0,
+        "finalPurchaseCount": 3,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 850
+    },
+    {
+      "raceKey": "20260908-44-7",
+      "controlTickets": 1,
+      "v1Tickets": 1,
+      "v2Tickets": 1,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 1,
+        "terminalCliffCount": 1,
+        "preMergeTicketCount": 1,
+        "exactMergeTicketCount": 1,
+        "nearConsolidationTicketCount": 1,
+        "allocatedTicketCount": 1,
+        "mainCount": 1,
+        "coverCount": 0,
+        "finalPurchaseCount": 1,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 620
+    },
+    {
+      "raceKey": "20260908-21-6",
+      "controlTickets": 2,
+      "v1Tickets": 5,
+      "v2Tickets": 5,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 5,
+        "terminalCliffCount": 5,
+        "preMergeTicketCount": 5,
+        "exactMergeTicketCount": 5,
+        "nearConsolidationTicketCount": 5,
+        "allocatedTicketCount": 5,
+        "mainCount": 5,
+        "coverCount": 0,
+        "finalPurchaseCount": 5,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": true,
+        "terminalCliff": true,
+        "mergeBefore": true,
+        "exactMerge": true,
+        "nearConsolidation": true,
+        "allocation": true,
+        "final": true
+      },
+      "exactHitControl": false,
+      "exactHitV1": true,
+      "exactHitV2": true,
+      "payout": 300
+    },
+    {
+      "raceKey": "20260908-44-6",
+      "controlTickets": 6,
+      "v1Tickets": 6,
+      "v2Tickets": 6,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 6,
+        "terminalCliffCount": 6,
+        "preMergeTicketCount": 6,
+        "exactMergeTicketCount": 6,
+        "nearConsolidationTicketCount": 6,
+        "allocatedTicketCount": 6,
+        "mainCount": 6,
+        "coverCount": 0,
+        "finalPurchaseCount": 6,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 1570
+    },
+    {
+      "raceKey": "20260908-21-5",
+      "controlTickets": 6,
+      "v1Tickets": 6,
+      "v2Tickets": 6,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 6,
+        "terminalCliffCount": 6,
+        "preMergeTicketCount": 6,
+        "exactMergeTicketCount": 6,
+        "nearConsolidationTicketCount": 6,
+        "allocatedTicketCount": 6,
+        "mainCount": 6,
+        "coverCount": 0,
+        "finalPurchaseCount": 6,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 1200
+    },
+    {
+      "raceKey": "20260908-44-4",
+      "controlTickets": 0,
+      "v1Tickets": 0,
+      "v2Tickets": 0,
+      "v1Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Flow": {
+        "rawScenarioCount": 6,
+        "strongScenarioCandidateCount": 3,
+        "scenarioCliffCount": 2,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 180,
+        "terminalCliffCount": 49,
+        "preMergeTicketCount": 49,
+        "exactMergeTicketCount": 49,
+        "nearConsolidationTicketCount": 49,
+        "allocatedTicketCount": 49,
+        "mainCount": 0,
+        "coverCount": 0,
+        "finalPurchaseCount": 0,
+        "eligible": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP",
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 5310
+    },
+    {
+      "raceKey": "20260908-21-3",
+      "controlTickets": 2,
+      "v1Tickets": 2,
+      "v2Tickets": 2,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 2,
+        "terminalCliffCount": 2,
+        "preMergeTicketCount": 2,
+        "exactMergeTicketCount": 2,
+        "nearConsolidationTicketCount": 2,
+        "allocatedTicketCount": 2,
+        "mainCount": 2,
+        "coverCount": 0,
+        "finalPurchaseCount": 2,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 2450
+    },
+    {
+      "raceKey": "20260908-44-2",
+      "controlTickets": 2,
+      "v1Tickets": 2,
+      "v2Tickets": 2,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 2,
+        "terminalCliffCount": 2,
+        "preMergeTicketCount": 2,
+        "exactMergeTicketCount": 2,
+        "nearConsolidationTicketCount": 2,
+        "allocatedTicketCount": 2,
+        "mainCount": 2,
+        "coverCount": 0,
+        "finalPurchaseCount": 2,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": true,
+        "terminalCliff": true,
+        "mergeBefore": true,
+        "exactMerge": true,
+        "nearConsolidation": true,
+        "allocation": true,
+        "final": true
+      },
+      "exactHitControl": true,
+      "exactHitV1": true,
+      "exactHitV2": true,
+      "payout": 1240
+    },
+    {
+      "raceKey": "20260908-44-1",
+      "controlTickets": 2,
+      "v1Tickets": 2,
+      "v2Tickets": 2,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 2,
+        "terminalCliffCount": 2,
+        "preMergeTicketCount": 2,
+        "exactMergeTicketCount": 2,
+        "nearConsolidationTicketCount": 2,
+        "allocatedTicketCount": 2,
+        "mainCount": 2,
+        "coverCount": 0,
+        "finalPurchaseCount": 2,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 2040
+    },
+    {
+      "raceKey": "20260908-37-7",
+      "controlTickets": 21,
+      "v1Tickets": 0,
+      "v2Tickets": 0,
+      "v1Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Flow": {
+        "rawScenarioCount": 6,
+        "strongScenarioCandidateCount": 3,
+        "scenarioCliffCount": 2,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 180,
+        "terminalCliffCount": 26,
+        "preMergeTicketCount": 26,
+        "exactMergeTicketCount": 26,
+        "nearConsolidationTicketCount": 26,
+        "allocatedTicketCount": 26,
+        "mainCount": 0,
+        "coverCount": 0,
+        "finalPurchaseCount": 0,
+        "eligible": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP",
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 1880
+    },
+    {
+      "raceKey": "20260908-37-6",
+      "controlTickets": 2,
+      "v1Tickets": 2,
+      "v2Tickets": 2,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 2,
+        "terminalCliffCount": 2,
+        "preMergeTicketCount": 2,
+        "exactMergeTicketCount": 2,
+        "nearConsolidationTicketCount": 2,
+        "allocatedTicketCount": 2,
+        "mainCount": 2,
+        "coverCount": 0,
+        "finalPurchaseCount": 2,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 22070
+    },
+    {
+      "raceKey": "20260908-37-5",
+      "controlTickets": 2,
+      "v1Tickets": 2,
+      "v2Tickets": 2,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 1,
+        "strongScenarioCandidateCount": 1,
+        "scenarioCliffCount": 1,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 2,
+        "terminalCliffCount": 2,
+        "preMergeTicketCount": 2,
+        "exactMergeTicketCount": 2,
+        "nearConsolidationTicketCount": 2,
+        "allocatedTicketCount": 2,
+        "mainCount": 2,
+        "coverCount": 0,
+        "finalPurchaseCount": 2,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 460
+    },
+    {
+      "raceKey": "20260908-37-4",
+      "controlTickets": 21,
+      "v1Tickets": 0,
+      "v2Tickets": 17,
+      "v1Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 5,
+        "strongScenarioCandidateCount": 3,
+        "scenarioCliffCount": 2,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 150,
+        "terminalCliffCount": 17,
+        "preMergeTicketCount": 17,
+        "exactMergeTicketCount": 17,
+        "nearConsolidationTicketCount": 17,
+        "allocatedTicketCount": 17,
+        "mainCount": 8,
+        "coverCount": 9,
+        "finalPurchaseCount": 17,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": true,
+        "terminalCliff": true,
+        "mergeBefore": true,
+        "exactMerge": true,
+        "nearConsolidation": true,
+        "allocation": true,
+        "final": true
+      },
+      "exactHitControl": true,
+      "exactHitV1": false,
+      "exactHitV2": true,
+      "payout": 4740
+    },
+    {
+      "raceKey": "20260908-37-3",
+      "controlTickets": 0,
+      "v1Tickets": 0,
+      "v2Tickets": 0,
+      "v1Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Flow": {
+        "rawScenarioCount": 6,
+        "strongScenarioCandidateCount": 3,
+        "scenarioCliffCount": 3,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 180,
+        "terminalCliffCount": 77,
+        "preMergeTicketCount": 77,
+        "exactMergeTicketCount": 77,
+        "nearConsolidationTicketCount": 77,
+        "allocatedTicketCount": 77,
+        "mainCount": 0,
+        "coverCount": 0,
+        "finalPurchaseCount": 0,
+        "eligible": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP",
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 1590
+    },
+    {
+      "raceKey": "20260908-37-2",
+      "controlTickets": 0,
+      "v1Tickets": 0,
+      "v2Tickets": 0,
+      "v1Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Eligibility": {
+        "state": "INELIGIBLE",
+        "canPurchase": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP"
+      },
+      "v2Flow": {
+        "rawScenarioCount": 5,
+        "strongScenarioCandidateCount": 2,
+        "scenarioCliffCount": 2,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 150,
+        "terminalCliffCount": 30,
+        "preMergeTicketCount": 30,
+        "exactMergeTicketCount": 30,
+        "nearConsolidationTicketCount": 30,
+        "allocatedTicketCount": 30,
+        "mainCount": 0,
+        "coverCount": 0,
+        "finalPurchaseCount": 0,
+        "eligible": false,
+        "reason": "NATURAL_SELECTION_EXCEEDS_CAP",
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": true,
+        "scenarioCliff": true,
+        "terminalCliff": true,
+        "mergeBefore": true,
+        "exactMerge": true,
+        "nearConsolidation": true,
+        "allocation": true,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 6100
+    },
+    {
+      "raceKey": "20260908-37-1",
+      "controlTickets": 4,
+      "v1Tickets": 4,
+      "v2Tickets": 4,
+      "v1Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Eligibility": {
+        "state": "PURCHASEABLE",
+        "canPurchase": true,
+        "reason": null
+      },
+      "v2Flow": {
+        "rawScenarioCount": 2,
+        "strongScenarioCandidateCount": 2,
+        "scenarioCliffCount": 2,
+        "rawTerminalCount": 210,
+        "naturalTerminalCount": 4,
+        "terminalCliffCount": 4,
+        "preMergeTicketCount": 4,
+        "exactMergeTicketCount": 4,
+        "nearConsolidationTicketCount": 4,
+        "allocatedTicketCount": 4,
+        "mainCount": 2,
+        "coverCount": 2,
+        "finalPurchaseCount": 4,
+        "eligible": true,
+        "reason": null,
+        "nearDuplicateScenariosMerged": 0
+      },
+      "correctSurvivalV2": {
+        "raw": true,
+        "natural": false,
+        "scenarioCliff": false,
+        "terminalCliff": false,
+        "mergeBefore": false,
+        "exactMerge": false,
+        "nearConsolidation": false,
+        "allocation": false,
+        "final": false
+      },
+      "exactHitControl": false,
+      "exactHitV1": false,
+      "exactHitV2": false,
+      "payout": 3350
+    }
+  ],
+  "source": "existing sealed read endpoints",
+  "requested": 114,
+  "readFailures": [],
+  "productionWrite": 0
+}

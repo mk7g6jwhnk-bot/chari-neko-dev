@@ -1,6 +1,7 @@
 import configJson from "./scenario-cliff-shadow-config.json" with { type: "json" };
 
 export const VERSION = "SCENARIO_CLIFF_PURCHASE_SHADOW_V1";
+export const VERSION_V2 = "SCENARIO_CLIFF_PURCHASE_SHADOW_V2";
 export const DEFAULT_CONFIG = Object.freeze(configJson);
 const NATURAL_CODES = new Set(["ADOPTED", "THIRD_VARIANT_AMBIGUITY", "THIRD_VARIANT_BOUNDARY"]);
 const RESULT_KEYS = new Set(["result", "finishOrder", "payout", "hit", "return", "roi", "actual"]);
@@ -67,6 +68,65 @@ export function buildScenarioCliffShadow(record, config = DEFAULT_CONFIG) {
   };
 }
 
+export function buildScenarioCliffShadowV2(record, config = DEFAULT_CONFIG) {
+  const prediction = sealedPrediction(record), rawRows = allLifecycleRows(prediction), lifecycle = lifecycleRows(prediction);
+  const missingnessAudit = auditMissingnessV2(prediction, lifecycle), scenarios = scoreScenarios(lifecycle, prediction, config, true);
+  const scenarioDecision = selectScenarioSetV2(scenarios, config);
+  const scenarioSelections = scenarioDecision.rows.map(scenario => ({ scenario, selection: selectScenarioTerminalsV2(scenario, config) }));
+  const beforeMerge = scenarioSelections.flatMap(({ scenario, selection }) => selection.rows.map(row => ({ ...row, scenarioSupport: supportRef(scenario) })));
+  const exactMergedBeforeScenarioConsolidation = mergeExactTickets(beforeMerge), consolidated = consolidateNearDuplicateScenarios(scenarioDecision.rows, config);
+  const exactMerged = remapConsolidatedScenarioSupport(exactMergedBeforeScenarioConsolidation, consolidated), allocated = allocateNaturalScenarioSet(exactMerged, consolidated.rows, config);
+  const criticalMissing = missingnessAudit.some(item => item.classification === "CRITICAL" && item.missing);
+  const eligibility = criticalMissing
+    ? { state: "INELIGIBLE", canPurchase: false, reason: "CRITICAL_DATA_MISSING" }
+    : allocated.length > config.maximumTickets
+      ? { state: "INELIGIBLE", canPurchase: false, reason: "NATURAL_SELECTION_EXCEEDS_CAP" }
+      : { state: "PURCHASEABLE", canPurchase: true, reason: null };
+  const classified = classifyTickets(allocated, consolidated.rows, config, eligibility.canPurchase), warnings = [];
+  if (eligibility.canPurchase && classified.length >= config.manyTickets) warnings.push("MANY_TICKETS");
+  if (eligibility.canPurchase && hasImpactfulPartialMissing(missingnessAudit)) warnings.push("PARTIAL_DATA_MISSING");
+  const compositeOdds = compositeMarketPrice(classified);
+  if (eligibility.canPurchase && compositeOdds !== null && compositeOdds < config.lowOddsComposite) warnings.push("LOW_ODDS_VALUE");
+  const stageOrders = {
+    raw: rawRows.map(ticketKey).filter(Boolean), natural: lifecycle.map(ticketKey).filter(Boolean), scenarioCliff: scenarioDecision.rows.flatMap(s => s.terminals.map(ticketKey)),
+    terminalCliff: scenarioSelections.flatMap(x => x.selection.rows.map(ticketKey)), mergeBefore: beforeMerge.map(ticketKey), exactMerge: exactMerged.map(ticketKey),
+    nearConsolidation: exactMerged.map(ticketKey), allocation: allocated.map(ticketKey), final: classified.map(ticketKey)
+  };
+  return {
+    version: VERSION_V2, mode: "RESEARCH_ONLY_SHADOW", raceKey: record?.raceKey || prediction?.raceKey || null, configVersion: config.version,
+    predictionContinues: true, scenarios: scenarios.map(stripTerminals), selectedScenarioIds: consolidated.rows.map(x => x.scenarioId),
+    scenarioBoundary: { ...stripRows(scenarioDecision), singletonCliffRelaxed: scenarioDecision.singletonCliffRelaxed },
+    terminalBoundaries: scenarioSelections.map(({ scenario, selection }) => ({ scenarioId: scenario.scenarioId, ...stripRows(selection), noCliffRetention: !selection.detected })),
+    naturalTicketCount: allocated.length, tickets: eligibility.canPurchase ? classified : [], purchaseEligibility: eligibility, warnings, missingnessAudit,
+    scenarioConcentration: concentration(scenarios), raceConfidence: raceConfidence(consolidated.rows, missingnessAudit, config),
+    hooks: { exacta: pairHook(classified), trio: trioHook(classified), productionConnected: false },
+    flow: {
+      rawScenarioCount: scenarios.length, strongScenarioCandidateCount: scenarioDecision.supportedCount, scenarioCliffCount: scenarioDecision.rows.length,
+      rawTerminalCount: rawRows.length, naturalTerminalCount: lifecycle.length, terminalCliffCount: stageOrders.terminalCliff.length,
+      preMergeTicketCount: beforeMerge.length, exactMergeTicketCount: exactMergedBeforeScenarioConsolidation.length, nearConsolidationTicketCount: exactMerged.length,
+      allocatedTicketCount: allocated.length, mainCount: classified.filter(x => x.category === "MAIN").length, coverCount: classified.filter(x => x.category === "COVER").length,
+      finalPurchaseCount: classified.length, eligible: eligibility.canPurchase, reason: eligibility.reason, nearDuplicateScenariosMerged: consolidated.mergedCount,
+      stageOrders
+    },
+    audit: { technicalScenarioDuplicates: scenarios.reduce((n, row) => n + row.technicalDuplicateCount, 0), duplicateTicketMerges: beforeMerge.length - exactMerged.length, nearDuplicateScenarioMerges: consolidated.mergedCount, resultFieldsUsed: [] }
+  };
+}
+
+export function evaluateScenarioCliffThreeWay(records, config = DEFAULT_CONFIG) {
+  const safe = (records || []).filter(record => !isProtected(record));
+  const races = safe.map(record => {
+    const v1 = buildScenarioCliffShadow(record, config), v2 = buildScenarioCliffShadowV2(record, config), control = controlPlan(record), finish = confirmedFinish(record), prediction = sealedPrediction(record);
+    return { raceKey: record.raceKey, control, v1, v2, finish, generatedCorrect: Boolean(finish && allLifecycleRows(prediction).some(row => ticketKey(row) === finish.join("-"))), naturalCorrect: Boolean(finish && lifecycleRows(prediction).some(row => ticketKey(row) === finish.join("-"))), payout: finish ? finite(record?.result?.result?.payout ?? record?.result?.payout, 0) : null };
+  });
+  return {
+    version: VERSION_V2, readOnly: true, productionWriteAllowed: false, cohortSize: races.length, protectedExcluded: (records || []).length - safe.length,
+    control: summarizeThree(races, "control"), candidateV1: summarizeThree(races, "v1"), candidateV2: summarizeThree(races, "v2"),
+    v1CapCauses: diagnoseCapCauses(races, "v1"), v2CapCauses: diagnoseCapCauses(races, "v2"), v1SmallCauses: diagnoseSmallCauses(races, "v1"), v2SmallCauses: diagnoseSmallCauses(races, "v2"),
+    v2Warnings: countValues(races.flatMap(row => row.v2.warnings)), v2IneligibleReasons: countValues(races.map(row => row.v2.purchaseEligibility.reason).filter(Boolean)),
+    v2Flow: summarizeFlows(races.map(row => row.v2.flow)), races: races.map(compactThreeRace)
+  };
+}
+
 export function evaluateScenarioCliffShadow(records, config = DEFAULT_CONFIG) {
   const safe = (records || []).filter(record => !isProtected(record));
   const races = safe.map(record => {
@@ -76,7 +136,114 @@ export function evaluateScenarioCliffShadow(records, config = DEFAULT_CONFIG) {
   return { version: VERSION, readOnly: true, productionWriteAllowed: false, protectedExcluded: (records || []).length - safe.length, cohortSize: races.length, control: summarize(races, "control"), candidate: summarize(races, "candidate"), warnings: countValues(races.flatMap(row => row.candidate.warnings)), ineligibleReasons: countValues(races.map(row => row.candidate.purchaseEligibility.reason).filter(Boolean)), duplicateScenarioSupportDetected: races.reduce((n, row) => n + row.candidate.audit.technicalScenarioDuplicates, 0), races: races.map(compactRace) };
 }
 
-function scoreScenarios(rows, prediction, config) {
+function selectScenarioSetV2(scenarios, config) {
+  const top = scenarios[0]?.scenarioRelativeScore || 0, supported = scenarios.filter(row => !top || row.scenarioRelativeScore / top >= config.v2.scenarioSupportFloor);
+  const cliff = selectNaturalBoundary(supported, config.scenarioBoundary, "scenarioRelativeScore");
+  const singleton = cliff.detected && cliff.rows.length === 1;
+  const strongSingleton = singleton && cliff.boundary.boundaryScore >= config.v2.strongSingletonBoundaryScore && cliff.boundary.relativeGap >= config.v2.strongSingletonRelativeGap;
+  const rows = singleton && !strongSingleton ? supported : cliff.rows;
+  return { ...cliff, rows, supportedCount: supported.length, singletonCliffRelaxed: singleton && !strongSingleton };
+}
+
+function selectScenarioTerminalsV2(scenario, config) {
+  const rows = scenario.terminals, byPair = new Map();
+  for (const row of rows) { const key = row.order?.slice(0, 2).join("-"); if (!byPair.has(key)) byPair.set(key, []); byPair.get(key).push(row); }
+  const pairs = [...byPair].map(([pair, terminals]) => ({ pair, terminals, score: Math.max(...terminals.map(row => finite(row.pairRelativeScore, row.terminalRelativeScore))) })).sort((a, b) => b.score - a.score || a.pair.localeCompare(b.pair, "en"));
+  const topPair = pairs[0]?.score || 0, supportedPairs = pairs.filter(pair => !topPair || pair.score / topPair >= config.v2.pairSupportFloor);
+  const selected = supportedPairs.flatMap(pair => selectNaturalBoundary(pair.terminals, config.terminalBoundary, "terminalRelativeScore").rows);
+  const whole = selectNaturalBoundary(rows, config.terminalBoundary, "terminalRelativeScore");
+  return { ...whole, rows: uniqueByTicket(selected), pairCountBefore: pairs.length, pairCountAfter: supportedPairs.length, noCliffMultipleRetention: !whole.detected && selected.length > 1 };
+}
+
+function consolidateNearDuplicateScenarios(scenarios, config) {
+  const kept = [], mergedInto = new Map();
+  for (const scenario of scenarios) {
+    const target = kept.find(other => scenarioFamilyBase(other.scenarioId) === scenarioFamilyBase(scenario.scenarioId) && jaccard(other.terminals.map(ticketKey), scenario.terminals.map(ticketKey)) >= config.v2.nearDuplicateOverlap);
+    if (!target) kept.push({ ...scenario, terminals: [...scenario.terminals], consolidatedScenarioIds: [scenario.scenarioId] });
+    else {
+      target.terminals = uniqueByTicket([...target.terminals, ...scenario.terminals]); target.consolidatedScenarioIds.push(scenario.scenarioId);
+      target.scenarioRelativeScore = Math.max(target.scenarioRelativeScore, scenario.scenarioRelativeScore); mergedInto.set(scenario.scenarioId, target.scenarioId);
+    }
+  }
+  return { rows: kept, mergedCount: mergedInto.size, mergedInto: Object.fromEntries(mergedInto) };
+}
+
+function remapConsolidatedScenarioSupport(tickets, consolidated) {
+  return tickets.map(ticket => {
+    const supports = new Map();
+    for (const support of ticket.supportingScenarios) {
+      const scenarioId = consolidated.mergedInto[support.scenarioId] || support.scenarioId;
+      if (!supports.has(scenarioId)) supports.set(scenarioId, { ...support, scenarioId, independenceKey: scenarioId });
+    }
+    const supportingScenarios = [...supports.values()];
+    return { ...ticket, supportingScenarios, scenarioIndependenceKeys: supportingScenarios.map(x => x.independenceKey), independentScenarioSupportCount: supportingScenarios.length };
+  });
+}
+
+function allocateNaturalScenarioSet(tickets, scenarios, config) {
+  if (!tickets.length) return [];
+  const topScenario = scenarios[0]?.scenarioRelativeScore || 0;
+  const allowed = new Set(scenarios.filter((scenario, index) => index === 0 || !topScenario || scenario.scenarioRelativeScore / topScenario >= config.v2.weakScenarioTailFloor).map(row => row.scenarioId));
+  return tickets.filter(ticket => ticket.supportingScenarios.some(support => allowed.has(support.scenarioId)));
+}
+
+function summarizeThree(races, kind) {
+  const plan = row => kind === "control" ? row.control : row[kind].tickets;
+  const counts = races.map(row => plan(row).length), confirmed = races.filter(row => row.finish), hits = confirmed.filter(row => plan(row).some(ticket => ticketKey(ticket) === row.finish.join("-")));
+  const investment = confirmed.reduce((sum, row) => sum + plan(row).length * 100, 0), returned = hits.reduce((sum, row) => sum + row.payout, 0), candidate = kind !== "control";
+  return {
+    raceCount: races.length, purchaseable: candidate ? races.filter(row => row[kind].purchaseEligibility.canPurchase).length : races.filter(row => row.control.length).length,
+    ineligible: candidate ? races.filter(row => !row[kind].purchaseEligibility.canPurchase).length : 0, ticketDistribution: { ...distribution(counts), oneTo3: counts.filter(x => x >= 1 && x <= 3).length, fourTo6: counts.filter(x => x >= 4 && x <= 6).length },
+    exactHits: hits.length, generatedCorrectTerminal: confirmed.filter(row => row.generatedCorrect).length, naturalCorrectSurvived: confirmed.filter(row => row.naturalCorrect).length, finalCorrectSurvived: hits.length,
+    investment, return: returned, roi: investment ? returned / investment : null,
+    mainTickets: candidate ? races.flatMap(row => row[kind].tickets).filter(x => x.category === "MAIN").length : null,
+    coverTickets: candidate ? races.flatMap(row => row[kind].tickets).filter(x => x.category === "COVER").length : null,
+    thickTickets: candidate ? races.flatMap(row => row[kind].tickets).filter(x => x.isThick).length : null,
+    mainHits: candidate ? hits.filter(row => row[kind].tickets.some(x => ticketKey(x) === row.finish.join("-") && x.category === "MAIN")).length : null,
+    coverHits: candidate ? hits.filter(row => row[kind].tickets.some(x => ticketKey(x) === row.finish.join("-") && x.category === "COVER")).length : null,
+    thickHits: candidate ? hits.filter(row => row[kind].tickets.some(x => ticketKey(x) === row.finish.join("-") && x.isThick)).length : null,
+    capIneligible: candidate ? races.filter(row => row[kind].purchaseEligibility.reason === "NATURAL_SELECTION_EXCEEDS_CAP").length : null,
+    warnings: candidate ? countValues(races.flatMap(row => row[kind].warnings)) : {}, highPayoutCapture: { hitsAtLeast10000: hits.filter(row => row.payout >= 10000).length, returnAtLeast10000: hits.filter(row => row.payout >= 10000).reduce((sum, row) => sum + row.payout, 0), largestPayout: hits.length ? Math.max(...hits.map(row => row.payout)) : null },
+    duplicateMerges: candidate ? races.reduce((sum, row) => sum + Number(row[kind].audit.duplicateTicketMerges || 0), 0) : null,
+    nearDuplicateScenarioMerges: kind === "v2" ? races.reduce((sum, row) => sum + row.v2.audit.nearDuplicateScenarioMerges, 0) : null
+  };
+}
+
+function diagnoseCapCauses(races, kind) {
+  const buckets = { MANY_SCENARIOS: 0, MANY_TERMINALS_PER_SCENARIO: 0, TECHNICAL_NEAR_DUPLICATES: 0, PRE_EXACT_MERGE_ONLY: 0, WEAK_SCENARIO_CLIFF: 0, WEAK_TERMINAL_CLIFF: 0, NO_SCENARIO_ALLOCATION: 0, OTHER: 0 };
+  for (const row of races.filter(row => row[kind].purchaseEligibility.reason === "NATURAL_SELECTION_EXCEEDS_CAP")) {
+    const candidate = row[kind], scenarios = candidate.scenarios || [], matched = new Set();
+    if (scenarios.length >= 5) matched.add("MANY_SCENARIOS");
+    if (scenarios.some(s => s.terminalCount >= 12)) matched.add("MANY_TERMINALS_PER_SCENARIO");
+    if (candidate.audit.technicalScenarioDuplicates > 0) matched.add("TECHNICAL_NEAR_DUPLICATES");
+    if (candidate.audit.duplicateTicketMerges > 0 && candidate.naturalTicketCount <= 20) matched.add("PRE_EXACT_MERGE_ONLY");
+    if (!candidate.scenarioBoundary.detected) matched.add("WEAK_SCENARIO_CLIFF");
+    if ((candidate.terminalBoundaries || []).some(x => !x.detected)) matched.add("WEAK_TERMINAL_CLIFF");
+    if (kind === "v1") matched.add("NO_SCENARIO_ALLOCATION");
+    if (!matched.size) matched.add("OTHER");
+    for (const key of matched) buckets[key] += 1;
+  }
+  return buckets;
+}
+
+function diagnoseSmallCauses(races, kind) {
+  const buckets = { STRONG_SCENARIO_CLIFF: 0, STRONG_TERMINAL_CLIFF: 0, STRONGEST_SCENARIO_ONLY: 0, MAIN_CLASSIFICATION_DROP: 0, COVER_STRUCTURALLY_ABSENT: 0, MERGE_CONSOLIDATION: 0, CAP_PROCESS: 0, NATURALLY_SMALL: 0 };
+  for (const row of races.filter(row => { const n = row[kind].tickets.length; return n >= 1 && n <= 3; })) {
+    const candidate = row[kind];
+    if (candidate.scenarioBoundary.detected) buckets.STRONG_SCENARIO_CLIFF += 1;
+    if ((candidate.terminalBoundaries || []).some(x => x.detected)) buckets.STRONG_TERMINAL_CLIFF += 1;
+    if (candidate.selectedScenarioIds.length === 1) buckets.STRONGEST_SCENARIO_ONLY += 1;
+    if (!candidate.tickets.some(x => x.category === "COVER")) buckets.COVER_STRUCTURALLY_ABSENT += 1;
+    if (candidate.audit.duplicateTicketMerges > 0) buckets.MERGE_CONSOLIDATION += 1;
+    if (candidate.naturalTicketCount <= 3) buckets.NATURALLY_SMALL += 1;
+  }
+  return buckets;
+}
+
+function summarizeFlows(flows) { const keys = ["rawScenarioCount", "strongScenarioCandidateCount", "scenarioCliffCount", "rawTerminalCount", "naturalTerminalCount", "terminalCliffCount", "preMergeTicketCount", "exactMergeTicketCount", "nearConsolidationTicketCount", "allocatedTicketCount", "mainCount", "coverCount", "finalPurchaseCount"]; return Object.fromEntries(keys.map(key => [key, distribution(flows.map(flow => Number(flow[key] || 0)))])); }
+function compactThreeRace(row) { const survive = candidate => { const key = row.finish?.join("-"); return key ? Object.fromEntries(Object.entries(candidate.flow?.stageOrders || {}).map(([stage, orders]) => [stage, orders.includes(key)])) : {}; }; return { raceKey: row.raceKey, controlTickets: row.control.length, v1Tickets: row.v1.tickets.length, v2Tickets: row.v2.tickets.length, v1Eligibility: row.v1.purchaseEligibility, v2Eligibility: row.v2.purchaseEligibility, v2Flow: { ...row.v2.flow, stageOrders: undefined }, correctSurvivalV2: survive(row.v2), exactHitControl: Boolean(row.finish && row.control.some(x => ticketKey(x) === row.finish.join("-"))), exactHitV1: Boolean(row.finish && row.v1.tickets.some(x => ticketKey(x) === row.finish.join("-"))), exactHitV2: Boolean(row.finish && row.v2.tickets.some(x => ticketKey(x) === row.finish.join("-"))), payout: row.payout }; }
+
+function scoreScenarios(rows, prediction, config, preserveUnknown = false) {
   const groups = new Map();
   for (const row of rows) {
     const provenance = provenanceFor(row, prediction);
@@ -88,7 +255,7 @@ function scoreScenarios(rows, prediction, config) {
     group.rows.push(row);
   }
   const scored = [...groups.values()].map(group => {
-    const terminals = group.rows.map(row => scoreTerminal(row, config));
+    const terminals = group.rows.map(row => scoreTerminal(row, config, preserveUnknown));
     const best = Math.max(0, ...terminals.map(row => row.terminalRelativeScore));
     const mass = terminals.reduce((sum, row) => sum + Math.max(0, row.terminalRelativeScore), 0);
     const supports = unique(group.rows.flatMap(row => supportEvidence(row)));
@@ -100,19 +267,20 @@ function scoreScenarios(rows, prediction, config) {
   return scored.map((row, index) => ({ ...row, scenarioRank: index + 1 }));
 }
 
-function scoreTerminal(row, config) {
+function scoreTerminal(row, config, preserveUnknown = false) {
   rejectResultLeakage(row);
   const order = normalizeOrder(row.order || row.combination);
-  const model = firstFinite(row.terminalModelWeight, row.normalizedWeight, row.probability, row.modelWeight);
-  const natural = firstFinite(row.naturalConvergenceScore, row.scenarioCoherence);
-  const branchFit = firstFinite(row.branchFit, row.withinBranchFit);
-  const pair = firstFinite(row.pairRelativeScore, row.secondFamilyRelativeToBest, reciprocalRank(row.pairRank));
-  const third = firstFinite(row.thirdConditionalScore, row.thirdFamilyRelativeToBest, row.thirdVariantRelativeToBest, reciprocalRank(row.thirdRank));
+  const pick = preserveUnknown ? firstKnownFinite : firstFinite;
+  const model = pick(row.terminalModelWeight, row.normalizedWeight, row.probability, row.modelWeight);
+  const natural = pick(row.naturalConvergenceScore, row.scenarioCoherence);
+  const branchFit = pick(row.branchFit, row.withinBranchFit);
+  const pair = pick(row.pairRelativeScore, row.secondFamilyRelativeToBest, reciprocalRank(row.pairRank));
+  const third = pick(row.thirdConditionalScore, row.thirdFamilyRelativeToBest, row.thirdVariantRelativeToBest, reciprocalRank(row.thirdRank));
   const components = { model, natural, branchFit, pair, third };
   const available = Object.entries(components).filter(([, value]) => Number.isFinite(value));
   const weightSum = available.reduce((sum, [key]) => sum + config.scoreWeights[key], 0);
   const terminalRelativeScore = weightSum ? available.reduce((sum, [key, value]) => sum + config.scoreWeights[key] * normalizeScore(value), 0) / weightSum : 0;
-  return { order, firstRelativeScore: firstFinite(row.firstRelativeScore, reciprocalRank(row.firstRank), reciprocalRank(row.derivedFirstMassRank)), pairRelativeScore: pair, thirdConditionalScore: third, terminalRelativeScore, terminalScoreBreakdown: components, odds: finite(row.odds), original: row };
+  return { order, firstRelativeScore: pick(row.firstRelativeScore, reciprocalRank(row.firstRank), reciprocalRank(row.derivedFirstMassRank)), pairRelativeScore: pair, thirdConditionalScore: third, terminalRelativeScore, terminalScoreBreakdown: components, odds: preserveUnknown ? knownFinite(row.odds) : finite(row.odds), original: row };
 }
 
 function mergeExactTickets(rows) {
@@ -153,7 +321,7 @@ function raceConfidence(scenarios, missingness, config) {
 }
 
 function auditMissingness(prediction, rows) {
-  const hasRows = rows.length > 0, hasScenario = rows.some(row => row.dominantBranchId || row.scenarioProvenanceId), hasModel = rows.some(row => [row.terminalModelWeight, row.normalizedWeight, row.probability, row.modelWeight].some(Number.isFinite)), hasRoles = rows.some(row => Number.isFinite(Number(row.branchFit ?? row.withinBranchFit ?? row.scenarioCoherence)));
+  const hasRows = rows.length > 0, hasScenario = rows.some(row => row.dominantBranchId || row.scenarioProvenanceId), hasModel = rows.some(row => [row.terminalModelWeight, row.normalizedWeight, row.probability, row.modelWeight].some(isKnownFinite)), hasRoles = rows.some(row => isKnownFinite(row.branchFit ?? row.withinBranchFit ?? row.scenarioCoherence));
   return [
     { field: "terminalLifecycle", classification: "CRITICAL", missing: !hasRows, affectedScope: "terminal generation" },
     { field: "scenarioIdentity", classification: "CRITICAL", missing: !hasScenario, affectedScope: "scenario selection" },
@@ -161,6 +329,15 @@ function auditMissingness(prediction, rows) {
     { field: "roleExecutionSupport", classification: "IMPORTANT", missing: !hasRoles, affectedScope: "scenario evidence" },
     { field: "marketOdds", classification: "AUXILIARY", missing: !rows.some(row => Number.isFinite(Number(row.odds))), affectedScope: "odds value warning only" }
   ];
+}
+function auditMissingnessV2(prediction, rows) {
+  const base = auditMissingness(prediction, rows), modelAvailable = !base.find(item => item.field === "modelSupport")?.missing, naturalAvailable = rows.some(row => isKnownFinite(row.naturalConvergenceScore)), roleAvailable = !base.find(item => item.field === "roleExecutionSupport")?.missing;
+  return base.map(item => {
+    if (item.field === "marketOdds") return { ...item, warningEligible: false, impact: "AUXILIARY_ONLY" };
+    if (item.field === "roleExecutionSupport" && item.missing && modelAvailable && naturalAvailable) return { ...item, classification: "AUXILIARY", warningEligible: false, impact: "REDUNDANT_WITH_MODEL_AND_NATURAL_SUPPORT" };
+    if (item.field === "modelSupport" && item.missing && naturalAvailable && roleAvailable) return { ...item, classification: "AUXILIARY", warningEligible: false, impact: "REDUNDANT_WITH_NATURAL_AND_ROLE_SUPPORT" };
+    return { ...item, warningEligible: item.classification === "IMPORTANT", impact: item.classification === "CRITICAL" ? "PURCHASE_BLOCKING" : item.classification === "IMPORTANT" ? "PURCHASE_DECISION_MATERIAL" : "DIAGNOSTIC_ONLY" };
+  });
 }
 
 function summarize(races, kind) {
@@ -185,12 +362,16 @@ function pairHook(rows) { const groups = new Map(); for (const row of rows) { co
 function trioHook(rows) { const groups = new Map(); for (const row of rows) { const key = [...(row.order || [])].sort((a, b) => a - b).join("-"); if (!key) continue; groups.set(key, (groups.get(key) || 0) + 1); } return [...groups].filter(([, permutations]) => permutations > 1).map(([trio, permutations]) => ({ trio, permutations, researchOnly: true })); }
 function compositeMarketPrice(rows) { const odds = rows.map(x => finite(x.odds)).filter(x => x > 0); if (odds.length !== rows.length || !odds.length) return null; const inv = odds.reduce((n, value) => n + 1 / value, 0); return inv ? 1 / inv : null; }
 function hasPartialMissing(rows) { return rows.some(x => x.missing && x.classification !== "CRITICAL"); }
+function hasImpactfulPartialMissing(rows) { return rows.some(x => x.missing && x.classification === "IMPORTANT" && x.warningEligible !== false); }
 function confirmedFinish(record) { const result = record?.result?.result || record?.result; if (String(result?.status).toLowerCase() !== "confirmed") return null; const order = normalizeOrder(result?.finishOrder); return order?.length === 3 ? order : null; }
 function isProtected(record) { return [record?.sequence, record?.recordNumber, record?.comparisonNumber, record?.validationIndex, record?.sealed?.sequence].some(value => Number.isFinite(Number(value)) && Number(value) >= 403 && Number(value) <= 502); }
 function rejectResultLeakage(row) { for (const key of Object.keys(row || {})) if (RESULT_KEYS.has(key)) throw new Error(`result-aware terminal field prohibited: ${key}`); }
 function normalizeOrder(value) { const values = (Array.isArray(value) ? value : String(value || "").match(/\d+/g) || []).map(Number).slice(0, 3); return values.length === 3 && new Set(values).size === 3 ? values : null; }
 function ticketKey(row) { return normalizeOrder(row?.order || row?.combination)?.join("-") || ""; }
 function firstFinite(...values) { for (const value of values) if (Number.isFinite(Number(value))) return Number(value); return null; }
+function firstKnownFinite(...values) { for (const value of values) if (isKnownFinite(value)) return Number(value); return null; }
+function knownFinite(value) { return isKnownFinite(value) ? Number(value) : null; }
+function isKnownFinite(value) { return value !== null && value !== undefined && value !== "" && Number.isFinite(Number(value)); }
 function reciprocalRank(value) { const n = Number(value); return Number.isFinite(n) && n > 0 ? 1 / n : null; }
 function normalizeScore(value) { const n = Number(value); return Number.isFinite(n) ? n < 0 ? 0 : n > 1 ? n / (1 + n) : n : null; }
 function consistency(values, range) { if (values.length < 2) return 1; return 1 - clamp((Math.max(...values) - Math.min(...values)) / range); }
@@ -201,6 +382,9 @@ function compactRace(row) { return { raceKey: row.raceKey, controlTickets: row.c
 function distribution(values) { return { mean: mean(values), median: quantile(values, .5), p90: quantile(values, .9), max: values.length ? Math.max(...values) : null, sixOrLess: values.filter(x => x <= 6).length, sevenTo10: values.filter(x => x >= 7 && x <= 10).length, elevenTo15: values.filter(x => x >= 11 && x <= 15).length, sixteenTo20: values.filter(x => x >= 16 && x <= 20).length, over20: values.filter(x => x > 20).length }; }
 function countValues(values) { return values.reduce((out, value) => (out[value] = (out[value] || 0) + 1, out), {}); }
 function unique(values) { return [...new Set(values)]; }
+function uniqueByTicket(values) { const map = new Map(); for (const value of values) { const key = ticketKey(value); if (key && !map.has(key)) map.set(key, value); } return [...map.values()]; }
+function scenarioFamilyBase(value) { return String(value || "UNKNOWN").split("|")[0].replace(/[-_:](?:LINE)?[A-Z0-9]+$/i, ""); }
+function jaccard(left, right) { const a = new Set(left), b = new Set(right), union = new Set([...a, ...b]); if (!union.size) return 0; let overlap = 0; for (const value of a) if (b.has(value)) overlap += 1; return overlap / union.size; }
 function median(values) { return quantile(values, .5); }
 function quantile(values, p) { if (!values.length) return null; const sorted = [...values].sort((a, b) => a - b), i = (sorted.length - 1) * p, lo = Math.floor(i), hi = Math.ceil(i); return sorted[lo] + (sorted[hi] - sorted[lo]) * (i - lo); }
 function mean(values) { return values.length ? values.reduce((a, b) => a + b, 0) / values.length : null; }

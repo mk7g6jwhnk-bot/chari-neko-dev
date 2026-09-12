@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { boundaryScores, buildScenarioCliffShadow, DEFAULT_CONFIG, evaluateScenarioCliffShadow, selectNaturalBoundary, VERSION } from "../research/scenario-cliff-shadow.mjs";
+import { boundaryScores, buildScenarioCliffShadow, buildScenarioCliffShadowV2, DEFAULT_CONFIG, evaluateScenarioCliffShadow, evaluateScenarioCliffThreeWay, selectNaturalBoundary, VERSION } from "../research/scenario-cliff-shadow.mjs";
 
 const terminal = (order, score, scenario = "LEADER_HOLD", extra = {}) => ({ order, purchaseRejectCode: "ADOPTED", dominantBranchId: scenario, terminalModelWeight: score, naturalConvergenceScore: score, branchFit: score, secondFamilyRelativeToBest: score, thirdFamilyRelativeToBest: score, ...extra });
 const record = rows => ({ raceKey: "20260901-01-1", sealed: { researchPrediction: { performanceSchemaVersion: "PURCHASE_PERFORMANCE_V2", standardPurchasePlan: [{ order: [1, 2, 3], betClass: "MAIN" }], purchase: { audit: { terminalLifecycleAudit: { rows } } } } }, result: { result: { status: "confirmed", finishOrder: [1, 2, 4], payout: 12340 } } });
@@ -60,4 +60,37 @@ assert.equal(evaluation.candidate.exactHits, 1);
 const before = JSON.stringify(record([terminal([1, 2, 3], .9)]).sealed.researchPrediction);
 const immutable = record([terminal([1, 2, 3], .9)]); buildScenarioCliffShadow(immutable);
 assert.equal(JSON.stringify(immutable.sealed.researchPrediction), before);
+
+const noCliffV2 = buildScenarioCliffShadowV2(record([terminal([1, 2, 3], .9), terminal([1, 2, 4], .89), terminal([1, 2, 5], .88)]));
+assert.equal(noCliffV2.tickets.length, 3, "V2 no-cliff retains multiple natural terminals");
+const clearCliffV2 = buildScenarioCliffShadowV2(record([terminal([1, 2, 3], 1), terminal([1, 2, 4], .92), terminal([1, 2, 5], .2)]));
+assert.ok(clearCliffV2.tickets.length < 3, "clear cliff stops the scenario terminal tail");
+
+const duplicateBeforeCap = buildScenarioCliffShadowV2(record(Array.from({ length: 30 }, (_, index) => terminal([1, 2, 3], .9 - index / 1000, index % 2 ? "LEAD-A" : "LEAD-B"))), { ...DEFAULT_CONFIG, scenarioBoundary: { ...DEFAULT_CONFIG.scenarioBoundary, minimumScore: 2 }, terminalBoundary: { ...DEFAULT_CONFIG.terminalBoundary, minimumScore: 2 } });
+assert.equal(duplicateBeforeCap.purchaseEligibility.canPurchase, true, ">20 before consolidation can be eligible after exact/near merge");
+assert.equal(duplicateBeforeCap.tickets.length, 1);
+assert.ok(duplicateBeforeCap.audit.nearDuplicateScenarioMerges >= 1, "near-duplicate scenarios consolidate before cap");
+
+const broad = [];
+for (let first = 1; first <= 6; first += 1) for (let second = 1; second <= 6; second += 1) for (let third = 1; third <= 6; third += 1) if (new Set([first, second, third]).size === 3) broad.push(terminal([first, second, third], .8, "FLAT"));
+const finalOver = buildScenarioCliffShadowV2(record(broad), { ...DEFAULT_CONFIG, scenarioBoundary: { ...DEFAULT_CONFIG.scenarioBoundary, minimumScore: 2 }, terminalBoundary: { ...DEFAULT_CONFIG.terminalBoundary, minimumScore: 2 }, v2: { ...DEFAULT_CONFIG.v2, pairSupportFloor: 0 } });
+assert.equal(finalOver.purchaseEligibility.reason, "NATURAL_SELECTION_EXCEEDS_CAP", "still over 20 after final consolidation is ineligible");
+assert.equal(finalOver.tickets.length, 0, "never arbitrary top20 slices");
+
+const scenariosV2 = buildScenarioCliffShadowV2(record([terminal([1, 2, 3], .9, "LEAD-A"), terminal([4, 5, 6], .85, "MAKURI-B"), terminal([6, 5, 4], .2, "WEAK-C")]));
+assert.ok(scenariosV2.selectedScenarioIds.some(x => x.startsWith("LEAD-A")) && scenariosV2.selectedScenarioIds.some(x => x.startsWith("MAKURI-B")), "multiple supported scenarios preserved");
+assert.ok(!scenariosV2.selectedScenarioIds.some(x => x.startsWith("WEAK-C")), "weak scenario is not force-filled");
+assert.ok(scenariosV2.tickets.some(x => x.category === "MAIN") && scenariosV2.tickets.some(x => x.category === "COVER"), "MAIN/COVER follow scenario families");
+assert.equal(scenariosV2.tickets.find(x => x.category === "MAIN").supportingScenarios[0].scenarioId.startsWith("LEAD-A"), true);
+
+assert.equal(noCliffV2.warnings.includes("PARTIAL_DATA_MISSING"), false, "auxiliary odds absence is not a permanent partial-data warning");
+const materialMissing = buildScenarioCliffShadowV2(record([terminal([1, 2, 3], .9, "A", { terminalModelWeight: null, probability: null, modelWeight: null, naturalConvergenceScore: null })]));
+assert.ok(materialMissing.warnings.includes("PARTIAL_DATA_MISSING"), "material non-redundant missing support remains a warning");
+assert.equal(buildScenarioCliffShadowV2(record([])).purchaseEligibility.reason, "CRITICAL_DATA_MISSING");
+assert.throws(() => buildScenarioCliffShadowV2(record([terminal([1, 2, 3], .9, "A", { result: "win" })])), /result-aware/);
+const v2Unknown = buildScenarioCliffShadowV2(record([terminal([1, 2, 3], .9, "UNKNOWN", { branchFit: null })]));
+assert.ok(v2Unknown.scenarios[0].unknownEvidenceCount > 0);
+
+const threeWay = evaluateScenarioCliffThreeWay([record([terminal([1, 2, 4], .9)]), protectedRecord]);
+assert.equal(threeWay.cohortSize, 1); assert.equal(threeWay.protectedExcluded, 1); assert.equal(threeWay.candidateV2.exactHits, 1);
 console.log("PASS scenario relative score / cliff shadow");

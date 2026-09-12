@@ -8,4 +8,12 @@
   "lowOddsComposite": 8,
   "confidence": { "high": 0.76, "mediumHigh": 0.62, "medium": 0.48, "low": 0.32 },
   "scoreWeights": { "model": 0.42, "natural": 0.23, "branchFit": 0.20, "pair": 0.09, "third": 0.06 }
+  ,"v2": {
+    "scenarioSupportFloor": 0.58,
+    "pairSupportFloor": 0.55,
+    "strongSingletonBoundaryScore": 0.72,
+    "strongSingletonRelativeGap": 0.20,
+    "nearDuplicateOverlap": 0.75,
+    "weakScenarioTailFloor": 0.64
+  }
 }
