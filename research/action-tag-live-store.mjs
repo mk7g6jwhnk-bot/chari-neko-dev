@@ -6,11 +6,19 @@ import { generateObservationCandidates } from './action-tag-collector.mjs';
 import { buildRaceReviewCase, submitRaceReview } from './action-tag-race-review.mjs';
 
 export const MAX_RECORD_BYTES = 2 * 1024 * 1024;
-export function eligibleMetadata(meta) {
+export function eligibleMetadata(meta, enrollment = null) {
   if (!/^\d{8}-[A-Za-z0-9]+-\d{1,2}$/.test(meta?.raceKey || '')) return false;
   if (isFinalTest(meta)) return false;
   // Unknown membership fails closed. This live lane only starts AFTER the frozen test.
-  return Number.isInteger(meta?.sequence) && meta.sequence > 502 && !meta.historical && !meta.backfill;
+  if (meta.historical || meta.backfill) return false;
+  if (Number.isInteger(meta?.sequence)) return meta.sequence > 502;
+  // Production status has no synthetic comparison sequence.  A live certificate is
+  // accepted only for races/results strictly after this collector's enrollment day.
+  // This is a separate forward cohort; it never assigns or guesses a sequence.
+  if (meta?.membershipSource !== 'PRODUCTION_LIVE_STATUS_V1' || meta?.forwardOnly !== true || !enrollment?.startedAt) return false;
+  const enrolled = Date.parse(enrollment.startedAt), observed = Date.parse(meta.resultObservedAt), collected = Date.parse(meta.collectedAt);
+  const enrollmentJstDay = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Tokyo', year:'numeric', month:'2-digit', day:'2-digit' }).format(new Date(enrolled)).replaceAll('-', '');
+  return Number.isFinite(observed) && observed >= enrolled && Number.isFinite(collected) && collected >= observed && meta.raceKey.slice(0, 8) > enrollmentJstDay;
 }
 
 // A complete, fsynced event is linked into place exclusively. A process crash leaves
@@ -52,7 +60,7 @@ export class LiveActionStore {
   async *raceReviews(key) { yield* this.events(path.join('reviews', hashEvidence(key))); }
   async getRace(key) { return read(this.file('races', key)); }
   async ingest(meta, record) {
-    if (!eligibleMetadata(meta) || isFinalTest(record) || record.raceKey !== meta.raceKey) throw Error('FINAL_TEST_OR_UNKNOWN_MEMBERSHIP');
+    if (!eligibleMetadata(meta, this.enrollment) || isFinalTest(record) || record.raceKey !== meta.raceKey) throw Error('FINAL_TEST_OR_UNKNOWN_MEMBERSHIP');
     if (record.historical || record.backfill || !(Date.parse(meta.collectedAt) >= Date.parse(this.enrollment.startedAt))) throw Error('HISTORICAL_BACKFILL_FORBIDDEN');
     if (await this.getRace(meta.raceKey)) return false;
     const normalized = normalizeProductionRecord(record);
@@ -71,7 +79,7 @@ export class LiveActionStore {
   }
   async saveReview(key, input) {
     const event = await this.getRace(key);
-    if (!event || !eligibleMetadata(event.metadata) || isFinalTest(event.record)) throw Error('RACE_INELIGIBLE');
+    if (!event || !eligibleMetadata(event.metadata, this.enrollment) || isFinalTest(event.record)) throw Error('RACE_INELIGIBLE');
     const reviewerId = String(input.reviewerId || '').trim();
     if (!reviewerId || reviewerId.length > 100) throw Error('REVIEWER_REQUIRED');
     const answers = input.answers || {};

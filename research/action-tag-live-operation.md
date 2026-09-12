@@ -11,17 +11,17 @@
 
 Uで現在の質問をUNKNOWN、上下キーで質問を移動、1〜6で選択、Ctrl+Enterで保存、Alt+左で前R。全項目UNKNOWNボタンもある。下書きは同じブラウザ・同じ確認者IDで復元される。確定データはPCのディスクに残り、ブラウザを閉じても失われない。
 
-**現在は自動接続未設定で、実データは0R。** UI起動だけでRailwayの実データを取得する状態にはまだなっていない。画面の「自動接続：未設定」を稼働中と解釈しない。
+実データ収集は別プロセスで `npm run research:action-collect -- 5` を実行する。UI起動だけでは取得しない。既定5R、1 run最大30Rで、productionのGET APIからローカルResearch storeへだけappendする。
 
 ## 収集接続の条件
 
-この実装は別プロセスで動くread-only sidecar。prediction/purchaseの呼出しチェーンにimportしない。productionへのhookや新規APIは現時点で追加していない。
+この実装は別プロセスで動くread-only sidecar。prediction/purchaseの呼出しチェーンにimportしない。productionへのhookや新規APIは追加していない。live経路はcollector status、saved prediction detail、sealed resultの既存GETだけを使う。
 
 `action-tag-live.config.example.json` を参考に、`research/action-tag-live.config.json` に `metadataFile` と `recordsDirectory` を指定できる。既存production collectorが保存したrecordのread-only mirrorと、**確定したcohort番号付きmetadata feed** が必要。現productionにはこのfeedがなく、exporterとの接続は未完了。
 
 metadataは1行1JSON、改行で確定するJSONL。列は `raceKey`、整数`sequence`、ISO日時`collectedAt`、mirror内の相対`recordPath`。番号は403〜502を定義した元の固定順序でなければならない。現時点のファイル順／取得順で採番し直してはいけない。
 
-- `sequence > 502` の確実なmembershipだけを許可。403〜502、欠落、文字列番号、historical/backfillは本文を読む前に除外。
+- mirror経路は`sequence > 502`だけを許可。live status経路はsequenceを再採番せず、enrollment翌日以降かつenrollment後に結果確定したraceを別のforward cohortとして許可する。403〜502を示す識別子があれば拒否する。
 - 初回起動の `enrollment.json` 以後に取得された新規結果だけを許可。過去データのbackfillはしない。
 - metadata feedを30秒間隔でstream読取。最大20raceの待機queue、1record最大2MiB、metadata行最大16Ki文字、heap guard 128MiB。
 - source側のread-only mirrorが残っていれば、失敗・中断raceは次回scanで再処理する。完了したrace bundleがcheckpoint。キュー待機中のraceは完了扱いにしない。

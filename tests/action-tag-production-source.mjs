@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import { composeRecord, ProductionActionTagSource } from '../research/action-tag-production-source.mjs';
+const row={raceKey:'20260912-34-2',venueName:'川崎',raceNumber:2,resultLifecycleState:'RESULT_CONFIRMED',resultObservedAt:'2026-09-12T07:41:49.432Z'};
+const prediction={predictionSealedAt:'2026-09-11T17:01:50.024Z',predictionHash:'P',inputHash:'I',immutable:true,predictionPayload:{race:{participants:[{number:1,registration:'R1',lineId:'A',lineOrder:1,officialProfileEvidence:{officialTotalStarts:20,backCount:4,winningStyleRates:{escape:20,makuri:0,difference:0,mark:0}}}]}}};
+const result={resultObservedAt:row.resultObservedAt,resultHash:'R',immutable:true,officialResult:{status:'confirmed',finishOrder:[1,2,3],source:'JSJ040'},purchaseEvaluation:{standardHit:false}};
+assert.equal(composeRecord(row,prediction,result).participants[0].recent_4_months.back,4);
+const events=new Map(),store={enrollment:{startedAt:'2026-09-11T10:35:19.980Z'},getRace:async k=>events.get(k),ingest:async(m,r)=>{events.set(m.raceKey,{m,r});return true;}};
+const payloads=[{schemaVersion:'COLLECTOR_STATUS_V2',races:[row],collectorProcessHealthy:true,storageHealthy:true,browserConnected:true},prediction,result,prediction,result];
+const source=new ProductionActionTagSource({store,fetchImpl:async()=>({ok:true,status:200,json:async()=>payloads.shift()}),maxPerRun:1});
+const metrics=await source.run(); assert.equal(metrics.accepted,1); assert.equal(metrics.predictionHashMismatch,0); assert.equal(metrics.purchaseHashMismatch,0); assert.equal(metrics.productionWrite,0);
+console.log('PASS production read-only source, forward cohort, immutable hash audit');

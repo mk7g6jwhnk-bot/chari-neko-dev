@@ -17,6 +17,10 @@ const record = n => ({ raceKey:`20260912-28-${n}`, venueName:'TEST ONLY',raceNo:
   lines:[{number:1,lineId:'A',position:1},{number:2,lineId:'A',position:2}],
   result:{status:'confirmed',finishOrder:[1,2]}, officialEvidence:{source:'synthetic-test-only',winningMethod:'逃げ',finishOrder:[1,2],markers:{backNumber:1},observedAt:now} });
 const meta = n => ({raceKey:record(n).raceKey,sequence:502+n,collectedAt:now,recordPath:`${n}.json`});
+const enrollment={startedAt:'2026-09-11T10:35:19.980Z'};
+assert.equal(eligibleMetadata({raceKey:'20260912-28-1',collectedAt:now,resultObservedAt:now,membershipSource:'PRODUCTION_LIVE_STATUS_V1',forwardOnly:true},enrollment),true);
+assert.equal(eligibleMetadata({raceKey:'20260911-28-1',collectedAt:now,resultObservedAt:now,membershipSource:'PRODUCTION_LIVE_STATUS_V1',forwardOnly:true},enrollment),false);
+assert.equal(eligibleMetadata({raceKey:'20260912-28-1',collectedAt:now,resultObservedAt:now,membershipSource:'PRODUCTION_LIVE_STATUS_V1',forwardOnly:true,comparisonNumber:450},enrollment),false);
 for (let index=403;index<=502;index++) { assert.equal(eligibleMetadata({...meta(1),sequence:index}),false); assert.equal(isFinalTest({sealed:{sequence:index}}),true); }
 for (const sequence of [undefined,null,'503',0,402]) assert.equal(eligibleMetadata({...meta(1),sequence}),false);
 assert.equal(eligibleMetadata({...meta(1),sealed:{sequence:450}}),false);
