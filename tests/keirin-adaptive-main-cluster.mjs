@@ -1,25 +1,16 @@
 import assert from "node:assert/strict";
-import {selectNaturalBranchTiers,selectAdaptiveMainCluster} from "../keirin/sports/keirin-branches.mjs";
+import {generateKeirinBranches} from "../keirin/sports/keirin-branches.mjs";
 
-const branches=[
-  {id:"a",score:8.58},{id:"b",score:8.00},{id:"c",score:7.50},
-  {id:"d",score:5.57},{id:"e",score:5.39},{id:"f",score:5.28},{id:"g",score:5.20}
+const scored=[
+  {id:"a1",number:1,roleScores:{first:8},evidence:{start:8,sprint:8,finish:7,recent:7,tracking:6}},
+  {id:"a2",number:2,roleScores:{first:6},evidence:{start:5,sprint:5,finish:8,recent:7,tracking:8}},
+  {id:"b1",number:3,roleScores:{first:7},evidence:{start:7,sprint:7,finish:6,recent:6,tracking:5}},
+  {id:"b2",number:4,roleScores:{first:5},evidence:{start:4,sprint:4,finish:7,recent:6,tracking:7}}
 ];
-const tiers=selectNaturalBranchTiers(branches);
-assert.deepEqual(tiers.main.map(branch=>branch.id),["a"],"core scenario must not be a forced upper 2-cluster");
-assert.deepEqual(tiers.contender.map(branch=>branch.id),["b","c"],"near-top branches before the robust lower break remain contenders");
-assert.deepEqual(tiers.sub.map(branch=>branch.id),["d","e","f","g"]);
-assert.deepEqual(selectAdaptiveMainCluster(branches).map(branch=>branch.id),["a"],"compatibility export uses the new core tier semantics");
-
-const flat=selectNaturalBranchTiers([{id:"x",score:5},{id:"y",score:5},{id:"z",score:5}]);
-assert.equal(flat.main.length,0,"when all scores are equal, do not invent a core winner");
-assert.equal(flat.contender.length,0,"equal scores do not justify a forecast contender");
-assert.deepEqual(flat.sub.map(branch=>branch.id),["x","y","z"],"equal-score branches remain possible only");
-
-const noLowerBreak=selectNaturalBranchTiers([
-  {id:"a",score:7.0},{id:"b",score:6.6},{id:"c",score:6.4},{id:"d",score:6.2}
-]);
-assert.deepEqual(noLowerBreak.main.map(branch=>branch.id),["a"]);
-assert.equal(noLowerBreak.contender.length,0,"without a natural boundary, mere possibility must not be promoted to forecast contender");
-assert.deepEqual(noLowerBreak.sub.map(branch=>branch.id),["b","c","d"],"non-core branches stay possible when no secondary group is evidenced");
-console.log("Keirin natural branch tiers passed:",tiers.main.map(x=>x.id).join(","),"/",tiers.contender.map(x=>x.id).join(","),"/",tiers.sub.map(x=>x.id).join(","));
+const lines=[{id:"A",type:"ライン",leader:scored[0],bante:scored[1]},{id:"B",type:"ライン",leader:scored[2],bante:scored[3]}];
+const branches=generateKeirinBranches({scored,lines,lineConfidence:"高"});
+assert.deepEqual(branches.map(branch=>branch.id),["LEAD-A","MAKURI-A","BANTE-A","LEAD-B","MAKURI-B","BANTE-B","BATTLE","SEPARATION"]);
+assert.ok(branches.every(branch=>branch.priority==="hypothesis"),"branch generator exposes hypotheses, not legacy adaptive tiers");
+assert.ok(Math.abs(branches.reduce((sum,branch)=>sum+branch.probability,0)-1)<1e-12);
+assert.deepEqual(generateKeirinBranches({scored,lines,lineConfidence:"高"}),branches,"branch generation must be deterministic");
+console.log("Keirin deterministic hypothesis pool passed:",branches.map(x=>x.id).join(","));
