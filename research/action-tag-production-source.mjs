@@ -45,7 +45,7 @@ export class ProductionActionTagSource {
 }
 
 export function isActionTagCollectionEligible(race,{collected=false,enrollment}={}){
-  if(collected||!/^\d{8}-[A-Za-z0-9]+-\d{1,2}$/.test(String(race?.raceKey||''))||race?.resultLifecycleState!=='RESULT_CONFIRMED'||isFinalTest(race))return false;
+  if(collected||!/^\d{8}-[A-Za-z0-9]+-\d{1,2}$/.test(String(race?.raceKey||''))||race?.resultLifecycleState!=='RESULT_CONFIRMED'||!race?.predictionSealedAt||isFinalTest(race))return false;
   const observed=Date.parse(race.resultObservedAt),started=Date.parse(enrollment?.startedAt);if(!Number.isFinite(observed)||!Number.isFinite(started)||observed<started)return false;
   const day=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(started)).replaceAll('-','');return race.raceKey.slice(0,8)>day;
 }

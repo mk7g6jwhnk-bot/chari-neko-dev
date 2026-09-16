@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { composeRecord, ProductionActionTagSource, isActionTagCollectionEligible } from '../research/action-tag-production-source.mjs';
-const row={raceKey:'20260912-34-2',venueName:'川崎',raceNumber:2,resultLifecycleState:'RESULT_CONFIRMED',resultObservedAt:'2026-09-12T07:41:49.432Z'};
+const row={raceKey:'20260912-34-2',venueName:'川崎',raceNumber:2,resultLifecycleState:'RESULT_CONFIRMED',predictionSealedAt:'2026-09-11T17:01:50.024Z',resultObservedAt:'2026-09-12T07:41:49.432Z'};
 const prediction={predictionSealedAt:'2026-09-11T17:01:50.024Z',predictionHash:'P',inputHash:'I',immutable:true,predictionPayload:{race:{participants:[{number:1,registration:'R1',lineId:'A',lineOrder:1,officialProfileEvidence:{officialTotalStarts:20,backCount:4,winningStyleRates:{escape:20,makuri:0,difference:0,mark:0}}}]}}};
 const result={resultObservedAt:row.resultObservedAt,resultHash:'R',immutable:true,officialResult:{status:'confirmed',finishOrder:[1,2,3],source:'JSJ040'},purchaseEvaluation:{standardHit:false}};
 assert.equal(composeRecord(row,prediction,result).participants[0].recent_4_months.back,4);
@@ -8,6 +8,7 @@ const events=new Map(),store={enrollment:{startedAt:'2026-09-11T10:35:19.980Z'},
 const payloads=[{schemaVersion:'COLLECTOR_STATUS_V2',races:[row],collectorProcessHealthy:true,storageHealthy:true,browserConnected:true},prediction,result,prediction,result];
 const source=new ProductionActionTagSource({store,fetchImpl:async()=>({ok:true,status:200,json:async()=>payloads.shift()}),maxPerRun:1});
 const metrics=await source.run(); assert.equal(metrics.accepted,1); assert.equal(metrics.predictionHashMismatch,0); assert.equal(metrics.purchaseHashMismatch,0); assert.equal(metrics.productionWrite,0);
+assert.equal(isActionTagCollectionEligible({...row,predictionSealedAt:null},{collected:false,enrollment:store.enrollment}),false);
 assert.equal(isActionTagCollectionEligible(row,{collected:false,enrollment:store.enrollment}),true);assert.equal(isActionTagCollectionEligible(row,{collected:true,enrollment:store.enrollment}),false);assert.equal(isActionTagCollectionEligible({...row,comparisonNumber:450},{collected:false,enrollment:store.enrollment}),false);
 let calls=0;const retry=new ProductionActionTagSource({store,fetchImpl:async()=>++calls===1?{ok:false,status:503}:{ok:true,status:200,json:async()=>({ok:true})}});assert.deepEqual(await retry.get('x'),{ok:true});assert.equal(retry.metrics.retryAttempts,1);assert.equal(retry.metrics.http503,0);
 const stalePayloads=[{schemaVersion:'COLLECTOR_STATUS_V2',statusReadFailed:true,autoCurrent:false,races:[],collectorProcessHealthy:true,storageHealthy:true,browserConnected:true}];const staleSource=new ProductionActionTagSource({store,fetchImpl:async()=>({ok:true,status:200,json:async()=>stalePayloads.shift()})});assert.equal((await staleSource.run()).stale,1);
