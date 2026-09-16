@@ -1,0 +1,8 @@
+{
+  "taskName": "ChariNeko-ActionTag-Continuous",
+  "cadenceMinutes": 15,
+  "leaseTimeoutMinutes": 45,
+  "command": "node research/action-tag-scheduled-run.mjs",
+  "killSwitch": "ACTION_TAG_COLLECTION_ENABLED=false",
+  "multipleInstances": "IGNORE_NEW"
+}

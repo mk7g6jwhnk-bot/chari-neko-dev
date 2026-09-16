@@ -7,7 +7,7 @@ const DEFAULT_BASE = 'https://chari-neko-dev.netlify.app/.netlify/functions';
 export class ProductionActionTagSource {
   constructor({ store, baseUrl = DEFAULT_BASE, fetchImpl = fetch, maxPerRun = 5, timeoutMs = 30000, maxHeapBytes = 192 * 1024 * 1024, maxRetries = 1 } = {}) {
     Object.assign(this, { store, baseUrl: baseUrl.replace(/\/$/, ''), fetchImpl, maxPerRun, timeoutMs, maxHeapBytes, maxRetries });
-    this.metrics = { mode:'READ_ONLY_PRODUCTION_SOURCE_LOCAL_RESEARCH_SINK', attempted:0, accepted:0, duplicates:0, excluded:0, failures:0, retryAttempts:0, retryableFailures:0, permanentFailures:0, unavailable:0, stale:0, http502:0, http503:0, timeouts:0, predictionHashMismatch:0, purchaseHashMismatch:0, peakHeapBytes:0, fetchLatencyMs:0, storageLatencyMs:0, lastError:null, startedAt:null, completedAt:null };
+    this.metrics = { mode:'READ_ONLY_PRODUCTION_SOURCE_LOCAL_RESEARCH_SINK', attempted:0, accepted:0, duplicates:0, excluded:0, failures:0, retryAttempts:0, retryableFailures:0, permanentFailures:0, unavailable:0, stale:0, http502:0, http503:0, timeouts:0, predictionHashMismatch:0, purchaseHashMismatch:0, sealedResultMismatch:0, peakHeapBytes:0, fetchLatencyMs:0, storageLatencyMs:0, lastError:null, startedAt:null, completedAt:null };
   }
   async run() {
     this.metrics.startedAt = new Date().toISOString();
@@ -30,6 +30,7 @@ export class ProductionActionTagSource {
         const afterResult = await this.get(`keirin-sealed-result?raceKey=${encodeURIComponent(row.raceKey)}`);
         if (beforePrediction.predictionHash !== afterPrediction.predictionHash) this.metrics.predictionHashMismatch++;
         if (purchaseHash(beforeResult) !== purchaseHash(afterResult)) this.metrics.purchaseHashMismatch++;
+        if (beforeResult.resultHash !== afterResult.resultHash) this.metrics.sealedResultMismatch++;
       } catch (error) { this.metrics.failures++; this.metrics.lastError=String(error?.message || error); if(/HTTP_(502|503)|timeout|abort/i.test(this.metrics.lastError))this.metrics.retryableFailures++;else if(/HTTP_404|INVALID|MEMBERSHIP/i.test(this.metrics.lastError))this.metrics.permanentFailures++;else this.metrics.unavailable++; }
       await yieldTurn();
     }

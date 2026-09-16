@@ -7,7 +7,7 @@ assert.equal(composeRecord(row,prediction,result).participants[0].recent_4_month
 const events=new Map(),store={enrollment:{startedAt:'2026-09-11T10:35:19.980Z'},getRace:async k=>events.get(k),ingest:async(m,r)=>{events.set(m.raceKey,{m,r});return true;}};
 const payloads=[{schemaVersion:'COLLECTOR_STATUS_V2',races:[row],collectorProcessHealthy:true,storageHealthy:true,browserConnected:true},prediction,result,prediction,result];
 const source=new ProductionActionTagSource({store,fetchImpl:async()=>({ok:true,status:200,json:async()=>payloads.shift()}),maxPerRun:1});
-const metrics=await source.run(); assert.equal(metrics.accepted,1); assert.equal(metrics.predictionHashMismatch,0); assert.equal(metrics.purchaseHashMismatch,0); assert.equal(metrics.productionWrite,0);
+const metrics=await source.run(); assert.equal(metrics.accepted,1); assert.equal(metrics.predictionHashMismatch,0); assert.equal(metrics.purchaseHashMismatch,0); assert.equal(metrics.sealedResultMismatch,0); assert.equal(metrics.productionWrite,0);
 assert.equal(isActionTagCollectionEligible({...row,predictionSealedAt:null},{collected:false,enrollment:store.enrollment}),false);
 assert.equal(isActionTagCollectionEligible(row,{collected:false,enrollment:store.enrollment}),true);assert.equal(isActionTagCollectionEligible(row,{collected:true,enrollment:store.enrollment}),false);assert.equal(isActionTagCollectionEligible({...row,comparisonNumber:450},{collected:false,enrollment:store.enrollment}),false);
 let calls=0;const retry=new ProductionActionTagSource({store,fetchImpl:async()=>++calls===1?{ok:false,status:503}:{ok:true,status:200,json:async()=>({ok:true})}});assert.deepEqual(await retry.get('x'),{ok:true});assert.equal(retry.metrics.retryAttempts,1);assert.equal(retry.metrics.http503,0);
