@@ -6,6 +6,7 @@ import { LiveActionStore } from './action-tag-live-store.mjs';
 import { LiveCollectorAdapter } from './action-tag-live-adapter.mjs';
 import { liveCoverage } from './action-tag-live-coverage.mjs';
 import { isGirlsRecord, sortRaces } from './action-review/ui-helpers.mjs';
+import { buildManualReviewV2 } from './manual-review-v2.mjs';
 const assets = path.join(path.dirname(fileURLToPath(import.meta.url)), 'action-review');
 export async function startReviewServer({ port = 8767, directory = path.join(assets, '..', 'action-tag-live-data'), metadataFile, recordsDirectory } = {}) {
   if (recordsDirectory) {
@@ -25,7 +26,7 @@ export async function startReviewServer({ port = 8767, directory = path.join(ass
       if (req.method === 'POST' && url.pathname === '/api/review') {
         if (req.headers['content-type'] !== 'application/json' || req.headers['x-research-review'] !== '1') return json(403, { error: 'REVIEW_HEADER_REQUIRED' });
         let body = ''; for await (const chunk of req) { body += chunk; if (Buffer.byteLength(body) > 32768) return json(413, { error: 'BODY_TOO_LARGE' }); }
-        const input = JSON.parse(body); return json(201, await store.saveReview(input.raceKey, input));
+        const input = JSON.parse(body); return json(201, input.manualReviewVersion===2?await store.saveReviewV2(input.raceKey,input):await store.saveReview(input.raceKey, input));
       }
       if (req.method !== 'GET') return json(405, { error: 'METHOD_NOT_ALLOWED' });
       if (url.pathname === '/api/status') return json(200, { coverage: await liveCoverage(store), collector: adapter.snapshot(), enrollment: store.enrollment });
@@ -33,7 +34,7 @@ export async function startReviewServer({ port = 8767, directory = path.join(ass
         const all = [], reviewer = url.searchParams.get('reviewer') || '', pending = url.searchParams.get('pending') !== '0';
         const offset = Math.max(0, Number(url.searchParams.get('offset')) || 0);
         for await (const event of store.events('races')) {
-          const reviewed = Boolean(await store.reviewed(event.raceKey, reviewer));
+          const reviewed = Boolean(await store.reviewedV2(event.raceKey, reviewer)||await store.reviewed(event.raceKey, reviewer));
           if (pending && reviewed) continue;
           all.push({ raceKey: event.raceKey, date: event.raceKey.slice(0,8), venue: event.record.venueName, raceNo: event.record.raceNo || Number(event.raceKey.split('-')[2]), scheduledStartAt:event.record.scheduledStartAt||null, girls:isGirlsRecord(event.record), reviewed });
         }
@@ -43,9 +44,9 @@ export async function startReviewServer({ port = 8767, directory = path.join(ass
       if (url.pathname.startsWith('/api/race/')) {
         const key = decodeURIComponent(url.pathname.slice('/api/race/'.length)), event = await store.getRace(key);
         if (!event) return json(404, { error: 'RACE_NOT_FOUND' });
-        return json(200, { ...event, priorReview: await store.reviewed(key, url.searchParams.get('reviewer') || '') });
+        const reviewer=url.searchParams.get('reviewer')||'';return json(200, { ...event, reviewCaseV2:buildManualReviewV2(event.record), priorReviewV2:await store.reviewedV2(key,reviewer), priorReview:await store.reviewed(key,reviewer) });
       }
-      const file = { '/': ['index.html', 'text/html'], '/app.mjs': ['app.mjs', 'text/javascript'], '/ui-helpers.mjs':['ui-helpers.mjs','text/javascript'], '/style.css': ['style.css', 'text/css'] }[url.pathname];
+      const file = { '/': ['index.html', 'text/html'], '/app.mjs': ['app.mjs', 'text/javascript'], '/app-v2.mjs':['app-v2.mjs','text/javascript'], '/ui-helpers.mjs':['ui-helpers.mjs','text/javascript'], '/style.css': ['style.css', 'text/css'] }[url.pathname];
       if (!file) return json(404, { error: 'NOT_FOUND' });
       res.writeHead(200, { 'content-type': `${file[1]}; charset=utf-8`, 'cache-control': 'no-store', 'x-content-type-options': 'nosniff', 'content-security-policy': "default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'" });
       res.end(await fs.readFile(path.join(assets, file[0])));
