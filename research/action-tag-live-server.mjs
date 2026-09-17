@@ -5,6 +5,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { LiveActionStore } from './action-tag-live-store.mjs';
 import { LiveCollectorAdapter } from './action-tag-live-adapter.mjs';
 import { liveCoverage } from './action-tag-live-coverage.mjs';
+import { isGirlsRecord, sortRaces } from './action-review/ui-helpers.mjs';
 const assets = path.join(path.dirname(fileURLToPath(import.meta.url)), 'action-review');
 export async function startReviewServer({ port = 8767, directory = path.join(assets, '..', 'action-tag-live-data'), metadataFile, recordsDirectory } = {}) {
   if (recordsDirectory) {
@@ -29,23 +30,22 @@ export async function startReviewServer({ port = 8767, directory = path.join(ass
       if (req.method !== 'GET') return json(405, { error: 'METHOD_NOT_ALLOWED' });
       if (url.pathname === '/api/status') return json(200, { coverage: await liveCoverage(store), collector: adapter.snapshot(), enrollment: store.enrollment });
       if (url.pathname === '/api/races') {
-        const rows = [], reviewer = url.searchParams.get('reviewer') || '', pending = url.searchParams.get('pending') !== '0';
-        const offset = Math.max(0, Number(url.searchParams.get('offset')) || 0); let matched = 0;
+        const all = [], reviewer = url.searchParams.get('reviewer') || '', pending = url.searchParams.get('pending') !== '0';
+        const offset = Math.max(0, Number(url.searchParams.get('offset')) || 0);
         for await (const event of store.events('races')) {
           const reviewed = Boolean(await store.reviewed(event.raceKey, reviewer));
           if (pending && reviewed) continue;
-          if (matched++ < offset) continue;
-          rows.push({ raceKey: event.raceKey, venue: event.record.venueName, reviewed });
-          if (rows.length === 50) break;
+          all.push({ raceKey: event.raceKey, date: event.raceKey.slice(0,8), venue: event.record.venueName, raceNo: event.record.raceNo || Number(event.raceKey.split('-')[2]), scheduledStartAt:event.record.scheduledStartAt||null, girls:isGirlsRecord(event.record), reviewed });
         }
-        return json(200, { rows, nextOffset: rows.length === 50 ? offset + 50 : null });
+        const sorted=sortRaces(all),rows=sorted.slice(offset,offset+100);
+        return json(200, { rows, nextOffset: offset+rows.length<sorted.length?offset+rows.length:null });
       }
       if (url.pathname.startsWith('/api/race/')) {
         const key = decodeURIComponent(url.pathname.slice('/api/race/'.length)), event = await store.getRace(key);
         if (!event) return json(404, { error: 'RACE_NOT_FOUND' });
         return json(200, { ...event, priorReview: await store.reviewed(key, url.searchParams.get('reviewer') || '') });
       }
-      const file = { '/': ['index.html', 'text/html'], '/app.mjs': ['app.mjs', 'text/javascript'], '/style.css': ['style.css', 'text/css'] }[url.pathname];
+      const file = { '/': ['index.html', 'text/html'], '/app.mjs': ['app.mjs', 'text/javascript'], '/ui-helpers.mjs':['ui-helpers.mjs','text/javascript'], '/style.css': ['style.css', 'text/css'] }[url.pathname];
       if (!file) return json(404, { error: 'NOT_FOUND' });
       res.writeHead(200, { 'content-type': `${file[1]}; charset=utf-8`, 'cache-control': 'no-store', 'x-content-type-options': 'nosniff', 'content-security-policy': "default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'" });
       res.end(await fs.readFile(path.join(assets, file[0])));

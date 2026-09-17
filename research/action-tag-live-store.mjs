@@ -94,7 +94,7 @@ export class LiveActionStore {
       if (known.includes(event.reviewCase.questions.find(q => q.id === question.id)) && !target) throw Error(`REVIEW_TARGET_REQUIRED:${question.id}`);
       question.targetRiderId = target?.riderId || `RACE:${key}`;
       const line = target && reviewCase.lineup.find(line => line.riders.some(rider => rider.riderId === target.riderId));
-      question.targetContext = { sourceRecordId: key, evidenceCount: 1,
+      question.targetContext = { sourceRecordId: key, evidenceCount: 1, applicability: question.applicability || 'APPLICABLE',
         ...(target ? { riderNumber: target.number, lineId: line.lineId, linePosition: target.position, lineSize: line.riders.length,
           conditionalCells: [target.position === 1 ? 'LINE_LEADER' : target.position === 2 ? 'BANTE' : null, line.riders.length === 2 ? 'TWO_RIDER_LINE' : line.riders.length >= 3 ? 'THREE_PLUS_RIDER_LINE' : null].filter(Boolean) } : {}) };
     }
