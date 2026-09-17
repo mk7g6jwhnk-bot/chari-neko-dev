@@ -7,6 +7,7 @@ import { LiveCollectorAdapter } from './action-tag-live-adapter.mjs';
 import { liveCoverage } from './action-tag-live-coverage.mjs';
 import { isGirlsRecord, sortRaces } from './action-review/ui-helpers.mjs';
 import { buildManualReviewV2 } from './manual-review-v2.mjs';
+import { reviewAvailability, summarizeV2Progress, REVIEW_PENDING, REVIEW_UNAVAILABLE_OLD_VIDEO } from './manual-review-availability.mjs';
 const assets = path.join(path.dirname(fileURLToPath(import.meta.url)), 'action-review');
 export async function startReviewServer({ port = 8767, directory = path.join(assets, '..', 'action-tag-live-data'), metadataFile, recordsDirectory } = {}) {
   if (recordsDirectory) {
@@ -29,14 +30,15 @@ export async function startReviewServer({ port = 8767, directory = path.join(ass
         const input = JSON.parse(body); return json(201, input.manualReviewVersion===2?await store.saveReviewV2(input.raceKey,input):await store.saveReview(input.raceKey, input));
       }
       if (req.method !== 'GET') return json(405, { error: 'METHOD_NOT_ALLOWED' });
-      if (url.pathname === '/api/status') return json(200, { coverage: await liveCoverage(store), collector: adapter.snapshot(), enrollment: store.enrollment });
+      if (url.pathname === '/api/status') { const progressRows=[];for await(const event of store.events('races')){const reviewV2=await store.reviewedV2(event.raceKey,url.searchParams.get('reviewer')||'');progressRows.push({availability:reviewAvailability({record:event.record,reviewV2}),reviewV2,mode:buildManualReviewV2(event.record).mode});}return json(200, { coverage: await liveCoverage(store), v2Progress:summarizeV2Progress(progressRows), collector: adapter.snapshot(), enrollment: store.enrollment }); }
       if (url.pathname === '/api/races') {
-        const all = [], reviewer = url.searchParams.get('reviewer') || '', pending = url.searchParams.get('pending') !== '0';
+        const all = [], reviewer = url.searchParams.get('reviewer') || '', pending = url.searchParams.get('pending') !== '0',includeUnavailable=url.searchParams.get('includeUnavailable')==='1';
         const offset = Math.max(0, Number(url.searchParams.get('offset')) || 0);
         for await (const event of store.events('races')) {
-          const reviewed = Boolean(await store.reviewedV2(event.raceKey, reviewer)||await store.reviewed(event.raceKey, reviewer));
-          if (pending && reviewed) continue;
-          all.push({ raceKey: event.raceKey, date: event.raceKey.slice(0,8), venue: event.record.venueName, raceNo: event.record.raceNo || Number(event.raceKey.split('-')[2]), scheduledStartAt:event.record.scheduledStartAt||null, girls:isGirlsRecord(event.record), reviewed });
+          const reviewV2=await store.reviewedV2(event.raceKey,reviewer),availability=reviewAvailability({record:event.record,reviewV2}),reviewed=Boolean(reviewV2);
+          if(availability===REVIEW_UNAVAILABLE_OLD_VIDEO&&!includeUnavailable)continue;
+          if(pending&&availability!==REVIEW_PENDING&&!(includeUnavailable&&availability===REVIEW_UNAVAILABLE_OLD_VIDEO))continue;
+          all.push({ raceKey: event.raceKey, date: event.raceKey.slice(0,8), venue: event.record.venueName, raceNo: event.record.raceNo || Number(event.raceKey.split('-')[2]), scheduledStartAt:event.record.scheduledStartAt||null, girls:isGirlsRecord(event.record), reviewed,availability });
         }
         const sorted=sortRaces(all),rows=sorted.slice(offset,offset+100);
         return json(200, { rows, nextOffset: offset+rows.length<sorted.length?offset+rows.length:null });
@@ -44,7 +46,7 @@ export async function startReviewServer({ port = 8767, directory = path.join(ass
       if (url.pathname.startsWith('/api/race/')) {
         const key = decodeURIComponent(url.pathname.slice('/api/race/'.length)), event = await store.getRace(key);
         if (!event) return json(404, { error: 'RACE_NOT_FOUND' });
-        const reviewer=url.searchParams.get('reviewer')||'';return json(200, { ...event, reviewCaseV2:buildManualReviewV2(event.record), priorReviewV2:await store.reviewedV2(key,reviewer), priorReview:await store.reviewed(key,reviewer) });
+        const reviewer=url.searchParams.get('reviewer')||'',priorReviewV2=await store.reviewedV2(key,reviewer);return json(200, { ...event, reviewCaseV2:buildManualReviewV2(event.record), availability:reviewAvailability({record:event.record,reviewV2:priorReviewV2}), priorReviewV2, priorReview:await store.reviewed(key,reviewer) });
       }
       const file = { '/': ['index.html', 'text/html'], '/app.mjs': ['app.mjs', 'text/javascript'], '/app-v2.mjs':['app-v2.mjs','text/javascript'], '/ui-helpers.mjs':['ui-helpers.mjs','text/javascript'], '/style.css': ['style.css', 'text/css'] }[url.pathname];
       if (!file) return json(404, { error: 'NOT_FOUND' });

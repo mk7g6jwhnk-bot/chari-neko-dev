@@ -5,6 +5,7 @@ import { hashEvidence, isFinalTest } from './action-tag-schema.mjs';
 import { generateObservationCandidates } from './action-tag-collector.mjs';
 import { buildRaceReviewCase, submitRaceReview } from './action-tag-race-review.mjs';
 import { buildManualReviewV2, createManualReviewV2 } from './manual-review-v2.mjs';
+import { reviewAvailability, REVIEW_UNAVAILABLE_OLD_VIDEO } from './manual-review-availability.mjs';
 
 export const MAX_RECORD_BYTES = 2 * 1024 * 1024;
 export function eligibleMetadata(meta, enrollment = null) {
@@ -115,7 +116,7 @@ export class LiveActionStore {
     return enriched;
   }
   async reviewed(key, reviewerId) { return read(this.file('reviews', `${key}|${reviewerId}`)); }
-  async saveReviewV2(key,input){const event=await this.getRace(key);if(!event||!eligibleMetadata(event.metadata,this.enrollment)||isFinalTest(event.record))throw Error('RACE_INELIGIBLE');const review=createManualReviewV2(buildManualReviewV2(event.record),input);if(!await appendEvent(this.file('reviews-v2',`${key}|${review.reviewerId}`),review))throw Error('DUPLICATE_REVIEW');return review;}
+  async saveReviewV2(key,input){const event=await this.getRace(key);if(!event||!eligibleMetadata(event.metadata,this.enrollment)||isFinalTest(event.record))throw Error('RACE_INELIGIBLE');if(reviewAvailability({record:event.record,now:input.now?new Date(input.now):new Date()})===REVIEW_UNAVAILABLE_OLD_VIDEO)throw Error(REVIEW_UNAVAILABLE_OLD_VIDEO);const review=createManualReviewV2(buildManualReviewV2(event.record),input);if(!await appendEvent(this.file('reviews-v2',`${key}|${review.reviewerId}`),review))throw Error('DUPLICATE_REVIEW');return review;}
   async reviewedV2(key,reviewerId){return read(this.file('reviews-v2',`${key}|${reviewerId}`));}
 }
 
