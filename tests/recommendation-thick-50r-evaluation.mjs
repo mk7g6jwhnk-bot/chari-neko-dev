@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import { build50rReport } from '../research/recommendation-thick-50r-evaluation.mjs';
+const read = name => JSON.parse(fs.readFileSync(new URL(`../research/${name}`, import.meta.url)));
+const report = build50rReport(read('recommendation-thick-50r-source.json'), read('recommendation-thick-50r-cohort.json'), read('thick-readonly-audit-results.json'), read('thick-v2-shadow-cohort.json'));
+assert.equal(report.cohort.requested, 50); assert.equal(report.cohort.evaluated, 50); assert.equal(report.cohort.excluded.length, 0);
+assert.equal(report.cohort.protectedFinalIncluded, 0); assert.equal(report.evaluation.cohortPolicy.thresholdSearch, false);
+assert.equal(report.comparison22r.evaluated.before, 22); assert.equal(report.comparison22r.evaluated.now, 50);
+assert.equal(report.additional.purchaseable, 35); assert.equal(report.additional.ineligible, 15);
+assert.equal(report.additional.odds.known, 0); assert.equal(report.additional.odds.highPayoutDatasetUsable, false);
+assert.equal(report.evaluation.thick.all.hits, 0); assert.equal(report.interpretation.recommendationSelectionAppearsUseful, false);
+assert.equal(report.interpretation.thickIncreaseValueSignal, false); assert.equal(report.interpretation.verdict, 'NO_USEFUL_SIGNAL_YET');
+assert.equal(report.safety.predictionMismatch, 0); assert.equal(report.safety.purchaseMismatch, 0); assert.equal(report.safety.sealedResultMismatch, 0);
+assert.equal(report.safety.productionChanged, false); assert.equal(report.safety.researchMeaningChanged, false); assert.equal(report.safety.historicalMutationCount, 0);
+console.log('PASS frozen 22R definitions, 50R cohort evaluation, exclusions, safety, UNKNOWN odds');

@@ -1,0 +1,690 @@
+{
+  "schemaVersion": "RECOMMENDATION_THICK_50R_REPORT_V1",
+  "frozenDefinition": "RECOMMENDATION_THICK_EVAL_V1",
+  "cohort": {
+    "requested": 50,
+    "fetched": 50,
+    "evaluated": 50,
+    "excluded": [],
+    "protectedFinalIncluded": 0
+  },
+  "evaluation": {
+    "schemaVersion": "RECOMMENDATION_THICK_EVAL_V1",
+    "datasetHash": "1358cd7bd593469e2dbea30878a26164f423efa27d89b9b49ac283333c462b77",
+    "evaluatedRaces": 50,
+    "cohortPolicy": {
+      "auditTrainLike": 0,
+      "heldOut": 50,
+      "protectedFinalIncluded": 0,
+      "unknownMembershipExcluded": 0,
+      "thresholdSearch": false
+    },
+    "confidence": {
+      "HIGH": {
+        "raceCount": 6,
+        "purchaseableCount": 6,
+        "purchaseableRate": 1,
+        "hits": 0,
+        "hitRate": 0,
+        "investment": 3300,
+        "return": 0,
+        "roi": 0,
+        "avgTickets": 5.5,
+        "avgReturn": 0,
+        "maxLosingStreak": 6,
+        "returnDistribution": {
+          "zero": 6,
+          "under10000": 0,
+          "atLeast10000": 0
+        }
+      },
+      "MEDIUM": {
+        "raceCount": 2,
+        "purchaseableCount": 2,
+        "purchaseableRate": 1,
+        "hits": 0,
+        "hitRate": 0,
+        "investment": 900,
+        "return": 0,
+        "roi": 0,
+        "avgTickets": 4.5,
+        "avgReturn": 0,
+        "maxLosingStreak": 2,
+        "returnDistribution": {
+          "zero": 2,
+          "under10000": 0,
+          "atLeast10000": 0
+        }
+      },
+      "LOW": {
+        "raceCount": 42,
+        "purchaseableCount": 27,
+        "purchaseableRate": 0.6428571428571429,
+        "hits": 1,
+        "hitRate": 0.037037037037037035,
+        "investment": 7700,
+        "return": 5850,
+        "roi": 0.7597402597402597,
+        "avgTickets": 2.8518518518518516,
+        "avgReturn": 216.66666666666666,
+        "maxLosingStreak": 20,
+        "returnDistribution": {
+          "zero": 26,
+          "under10000": 1,
+          "atLeast10000": 0
+        }
+      },
+      "UNKNOWN": {
+        "raceCount": 0,
+        "purchaseableCount": 0,
+        "purchaseableRate": null,
+        "hits": 0,
+        "hitRate": null,
+        "investment": 0,
+        "return": 0,
+        "roi": null,
+        "avgTickets": null,
+        "avgReturn": null,
+        "maxLosingStreak": 0,
+        "returnDistribution": {
+          "zero": 0,
+          "under10000": 0,
+          "atLeast10000": 0
+        }
+      }
+    },
+    "concentration": {
+      "HIGH": {
+        "raceCount": 25,
+        "purchaseableCount": 24,
+        "purchaseableRate": 0.96,
+        "hits": 0,
+        "hitRate": 0,
+        "investment": 7000,
+        "return": 0,
+        "roi": 0,
+        "avgTickets": 2.9166666666666665,
+        "avgReturn": 0,
+        "maxLosingStreak": 24,
+        "returnDistribution": {
+          "zero": 24,
+          "under10000": 0,
+          "atLeast10000": 0
+        }
+      },
+      "MEDIUM": {
+        "raceCount": 2,
+        "purchaseableCount": 2,
+        "purchaseableRate": 1,
+        "hits": 1,
+        "hitRate": 0.5,
+        "investment": 400,
+        "return": 5850,
+        "roi": 14.625,
+        "avgTickets": 2,
+        "avgReturn": 2925,
+        "maxLosingStreak": 1,
+        "returnDistribution": {
+          "zero": 1,
+          "under10000": 1,
+          "atLeast10000": 0
+        }
+      },
+      "LOW": {
+        "raceCount": 23,
+        "purchaseableCount": 9,
+        "purchaseableRate": 0.391304347826087,
+        "hits": 0,
+        "hitRate": 0,
+        "investment": 4500,
+        "return": 0,
+        "roi": 0,
+        "avgTickets": 5,
+        "avgReturn": 0,
+        "maxLosingStreak": 9,
+        "returnDistribution": {
+          "zero": 9,
+          "under10000": 0,
+          "atLeast10000": 0
+        }
+      },
+      "UNKNOWN": {
+        "raceCount": 0,
+        "purchaseableCount": 0,
+        "purchaseableRate": null,
+        "hits": 0,
+        "hitRate": null,
+        "investment": 0,
+        "return": 0,
+        "roi": null,
+        "avgTickets": null,
+        "avgReturn": null,
+        "maxLosingStreak": 0,
+        "returnDistribution": {
+          "zero": 0,
+          "under10000": 0,
+          "atLeast10000": 0
+        }
+      }
+    },
+    "purchaseability": {
+      "PURCHASEABLE": {
+        "raceCount": 6,
+        "purchaseableCount": 6,
+        "purchaseableRate": 1,
+        "hits": 0,
+        "hitRate": 0,
+        "investment": 3300,
+        "return": 0,
+        "roi": 0,
+        "avgTickets": 5.5,
+        "avgReturn": 0,
+        "maxLosingStreak": 6,
+        "returnDistribution": {
+          "zero": 6,
+          "under10000": 0,
+          "atLeast10000": 0
+        }
+      },
+      "WARNING": {
+        "raceCount": 29,
+        "purchaseableCount": 29,
+        "purchaseableRate": 1,
+        "hits": 1,
+        "hitRate": 0.034482758620689655,
+        "investment": 8600,
+        "return": 5850,
+        "roi": 0.6802325581395349,
+        "avgTickets": 2.9655172413793105,
+        "avgReturn": 201.72413793103448,
+        "maxLosingStreak": 21,
+        "returnDistribution": {
+          "zero": 28,
+          "under10000": 1,
+          "atLeast10000": 0
+        }
+      },
+      "INELIGIBLE": {
+        "raceCount": 15,
+        "purchaseableCount": 0,
+        "purchaseableRate": 0,
+        "hits": 0,
+        "hitRate": null,
+        "investment": 0,
+        "return": 0,
+        "roi": null,
+        "avgTickets": null,
+        "avgReturn": null,
+        "maxLosingStreak": 0,
+        "returnDistribution": {
+          "zero": 0,
+          "under10000": 0,
+          "atLeast10000": 0
+        }
+      }
+    },
+    "candidateGroups": {
+      "HIGH_CONFIDENCE_PURCHASEABLE": {
+        "selected": {
+          "raceCount": 6,
+          "purchaseableCount": 6,
+          "purchaseableRate": 1,
+          "hits": 0,
+          "hitRate": 0,
+          "investment": 3300,
+          "return": 0,
+          "roi": 0,
+          "avgTickets": 5.5,
+          "avgReturn": 0,
+          "maxLosingStreak": 6,
+          "returnDistribution": {
+            "zero": 6,
+            "under10000": 0,
+            "atLeast10000": 0
+          }
+        },
+        "nonSelected": {
+          "raceCount": 44,
+          "purchaseableCount": 29,
+          "purchaseableRate": 0.6590909090909091,
+          "hits": 1,
+          "hitRate": 0.034482758620689655,
+          "investment": 8600,
+          "return": 5850,
+          "roi": 0.6802325581395349,
+          "avgTickets": 2.9655172413793105,
+          "avgReturn": 201.72413793103448,
+          "maxLosingStreak": 21,
+          "returnDistribution": {
+            "zero": 28,
+            "under10000": 1,
+            "atLeast10000": 0
+          }
+        }
+      },
+      "MEDIUM_CONFIDENCE_PURCHASEABLE": {
+        "selected": {
+          "raceCount": 2,
+          "purchaseableCount": 2,
+          "purchaseableRate": 1,
+          "hits": 0,
+          "hitRate": 0,
+          "investment": 900,
+          "return": 0,
+          "roi": 0,
+          "avgTickets": 4.5,
+          "avgReturn": 0,
+          "maxLosingStreak": 2,
+          "returnDistribution": {
+            "zero": 2,
+            "under10000": 0,
+            "atLeast10000": 0
+          }
+        },
+        "nonSelected": {
+          "raceCount": 48,
+          "purchaseableCount": 33,
+          "purchaseableRate": 0.6875,
+          "hits": 1,
+          "hitRate": 0.030303030303030304,
+          "investment": 11000,
+          "return": 5850,
+          "roi": 0.5318181818181819,
+          "avgTickets": 3.3333333333333335,
+          "avgReturn": 177.27272727272728,
+          "maxLosingStreak": 24,
+          "returnDistribution": {
+            "zero": 32,
+            "under10000": 1,
+            "atLeast10000": 0
+          }
+        }
+      },
+      "HIGH_CONCENTRATION_PURCHASEABLE": {
+        "selected": {
+          "raceCount": 24,
+          "purchaseableCount": 24,
+          "purchaseableRate": 1,
+          "hits": 0,
+          "hitRate": 0,
+          "investment": 7000,
+          "return": 0,
+          "roi": 0,
+          "avgTickets": 2.9166666666666665,
+          "avgReturn": 0,
+          "maxLosingStreak": 24,
+          "returnDistribution": {
+            "zero": 24,
+            "under10000": 0,
+            "atLeast10000": 0
+          }
+        },
+        "nonSelected": {
+          "raceCount": 26,
+          "purchaseableCount": 11,
+          "purchaseableRate": 0.4230769230769231,
+          "hits": 1,
+          "hitRate": 0.09090909090909091,
+          "investment": 4900,
+          "return": 5850,
+          "roi": 1.1938775510204083,
+          "avgTickets": 4.454545454545454,
+          "avgReturn": 531.8181818181819,
+          "maxLosingStreak": 5,
+          "returnDistribution": {
+            "zero": 10,
+            "under10000": 1,
+            "atLeast10000": 0
+          }
+        }
+      },
+      "LOW_TICKET_COUNT_PURCHASEABLE": {
+        "selected": {
+          "raceCount": 26,
+          "purchaseableCount": 26,
+          "purchaseableRate": 1,
+          "hits": 1,
+          "hitRate": 0.038461538461538464,
+          "investment": 5200,
+          "return": 5850,
+          "roi": 1.125,
+          "avgTickets": 2,
+          "avgReturn": 225,
+          "maxLosingStreak": 21,
+          "returnDistribution": {
+            "zero": 25,
+            "under10000": 1,
+            "atLeast10000": 0
+          }
+        },
+        "nonSelected": {
+          "raceCount": 24,
+          "purchaseableCount": 9,
+          "purchaseableRate": 0.375,
+          "hits": 0,
+          "hitRate": 0,
+          "investment": 6700,
+          "return": 0,
+          "roi": 0,
+          "avgTickets": 7.444444444444445,
+          "avgReturn": 0,
+          "maxLosingStreak": 9,
+          "returnDistribution": {
+            "zero": 9,
+            "under10000": 0,
+            "atLeast10000": 0
+          }
+        }
+      },
+      "WARNING": {
+        "selected": {
+          "raceCount": 44,
+          "purchaseableCount": 29,
+          "purchaseableRate": 0.6590909090909091,
+          "hits": 1,
+          "hitRate": 0.034482758620689655,
+          "investment": 8600,
+          "return": 5850,
+          "roi": 0.6802325581395349,
+          "avgTickets": 2.9655172413793105,
+          "avgReturn": 201.72413793103448,
+          "maxLosingStreak": 21,
+          "returnDistribution": {
+            "zero": 28,
+            "under10000": 1,
+            "atLeast10000": 0
+          }
+        },
+        "nonSelected": {
+          "raceCount": 6,
+          "purchaseableCount": 6,
+          "purchaseableRate": 1,
+          "hits": 0,
+          "hitRate": 0,
+          "investment": 3300,
+          "return": 0,
+          "roi": 0,
+          "avgTickets": 5.5,
+          "avgReturn": 0,
+          "maxLosingStreak": 6,
+          "returnDistribution": {
+            "zero": 6,
+            "under10000": 0,
+            "atLeast10000": 0
+          }
+        }
+      },
+      "PARTIAL_DATA": {
+        "selected": {
+          "raceCount": 0,
+          "purchaseableCount": 0,
+          "purchaseableRate": null,
+          "hits": 0,
+          "hitRate": null,
+          "investment": 0,
+          "return": 0,
+          "roi": null,
+          "avgTickets": null,
+          "avgReturn": null,
+          "maxLosingStreak": 0,
+          "returnDistribution": {
+            "zero": 0,
+            "under10000": 0,
+            "atLeast10000": 0
+          }
+        },
+        "nonSelected": {
+          "raceCount": 50,
+          "purchaseableCount": 35,
+          "purchaseableRate": 0.7,
+          "hits": 1,
+          "hitRate": 0.02857142857142857,
+          "investment": 11900,
+          "return": 5850,
+          "roi": 0.49159663865546216,
+          "avgTickets": 3.4,
+          "avgReturn": 167.14285714285714,
+          "maxLosingStreak": 25,
+          "returnDistribution": {
+            "zero": 34,
+            "under10000": 1,
+            "atLeast10000": 0
+          }
+        }
+      }
+    },
+    "bestDiagnosticGroup": "LOW_TICKET_COUNT_PURCHASEABLE",
+    "thick": {
+      "all": {
+        "races": 27,
+        "tickets": 30,
+        "hits": 0,
+        "hitRate": 0,
+        "investment": 3000,
+        "return": 0,
+        "roi": 0
+      },
+      "main": {
+        "races": 27,
+        "tickets": 30,
+        "hits": 0,
+        "hitRate": 0,
+        "investment": 3000,
+        "return": 0,
+        "roi": 0
+      },
+      "cover": {
+        "races": 0,
+        "tickets": 0,
+        "hits": 0,
+        "hitRate": null,
+        "investment": 0,
+        "return": 0,
+        "roi": null
+      },
+      "nonThick": {
+        "races": 35,
+        "tickets": 89,
+        "hits": 1,
+        "hitRate": 0.011235955056179775,
+        "investment": 8900,
+        "return": 5850,
+        "roi": 0.6573033707865169
+      },
+      "sameRace": {
+        "note": "Ticket-level 100-yen flat comparison within the same evaluated races",
+        "thick": {
+          "races": 27,
+          "tickets": 30,
+          "hits": 0,
+          "hitRate": 0,
+          "investment": 3000,
+          "return": 0,
+          "roi": 0
+        },
+        "nonThick": {
+          "races": 35,
+          "tickets": 89,
+          "hits": 1,
+          "hitRate": 0.011235955056179775,
+          "investment": 8900,
+          "return": 5850,
+          "roi": 0.6573033707865169
+        }
+      }
+    },
+    "cliff": {
+      "clearCliff": 27,
+      "noCliffThick": 0,
+      "clearCliffNoThick": 0
+    },
+    "futureHoleHighPayout": {
+      "status": "READY_WITH_UNKNOWN_ODDS",
+      "fields": [
+        "oddsBand",
+        "predictiveSupport",
+        "purchaseSupport",
+        "highPayout",
+        "warning",
+        "confidence"
+      ],
+      "oddsMissing": 119
+    },
+    "recommendationSelectionAppearsUseful": "DESCRIPTIVE_YES",
+    "verdict": "RECOMMENDATION_EVAL_BASE_READY",
+    "productionPredictionChanged": false,
+    "productionPurchaseChanged": false,
+    "researchMeaningChanged": false,
+    "historicalMutationCount": 0
+  },
+  "additional": {
+    "purchaseable": 35,
+    "ineligible": 15,
+    "ticketBands": {
+      "1-3": {
+        "races": 26,
+        "purchaseable": 26,
+        "hits": 1,
+        "hitRate": 0.038461538461538464,
+        "investment": 5200,
+        "return": 5850,
+        "roi": 1.125
+      },
+      "4-6": {
+        "races": 5,
+        "purchaseable": 5,
+        "hits": 0,
+        "hitRate": 0,
+        "investment": 2300,
+        "return": 0,
+        "roi": 0
+      },
+      "7-10": {
+        "races": 2,
+        "purchaseable": 2,
+        "hits": 0,
+        "hitRate": 0,
+        "investment": 1700,
+        "return": 0,
+        "roi": 0
+      },
+      "11+": {
+        "races": 2,
+        "purchaseable": 2,
+        "hits": 0,
+        "hitRate": 0,
+        "investment": 2700,
+        "return": 0,
+        "roi": 0
+      }
+    },
+    "mainCoverThick": {
+      "main": {
+        "races": 35,
+        "tickets": 119,
+        "hits": 1,
+        "hitRate": 0.008403361344537815,
+        "investment": 11900,
+        "return": 5850,
+        "roi": 0.49159663865546216
+      },
+      "cover": {
+        "races": 0,
+        "tickets": 0,
+        "hits": 0,
+        "hitRate": null,
+        "investment": 0,
+        "return": 0,
+        "roi": null
+      },
+      "thick": {
+        "races": 27,
+        "tickets": 30,
+        "hits": 0,
+        "hitRate": 0,
+        "investment": 3000,
+        "return": 0,
+        "roi": 0
+      },
+      "nonThick": {
+        "races": 35,
+        "tickets": 89,
+        "hits": 1,
+        "hitRate": 0.011235955056179775,
+        "investment": 8900,
+        "return": 5850,
+        "roi": 0.6573033707865169
+      }
+    },
+    "odds": {
+      "known": 0,
+      "unknown": 119,
+      "highPayoutDatasetUsable": false
+    }
+  },
+  "comparison22r": {
+    "evaluated": {
+      "before": 22,
+      "now": 50
+    },
+    "purchaseable": {
+      "before": 18,
+      "now": 35
+    },
+    "bestDiagnosticGroup": {
+      "before": "LOW_TICKET_COUNT_PURCHASEABLE",
+      "now": "LOW_TICKET_COUNT_PURCHASEABLE"
+    },
+    "selection": {
+      "before": "DESCRIPTIVE_YES",
+      "now": "DESCRIPTIVE_YES"
+    },
+    "thick": {
+      "before": {
+        "races": 13,
+        "tickets": 13,
+        "hits": 1,
+        "hitRate": 0.07692307692307693,
+        "investment": 1300,
+        "return": 4740,
+        "roi": 3.646153846153846
+      },
+      "now": {
+        "races": 27,
+        "tickets": 30,
+        "hits": 0,
+        "hitRate": 0,
+        "investment": 3000,
+        "return": 0,
+        "roi": 0
+      }
+    },
+    "cliff": {
+      "before": {
+        "clearCliff": 13,
+        "noCliffThick": 0,
+        "clearCliffNoThick": 0
+      },
+      "now": {
+        "clearCliff": 27,
+        "noCliffThick": 0,
+        "clearCliffNoThick": 0
+      }
+    }
+  },
+  "interpretation": {
+    "recommendationSelectionAppearsUseful": false,
+    "descriptiveBestGroup": "LOW_TICKET_COUNT_PURCHASEABLE",
+    "reason": "Only one purchase hit across 35 purchaseable races; the descriptive best group is single-hit dominated.",
+    "thickIncreaseValueSignal": false,
+    "verdict": "NO_USEFUL_SIGNAL_YET"
+  },
+  "safety": {
+    "predictionMismatch": 0,
+    "purchaseMismatch": 0,
+    "sealedResultMismatch": 0,
+    "productionChanged": false,
+    "researchMeaningChanged": false,
+    "historicalMutationCount": 0
+  }
+}
