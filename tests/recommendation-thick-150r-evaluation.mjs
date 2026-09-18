@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import { evaluate150r } from '../research/recommendation-thick-150r-evaluation.mjs';
+const read=name=>JSON.parse(fs.readFileSync(new URL(`../research/${name}`,import.meta.url)));
+const report=evaluate150r(read('recommendation-thick-150r-source.json'),read('recommendation-thick-150r-cohort.json'),read('recommendation-thick-100r-evaluation.json'));
+assert.equal(report.cohort.collected,150);assert.equal(report.cohort.evaluated,150);assert.equal(report.cohort.first100Exact,true);assert.equal(report.cohort.duplicate,0);assert.equal(report.cohort.excluded,0);assert.equal(report.cohort.resultAvailable,150);assert.equal(report.cohort.protectedFinal,0);
+assert.deepEqual(report.first100.main,{races:78,tickets:284,hits:5,investment:28400,return:8300,roi:8300/28400});
+assert.deepEqual(report.first100.cover,{races:30,tickets:220,hits:2,investment:22000,return:3680,roi:3680/22000});
+assert.equal(report.first100.recommendation.selected.races,56);assert.equal(report.first100.recommendation.selected.tickets,112);assert.equal(report.first100.recommendation.selected.hits,3);assert.equal(report.first100.recommendation.selected.roi,7070/11200);
+assert.equal(report.new50.purchaseable,36);assert.equal(report.new50.ineligible,14);assert.equal(report.new50.overall.hits,2);assert.equal(report.new50.overall.roi,3660/9400);
+assert.equal(report.new50.recommendation.selected.races,28);assert.equal(report.new50.recommendation.selected.hits,1);assert.equal(report.new50.recommendation.selected.roi,3180/4600);
+assert.equal(report.new50.cover.tickets,95);assert.equal(report.new50.cover.hits,0);assert.equal(report.new50.thick.hits,0);
+assert.equal(report.integrity.issues,0);assert.equal(report.integrity.predictionMismatch,0);assert.equal(report.integrity.purchaseMismatch,0);assert.equal(report.integrity.sealedResultMismatch,0);assert.equal(report.integrity.historicalMutation,0);
+assert.equal(report.safety.productionPredictionChanged,false);assert.equal(report.safety.productionPurchaseChanged,false);assert.equal(report.safety.tuningPerformed,false);
+console.log('recommendation-thick-150r-evaluation: PASS');

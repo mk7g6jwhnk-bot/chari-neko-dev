@@ -34,8 +34,8 @@ async function fetchRace(baseUrl, raceKey, fetchImpl) {
   return { prediction, result, predictionAfter, resultAfter };
 }
 
-export async function fetch100rSource({ cohort, baseUrl = DEFAULT_BASE, fetchImpl = fetch, concurrency = 4 } = {}) {
-  if (!cohort || cohort.raceKeys?.length !== 100 || cohort.protectedFinalIncluded !== 0) throw Error('FROZEN_100R_COHORT_REQUIRED');
+export async function fetchMilestoneSource({ cohort, expectedRaces = cohort?.raceKeys?.length, baseUrl = DEFAULT_BASE, fetchImpl = fetch, concurrency = 4 } = {}) {
+  if (!cohort || !Number.isInteger(expectedRaces) || cohort.raceKeys?.length !== expectedRaces || cohort.protectedFinalIncluded !== 0) throw Error('FROZEN_MILESTONE_COHORT_REQUIRED');
   const records = [], exclusions = [], hashes = { predictionMismatch: 0, purchaseMismatch: 0, sealedResultMismatch: 0 };
   let cursor = 0;
   async function worker() {
@@ -78,10 +78,12 @@ export async function fetch100rSource({ cohort, baseUrl = DEFAULT_BASE, fetchImp
     rating: r.rating, concentration: r.concentration, canPurchase: r.canPurchase, display: r.display, qualificationBoundary: r.qualificationBoundary,
     tickets: r.tickets, mainTickets: r.tickets.filter(t => t.category === 'MAIN') }));
   const coverHits = audit.races.filter(r => eligible.has(r.raceKey)).flatMap(r => r.tickets.filter(t => t.category === 'COVER' && t.order === r.finish).map(t => ({ raceKey: r.raceKey, order: t.order, payout: r.payout })));
-  return { schemaVersion: 'RECOMMENDATION_THICK_100R_SOURCE_V2', cohort, hashes, snapshotHashes, exclusions,
+  return { schemaVersion: `RECOMMENDATION_THICK_${expectedRaces}R_SOURCE_V2`, cohort, hashes, snapshotHashes, exclusions,
     ticketDiagnostics, thickPerformance: audit.thickPerformance, nonThickMainPerformance: audit.nonThickMainPerformance, coverPerformance: { hits: coverHits },
     safety: { protectedFinalIncluded: 0, productionWrite: 0, historicalMutation: 0, thresholdSearch: false } };
 }
+
+export const fetch100rSource = options => fetchMilestoneSource({ ...options, expectedRaces: 100 });
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const cohort = JSON.parse(await fs.readFile(new URL('./recommendation-thick-100r-cohort.json', import.meta.url)));
