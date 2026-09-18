@@ -71,13 +71,15 @@ export async function fetch100rSource({ cohort, baseUrl = DEFAULT_BASE, fetchImp
   }
   await Promise.all(Array.from({ length: Math.max(1, Math.min(8, concurrency)) }, worker));
   const audit = auditThick(records.filter(Boolean), { sourceTotalV2: cohort.raceKeys.length });
+  const snapshotHashes = Object.fromEntries(records.filter(Boolean).map(record => [record.raceKey, record.sourceHashes]));
   const eligible = new Set(audit.races.filter(r => r.confirmed && r.temporalValid && r.verificationValid && /^\d+-\d+-\d+$/.test(r.finish) && r.payout !== null).map(r => r.raceKey));
   for (const row of audit.races) if (!eligible.has(row.raceKey)) exclusions.push({ raceKey: row.raceKey, reason: !row.confirmed ? 'RESULT_NOT_CONFIRMED' : !row.temporalValid ? 'TEMPORAL_INVALID' : !row.verificationValid ? 'INTEGRITY_INVALID' : row.payout === null ? 'PAYOUT_UNKNOWN' : 'FINISH_ORDER_INVALID' });
   const ticketDiagnostics = audit.races.map(r => ({ raceKey: r.raceKey, inConfirmedCohort: eligible.has(r.raceKey), quality: r.quality, qualitySource: r.qualitySource,
     rating: r.rating, concentration: r.concentration, canPurchase: r.canPurchase, display: r.display, qualificationBoundary: r.qualificationBoundary,
-    mainTickets: r.tickets.filter(t => t.category === 'MAIN') }));
-  return { schemaVersion: 'RECOMMENDATION_THICK_100R_SOURCE_V1', cohort, hashes, exclusions,
-    ticketDiagnostics, thickPerformance: audit.thickPerformance, nonThickMainPerformance: audit.nonThickMainPerformance,
+    tickets: r.tickets, mainTickets: r.tickets.filter(t => t.category === 'MAIN') }));
+  const coverHits = audit.races.filter(r => eligible.has(r.raceKey)).flatMap(r => r.tickets.filter(t => t.category === 'COVER' && t.order === r.finish).map(t => ({ raceKey: r.raceKey, order: t.order, payout: r.payout })));
+  return { schemaVersion: 'RECOMMENDATION_THICK_100R_SOURCE_V2', cohort, hashes, snapshotHashes, exclusions,
+    ticketDiagnostics, thickPerformance: audit.thickPerformance, nonThickMainPerformance: audit.nonThickMainPerformance, coverPerformance: { hits: coverHits },
     safety: { protectedFinalIncluded: 0, productionWrite: 0, historicalMutation: 0, thresholdSearch: false } };
 }
 

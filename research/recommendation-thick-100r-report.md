@@ -18,10 +18,14 @@ action-tag forward-only append順の先頭100Rを固定した。収集100R、uni
 | evaluated | 100 |
 | 購入可 / 購入不可 | 78 / 22 |
 | MAIN点数 / 的中 | 284 / 5 |
-| 投資 / 払戻 | 28,400円 / 8,300円 |
+| MAIN投資 / 払戻 | 28,400円 / 8,300円 |
 | MAIN ROI | 29.23% |
-| COVER | 0点（保存済みcohortに対象なし） |
+| COVER点数 / 的中 | 220 / 2 |
+| COVER投資 / 払戻 / ROI | 22,000円 / 3,680円 / 16.73% |
+| actual purchase合計 | 504点 / 7的中 / ROI 23.77% |
 | 高配当的中（1万円以上） | 0 |
+
+2026-09-18のCOVER整合性監査で、初版sourceが`r.tickets`からMAINだけを抽出していたことを確認した。recommendation group・点数帯・THICKの固定評価は従来どおりMAIN scopeを維持し、actual purchase分類を別集計として追加した。
 
 ## recommendation候補group
 

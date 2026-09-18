@@ -589,13 +589,13 @@
         "roi": 0.29225352112676056
       },
       "cover": {
-        "races": 0,
-        "tickets": 0,
-        "hits": 0,
-        "hitRate": null,
-        "investment": 0,
-        "return": 0,
-        "roi": null
+        "races": 30,
+        "tickets": 220,
+        "hits": 2,
+        "hitRate": 0.00909090909090909,
+        "investment": 22000,
+        "return": 3680,
+        "roi": 0.16727272727272727
       },
       "thick": {
         "races": 56,
@@ -615,6 +615,13 @@
         "return": 8140,
         "roi": 0.3650224215246637
       }
+    },
+    "actualPurchased": {
+      "tickets": 504,
+      "hits": 7,
+      "investment": 50400,
+      "return": 11980,
+      "roi": 0.2376984126984127
     },
     "odds": {
       "known": 0,

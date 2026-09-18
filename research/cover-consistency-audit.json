@@ -1,0 +1,236 @@
+{
+  "schemaVersion": "COVER_CONSISTENCY_AUDIT_V1",
+  "classification": "A_21249DC_EVALUATION_CLASSIFICATION_BUG",
+  "rootCause": "recommendation-thick-100r-fetch retained only MAIN tickets and recommendation-thick-evaluation hard-coded every retained ticket as MAIN; final sealed COVER tickets were omitted.",
+  "cohort": {
+    "same": true,
+    "raceCount": 100,
+    "temporalOrderSame": true,
+    "keyDifferences": [],
+    "recommendationExcluded": 0,
+    "distanceExcluded": 0,
+    "protectedFinal": 0,
+    "duplicates": 0,
+    "resultAvailable": 100
+  },
+  "snapshot": {
+    "same": true,
+    "predictionSealMismatches": [],
+    "purchasePlanMismatches": [],
+    "source": "keirin-saved-prediction-detail predictionPayload.prediction.canonicalPurchasePlan.standardTickets",
+    "classificationSource": "saved ticket betClass/category; no inferred candidate classification"
+  },
+  "corrected": {
+    "purchaseable": 78,
+    "ineligible": 22,
+    "main": {
+      "tickets": 284,
+      "hits": 5
+    },
+    "cover": {
+      "tickets": 220,
+      "hits": 2
+    },
+    "thick": {
+      "tickets": 61,
+      "hits": 1
+    },
+    "total": {
+      "tickets": 504,
+      "hits": 7
+    }
+  },
+  "coverHits": [
+    {
+      "raceKey": "20260917-84-1",
+      "actualResult": "5-4-1",
+      "exactWinningTicket": "5-4-1",
+      "predictionTerminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": true,
+        "globalRank": 31,
+        "scenarioFamilyRank": 3,
+        "purchaseRejectCode": "ADOPTED",
+        "purchaseReason": "終端総合評価順位26位：確率・着順評価・根拠・独立支持を総合評価"
+      },
+      "purchaseCandidateStatus": true,
+      "finalPurchaseClassification": "COVER",
+      "main": false,
+      "cover": true,
+      "thick": false,
+      "actualPurchased": true,
+      "sourceFile": "research/prediction-distance-100r-source.json",
+      "sourceField": "rows[].purchase.tickets[].class",
+      "predictionSealHash": "62b4fd29df2137394987eca48ca7c270a639cb8cb550cb969a050c7a8ced9b86",
+      "purchasePayloadHash": "13af90f6825411ea0cb7e3533f9c5e8553bc32e62bbd985b6d2aaf1437377506",
+      "payout": 2690
+    },
+    {
+      "raceKey": "20260917-63-2",
+      "actualResult": "1-7-4",
+      "exactWinningTicket": "1-7-4",
+      "predictionTerminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": true,
+        "globalRank": 20,
+        "scenarioFamilyRank": 2,
+        "purchaseRejectCode": "ADOPTED",
+        "purchaseReason": "終端総合評価順位20位：確率・着順評価・根拠・独立支持を総合評価"
+      },
+      "purchaseCandidateStatus": true,
+      "finalPurchaseClassification": "COVER",
+      "main": false,
+      "cover": true,
+      "thick": false,
+      "actualPurchased": true,
+      "sourceFile": "research/prediction-distance-100r-source.json",
+      "sourceField": "rows[].purchase.tickets[].class",
+      "predictionSealHash": "74db9197b22d3676a7769034db5695fa64ed8f40841ab277abbf956039754ee9",
+      "purchasePayloadHash": "887e023ae268dd1291ba93ccfb7d4c5c300d7eeeed0553cd1d52128f01a252d9",
+      "payout": 990
+    }
+  ],
+  "mainHits": [
+    {
+      "raceKey": "20260912-53-12",
+      "actualResult": "9-1-7",
+      "exactWinningTicket": "9-1-7",
+      "predictionTerminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": true,
+        "globalRank": 1,
+        "scenarioFamilyRank": 1,
+        "purchaseRejectCode": "ADOPTED",
+        "purchaseReason": "終端総合評価順位1位：確率・着順評価・根拠・独立支持を総合評価"
+      },
+      "purchaseCandidateStatus": true,
+      "finalPurchaseClassification": "MAIN",
+      "main": true,
+      "cover": false,
+      "thick": false,
+      "actualPurchased": true,
+      "sourceFile": "research/prediction-distance-100r-source.json",
+      "sourceField": "rows[].purchase.tickets[].class",
+      "predictionSealHash": "3d4f25ae6cb4b4f4c779f16ea382432e7261133b38cce870f8a55b1163efabbc",
+      "purchasePayloadHash": "3c2dd20ac4e1bd1803b40affb6b236014d307ca2b4f704dd51685adaf9cee116",
+      "payout": 5850
+    },
+    {
+      "raceKey": "20260917-84-6",
+      "actualResult": "5-1-4",
+      "exactWinningTicket": "5-1-4",
+      "predictionTerminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": true,
+        "globalRank": 3,
+        "scenarioFamilyRank": 1,
+        "purchaseRejectCode": "ADOPTED",
+        "purchaseReason": "終端総合評価順位3位：確率・着順評価・根拠・独立支持を総合評価"
+      },
+      "purchaseCandidateStatus": true,
+      "finalPurchaseClassification": "MAIN",
+      "main": true,
+      "cover": false,
+      "thick": false,
+      "actualPurchased": true,
+      "sourceFile": "research/prediction-distance-100r-source.json",
+      "sourceField": "rows[].purchase.tickets[].class",
+      "predictionSealHash": "c2ec7bc510a2578c82ef6ed3daf183aac582940151693af9830fd74548119e09",
+      "purchasePayloadHash": "2be48eb52e2d969a5bde6c1bb0e61826b0bcb26af7f9ce7130ea8829391d909e",
+      "payout": 550
+    },
+    {
+      "raceKey": "20260917-73-6",
+      "actualResult": "2-4-7",
+      "exactWinningTicket": "2-4-7",
+      "predictionTerminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": true,
+        "globalRank": 1,
+        "scenarioFamilyRank": 1,
+        "purchaseRejectCode": "ADOPTED",
+        "purchaseReason": "終端総合評価順位1位：確率・着順評価・根拠・独立支持を総合評価"
+      },
+      "purchaseCandidateStatus": true,
+      "finalPurchaseClassification": "MAIN",
+      "main": true,
+      "cover": false,
+      "thick": true,
+      "actualPurchased": true,
+      "sourceFile": "research/prediction-distance-100r-source.json",
+      "sourceField": "rows[].purchase.tickets[].class",
+      "predictionSealHash": "c24e0532abf5be1d15dd5efffdfeb26d3265f7dd6d512c114f5c37ff66ae0ede",
+      "purchasePayloadHash": "e0914d1c31c6aa27ea9293d8f6b0e4ab72517b2cab3ac9f60e4fb152348e7f63",
+      "payout": 160
+    },
+    {
+      "raceKey": "20260917-13-6",
+      "actualResult": "4-7-2",
+      "exactWinningTicket": "4-7-2",
+      "predictionTerminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": true,
+        "globalRank": 7,
+        "scenarioFamilyRank": 1,
+        "purchaseRejectCode": "ADOPTED",
+        "purchaseReason": "終端総合評価順位7位：確率・着順評価・根拠・独立支持を総合評価"
+      },
+      "purchaseCandidateStatus": true,
+      "finalPurchaseClassification": "MAIN",
+      "main": true,
+      "cover": false,
+      "thick": false,
+      "actualPurchased": true,
+      "sourceFile": "research/prediction-distance-100r-source.json",
+      "sourceField": "rows[].purchase.tickets[].class",
+      "predictionSealHash": "b09f8a29fc8e1de98ff104966e4f3a83d58706ec6d562850fefa0511f3b7e498",
+      "purchasePayloadHash": "2e4c6df6177e1d865849a7e848f7b5b26648d9a0141f00d17a25a280389e830d",
+      "payout": 1060
+    },
+    {
+      "raceKey": "20260917-83-1",
+      "actualResult": "1-2-4",
+      "exactWinningTicket": "1-2-4",
+      "predictionTerminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": true,
+        "globalRank": 11,
+        "scenarioFamilyRank": 1,
+        "purchaseRejectCode": "ADOPTED",
+        "purchaseReason": "終端総合評価順位10位：確率・着順評価・根拠・独立支持を総合評価"
+      },
+      "purchaseCandidateStatus": true,
+      "finalPurchaseClassification": "MAIN",
+      "main": true,
+      "cover": false,
+      "thick": false,
+      "actualPurchased": true,
+      "sourceFile": "research/prediction-distance-100r-source.json",
+      "sourceField": "rows[].purchase.tickets[].class",
+      "predictionSealHash": "2ad6c4aae70767c228da3bff13aea810dc241b7f3113e88a08b6370d07b1dc8f",
+      "purchasePayloadHash": "2f6fb79748ba0b386eac3af8e7af78118e7048cf5394b6422e21efe955126108",
+      "payout": 680
+    }
+  ],
+  "integrity": {
+    "predictionMismatch": 0,
+    "purchaseMismatch": 0,
+    "sealedResultMismatch": 0,
+    "historicalMutation": 0,
+    "productionChanged": false
+  }
+}

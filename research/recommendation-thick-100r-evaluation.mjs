@@ -16,11 +16,21 @@ const raceStats = rows => {
 };
 const bands = [[1,3,'1-3'],[4,6,'4-6'],[7,10,'7-10'],[11,Infinity,'11+']];
 
+const categoryStats = (source, category) => {
+  const hits = new Map((source.coverPerformance?.hits || []).map(hit => [`${hit.raceKey}/${hit.order}`, hit.payout]));
+  const tickets = source.ticketDiagnostics.filter(row => row.canPurchase === true).flatMap(row => (row.tickets || []).filter(ticket => ticket.category === category).map(ticket => ({ ...ticket, raceKey: row.raceKey })));
+  const returned = tickets.reduce((sum, ticket) => sum + (hits.get(`${ticket.raceKey}/${ticket.order}`) || 0), 0);
+  return { races: new Set(tickets.map(ticket => ticket.raceKey)).size, tickets: tickets.length,
+    hits: tickets.filter(ticket => hits.has(`${ticket.raceKey}/${ticket.order}`)).length,
+    hitRate: tickets.length ? tickets.filter(ticket => hits.has(`${ticket.raceKey}/${ticket.order}`)).length / tickets.length : null,
+    investment: tickets.length * 100, return: returned, roi: tickets.length ? returned / (tickets.length * 100) : null };
+};
+
 export function build100rReport(source, cohort, baseline50) {
   const dataset = buildDataset(source, { auditRaceKeys: [], heldOutRaceKeys: cohort.raceKeys });
   const evaluation = evaluate(dataset);
   const ticketBands = Object.fromEntries(bands.map(([lo, hi, name]) => [name, raceStats(dataset.rows.filter(r => r.preResult.ticketCount >= lo && r.preResult.ticketCount <= hi))]));
-  const main = stats(dataset.rows, t => t.class === 'MAIN'), cover = stats(dataset.rows, t => t.class === 'COVER');
+  const main = stats(dataset.rows, t => t.class === 'MAIN'), cover = categoryStats(source, 'COVER');
   const useful = evaluation.recommendationSelectionAppearsUseful === 'DESCRIPTIVE_YES' && main.hits >= 3;
   const thickSignal = evaluation.thick.all.hits >= 3 && evaluation.thick.all.roi > evaluation.thick.nonThick.roi;
   const verdict = useful ? 'USEFUL_SIGNAL_EMERGING' : thickSignal ? 'PROMISING_BUT_MORE_DATA' : baseline50.interpretation.verdict === 'NO_USEFUL_SIGNAL_YET' ? 'NO_USEFUL_SIGNAL_YET' : 'SIGNAL_DISAPPEARED';
@@ -30,6 +40,9 @@ export function build100rReport(source, cohort, baseline50) {
     evaluation, additional: { purchaseable: dataset.rows.filter(r => r.preResult.purchaseable).length,
       ineligible: dataset.rows.filter(r => !r.preResult.purchaseable).length, ticketBands,
       mainCoverThick: { main, cover, thick: evaluation.thick.all, nonThick: evaluation.thick.nonThick },
+      actualPurchased: { tickets: main.tickets + cover.tickets, hits: main.hits + cover.hits,
+        investment: main.investment + cover.investment, return: main.return + cover.return,
+        roi: (main.investment + cover.investment) ? (main.return + cover.return) / (main.investment + cover.investment) : null },
       odds: { known: 0, unknown: evaluation.futureHoleHighPayout.oddsMissing, highPayoutDatasetUsable: false } },
     comparison50r: { evaluated: { before: baseline50.cohort.evaluated, now: evaluation.evaluatedRaces },
       purchaseable: { before: baseline50.additional.purchaseable, now: dataset.rows.filter(r => r.preResult.purchaseable).length },
