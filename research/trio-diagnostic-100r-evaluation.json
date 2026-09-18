@@ -1,0 +1,3668 @@
+{
+  "schemaVersion": "TRIO_DIAGNOSTIC_V1",
+  "verdict": "TRIO_SIGNAL_STRONG_ENOUGH_TO_STUDY",
+  "definition": {
+    "actualTrio": "confirmed top-three riders sorted ascending",
+    "trioScore": "maximum saved pre-result terminal probability among permutations",
+    "meaningful": "at least one representative terminal or existing natural purchase candidate code",
+    "technicalDuplicateHandling": "permutation dedup; strongest score; branch support counted once",
+    "naturalBoundary": "DATA_NOT_AVAILABLE; no new threshold introduced",
+    "resultAwareScoring": false
+  },
+  "cohort": {
+    "expected": 100,
+    "rows": 100,
+    "exactMatch": true,
+    "orderMatch": true,
+    "keyHash": "eae2637c34416d9ebab9a7dfdcebdb92a85b85e7f97d106b54bab85dd56d667b",
+    "expectedKeyHash": "eae2637c34416d9ebab9a7dfdcebdb92a85b85e7f97d106b54bab85dd56d667b",
+    "duplicate": 0,
+    "resultAvailable": 100,
+    "protectedFinal": 0
+  },
+  "integrity": {
+    "predictionMismatch": 0,
+    "purchaseMismatch": 0,
+    "sealedResultMismatch": 0,
+    "mismatchTotal": 0,
+    "historicalMutation": 0,
+    "resultAwareScoreCreation": 0,
+    "payoutInference": 0
+  },
+  "summary": {
+    "races": 100,
+    "trifectaHits": 7,
+    "exactTrioGenerated": 100,
+    "exactTrioGeneratedRate": 1,
+    "meaningfulExactTrio": 51,
+    "meaningfulExactTrioRate": 0.51,
+    "top1": 13,
+    "top3": 31,
+    "top5": 44,
+    "top10": 63,
+    "outsideTop10": 37,
+    "missing": 0,
+    "purchaseDerivedTrioHitRaces": 16,
+    "trifectaMissTrioHit": 9,
+    "internalTrioOnly": 35,
+    "twoOfThreeOnly": 36,
+    "upstreamTrioMiss": 13,
+    "categories": {
+      "A_TRIFECTA_HIT": 7,
+      "B_TRIO_WOULD_HIT": 9,
+      "C_INTERNAL_TRIO_ONLY": 35,
+      "D_TWO_OF_THREE_ONLY": 36,
+      "E_TRIO_UPSTREAM_MISS": 13,
+      "F_UNCLASSIFIABLE": 0
+    },
+    "ordering": {
+      "sameThreeWrongOrder": 9,
+      "reverse12SameThird": 4,
+      "otherPermutation": 5,
+      "meaningfulButOutsidePurchase": 35
+    },
+    "trioCandidates": {
+      "average": 15.71,
+      "median": 3,
+      "p90": 35
+    }
+  },
+  "p3Relation": {
+    "p3Races": 55,
+    "p3AndMeaningfulExactTrio": 51
+  },
+  "candidateSets": {
+    "allMeaningful": {
+      "hitRaces": 51,
+      "tickets": 1571
+    },
+    "naturalBoundary": "DATA_NOT_AVAILABLE",
+    "purchaseDerived": {
+      "uniqueTrioTickets": 275,
+      "trioHitRaces": 16
+    },
+    "lowTicketPurchaseDerived": {
+      "uniqueTrioTickets": 125,
+      "trioHitRaces": 8
+    }
+  },
+  "lowTicket": {
+    "races": 56,
+    "trifectaHits": 3,
+    "exactTrioGenerated": 56,
+    "exactTrioGeneratedRate": 1,
+    "meaningfulExactTrio": 17,
+    "meaningfulExactTrioRate": 0.30357142857142855,
+    "top1": 8,
+    "top3": 18,
+    "top5": 27,
+    "top10": 37,
+    "outsideTop10": 19,
+    "missing": 0,
+    "purchaseDerivedTrioHitRaces": 8,
+    "trifectaMissTrioHit": 5,
+    "internalTrioOnly": 9,
+    "twoOfThreeOnly": 27,
+    "upstreamTrioMiss": 12,
+    "categories": {
+      "A_TRIFECTA_HIT": 3,
+      "B_TRIO_WOULD_HIT": 5,
+      "C_INTERNAL_TRIO_ONLY": 9,
+      "D_TWO_OF_THREE_ONLY": 27,
+      "E_TRIO_UPSTREAM_MISS": 12,
+      "F_UNCLASSIFIABLE": 0
+    },
+    "ordering": {
+      "sameThreeWrongOrder": 5,
+      "reverse12SameThird": 3,
+      "otherPermutation": 2,
+      "meaningfulButOutsidePurchase": 9
+    },
+    "trioCandidates": {
+      "average": 5.482142857142857,
+      "median": 1,
+      "p90": 26
+    }
+  },
+  "actualPurchase": {
+    "main": {
+      "uniqueTrioTickets": 178,
+      "trioHitRaces": 13
+    },
+    "cover": {
+      "uniqueTrioTickets": 146,
+      "trioHitRaces": 6
+    },
+    "combined": {
+      "uniqueTrioTickets": 275,
+      "trioHitRaces": 16
+    }
+  },
+  "thick": {
+    "uniqueTrioTickets": 60,
+    "trioHitRaces": 6,
+    "trifectaWrongOrderButTrioCorrect": 5,
+    "twoOfThreeOnly": 29,
+    "worse": 25
+  },
+  "payout": {
+    "status": "DATA_NOT_AVAILABLE",
+    "reason": "sealed source contains trifecta payout only; official trio payout is absent",
+    "investment": null,
+    "return": null,
+    "roi": null
+  },
+  "suitabilityObservations": {
+    "p3ButOrderingWeak": 48,
+    "exactTrioMeaningfulButPurchaseOutside": 35,
+    "multipleMeaningfulPermutations": 46
+  },
+  "rows": [
+    {
+      "raceKey": "20260912-53-2",
+      "actualOrder": "1-7-8",
+      "actualTrio": "1-7-8",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 54,
+        "highRank": false,
+        "candidateCount": 52,
+        "strongestTerminalScore": 0.0023951475176457863,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 12,
+        "hit": false,
+        "mainUniqueTrios": 5,
+        "mainHit": false,
+        "coverUniqueTrios": 7,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 2,
+      "category": "D_TWO_OF_THREE_ONLY"
+    },
+    {
+      "raceKey": "20260912-46-2",
+      "actualOrder": "4-3-5",
+      "actualTrio": "3-4-5",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 14,
+        "highRank": false,
+        "candidateCount": 20,
+        "strongestTerminalScore": 0.012306421598178307,
+        "meaningfulScenarioSupportCount": 2
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 9,
+        "hit": false,
+        "mainUniqueTrios": 3,
+        "mainHit": false,
+        "coverUniqueTrios": 9,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": true
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "C_INTERNAL_TRIO_ONLY"
+    },
+    {
+      "raceKey": "20260912-53-3",
+      "actualOrder": "3-1-5",
+      "actualTrio": "1-3-5",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 40,
+        "highRank": false,
+        "candidateCount": 1,
+        "strongestTerminalScore": 0.003423059075342162,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 1,
+        "hit": false,
+        "mainUniqueTrios": 1,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 1,
+      "category": "E_TRIO_UPSTREAM_MISS"
+    },
+    {
+      "raceKey": "20260912-46-3",
+      "actualOrder": "5-7-3",
+      "actualTrio": "3-5-7",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 20,
+        "highRank": false,
+        "candidateCount": 35,
+        "strongestTerminalScore": 0.00866640529368937,
+        "meaningfulScenarioSupportCount": 3
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 10,
+        "hit": false,
+        "mainUniqueTrios": 7,
+        "mainHit": false,
+        "coverUniqueTrios": 6,
+        "coverHit": false,
+        "thickUniqueTrios": 4,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": true
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "C_INTERNAL_TRIO_ONLY"
+    },
+    {
+      "raceKey": "20260912-53-4",
+      "actualOrder": "2-3-7",
+      "actualTrio": "2-3-7",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 4,
+        "highRank": true,
+        "candidateCount": 84,
+        "strongestTerminalScore": 0.005135122647864192,
+        "meaningfulScenarioSupportCount": 3
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 13,
+        "hit": false,
+        "mainUniqueTrios": 12,
+        "mainHit": false,
+        "coverUniqueTrios": 10,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": true
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "C_INTERNAL_TRIO_ONLY"
+    },
+    {
+      "raceKey": "20260912-46-4",
+      "actualOrder": "2-6-3",
+      "actualTrio": "2-3-6",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 4,
+        "highRank": true,
+        "candidateCount": 1,
+        "strongestTerminalScore": 0.009068032655216251,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 1,
+        "hit": false,
+        "mainUniqueTrios": 1,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 2,
+      "category": "D_TWO_OF_THREE_ONLY"
+    },
+    {
+      "raceKey": "20260912-53-5",
+      "actualOrder": "1-5-2",
+      "actualTrio": "1-2-5",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 6,
+        "highRank": true,
+        "candidateCount": 83,
+        "strongestTerminalScore": 0.005447677771950788,
+        "meaningfulScenarioSupportCount": 3
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_BLOCKED",
+        "uniqueTrios": 0,
+        "hit": false,
+        "mainUniqueTrios": 0,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": true
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "C_INTERNAL_TRIO_ONLY"
+    },
+    {
+      "raceKey": "20260912-53-6",
+      "actualOrder": "8-2-7",
+      "actualTrio": "2-7-8",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 14,
+        "highRank": false,
+        "candidateCount": 1,
+        "strongestTerminalScore": 0.0045361832303706905,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 1,
+        "hit": false,
+        "mainUniqueTrios": 1,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 2,
+      "category": "D_TWO_OF_THREE_ONLY"
+    },
+    {
+      "raceKey": "20260912-53-7",
+      "actualOrder": "5-7-9",
+      "actualTrio": "5-7-9",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 62,
+        "highRank": false,
+        "candidateCount": 83,
+        "strongestTerminalScore": 0.002638836984481521,
+        "meaningfulScenarioSupportCount": 2
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_BLOCKED",
+        "uniqueTrios": 0,
+        "hit": false,
+        "mainUniqueTrios": 0,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": true
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "C_INTERNAL_TRIO_ONLY"
+    },
+    {
+      "raceKey": "20260912-46-7",
+      "actualOrder": "4-2-7",
+      "actualTrio": "2-4-7",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 7,
+        "highRank": true,
+        "candidateCount": 35,
+        "strongestTerminalScore": 0.009228391062040585,
+        "meaningfulScenarioSupportCount": 3
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_BLOCKED",
+        "uniqueTrios": 0,
+        "hit": false,
+        "mainUniqueTrios": 0,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": true
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "C_INTERNAL_TRIO_ONLY"
+    },
+    {
+      "raceKey": "20260912-53-9",
+      "actualOrder": "7-2-5",
+      "actualTrio": "2-5-7",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 3,
+        "highRank": true,
+        "candidateCount": 83,
+        "strongestTerminalScore": 0.00594509207042379,
+        "meaningfulScenarioSupportCount": 2
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_BLOCKED",
+        "uniqueTrios": 0,
+        "hit": false,
+        "mainUniqueTrios": 0,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": true
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "C_INTERNAL_TRIO_ONLY"
+    },
+    {
+      "raceKey": "20260912-46-10",
+      "actualOrder": "6-5-3",
+      "actualTrio": "3-5-6",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 3,
+        "highRank": true,
+        "candidateCount": 3,
+        "strongestTerminalScore": 0.007529296811496166,
+        "meaningfulScenarioSupportCount": 1
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 3,
+        "hit": true,
+        "mainUniqueTrios": 3,
+        "mainHit": true,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": true,
+        "reverse12SameThird": true,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "B_TRIO_WOULD_HIT"
+    },
+    {
+      "raceKey": "20260912-53-11",
+      "actualOrder": "7-2-8",
+      "actualTrio": "2-7-8",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 29,
+        "highRank": false,
+        "candidateCount": 48,
+        "strongestTerminalScore": 0.003540495931673907,
+        "meaningfulScenarioSupportCount": 1
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 11,
+        "hit": true,
+        "mainUniqueTrios": 4,
+        "mainHit": false,
+        "coverUniqueTrios": 7,
+        "coverHit": true,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": true,
+        "reverse12SameThird": false,
+        "otherPermutation": true,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "B_TRIO_WOULD_HIT"
+    },
+    {
+      "raceKey": "20260912-85-1",
+      "actualOrder": "4-1-5",
+      "actualTrio": "1-4-5",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 9,
+        "highRank": true,
+        "candidateCount": 1,
+        "strongestTerminalScore": 0.009469888353619093,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 1,
+        "hit": false,
+        "mainUniqueTrios": 1,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 1,
+      "category": "E_TRIO_UPSTREAM_MISS"
+    },
+    {
+      "raceKey": "20260912-85-2",
+      "actualOrder": "7-1-3",
+      "actualTrio": "1-3-7",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 14,
+        "highRank": false,
+        "candidateCount": 4,
+        "strongestTerminalScore": 0.008563609271397316,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_BLOCKED",
+        "uniqueTrios": 0,
+        "hit": false,
+        "mainUniqueTrios": 0,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 2,
+      "category": "D_TWO_OF_THREE_ONLY"
+    },
+    {
+      "raceKey": "20260912-34-2",
+      "actualOrder": "5-1-6",
+      "actualTrio": "1-5-6",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 8,
+        "highRank": true,
+        "candidateCount": 35,
+        "strongestTerminalScore": 0.00974301190356379,
+        "meaningfulScenarioSupportCount": 2
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_BLOCKED",
+        "uniqueTrios": 0,
+        "hit": false,
+        "mainUniqueTrios": 0,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": true
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "C_INTERNAL_TRIO_ONLY"
+    },
+    {
+      "raceKey": "20260912-53-12",
+      "actualOrder": "9-1-7",
+      "actualTrio": "1-7-9",
+      "lowTicket": true,
+      "trifectaHit": true,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1,
+        "highRank": true,
+        "candidateCount": 2,
+        "strongestTerminalScore": 0.005484190485043694,
+        "meaningfulScenarioSupportCount": 1
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 2,
+        "hit": true,
+        "mainUniqueTrios": 1,
+        "mainHit": true,
+        "coverUniqueTrios": 1,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "A_TRIFECTA_HIT"
+    },
+    {
+      "raceKey": "20260912-85-3",
+      "actualOrder": "4-1-3",
+      "actualTrio": "1-3-4",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 3,
+        "highRank": true,
+        "candidateCount": 2,
+        "strongestTerminalScore": 0.009899654374559539,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 2,
+        "hit": false,
+        "mainUniqueTrios": 2,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 2,
+      "category": "D_TWO_OF_THREE_ONLY"
+    },
+    {
+      "raceKey": "20260912-34-3",
+      "actualOrder": "1-5-2",
+      "actualTrio": "1-2-5",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 7,
+        "highRank": true,
+        "candidateCount": 4,
+        "strongestTerminalScore": 0.01005099068415133,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 3,
+        "hit": false,
+        "mainUniqueTrios": 3,
+        "mainHit": false,
+        "coverUniqueTrios": 2,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 2,
+      "category": "D_TWO_OF_THREE_ONLY"
+    },
+    {
+      "raceKey": "20260912-85-4",
+      "actualOrder": "3-5-7",
+      "actualTrio": "3-5-7",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 2,
+        "highRank": true,
+        "candidateCount": 2,
+        "strongestTerminalScore": 0.01261669969936586,
+        "meaningfulScenarioSupportCount": 1
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 1,
+        "hit": false,
+        "mainUniqueTrios": 1,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": true
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "C_INTERNAL_TRIO_ONLY"
+    },
+    {
+      "raceKey": "20260912-34-4",
+      "actualOrder": "3-1-2",
+      "actualTrio": "1-2-3",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 3,
+        "highRank": true,
+        "candidateCount": 1,
+        "strongestTerminalScore": 0.014565618976419394,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 1,
+        "hit": false,
+        "mainUniqueTrios": 1,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 2,
+      "category": "D_TWO_OF_THREE_ONLY"
+    },
+    {
+      "raceKey": "20260912-85-5",
+      "actualOrder": "7-6-1",
+      "actualTrio": "1-6-7",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 19,
+        "highRank": false,
+        "candidateCount": 5,
+        "strongestTerminalScore": 0.006466873342874599,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 5,
+        "hit": false,
+        "mainUniqueTrios": 3,
+        "mainHit": false,
+        "coverUniqueTrios": 2,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 2,
+      "category": "D_TWO_OF_THREE_ONLY"
+    },
+    {
+      "raceKey": "20260912-34-5",
+      "actualOrder": "1-4-2",
+      "actualTrio": "1-2-4",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 10,
+        "highRank": true,
+        "candidateCount": 1,
+        "strongestTerminalScore": 0.010578402192556438,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 1,
+        "hit": false,
+        "mainUniqueTrios": 1,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 1,
+      "category": "E_TRIO_UPSTREAM_MISS"
+    },
+    {
+      "raceKey": "20260912-85-6",
+      "actualOrder": "1-7-5",
+      "actualTrio": "1-5-7",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 11,
+        "highRank": false,
+        "candidateCount": 35,
+        "strongestTerminalScore": 0.008137166840814537,
+        "meaningfulScenarioSupportCount": 3
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_BLOCKED",
+        "uniqueTrios": 0,
+        "hit": false,
+        "mainUniqueTrios": 0,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": true
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "C_INTERNAL_TRIO_ONLY"
+    },
+    {
+      "raceKey": "20260912-34-6",
+      "actualOrder": "4-6-2",
+      "actualTrio": "2-4-6",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 10,
+        "highRank": true,
+        "candidateCount": 1,
+        "strongestTerminalScore": 0.015962332179416144,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 1,
+        "hit": false,
+        "mainUniqueTrios": 1,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 1,
+      "category": "E_TRIO_UPSTREAM_MISS"
+    },
+    {
+      "raceKey": "20260912-85-7",
+      "actualOrder": "4-5-1",
+      "actualTrio": "1-4-5",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 9,
+        "highRank": true,
+        "candidateCount": 35,
+        "strongestTerminalScore": 0.00911030869918418,
+        "meaningfulScenarioSupportCount": 2
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_BLOCKED",
+        "uniqueTrios": 0,
+        "hit": false,
+        "mainUniqueTrios": 0,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": true
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "C_INTERNAL_TRIO_ONLY"
+    },
+    {
+      "raceKey": "20260912-34-7",
+      "actualOrder": "4-5-6",
+      "actualTrio": "4-5-6",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 30,
+        "highRank": false,
+        "candidateCount": 1,
+        "strongestTerminalScore": 0.005303367341417317,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 1,
+        "hit": false,
+        "mainUniqueTrios": 1,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 1,
+      "category": "E_TRIO_UPSTREAM_MISS"
+    },
+    {
+      "raceKey": "20260912-85-8",
+      "actualOrder": "7-2-5",
+      "actualTrio": "2-5-7",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 28,
+        "highRank": false,
+        "candidateCount": 1,
+        "strongestTerminalScore": 0.004820310655116415,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 1,
+        "hit": false,
+        "mainUniqueTrios": 1,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 0,
+      "category": "E_TRIO_UPSTREAM_MISS"
+    },
+    {
+      "raceKey": "20260912-85-9",
+      "actualOrder": "1-2-3",
+      "actualTrio": "1-2-3",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 9,
+        "highRank": true,
+        "candidateCount": 1,
+        "strongestTerminalScore": 0.010894174309912732,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 1,
+        "hit": false,
+        "mainUniqueTrios": 1,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 2,
+      "category": "D_TWO_OF_THREE_ONLY"
+    },
+    {
+      "raceKey": "20260912-34-9",
+      "actualOrder": "7-3-2",
+      "actualTrio": "2-3-7",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1,
+        "highRank": true,
+        "candidateCount": 35,
+        "strongestTerminalScore": 0.013107890383694807,
+        "meaningfulScenarioSupportCount": 3
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 9,
+        "hit": false,
+        "mainUniqueTrios": 5,
+        "mainHit": false,
+        "coverUniqueTrios": 6,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": true
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "C_INTERNAL_TRIO_ONLY"
+    },
+    {
+      "raceKey": "20260916-13-6",
+      "actualOrder": "5-6-2",
+      "actualTrio": "2-5-6",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 5,
+        "highRank": true,
+        "candidateCount": 4,
+        "strongestTerminalScore": 0.007173087632716342,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 4,
+        "hit": false,
+        "mainUniqueTrios": 4,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 2,
+      "category": "D_TWO_OF_THREE_ONLY"
+    },
+    {
+      "raceKey": "20260916-86-7",
+      "actualOrder": "2-7-3",
+      "actualTrio": "2-3-7",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 4,
+        "highRank": true,
+        "candidateCount": 35,
+        "strongestTerminalScore": 0.011331346586437075,
+        "meaningfulScenarioSupportCount": 3
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_BLOCKED",
+        "uniqueTrios": 0,
+        "hit": false,
+        "mainUniqueTrios": 0,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": true
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "C_INTERNAL_TRIO_ONLY"
+    },
+    {
+      "raceKey": "20260916-13-7",
+      "actualOrder": "5-7-3",
+      "actualTrio": "3-5-7",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1,
+        "highRank": true,
+        "candidateCount": 4,
+        "strongestTerminalScore": 0.015461902798855126,
+        "meaningfulScenarioSupportCount": 1
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 3,
+        "hit": false,
+        "mainUniqueTrios": 2,
+        "mainHit": false,
+        "coverUniqueTrios": 1,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": true
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "C_INTERNAL_TRIO_ONLY"
+    },
+    {
+      "raceKey": "20260916-86-8",
+      "actualOrder": "5-3-6",
+      "actualTrio": "3-5-6",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 34,
+        "highRank": false,
+        "candidateCount": 35,
+        "strongestTerminalScore": 0.004221814178920171,
+        "meaningfulScenarioSupportCount": 2
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_BLOCKED",
+        "uniqueTrios": 0,
+        "hit": false,
+        "mainUniqueTrios": 0,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": true
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "C_INTERNAL_TRIO_ONLY"
+    },
+    {
+      "raceKey": "20260916-13-8",
+      "actualOrder": "3-5-4",
+      "actualTrio": "3-4-5",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1,
+        "highRank": true,
+        "candidateCount": 3,
+        "strongestTerminalScore": 0.014944440258867242,
+        "meaningfulScenarioSupportCount": 1
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 2,
+        "hit": false,
+        "mainUniqueTrios": 2,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": true
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "C_INTERNAL_TRIO_ONLY"
+    },
+    {
+      "raceKey": "20260916-86-9",
+      "actualOrder": "4-1-2",
+      "actualTrio": "1-2-4",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 6,
+        "highRank": true,
+        "candidateCount": 1,
+        "strongestTerminalScore": 0.011236561273105737,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 1,
+        "hit": false,
+        "mainUniqueTrios": 1,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 2,
+      "category": "D_TWO_OF_THREE_ONLY"
+    },
+    {
+      "raceKey": "20260916-86-10",
+      "actualOrder": "1-2-6",
+      "actualTrio": "1-2-6",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 20,
+        "highRank": false,
+        "candidateCount": 35,
+        "strongestTerminalScore": 0.006544026550169156,
+        "meaningfulScenarioSupportCount": 2
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 2,
+        "hit": false,
+        "mainUniqueTrios": 1,
+        "mainHit": false,
+        "coverUniqueTrios": 2,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": true
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "C_INTERNAL_TRIO_ONLY"
+    },
+    {
+      "raceKey": "20260916-13-10",
+      "actualOrder": "3-7-1",
+      "actualTrio": "1-3-7",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 3,
+        "highRank": true,
+        "candidateCount": 35,
+        "strongestTerminalScore": 0.011882535212977384,
+        "meaningfulScenarioSupportCount": 3
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_BLOCKED",
+        "uniqueTrios": 0,
+        "hit": false,
+        "mainUniqueTrios": 0,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": true
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "C_INTERNAL_TRIO_ONLY"
+    },
+    {
+      "raceKey": "20260916-86-11",
+      "actualOrder": "4-2-1",
+      "actualTrio": "1-2-4",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 2,
+        "highRank": true,
+        "candidateCount": 1,
+        "strongestTerminalScore": 0.010782735184367162,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 1,
+        "hit": false,
+        "mainUniqueTrios": 1,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 2,
+      "category": "D_TWO_OF_THREE_ONLY"
+    },
+    {
+      "raceKey": "20260916-13-11",
+      "actualOrder": "1-4-2",
+      "actualTrio": "1-2-4",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 8,
+        "highRank": true,
+        "candidateCount": 35,
+        "strongestTerminalScore": 0.009900784622072981,
+        "meaningfulScenarioSupportCount": 3
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_BLOCKED",
+        "uniqueTrios": 0,
+        "hit": false,
+        "mainUniqueTrios": 0,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": true
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "C_INTERNAL_TRIO_ONLY"
+    },
+    {
+      "raceKey": "20260916-86-12",
+      "actualOrder": "7-3-4",
+      "actualTrio": "3-4-7",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 30,
+        "highRank": false,
+        "candidateCount": 35,
+        "strongestTerminalScore": 0.005586606792392939,
+        "meaningfulScenarioSupportCount": 2
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_BLOCKED",
+        "uniqueTrios": 0,
+        "hit": false,
+        "mainUniqueTrios": 0,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": true
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "C_INTERNAL_TRIO_ONLY"
+    },
+    {
+      "raceKey": "20260916-12-1",
+      "actualOrder": "2-1-6",
+      "actualTrio": "1-2-6",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 11,
+        "highRank": false,
+        "candidateCount": 3,
+        "strongestTerminalScore": 0.007105880397892395,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 3,
+        "hit": false,
+        "mainUniqueTrios": 3,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 2,
+      "category": "D_TWO_OF_THREE_ONLY"
+    },
+    {
+      "raceKey": "20260916-37-1",
+      "actualOrder": "1-5-2",
+      "actualTrio": "1-2-5",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 7,
+        "highRank": true,
+        "candidateCount": 2,
+        "strongestTerminalScore": 0.009406082658845764,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 2,
+        "hit": false,
+        "mainUniqueTrios": 2,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 2,
+      "category": "D_TWO_OF_THREE_ONLY"
+    },
+    {
+      "raceKey": "20260916-37-2",
+      "actualOrder": "5-3-2",
+      "actualTrio": "2-3-5",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 4,
+        "highRank": true,
+        "candidateCount": 1,
+        "strongestTerminalScore": 0.010430981718333426,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 1,
+        "hit": false,
+        "mainUniqueTrios": 1,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 2,
+      "category": "D_TWO_OF_THREE_ONLY"
+    },
+    {
+      "raceKey": "20260916-37-3",
+      "actualOrder": "1-4-3",
+      "actualTrio": "1-3-4",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 12,
+        "highRank": false,
+        "candidateCount": 33,
+        "strongestTerminalScore": 0.008087358115442445,
+        "meaningfulScenarioSupportCount": 3
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_BLOCKED",
+        "uniqueTrios": 0,
+        "hit": false,
+        "mainUniqueTrios": 0,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": true
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "C_INTERNAL_TRIO_ONLY"
+    },
+    {
+      "raceKey": "20260916-37-4",
+      "actualOrder": "3-1-6",
+      "actualTrio": "1-3-6",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 12,
+        "highRank": false,
+        "candidateCount": 1,
+        "strongestTerminalScore": 0.010143466464371914,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 1,
+        "hit": false,
+        "mainUniqueTrios": 1,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 2,
+      "category": "D_TWO_OF_THREE_ONLY"
+    },
+    {
+      "raceKey": "20260916-12-5",
+      "actualOrder": "5-1-4",
+      "actualTrio": "1-4-5",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 13,
+        "highRank": false,
+        "candidateCount": 35,
+        "strongestTerminalScore": 0.007886984306428785,
+        "meaningfulScenarioSupportCount": 3
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 9,
+        "hit": false,
+        "mainUniqueTrios": 2,
+        "mainHit": false,
+        "coverUniqueTrios": 7,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": true
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "C_INTERNAL_TRIO_ONLY"
+    },
+    {
+      "raceKey": "20260916-37-5",
+      "actualOrder": "4-3-1",
+      "actualTrio": "1-3-4",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 4,
+        "highRank": true,
+        "candidateCount": 1,
+        "strongestTerminalScore": 0.00924902834251497,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 1,
+        "hit": false,
+        "mainUniqueTrios": 1,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 2,
+      "category": "D_TWO_OF_THREE_ONLY"
+    },
+    {
+      "raceKey": "20260916-37-6",
+      "actualOrder": "1-4-7",
+      "actualTrio": "1-4-7",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 15,
+        "highRank": false,
+        "candidateCount": 4,
+        "strongestTerminalScore": 0.0069013109986568915,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 4,
+        "hit": false,
+        "mainUniqueTrios": 1,
+        "mainHit": false,
+        "coverUniqueTrios": 3,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 2,
+      "category": "D_TWO_OF_THREE_ONLY"
+    },
+    {
+      "raceKey": "20260916-37-7",
+      "actualOrder": "2-1-3",
+      "actualTrio": "1-2-3",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1,
+        "highRank": true,
+        "candidateCount": 35,
+        "strongestTerminalScore": 0.011974819103988727,
+        "meaningfulScenarioSupportCount": 3
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_BLOCKED",
+        "uniqueTrios": 0,
+        "hit": false,
+        "mainUniqueTrios": 0,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": true
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "C_INTERNAL_TRIO_ONLY"
+    },
+    {
+      "raceKey": "20260916-37-8",
+      "actualOrder": "1-3-2",
+      "actualTrio": "1-2-3",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1,
+        "highRank": true,
+        "candidateCount": 3,
+        "strongestTerminalScore": 0.008174511783341309,
+        "meaningfulScenarioSupportCount": 1
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 1,
+        "hit": true,
+        "mainUniqueTrios": 1,
+        "mainHit": true,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": true
+      },
+      "ordering": {
+        "sameThreeWrongOrder": true,
+        "reverse12SameThird": true,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "B_TRIO_WOULD_HIT"
+    },
+    {
+      "raceKey": "20260916-12-9",
+      "actualOrder": "3-6-1",
+      "actualTrio": "1-3-6",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 14,
+        "highRank": false,
+        "candidateCount": 2,
+        "strongestTerminalScore": 0.0070525481199115786,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 1,
+        "hit": false,
+        "mainUniqueTrios": 1,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 1,
+      "category": "E_TRIO_UPSTREAM_MISS"
+    },
+    {
+      "raceKey": "20260916-37-9",
+      "actualOrder": "2-4-3",
+      "actualTrio": "2-3-4",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 5,
+        "highRank": true,
+        "candidateCount": 1,
+        "strongestTerminalScore": 0.008330929969066474,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 1,
+        "hit": false,
+        "mainUniqueTrios": 1,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 2,
+      "category": "D_TWO_OF_THREE_ONLY"
+    },
+    {
+      "raceKey": "20260917-84-1",
+      "actualOrder": "5-4-1",
+      "actualTrio": "1-4-5",
+      "lowTicket": false,
+      "trifectaHit": true,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1,
+        "highRank": true,
+        "candidateCount": 20,
+        "strongestTerminalScore": 0.02754931665004694,
+        "meaningfulScenarioSupportCount": 3
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 9,
+        "hit": true,
+        "mainUniqueTrios": 4,
+        "mainHit": true,
+        "coverUniqueTrios": 9,
+        "coverHit": true,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "A_TRIFECTA_HIT"
+    },
+    {
+      "raceKey": "20260917-73-1",
+      "actualOrder": "2-5-1",
+      "actualTrio": "1-2-5",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 11,
+        "highRank": false,
+        "candidateCount": 35,
+        "strongestTerminalScore": 0.009334636304853408,
+        "meaningfulScenarioSupportCount": 3
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_BLOCKED",
+        "uniqueTrios": 0,
+        "hit": false,
+        "mainUniqueTrios": 0,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": true
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "C_INTERNAL_TRIO_ONLY"
+    },
+    {
+      "raceKey": "20260917-84-2",
+      "actualOrder": "5-1-2",
+      "actualTrio": "1-2-5",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1,
+        "highRank": true,
+        "candidateCount": 3,
+        "strongestTerminalScore": 0.017374548985031827,
+        "meaningfulScenarioSupportCount": 1
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 3,
+        "hit": true,
+        "mainUniqueTrios": 3,
+        "mainHit": true,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": true
+      },
+      "ordering": {
+        "sameThreeWrongOrder": true,
+        "reverse12SameThird": false,
+        "otherPermutation": true,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "B_TRIO_WOULD_HIT"
+    },
+    {
+      "raceKey": "20260917-84-3",
+      "actualOrder": "2-7-3",
+      "actualTrio": "2-3-7",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 3,
+        "highRank": true,
+        "candidateCount": 32,
+        "strongestTerminalScore": 0.01673313813910627,
+        "meaningfulScenarioSupportCount": 2
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 13,
+        "hit": true,
+        "mainUniqueTrios": 2,
+        "mainHit": true,
+        "coverUniqueTrios": 11,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": true
+      },
+      "ordering": {
+        "sameThreeWrongOrder": true,
+        "reverse12SameThird": false,
+        "otherPermutation": true,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "B_TRIO_WOULD_HIT"
+    },
+    {
+      "raceKey": "20260917-84-4",
+      "actualOrder": "4-3-1",
+      "actualTrio": "1-3-4",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 2,
+        "highRank": true,
+        "candidateCount": 35,
+        "strongestTerminalScore": 0.012310067188457516,
+        "meaningfulScenarioSupportCount": 3
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 6,
+        "hit": false,
+        "mainUniqueTrios": 3,
+        "mainHit": false,
+        "coverUniqueTrios": 6,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": true
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "C_INTERNAL_TRIO_ONLY"
+    },
+    {
+      "raceKey": "20260917-84-5",
+      "actualOrder": "2-4-6",
+      "actualTrio": "2-4-6",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 15,
+        "highRank": false,
+        "candidateCount": 5,
+        "strongestTerminalScore": 0.008427481758493694,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 3,
+        "hit": false,
+        "mainUniqueTrios": 3,
+        "mainHit": false,
+        "coverUniqueTrios": 2,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 2,
+      "category": "D_TWO_OF_THREE_ONLY"
+    },
+    {
+      "raceKey": "20260917-73-5",
+      "actualOrder": "5-1-4",
+      "actualTrio": "1-4-5",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 4,
+        "highRank": true,
+        "candidateCount": 1,
+        "strongestTerminalScore": 0.014225516888562734,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 1,
+        "hit": false,
+        "mainUniqueTrios": 1,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 2,
+      "category": "D_TWO_OF_THREE_ONLY"
+    },
+    {
+      "raceKey": "20260917-84-6",
+      "actualOrder": "5-1-4",
+      "actualTrio": "1-4-5",
+      "lowTicket": false,
+      "trifectaHit": true,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 2,
+        "highRank": true,
+        "candidateCount": 3,
+        "strongestTerminalScore": 0.009561661470131206,
+        "meaningfulScenarioSupportCount": 2
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 3,
+        "hit": true,
+        "mainUniqueTrios": 3,
+        "mainHit": true,
+        "coverUniqueTrios": 1,
+        "coverHit": true,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "A_TRIFECTA_HIT"
+    },
+    {
+      "raceKey": "20260917-73-6",
+      "actualOrder": "2-4-7",
+      "actualTrio": "2-4-7",
+      "lowTicket": true,
+      "trifectaHit": true,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1,
+        "highRank": true,
+        "candidateCount": 1,
+        "strongestTerminalScore": 0.01485351341879884,
+        "meaningfulScenarioSupportCount": 1
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 1,
+        "hit": true,
+        "mainUniqueTrios": 1,
+        "mainHit": true,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": true
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "A_TRIFECTA_HIT"
+    },
+    {
+      "raceKey": "20260917-84-7",
+      "actualOrder": "7-3-4",
+      "actualTrio": "3-4-7",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 9,
+        "highRank": true,
+        "candidateCount": 35,
+        "strongestTerminalScore": 0.010244313164666612,
+        "meaningfulScenarioSupportCount": 3
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_BLOCKED",
+        "uniqueTrios": 0,
+        "hit": false,
+        "mainUniqueTrios": 0,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": true
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "C_INTERNAL_TRIO_ONLY"
+    },
+    {
+      "raceKey": "20260917-63-1",
+      "actualOrder": "2-7-1",
+      "actualTrio": "1-2-7",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 3,
+        "highRank": true,
+        "candidateCount": 13,
+        "strongestTerminalScore": 0.011678349682445003,
+        "meaningfulScenarioSupportCount": 2
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 9,
+        "hit": false,
+        "mainUniqueTrios": 6,
+        "mainHit": false,
+        "coverUniqueTrios": 5,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": true
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "C_INTERNAL_TRIO_ONLY"
+    },
+    {
+      "raceKey": "20260917-28-1",
+      "actualOrder": "4-5-6",
+      "actualTrio": "4-5-6",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 25,
+        "highRank": false,
+        "candidateCount": 1,
+        "strongestTerminalScore": 0.006133558097515315,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 1,
+        "hit": false,
+        "mainUniqueTrios": 1,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 1,
+      "category": "E_TRIO_UPSTREAM_MISS"
+    },
+    {
+      "raceKey": "20260917-63-2",
+      "actualOrder": "1-7-4",
+      "actualTrio": "1-4-7",
+      "lowTicket": false,
+      "trifectaHit": true,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 9,
+        "highRank": true,
+        "candidateCount": 10,
+        "strongestTerminalScore": 0.010593320634204609,
+        "meaningfulScenarioSupportCount": 1
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 10,
+        "hit": true,
+        "mainUniqueTrios": 3,
+        "mainHit": false,
+        "coverUniqueTrios": 9,
+        "coverHit": true,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "A_TRIFECTA_HIT"
+    },
+    {
+      "raceKey": "20260917-63-3",
+      "actualOrder": "7-1-2",
+      "actualTrio": "1-2-7",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 12,
+        "highRank": false,
+        "candidateCount": 1,
+        "strongestTerminalScore": 0.007193452125047955,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 1,
+        "hit": false,
+        "mainUniqueTrios": 1,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 1,
+      "category": "E_TRIO_UPSTREAM_MISS"
+    },
+    {
+      "raceKey": "20260917-63-5",
+      "actualOrder": "3-4-1",
+      "actualTrio": "1-3-4",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 11,
+        "highRank": false,
+        "candidateCount": 35,
+        "strongestTerminalScore": 0.007504126814810622,
+        "meaningfulScenarioSupportCount": 3
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_BLOCKED",
+        "uniqueTrios": 0,
+        "hit": false,
+        "mainUniqueTrios": 0,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": true
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "C_INTERNAL_TRIO_ONLY"
+    },
+    {
+      "raceKey": "20260917-28-5",
+      "actualOrder": "5-4-7",
+      "actualTrio": "4-5-7",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 8,
+        "highRank": true,
+        "candidateCount": 1,
+        "strongestTerminalScore": 0.0058357094996470205,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 1,
+        "hit": false,
+        "mainUniqueTrios": 1,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 2,
+      "category": "D_TWO_OF_THREE_ONLY"
+    },
+    {
+      "raceKey": "20260917-28-6",
+      "actualOrder": "4-7-2",
+      "actualTrio": "2-4-7",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 4,
+        "highRank": true,
+        "candidateCount": 28,
+        "strongestTerminalScore": 0.009999834216135695,
+        "meaningfulScenarioSupportCount": 1
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 5,
+        "hit": false,
+        "mainUniqueTrios": 5,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": true
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "C_INTERNAL_TRIO_ONLY"
+    },
+    {
+      "raceKey": "20260917-28-9",
+      "actualOrder": "1-7-4",
+      "actualTrio": "1-4-7",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 3,
+        "highRank": true,
+        "candidateCount": 35,
+        "strongestTerminalScore": 0.010237056110053674,
+        "meaningfulScenarioSupportCount": 3
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_BLOCKED",
+        "uniqueTrios": 0,
+        "hit": false,
+        "mainUniqueTrios": 0,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": true
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "C_INTERNAL_TRIO_ONLY"
+    },
+    {
+      "raceKey": "20260917-63-10",
+      "actualOrder": "6-3-4",
+      "actualTrio": "3-4-6",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 32,
+        "highRank": false,
+        "candidateCount": 1,
+        "strongestTerminalScore": 0.004368945341933031,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 1,
+        "hit": false,
+        "mainUniqueTrios": 1,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 1,
+      "category": "E_TRIO_UPSTREAM_MISS"
+    },
+    {
+      "raceKey": "20260917-28-10",
+      "actualOrder": "3-7-5",
+      "actualTrio": "3-5-7",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 14,
+        "highRank": false,
+        "candidateCount": 2,
+        "strongestTerminalScore": 0.008774329450949477,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 2,
+        "hit": false,
+        "mainUniqueTrios": 2,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 1,
+      "category": "E_TRIO_UPSTREAM_MISS"
+    },
+    {
+      "raceKey": "20260917-63-11",
+      "actualOrder": "3-4-2",
+      "actualTrio": "2-3-4",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 21,
+        "highRank": false,
+        "candidateCount": 1,
+        "strongestTerminalScore": 0.006449143423813229,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 1,
+        "hit": false,
+        "mainUniqueTrios": 1,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 1,
+      "category": "E_TRIO_UPSTREAM_MISS"
+    },
+    {
+      "raceKey": "20260917-86-1",
+      "actualOrder": "7-5-3",
+      "actualTrio": "3-5-7",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1,
+        "highRank": true,
+        "candidateCount": 35,
+        "strongestTerminalScore": 0.011875660229859137,
+        "meaningfulScenarioSupportCount": 3
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 13,
+        "hit": true,
+        "mainUniqueTrios": 5,
+        "mainHit": true,
+        "coverUniqueTrios": 12,
+        "coverHit": true,
+        "thickUniqueTrios": 1,
+        "thickHit": true
+      },
+      "ordering": {
+        "sameThreeWrongOrder": true,
+        "reverse12SameThird": false,
+        "otherPermutation": true,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "B_TRIO_WOULD_HIT"
+    },
+    {
+      "raceKey": "20260917-63-12",
+      "actualOrder": "1-2-7",
+      "actualTrio": "1-2-7",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 12,
+        "highRank": false,
+        "candidateCount": 3,
+        "strongestTerminalScore": 0.007681444746241767,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 3,
+        "hit": false,
+        "mainUniqueTrios": 3,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 2,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 2,
+      "category": "D_TWO_OF_THREE_ONLY"
+    },
+    {
+      "raceKey": "20260917-86-3",
+      "actualOrder": "3-4-7",
+      "actualTrio": "3-4-7",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 5,
+        "highRank": true,
+        "candidateCount": 1,
+        "strongestTerminalScore": 0.010786889491967011,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 1,
+        "hit": false,
+        "mainUniqueTrios": 1,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 2,
+      "category": "D_TWO_OF_THREE_ONLY"
+    },
+    {
+      "raceKey": "20260917-13-3",
+      "actualOrder": "7-1-4",
+      "actualTrio": "1-4-7",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 7,
+        "highRank": true,
+        "candidateCount": 3,
+        "strongestTerminalScore": 0.009562364284978527,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 3,
+        "hit": false,
+        "mainUniqueTrios": 2,
+        "mainHit": false,
+        "coverUniqueTrios": 2,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 2,
+      "category": "D_TWO_OF_THREE_ONLY"
+    },
+    {
+      "raceKey": "20260917-86-4",
+      "actualOrder": "4-3-1",
+      "actualTrio": "1-3-4",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 10,
+        "highRank": true,
+        "candidateCount": 35,
+        "strongestTerminalScore": 0.009078892534714826,
+        "meaningfulScenarioSupportCount": 3
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_BLOCKED",
+        "uniqueTrios": 0,
+        "hit": false,
+        "mainUniqueTrios": 0,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": true
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "C_INTERNAL_TRIO_ONLY"
+    },
+    {
+      "raceKey": "20260917-13-4",
+      "actualOrder": "6-4-1",
+      "actualTrio": "1-4-6",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 15,
+        "highRank": false,
+        "candidateCount": 10,
+        "strongestTerminalScore": 0.0053800478622653995,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 6,
+        "hit": false,
+        "mainUniqueTrios": 6,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 2,
+      "category": "D_TWO_OF_THREE_ONLY"
+    },
+    {
+      "raceKey": "20260917-86-5",
+      "actualOrder": "1-7-5",
+      "actualTrio": "1-5-7",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 11,
+        "highRank": false,
+        "candidateCount": 2,
+        "strongestTerminalScore": 0.009617300449520695,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 2,
+        "hit": false,
+        "mainUniqueTrios": 2,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 2,
+      "category": "D_TWO_OF_THREE_ONLY"
+    },
+    {
+      "raceKey": "20260917-86-6",
+      "actualOrder": "2-3-4",
+      "actualTrio": "2-3-4",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 2,
+        "highRank": true,
+        "candidateCount": 2,
+        "strongestTerminalScore": 0.011534885253097036,
+        "meaningfulScenarioSupportCount": 1
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 1,
+        "hit": true,
+        "mainUniqueTrios": 1,
+        "mainHit": true,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": true,
+        "reverse12SameThird": false,
+        "otherPermutation": true,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "B_TRIO_WOULD_HIT"
+    },
+    {
+      "raceKey": "20260917-13-6",
+      "actualOrder": "4-7-2",
+      "actualTrio": "2-4-7",
+      "lowTicket": true,
+      "trifectaHit": true,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1,
+        "highRank": true,
+        "candidateCount": 6,
+        "strongestTerminalScore": 0.013294260378420407,
+        "meaningfulScenarioSupportCount": 2
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 3,
+        "hit": true,
+        "mainUniqueTrios": 3,
+        "mainHit": true,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "A_TRIFECTA_HIT"
+    },
+    {
+      "raceKey": "20260917-86-7",
+      "actualOrder": "4-3-7",
+      "actualTrio": "3-4-7",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 13,
+        "highRank": false,
+        "candidateCount": 35,
+        "strongestTerminalScore": 0.008022801669652217,
+        "meaningfulScenarioSupportCount": 3
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 14,
+        "hit": false,
+        "mainUniqueTrios": 3,
+        "mainHit": false,
+        "coverUniqueTrios": 14,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": true
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "C_INTERNAL_TRIO_ONLY"
+    },
+    {
+      "raceKey": "20260917-13-7",
+      "actualOrder": "6-5-4",
+      "actualTrio": "4-5-6",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 31,
+        "highRank": false,
+        "candidateCount": 4,
+        "strongestTerminalScore": 0.004984661222202366,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 4,
+        "hit": false,
+        "mainUniqueTrios": 3,
+        "mainHit": false,
+        "coverUniqueTrios": 3,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 1,
+      "category": "E_TRIO_UPSTREAM_MISS"
+    },
+    {
+      "raceKey": "20260917-86-8",
+      "actualOrder": "7-3-5",
+      "actualTrio": "3-5-7",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 12,
+        "highRank": false,
+        "candidateCount": 35,
+        "strongestTerminalScore": 0.007107728391281975,
+        "meaningfulScenarioSupportCount": 2
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 3,
+        "hit": false,
+        "mainUniqueTrios": 3,
+        "mainHit": false,
+        "coverUniqueTrios": 3,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": true
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "C_INTERNAL_TRIO_ONLY"
+    },
+    {
+      "raceKey": "20260917-13-8",
+      "actualOrder": "4-3-2",
+      "actualTrio": "2-3-4",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 4,
+        "highRank": true,
+        "candidateCount": 1,
+        "strongestTerminalScore": 0.010117224417582345,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 1,
+        "hit": false,
+        "mainUniqueTrios": 1,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 2,
+      "category": "D_TWO_OF_THREE_ONLY"
+    },
+    {
+      "raceKey": "20260917-86-9",
+      "actualOrder": "5-2-1",
+      "actualTrio": "1-2-5",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 15,
+        "highRank": false,
+        "candidateCount": 2,
+        "strongestTerminalScore": 0.007393842252110785,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 2,
+        "hit": false,
+        "mainUniqueTrios": 1,
+        "mainHit": false,
+        "coverUniqueTrios": 2,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 2,
+      "category": "D_TWO_OF_THREE_ONLY"
+    },
+    {
+      "raceKey": "20260917-13-9",
+      "actualOrder": "4-1-7",
+      "actualTrio": "1-4-7",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 4,
+        "highRank": true,
+        "candidateCount": 1,
+        "strongestTerminalScore": 0.008359425219006454,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 1,
+        "hit": false,
+        "mainUniqueTrios": 1,
+        "mainHit": false,
+        "coverUniqueTrios": 1,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 2,
+      "category": "D_TWO_OF_THREE_ONLY"
+    },
+    {
+      "raceKey": "20260917-86-10",
+      "actualOrder": "7-2-5",
+      "actualTrio": "2-5-7",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 3,
+        "highRank": true,
+        "candidateCount": 3,
+        "strongestTerminalScore": 0.010290601525800065,
+        "meaningfulScenarioSupportCount": 1
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_BLOCKED",
+        "uniqueTrios": 0,
+        "hit": false,
+        "mainUniqueTrios": 0,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": true
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "C_INTERNAL_TRIO_ONLY"
+    },
+    {
+      "raceKey": "20260917-13-10",
+      "actualOrder": "3-6-4",
+      "actualTrio": "3-4-6",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 2,
+        "highRank": true,
+        "candidateCount": 1,
+        "strongestTerminalScore": 0.008044745278150403,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 1,
+        "hit": false,
+        "mainUniqueTrios": 1,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 2,
+      "category": "D_TWO_OF_THREE_ONLY"
+    },
+    {
+      "raceKey": "20260917-86-11",
+      "actualOrder": "4-1-2",
+      "actualTrio": "1-2-4",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 6,
+        "highRank": true,
+        "candidateCount": 1,
+        "strongestTerminalScore": 0.010491120392119411,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 1,
+        "hit": false,
+        "mainUniqueTrios": 1,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 2,
+      "category": "D_TWO_OF_THREE_ONLY"
+    },
+    {
+      "raceKey": "20260917-13-11",
+      "actualOrder": "1-3-5",
+      "actualTrio": "1-3-5",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1,
+        "highRank": true,
+        "candidateCount": 2,
+        "strongestTerminalScore": 0.014107530716839898,
+        "meaningfulScenarioSupportCount": 1
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 2,
+        "hit": true,
+        "mainUniqueTrios": 1,
+        "mainHit": false,
+        "coverUniqueTrios": 1,
+        "coverHit": true,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": true,
+        "reverse12SameThird": true,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "B_TRIO_WOULD_HIT"
+    },
+    {
+      "raceKey": "20260917-86-12",
+      "actualOrder": "5-4-1",
+      "actualTrio": "1-4-5",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 2,
+        "highRank": true,
+        "candidateCount": 1,
+        "strongestTerminalScore": 0.012932448823187559,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 1,
+        "hit": false,
+        "mainUniqueTrios": 1,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 2,
+      "category": "D_TWO_OF_THREE_ONLY"
+    },
+    {
+      "raceKey": "20260917-83-1",
+      "actualOrder": "1-2-4",
+      "actualTrio": "1-2-4",
+      "lowTicket": false,
+      "trifectaHit": true,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 6,
+        "highRank": true,
+        "candidateCount": 9,
+        "strongestTerminalScore": 0.009096027475431938,
+        "meaningfulScenarioSupportCount": 1
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 9,
+        "hit": true,
+        "mainUniqueTrios": 9,
+        "mainHit": true,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "A_TRIFECTA_HIT"
+    },
+    {
+      "raceKey": "20260917-34-2",
+      "actualOrder": "1-2-3",
+      "actualTrio": "1-2-3",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 3,
+        "highRank": true,
+        "candidateCount": 35,
+        "strongestTerminalScore": 0.013099958093719919,
+        "meaningfulScenarioSupportCount": 3
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_BLOCKED",
+        "uniqueTrios": 0,
+        "hit": false,
+        "mainUniqueTrios": 0,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": true
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "C_INTERNAL_TRIO_ONLY"
+    },
+    {
+      "raceKey": "20260917-83-3",
+      "actualOrder": "2-3-6",
+      "actualTrio": "2-3-6",
+      "lowTicket": false,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 20,
+        "highRank": false,
+        "candidateCount": 3,
+        "strongestTerminalScore": 0.007542217832394065,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 3,
+        "hit": false,
+        "mainUniqueTrios": 2,
+        "mainHit": false,
+        "coverUniqueTrios": 1,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 2,
+      "category": "D_TWO_OF_THREE_ONLY"
+    },
+    {
+      "raceKey": "20260917-34-5",
+      "actualOrder": "1-3-2",
+      "actualTrio": "1-2-3",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 5,
+        "highRank": true,
+        "candidateCount": 2,
+        "strongestTerminalScore": 0.016717623688539494,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 2,
+        "hit": false,
+        "mainUniqueTrios": 1,
+        "mainHit": false,
+        "coverUniqueTrios": 1,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 2,
+      "category": "D_TWO_OF_THREE_ONLY"
+    },
+    {
+      "raceKey": "20260917-83-7",
+      "actualOrder": "1-2-4",
+      "actualTrio": "1-2-4",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 2,
+        "highRank": true,
+        "candidateCount": 1,
+        "strongestTerminalScore": 0.012525405112141097,
+        "meaningfulScenarioSupportCount": 0
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 1,
+        "hit": false,
+        "mainUniqueTrios": 1,
+        "mainHit": false,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 2,
+      "category": "D_TWO_OF_THREE_ONLY"
+    },
+    {
+      "raceKey": "20260917-83-9",
+      "actualOrder": "2-1-4",
+      "actualTrio": "1-2-4",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1,
+        "highRank": true,
+        "candidateCount": 1,
+        "strongestTerminalScore": 0.01711372269755213,
+        "meaningfulScenarioSupportCount": 1
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 1,
+        "hit": true,
+        "mainUniqueTrios": 1,
+        "mainHit": true,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 1,
+        "thickHit": true
+      },
+      "ordering": {
+        "sameThreeWrongOrder": true,
+        "reverse12SameThird": true,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "B_TRIO_WOULD_HIT"
+    }
+  ],
+  "safety": {
+    "productionPredictionChanged": false,
+    "productionPurchaseChanged": false,
+    "tuningPerformed": false,
+    "historicalMutationCount": 0
+  }
+}
