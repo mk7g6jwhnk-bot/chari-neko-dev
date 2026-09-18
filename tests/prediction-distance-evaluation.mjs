@@ -1,0 +1,36 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import { evaluatePredictionDistance } from '../research/prediction-distance-evaluation.mjs';
+
+const source = JSON.parse(fs.readFileSync(new URL('../research/prediction-distance-100r-source.json', import.meta.url)));
+const recommendation = JSON.parse(fs.readFileSync(new URL('../research/recommendation-thick-100r-source.json', import.meta.url)));
+const cohort = JSON.parse(fs.readFileSync(new URL('../research/recommendation-thick-100r-cohort.json', import.meta.url)));
+const lowTicketRaceKeys = recommendation.ticketDiagnostics.filter(row => row.inConfirmedCohort && row.canPurchase === true && row.mainTickets.length <= 3).map(row => row.raceKey);
+const report = evaluatePredictionDistance(source, { lowTicketRaceKeys });
+
+assert.deepEqual(source.cohort.raceKeys, cohort.raceKeys);
+assert.equal(report.cohort.raceCount, 100);
+assert.equal(report.cohort.rows, 100);
+assert.equal(report.cohort.duplicate, 0);
+assert.equal(report.cohort.resultAvailable, 100);
+assert.equal(report.integrity.issues, 0);
+assert.equal(report.summary.exactHits, 7);
+assert.deepEqual(report.summary.riderSelection, { P3: 55, P2: 33, P1: 11, P0: 1, successRate: .88, broadGeneratedP3: 100 });
+assert.equal(report.summary.winner.generated, 100);
+assert.equal(report.summary.winner.top3, 61);
+assert.equal(report.summary.pair.generated, 100);
+assert.equal(report.summary.reverse.exact12SameThird, 7);
+assert.equal(report.summary.third.outsideTop3, 27);
+assert.equal(report.summary.terminal.generated, 100);
+assert.equal(report.summary.terminal.meaningful, 42);
+assert.equal(report.summary.terminal.correctInternalNotPurchased, 35);
+assert.deepEqual(report.summary.distance.distribution, { 0: 7, 1: 47, 2: 34, 3: 11, 4: 1 });
+assert.equal(report.lowTicket.races, 56);
+assert.equal(report.lowTicket.riderSelection.successRate, 45 / 56);
+assert.equal(report.thick.tickets, 61);
+assert.equal(report.thick.exact, 1);
+assert.equal(report.safety.productionPredictionChanged, false);
+assert.equal(report.safety.productionPurchaseChanged, false);
+assert.equal(report.safety.tuningPerformed, false);
+assert.equal(report.safety.historicalMutationCount, 0);
+console.log('PASS fixed 100R prediction-distance diagnosis, cohort integrity, low-ticket and THICK subsets');

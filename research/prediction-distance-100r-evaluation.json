@@ -1,0 +1,4547 @@
+{
+  "schemaVersion": "PREDICTION_DISTANCE_DIAGNOSIS_V1",
+  "definition": {
+    "candidateCodes": [
+      "ADOPTED",
+      "THIRD_VARIANT_AMBIGUITY",
+      "THIRD_VARIANT_BOUNDARY"
+    ],
+    "meaningfulTerminal": "representativeTerminal OR existing natural purchase candidate code",
+    "riderSelectionGood": "at least two actual top-three riders in meaningful terminals",
+    "orderingGood": "saved winner rank <=3 AND saved exact-pair rank <=5 AND saved conditional-third rank <=3",
+    "thresholdSearch": false
+  },
+  "cohort": {
+    "raceCount": 100,
+    "keyHash": "eae2637c34416d9ebab9a7dfdcebdb92a85b85e7f97d106b54bab85dd56d667b",
+    "sourceKeyHash": "eae2637c34416d9ebab9a7dfdcebdb92a85b85e7f97d106b54bab85dd56d667b",
+    "rows": 100,
+    "duplicate": 0,
+    "resultAvailable": 100,
+    "protectedFinal": 0
+  },
+  "integrity": {
+    "predictionMismatch": 0,
+    "purchaseMismatch": 0,
+    "sealedResultMismatch": 0,
+    "exclusions": 0,
+    "temporalViolations": 0,
+    "resultAwareLeakage": 0,
+    "postHocModification": 0,
+    "historicalMutation": 0,
+    "issues": 0
+  },
+  "summary": {
+    "races": 100,
+    "exactHits": 7,
+    "riderSelection": {
+      "P3": 55,
+      "P2": 33,
+      "P1": 11,
+      "P0": 1,
+      "successRate": 0.88,
+      "broadGeneratedP3": 100
+    },
+    "winner": {
+      "generated": 100,
+      "generatedRate": 1,
+      "meaningful": 84,
+      "top1": 31,
+      "top2": 50,
+      "top3": 61,
+      "outsideTop3": 39,
+      "notGenerated": 0
+    },
+    "pair": {
+      "generated": 100,
+      "generatedRate": 1,
+      "meaningful": 54,
+      "reverseMeaningful": 51,
+      "top1": 17,
+      "top3": 30,
+      "top5": 38,
+      "outsideTop5": 62
+    },
+    "reverse": {
+      "exact12SameThird": 7,
+      "reverse12ThirdDifferent": 13,
+      "candidatePresentNotPurchased": 44
+    },
+    "third": {
+      "generated": 100,
+      "generatedRate": 1,
+      "top1": 23,
+      "top3": 73,
+      "outsideTop3": 27,
+      "missing": 0
+    },
+    "terminal": {
+      "generated": 100,
+      "generatedRate": 1,
+      "meaningful": 42,
+      "meaningfulRate": 0.42,
+      "purchaseCandidate": 42,
+      "purchased": 7,
+      "correctInternalNotPurchased": 35
+    },
+    "categories": {
+      "A_EXACT_HIT": 7,
+      "B_NEAR_MISS_ORDER": 12,
+      "C_CORRECT_INTERNAL_NOT_PURCHASED": 35,
+      "D_RIDERS_RIGHT_RANKING_WRONG": 34,
+      "E_UPSTREAM_MISS": 12,
+      "F_UNCLASSIFIABLE": 0
+    },
+    "distance": {
+      "distribution": {
+        "0": 7,
+        "1": 47,
+        "2": 34,
+        "3": 11,
+        "4": 1
+      },
+      "mean": 1.52,
+      "median": 1,
+      "p90": 3
+    },
+    "separation": {
+      "riderSelectionGood": 88,
+      "orderingGood": 27,
+      "purchaseSelectionGood": 42
+    },
+    "scenario": {
+      "SCENARIO_CLOSE": 14,
+      "SCENARIO_PARTIALLY_CLOSE": 14,
+      "SCENARIO_MISS": 2,
+      "INSUFFICIENT_EVIDENCE": 70
+    },
+    "primaryCauses": {
+      "NONE_EXACT_HIT": 7,
+      "PAIR_ORDER_MISS": 17,
+      "PURCHASE_INELIGIBLE": 19,
+      "PURCHASE_SELECTION_MISS": 16,
+      "REVERSE_12": 13,
+      "SCENARIO_RANKING_MISS": 5,
+      "THIRD_CONDITIONAL_MISS": 7,
+      "UPSTREAM_RIDER_MISS": 9,
+      "WINNER_SELECTION_MISS": 7
+    }
+  },
+  "lowTicket": {
+    "races": 56,
+    "exactHits": 3,
+    "riderSelection": {
+      "P3": 19,
+      "P2": 26,
+      "P1": 10,
+      "P0": 1,
+      "successRate": 0.8035714285714286,
+      "broadGeneratedP3": 56
+    },
+    "winner": {
+      "generated": 56,
+      "generatedRate": 1,
+      "meaningful": 41,
+      "top1": 19,
+      "top2": 30,
+      "top3": 36,
+      "outsideTop3": 20,
+      "notGenerated": 0
+    },
+    "pair": {
+      "generated": 56,
+      "generatedRate": 1,
+      "meaningful": 20,
+      "reverseMeaningful": 17,
+      "top1": 12,
+      "top3": 18,
+      "top5": 23,
+      "outsideTop5": 33
+    },
+    "reverse": {
+      "exact12SameThird": 3,
+      "reverse12ThirdDifferent": 7,
+      "candidatePresentNotPurchased": 14
+    },
+    "third": {
+      "generated": 56,
+      "generatedRate": 1,
+      "top1": 13,
+      "top3": 44,
+      "outsideTop3": 12,
+      "missing": 0
+    },
+    "terminal": {
+      "generated": 56,
+      "generatedRate": 1,
+      "meaningful": 13,
+      "meaningfulRate": 0.23214285714285715,
+      "purchaseCandidate": 13,
+      "purchased": 3,
+      "correctInternalNotPurchased": 10
+    },
+    "categories": {
+      "A_EXACT_HIT": 3,
+      "B_NEAR_MISS_ORDER": 8,
+      "C_CORRECT_INTERNAL_NOT_PURCHASED": 10,
+      "D_RIDERS_RIGHT_RANKING_WRONG": 24,
+      "E_UPSTREAM_MISS": 11,
+      "F_UNCLASSIFIABLE": 0
+    },
+    "distance": {
+      "distribution": {
+        "0": 3,
+        "1": 18,
+        "2": 24,
+        "3": 10,
+        "4": 1
+      },
+      "mean": 1.7857142857142858,
+      "median": 2,
+      "p90": 3
+    },
+    "separation": {
+      "riderSelectionGood": 45,
+      "orderingGood": 19,
+      "purchaseSelectionGood": 13
+    },
+    "scenario": {
+      "SCENARIO_CLOSE": 8,
+      "SCENARIO_PARTIALLY_CLOSE": 5,
+      "SCENARIO_MISS": 2,
+      "INSUFFICIENT_EVIDENCE": 41
+    },
+    "primaryCauses": {
+      "NONE_EXACT_HIT": 3,
+      "PAIR_ORDER_MISS": 11,
+      "PURCHASE_SELECTION_MISS": 10,
+      "REVERSE_12": 10,
+      "SCENARIO_RANKING_MISS": 4,
+      "THIRD_CONDITIONAL_MISS": 3,
+      "UPSTREAM_RIDER_MISS": 8,
+      "WINNER_SELECTION_MISS": 7
+    }
+  },
+  "thick": {
+    "tickets": 61,
+    "exact": 1,
+    "reverseSameThird": 0,
+    "exactPairThirdDifferent": 5,
+    "sameRidersWrongOrder": 5,
+    "twoRiders": 25,
+    "completelyWrong": 25
+  },
+  "largestBottlenecks": [
+    {
+      "cause": "PURCHASE_INELIGIBLE",
+      "count": 19
+    },
+    {
+      "cause": "PAIR_ORDER_MISS",
+      "count": 17
+    },
+    {
+      "cause": "PURCHASE_SELECTION_MISS",
+      "count": 16
+    }
+  ],
+  "races": [
+    {
+      "raceKey": "20260912-53-2",
+      "actualOrder": "1-7-8",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 5
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": false,
+        "rank": 37
+      },
+      "third": {
+        "generated": true,
+        "rank": 1
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 194,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "D_RIDERS_RIGHT_RANKING_WRONG",
+      "distance": 2,
+      "primaryCause": "PAIR_ORDER_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260912-46-2",
+      "actualOrder": "4-3-5",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 5
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": true,
+        "rank": 16
+      },
+      "third": {
+        "generated": true,
+        "rank": 1
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": false,
+        "globalRank": 28,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "THIRD_VARIANT_AMBIGUITY",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "C_CORRECT_INTERNAL_NOT_PURCHASED",
+      "distance": 1,
+      "primaryCause": "PURCHASE_SELECTION_MISS",
+      "secondaryCauses": [
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260912-53-3",
+      "actualOrder": "3-1-5",
+      "meaningfulRiderCount": 1,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 3
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": false,
+        "rank": 29
+      },
+      "third": {
+        "generated": true,
+        "rank": 2
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 113,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "E_UPSTREAM_MISS",
+      "distance": 3,
+      "primaryCause": "UPSTREAM_RIDER_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260912-46-3",
+      "actualOrder": "5-7-3",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 3
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": true,
+        "rank": 12
+      },
+      "third": {
+        "generated": true,
+        "rank": 5
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": false,
+        "globalRank": 71,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "THIRD_VARIANT_AMBIGUITY",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "C_CORRECT_INTERNAL_NOT_PURCHASED",
+      "distance": 1,
+      "primaryCause": "PURCHASE_SELECTION_MISS",
+      "secondaryCauses": [
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260912-53-4",
+      "actualOrder": "2-3-7",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 7
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": true,
+        "rank": 29
+      },
+      "third": {
+        "generated": true,
+        "rank": 5
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": false,
+        "globalRank": 232,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "THIRD_VARIANT_AMBIGUITY",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "C_CORRECT_INTERNAL_NOT_PURCHASED",
+      "distance": 1,
+      "primaryCause": "PURCHASE_SELECTION_MISS",
+      "secondaryCauses": [
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260912-46-4",
+      "actualOrder": "2-6-3",
+      "meaningfulRiderCount": 2,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 2
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": false,
+        "rank": 9
+      },
+      "third": {
+        "generated": true,
+        "rank": 1
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 15,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "D_RIDERS_RIGHT_RANKING_WRONG",
+      "distance": 2,
+      "primaryCause": "PAIR_ORDER_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260912-53-5",
+      "actualOrder": "1-5-2",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 5
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": true,
+        "rank": 35
+      },
+      "third": {
+        "generated": true,
+        "rank": 2
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": false,
+        "globalRank": 213,
+        "scenarioFamilyRank": 5,
+        "purchaseRejectCode": "ADOPTED",
+        "purchaseReason": "終端総合評価順位184位：確率・着順評価・根拠・独立支持を総合評価"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "SCENARIO_PARTIALLY_CLOSE",
+      "category": "C_CORRECT_INTERNAL_NOT_PURCHASED",
+      "distance": 1,
+      "primaryCause": "PURCHASE_INELIGIBLE",
+      "secondaryCauses": [
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260912-53-6",
+      "actualOrder": "8-2-7",
+      "meaningfulRiderCount": 2,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 5
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": false,
+        "rank": 38
+      },
+      "third": {
+        "generated": true,
+        "rank": 2
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 222,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "D_RIDERS_RIGHT_RANKING_WRONG",
+      "distance": 2,
+      "primaryCause": "WINNER_SELECTION_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260912-53-7",
+      "actualOrder": "5-7-9",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 7
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": true,
+        "rank": 50
+      },
+      "third": {
+        "generated": true,
+        "rank": 2
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 341,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "D_RIDERS_RIGHT_RANKING_WRONG",
+      "distance": 2,
+      "primaryCause": "REVERSE_12",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK",
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260912-46-7",
+      "actualOrder": "4-2-7",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 2
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": true,
+        "rank": 6
+      },
+      "third": {
+        "generated": true,
+        "rank": 2
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": false,
+        "globalRank": 14,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "THIRD_VARIANT_AMBIGUITY",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "C_CORRECT_INTERNAL_NOT_PURCHASED",
+      "distance": 1,
+      "primaryCause": "PURCHASE_INELIGIBLE",
+      "secondaryCauses": [
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260912-53-9",
+      "actualOrder": "7-2-5",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 4
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": true,
+        "rank": 30
+      },
+      "third": {
+        "generated": true,
+        "rank": 2
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": false,
+        "globalRank": 170,
+        "scenarioFamilyRank": 4,
+        "purchaseRejectCode": "ADOPTED",
+        "purchaseReason": "終端総合評価順位159位：確率・着順評価・根拠・独立支持を総合評価"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "SCENARIO_PARTIALLY_CLOSE",
+      "category": "C_CORRECT_INTERNAL_NOT_PURCHASED",
+      "distance": 1,
+      "primaryCause": "PURCHASE_INELIGIBLE",
+      "secondaryCauses": [
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260912-46-10",
+      "actualOrder": "6-5-3",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 4
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": true,
+        "rank": 14
+      },
+      "third": {
+        "generated": true,
+        "rank": 3
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 58,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": true,
+        "reverse12ThirdDifferent": true,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "B_NEAR_MISS_ORDER",
+      "distance": 1,
+      "primaryCause": "REVERSE_12",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260912-53-11",
+      "actualOrder": "7-2-8",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 7
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": false,
+        "rank": 38
+      },
+      "third": {
+        "generated": true,
+        "rank": 7
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 370,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "B_NEAR_MISS_ORDER",
+      "distance": 1,
+      "primaryCause": "PAIR_ORDER_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260912-85-1",
+      "actualOrder": "4-1-5",
+      "meaningfulRiderCount": 1,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 2
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": false,
+        "rank": 5
+      },
+      "third": {
+        "generated": true,
+        "rank": 3
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 19,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "E_UPSTREAM_MISS",
+      "distance": 3,
+      "primaryCause": "UPSTREAM_RIDER_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260912-85-2",
+      "actualOrder": "7-1-3",
+      "meaningfulRiderCount": 2,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 2
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": false,
+        "rank": 12
+      },
+      "third": {
+        "generated": true,
+        "rank": 2
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 35,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "D_RIDERS_RIGHT_RANKING_WRONG",
+      "distance": 2,
+      "primaryCause": "PAIR_ORDER_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260912-34-2",
+      "actualOrder": "5-1-6",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 4
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": true,
+        "rank": 17
+      },
+      "third": {
+        "generated": true,
+        "rank": 4
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": false,
+        "globalRank": 102,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "THIRD_VARIANT_BOUNDARY",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "C_CORRECT_INTERNAL_NOT_PURCHASED",
+      "distance": 1,
+      "primaryCause": "PURCHASE_INELIGIBLE",
+      "secondaryCauses": [
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260912-53-12",
+      "actualOrder": "9-1-7",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": false,
+        "rank": 1
+      },
+      "third": {
+        "generated": true,
+        "rank": 1
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": true,
+        "globalRank": 1,
+        "scenarioFamilyRank": 1,
+        "purchaseRejectCode": "ADOPTED",
+        "purchaseReason": "終端総合評価順位1位：確率・着順評価・根拠・独立支持を総合評価"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "SCENARIO_CLOSE",
+      "category": "A_EXACT_HIT",
+      "distance": 0,
+      "primaryCause": "NONE_EXACT_HIT",
+      "secondaryCauses": []
+    },
+    {
+      "raceKey": "20260912-85-3",
+      "actualOrder": "4-1-3",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 4
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": true,
+        "rank": 19
+      },
+      "third": {
+        "generated": true,
+        "rank": 2
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 66,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": true,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "D_RIDERS_RIGHT_RANKING_WRONG",
+      "distance": 2,
+      "primaryCause": "REVERSE_12",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK",
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260912-34-3",
+      "actualOrder": "1-5-2",
+      "meaningfulRiderCount": 2,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": false,
+        "rank": 3
+      },
+      "third": {
+        "generated": true,
+        "rank": 4
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 19,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "D_RIDERS_RIGHT_RANKING_WRONG",
+      "distance": 2,
+      "primaryCause": "THIRD_CONDITIONAL_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260912-85-4",
+      "actualOrder": "3-5-7",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": false,
+        "rank": 1
+      },
+      "third": {
+        "generated": true,
+        "rank": 2
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": false,
+        "globalRank": 2,
+        "scenarioFamilyRank": 1,
+        "purchaseRejectCode": "THIRD_VARIANT_AMBIGUITY",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "SCENARIO_CLOSE",
+      "category": "C_CORRECT_INTERNAL_NOT_PURCHASED",
+      "distance": 1,
+      "primaryCause": "PURCHASE_SELECTION_MISS",
+      "secondaryCauses": []
+    },
+    {
+      "raceKey": "20260912-34-4",
+      "actualOrder": "3-1-2",
+      "meaningfulRiderCount": 2,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": false,
+        "rank": 1
+      },
+      "third": {
+        "generated": true,
+        "rank": 3
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 5,
+        "scenarioFamilyRank": 1,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "SCENARIO_PARTIALLY_CLOSE",
+      "category": "B_NEAR_MISS_ORDER",
+      "distance": 1,
+      "primaryCause": "SCENARIO_RANKING_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260912-85-5",
+      "actualOrder": "7-6-1",
+      "meaningfulRiderCount": 2,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 7
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": false,
+        "rank": 40
+      },
+      "third": {
+        "generated": true,
+        "rank": 3
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 196,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "D_RIDERS_RIGHT_RANKING_WRONG",
+      "distance": 2,
+      "primaryCause": "PAIR_ORDER_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260912-34-5",
+      "actualOrder": "1-4-2",
+      "meaningfulRiderCount": 1,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 2
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": false,
+        "rank": 4
+      },
+      "third": {
+        "generated": true,
+        "rank": 3
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 28,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "E_UPSTREAM_MISS",
+      "distance": 3,
+      "primaryCause": "UPSTREAM_RIDER_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260912-85-6",
+      "actualOrder": "1-7-5",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 3
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": true,
+        "rank": 9
+      },
+      "third": {
+        "generated": true,
+        "rank": 1
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": false,
+        "globalRank": 27,
+        "scenarioFamilyRank": 3,
+        "purchaseRejectCode": "ADOPTED",
+        "purchaseReason": "終端総合評価順位27位：確率・着順評価・根拠・独立支持を総合評価"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "SCENARIO_PARTIALLY_CLOSE",
+      "category": "C_CORRECT_INTERNAL_NOT_PURCHASED",
+      "distance": 1,
+      "primaryCause": "PURCHASE_INELIGIBLE",
+      "secondaryCauses": [
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260912-34-6",
+      "actualOrder": "4-6-2",
+      "meaningfulRiderCount": 1,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 3
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": false,
+        "rank": 16
+      },
+      "third": {
+        "generated": true,
+        "rank": 3
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 62,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "E_UPSTREAM_MISS",
+      "distance": 3,
+      "primaryCause": "PAIR_ORDER_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260912-85-7",
+      "actualOrder": "4-5-1",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 7
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": true,
+        "rank": 39
+      },
+      "third": {
+        "generated": true,
+        "rank": 2
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 191,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "D_RIDERS_RIGHT_RANKING_WRONG",
+      "distance": 2,
+      "primaryCause": "REVERSE_12",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK",
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260912-34-7",
+      "actualOrder": "4-5-6",
+      "meaningfulRiderCount": 1,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 4
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": false,
+        "rank": 17
+      },
+      "third": {
+        "generated": true,
+        "rank": 4
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 91,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "E_UPSTREAM_MISS",
+      "distance": 3,
+      "primaryCause": "UPSTREAM_RIDER_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260912-85-8",
+      "actualOrder": "7-2-5",
+      "meaningfulRiderCount": 0,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 2
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": false,
+        "rank": 12
+      },
+      "third": {
+        "generated": true,
+        "rank": 4
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 86,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "E_UPSTREAM_MISS",
+      "distance": 4,
+      "primaryCause": "UPSTREAM_RIDER_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260912-85-9",
+      "actualOrder": "1-2-3",
+      "meaningfulRiderCount": 2,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": false,
+        "rank": 1
+      },
+      "third": {
+        "generated": true,
+        "rank": 4
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 17,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "D_RIDERS_RIGHT_RANKING_WRONG",
+      "distance": 2,
+      "primaryCause": "THIRD_CONDITIONAL_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260912-34-9",
+      "actualOrder": "7-3-2",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 2
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": true,
+        "rank": 1
+      },
+      "third": {
+        "generated": true,
+        "rank": 1
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": false,
+        "globalRank": 1,
+        "scenarioFamilyRank": 2,
+        "purchaseRejectCode": "THIRD_VARIANT_AMBIGUITY",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "SCENARIO_PARTIALLY_CLOSE",
+      "category": "C_CORRECT_INTERNAL_NOT_PURCHASED",
+      "distance": 1,
+      "primaryCause": "PURCHASE_SELECTION_MISS",
+      "secondaryCauses": [
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260916-13-6",
+      "actualOrder": "5-6-2",
+      "meaningfulRiderCount": 2,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 2
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": true,
+        "rank": 1
+      },
+      "third": {
+        "generated": true,
+        "rank": 3
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 13,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": true,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "B_NEAR_MISS_ORDER",
+      "distance": 1,
+      "primaryCause": "SCENARIO_RANKING_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK",
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260916-86-7",
+      "actualOrder": "2-7-3",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 5
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": true,
+        "rank": 27
+      },
+      "third": {
+        "generated": true,
+        "rank": 3
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": false,
+        "globalRank": 127,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "THIRD_VARIANT_AMBIGUITY",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "C_CORRECT_INTERNAL_NOT_PURCHASED",
+      "distance": 1,
+      "primaryCause": "PURCHASE_INELIGIBLE",
+      "secondaryCauses": [
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260916-13-7",
+      "actualOrder": "5-7-3",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": false,
+        "rank": 1
+      },
+      "third": {
+        "generated": true,
+        "rank": 1
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": false,
+        "globalRank": 1,
+        "scenarioFamilyRank": 1,
+        "purchaseRejectCode": "THIRD_VARIANT_AMBIGUITY",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "SCENARIO_CLOSE",
+      "category": "C_CORRECT_INTERNAL_NOT_PURCHASED",
+      "distance": 1,
+      "primaryCause": "PURCHASE_SELECTION_MISS",
+      "secondaryCauses": []
+    },
+    {
+      "raceKey": "20260916-86-8",
+      "actualOrder": "5-3-6",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 6
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": true,
+        "rank": 27
+      },
+      "third": {
+        "generated": true,
+        "rank": 4
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": false,
+        "globalRank": 130,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "THIRD_VARIANT_AMBIGUITY",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "C_CORRECT_INTERNAL_NOT_PURCHASED",
+      "distance": 1,
+      "primaryCause": "PURCHASE_INELIGIBLE",
+      "secondaryCauses": [
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260916-13-8",
+      "actualOrder": "3-5-4",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": false,
+        "rank": 1
+      },
+      "third": {
+        "generated": true,
+        "rank": 1
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": false,
+        "globalRank": 1,
+        "scenarioFamilyRank": 1,
+        "purchaseRejectCode": "THIRD_VARIANT_AMBIGUITY",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "SCENARIO_CLOSE",
+      "category": "C_CORRECT_INTERNAL_NOT_PURCHASED",
+      "distance": 1,
+      "primaryCause": "PURCHASE_SELECTION_MISS",
+      "secondaryCauses": []
+    },
+    {
+      "raceKey": "20260916-86-9",
+      "actualOrder": "4-1-2",
+      "meaningfulRiderCount": 2,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 4
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": false,
+        "rank": 22
+      },
+      "third": {
+        "generated": true,
+        "rank": 3
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 103,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "D_RIDERS_RIGHT_RANKING_WRONG",
+      "distance": 2,
+      "primaryCause": "PAIR_ORDER_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260916-86-10",
+      "actualOrder": "1-2-6",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 3
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": true,
+        "rank": 8
+      },
+      "third": {
+        "generated": true,
+        "rank": 3
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": false,
+        "globalRank": 46,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "THIRD_VARIANT_AMBIGUITY",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "C_CORRECT_INTERNAL_NOT_PURCHASED",
+      "distance": 1,
+      "primaryCause": "PURCHASE_SELECTION_MISS",
+      "secondaryCauses": [
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260916-13-10",
+      "actualOrder": "3-7-1",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": true,
+        "rank": 1
+      },
+      "third": {
+        "generated": true,
+        "rank": 3
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": false,
+        "globalRank": 6,
+        "scenarioFamilyRank": 1,
+        "purchaseRejectCode": "ADOPTED",
+        "purchaseReason": "終端総合評価順位6位：確率・着順評価・根拠・独立支持を総合評価"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "SCENARIO_CLOSE",
+      "category": "C_CORRECT_INTERNAL_NOT_PURCHASED",
+      "distance": 1,
+      "primaryCause": "PURCHASE_INELIGIBLE",
+      "secondaryCauses": [
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260916-86-11",
+      "actualOrder": "4-2-1",
+      "meaningfulRiderCount": 2,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": false,
+        "rank": 3
+      },
+      "third": {
+        "generated": true,
+        "rank": 1
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 4,
+        "scenarioFamilyRank": 1,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "SCENARIO_PARTIALLY_CLOSE",
+      "category": "D_RIDERS_RIGHT_RANKING_WRONG",
+      "distance": 2,
+      "primaryCause": "PAIR_ORDER_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260916-13-11",
+      "actualOrder": "1-4-2",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": true,
+        "rank": 2
+      },
+      "third": {
+        "generated": true,
+        "rank": 4
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": false,
+        "globalRank": 34,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "THIRD_VARIANT_BOUNDARY",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "C_CORRECT_INTERNAL_NOT_PURCHASED",
+      "distance": 1,
+      "primaryCause": "PURCHASE_INELIGIBLE",
+      "secondaryCauses": [
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260916-86-12",
+      "actualOrder": "7-3-4",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 5
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": true,
+        "rank": 27
+      },
+      "third": {
+        "generated": true,
+        "rank": 1
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": false,
+        "globalRank": 76,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "THIRD_VARIANT_AMBIGUITY",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "C_CORRECT_INTERNAL_NOT_PURCHASED",
+      "distance": 1,
+      "primaryCause": "PURCHASE_INELIGIBLE",
+      "secondaryCauses": [
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260916-12-1",
+      "actualOrder": "2-1-6",
+      "meaningfulRiderCount": 2,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 2
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": true,
+        "rank": 2
+      },
+      "third": {
+        "generated": true,
+        "rank": 5
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 43,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": true,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "D_RIDERS_RIGHT_RANKING_WRONG",
+      "distance": 2,
+      "primaryCause": "THIRD_CONDITIONAL_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK",
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260916-37-1",
+      "actualOrder": "1-5-2",
+      "meaningfulRiderCount": 2,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": false,
+        "rank": 3
+      },
+      "third": {
+        "generated": true,
+        "rank": 3
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 14,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "D_RIDERS_RIGHT_RANKING_WRONG",
+      "distance": 2,
+      "primaryCause": "PAIR_ORDER_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260916-37-2",
+      "actualOrder": "5-3-2",
+      "meaningfulRiderCount": 2,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 2
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": false,
+        "rank": 4
+      },
+      "third": {
+        "generated": true,
+        "rank": 2
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 6,
+        "scenarioFamilyRank": 2,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "SCENARIO_MISS",
+      "category": "D_RIDERS_RIGHT_RANKING_WRONG",
+      "distance": 2,
+      "primaryCause": "WINNER_SELECTION_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260916-37-3",
+      "actualOrder": "1-4-3",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": true,
+        "rank": 4
+      },
+      "third": {
+        "generated": true,
+        "rank": 4
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": false,
+        "globalRank": 22,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "THIRD_VARIANT_AMBIGUITY",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "C_CORRECT_INTERNAL_NOT_PURCHASED",
+      "distance": 1,
+      "primaryCause": "PURCHASE_INELIGIBLE",
+      "secondaryCauses": [
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260916-37-4",
+      "actualOrder": "3-1-6",
+      "meaningfulRiderCount": 2,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 5
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": true,
+        "rank": 19
+      },
+      "third": {
+        "generated": true,
+        "rank": 4
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 108,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": true,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "D_RIDERS_RIGHT_RANKING_WRONG",
+      "distance": 2,
+      "primaryCause": "REVERSE_12",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK",
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260916-12-5",
+      "actualOrder": "5-1-4",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": true,
+        "rank": 1
+      },
+      "third": {
+        "generated": true,
+        "rank": 4
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": false,
+        "globalRank": 26,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "THIRD_VARIANT_AMBIGUITY",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "C_CORRECT_INTERNAL_NOT_PURCHASED",
+      "distance": 1,
+      "primaryCause": "PURCHASE_SELECTION_MISS",
+      "secondaryCauses": [
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260916-37-5",
+      "actualOrder": "4-3-1",
+      "meaningfulRiderCount": 2,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 2
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": false,
+        "rank": 9
+      },
+      "third": {
+        "generated": true,
+        "rank": 1
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 11,
+        "scenarioFamilyRank": 2,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "SCENARIO_MISS",
+      "category": "D_RIDERS_RIGHT_RANKING_WRONG",
+      "distance": 2,
+      "primaryCause": "WINNER_SELECTION_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260916-37-6",
+      "actualOrder": "1-4-7",
+      "meaningfulRiderCount": 2,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 6
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": true,
+        "rank": 34
+      },
+      "third": {
+        "generated": true,
+        "rank": 2
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 154,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": true,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "D_RIDERS_RIGHT_RANKING_WRONG",
+      "distance": 2,
+      "primaryCause": "REVERSE_12",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK",
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260916-37-7",
+      "actualOrder": "2-1-3",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 5
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": true,
+        "rank": 24
+      },
+      "third": {
+        "generated": true,
+        "rank": 1
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": false,
+        "globalRank": 51,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "THIRD_VARIANT_AMBIGUITY",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "C_CORRECT_INTERNAL_NOT_PURCHASED",
+      "distance": 1,
+      "primaryCause": "PURCHASE_INELIGIBLE",
+      "secondaryCauses": [
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260916-37-8",
+      "actualOrder": "1-3-2",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": true,
+        "rank": 7
+      },
+      "third": {
+        "generated": true,
+        "rank": 1
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 10,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": true,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "B_NEAR_MISS_ORDER",
+      "distance": 1,
+      "primaryCause": "REVERSE_12",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260916-12-9",
+      "actualOrder": "3-6-1",
+      "meaningfulRiderCount": 1,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 2
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": false,
+        "rank": 14
+      },
+      "third": {
+        "generated": true,
+        "rank": 2
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 43,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "E_UPSTREAM_MISS",
+      "distance": 3,
+      "primaryCause": "UPSTREAM_RIDER_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260916-37-9",
+      "actualOrder": "2-4-3",
+      "meaningfulRiderCount": 2,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 7
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": false,
+        "rank": 35
+      },
+      "third": {
+        "generated": true,
+        "rank": 2
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 140,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "D_RIDERS_RIGHT_RANKING_WRONG",
+      "distance": 2,
+      "primaryCause": "PAIR_ORDER_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260917-84-1",
+      "actualOrder": "5-4-1",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 3
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": true,
+        "rank": 9
+      },
+      "third": {
+        "generated": true,
+        "rank": 1
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": true,
+        "globalRank": 31,
+        "scenarioFamilyRank": 3,
+        "purchaseRejectCode": "ADOPTED",
+        "purchaseReason": "終端総合評価順位26位：確率・着順評価・根拠・独立支持を総合評価"
+      },
+      "reverse": {
+        "exact12SameThird": true,
+        "reverse12ThirdDifferent": true,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "SCENARIO_PARTIALLY_CLOSE",
+      "category": "A_EXACT_HIT",
+      "distance": 0,
+      "primaryCause": "NONE_EXACT_HIT",
+      "secondaryCauses": []
+    },
+    {
+      "raceKey": "20260917-73-1",
+      "actualOrder": "2-5-1",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 4
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": true,
+        "rank": 27
+      },
+      "third": {
+        "generated": true,
+        "rank": 1
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": false,
+        "globalRank": 113,
+        "scenarioFamilyRank": 4,
+        "purchaseRejectCode": "ADOPTED",
+        "purchaseReason": "終端総合評価順位115位：確率・着順評価・根拠・独立支持を総合評価"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "SCENARIO_PARTIALLY_CLOSE",
+      "category": "C_CORRECT_INTERNAL_NOT_PURCHASED",
+      "distance": 1,
+      "primaryCause": "PURCHASE_INELIGIBLE",
+      "secondaryCauses": [
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260917-84-2",
+      "actualOrder": "5-1-2",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 5
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": false,
+        "rank": 22
+      },
+      "third": {
+        "generated": true,
+        "rank": 1
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 79,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "B_NEAR_MISS_ORDER",
+      "distance": 1,
+      "primaryCause": "PAIR_ORDER_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260917-84-3",
+      "actualOrder": "2-7-3",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": true,
+        "rank": 1
+      },
+      "third": {
+        "generated": true,
+        "rank": 2
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": false,
+        "globalRank": 3,
+        "scenarioFamilyRank": 1,
+        "purchaseRejectCode": "THIRD_VARIANT_AMBIGUITY",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "SCENARIO_CLOSE",
+      "category": "C_CORRECT_INTERNAL_NOT_PURCHASED",
+      "distance": 1,
+      "primaryCause": "PURCHASE_SELECTION_MISS",
+      "secondaryCauses": [
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260917-84-4",
+      "actualOrder": "4-3-1",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": true,
+        "rank": 1
+      },
+      "third": {
+        "generated": true,
+        "rank": 2
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": false,
+        "globalRank": 2,
+        "scenarioFamilyRank": 1,
+        "purchaseRejectCode": "THIRD_VARIANT_AMBIGUITY",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "SCENARIO_CLOSE",
+      "category": "C_CORRECT_INTERNAL_NOT_PURCHASED",
+      "distance": 1,
+      "primaryCause": "PURCHASE_SELECTION_MISS",
+      "secondaryCauses": [
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260917-84-5",
+      "actualOrder": "2-4-6",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 2
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": true,
+        "rank": 3
+      },
+      "third": {
+        "generated": true,
+        "rank": 5
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 34,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": true,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "D_RIDERS_RIGHT_RANKING_WRONG",
+      "distance": 2,
+      "primaryCause": "THIRD_CONDITIONAL_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK",
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260917-73-5",
+      "actualOrder": "5-1-4",
+      "meaningfulRiderCount": 2,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": false,
+        "rank": 1
+      },
+      "third": {
+        "generated": true,
+        "rank": 3
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 6,
+        "scenarioFamilyRank": 1,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "SCENARIO_PARTIALLY_CLOSE",
+      "category": "B_NEAR_MISS_ORDER",
+      "distance": 1,
+      "primaryCause": "SCENARIO_RANKING_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260917-84-6",
+      "actualOrder": "5-1-4",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": true,
+        "rank": 4
+      },
+      "third": {
+        "generated": true,
+        "rank": 1
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": true,
+        "globalRank": 3,
+        "scenarioFamilyRank": 1,
+        "purchaseRejectCode": "ADOPTED",
+        "purchaseReason": "終端総合評価順位3位：確率・着順評価・根拠・独立支持を総合評価"
+      },
+      "reverse": {
+        "exact12SameThird": true,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "SCENARIO_CLOSE",
+      "category": "A_EXACT_HIT",
+      "distance": 0,
+      "primaryCause": "NONE_EXACT_HIT",
+      "secondaryCauses": []
+    },
+    {
+      "raceKey": "20260917-73-6",
+      "actualOrder": "2-4-7",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": false,
+        "rank": 1
+      },
+      "third": {
+        "generated": true,
+        "rank": 1
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": true,
+        "globalRank": 1,
+        "scenarioFamilyRank": 1,
+        "purchaseRejectCode": "ADOPTED",
+        "purchaseReason": "終端総合評価順位1位：確率・着順評価・根拠・独立支持を総合評価"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "SCENARIO_CLOSE",
+      "category": "A_EXACT_HIT",
+      "distance": 0,
+      "primaryCause": "NONE_EXACT_HIT",
+      "secondaryCauses": []
+    },
+    {
+      "raceKey": "20260917-84-7",
+      "actualOrder": "7-3-4",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": true,
+        "rank": 5
+      },
+      "third": {
+        "generated": true,
+        "rank": 4
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": false,
+        "globalRank": 26,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "THIRD_VARIANT_AMBIGUITY",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "C_CORRECT_INTERNAL_NOT_PURCHASED",
+      "distance": 1,
+      "primaryCause": "PURCHASE_INELIGIBLE",
+      "secondaryCauses": [
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260917-63-1",
+      "actualOrder": "2-7-1",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 3
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": true,
+        "rank": 9
+      },
+      "third": {
+        "generated": true,
+        "rank": 1
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": false,
+        "globalRank": 8,
+        "scenarioFamilyRank": 3,
+        "purchaseRejectCode": "THIRD_VARIANT_AMBIGUITY",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "SCENARIO_PARTIALLY_CLOSE",
+      "category": "C_CORRECT_INTERNAL_NOT_PURCHASED",
+      "distance": 1,
+      "primaryCause": "PURCHASE_SELECTION_MISS",
+      "secondaryCauses": [
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260917-28-1",
+      "actualOrder": "4-5-6",
+      "meaningfulRiderCount": 1,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 5
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": false,
+        "rank": 33
+      },
+      "third": {
+        "generated": true,
+        "rank": 4
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 167,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "E_UPSTREAM_MISS",
+      "distance": 3,
+      "primaryCause": "PAIR_ORDER_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260917-63-2",
+      "actualOrder": "1-7-4",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 2
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": false,
+        "rank": 6
+      },
+      "third": {
+        "generated": true,
+        "rank": 3
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": true,
+        "globalRank": 20,
+        "scenarioFamilyRank": 2,
+        "purchaseRejectCode": "ADOPTED",
+        "purchaseReason": "終端総合評価順位20位：確率・着順評価・根拠・独立支持を総合評価"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "SCENARIO_PARTIALLY_CLOSE",
+      "category": "A_EXACT_HIT",
+      "distance": 0,
+      "primaryCause": "NONE_EXACT_HIT",
+      "secondaryCauses": []
+    },
+    {
+      "raceKey": "20260917-63-3",
+      "actualOrder": "7-1-2",
+      "meaningfulRiderCount": 1,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 6
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": false,
+        "rank": 28
+      },
+      "third": {
+        "generated": true,
+        "rank": 4
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 155,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "E_UPSTREAM_MISS",
+      "distance": 3,
+      "primaryCause": "UPSTREAM_RIDER_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260917-63-5",
+      "actualOrder": "3-4-1",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": true,
+        "rank": 3
+      },
+      "third": {
+        "generated": true,
+        "rank": 4
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": false,
+        "globalRank": 21,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "THIRD_VARIANT_AMBIGUITY",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "C_CORRECT_INTERNAL_NOT_PURCHASED",
+      "distance": 1,
+      "primaryCause": "PURCHASE_INELIGIBLE",
+      "secondaryCauses": [
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260917-28-5",
+      "actualOrder": "5-4-7",
+      "meaningfulRiderCount": 2,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 2
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": false,
+        "rank": 2
+      },
+      "third": {
+        "generated": true,
+        "rank": 3
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 33,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "B_NEAR_MISS_ORDER",
+      "distance": 1,
+      "primaryCause": "SCENARIO_RANKING_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260917-28-6",
+      "actualOrder": "4-7-2",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": true,
+        "rank": 7
+      },
+      "third": {
+        "generated": true,
+        "rank": 2
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": false,
+        "globalRank": 16,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "THIRD_VARIANT_AMBIGUITY",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "C_CORRECT_INTERNAL_NOT_PURCHASED",
+      "distance": 1,
+      "primaryCause": "PURCHASE_SELECTION_MISS",
+      "secondaryCauses": [
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260917-28-9",
+      "actualOrder": "1-7-4",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 4
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": true,
+        "rank": 24
+      },
+      "third": {
+        "generated": true,
+        "rank": 2
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": false,
+        "globalRank": 105,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "THIRD_VARIANT_AMBIGUITY",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "C_CORRECT_INTERNAL_NOT_PURCHASED",
+      "distance": 1,
+      "primaryCause": "PURCHASE_INELIGIBLE",
+      "secondaryCauses": [
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260917-63-10",
+      "actualOrder": "6-3-4",
+      "meaningfulRiderCount": 1,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 6
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": false,
+        "rank": 34
+      },
+      "third": {
+        "generated": true,
+        "rank": 5
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 178,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "E_UPSTREAM_MISS",
+      "distance": 3,
+      "primaryCause": "UPSTREAM_RIDER_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260917-28-10",
+      "actualOrder": "3-7-5",
+      "meaningfulRiderCount": 2,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 3
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": false,
+        "rank": 7
+      },
+      "third": {
+        "generated": true,
+        "rank": 3
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 25,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "D_RIDERS_RIGHT_RANKING_WRONG",
+      "distance": 2,
+      "primaryCause": "WINNER_SELECTION_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260917-63-11",
+      "actualOrder": "3-4-2",
+      "meaningfulRiderCount": 1,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 2
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": false,
+        "rank": 9
+      },
+      "third": {
+        "generated": true,
+        "rank": 4
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 67,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "E_UPSTREAM_MISS",
+      "distance": 3,
+      "primaryCause": "PAIR_ORDER_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260917-86-1",
+      "actualOrder": "7-5-3",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": true,
+        "rank": 1
+      },
+      "third": {
+        "generated": true,
+        "rank": 2
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": false,
+        "globalRank": 5,
+        "scenarioFamilyRank": 1,
+        "purchaseRejectCode": "THIRD_VARIANT_AMBIGUITY",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "SCENARIO_CLOSE",
+      "category": "C_CORRECT_INTERNAL_NOT_PURCHASED",
+      "distance": 1,
+      "primaryCause": "PURCHASE_SELECTION_MISS",
+      "secondaryCauses": [
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260917-63-12",
+      "actualOrder": "1-2-7",
+      "meaningfulRiderCount": 2,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 6
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": false,
+        "rank": 21
+      },
+      "third": {
+        "generated": true,
+        "rank": 3
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 116,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "D_RIDERS_RIGHT_RANKING_WRONG",
+      "distance": 2,
+      "primaryCause": "PAIR_ORDER_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260917-86-3",
+      "actualOrder": "3-4-7",
+      "meaningfulRiderCount": 2,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": false,
+        "rank": 6
+      },
+      "third": {
+        "generated": true,
+        "rank": 2
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 12,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "D_RIDERS_RIGHT_RANKING_WRONG",
+      "distance": 2,
+      "primaryCause": "PAIR_ORDER_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260917-13-3",
+      "actualOrder": "7-1-4",
+      "meaningfulRiderCount": 2,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 4
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": false,
+        "rank": 25
+      },
+      "third": {
+        "generated": true,
+        "rank": 1
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 96,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "D_RIDERS_RIGHT_RANKING_WRONG",
+      "distance": 2,
+      "primaryCause": "WINNER_SELECTION_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260917-86-4",
+      "actualOrder": "4-3-1",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": true,
+        "rank": 6
+      },
+      "third": {
+        "generated": true,
+        "rank": 4
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": false,
+        "globalRank": 30,
+        "scenarioFamilyRank": 1,
+        "purchaseRejectCode": "ADOPTED",
+        "purchaseReason": "終端総合評価順位32位：確率・着順評価・根拠・独立支持を総合評価"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "SCENARIO_CLOSE",
+      "category": "C_CORRECT_INTERNAL_NOT_PURCHASED",
+      "distance": 1,
+      "primaryCause": "PURCHASE_INELIGIBLE",
+      "secondaryCauses": [
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260917-13-4",
+      "actualOrder": "6-4-1",
+      "meaningfulRiderCount": 2,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 3
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": true,
+        "rank": 6
+      },
+      "third": {
+        "generated": true,
+        "rank": 4
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 71,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "D_RIDERS_RIGHT_RANKING_WRONG",
+      "distance": 2,
+      "primaryCause": "THIRD_CONDITIONAL_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK",
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260917-86-5",
+      "actualOrder": "1-7-5",
+      "meaningfulRiderCount": 2,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 2
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": false,
+        "rank": 5
+      },
+      "third": {
+        "generated": true,
+        "rank": 3
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 28,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "D_RIDERS_RIGHT_RANKING_WRONG",
+      "distance": 2,
+      "primaryCause": "WINNER_SELECTION_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260917-86-6",
+      "actualOrder": "2-3-4",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 5
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": false,
+        "rank": 19
+      },
+      "third": {
+        "generated": true,
+        "rank": 1
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 71,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "B_NEAR_MISS_ORDER",
+      "distance": 1,
+      "primaryCause": "PAIR_ORDER_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260917-13-6",
+      "actualOrder": "4-7-2",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": false,
+        "rank": 3
+      },
+      "third": {
+        "generated": true,
+        "rank": 2
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": true,
+        "globalRank": 7,
+        "scenarioFamilyRank": 1,
+        "purchaseRejectCode": "ADOPTED",
+        "purchaseReason": "終端総合評価順位7位：確率・着順評価・根拠・独立支持を総合評価"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "SCENARIO_CLOSE",
+      "category": "A_EXACT_HIT",
+      "distance": 0,
+      "primaryCause": "NONE_EXACT_HIT",
+      "secondaryCauses": []
+    },
+    {
+      "raceKey": "20260917-86-7",
+      "actualOrder": "4-3-7",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 6
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": true,
+        "rank": 27
+      },
+      "third": {
+        "generated": true,
+        "rank": 4
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": false,
+        "globalRank": 160,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "THIRD_VARIANT_AMBIGUITY",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "C_CORRECT_INTERNAL_NOT_PURCHASED",
+      "distance": 1,
+      "primaryCause": "PURCHASE_SELECTION_MISS",
+      "secondaryCauses": [
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260917-13-7",
+      "actualOrder": "6-5-4",
+      "meaningfulRiderCount": 1,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 7
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": false,
+        "rank": 32
+      },
+      "third": {
+        "generated": true,
+        "rank": 5
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 198,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "E_UPSTREAM_MISS",
+      "distance": 3,
+      "primaryCause": "UPSTREAM_RIDER_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260917-86-8",
+      "actualOrder": "7-3-5",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 3
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": true,
+        "rank": 9
+      },
+      "third": {
+        "generated": true,
+        "rank": 3
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": false,
+        "globalRank": 56,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "THIRD_VARIANT_AMBIGUITY",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "C_CORRECT_INTERNAL_NOT_PURCHASED",
+      "distance": 1,
+      "primaryCause": "PURCHASE_SELECTION_MISS",
+      "secondaryCauses": [
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260917-13-8",
+      "actualOrder": "4-3-2",
+      "meaningfulRiderCount": 2,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": false,
+        "rank": 6
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": false,
+        "rank": 27
+      },
+      "third": {
+        "generated": true,
+        "rank": 2
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 91,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "D_RIDERS_RIGHT_RANKING_WRONG",
+      "distance": 2,
+      "primaryCause": "WINNER_SELECTION_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260917-86-9",
+      "actualOrder": "5-2-1",
+      "meaningfulRiderCount": 2,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 2
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": false,
+        "rank": 2
+      },
+      "third": {
+        "generated": true,
+        "rank": 5
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 39,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "D_RIDERS_RIGHT_RANKING_WRONG",
+      "distance": 2,
+      "primaryCause": "THIRD_CONDITIONAL_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260917-13-9",
+      "actualOrder": "4-1-7",
+      "meaningfulRiderCount": 2,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 5
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": true,
+        "rank": 26
+      },
+      "third": {
+        "generated": true,
+        "rank": 2
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 119,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": true,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "D_RIDERS_RIGHT_RANKING_WRONG",
+      "distance": 2,
+      "primaryCause": "REVERSE_12",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK",
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260917-86-10",
+      "actualOrder": "7-2-5",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": false,
+        "rank": 3
+      },
+      "third": {
+        "generated": true,
+        "rank": 2
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": false,
+        "globalRank": 5,
+        "scenarioFamilyRank": 1,
+        "purchaseRejectCode": "THIRD_VARIANT_AMBIGUITY",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "SCENARIO_CLOSE",
+      "category": "C_CORRECT_INTERNAL_NOT_PURCHASED",
+      "distance": 1,
+      "primaryCause": "PURCHASE_INELIGIBLE",
+      "secondaryCauses": []
+    },
+    {
+      "raceKey": "20260917-13-10",
+      "actualOrder": "3-6-4",
+      "meaningfulRiderCount": 2,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": false,
+        "rank": 5
+      },
+      "third": {
+        "generated": true,
+        "rank": 2
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 9,
+        "scenarioFamilyRank": 1,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "SCENARIO_PARTIALLY_CLOSE",
+      "category": "D_RIDERS_RIGHT_RANKING_WRONG",
+      "distance": 2,
+      "primaryCause": "PAIR_ORDER_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260917-86-11",
+      "actualOrder": "4-1-2",
+      "meaningfulRiderCount": 2,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 4
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": true,
+        "rank": 21
+      },
+      "third": {
+        "generated": true,
+        "rank": 3
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 109,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": true,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "D_RIDERS_RIGHT_RANKING_WRONG",
+      "distance": 2,
+      "primaryCause": "REVERSE_12",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK",
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260917-13-11",
+      "actualOrder": "1-3-5",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 4
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": true,
+        "rank": 18
+      },
+      "third": {
+        "generated": true,
+        "rank": 1
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 44,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": true,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "B_NEAR_MISS_ORDER",
+      "distance": 1,
+      "primaryCause": "REVERSE_12",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260917-86-12",
+      "actualOrder": "5-4-1",
+      "meaningfulRiderCount": 2,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 5
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": true,
+        "rank": 17
+      },
+      "third": {
+        "generated": true,
+        "rank": 2
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 54,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": true,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "D_RIDERS_RIGHT_RANKING_WRONG",
+      "distance": 2,
+      "primaryCause": "REVERSE_12",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK",
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260917-83-1",
+      "actualOrder": "1-2-4",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": true,
+        "rank": 2
+      },
+      "third": {
+        "generated": true,
+        "rank": 3
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": true,
+        "globalRank": 11,
+        "scenarioFamilyRank": 1,
+        "purchaseRejectCode": "ADOPTED",
+        "purchaseReason": "終端総合評価順位10位：確率・着順評価・根拠・独立支持を総合評価"
+      },
+      "reverse": {
+        "exact12SameThird": true,
+        "reverse12ThirdDifferent": true,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "SCENARIO_CLOSE",
+      "category": "A_EXACT_HIT",
+      "distance": 0,
+      "primaryCause": "NONE_EXACT_HIT",
+      "secondaryCauses": []
+    },
+    {
+      "raceKey": "20260917-34-2",
+      "actualOrder": "1-2-3",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 2
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": true,
+        "rank": 1
+      },
+      "third": {
+        "generated": true,
+        "rank": 3
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": false,
+        "globalRank": 6,
+        "scenarioFamilyRank": 2,
+        "purchaseRejectCode": "THIRD_VARIANT_AMBIGUITY",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "SCENARIO_PARTIALLY_CLOSE",
+      "category": "C_CORRECT_INTERNAL_NOT_PURCHASED",
+      "distance": 1,
+      "primaryCause": "PURCHASE_INELIGIBLE",
+      "secondaryCauses": [
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260917-83-3",
+      "actualOrder": "2-3-6",
+      "meaningfulRiderCount": 2,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": false,
+        "rank": 3
+      },
+      "third": {
+        "generated": true,
+        "rank": 5
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 55,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "D_RIDERS_RIGHT_RANKING_WRONG",
+      "distance": 2,
+      "primaryCause": "THIRD_CONDITIONAL_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260917-34-5",
+      "actualOrder": "1-3-2",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 3
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": true,
+        "rank": 13
+      },
+      "third": {
+        "generated": true,
+        "rank": 3
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 60,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": true,
+        "candidatePresentNotPurchased": true
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "D_RIDERS_RIGHT_RANKING_WRONG",
+      "distance": 2,
+      "primaryCause": "REVERSE_12",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK",
+        "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260917-83-7",
+      "actualOrder": "1-2-4",
+      "meaningfulRiderCount": 2,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": false,
+        "rank": 1
+      },
+      "third": {
+        "generated": true,
+        "rank": 2
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 4,
+        "scenarioFamilyRank": 1,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "SCENARIO_PARTIALLY_CLOSE",
+      "category": "B_NEAR_MISS_ORDER",
+      "distance": 1,
+      "primaryCause": "SCENARIO_RANKING_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    },
+    {
+      "raceKey": "20260917-83-9",
+      "actualOrder": "2-1-4",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 5
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": true,
+        "rank": 26
+      },
+      "third": {
+        "generated": true,
+        "rank": 1
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 121,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": true,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "B_NEAR_MISS_ORDER",
+      "distance": 1,
+      "primaryCause": "REVERSE_12",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
+      ]
+    }
+  ],
+  "safety": {
+    "productionPredictionChanged": false,
+    "productionPurchaseChanged": false,
+    "tuningPerformed": false,
+    "historicalMutationCount": 0
+  }
+}
