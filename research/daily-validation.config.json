@@ -12,7 +12,8 @@
     "ticketCountRatio": 3,
     "checkpointStallHours": 48
   },
-  "milestones": [300, 500, 1000],
+  "observationMilestoneInterval": 50,
+  "adjustmentMilestones": [300, 500, 1000],
   "automaticTuning": false,
   "productionWrite": false
 }

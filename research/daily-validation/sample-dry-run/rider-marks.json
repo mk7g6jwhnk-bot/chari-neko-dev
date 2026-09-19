@@ -1539,49 +1539,189 @@
           "predictionHash": "2dc1e0e13f1c7b6acf471873e794d49f663b591cf0c30bb267ad7acd703ec3ed"
         }
       ]
+    },
+    {
+      "raceKey": "20260919-75-4",
+      "result": [
+        7,
+        4,
+        1
+      ],
+      "marks": [
+        {
+          "riderId": "016018",
+          "number": 7,
+          "name": "田中　衛太",
+          "score": 7.19372532,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 1,
+          "mark": "◎",
+          "raceKey": "20260919-75-4",
+          "predictionTimestamp": "2026-09-18T17:19:46.993Z",
+          "predictionHash": "e9f66076c6381717b178710d53cd2fcc7443506afb23a14ddc19158bc07bd80a"
+        },
+        {
+          "riderId": "013451",
+          "number": 4,
+          "name": "松本　大地",
+          "score": 6.01929055,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 2,
+          "mark": "○",
+          "raceKey": "20260919-75-4",
+          "predictionTimestamp": "2026-09-18T17:19:46.993Z",
+          "predictionHash": "e9f66076c6381717b178710d53cd2fcc7443506afb23a14ddc19158bc07bd80a"
+        },
+        {
+          "riderId": "015542",
+          "number": 3,
+          "name": "中嶋　樹",
+          "score": 5.747278150000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 3,
+          "mark": "▲",
+          "raceKey": "20260919-75-4",
+          "predictionTimestamp": "2026-09-18T17:19:46.993Z",
+          "predictionHash": "e9f66076c6381717b178710d53cd2fcc7443506afb23a14ddc19158bc07bd80a"
+        },
+        {
+          "riderId": "014033",
+          "number": 5,
+          "name": "藤縄　洋介",
+          "score": 5.2162343600000005,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 4,
+          "mark": "△",
+          "raceKey": "20260919-75-4",
+          "predictionTimestamp": "2026-09-18T17:19:46.993Z",
+          "predictionHash": "e9f66076c6381717b178710d53cd2fcc7443506afb23a14ddc19158bc07bd80a"
+        },
+        {
+          "riderId": "014884",
+          "number": 2,
+          "name": "友永　龍介",
+          "score": 4.7297762,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 5,
+          "mark": "☆",
+          "raceKey": "20260919-75-4",
+          "predictionTimestamp": "2026-09-18T17:19:46.993Z",
+          "predictionHash": "e9f66076c6381717b178710d53cd2fcc7443506afb23a14ddc19158bc07bd80a"
+        }
+      ]
+    },
+    {
+      "raceKey": "20260919-75-5",
+      "result": [
+        1,
+        4,
+        3
+      ],
+      "marks": [
+        {
+          "riderId": "015320",
+          "number": 4,
+          "name": "那須　萌美",
+          "score": 6.293432640000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 1,
+          "mark": "◎",
+          "raceKey": "20260919-75-5",
+          "predictionTimestamp": "2026-09-18T17:20:44.403Z",
+          "predictionHash": "7ac0ad7104bacb2f333a41a361b92934374f558db4d1bac1b7deccc10e1283fe"
+        },
+        {
+          "riderId": "015020",
+          "number": 3,
+          "name": "奥井　迪",
+          "score": 6.10269012,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 2,
+          "mark": "○",
+          "raceKey": "20260919-75-5",
+          "predictionTimestamp": "2026-09-18T17:20:44.403Z",
+          "predictionHash": "7ac0ad7104bacb2f333a41a361b92934374f558db4d1bac1b7deccc10e1283fe"
+        },
+        {
+          "riderId": "015761",
+          "number": 2,
+          "name": "吉村美有紀",
+          "score": 5.448048120000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 3,
+          "mark": "▲",
+          "raceKey": "20260919-75-5",
+          "predictionTimestamp": "2026-09-18T17:20:44.403Z",
+          "predictionHash": "7ac0ad7104bacb2f333a41a361b92934374f558db4d1bac1b7deccc10e1283fe"
+        },
+        {
+          "riderId": "015402",
+          "number": 1,
+          "name": "鈴木　樹里",
+          "score": 4.6965094,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 4,
+          "mark": "△",
+          "raceKey": "20260919-75-5",
+          "predictionTimestamp": "2026-09-18T17:20:44.403Z",
+          "predictionHash": "7ac0ad7104bacb2f333a41a361b92934374f558db4d1bac1b7deccc10e1283fe"
+        },
+        {
+          "riderId": "015957",
+          "number": 7,
+          "name": "成海　綾香",
+          "score": 3.8018066,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 5,
+          "mark": "☆",
+          "raceKey": "20260919-75-5",
+          "predictionTimestamp": "2026-09-18T17:20:44.403Z",
+          "predictionHash": "7ac0ad7104bacb2f333a41a361b92934374f558db4d1bac1b7deccc10e1283fe"
+        }
+      ]
     }
   ],
   "summary": {
-    "races": 22,
-    "winnerTop1": 6,
-    "winnerTop2": 12,
-    "winnerTop3": 19,
-    "winnerTop5": 21,
-    "secondTop5": 17,
-    "thirdTop5": 16,
+    "races": 24,
+    "winnerTop1": 7,
+    "winnerTop2": 13,
+    "winnerTop3": 20,
+    "winnerTop5": 23,
+    "secondTop5": 19,
+    "thirdTop5": 17,
     "resultTop3Overlap": {
       "0": 0,
       "1": 0,
-      "2": 12,
-      "3": 10
+      "2": 13,
+      "3": 11
     },
     "markStats": {
       "◎": {
-        "races": 22,
-        "first": 6,
-        "top2": 12,
-        "top3": 13
+        "races": 24,
+        "first": 7,
+        "top2": 14,
+        "top3": 15
       },
       "○": {
-        "races": 22,
+        "races": 24,
         "first": 6,
-        "top2": 10,
-        "top3": 12
+        "top2": 11,
+        "top3": 14
       },
       "▲": {
-        "races": 22,
+        "races": 24,
         "first": 7,
         "top2": 9,
         "top3": 14
       },
       "△": {
-        "races": 22,
-        "first": 2,
-        "top2": 5,
-        "top3": 9
+        "races": 24,
+        "first": 3,
+        "top2": 6,
+        "top3": 10
       },
       "☆": {
-        "races": 22,
+        "races": 24,
         "first": 0,
         "top2": 2,
         "top3": 6

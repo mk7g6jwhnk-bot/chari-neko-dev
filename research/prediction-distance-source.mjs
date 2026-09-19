@@ -28,6 +28,7 @@ async function getJson(base, name, raceKey, fetchImpl) {
 
 function compact(predictionResponse, resultResponse) {
   const prediction = predictionResponse.predictionPayload?.prediction || {};
+  const race = predictionResponse.predictionPayload?.race || predictionResponse.predictionPayload?.targetRace || {};
   const lifecycle = prediction.purchase?.audit?.terminalLifecycleAudit || prediction.audit?.purchaseAudit?.terminalLifecycleAudit;
   const lifecycleRows = Array.isArray(lifecycle) ? lifecycle : lifecycle?.rows || [];
   const lifecycleByOrder = new Map(lifecycleRows.map(row => [order(row.order), row]));
@@ -68,6 +69,10 @@ function compact(predictionResponse, resultResponse) {
       tickets: plan.map(ticket => ({ order: order(ticket.order || ticket.combination), class: cls(ticket),
         thick: ticket.thickQualified === true || ticket.qualification === 'THICK_PREDICTION_QUALIFIED' })) },
     prediction: { participantNumbers: (prediction.scored || []).map(row => Number(row.number)).filter(Number.isFinite),
+      structureInput: { raceType: String(race.raceCategory || prediction.raceCategory || 'standard').toUpperCase(), fieldSize: (prediction.scored || race.participants || []).length,
+        lineDataAvailable: race.lineDataAvailable === true || prediction.lineDataAvailable === true || (prediction.lines || []).some(line => (line.members || []).length > 1),
+        reason: race.lineDataReason || prediction.lineDataReason || null,
+        lines: (prediction.lines || []).map(line => ({ type: line.type || null, members: (line.members || []).map(member => Number(member.number || member.id)).filter(Number.isFinite) })) },
       riderScores: (prediction.scored || []).map(row => ({ riderId: row.registration || row.riderId || row.id || null, number: Number(row.number), name: row.name || null,
         score: Number(row.roleScores?.first), scoreSource: 'prediction.scored[].roleScores.first' })).filter(row => Number.isFinite(row.number) && Number.isFinite(row.score)), terminals }
   };

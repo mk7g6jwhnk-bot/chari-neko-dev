@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#08111f">
   <title>チャリ猫</title>
   <link rel="manifest" href="manifest.json?v=50">
-  <link rel="stylesheet" href="styles.css?v=50">
+  <link rel="stylesheet" href="styles.css?v=51">
 </head>
 <body>
 <header class="appHeader">
@@ -38,6 +38,7 @@
     <section id="homePredictionStatus" class="card compact"><div class="sectionHead"><h2>今日の予想状況</h2><span class="pill">確認中</span></div></section>
     <section id="homeHighlights" class="card compact"><div class="sectionHead"><h2>注目レース</h2><span class="pill">集計中</span></div><p class="muted">購入可・注意・高配当・荒れ気配を整理します。</p></section>
     <section id="homeRecentResults" class="card compact"><div class="sectionHead"><h2>最近の結果</h2><button id="openPredictionHistory" class="secondary" type="button">予想履歴を開く</button></div><p class="muted">保存済みの自動予想と公式結果を読み取ります。</p></section>
+    <section class="card compact validationEntry"><div class="sectionHead"><div><small>RESEARCH / READ ONLY</small><h2>検証状況</h2></div><button id="openValidationStatus" class="secondary compactAction" type="button">開く</button></div><p class="muted">日次検証、節目、Integrity、構造別傾向を確認します。</p></section>
     <section id="homeSystemStatus" class="card compact"><div class="sectionHead"><h2>研究・システム状態</h2><span class="pill">確認中</span></div><p class="muted">保存済み状態を読み取っています。</p><details><summary>運用詳細</summary><div id="homeOperationalDetails" class="metaGrid"></div></details></section>
     <section class="card compact"><div class="sectionHead"><h2>保存済み予想</h2><span id="savedCount" class="pill">0件</span></div><div id="savedList" class="stack"></div></section>
   </section>
@@ -47,6 +48,15 @@
     <section class="card compact historyFilters"><label>開始日<input id="historyFrom" type="date"></label><label>終了日<input id="historyTo" type="date"></label><label>場<input id="historyVenue" type="search" placeholder="すべて"></label><label>状態<select id="historyStatus"><option value="all">すべて</option><option value="hit">的中</option><option value="miss">不的中</option><option value="waiting">結果待ち</option><option value="allowed">購入可</option><option value="caution">注意</option><option value="blocked">見送り</option></select></label><button id="reloadHistory" class="primary" type="button">表示</button></section>
     <p id="historyNotice" class="muted">Railwayの保存済み予想を読み取っています。</p>
     <div id="historyList" class="stack"></div>
+  </section>
+
+  <section id="validation" class="screen">
+    <div class="pageTitle"><div><small>RESEARCH / READ ONLY</small><h1>検証状況</h1></div><span id="validationStatusBadge" class="pill">確認中</span></div>
+    <section id="validationOverview" class="card compact validationHero"><p class="muted">日次検証の状態を読み取っています。</p></section>
+    <section id="validationDaily" class="card compact"><div class="sectionHead"><h2>最新日次</h2><span class="pill">要約</span></div></section>
+    <section id="validationMilestones" class="card compact"><div class="sectionHead"><h2>節目</h2><span class="pill">観測のみ</span></div></section>
+    <details id="validationDetails" class="card compact validationDetails"><summary>詳細を見る</summary><div id="validationDetailBody"></div></details>
+    <details id="validationStructure" class="card compact validationDetails"><summary>構造別傾向</summary><div id="validationStructureBody"></div></details>
   </section>
 
   <section id="meetings" class="screen">
@@ -99,5 +109,5 @@
   <section id="loading" class="screen"><section class="card loadingCard"><div class="spinner"></div><h1 id="loadingTitle">取得中</h1><p id="loadingMessage">公式データを確認しています。</p></section></section>
   <section id="error" class="screen"><section class="card errorCard"><div class="errorIcon">!</div><h1 id="errorTitle">取得失敗</h1><p id="errorMessage"></p><button id="retryBtn" class="primary">再試行</button><button id="errorHome" class="secondary">ホームへ</button></section></section>
 </main>
-<script type="module" src="app.mjs?v=62"></script>
+<script type="module" src="app.mjs?v=63"></script>
 </body></html>

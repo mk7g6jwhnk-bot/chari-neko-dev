@@ -12,12 +12,12 @@
     "thresholdSearch": false
   },
   "cohort": {
-    "raceCount": 22,
-    "keyHash": "584b2eec604207b202d76873b18ce48c7d523ea49a0d41c2bb278b6a6a9cf150",
-    "sourceKeyHash": "584b2eec604207b202d76873b18ce48c7d523ea49a0d41c2bb278b6a6a9cf150",
-    "rows": 22,
+    "raceCount": 24,
+    "keyHash": "70612f6b14200aa3fbfdb87fe0a8555f31135208e3964e5d5b0afd1b7fee0ded",
+    "sourceKeyHash": "70612f6b14200aa3fbfdb87fe0a8555f31135208e3964e5d5b0afd1b7fee0ded",
+    "rows": 24,
     "duplicate": 0,
-    "resultAvailable": 22,
+    "resultAvailable": 24,
     "protectedFinal": 0
   },
   "integrity": {
@@ -32,35 +32,35 @@
     "issues": 0
   },
   "summary": {
-    "races": 22,
-    "exactHits": 2,
+    "races": 24,
+    "exactHits": 3,
     "riderSelection": {
-      "P3": 12,
+      "P3": 14,
       "P2": 9,
       "P1": 1,
       "P0": 0,
-      "successRate": 0.9545454545454546,
-      "broadGeneratedP3": 22
+      "successRate": 0.9583333333333334,
+      "broadGeneratedP3": 24
     },
     "winner": {
-      "generated": 22,
+      "generated": 24,
       "generatedRate": 1,
-      "meaningful": 20,
-      "top1": 4,
-      "top2": 7,
-      "top3": 11,
-      "outsideTop3": 11,
+      "meaningful": 22,
+      "top1": 5,
+      "top2": 8,
+      "top3": 12,
+      "outsideTop3": 12,
       "notGenerated": 0
     },
     "pair": {
-      "generated": 22,
+      "generated": 24,
       "generatedRate": 1,
-      "meaningful": 9,
+      "meaningful": 10,
       "reverseMeaningful": 11,
-      "top1": 1,
-      "top3": 3,
-      "top5": 4,
-      "outsideTop5": 18
+      "top1": 2,
+      "top3": 4,
+      "top5": 5,
+      "outsideTop5": 19
     },
     "reverse": {
       "exact12SameThird": 3,
@@ -68,25 +68,25 @@
       "candidatePresentNotPurchased": 8
     },
     "third": {
-      "generated": 22,
+      "generated": 24,
       "generatedRate": 1,
-      "top1": 9,
-      "top3": 16,
+      "top1": 10,
+      "top3": 18,
       "outsideTop3": 6,
       "missing": 0
     },
     "terminal": {
-      "generated": 22,
+      "generated": 24,
       "generatedRate": 1,
-      "meaningful": 8,
-      "meaningfulRate": 0.36363636363636365,
-      "purchaseCandidate": 8,
-      "purchased": 2,
+      "meaningful": 9,
+      "meaningfulRate": 0.375,
+      "purchaseCandidate": 9,
+      "purchased": 3,
       "correctInternalNotPurchased": 6
     },
     "categories": {
-      "A_EXACT_HIT": 2,
-      "B_NEAR_MISS_ORDER": 2,
+      "A_EXACT_HIT": 3,
+      "B_NEAR_MISS_ORDER": 3,
       "C_CORRECT_INTERNAL_NOT_PURCHASED": 6,
       "D_RIDERS_RIGHT_RANKING_WRONG": 11,
       "E_UPSTREAM_MISS": 1,
@@ -94,30 +94,30 @@
     },
     "distance": {
       "distribution": {
-        "0": 2,
-        "1": 8,
+        "0": 3,
+        "1": 9,
         "2": 11,
         "3": 1,
         "4": 0
       },
-      "mean": 1.5,
-      "median": 2,
+      "mean": 1.4166666666666667,
+      "median": 1.5,
       "p90": 2
     },
     "separation": {
-      "riderSelectionGood": 21,
-      "orderingGood": 2,
-      "purchaseSelectionGood": 8
+      "riderSelectionGood": 23,
+      "orderingGood": 3,
+      "purchaseSelectionGood": 9
     },
     "scenario": {
-      "SCENARIO_CLOSE": 2,
+      "SCENARIO_CLOSE": 3,
       "SCENARIO_PARTIALLY_CLOSE": 3,
       "SCENARIO_MISS": 0,
-      "INSUFFICIENT_EVIDENCE": 17
+      "INSUFFICIENT_EVIDENCE": 18
     },
     "primaryCauses": {
-      "NONE_EXACT_HIT": 2,
-      "PAIR_ORDER_MISS": 6,
+      "NONE_EXACT_HIT": 3,
+      "PAIR_ORDER_MISS": 7,
       "PURCHASE_INELIGIBLE": 5,
       "PURCHASE_SELECTION_MISS": 1,
       "REVERSE_12": 5,
@@ -126,35 +126,35 @@
     }
   },
   "lowTicket": {
-    "races": 12,
+    "races": 13,
     "exactHits": 1,
     "riderSelection": {
-      "P3": 4,
+      "P3": 5,
       "P2": 7,
       "P1": 1,
       "P0": 0,
-      "successRate": 0.9166666666666666,
-      "broadGeneratedP3": 12
+      "successRate": 0.9230769230769231,
+      "broadGeneratedP3": 13
     },
     "winner": {
-      "generated": 12,
+      "generated": 13,
       "generatedRate": 1,
-      "meaningful": 11,
+      "meaningful": 12,
       "top1": 3,
       "top2": 3,
       "top3": 4,
-      "outsideTop3": 8,
+      "outsideTop3": 9,
       "notGenerated": 0
     },
     "pair": {
-      "generated": 12,
+      "generated": 13,
       "generatedRate": 1,
       "meaningful": 3,
       "reverseMeaningful": 6,
       "top1": 0,
       "top3": 1,
       "top5": 2,
-      "outsideTop5": 10
+      "outsideTop5": 11
     },
     "reverse": {
       "exact12SameThird": 2,
@@ -162,25 +162,25 @@
       "candidatePresentNotPurchased": 4
     },
     "third": {
-      "generated": 12,
+      "generated": 13,
       "generatedRate": 1,
       "top1": 4,
-      "top3": 8,
+      "top3": 9,
       "outsideTop3": 4,
       "missing": 0
     },
     "terminal": {
-      "generated": 12,
+      "generated": 13,
       "generatedRate": 1,
       "meaningful": 2,
-      "meaningfulRate": 0.16666666666666666,
+      "meaningfulRate": 0.15384615384615385,
       "purchaseCandidate": 2,
       "purchased": 1,
       "correctInternalNotPurchased": 1
     },
     "categories": {
       "A_EXACT_HIT": 1,
-      "B_NEAR_MISS_ORDER": 2,
+      "B_NEAR_MISS_ORDER": 3,
       "C_CORRECT_INTERNAL_NOT_PURCHASED": 1,
       "D_RIDERS_RIGHT_RANKING_WRONG": 7,
       "E_UPSTREAM_MISS": 1,
@@ -189,17 +189,17 @@
     "distance": {
       "distribution": {
         "0": 1,
-        "1": 3,
+        "1": 4,
         "2": 7,
         "3": 1,
         "4": 0
       },
-      "mean": 1.6666666666666667,
+      "mean": 1.6153846153846154,
       "median": 2,
       "p90": 2
     },
     "separation": {
-      "riderSelectionGood": 11,
+      "riderSelectionGood": 12,
       "orderingGood": 1,
       "purchaseSelectionGood": 2
     },
@@ -207,11 +207,11 @@
       "SCENARIO_CLOSE": 1,
       "SCENARIO_PARTIALLY_CLOSE": 0,
       "SCENARIO_MISS": 0,
-      "INSUFFICIENT_EVIDENCE": 11
+      "INSUFFICIENT_EVIDENCE": 12
     },
     "primaryCauses": {
       "NONE_EXACT_HIT": 1,
-      "PAIR_ORDER_MISS": 3,
+      "PAIR_ORDER_MISS": 4,
       "PURCHASE_SELECTION_MISS": 1,
       "REVERSE_12": 5,
       "THIRD_CONDITIONAL_MISS": 1,
@@ -230,7 +230,7 @@
   "largestBottlenecks": [
     {
       "cause": "PAIR_ORDER_MISS",
-      "count": 6
+      "count": 7
     },
     {
       "cause": "PURCHASE_INELIGIBLE",
@@ -1183,6 +1183,90 @@
       "primaryCause": "PURCHASE_INELIGIBLE",
       "secondaryCauses": [
         "REVERSE_PAIR_PRESENT_NOT_PURCHASED"
+      ]
+    },
+    {
+      "raceKey": "20260919-75-4",
+      "actualOrder": "7-4-1",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": true,
+        "reverseMeaningful": false,
+        "rank": 1
+      },
+      "third": {
+        "generated": true,
+        "rank": 1
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": true,
+        "purchaseCandidate": true,
+        "purchased": true,
+        "globalRank": 1,
+        "scenarioFamilyRank": 1,
+        "purchaseRejectCode": "ADOPTED",
+        "purchaseReason": "終端総合評価順位1位：確率・着順評価・根拠・独立支持を総合評価"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "SCENARIO_CLOSE",
+      "category": "A_EXACT_HIT",
+      "distance": 0,
+      "primaryCause": "NONE_EXACT_HIT",
+      "secondaryCauses": []
+    },
+    {
+      "raceKey": "20260919-75-5",
+      "actualOrder": "1-4-3",
+      "meaningfulRiderCount": 3,
+      "broadRiderCount": 3,
+      "winner": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 4
+      },
+      "pair": {
+        "generated": true,
+        "meaningful": false,
+        "reverseMeaningful": false,
+        "rank": 11
+      },
+      "third": {
+        "generated": true,
+        "rank": 2
+      },
+      "terminal": {
+        "generated": true,
+        "meaningful": false,
+        "purchaseCandidate": false,
+        "purchased": false,
+        "globalRank": 37,
+        "scenarioFamilyRank": null,
+        "purchaseRejectCode": "PURCHASE_CUTOFF",
+        "purchaseReason": "終端総合評価が購入候補順位に届かない"
+      },
+      "reverse": {
+        "exact12SameThird": false,
+        "reverse12ThirdDifferent": false,
+        "candidatePresentNotPurchased": false
+      },
+      "scenario": "INSUFFICIENT_EVIDENCE",
+      "category": "B_NEAR_MISS_ORDER",
+      "distance": 1,
+      "primaryCause": "PAIR_ORDER_MISS",
+      "secondaryCauses": [
+        "EXACT_TERMINAL_LOW_RANK"
       ]
     }
   ],

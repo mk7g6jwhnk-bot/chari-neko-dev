@@ -1,6 +1,6 @@
 {
   "schemaVersion": "TRIO_DIAGNOSTIC_V1",
-  "verdict": "TRIO_SIGNAL_PROMISING",
+  "verdict": "TRIO_SIGNAL_STRONG_ENOUGH_TO_STUDY",
   "definition": {
     "actualTrio": "confirmed top-three riders sorted ascending",
     "trioScore": "maximum saved pre-result terminal probability among permutations",
@@ -10,14 +10,14 @@
     "resultAwareScoring": false
   },
   "cohort": {
-    "expected": 22,
-    "rows": 22,
+    "expected": 24,
+    "rows": 24,
     "exactMatch": true,
     "orderMatch": true,
-    "keyHash": "584b2eec604207b202d76873b18ce48c7d523ea49a0d41c2bb278b6a6a9cf150",
-    "expectedKeyHash": "584b2eec604207b202d76873b18ce48c7d523ea49a0d41c2bb278b6a6a9cf150",
+    "keyHash": "70612f6b14200aa3fbfdb87fe0a8555f31135208e3964e5d5b0afd1b7fee0ded",
+    "expectedKeyHash": "70612f6b14200aa3fbfdb87fe0a8555f31135208e3964e5d5b0afd1b7fee0ded",
     "duplicate": 0,
-    "resultAvailable": 22,
+    "resultAvailable": 24,
     "protectedFinal": 0
   },
   "integrity": {
@@ -30,112 +30,112 @@
     "payoutInference": 0
   },
   "summary": {
-    "races": 22,
-    "trifectaHits": 2,
-    "exactTrioGenerated": 22,
+    "races": 24,
+    "trifectaHits": 3,
+    "exactTrioGenerated": 24,
     "exactTrioGeneratedRate": 1,
-    "meaningfulExactTrio": 10,
-    "meaningfulExactTrioRate": 0.45454545454545453,
-    "top1": 3,
-    "top3": 5,
-    "top5": 7,
-    "top10": 11,
+    "meaningfulExactTrio": 12,
+    "meaningfulExactTrioRate": 0.5,
+    "top1": 4,
+    "top3": 7,
+    "top5": 9,
+    "top10": 13,
     "outsideTop10": 11,
     "missing": 0,
-    "purchaseDerivedTrioHitRaces": 4,
-    "trifectaMissTrioHit": 2,
+    "purchaseDerivedTrioHitRaces": 6,
+    "trifectaMissTrioHit": 3,
     "internalTrioOnly": 6,
     "twoOfThreeOnly": 11,
     "upstreamTrioMiss": 1,
     "categories": {
-      "A_TRIFECTA_HIT": 2,
-      "B_TRIO_WOULD_HIT": 2,
+      "A_TRIFECTA_HIT": 3,
+      "B_TRIO_WOULD_HIT": 3,
       "C_INTERNAL_TRIO_ONLY": 6,
       "D_TWO_OF_THREE_ONLY": 11,
       "E_TRIO_UPSTREAM_MISS": 1,
       "F_UNCLASSIFIABLE": 0
     },
     "ordering": {
-      "sameThreeWrongOrder": 2,
+      "sameThreeWrongOrder": 3,
       "reverse12SameThird": 2,
-      "otherPermutation": 0,
+      "otherPermutation": 1,
       "meaningfulButOutsidePurchase": 6
     },
     "trioCandidates": {
-      "average": 20.863636363636363,
-      "median": 4.5,
-      "p90": 75.7
+      "average": 19.333333333333332,
+      "median": 4,
+      "p90": 75.1
     }
   },
   "p3Relation": {
-    "p3Races": 12,
-    "p3AndMeaningfulExactTrio": 10
+    "p3Races": 14,
+    "p3AndMeaningfulExactTrio": 12
   },
   "candidateSets": {
     "allMeaningful": {
-      "hitRaces": 10,
-      "tickets": 459
+      "hitRaces": 12,
+      "tickets": 464
     },
     "naturalBoundary": "DATA_NOT_AVAILABLE",
     "purchaseDerived": {
-      "uniqueTrioTickets": 45,
-      "trioHitRaces": 4
+      "uniqueTrioTickets": 50,
+      "trioHitRaces": 6
     },
     "lowTicketPurchaseDerived": {
-      "uniqueTrioTickets": 36,
-      "trioHitRaces": 3
+      "uniqueTrioTickets": 38,
+      "trioHitRaces": 4
     }
   },
   "lowTicket": {
-    "races": 12,
+    "races": 13,
     "trifectaHits": 1,
-    "exactTrioGenerated": 12,
+    "exactTrioGenerated": 13,
     "exactTrioGeneratedRate": 1,
-    "meaningfulExactTrio": 4,
-    "meaningfulExactTrioRate": 0.3333333333333333,
+    "meaningfulExactTrio": 5,
+    "meaningfulExactTrioRate": 0.38461538461538464,
     "top1": 2,
-    "top3": 3,
-    "top5": 5,
-    "top10": 6,
+    "top3": 4,
+    "top5": 6,
+    "top10": 7,
     "outsideTop10": 6,
     "missing": 0,
-    "purchaseDerivedTrioHitRaces": 3,
-    "trifectaMissTrioHit": 2,
+    "purchaseDerivedTrioHitRaces": 4,
+    "trifectaMissTrioHit": 3,
     "internalTrioOnly": 1,
     "twoOfThreeOnly": 7,
     "upstreamTrioMiss": 1,
     "categories": {
       "A_TRIFECTA_HIT": 1,
-      "B_TRIO_WOULD_HIT": 2,
+      "B_TRIO_WOULD_HIT": 3,
       "C_INTERNAL_TRIO_ONLY": 1,
       "D_TWO_OF_THREE_ONLY": 7,
       "E_TRIO_UPSTREAM_MISS": 1,
       "F_UNCLASSIFIABLE": 0
     },
     "ordering": {
-      "sameThreeWrongOrder": 2,
+      "sameThreeWrongOrder": 3,
       "reverse12SameThird": 2,
-      "otherPermutation": 0,
+      "otherPermutation": 1,
       "meaningfulButOutsidePurchase": 1
     },
     "trioCandidates": {
-      "average": 5.333333333333333,
-      "median": 2.5,
-      "p90": 5.9
+      "average": 5.076923076923077,
+      "median": 2,
+      "p90": 5.800000000000001
     }
   },
   "actualPurchase": {
     "main": {
-      "uniqueTrioTickets": 25,
-      "trioHitRaces": 4
+      "uniqueTrioTickets": 30,
+      "trioHitRaces": 6
     },
     "cover": {
       "uniqueTrioTickets": 30,
       "trioHitRaces": 1
     },
     "combined": {
-      "uniqueTrioTickets": 45,
-      "trioHitRaces": 4
+      "uniqueTrioTickets": 50,
+      "trioHitRaces": 6
     }
   },
   "thick": {
@@ -153,9 +153,9 @@
     "roi": null
   },
   "suitabilityObservations": {
-    "p3ButOrderingWeak": 10,
+    "p3ButOrderingWeak": 11,
     "exactTrioMeaningfulButPurchaseOutside": 6,
-    "multipleMeaningfulPermutations": 8
+    "multipleMeaningfulPermutations": 9
   },
   "rows": [
     {
@@ -927,6 +927,76 @@
       },
       "maxMeaningfulOverlap": 3,
       "category": "C_INTERNAL_TRIO_ONLY"
+    },
+    {
+      "raceKey": "20260919-75-4",
+      "actualOrder": "7-4-1",
+      "actualTrio": "1-4-7",
+      "lowTicket": false,
+      "trifectaHit": true,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 1,
+        "highRank": true,
+        "candidateCount": 3,
+        "strongestTerminalScore": 0.015566551898653724,
+        "meaningfulScenarioSupportCount": 1
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 3,
+        "hit": true,
+        "mainUniqueTrios": 3,
+        "mainHit": true,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": false,
+        "reverse12SameThird": false,
+        "otherPermutation": false,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "A_TRIFECTA_HIT"
+    },
+    {
+      "raceKey": "20260919-75-5",
+      "actualOrder": "1-4-3",
+      "actualTrio": "1-3-4",
+      "lowTicket": true,
+      "trifectaHit": false,
+      "trio": {
+        "generated": true,
+        "meaningful": true,
+        "rank": 2,
+        "highRank": true,
+        "candidateCount": 2,
+        "strongestTerminalScore": 0.011554329964418882,
+        "meaningfulScenarioSupportCount": 1
+      },
+      "purchase": {
+        "eligibility": "PURCHASE_ALLOWED",
+        "uniqueTrios": 2,
+        "hit": true,
+        "mainUniqueTrios": 2,
+        "mainHit": true,
+        "coverUniqueTrios": 0,
+        "coverHit": false,
+        "thickUniqueTrios": 0,
+        "thickHit": false
+      },
+      "ordering": {
+        "sameThreeWrongOrder": true,
+        "reverse12SameThird": false,
+        "otherPermutation": true,
+        "meaningfulButOutsidePurchase": false
+      },
+      "maxMeaningfulOverlap": 3,
+      "category": "B_TRIO_WOULD_HIT"
     }
   ],
   "safety": {
