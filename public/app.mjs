@@ -23,7 +23,7 @@ const ODDS_CACHE_KEY="chari-neko:keirin-odds-cache:v1";
 const RACE_META_CACHE_KEY="chari-neko:keirin-race-meta-cache:v1";
 const RESULT_CACHE_KEY="chari-neko:keirin-result-cache:v1";
 const MEETING_CACHE_KEY="chari-neko:keirin-meeting-cache:v1";
-const APP_RELEASE="KEIRIN-0.5.25-validation-status-live-sync";
+const APP_RELEASE="KEIRIN-0.5.26-validation-status-auto-refresh";
 // A display release must not invalidate existing prediction snapshots.
 const SNAPSHOT_COMPATIBLE_VERSION="KEIRIN-0.5.23-performance-lifecycle-display";
 const APP_UPDATE_CHECK_INTERVAL_MS=5*60*1000;
@@ -40,7 +40,7 @@ renderSaved();renderHomeRecommendations();
 void loadCollectorStatus();
 setupAutoUpdate();
 
-function setupAutoUpdate(){checkForAppUpdate();document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")checkForAppUpdate()});window.addEventListener("online",()=>checkForAppUpdate(true))}
+function setupAutoUpdate(){checkForAppUpdate();document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"){checkForAppUpdate();if(state.screen==="validation")void loadValidationStatus()}});window.addEventListener("online",()=>{checkForAppUpdate(true);if(state.screen==="validation")void loadValidationStatus()});setInterval(()=>{if(state.screen==="validation"&&document.visibilityState==="visible")void loadValidationStatus()},APP_UPDATE_CHECK_INTERVAL_MS)}
 async function checkForAppUpdate(force=false){if(appUpdateCheckBusy||state.busy)return;const now=Date.now();if(!force&&now-lastAppUpdateCheckAt<APP_UPDATE_CHECK_INTERVAL_MS)return;lastAppUpdateCheckAt=now;appUpdateCheckBusy=true;try{const response=await fetch(`/version.json?t=${now}`,{cache:"no-store",headers:{accept:"application/json"}});if(!response.ok)return;const remote=await response.json();const remoteVersion=String(remote?.version||"").trim();if(!remoteVersion)return;if(remoteVersion===APP_RELEASE){const current=new URL(location.href);if(current.searchParams.has("appv")){current.searchParams.delete("appv");history.replaceState(history.state,"",current.toString())}return}const current=new URL(location.href);if(current.searchParams.get("appv")===remoteVersion)return;const attemptedKey=`chari-neko:auto-update-attempt:${remoteVersion}`;if(sessionStorage.getItem(attemptedKey)==="1")return;sessionStorage.setItem(attemptedKey,"1");current.searchParams.set("appv",remoteVersion);location.replace(current.toString())}catch{}finally{appUpdateCheckBusy=false}}
 
 function show(id,push=true){if(push&&state.screen!==id){state.history.push(state.screen);history.pushState({screen:id},"")}state.screen=id;screens.forEach(x=>x.classList.toggle("active",x.id===id));updateHeaderNav(id);if(id==="detail"||id==="prediction")sealedResultController.render(state.snapshot);window.scrollTo(0,0)}
