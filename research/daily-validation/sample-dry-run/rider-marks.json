@@ -1,0 +1,1591 @@
+{
+  "details": [
+    {
+      "raceKey": "20260919-73-1",
+      "result": [
+        2,
+        4,
+        6
+      ],
+      "marks": [
+        {
+          "riderId": "015923",
+          "number": 4,
+          "name": "右近　陸人",
+          "score": 6.9716678000000005,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 1,
+          "mark": "◎",
+          "raceKey": "20260919-73-1",
+          "predictionTimestamp": "2026-09-18T15:18:01.986Z",
+          "predictionHash": "5788355f24a9e2ad3709e6438918b70cf75b29f85a9fa40d0fbe6a073743a600"
+        },
+        {
+          "riderId": "014678",
+          "number": 1,
+          "name": "樋口有樹郎",
+          "score": 6.042278379999999,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 2,
+          "mark": "○",
+          "raceKey": "20260919-73-1",
+          "predictionTimestamp": "2026-09-18T15:18:01.986Z",
+          "predictionHash": "5788355f24a9e2ad3709e6438918b70cf75b29f85a9fa40d0fbe6a073743a600"
+        },
+        {
+          "riderId": "013965",
+          "number": 2,
+          "name": "岡田　雅也",
+          "score": 5.474832620000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 3,
+          "mark": "▲",
+          "raceKey": "20260919-73-1",
+          "predictionTimestamp": "2026-09-18T15:18:01.986Z",
+          "predictionHash": "5788355f24a9e2ad3709e6438918b70cf75b29f85a9fa40d0fbe6a073743a600"
+        },
+        {
+          "riderId": "011346",
+          "number": 3,
+          "name": "野崎　修一",
+          "score": 4.213472620000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 4,
+          "mark": "△",
+          "raceKey": "20260919-73-1",
+          "predictionTimestamp": "2026-09-18T15:18:01.986Z",
+          "predictionHash": "5788355f24a9e2ad3709e6438918b70cf75b29f85a9fa40d0fbe6a073743a600"
+        },
+        {
+          "riderId": "012290",
+          "number": 6,
+          "name": "小西　芳樹",
+          "score": 3.5016950000000002,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 5,
+          "mark": "☆",
+          "raceKey": "20260919-73-1",
+          "predictionTimestamp": "2026-09-18T15:18:01.986Z",
+          "predictionHash": "5788355f24a9e2ad3709e6438918b70cf75b29f85a9fa40d0fbe6a073743a600"
+        }
+      ]
+    },
+    {
+      "raceKey": "20260919-73-5",
+      "result": [
+        7,
+        5,
+        3
+      ],
+      "marks": [
+        {
+          "riderId": "015996",
+          "number": 7,
+          "name": "白井　輝",
+          "score": 6.9854877500000025,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 1,
+          "mark": "◎",
+          "raceKey": "20260919-73-5",
+          "predictionTimestamp": "2026-09-18T15:22:15.266Z",
+          "predictionHash": "3103b4bdf58a41c9d17ca506e6e880e660f3cdc9ef9f7ea2272fc5eb672403f2"
+        },
+        {
+          "riderId": "013131",
+          "number": 2,
+          "name": "藤野　一良",
+          "score": 6.1726142,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 2,
+          "mark": "○",
+          "raceKey": "20260919-73-5",
+          "predictionTimestamp": "2026-09-18T15:22:15.266Z",
+          "predictionHash": "3103b4bdf58a41c9d17ca506e6e880e660f3cdc9ef9f7ea2272fc5eb672403f2"
+        },
+        {
+          "riderId": "014434",
+          "number": 3,
+          "name": "山崎　功也",
+          "score": 5.7358466,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 3,
+          "mark": "▲",
+          "raceKey": "20260919-73-5",
+          "predictionTimestamp": "2026-09-18T15:22:15.266Z",
+          "predictionHash": "3103b4bdf58a41c9d17ca506e6e880e660f3cdc9ef9f7ea2272fc5eb672403f2"
+        },
+        {
+          "riderId": "014872",
+          "number": 1,
+          "name": "玉村　元気",
+          "score": 5.5473875,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 4,
+          "mark": "△",
+          "raceKey": "20260919-73-5",
+          "predictionTimestamp": "2026-09-18T15:22:15.266Z",
+          "predictionHash": "3103b4bdf58a41c9d17ca506e6e880e660f3cdc9ef9f7ea2272fc5eb672403f2"
+        },
+        {
+          "riderId": "014931",
+          "number": 5,
+          "name": "横田　政直",
+          "score": 5.3317605,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 5,
+          "mark": "☆",
+          "raceKey": "20260919-73-5",
+          "predictionTimestamp": "2026-09-18T15:22:15.266Z",
+          "predictionHash": "3103b4bdf58a41c9d17ca506e6e880e660f3cdc9ef9f7ea2272fc5eb672403f2"
+        }
+      ]
+    },
+    {
+      "raceKey": "20260919-73-6",
+      "result": [
+        5,
+        2,
+        7
+      ],
+      "marks": [
+        {
+          "riderId": "015971",
+          "number": 5,
+          "name": "阿部　凪汰",
+          "score": 7.291572070000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 1,
+          "mark": "◎",
+          "raceKey": "20260919-73-6",
+          "predictionTimestamp": "2026-09-18T15:23:13.719Z",
+          "predictionHash": "ad26576d84abcf23c39767d26921325e4e1c0f651327b15bab274936f7fa67b1"
+        },
+        {
+          "riderId": "015708",
+          "number": 2,
+          "name": "山口　直樹",
+          "score": 6.6909373,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 2,
+          "mark": "○",
+          "raceKey": "20260919-73-6",
+          "predictionTimestamp": "2026-09-18T15:23:13.719Z",
+          "predictionHash": "ad26576d84abcf23c39767d26921325e4e1c0f651327b15bab274936f7fa67b1"
+        },
+        {
+          "riderId": "013314",
+          "number": 1,
+          "name": "鈴木　宏章",
+          "score": 6.0617666,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 3,
+          "mark": "▲",
+          "raceKey": "20260919-73-6",
+          "predictionTimestamp": "2026-09-18T15:23:13.719Z",
+          "predictionHash": "ad26576d84abcf23c39767d26921325e4e1c0f651327b15bab274936f7fa67b1"
+        },
+        {
+          "riderId": "015283",
+          "number": 7,
+          "name": "安本　昇平",
+          "score": 5.824664520000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 4,
+          "mark": "△",
+          "raceKey": "20260919-73-6",
+          "predictionTimestamp": "2026-09-18T15:23:13.719Z",
+          "predictionHash": "ad26576d84abcf23c39767d26921325e4e1c0f651327b15bab274936f7fa67b1"
+        },
+        {
+          "riderId": "015286",
+          "number": 3,
+          "name": "土居　佑次",
+          "score": 5.364257800000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 5,
+          "mark": "☆",
+          "raceKey": "20260919-73-6",
+          "predictionTimestamp": "2026-09-18T15:23:13.719Z",
+          "predictionHash": "ad26576d84abcf23c39767d26921325e4e1c0f651327b15bab274936f7fa67b1"
+        }
+      ]
+    },
+    {
+      "raceKey": "20260919-73-7",
+      "result": [
+        2,
+        7,
+        3
+      ],
+      "marks": [
+        {
+          "riderId": "015371",
+          "number": 1,
+          "name": "田上　晃也",
+          "score": 7.294176200000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 1,
+          "mark": "◎",
+          "raceKey": "20260919-73-7",
+          "predictionTimestamp": "2026-09-18T15:24:05.845Z",
+          "predictionHash": "4ca678c54da3a79eadbfb2bb8ab4f76f639ace6a90c1f8d1084d1c30f90b4dee"
+        },
+        {
+          "riderId": "015979",
+          "number": 7,
+          "name": "福田　海響",
+          "score": 7.202721800000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 2,
+          "mark": "○",
+          "raceKey": "20260919-73-7",
+          "predictionTimestamp": "2026-09-18T15:24:05.845Z",
+          "predictionHash": "4ca678c54da3a79eadbfb2bb8ab4f76f639ace6a90c1f8d1084d1c30f90b4dee"
+        },
+        {
+          "riderId": "015967",
+          "number": 2,
+          "name": "田崎　隼翔",
+          "score": 6.870116200000002,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 3,
+          "mark": "▲",
+          "raceKey": "20260919-73-7",
+          "predictionTimestamp": "2026-09-18T15:24:05.845Z",
+          "predictionHash": "4ca678c54da3a79eadbfb2bb8ab4f76f639ace6a90c1f8d1084d1c30f90b4dee"
+        },
+        {
+          "riderId": "014126",
+          "number": 4,
+          "name": "高谷　敏史",
+          "score": 5.239623000000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 4,
+          "mark": "△",
+          "raceKey": "20260919-73-7",
+          "predictionTimestamp": "2026-09-18T15:24:05.845Z",
+          "predictionHash": "4ca678c54da3a79eadbfb2bb8ab4f76f639ace6a90c1f8d1084d1c30f90b4dee"
+        },
+        {
+          "riderId": "011574",
+          "number": 5,
+          "name": "坂本　英一",
+          "score": 5.002306150000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 5,
+          "mark": "☆",
+          "raceKey": "20260919-73-7",
+          "predictionTimestamp": "2026-09-18T15:24:05.845Z",
+          "predictionHash": "4ca678c54da3a79eadbfb2bb8ab4f76f639ace6a90c1f8d1084d1c30f90b4dee"
+        }
+      ]
+    },
+    {
+      "raceKey": "20260919-46-1",
+      "result": [
+        7,
+        5,
+        3
+      ],
+      "marks": [
+        {
+          "riderId": "015356",
+          "number": 7,
+          "name": "杉浦　侑吾",
+          "score": 7.144837480000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 1,
+          "mark": "◎",
+          "raceKey": "20260919-46-1",
+          "predictionTimestamp": "2026-09-18T15:25:28.479Z",
+          "predictionHash": "edf658cb64cf27fac67c57434e2564143d1916ba60208b2783e5cee647cafa50"
+        },
+        {
+          "riderId": "014718",
+          "number": 9,
+          "name": "小松崎大地",
+          "score": 6.8342440400000015,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 2,
+          "mark": "○",
+          "raceKey": "20260919-46-1",
+          "predictionTimestamp": "2026-09-18T15:25:28.479Z",
+          "predictionHash": "edf658cb64cf27fac67c57434e2564143d1916ba60208b2783e5cee647cafa50"
+        },
+        {
+          "riderId": "015337",
+          "number": 3,
+          "name": "佐藤　礼文",
+          "score": 6.214509400000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 3,
+          "mark": "▲",
+          "raceKey": "20260919-46-1",
+          "predictionTimestamp": "2026-09-18T15:25:28.479Z",
+          "predictionHash": "edf658cb64cf27fac67c57434e2564143d1916ba60208b2783e5cee647cafa50"
+        },
+        {
+          "riderId": "014545",
+          "number": 5,
+          "name": "岡崎　智哉",
+          "score": 5.776998800000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 4,
+          "mark": "△",
+          "raceKey": "20260919-46-1",
+          "predictionTimestamp": "2026-09-18T15:25:28.479Z",
+          "predictionHash": "edf658cb64cf27fac67c57434e2564143d1916ba60208b2783e5cee647cafa50"
+        },
+        {
+          "riderId": "014835",
+          "number": 8,
+          "name": "窓場千加頼",
+          "score": 5.18771703,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 5,
+          "mark": "☆",
+          "raceKey": "20260919-46-1",
+          "predictionTimestamp": "2026-09-18T15:25:28.479Z",
+          "predictionHash": "edf658cb64cf27fac67c57434e2564143d1916ba60208b2783e5cee647cafa50"
+        }
+      ]
+    },
+    {
+      "raceKey": "20260919-46-3",
+      "result": [
+        1,
+        7,
+        2
+      ],
+      "marks": [
+        {
+          "riderId": "015474",
+          "number": 5,
+          "name": "阿部　将大",
+          "score": 6.712265110000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 1,
+          "mark": "◎",
+          "raceKey": "20260919-46-3",
+          "predictionTimestamp": "2026-09-18T15:29:09.757Z",
+          "predictionHash": "153c2059840310688c67ac6e18923882ad455f6aaf5f216745668f931db0476a"
+        },
+        {
+          "riderId": "014744",
+          "number": 3,
+          "name": "和田真久留",
+          "score": 6.421583330000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 2,
+          "mark": "○",
+          "raceKey": "20260919-46-3",
+          "predictionTimestamp": "2026-09-18T15:29:09.757Z",
+          "predictionHash": "153c2059840310688c67ac6e18923882ad455f6aaf5f216745668f931db0476a"
+        },
+        {
+          "riderId": "015537",
+          "number": 2,
+          "name": "志田　龍星",
+          "score": 6.35538466,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 3,
+          "mark": "▲",
+          "raceKey": "20260919-46-3",
+          "predictionTimestamp": "2026-09-18T15:29:09.757Z",
+          "predictionHash": "153c2059840310688c67ac6e18923882ad455f6aaf5f216745668f931db0476a"
+        },
+        {
+          "riderId": "015516",
+          "number": 7,
+          "name": "木村　皆斗",
+          "score": 6.2535562,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 4,
+          "mark": "△",
+          "raceKey": "20260919-46-3",
+          "predictionTimestamp": "2026-09-18T15:29:09.757Z",
+          "predictionHash": "153c2059840310688c67ac6e18923882ad455f6aaf5f216745668f931db0476a"
+        },
+        {
+          "riderId": "013745",
+          "number": 9,
+          "name": "中川誠一郎",
+          "score": 5.487947800000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 5,
+          "mark": "☆",
+          "raceKey": "20260919-46-3",
+          "predictionTimestamp": "2026-09-18T15:29:09.757Z",
+          "predictionHash": "153c2059840310688c67ac6e18923882ad455f6aaf5f216745668f931db0476a"
+        }
+      ]
+    },
+    {
+      "raceKey": "20260919-21-3",
+      "result": [
+        1,
+        4,
+        3
+      ],
+      "marks": [
+        {
+          "riderId": "014314",
+          "number": 4,
+          "name": "中川　繁樹",
+          "score": 6.449332719999999,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 1,
+          "mark": "◎",
+          "raceKey": "20260919-21-3",
+          "predictionTimestamp": "2026-09-18T16:17:27.715Z",
+          "predictionHash": "10de21b7938c0ac6254011ef84ac12d93532dad4c38d46dc0bf3a05dcbd355d9"
+        },
+        {
+          "riderId": "014748",
+          "number": 3,
+          "name": "山口　智弘",
+          "score": 6.105039400000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 2,
+          "mark": "○",
+          "raceKey": "20260919-21-3",
+          "predictionTimestamp": "2026-09-18T16:17:27.715Z",
+          "predictionHash": "10de21b7938c0ac6254011ef84ac12d93532dad4c38d46dc0bf3a05dcbd355d9"
+        },
+        {
+          "riderId": "014988",
+          "number": 1,
+          "name": "伊早坂駿一",
+          "score": 5.4075565,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 3,
+          "mark": "▲",
+          "raceKey": "20260919-21-3",
+          "predictionTimestamp": "2026-09-18T16:17:27.715Z",
+          "predictionHash": "10de21b7938c0ac6254011ef84ac12d93532dad4c38d46dc0bf3a05dcbd355d9"
+        },
+        {
+          "riderId": "012963",
+          "number": 5,
+          "name": "荻野　哲",
+          "score": 5.1915378,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 4,
+          "mark": "△",
+          "raceKey": "20260919-21-3",
+          "predictionTimestamp": "2026-09-18T16:17:27.715Z",
+          "predictionHash": "10de21b7938c0ac6254011ef84ac12d93532dad4c38d46dc0bf3a05dcbd355d9"
+        },
+        {
+          "riderId": "012844",
+          "number": 6,
+          "name": "米澤　大輔",
+          "score": 5.002965517241379,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 5,
+          "mark": "☆",
+          "raceKey": "20260919-21-3",
+          "predictionTimestamp": "2026-09-18T16:17:27.715Z",
+          "predictionHash": "10de21b7938c0ac6254011ef84ac12d93532dad4c38d46dc0bf3a05dcbd355d9"
+        }
+      ]
+    },
+    {
+      "raceKey": "20260919-46-4",
+      "result": [
+        2,
+        5,
+        6
+      ],
+      "marks": [
+        {
+          "riderId": "015037",
+          "number": 3,
+          "name": "鈴木　竜士",
+          "score": 7.019604899999999,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 1,
+          "mark": "◎",
+          "raceKey": "20260919-46-4",
+          "predictionTimestamp": "2026-09-18T15:49:27.814Z",
+          "predictionHash": "a4cba3c8d4d8195ddc41eef6df84956cf9935a822bdcb3160fd96cf65726a7d1"
+        },
+        {
+          "riderId": "015799",
+          "number": 9,
+          "name": "森田　一郎",
+          "score": 6.959016200000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 2,
+          "mark": "○",
+          "raceKey": "20260919-46-4",
+          "predictionTimestamp": "2026-09-18T15:49:27.814Z",
+          "predictionHash": "a4cba3c8d4d8195ddc41eef6df84956cf9935a822bdcb3160fd96cf65726a7d1"
+        },
+        {
+          "riderId": "015649",
+          "number": 5,
+          "name": "後藤　大輝",
+          "score": 6.272856200000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 3,
+          "mark": "▲",
+          "raceKey": "20260919-46-4",
+          "predictionTimestamp": "2026-09-18T15:49:27.814Z",
+          "predictionHash": "a4cba3c8d4d8195ddc41eef6df84956cf9935a822bdcb3160fd96cf65726a7d1"
+        },
+        {
+          "riderId": "014112",
+          "number": 2,
+          "name": "小川　勇介",
+          "score": 6.051291040000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 4,
+          "mark": "△",
+          "raceKey": "20260919-46-4",
+          "predictionTimestamp": "2026-09-18T15:49:27.814Z",
+          "predictionHash": "a4cba3c8d4d8195ddc41eef6df84956cf9935a822bdcb3160fd96cf65726a7d1"
+        },
+        {
+          "riderId": "015449",
+          "number": 1,
+          "name": "橋本　優己",
+          "score": 5.8031612,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 5,
+          "mark": "☆",
+          "raceKey": "20260919-46-4",
+          "predictionTimestamp": "2026-09-18T15:49:27.814Z",
+          "predictionHash": "a4cba3c8d4d8195ddc41eef6df84956cf9935a822bdcb3160fd96cf65726a7d1"
+        }
+      ]
+    },
+    {
+      "raceKey": "20260919-21-4",
+      "result": [
+        4,
+        6,
+        1
+      ],
+      "marks": [
+        {
+          "riderId": "015594",
+          "number": 1,
+          "name": "金田　涼馬",
+          "score": 6.9370657000000016,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 1,
+          "mark": "◎",
+          "raceKey": "20260919-21-4",
+          "predictionTimestamp": "2026-09-18T15:50:08.746Z",
+          "predictionHash": "8c05931e1fd127ac19f2781b14652c3b3d07ef2d195d70784af4a8bb307db365"
+        },
+        {
+          "riderId": "014153",
+          "number": 4,
+          "name": "伊藤　太一",
+          "score": 6.30097952,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 2,
+          "mark": "○",
+          "raceKey": "20260919-21-4",
+          "predictionTimestamp": "2026-09-18T15:50:08.746Z",
+          "predictionHash": "8c05931e1fd127ac19f2781b14652c3b3d07ef2d195d70784af4a8bb307db365"
+        },
+        {
+          "riderId": "015644",
+          "number": 5,
+          "name": "中野光太郎",
+          "score": 5.981684600000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 3,
+          "mark": "▲",
+          "raceKey": "20260919-21-4",
+          "predictionTimestamp": "2026-09-18T15:50:08.746Z",
+          "predictionHash": "8c05931e1fd127ac19f2781b14652c3b3d07ef2d195d70784af4a8bb307db365"
+        },
+        {
+          "riderId": "013968",
+          "number": 3,
+          "name": "越智　展孝",
+          "score": 5.4831494,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 4,
+          "mark": "△",
+          "raceKey": "20260919-21-4",
+          "predictionTimestamp": "2026-09-18T15:50:08.746Z",
+          "predictionHash": "8c05931e1fd127ac19f2781b14652c3b3d07ef2d195d70784af4a8bb307db365"
+        },
+        {
+          "riderId": "014334",
+          "number": 2,
+          "name": "高倉　俊宏",
+          "score": 5.45135488,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 5,
+          "mark": "☆",
+          "raceKey": "20260919-21-4",
+          "predictionTimestamp": "2026-09-18T15:50:08.746Z",
+          "predictionHash": "8c05931e1fd127ac19f2781b14652c3b3d07ef2d195d70784af4a8bb307db365"
+        }
+      ]
+    },
+    {
+      "raceKey": "20260919-46-5",
+      "result": [
+        1,
+        9,
+        6
+      ],
+      "marks": [
+        {
+          "riderId": "015731",
+          "number": 9,
+          "name": "西田　優大",
+          "score": 7.077456550000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 1,
+          "mark": "◎",
+          "raceKey": "20260919-46-5",
+          "predictionTimestamp": "2026-09-18T15:50:42.865Z",
+          "predictionHash": "9970fac5d4758df9a37bc7209c0bbc51788fbd3f4b4859294ae294dd34e3393d"
+        },
+        {
+          "riderId": "015814",
+          "number": 5,
+          "name": "岩井　芯",
+          "score": 6.350716200000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 2,
+          "mark": "○",
+          "raceKey": "20260919-46-5",
+          "predictionTimestamp": "2026-09-18T15:50:42.865Z",
+          "predictionHash": "9970fac5d4758df9a37bc7209c0bbc51788fbd3f4b4859294ae294dd34e3393d"
+        },
+        {
+          "riderId": "014681",
+          "number": 1,
+          "name": "松浦　悠士",
+          "score": 6.10187436,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 3,
+          "mark": "▲",
+          "raceKey": "20260919-46-5",
+          "predictionTimestamp": "2026-09-18T15:50:42.865Z",
+          "predictionHash": "9970fac5d4758df9a37bc7209c0bbc51788fbd3f4b4859294ae294dd34e3393d"
+        },
+        {
+          "riderId": "013904",
+          "number": 3,
+          "name": "佐藤　友和",
+          "score": 5.73578188,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 4,
+          "mark": "△",
+          "raceKey": "20260919-46-5",
+          "predictionTimestamp": "2026-09-18T15:50:42.865Z",
+          "predictionHash": "9970fac5d4758df9a37bc7209c0bbc51788fbd3f4b4859294ae294dd34e3393d"
+        },
+        {
+          "riderId": "015038",
+          "number": 7,
+          "name": "山岸　佳太",
+          "score": 5.433999399999999,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 5,
+          "mark": "☆",
+          "raceKey": "20260919-46-5",
+          "predictionTimestamp": "2026-09-18T15:50:42.865Z",
+          "predictionHash": "9970fac5d4758df9a37bc7209c0bbc51788fbd3f4b4859294ae294dd34e3393d"
+        }
+      ]
+    },
+    {
+      "raceKey": "20260919-21-6",
+      "result": [
+        2,
+        6,
+        4
+      ],
+      "marks": [
+        {
+          "riderId": "015660",
+          "number": 1,
+          "name": "河崎　正晴",
+          "score": 6.85549224,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 1,
+          "mark": "◎",
+          "raceKey": "20260919-21-6",
+          "predictionTimestamp": "2026-09-18T16:20:24.232Z",
+          "predictionHash": "80a6440c5d44b772f9c755a0f84389b018ebff67a115b594c6e5e77dec0df982"
+        },
+        {
+          "riderId": "015004",
+          "number": 2,
+          "name": "畑段　嵐士",
+          "score": 6.396673809999999,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 2,
+          "mark": "○",
+          "raceKey": "20260919-21-6",
+          "predictionTimestamp": "2026-09-18T16:20:24.232Z",
+          "predictionHash": "80a6440c5d44b772f9c755a0f84389b018ebff67a115b594c6e5e77dec0df982"
+        },
+        {
+          "riderId": "015132",
+          "number": 5,
+          "name": "瓜生　崇智",
+          "score": 6.015846600000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 3,
+          "mark": "▲",
+          "raceKey": "20260919-21-6",
+          "predictionTimestamp": "2026-09-18T16:20:24.232Z",
+          "predictionHash": "80a6440c5d44b772f9c755a0f84389b018ebff67a115b594c6e5e77dec0df982"
+        },
+        {
+          "riderId": "014811",
+          "number": 3,
+          "name": "笠松　将太",
+          "score": 5.8266797000000015,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 4,
+          "mark": "△",
+          "raceKey": "20260919-21-6",
+          "predictionTimestamp": "2026-09-18T16:20:24.232Z",
+          "predictionHash": "80a6440c5d44b772f9c755a0f84389b018ebff67a115b594c6e5e77dec0df982"
+        },
+        {
+          "riderId": "015539",
+          "number": 4,
+          "name": "上杉　嘉槻",
+          "score": 5.2193456000000005,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 5,
+          "mark": "☆",
+          "raceKey": "20260919-21-6",
+          "predictionTimestamp": "2026-09-18T16:20:24.232Z",
+          "predictionHash": "80a6440c5d44b772f9c755a0f84389b018ebff67a115b594c6e5e77dec0df982"
+        }
+      ]
+    },
+    {
+      "raceKey": "20260919-46-6",
+      "result": [
+        3,
+        5,
+        7
+      ],
+      "marks": [
+        {
+          "riderId": "013516",
+          "number": 5,
+          "name": "荒井　崇博",
+          "score": 6.598472859999999,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 1,
+          "mark": "◎",
+          "raceKey": "20260919-46-6",
+          "predictionTimestamp": "2026-09-18T16:19:33.670Z",
+          "predictionHash": "99e76ae8a80ada43c7d299784122dcbf317cb187b5459305f164481d18fca269"
+        },
+        {
+          "riderId": "015272",
+          "number": 1,
+          "name": "中釜　章成",
+          "score": 6.03190818,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 2,
+          "mark": "○",
+          "raceKey": "20260919-46-6",
+          "predictionTimestamp": "2026-09-18T16:19:33.670Z",
+          "predictionHash": "99e76ae8a80ada43c7d299784122dcbf317cb187b5459305f164481d18fca269"
+        },
+        {
+          "riderId": "014501",
+          "number": 3,
+          "name": "守澤　太志",
+          "score": 5.8779762,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 3,
+          "mark": "▲",
+          "raceKey": "20260919-46-6",
+          "predictionTimestamp": "2026-09-18T16:19:33.670Z",
+          "predictionHash": "99e76ae8a80ada43c7d299784122dcbf317cb187b5459305f164481d18fca269"
+        },
+        {
+          "riderId": "015778",
+          "number": 4,
+          "name": "小堀　敢太",
+          "score": 5.570216200000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 4,
+          "mark": "△",
+          "raceKey": "20260919-46-6",
+          "predictionTimestamp": "2026-09-18T16:19:33.670Z",
+          "predictionHash": "99e76ae8a80ada43c7d299784122dcbf317cb187b5459305f164481d18fca269"
+        },
+        {
+          "riderId": "013162",
+          "number": 7,
+          "name": "佐藤慎太郎",
+          "score": 5.48551262,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 5,
+          "mark": "☆",
+          "raceKey": "20260919-46-6",
+          "predictionTimestamp": "2026-09-18T16:19:33.670Z",
+          "predictionHash": "99e76ae8a80ada43c7d299784122dcbf317cb187b5459305f164481d18fca269"
+        }
+      ]
+    },
+    {
+      "raceKey": "20260919-21-7",
+      "result": [
+        2,
+        3,
+        4
+      ],
+      "marks": [
+        {
+          "riderId": "015654",
+          "number": 7,
+          "name": "梅崎　隆介",
+          "score": 7.0732999,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 1,
+          "mark": "◎",
+          "raceKey": "20260919-21-7",
+          "predictionTimestamp": "2026-09-18T16:21:13.952Z",
+          "predictionHash": "61961673ba7ff333426ad98e7848ffc8721f81f9d283756339e9bbaa50f346e0"
+        },
+        {
+          "riderId": "014184",
+          "number": 2,
+          "name": "池田　良",
+          "score": 5.7948011,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 2,
+          "mark": "○",
+          "raceKey": "20260919-21-7",
+          "predictionTimestamp": "2026-09-18T16:21:13.952Z",
+          "predictionHash": "61961673ba7ff333426ad98e7848ffc8721f81f9d283756339e9bbaa50f346e0"
+        },
+        {
+          "riderId": "015802",
+          "number": 6,
+          "name": "中島　竜誠",
+          "score": 5.675379310344827,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 3,
+          "mark": "▲",
+          "raceKey": "20260919-21-7",
+          "predictionTimestamp": "2026-09-18T16:21:13.952Z",
+          "predictionHash": "61961673ba7ff333426ad98e7848ffc8721f81f9d283756339e9bbaa50f346e0"
+        },
+        {
+          "riderId": "015244",
+          "number": 1,
+          "name": "植原　琢也",
+          "score": 5.3020523200000005,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 4,
+          "mark": "△",
+          "raceKey": "20260919-21-7",
+          "predictionTimestamp": "2026-09-18T16:21:13.952Z",
+          "predictionHash": "61961673ba7ff333426ad98e7848ffc8721f81f9d283756339e9bbaa50f346e0"
+        },
+        {
+          "riderId": "014114",
+          "number": 3,
+          "name": "坂本　亮馬",
+          "score": 4.914453611111112,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 5,
+          "mark": "☆",
+          "raceKey": "20260919-21-7",
+          "predictionTimestamp": "2026-09-18T16:21:13.952Z",
+          "predictionHash": "61961673ba7ff333426ad98e7848ffc8721f81f9d283756339e9bbaa50f346e0"
+        }
+      ]
+    },
+    {
+      "raceKey": "20260919-21-8",
+      "result": [
+        5,
+        7,
+        1
+      ],
+      "marks": [
+        {
+          "riderId": "014168",
+          "number": 5,
+          "name": "高橋　和也",
+          "score": 7.028603850000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 1,
+          "mark": "◎",
+          "raceKey": "20260919-21-8",
+          "predictionTimestamp": "2026-09-18T15:57:39.808Z",
+          "predictionHash": "d721750e61393bbb8ab265ac50ee4e01ae045a386af3e47c90160e509d954ef8"
+        },
+        {
+          "riderId": "014831",
+          "number": 7,
+          "name": "伊藤　裕貴",
+          "score": 6.7291004,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 2,
+          "mark": "○",
+          "raceKey": "20260919-21-8",
+          "predictionTimestamp": "2026-09-18T15:57:39.808Z",
+          "predictionHash": "d721750e61393bbb8ab265ac50ee4e01ae045a386af3e47c90160e509d954ef8"
+        },
+        {
+          "riderId": "013295",
+          "number": 1,
+          "name": "佐々木則幸",
+          "score": 5.96021952,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 3,
+          "mark": "▲",
+          "raceKey": "20260919-21-8",
+          "predictionTimestamp": "2026-09-18T15:57:39.808Z",
+          "predictionHash": "d721750e61393bbb8ab265ac50ee4e01ae045a386af3e47c90160e509d954ef8"
+        },
+        {
+          "riderId": "015420",
+          "number": 2,
+          "name": "梁島　邦友",
+          "score": 5.347435000000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 4,
+          "mark": "△",
+          "raceKey": "20260919-21-8",
+          "predictionTimestamp": "2026-09-18T15:57:39.808Z",
+          "predictionHash": "d721750e61393bbb8ab265ac50ee4e01ae045a386af3e47c90160e509d954ef8"
+        },
+        {
+          "riderId": "015648",
+          "number": 4,
+          "name": "森本桂太郎",
+          "score": 5.1682762,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 5,
+          "mark": "☆",
+          "raceKey": "20260919-21-8",
+          "predictionTimestamp": "2026-09-18T15:57:39.808Z",
+          "predictionHash": "d721750e61393bbb8ab265ac50ee4e01ae045a386af3e47c90160e509d954ef8"
+        }
+      ]
+    },
+    {
+      "raceKey": "20260919-46-8",
+      "result": [
+        2,
+        6,
+        5
+      ],
+      "marks": [
+        {
+          "riderId": "015298",
+          "number": 1,
+          "name": "嘉永　泰斗",
+          "score": 6.667914420000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 1,
+          "mark": "◎",
+          "raceKey": "20260919-46-8",
+          "predictionTimestamp": "2026-09-18T15:58:12.472Z",
+          "predictionHash": "fb270e6a93030532be175031d82f18786a78f97457e81413305559e2c7454c87"
+        },
+        {
+          "riderId": "015341",
+          "number": 5,
+          "name": "坂井　洋",
+          "score": 6.66331514,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 2,
+          "mark": "○",
+          "raceKey": "20260919-46-8",
+          "predictionTimestamp": "2026-09-18T15:58:12.472Z",
+          "predictionHash": "fb270e6a93030532be175031d82f18786a78f97457e81413305559e2c7454c87"
+        },
+        {
+          "riderId": "015009",
+          "number": 3,
+          "name": "清水　裕友",
+          "score": 6.30525175,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 3,
+          "mark": "▲",
+          "raceKey": "20260919-46-8",
+          "predictionTimestamp": "2026-09-18T15:58:12.472Z",
+          "predictionHash": "fb270e6a93030532be175031d82f18786a78f97457e81413305559e2c7454c87"
+        },
+        {
+          "riderId": "014129",
+          "number": 2,
+          "name": "菅田　壱道",
+          "score": 6.1057714800000005,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 4,
+          "mark": "△",
+          "raceKey": "20260919-46-8",
+          "predictionTimestamp": "2026-09-18T15:58:12.472Z",
+          "predictionHash": "fb270e6a93030532be175031d82f18786a78f97457e81413305559e2c7454c87"
+        },
+        {
+          "riderId": "014484",
+          "number": 7,
+          "name": "河端　朋之",
+          "score": 5.957150500000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 5,
+          "mark": "☆",
+          "raceKey": "20260919-46-8",
+          "predictionTimestamp": "2026-09-18T15:58:12.472Z",
+          "predictionHash": "fb270e6a93030532be175031d82f18786a78f97457e81413305559e2c7454c87"
+        }
+      ]
+    },
+    {
+      "raceKey": "20260919-46-9",
+      "result": [
+        1,
+        6,
+        7
+      ],
+      "marks": [
+        {
+          "riderId": "014380",
+          "number": 2,
+          "name": "根田　空史",
+          "score": 6.953352840000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 1,
+          "mark": "◎",
+          "raceKey": "20260919-46-9",
+          "predictionTimestamp": "2026-09-18T16:23:25.189Z",
+          "predictionHash": "24fe98ecf188fe12a70bf8f0c1dea3bf52b1abe0c648a7c54fe57ac44f46af56"
+        },
+        {
+          "riderId": "015248",
+          "number": 1,
+          "name": "森田　優弥",
+          "score": 6.7914362000000015,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 2,
+          "mark": "○",
+          "raceKey": "20260919-46-9",
+          "predictionTimestamp": "2026-09-18T16:23:25.189Z",
+          "predictionHash": "24fe98ecf188fe12a70bf8f0c1dea3bf52b1abe0c648a7c54fe57ac44f46af56"
+        },
+        {
+          "riderId": "014396",
+          "number": 9,
+          "name": "脇本　雄太",
+          "score": 6.5174185,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 3,
+          "mark": "▲",
+          "raceKey": "20260919-46-9",
+          "predictionTimestamp": "2026-09-18T16:23:25.189Z",
+          "predictionHash": "24fe98ecf188fe12a70bf8f0c1dea3bf52b1abe0c648a7c54fe57ac44f46af56"
+        },
+        {
+          "riderId": "013880",
+          "number": 7,
+          "name": "岩津　裕介",
+          "score": 5.58234908,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 4,
+          "mark": "△",
+          "raceKey": "20260919-46-9",
+          "predictionTimestamp": "2026-09-18T16:23:25.189Z",
+          "predictionHash": "24fe98ecf188fe12a70bf8f0c1dea3bf52b1abe0c648a7c54fe57ac44f46af56"
+        },
+        {
+          "riderId": "015443",
+          "number": 4,
+          "name": "道場　晃規",
+          "score": 5.5278478,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 5,
+          "mark": "☆",
+          "raceKey": "20260919-46-9",
+          "predictionTimestamp": "2026-09-18T16:23:25.189Z",
+          "predictionHash": "24fe98ecf188fe12a70bf8f0c1dea3bf52b1abe0c648a7c54fe57ac44f46af56"
+        }
+      ]
+    },
+    {
+      "raceKey": "20260919-38-1",
+      "result": [
+        1,
+        4,
+        7
+      ],
+      "marks": [
+        {
+          "riderId": "014206",
+          "number": 4,
+          "name": "金野　俊秋",
+          "score": 6.791837940000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 1,
+          "mark": "◎",
+          "raceKey": "20260919-38-1",
+          "predictionTimestamp": "2026-09-18T16:29:23.868Z",
+          "predictionHash": "191e799db4702de19f0a14490a2a5de38ca98c01aefda351bde766f3235e320d"
+        },
+        {
+          "riderId": "015780",
+          "number": 2,
+          "name": "小田　恭介",
+          "score": 6.017974200000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 2,
+          "mark": "○",
+          "raceKey": "20260919-38-1",
+          "predictionTimestamp": "2026-09-18T16:29:23.868Z",
+          "predictionHash": "191e799db4702de19f0a14490a2a5de38ca98c01aefda351bde766f3235e320d"
+        },
+        {
+          "riderId": "013447",
+          "number": 1,
+          "name": "坂本　晃輝",
+          "score": 5.896287640000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 3,
+          "mark": "▲",
+          "raceKey": "20260919-38-1",
+          "predictionTimestamp": "2026-09-18T16:29:23.868Z",
+          "predictionHash": "191e799db4702de19f0a14490a2a5de38ca98c01aefda351bde766f3235e320d"
+        },
+        {
+          "riderId": "015180",
+          "number": 5,
+          "name": "下岡　将也",
+          "score": 4.6378462,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 4,
+          "mark": "△",
+          "raceKey": "20260919-38-1",
+          "predictionTimestamp": "2026-09-18T16:29:23.868Z",
+          "predictionHash": "191e799db4702de19f0a14490a2a5de38ca98c01aefda351bde766f3235e320d"
+        },
+        {
+          "riderId": "013068",
+          "number": 7,
+          "name": "城戸崎隆史",
+          "score": 4.456495,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 5,
+          "mark": "☆",
+          "raceKey": "20260919-38-1",
+          "predictionTimestamp": "2026-09-18T16:29:23.868Z",
+          "predictionHash": "191e799db4702de19f0a14490a2a5de38ca98c01aefda351bde766f3235e320d"
+        }
+      ]
+    },
+    {
+      "raceKey": "20260919-46-11",
+      "result": [
+        7,
+        1,
+        4
+      ],
+      "marks": [
+        {
+          "riderId": "015039",
+          "number": 1,
+          "name": "吉田　拓矢",
+          "score": 7.2326078,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 1,
+          "mark": "◎",
+          "raceKey": "20260919-46-11",
+          "predictionTimestamp": "2026-09-18T16:53:07.526Z",
+          "predictionHash": "46e229b67e0056d539ff48b9191da07696f301bbfe618d7007a7e085781e119a"
+        },
+        {
+          "riderId": "015413",
+          "number": 7,
+          "name": "寺崎　浩平",
+          "score": 6.4153626,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 2,
+          "mark": "○",
+          "raceKey": "20260919-46-11",
+          "predictionTimestamp": "2026-09-18T16:53:07.526Z",
+          "predictionHash": "46e229b67e0056d539ff48b9191da07696f301bbfe618d7007a7e085781e119a"
+        },
+        {
+          "riderId": "015203",
+          "number": 5,
+          "name": "松本　貴治",
+          "score": 6.33781703,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 3,
+          "mark": "▲",
+          "raceKey": "20260919-46-11",
+          "predictionTimestamp": "2026-09-18T16:53:07.526Z",
+          "predictionHash": "46e229b67e0056d539ff48b9191da07696f301bbfe618d7007a7e085781e119a"
+        },
+        {
+          "riderId": "015034",
+          "number": 9,
+          "name": "新山　響平",
+          "score": 6.32966332,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 4,
+          "mark": "△",
+          "raceKey": "20260919-46-11",
+          "predictionTimestamp": "2026-09-18T16:53:07.526Z",
+          "predictionHash": "46e229b67e0056d539ff48b9191da07696f301bbfe618d7007a7e085781e119a"
+        },
+        {
+          "riderId": "015035",
+          "number": 3,
+          "name": "阿部　拓真",
+          "score": 5.3276189700000005,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 5,
+          "mark": "☆",
+          "raceKey": "20260919-46-11",
+          "predictionTimestamp": "2026-09-18T16:53:07.526Z",
+          "predictionHash": "46e229b67e0056d539ff48b9191da07696f301bbfe618d7007a7e085781e119a"
+        }
+      ]
+    },
+    {
+      "raceKey": "20260919-75-1",
+      "result": [
+        1,
+        4,
+        5
+      ],
+      "marks": [
+        {
+          "riderId": "015467",
+          "number": 1,
+          "name": "倉松　涼",
+          "score": 6.75296333,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 1,
+          "mark": "◎",
+          "raceKey": "20260919-75-1",
+          "predictionTimestamp": "2026-09-18T16:55:07.851Z",
+          "predictionHash": "b91b45844ee3c13ecd8af6965b780d69c36e91f8a53ffdcb49b3da4509e46fa7"
+        },
+        {
+          "riderId": "014595",
+          "number": 3,
+          "name": "瀧本　匡平",
+          "score": 6.06497036,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 2,
+          "mark": "○",
+          "raceKey": "20260919-75-1",
+          "predictionTimestamp": "2026-09-18T16:55:07.851Z",
+          "predictionHash": "b91b45844ee3c13ecd8af6965b780d69c36e91f8a53ffdcb49b3da4509e46fa7"
+        },
+        {
+          "riderId": "013489",
+          "number": 5,
+          "name": "藤井　孝則",
+          "score": 5.4457778,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 3,
+          "mark": "▲",
+          "raceKey": "20260919-75-1",
+          "predictionTimestamp": "2026-09-18T16:55:07.851Z",
+          "predictionHash": "b91b45844ee3c13ecd8af6965b780d69c36e91f8a53ffdcb49b3da4509e46fa7"
+        },
+        {
+          "riderId": "014776",
+          "number": 4,
+          "name": "川上　修平",
+          "score": 5.091294999999999,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 4,
+          "mark": "△",
+          "raceKey": "20260919-75-1",
+          "predictionTimestamp": "2026-09-18T16:55:07.851Z",
+          "predictionHash": "b91b45844ee3c13ecd8af6965b780d69c36e91f8a53ffdcb49b3da4509e46fa7"
+        },
+        {
+          "riderId": "016005",
+          "number": 6,
+          "name": "清家　大夢",
+          "score": 4.7978162,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 5,
+          "mark": "☆",
+          "raceKey": "20260919-75-1",
+          "predictionTimestamp": "2026-09-18T16:55:07.851Z",
+          "predictionHash": "b91b45844ee3c13ecd8af6965b780d69c36e91f8a53ffdcb49b3da4509e46fa7"
+        }
+      ]
+    },
+    {
+      "raceKey": "20260919-38-2",
+      "result": [
+        1,
+        5,
+        3
+      ],
+      "marks": [
+        {
+          "riderId": "015633",
+          "number": 7,
+          "name": "中釜　健次",
+          "score": 7.31978112,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 1,
+          "mark": "◎",
+          "raceKey": "20260919-38-2",
+          "predictionTimestamp": "2026-09-18T16:56:16.646Z",
+          "predictionHash": "2409b5c9b5e0e6b1bc0c1fdd943bb816ec9fe132e1fbd55abdce6f69d0c5bb0a"
+        },
+        {
+          "riderId": "014280",
+          "number": 1,
+          "name": "井上　公利",
+          "score": 6.775366000000002,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 2,
+          "mark": "○",
+          "raceKey": "20260919-38-2",
+          "predictionTimestamp": "2026-09-18T16:56:16.646Z",
+          "predictionHash": "2409b5c9b5e0e6b1bc0c1fdd943bb816ec9fe132e1fbd55abdce6f69d0c5bb0a"
+        },
+        {
+          "riderId": "012937",
+          "number": 5,
+          "name": "十文字菊雄",
+          "score": 5.3721266000000005,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 3,
+          "mark": "▲",
+          "raceKey": "20260919-38-2",
+          "predictionTimestamp": "2026-09-18T16:56:16.646Z",
+          "predictionHash": "2409b5c9b5e0e6b1bc0c1fdd943bb816ec9fe132e1fbd55abdce6f69d0c5bb0a"
+        },
+        {
+          "riderId": "014125",
+          "number": 4,
+          "name": "坂本　昌宏",
+          "score": 4.3485262,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 4,
+          "mark": "△",
+          "raceKey": "20260919-38-2",
+          "predictionTimestamp": "2026-09-18T16:56:16.646Z",
+          "predictionHash": "2409b5c9b5e0e6b1bc0c1fdd943bb816ec9fe132e1fbd55abdce6f69d0c5bb0a"
+        },
+        {
+          "riderId": "013179",
+          "number": 2,
+          "name": "飯島　淳",
+          "score": 4.2059896000000006,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 5,
+          "mark": "☆",
+          "raceKey": "20260919-38-2",
+          "predictionTimestamp": "2026-09-18T16:56:16.646Z",
+          "predictionHash": "2409b5c9b5e0e6b1bc0c1fdd943bb816ec9fe132e1fbd55abdce6f69d0c5bb0a"
+        }
+      ]
+    },
+    {
+      "raceKey": "20260919-46-12",
+      "result": [
+        7,
+        2,
+        9
+      ],
+      "marks": [
+        {
+          "riderId": "014838",
+          "number": 3,
+          "name": "古性　優作",
+          "score": 7.155954019999999,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 1,
+          "mark": "◎",
+          "raceKey": "20260919-46-12",
+          "predictionTimestamp": "2026-09-18T16:57:08.286Z",
+          "predictionHash": "42506b360114c3fda9231c40968eba304f3f75425e9ccca2ee3885758eb8014d"
+        },
+        {
+          "riderId": "014741",
+          "number": 1,
+          "name": "郡司　浩平",
+          "score": 7.0591521,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 2,
+          "mark": "○",
+          "raceKey": "20260919-46-12",
+          "predictionTimestamp": "2026-09-18T16:57:08.286Z",
+          "predictionHash": "42506b360114c3fda9231c40968eba304f3f75425e9ccca2ee3885758eb8014d"
+        },
+        {
+          "riderId": "014534",
+          "number": 7,
+          "name": "深谷　知広",
+          "score": 6.65880538,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 3,
+          "mark": "▲",
+          "raceKey": "20260919-46-12",
+          "predictionTimestamp": "2026-09-18T16:57:08.286Z",
+          "predictionHash": "42506b360114c3fda9231c40968eba304f3f75425e9ccca2ee3885758eb8014d"
+        },
+        {
+          "riderId": "015465",
+          "number": 9,
+          "name": "石原　颯",
+          "score": 6.616996200000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 4,
+          "mark": "△",
+          "raceKey": "20260919-46-12",
+          "predictionTimestamp": "2026-09-18T16:57:08.286Z",
+          "predictionHash": "42506b360114c3fda9231c40968eba304f3f75425e9ccca2ee3885758eb8014d"
+        },
+        {
+          "riderId": "015213",
+          "number": 5,
+          "name": "山崎　賢人",
+          "score": 6.110056200000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 5,
+          "mark": "☆",
+          "raceKey": "20260919-46-12",
+          "predictionTimestamp": "2026-09-18T16:57:08.286Z",
+          "predictionHash": "42506b360114c3fda9231c40968eba304f3f75425e9ccca2ee3885758eb8014d"
+        }
+      ]
+    },
+    {
+      "raceKey": "20260919-75-3",
+      "result": [
+        1,
+        4,
+        3
+      ],
+      "marks": [
+        {
+          "riderId": "015993",
+          "number": 1,
+          "name": "西澤　優聖",
+          "score": 7.038472840000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 1,
+          "mark": "◎",
+          "raceKey": "20260919-75-3",
+          "predictionTimestamp": "2026-09-18T17:18:45.331Z",
+          "predictionHash": "2dc1e0e13f1c7b6acf471873e794d49f663b591cf0c30bb267ad7acd703ec3ed"
+        },
+        {
+          "riderId": "014093",
+          "number": 4,
+          "name": "窪田　陽介",
+          "score": 5.772880000000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 2,
+          "mark": "○",
+          "raceKey": "20260919-75-3",
+          "predictionTimestamp": "2026-09-18T17:18:45.331Z",
+          "predictionHash": "2dc1e0e13f1c7b6acf471873e794d49f663b591cf0c30bb267ad7acd703ec3ed"
+        },
+        {
+          "riderId": "015739",
+          "number": 5,
+          "name": "楠本　政明",
+          "score": 5.6780162,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 3,
+          "mark": "▲",
+          "raceKey": "20260919-75-3",
+          "predictionTimestamp": "2026-09-18T17:18:45.331Z",
+          "predictionHash": "2dc1e0e13f1c7b6acf471873e794d49f663b591cf0c30bb267ad7acd703ec3ed"
+        },
+        {
+          "riderId": "014120",
+          "number": 3,
+          "name": "永田　修一",
+          "score": 5.402085400000001,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 4,
+          "mark": "△",
+          "raceKey": "20260919-75-3",
+          "predictionTimestamp": "2026-09-18T17:18:45.331Z",
+          "predictionHash": "2dc1e0e13f1c7b6acf471873e794d49f663b591cf0c30bb267ad7acd703ec3ed"
+        },
+        {
+          "riderId": "012299",
+          "number": 7,
+          "name": "増成　富夫",
+          "score": 5.2640108,
+          "scoreSource": "prediction.scored[].roleScores.first",
+          "rank": 5,
+          "mark": "☆",
+          "raceKey": "20260919-75-3",
+          "predictionTimestamp": "2026-09-18T17:18:45.331Z",
+          "predictionHash": "2dc1e0e13f1c7b6acf471873e794d49f663b591cf0c30bb267ad7acd703ec3ed"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "races": 22,
+    "winnerTop1": 6,
+    "winnerTop2": 12,
+    "winnerTop3": 19,
+    "winnerTop5": 21,
+    "secondTop5": 17,
+    "thirdTop5": 16,
+    "resultTop3Overlap": {
+      "0": 0,
+      "1": 0,
+      "2": 12,
+      "3": 10
+    },
+    "markStats": {
+      "◎": {
+        "races": 22,
+        "first": 6,
+        "top2": 12,
+        "top3": 13
+      },
+      "○": {
+        "races": 22,
+        "first": 6,
+        "top2": 10,
+        "top3": 12
+      },
+      "▲": {
+        "races": 22,
+        "first": 7,
+        "top2": 9,
+        "top3": 14
+      },
+      "△": {
+        "races": 22,
+        "first": 2,
+        "top2": 5,
+        "top3": 9
+      },
+      "☆": {
+        "races": 22,
+        "first": 0,
+        "top2": 2,
+        "top3": 6
+      }
+    }
+  }
+}

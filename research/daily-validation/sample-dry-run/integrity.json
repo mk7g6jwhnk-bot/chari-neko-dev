@@ -1,0 +1,10 @@
+{
+  "issues": [],
+  "predictionMismatch": 0,
+  "purchaseMismatch": 0,
+  "sealedResultMismatch": 0,
+  "temporalViolation": 0,
+  "resultAwareLeakage": 0,
+  "historicalMutation": 0,
+  "productionWrite": 0
+}

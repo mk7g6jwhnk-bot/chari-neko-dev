@@ -67,7 +67,9 @@ function compact(predictionResponse, resultResponse) {
     purchase: { eligibility: resultResponse.purchaseEvaluation?.purchaseEligibility || prediction.purchaseEligibility?.state || null,
       tickets: plan.map(ticket => ({ order: order(ticket.order || ticket.combination), class: cls(ticket),
         thick: ticket.thickQualified === true || ticket.qualification === 'THICK_PREDICTION_QUALIFIED' })) },
-    prediction: { participantNumbers: (prediction.scored || []).map(row => Number(row.number)).filter(Number.isFinite), terminals }
+    prediction: { participantNumbers: (prediction.scored || []).map(row => Number(row.number)).filter(Number.isFinite),
+      riderScores: (prediction.scored || []).map(row => ({ riderId: row.registration || row.riderId || row.id || null, number: Number(row.number), name: row.name || null,
+        score: Number(row.roleScores?.first), scoreSource: 'prediction.scored[].roleScores.first' })).filter(row => Number.isFinite(row.number) && Number.isFinite(row.score)), terminals }
   };
 }
 

@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "DAILY_VALIDATION_CONFIG_V1",
+  "timeZone": "Asia/Tokyo",
+  "schedule": "06:30",
+  "taskName": "ChariNeko Daily Validation",
+  "leaseTimeoutMinutes": 120,
+  "warning": {
+    "minimumSourceCollected": 1,
+    "purchaseableRateDelta": 0.3,
+    "p2PlusRateDelta": 0.3,
+    "categoryCountRatio": 3,
+    "ticketCountRatio": 3,
+    "checkpointStallHours": 48
+  },
+  "milestones": [300, 500, 1000],
+  "automaticTuning": false,
+  "productionWrite": false
+}
