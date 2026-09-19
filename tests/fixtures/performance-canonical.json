@@ -1,0 +1,3322 @@
+{
+  "sourceHashes": {
+    "purchase-performance.mjs": "1b9911fb509629c1c0fa2cf0faa56f72af24341504bf31e13780a077acbe7f10",
+    "canonical-purchase-eligibility.mjs": "f3775b1f9853774437468f1960a6a6a45391b8edc0c3b9fa0106c7dd7bd486c9",
+    "sealed-result-read.mjs": "40258690675f857e2bb89adf96f368585eb635effd3b71ce54a1a8e114729f73"
+  },
+  "now": "2026-09-12T03:00:00Z",
+  "status": {
+    "ok": true,
+    "schemaVersion": "COLLECTOR_STATUS_V2",
+    "dailyDate": "20260912",
+    "autoStatusAvailable": true,
+    "researchStatusAvailable": true,
+    "autoCurrent": true,
+    "researchCurrent": true,
+    "autoSource": "auto_lifecycle_snapshot",
+    "researchSource": "research_shadow_snapshot",
+    "autoObservedAt": "2026-09-12T03:00:00.000Z",
+    "researchObservedAt": "2026-09-12T03:00:00.000Z",
+    "checkedAt": "2026-09-12T03:00:00.000Z",
+    "collectorHealthy": true,
+    "collectorOperational": true,
+    "storageWritable": true,
+    "browserConnected": true,
+    "todayRaceCount": 9,
+    "meetingCount": 1,
+    "prefetchedRaceCount": 9,
+    "sealedPredictionCount": 9,
+    "resultLoadedCount": 5,
+    "verifiedCount": 5,
+    "pendingResultCount": 1,
+    "retryingCount": 1,
+    "failureCount": 1,
+    "preRaceSealSucceeded": 9,
+    "preRaceSealFailed": 0,
+    "purchasePerformance": {
+      "version": "PURCHASE_PERFORMANCE_V2",
+      "performanceSchemaVersion": "PURCHASE_PERFORMANCE_V2",
+      "generatedAt": "2026-09-12T03:00:00.000Z",
+      "statsEligibleFrom": "2026-08-01T09:00:00+09:00",
+      "firstEligibleRaceKey": "20260801-12-1",
+      "firstEligibleAt": "2026-08-01T09:00:00+09:00",
+      "periods": {
+        "today": {
+          "evaluatedRaces": 4,
+          "betRaces": 3,
+          "betRaceRate": 0.75,
+          "hitRaces": 2,
+          "hitRate": 0.6666666666666666,
+          "ticketCount": 9,
+          "investment": 900,
+          "return": 90740,
+          "roi": 100.82222222222222,
+          "categories": {
+            "main": {
+              "evaluatedRaces": 4,
+              "betRaces": 3,
+              "hitRaces": 1,
+              "hitRate": 0.3333333333333333,
+              "ticketCount": 6,
+              "investment": 600,
+              "return": 1250,
+              "roi": 2.0833333333333335,
+              "averageHitOdds": 12.5,
+              "longestLosingStreak": 2
+            },
+            "cover": {
+              "evaluatedRaces": 4,
+              "betRaces": 3,
+              "hitRaces": 1,
+              "hitRate": 0.3333333333333333,
+              "ticketCount": 3,
+              "investment": 300,
+              "return": 89490,
+              "roi": 298.3,
+              "averageHitOdds": 894.9,
+              "longestLosingStreak": 1
+            },
+            "combined": {
+              "evaluatedRaces": 4,
+              "betRaces": 3,
+              "hitRaces": 2,
+              "hitRate": 0.6666666666666666,
+              "ticketCount": 9,
+              "investment": 900,
+              "return": 90740,
+              "roi": 100.82222222222222,
+              "averageHitOdds": 453.7,
+              "longestLosingStreak": 1
+            },
+            "thick": {
+              "evaluatedRaces": 4,
+              "betRaces": 3,
+              "hitRaces": 1,
+              "hitRate": 0.3333333333333333,
+              "ticketCount": 3,
+              "investment": 300,
+              "return": 1250,
+              "roi": 4.166666666666667,
+              "averageHitOdds": 12.5,
+              "longestLosingStreak": 2
+            },
+            "standard": {
+              "evaluatedRaces": 4,
+              "betRaces": 3,
+              "hitRaces": 2,
+              "hitRate": 0.6666666666666666,
+              "ticketCount": 9,
+              "investment": 900,
+              "return": 90740,
+              "roi": 100.82222222222222,
+              "averageHitOdds": 453.7,
+              "longestLosingStreak": 1
+            }
+          },
+          "actualStake": {
+            "available": false,
+            "evaluatedRaces": 0,
+            "betRaces": 0,
+            "hitRaces": 0,
+            "investment": 0,
+            "return": 0,
+            "roi": null
+          }
+        },
+        "recent7": {
+          "evaluatedRaces": 6,
+          "betRaces": 5,
+          "betRaceRate": 0.8333333333333334,
+          "hitRaces": 3,
+          "hitRate": 0.6,
+          "ticketCount": 15,
+          "investment": 1500,
+          "return": 91990,
+          "roi": 61.32666666666667,
+          "categories": {
+            "main": {
+              "evaluatedRaces": 6,
+              "betRaces": 5,
+              "hitRaces": 2,
+              "hitRate": 0.4,
+              "ticketCount": 10,
+              "investment": 1000,
+              "return": 2500,
+              "roi": 2.5,
+              "averageHitOdds": 12.5,
+              "longestLosingStreak": 2
+            },
+            "cover": {
+              "evaluatedRaces": 6,
+              "betRaces": 5,
+              "hitRaces": 1,
+              "hitRate": 0.2,
+              "ticketCount": 5,
+              "investment": 500,
+              "return": 89490,
+              "roi": 178.98,
+              "averageHitOdds": 894.9,
+              "longestLosingStreak": 3
+            },
+            "combined": {
+              "evaluatedRaces": 6,
+              "betRaces": 5,
+              "hitRaces": 3,
+              "hitRate": 0.6,
+              "ticketCount": 15,
+              "investment": 1500,
+              "return": 91990,
+              "roi": 61.32666666666667,
+              "averageHitOdds": 306.6333333333333,
+              "longestLosingStreak": 1
+            },
+            "thick": {
+              "evaluatedRaces": 6,
+              "betRaces": 5,
+              "hitRaces": 2,
+              "hitRate": 0.4,
+              "ticketCount": 5,
+              "investment": 500,
+              "return": 2500,
+              "roi": 5,
+              "averageHitOdds": 12.5,
+              "longestLosingStreak": 2
+            },
+            "standard": {
+              "evaluatedRaces": 6,
+              "betRaces": 5,
+              "hitRaces": 3,
+              "hitRate": 0.6,
+              "ticketCount": 15,
+              "investment": 1500,
+              "return": 91990,
+              "roi": 61.32666666666667,
+              "averageHitOdds": 306.6333333333333,
+              "longestLosingStreak": 1
+            }
+          },
+          "actualStake": {
+            "available": false,
+            "evaluatedRaces": 0,
+            "betRaces": 0,
+            "hitRaces": 0,
+            "investment": 0,
+            "return": 0,
+            "roi": null
+          }
+        },
+        "recent30": {
+          "evaluatedRaces": 7,
+          "betRaces": 6,
+          "betRaceRate": 0.8571428571428571,
+          "hitRaces": 4,
+          "hitRate": 0.6666666666666666,
+          "ticketCount": 18,
+          "investment": 1800,
+          "return": 93240,
+          "roi": 51.8,
+          "categories": {
+            "main": {
+              "evaluatedRaces": 7,
+              "betRaces": 6,
+              "hitRaces": 3,
+              "hitRate": 0.5,
+              "ticketCount": 12,
+              "investment": 1200,
+              "return": 3750,
+              "roi": 3.125,
+              "averageHitOdds": 12.5,
+              "longestLosingStreak": 2
+            },
+            "cover": {
+              "evaluatedRaces": 7,
+              "betRaces": 6,
+              "hitRaces": 1,
+              "hitRate": 0.16666666666666666,
+              "ticketCount": 6,
+              "investment": 600,
+              "return": 89490,
+              "roi": 149.15,
+              "averageHitOdds": 894.9,
+              "longestLosingStreak": 4
+            },
+            "combined": {
+              "evaluatedRaces": 7,
+              "betRaces": 6,
+              "hitRaces": 4,
+              "hitRate": 0.6666666666666666,
+              "ticketCount": 18,
+              "investment": 1800,
+              "return": 93240,
+              "roi": 51.8,
+              "averageHitOdds": 233.1,
+              "longestLosingStreak": 1
+            },
+            "thick": {
+              "evaluatedRaces": 7,
+              "betRaces": 6,
+              "hitRaces": 3,
+              "hitRate": 0.5,
+              "ticketCount": 6,
+              "investment": 600,
+              "return": 3750,
+              "roi": 6.25,
+              "averageHitOdds": 12.5,
+              "longestLosingStreak": 2
+            },
+            "standard": {
+              "evaluatedRaces": 7,
+              "betRaces": 6,
+              "hitRaces": 4,
+              "hitRate": 0.6666666666666666,
+              "ticketCount": 18,
+              "investment": 1800,
+              "return": 93240,
+              "roi": 51.8,
+              "averageHitOdds": 233.1,
+              "longestLosingStreak": 1
+            }
+          },
+          "actualStake": {
+            "available": false,
+            "evaluatedRaces": 0,
+            "betRaces": 0,
+            "hitRaces": 0,
+            "investment": 0,
+            "return": 0,
+            "roi": null
+          }
+        },
+        "cumulative": {
+          "evaluatedRaces": 8,
+          "betRaces": 7,
+          "betRaceRate": 0.875,
+          "hitRaces": 5,
+          "hitRate": 0.7142857142857143,
+          "ticketCount": 21,
+          "investment": 2100,
+          "return": 94490,
+          "roi": 44.99523809523809,
+          "categories": {
+            "main": {
+              "evaluatedRaces": 8,
+              "betRaces": 7,
+              "hitRaces": 4,
+              "hitRate": 0.5714285714285714,
+              "ticketCount": 14,
+              "investment": 1400,
+              "return": 5000,
+              "roi": 3.5714285714285716,
+              "averageHitOdds": 12.5,
+              "longestLosingStreak": 2
+            },
+            "cover": {
+              "evaluatedRaces": 8,
+              "betRaces": 7,
+              "hitRaces": 1,
+              "hitRate": 0.14285714285714285,
+              "ticketCount": 7,
+              "investment": 700,
+              "return": 89490,
+              "roi": 127.84285714285714,
+              "averageHitOdds": 894.9,
+              "longestLosingStreak": 5
+            },
+            "combined": {
+              "evaluatedRaces": 8,
+              "betRaces": 7,
+              "hitRaces": 5,
+              "hitRate": 0.7142857142857143,
+              "ticketCount": 21,
+              "investment": 2100,
+              "return": 94490,
+              "roi": 44.99523809523809,
+              "averageHitOdds": 188.98,
+              "longestLosingStreak": 1
+            },
+            "thick": {
+              "evaluatedRaces": 8,
+              "betRaces": 7,
+              "hitRaces": 4,
+              "hitRate": 0.5714285714285714,
+              "ticketCount": 7,
+              "investment": 700,
+              "return": 5000,
+              "roi": 7.142857142857143,
+              "averageHitOdds": 12.5,
+              "longestLosingStreak": 2
+            },
+            "standard": {
+              "evaluatedRaces": 8,
+              "betRaces": 7,
+              "hitRaces": 5,
+              "hitRate": 0.7142857142857143,
+              "ticketCount": 21,
+              "investment": 2100,
+              "return": 94490,
+              "roi": 44.99523809523809,
+              "averageHitOdds": 188.98,
+              "longestLosingStreak": 1
+            }
+          },
+          "actualStake": {
+            "available": false,
+            "evaluatedRaces": 0,
+            "betRaces": 0,
+            "hitRaces": 0,
+            "investment": 0,
+            "return": 0,
+            "roi": null
+          }
+        },
+        "cohort50": {
+          "evaluatedRaces": 8,
+          "betRaces": 7,
+          "betRaceRate": 0.875,
+          "hitRaces": 5,
+          "hitRate": 0.7142857142857143,
+          "ticketCount": 21,
+          "investment": 2100,
+          "return": 94490,
+          "roi": 44.99523809523809,
+          "categories": {
+            "main": {
+              "evaluatedRaces": 8,
+              "betRaces": 7,
+              "hitRaces": 4,
+              "hitRate": 0.5714285714285714,
+              "ticketCount": 14,
+              "investment": 1400,
+              "return": 5000,
+              "roi": 3.5714285714285716,
+              "averageHitOdds": 12.5,
+              "longestLosingStreak": 2
+            },
+            "cover": {
+              "evaluatedRaces": 8,
+              "betRaces": 7,
+              "hitRaces": 1,
+              "hitRate": 0.14285714285714285,
+              "ticketCount": 7,
+              "investment": 700,
+              "return": 89490,
+              "roi": 127.84285714285714,
+              "averageHitOdds": 894.9,
+              "longestLosingStreak": 5
+            },
+            "combined": {
+              "evaluatedRaces": 8,
+              "betRaces": 7,
+              "hitRaces": 5,
+              "hitRate": 0.7142857142857143,
+              "ticketCount": 21,
+              "investment": 2100,
+              "return": 94490,
+              "roi": 44.99523809523809,
+              "averageHitOdds": 188.98,
+              "longestLosingStreak": 1
+            },
+            "thick": {
+              "evaluatedRaces": 8,
+              "betRaces": 7,
+              "hitRaces": 4,
+              "hitRate": 0.5714285714285714,
+              "ticketCount": 7,
+              "investment": 700,
+              "return": 5000,
+              "roi": 7.142857142857143,
+              "averageHitOdds": 12.5,
+              "longestLosingStreak": 2
+            },
+            "standard": {
+              "evaluatedRaces": 8,
+              "betRaces": 7,
+              "hitRaces": 5,
+              "hitRate": 0.7142857142857143,
+              "ticketCount": 21,
+              "investment": 2100,
+              "return": 94490,
+              "roi": 44.99523809523809,
+              "averageHitOdds": 188.98,
+              "longestLosingStreak": 1
+            }
+          },
+          "actualStake": {
+            "available": false,
+            "evaluatedRaces": 0,
+            "betRaces": 0,
+            "hitRaces": 0,
+            "investment": 0,
+            "return": 0,
+            "roi": null
+          }
+        },
+        "cohort100": {
+          "evaluatedRaces": 8,
+          "betRaces": 7,
+          "betRaceRate": 0.875,
+          "hitRaces": 5,
+          "hitRate": 0.7142857142857143,
+          "ticketCount": 21,
+          "investment": 2100,
+          "return": 94490,
+          "roi": 44.99523809523809,
+          "categories": {
+            "main": {
+              "evaluatedRaces": 8,
+              "betRaces": 7,
+              "hitRaces": 4,
+              "hitRate": 0.5714285714285714,
+              "ticketCount": 14,
+              "investment": 1400,
+              "return": 5000,
+              "roi": 3.5714285714285716,
+              "averageHitOdds": 12.5,
+              "longestLosingStreak": 2
+            },
+            "cover": {
+              "evaluatedRaces": 8,
+              "betRaces": 7,
+              "hitRaces": 1,
+              "hitRate": 0.14285714285714285,
+              "ticketCount": 7,
+              "investment": 700,
+              "return": 89490,
+              "roi": 127.84285714285714,
+              "averageHitOdds": 894.9,
+              "longestLosingStreak": 5
+            },
+            "combined": {
+              "evaluatedRaces": 8,
+              "betRaces": 7,
+              "hitRaces": 5,
+              "hitRate": 0.7142857142857143,
+              "ticketCount": 21,
+              "investment": 2100,
+              "return": 94490,
+              "roi": 44.99523809523809,
+              "averageHitOdds": 188.98,
+              "longestLosingStreak": 1
+            },
+            "thick": {
+              "evaluatedRaces": 8,
+              "betRaces": 7,
+              "hitRaces": 4,
+              "hitRate": 0.5714285714285714,
+              "ticketCount": 7,
+              "investment": 700,
+              "return": 5000,
+              "roi": 7.142857142857143,
+              "averageHitOdds": 12.5,
+              "longestLosingStreak": 2
+            },
+            "standard": {
+              "evaluatedRaces": 8,
+              "betRaces": 7,
+              "hitRaces": 5,
+              "hitRate": 0.7142857142857143,
+              "ticketCount": 21,
+              "investment": 2100,
+              "return": 94490,
+              "roi": 44.99523809523809,
+              "averageHitOdds": 188.98,
+              "longestLosingStreak": 1
+            }
+          },
+          "actualStake": {
+            "available": false,
+            "evaluatedRaces": 0,
+            "betRaces": 0,
+            "hitRaces": 0,
+            "investment": 0,
+            "return": 0,
+            "roi": null
+          }
+        },
+        "holdout101": {
+          "evaluatedRaces": 0,
+          "betRaces": 0,
+          "betRaceRate": null,
+          "hitRaces": 0,
+          "hitRate": null,
+          "ticketCount": 0,
+          "investment": 0,
+          "return": 0,
+          "roi": null,
+          "categories": {
+            "main": {
+              "evaluatedRaces": 0,
+              "betRaces": 0,
+              "hitRaces": 0,
+              "hitRate": null,
+              "ticketCount": 0,
+              "investment": 0,
+              "return": 0,
+              "roi": null,
+              "averageHitOdds": null,
+              "longestLosingStreak": 0
+            },
+            "cover": {
+              "evaluatedRaces": 0,
+              "betRaces": 0,
+              "hitRaces": 0,
+              "hitRate": null,
+              "ticketCount": 0,
+              "investment": 0,
+              "return": 0,
+              "roi": null,
+              "averageHitOdds": null,
+              "longestLosingStreak": 0
+            },
+            "combined": {
+              "evaluatedRaces": 0,
+              "betRaces": 0,
+              "hitRaces": 0,
+              "hitRate": null,
+              "ticketCount": 0,
+              "investment": 0,
+              "return": 0,
+              "roi": null,
+              "averageHitOdds": null,
+              "longestLosingStreak": 0
+            },
+            "thick": {
+              "evaluatedRaces": 0,
+              "betRaces": 0,
+              "hitRaces": 0,
+              "hitRate": null,
+              "ticketCount": 0,
+              "investment": 0,
+              "return": 0,
+              "roi": null,
+              "averageHitOdds": null,
+              "longestLosingStreak": 0
+            },
+            "standard": {
+              "evaluatedRaces": 0,
+              "betRaces": 0,
+              "hitRaces": 0,
+              "hitRate": null,
+              "ticketCount": 0,
+              "investment": 0,
+              "return": 0,
+              "roi": null,
+              "averageHitOdds": null,
+              "longestLosingStreak": 0
+            }
+          },
+          "actualStake": {
+            "available": false,
+            "evaluatedRaces": 0,
+            "betRaces": 0,
+            "hitRaces": 0,
+            "investment": 0,
+            "return": 0,
+            "roi": null
+          }
+        }
+      },
+      "cohortAudit": {
+        "storedV2Records": 13,
+        "resultComplete": 9,
+        "explicitPurchaseTrue": 11,
+        "explicitPurchaseFalse": 1,
+        "eligibilityUnknown": 1,
+        "canonicalPlanPresent": 13,
+        "payoutValid": 9,
+        "evaluatedRecords": 8,
+        "purchaseEligibleRecords": 7,
+        "excluded": {
+          "LEGACY_UNKNOWN": 1,
+          "NO_RESULT": 4
+        }
+      }
+    },
+    "researchProgress": {
+      "comparableTotal": 200,
+      "progress50": 50,
+      "progress100": 100,
+      "cohort": "production-existing-cohort",
+      "reportStatus": "GENERATED"
+    },
+    "races": [
+      {
+        "raceKey": "20260912-12-1",
+        "venueName": "青森",
+        "venueCode": "12",
+        "raceNumber": 1,
+        "date": "20260912",
+        "scheduledStartTime": "2026-09-12T10:00:00+09:00",
+        "state": "VERIFIED",
+        "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+        "predictionSealedAt": "2026-09-12T09:00:00+09:00",
+        "resultObservedAt": "2026-09-12T10:10:00+09:00",
+        "resultLifecycleState": "RESULT_CONFIRMED"
+      },
+      {
+        "raceKey": "20260912-12-2",
+        "venueName": "青森",
+        "venueCode": "12",
+        "raceNumber": 2,
+        "date": "20260912",
+        "scheduledStartTime": "2026-09-12T10:00:00+09:00",
+        "state": "VERIFIED",
+        "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+        "predictionSealedAt": "2026-09-12T09:00:00+09:00",
+        "resultObservedAt": "2026-09-12T10:10:00+09:00",
+        "resultLifecycleState": "RESULT_CONFIRMED"
+      },
+      {
+        "raceKey": "20260912-12-3",
+        "venueName": "青森",
+        "venueCode": "12",
+        "raceNumber": 3,
+        "date": "20260912",
+        "scheduledStartTime": "2026-09-12T10:00:00+09:00",
+        "state": "VERIFIED",
+        "predictionHash": "a9c95b8aab8b407da986c1ff8a695dd04070d11df1cc58a6844090dacaefdc4f",
+        "predictionSealedAt": "2026-09-12T09:00:00+09:00",
+        "resultObservedAt": "2026-09-12T10:10:00+09:00",
+        "resultLifecycleState": "RESULT_CONFIRMED"
+      },
+      {
+        "raceKey": "20260912-12-4",
+        "venueName": "青森",
+        "venueCode": "12",
+        "raceNumber": 4,
+        "date": "20260912",
+        "scheduledStartTime": "2026-09-12T10:00:00+09:00",
+        "state": "VERIFIED",
+        "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+        "predictionSealedAt": "2026-09-12T09:00:00+09:00",
+        "resultObservedAt": "2026-09-12T10:10:00+09:00",
+        "resultLifecycleState": "RESULT_CONFIRMED"
+      },
+      {
+        "raceKey": "20260912-12-5",
+        "venueName": "青森",
+        "venueCode": "12",
+        "raceNumber": 5,
+        "date": "20260912",
+        "scheduledStartTime": "2026-09-12T10:00:00+09:00",
+        "state": "VERIFIED",
+        "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+        "predictionSealedAt": "2026-09-12T09:00:00+09:00",
+        "resultObservedAt": "2026-09-12T10:10:00+09:00",
+        "resultLifecycleState": "RESULT_CONFIRMED"
+      },
+      {
+        "raceKey": "20260912-12-6",
+        "venueName": "青森",
+        "venueCode": "12",
+        "raceNumber": 6,
+        "date": "20260912",
+        "scheduledStartTime": "2026-09-12T10:00:00+09:00",
+        "state": "RESULT_PENDING",
+        "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+        "predictionSealedAt": "2026-09-12T09:00:00+09:00",
+        "resultLifecycleState": "RESULT_PENDING"
+      },
+      {
+        "raceKey": "20260912-12-7",
+        "venueName": "青森",
+        "venueCode": "12",
+        "raceNumber": 7,
+        "date": "20260912",
+        "scheduledStartTime": "2026-09-12T10:00:00+09:00",
+        "state": "RESULT_RETRYING",
+        "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+        "predictionSealedAt": "2026-09-12T09:00:00+09:00",
+        "resultLifecycleState": "RESULT_RETRYING"
+      },
+      {
+        "raceKey": "20260912-12-8",
+        "venueName": "青森",
+        "venueCode": "12",
+        "raceNumber": 8,
+        "date": "20260912",
+        "scheduledStartTime": "2026-09-12T10:00:00+09:00",
+        "state": "RESULT_FETCH_FAILED",
+        "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+        "predictionSealedAt": "2026-09-12T09:00:00+09:00",
+        "resultLifecycleState": "RESULT_FETCH_FAILED"
+      },
+      {
+        "raceKey": "20260912-12-9",
+        "venueName": "青森",
+        "venueCode": "12",
+        "raceNumber": 9,
+        "date": "20260912",
+        "scheduledStartTime": "2026-09-12T14:00:00+09:00",
+        "state": "PREDICTION_SEALED",
+        "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+        "predictionSealedAt": "2026-09-12T09:00:00+09:00",
+        "resultLifecycleState": "PREDICTION_SEALED"
+      }
+    ]
+  },
+  "histories": {
+    "20260801": {
+      "ok": true,
+      "date": "20260801",
+      "count": 1,
+      "records": [
+        {
+          "raceKey": "20260801-12-1",
+          "venue": "青森",
+          "raceNumber": 1,
+          "scheduledStartTime": "2026-08-01T10:00:00+09:00",
+          "predictionSealedAt": "2026-08-01T09:00:00+09:00",
+          "lifecycleStatus": "VERIFIED",
+          "resultAttached": true,
+          "compared": false,
+          "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+          "displayStatus": "RESULT_ATTACHED",
+          "judgement": "購入可",
+          "purchaseAllowed": true,
+          "noBet": false,
+          "canonicalEligibility": {
+            "isPurchaseTarget": true,
+            "exclusionReason": null,
+            "purchasePlanPresent": true,
+            "canonicalPurchaseSnapshotPresent": true,
+            "resultConfirmed": true,
+            "payoutConfirmed": true,
+            "performanceEligible": true,
+            "eligibilityKnown": true
+          },
+          "mainTicketCount": 2,
+          "coverTicketCount": 1,
+          "thick": true,
+          "finishOrder": [
+            1,
+            2,
+            3
+          ],
+          "resultStatus": "confirmed",
+          "payout": 1250,
+          "purchaseEvaluation": {
+            "purchaseEligibility": "PURCHASE_ALLOWED",
+            "standardHit": true,
+            "investment": 300,
+            "return": 1250,
+            "roi": 4.166666666666667,
+            "actualStake": {
+              "available": false,
+              "ticketCount": 0,
+              "investment": 0,
+              "return": 0,
+              "roi": null,
+              "hit": false
+            },
+            "exclusionReason": null
+          }
+        }
+      ],
+      "readOnly": true
+    },
+    "20260814": {
+      "ok": true,
+      "date": "20260814",
+      "count": 1,
+      "records": [
+        {
+          "raceKey": "20260814-12-1",
+          "venue": "青森",
+          "raceNumber": 1,
+          "scheduledStartTime": "2026-08-14T10:00:00+09:00",
+          "predictionSealedAt": "2026-08-14T09:00:00+09:00",
+          "lifecycleStatus": "VERIFIED",
+          "resultAttached": true,
+          "compared": false,
+          "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+          "displayStatus": "RESULT_ATTACHED",
+          "judgement": "購入可",
+          "purchaseAllowed": true,
+          "noBet": false,
+          "canonicalEligibility": {
+            "isPurchaseTarget": true,
+            "exclusionReason": null,
+            "purchasePlanPresent": true,
+            "canonicalPurchaseSnapshotPresent": true,
+            "resultConfirmed": true,
+            "payoutConfirmed": true,
+            "performanceEligible": true,
+            "eligibilityKnown": true
+          },
+          "mainTicketCount": 2,
+          "coverTicketCount": 1,
+          "thick": true,
+          "finishOrder": [
+            1,
+            2,
+            3
+          ],
+          "resultStatus": "confirmed",
+          "payout": 1250,
+          "purchaseEvaluation": {
+            "purchaseEligibility": "PURCHASE_ALLOWED",
+            "standardHit": true,
+            "investment": 300,
+            "return": 1250,
+            "roi": 4.166666666666667,
+            "actualStake": {
+              "available": false,
+              "ticketCount": 0,
+              "investment": 0,
+              "return": 0,
+              "roi": null,
+              "hit": false
+            },
+            "exclusionReason": null
+          }
+        }
+      ],
+      "readOnly": true
+    },
+    "20260906": {
+      "ok": true,
+      "date": "20260906",
+      "count": 1,
+      "records": [
+        {
+          "raceKey": "20260906-12-1",
+          "venue": "青森",
+          "raceNumber": 1,
+          "scheduledStartTime": "2026-09-06T10:00:00+09:00",
+          "predictionSealedAt": "2026-09-06T09:00:00+09:00",
+          "lifecycleStatus": "VERIFIED",
+          "resultAttached": true,
+          "compared": false,
+          "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+          "displayStatus": "RESULT_ATTACHED",
+          "judgement": "購入可",
+          "purchaseAllowed": true,
+          "noBet": false,
+          "canonicalEligibility": {
+            "isPurchaseTarget": true,
+            "exclusionReason": null,
+            "purchasePlanPresent": true,
+            "canonicalPurchaseSnapshotPresent": true,
+            "resultConfirmed": true,
+            "payoutConfirmed": true,
+            "performanceEligible": true,
+            "eligibilityKnown": true
+          },
+          "mainTicketCount": 2,
+          "coverTicketCount": 1,
+          "thick": true,
+          "finishOrder": [
+            7,
+            6,
+            5
+          ],
+          "resultStatus": "confirmed",
+          "payout": 1250,
+          "purchaseEvaluation": {
+            "purchaseEligibility": "PURCHASE_ALLOWED",
+            "standardHit": false,
+            "investment": 300,
+            "return": 0,
+            "roi": 0,
+            "actualStake": {
+              "available": false,
+              "ticketCount": 0,
+              "investment": 0,
+              "return": 0,
+              "roi": null,
+              "hit": false
+            },
+            "exclusionReason": null
+          }
+        }
+      ],
+      "readOnly": true
+    },
+    "20260911": {
+      "ok": true,
+      "date": "20260911",
+      "count": 1,
+      "records": [
+        {
+          "raceKey": "20260911-12-1",
+          "venue": "青森",
+          "raceNumber": 1,
+          "scheduledStartTime": "2026-09-11T10:00:00+09:00",
+          "predictionSealedAt": "2026-09-11T09:00:00+09:00",
+          "lifecycleStatus": "VERIFIED",
+          "resultAttached": true,
+          "compared": false,
+          "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+          "displayStatus": "RESULT_ATTACHED",
+          "judgement": "購入可",
+          "purchaseAllowed": true,
+          "noBet": false,
+          "canonicalEligibility": {
+            "isPurchaseTarget": true,
+            "exclusionReason": null,
+            "purchasePlanPresent": true,
+            "canonicalPurchaseSnapshotPresent": true,
+            "resultConfirmed": true,
+            "payoutConfirmed": true,
+            "performanceEligible": true,
+            "eligibilityKnown": true
+          },
+          "mainTicketCount": 2,
+          "coverTicketCount": 1,
+          "thick": true,
+          "finishOrder": [
+            1,
+            2,
+            3
+          ],
+          "resultStatus": "confirmed",
+          "payout": 1250,
+          "purchaseEvaluation": {
+            "purchaseEligibility": "PURCHASE_ALLOWED",
+            "standardHit": true,
+            "investment": 300,
+            "return": 1250,
+            "roi": 4.166666666666667,
+            "actualStake": {
+              "available": false,
+              "ticketCount": 0,
+              "investment": 0,
+              "return": 0,
+              "roi": null,
+              "hit": false
+            },
+            "exclusionReason": null
+          }
+        }
+      ],
+      "readOnly": true
+    },
+    "20260912": {
+      "ok": true,
+      "date": "20260912",
+      "count": 9,
+      "records": [
+        {
+          "raceKey": "20260912-12-1",
+          "venue": "青森",
+          "raceNumber": 1,
+          "scheduledStartTime": "2026-09-12T10:00:00+09:00",
+          "predictionSealedAt": "2026-09-12T09:00:00+09:00",
+          "lifecycleStatus": "VERIFIED",
+          "resultAttached": true,
+          "compared": false,
+          "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+          "displayStatus": "RESULT_ATTACHED",
+          "judgement": "購入可",
+          "purchaseAllowed": true,
+          "noBet": false,
+          "canonicalEligibility": {
+            "isPurchaseTarget": true,
+            "exclusionReason": null,
+            "purchasePlanPresent": true,
+            "canonicalPurchaseSnapshotPresent": true,
+            "resultConfirmed": true,
+            "payoutConfirmed": true,
+            "performanceEligible": true,
+            "eligibilityKnown": true
+          },
+          "mainTicketCount": 2,
+          "coverTicketCount": 1,
+          "thick": true,
+          "finishOrder": [
+            1,
+            2,
+            3
+          ],
+          "resultStatus": "confirmed",
+          "payout": 1250,
+          "purchaseEvaluation": {
+            "purchaseEligibility": "PURCHASE_ALLOWED",
+            "standardHit": true,
+            "investment": 300,
+            "return": 1250,
+            "roi": 4.166666666666667,
+            "actualStake": {
+              "available": false,
+              "ticketCount": 0,
+              "investment": 0,
+              "return": 0,
+              "roi": null,
+              "hit": false
+            },
+            "exclusionReason": null
+          }
+        },
+        {
+          "raceKey": "20260912-12-2",
+          "venue": "青森",
+          "raceNumber": 2,
+          "scheduledStartTime": "2026-09-12T10:00:00+09:00",
+          "predictionSealedAt": "2026-09-12T09:00:00+09:00",
+          "lifecycleStatus": "VERIFIED",
+          "resultAttached": true,
+          "compared": false,
+          "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+          "displayStatus": "RESULT_ATTACHED",
+          "judgement": "購入可",
+          "purchaseAllowed": true,
+          "noBet": false,
+          "canonicalEligibility": {
+            "isPurchaseTarget": true,
+            "exclusionReason": null,
+            "purchasePlanPresent": true,
+            "canonicalPurchaseSnapshotPresent": true,
+            "resultConfirmed": true,
+            "payoutConfirmed": true,
+            "performanceEligible": true,
+            "eligibilityKnown": true
+          },
+          "mainTicketCount": 2,
+          "coverTicketCount": 1,
+          "thick": true,
+          "finishOrder": [
+            2,
+            1,
+            3
+          ],
+          "resultStatus": "confirmed",
+          "payout": 89490,
+          "purchaseEvaluation": {
+            "purchaseEligibility": "PURCHASE_ALLOWED",
+            "standardHit": true,
+            "investment": 300,
+            "return": 89490,
+            "roi": 298.3,
+            "actualStake": {
+              "available": false,
+              "ticketCount": 0,
+              "investment": 0,
+              "return": 0,
+              "roi": null,
+              "hit": false
+            },
+            "exclusionReason": null
+          }
+        },
+        {
+          "raceKey": "20260912-12-3",
+          "venue": "青森",
+          "raceNumber": 3,
+          "scheduledStartTime": "2026-09-12T10:00:00+09:00",
+          "predictionSealedAt": "2026-09-12T09:00:00+09:00",
+          "lifecycleStatus": "VERIFIED",
+          "resultAttached": true,
+          "compared": false,
+          "predictionHash": "a9c95b8aab8b407da986c1ff8a695dd04070d11df1cc58a6844090dacaefdc4f",
+          "displayStatus": "RESULT_ATTACHED",
+          "judgement": "見送り",
+          "purchaseAllowed": false,
+          "noBet": true,
+          "canonicalEligibility": {
+            "isPurchaseTarget": false,
+            "exclusionReason": "PURCHASE_INELIGIBLE",
+            "purchasePlanPresent": true,
+            "canonicalPurchaseSnapshotPresent": true,
+            "resultConfirmed": true,
+            "payoutConfirmed": true,
+            "performanceEligible": true,
+            "eligibilityKnown": true
+          },
+          "mainTicketCount": 0,
+          "coverTicketCount": 0,
+          "thick": false,
+          "finishOrder": [
+            1,
+            2,
+            3
+          ],
+          "resultStatus": "confirmed",
+          "payout": 1250,
+          "purchaseEvaluation": {
+            "purchaseEligibility": "PURCHASE_BLOCKED",
+            "standardHit": false,
+            "investment": 0,
+            "return": 0,
+            "roi": null,
+            "actualStake": {
+              "available": false,
+              "ticketCount": 0,
+              "investment": 0,
+              "return": 0,
+              "roi": null,
+              "hit": false
+            },
+            "exclusionReason": "PURCHASE_INELIGIBLE"
+          }
+        },
+        {
+          "raceKey": "20260912-12-4",
+          "venue": "青森",
+          "raceNumber": 4,
+          "scheduledStartTime": "2026-09-12T10:00:00+09:00",
+          "predictionSealedAt": "2026-09-12T09:00:00+09:00",
+          "lifecycleStatus": "VERIFIED",
+          "resultAttached": true,
+          "compared": false,
+          "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+          "displayStatus": "RESULT_ATTACHED",
+          "judgement": "購入可",
+          "purchaseAllowed": true,
+          "noBet": false,
+          "canonicalEligibility": {
+            "isPurchaseTarget": true,
+            "exclusionReason": null,
+            "purchasePlanPresent": true,
+            "canonicalPurchaseSnapshotPresent": true,
+            "resultConfirmed": true,
+            "payoutConfirmed": true,
+            "performanceEligible": true,
+            "eligibilityKnown": true
+          },
+          "mainTicketCount": 2,
+          "coverTicketCount": 1,
+          "thick": true,
+          "finishOrder": [
+            7,
+            6,
+            5
+          ],
+          "resultStatus": "confirmed",
+          "payout": 1250,
+          "purchaseEvaluation": {
+            "purchaseEligibility": "PURCHASE_ALLOWED",
+            "standardHit": false,
+            "investment": 300,
+            "return": 0,
+            "roi": 0,
+            "actualStake": {
+              "available": false,
+              "ticketCount": 0,
+              "investment": 0,
+              "return": 0,
+              "roi": null,
+              "hit": false
+            },
+            "exclusionReason": null
+          }
+        },
+        {
+          "raceKey": "20260912-12-5",
+          "venue": "青森",
+          "raceNumber": 5,
+          "scheduledStartTime": "2026-09-12T10:00:00+09:00",
+          "predictionSealedAt": "2026-09-12T09:00:00+09:00",
+          "lifecycleStatus": "VERIFIED",
+          "resultAttached": true,
+          "compared": false,
+          "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+          "displayStatus": "RESULT_ATTACHED",
+          "judgement": "見送り",
+          "purchaseAllowed": false,
+          "noBet": true,
+          "canonicalEligibility": {
+            "isPurchaseTarget": false,
+            "exclusionReason": "LEGACY_UNKNOWN",
+            "purchasePlanPresent": true,
+            "canonicalPurchaseSnapshotPresent": true,
+            "resultConfirmed": true,
+            "payoutConfirmed": true,
+            "performanceEligible": false,
+            "eligibilityKnown": false
+          },
+          "mainTicketCount": 0,
+          "coverTicketCount": 0,
+          "thick": false,
+          "finishOrder": [
+            1,
+            2,
+            3
+          ],
+          "resultStatus": "confirmed",
+          "payout": 1250,
+          "purchaseEvaluation": {
+            "purchaseEligibility": "PURCHASE_BLOCKED",
+            "standardHit": false,
+            "investment": 0,
+            "return": 0,
+            "roi": null,
+            "actualStake": {
+              "available": false,
+              "ticketCount": 0,
+              "investment": 0,
+              "return": 0,
+              "roi": null,
+              "hit": false
+            },
+            "exclusionReason": "LEGACY_UNKNOWN"
+          }
+        },
+        {
+          "raceKey": "20260912-12-6",
+          "venue": "青森",
+          "raceNumber": 6,
+          "scheduledStartTime": "2026-09-12T10:00:00+09:00",
+          "predictionSealedAt": "2026-09-12T09:00:00+09:00",
+          "lifecycleStatus": "RESULT_PENDING",
+          "resultAttached": false,
+          "compared": false,
+          "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+          "displayStatus": "PREDICTION_SEALED",
+          "judgement": "見送り",
+          "purchaseAllowed": false,
+          "noBet": true,
+          "canonicalEligibility": {
+            "isPurchaseTarget": false,
+            "exclusionReason": "NO_RESULT",
+            "purchasePlanPresent": true,
+            "canonicalPurchaseSnapshotPresent": true,
+            "resultConfirmed": false,
+            "payoutConfirmed": false,
+            "performanceEligible": false,
+            "eligibilityKnown": true
+          },
+          "mainTicketCount": 0,
+          "coverTicketCount": 0,
+          "thick": false,
+          "finishOrder": [],
+          "resultStatus": null,
+          "payout": null,
+          "purchaseEvaluation": null
+        },
+        {
+          "raceKey": "20260912-12-7",
+          "venue": "青森",
+          "raceNumber": 7,
+          "scheduledStartTime": "2026-09-12T10:00:00+09:00",
+          "predictionSealedAt": "2026-09-12T09:00:00+09:00",
+          "lifecycleStatus": "RESULT_RETRYING",
+          "resultAttached": false,
+          "compared": false,
+          "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+          "displayStatus": "PREDICTION_SEALED",
+          "judgement": "見送り",
+          "purchaseAllowed": false,
+          "noBet": true,
+          "canonicalEligibility": {
+            "isPurchaseTarget": false,
+            "exclusionReason": "NO_RESULT",
+            "purchasePlanPresent": true,
+            "canonicalPurchaseSnapshotPresent": true,
+            "resultConfirmed": false,
+            "payoutConfirmed": false,
+            "performanceEligible": false,
+            "eligibilityKnown": true
+          },
+          "mainTicketCount": 0,
+          "coverTicketCount": 0,
+          "thick": false,
+          "finishOrder": [],
+          "resultStatus": null,
+          "payout": null,
+          "purchaseEvaluation": null
+        },
+        {
+          "raceKey": "20260912-12-8",
+          "venue": "青森",
+          "raceNumber": 8,
+          "scheduledStartTime": "2026-09-12T10:00:00+09:00",
+          "predictionSealedAt": "2026-09-12T09:00:00+09:00",
+          "lifecycleStatus": "RESULT_FETCH_FAILED",
+          "resultAttached": false,
+          "compared": false,
+          "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+          "displayStatus": "PREDICTION_SEALED",
+          "judgement": "見送り",
+          "purchaseAllowed": false,
+          "noBet": true,
+          "canonicalEligibility": {
+            "isPurchaseTarget": false,
+            "exclusionReason": "NO_RESULT",
+            "purchasePlanPresent": true,
+            "canonicalPurchaseSnapshotPresent": true,
+            "resultConfirmed": false,
+            "payoutConfirmed": false,
+            "performanceEligible": false,
+            "eligibilityKnown": true
+          },
+          "mainTicketCount": 0,
+          "coverTicketCount": 0,
+          "thick": false,
+          "finishOrder": [],
+          "resultStatus": null,
+          "payout": null,
+          "purchaseEvaluation": null
+        },
+        {
+          "raceKey": "20260912-12-9",
+          "venue": "青森",
+          "raceNumber": 9,
+          "scheduledStartTime": "2026-09-12T14:00:00+09:00",
+          "predictionSealedAt": "2026-09-12T09:00:00+09:00",
+          "lifecycleStatus": "PREDICTION_SEALED",
+          "resultAttached": false,
+          "compared": false,
+          "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+          "displayStatus": "PREDICTION_SEALED",
+          "judgement": "見送り",
+          "purchaseAllowed": false,
+          "noBet": true,
+          "canonicalEligibility": {
+            "isPurchaseTarget": false,
+            "exclusionReason": "NO_RESULT",
+            "purchasePlanPresent": true,
+            "canonicalPurchaseSnapshotPresent": true,
+            "resultConfirmed": false,
+            "payoutConfirmed": false,
+            "performanceEligible": false,
+            "eligibilityKnown": true
+          },
+          "mainTicketCount": 0,
+          "coverTicketCount": 0,
+          "thick": false,
+          "finishOrder": [],
+          "resultStatus": null,
+          "payout": null,
+          "purchaseEvaluation": null
+        }
+      ],
+      "readOnly": true
+    }
+  },
+  "details": {
+    "20260912-12-1": {
+      "ok": true,
+      "raceKey": "20260912-12-1",
+      "predictionSealedAt": "2026-09-12T09:00:00+09:00",
+      "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+      "inputHash": null,
+      "predictionVersion": "KEIRIN-0.5.20-girls-evidence-gate",
+      "integrityStatus": "VALID",
+      "temporalStatus": "VALID",
+      "immutable": true,
+      "scenarioProvenanceStatus": "UNAVAILABLE_LEGACY",
+      "source": "AUTO_LIFECYCLE_SEALED",
+      "predictionPayload": {
+        "ok": true,
+        "race": {
+          "date": "20260912",
+          "venueName": "青森",
+          "startTime": "10:00",
+          "deadline": "09:57",
+          "venueCode": "12",
+          "raceNo": 1,
+          "venue": "青森",
+          "participants": [],
+          "lineMode": "official_line"
+        },
+        "prediction": {
+          "engineVersion": "KEIRIN-0.5.20-girls-evidence-gate",
+          "performanceSchemaVersion": "PURCHASE_PERFORMANCE_V2",
+          "purchaseSchemaVersion": "PURCHASE_SCHEMA_V2",
+          "purchaseEligibility": {
+            "canPurchase": true
+          },
+          "noBet": false,
+          "standardPurchasePlan": [
+            {
+              "order": [
+                1,
+                2,
+                3
+              ],
+              "betClass": "MAIN",
+              "thickQualified": true
+            },
+            {
+              "order": [
+                1,
+                3,
+                2
+              ],
+              "betClass": "MAIN"
+            },
+            {
+              "order": [
+                2,
+                1,
+                3
+              ],
+              "betClass": "COVER"
+            }
+          ],
+          "canonicalPurchasePlan": {
+            "standardTickets": [
+              {
+                "order": [
+                  1,
+                  2,
+                  3
+                ],
+                "betClass": "MAIN",
+                "thickQualified": true
+              },
+              {
+                "order": [
+                  1,
+                  3,
+                  2
+                ],
+                "betClass": "MAIN"
+              },
+              {
+                "order": [
+                  2,
+                  1,
+                  3
+                ],
+                "betClass": "COVER"
+              }
+            ]
+          },
+          "terminals": [
+            {
+              "order": [
+                7,
+                6,
+                5
+              ],
+              "probability": 0.2
+            }
+          ],
+          "branches": [],
+          "scored": [],
+          "scenarioProvenanceStatus": "UNAVAILABLE_LEGACY"
+        },
+        "odds": null,
+        "dataQuality": null,
+        "warnings": [
+          "自動取得済み予想"
+        ],
+        "checkedAt": "2026-09-12T09:00:00+09:00",
+        "predictionSealedAt": "2026-09-12T09:00:00+09:00"
+      }
+    },
+    "20260912-12-2": {
+      "ok": true,
+      "raceKey": "20260912-12-2",
+      "predictionSealedAt": "2026-09-12T09:00:00+09:00",
+      "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+      "inputHash": null,
+      "predictionVersion": "KEIRIN-0.5.20-girls-evidence-gate",
+      "integrityStatus": "VALID",
+      "temporalStatus": "VALID",
+      "immutable": true,
+      "scenarioProvenanceStatus": "UNAVAILABLE_LEGACY",
+      "source": "AUTO_LIFECYCLE_SEALED",
+      "predictionPayload": {
+        "ok": true,
+        "race": {
+          "date": "20260912",
+          "venueName": "青森",
+          "startTime": "10:00",
+          "deadline": "09:57",
+          "venueCode": "12",
+          "raceNo": 2,
+          "venue": "青森",
+          "participants": [],
+          "lineMode": "official_line"
+        },
+        "prediction": {
+          "engineVersion": "KEIRIN-0.5.20-girls-evidence-gate",
+          "performanceSchemaVersion": "PURCHASE_PERFORMANCE_V2",
+          "purchaseSchemaVersion": "PURCHASE_SCHEMA_V2",
+          "purchaseEligibility": {
+            "canPurchase": true
+          },
+          "noBet": false,
+          "standardPurchasePlan": [
+            {
+              "order": [
+                1,
+                2,
+                3
+              ],
+              "betClass": "MAIN",
+              "thickQualified": true
+            },
+            {
+              "order": [
+                1,
+                3,
+                2
+              ],
+              "betClass": "MAIN"
+            },
+            {
+              "order": [
+                2,
+                1,
+                3
+              ],
+              "betClass": "COVER"
+            }
+          ],
+          "canonicalPurchasePlan": {
+            "standardTickets": [
+              {
+                "order": [
+                  1,
+                  2,
+                  3
+                ],
+                "betClass": "MAIN",
+                "thickQualified": true
+              },
+              {
+                "order": [
+                  1,
+                  3,
+                  2
+                ],
+                "betClass": "MAIN"
+              },
+              {
+                "order": [
+                  2,
+                  1,
+                  3
+                ],
+                "betClass": "COVER"
+              }
+            ]
+          },
+          "terminals": [
+            {
+              "order": [
+                7,
+                6,
+                5
+              ],
+              "probability": 0.2
+            }
+          ],
+          "branches": [],
+          "scored": [],
+          "scenarioProvenanceStatus": "UNAVAILABLE_LEGACY"
+        },
+        "odds": null,
+        "dataQuality": null,
+        "warnings": [
+          "自動取得済み予想"
+        ],
+        "checkedAt": "2026-09-12T09:00:00+09:00",
+        "predictionSealedAt": "2026-09-12T09:00:00+09:00"
+      }
+    },
+    "20260912-12-3": {
+      "ok": true,
+      "raceKey": "20260912-12-3",
+      "predictionSealedAt": "2026-09-12T09:00:00+09:00",
+      "predictionHash": "a9c95b8aab8b407da986c1ff8a695dd04070d11df1cc58a6844090dacaefdc4f",
+      "inputHash": null,
+      "predictionVersion": "KEIRIN-0.5.20-girls-evidence-gate",
+      "integrityStatus": "VALID",
+      "temporalStatus": "VALID",
+      "immutable": true,
+      "scenarioProvenanceStatus": "UNAVAILABLE_LEGACY",
+      "source": "AUTO_LIFECYCLE_SEALED",
+      "predictionPayload": {
+        "ok": true,
+        "race": {
+          "date": "20260912",
+          "venueName": "青森",
+          "startTime": "10:00",
+          "deadline": "09:57",
+          "venueCode": "12",
+          "raceNo": 3,
+          "venue": "青森",
+          "participants": [],
+          "lineMode": "official_line"
+        },
+        "prediction": {
+          "engineVersion": "KEIRIN-0.5.20-girls-evidence-gate",
+          "performanceSchemaVersion": "PURCHASE_PERFORMANCE_V2",
+          "purchaseSchemaVersion": "PURCHASE_SCHEMA_V2",
+          "purchaseEligibility": {
+            "canPurchase": false
+          },
+          "noBet": true,
+          "standardPurchasePlan": [
+            {
+              "order": [
+                1,
+                2,
+                3
+              ],
+              "betClass": "MAIN",
+              "thickQualified": true
+            },
+            {
+              "order": [
+                1,
+                3,
+                2
+              ],
+              "betClass": "MAIN"
+            },
+            {
+              "order": [
+                2,
+                1,
+                3
+              ],
+              "betClass": "COVER"
+            }
+          ],
+          "canonicalPurchasePlan": {
+            "standardTickets": [
+              {
+                "order": [
+                  1,
+                  2,
+                  3
+                ],
+                "betClass": "MAIN",
+                "thickQualified": true
+              },
+              {
+                "order": [
+                  1,
+                  3,
+                  2
+                ],
+                "betClass": "MAIN"
+              },
+              {
+                "order": [
+                  2,
+                  1,
+                  3
+                ],
+                "betClass": "COVER"
+              }
+            ]
+          },
+          "terminals": [
+            {
+              "order": [
+                7,
+                6,
+                5
+              ],
+              "probability": 0.2
+            }
+          ],
+          "branches": [],
+          "scored": [],
+          "scenarioProvenanceStatus": "UNAVAILABLE_LEGACY"
+        },
+        "odds": null,
+        "dataQuality": null,
+        "warnings": [
+          "自動取得済み予想"
+        ],
+        "checkedAt": "2026-09-12T09:00:00+09:00",
+        "predictionSealedAt": "2026-09-12T09:00:00+09:00"
+      }
+    },
+    "20260912-12-4": {
+      "ok": true,
+      "raceKey": "20260912-12-4",
+      "predictionSealedAt": "2026-09-12T09:00:00+09:00",
+      "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+      "inputHash": null,
+      "predictionVersion": "KEIRIN-0.5.20-girls-evidence-gate",
+      "integrityStatus": "VALID",
+      "temporalStatus": "VALID",
+      "immutable": true,
+      "scenarioProvenanceStatus": "UNAVAILABLE_LEGACY",
+      "source": "AUTO_LIFECYCLE_SEALED",
+      "predictionPayload": {
+        "ok": true,
+        "race": {
+          "date": "20260912",
+          "venueName": "青森",
+          "startTime": "10:00",
+          "deadline": "09:57",
+          "venueCode": "12",
+          "raceNo": 4,
+          "venue": "青森",
+          "participants": [],
+          "lineMode": "official_line"
+        },
+        "prediction": {
+          "engineVersion": "KEIRIN-0.5.20-girls-evidence-gate",
+          "performanceSchemaVersion": "PURCHASE_PERFORMANCE_V2",
+          "purchaseSchemaVersion": "PURCHASE_SCHEMA_V2",
+          "purchaseEligibility": {
+            "canPurchase": true
+          },
+          "noBet": false,
+          "standardPurchasePlan": [
+            {
+              "order": [
+                1,
+                2,
+                3
+              ],
+              "betClass": "MAIN",
+              "thickQualified": true
+            },
+            {
+              "order": [
+                1,
+                3,
+                2
+              ],
+              "betClass": "MAIN"
+            },
+            {
+              "order": [
+                2,
+                1,
+                3
+              ],
+              "betClass": "COVER"
+            }
+          ],
+          "canonicalPurchasePlan": {
+            "standardTickets": [
+              {
+                "order": [
+                  1,
+                  2,
+                  3
+                ],
+                "betClass": "MAIN",
+                "thickQualified": true
+              },
+              {
+                "order": [
+                  1,
+                  3,
+                  2
+                ],
+                "betClass": "MAIN"
+              },
+              {
+                "order": [
+                  2,
+                  1,
+                  3
+                ],
+                "betClass": "COVER"
+              }
+            ]
+          },
+          "terminals": [
+            {
+              "order": [
+                7,
+                6,
+                5
+              ],
+              "probability": 0.2
+            }
+          ],
+          "branches": [],
+          "scored": [],
+          "scenarioProvenanceStatus": "UNAVAILABLE_LEGACY"
+        },
+        "odds": null,
+        "dataQuality": null,
+        "warnings": [
+          "自動取得済み予想"
+        ],
+        "checkedAt": "2026-09-12T09:00:00+09:00",
+        "predictionSealedAt": "2026-09-12T09:00:00+09:00"
+      }
+    },
+    "20260912-12-5": {
+      "ok": true,
+      "raceKey": "20260912-12-5",
+      "predictionSealedAt": "2026-09-12T09:00:00+09:00",
+      "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+      "inputHash": null,
+      "predictionVersion": "KEIRIN-0.5.20-girls-evidence-gate",
+      "integrityStatus": "VALID",
+      "temporalStatus": "VALID",
+      "immutable": true,
+      "scenarioProvenanceStatus": "UNAVAILABLE_LEGACY",
+      "source": "AUTO_LIFECYCLE_SEALED",
+      "predictionPayload": {
+        "ok": true,
+        "race": {
+          "date": "20260912",
+          "venueName": "青森",
+          "startTime": "10:00",
+          "deadline": "09:57",
+          "venueCode": "12",
+          "raceNo": 5,
+          "venue": "青森",
+          "participants": [],
+          "lineMode": "official_line"
+        },
+        "prediction": {
+          "engineVersion": "KEIRIN-0.5.20-girls-evidence-gate",
+          "performanceSchemaVersion": "PURCHASE_PERFORMANCE_V2",
+          "purchaseSchemaVersion": "PURCHASE_SCHEMA_V2",
+          "purchaseEligibility": {},
+          "noBet": false,
+          "standardPurchasePlan": [
+            {
+              "order": [
+                1,
+                2,
+                3
+              ],
+              "betClass": "MAIN",
+              "thickQualified": true
+            },
+            {
+              "order": [
+                1,
+                3,
+                2
+              ],
+              "betClass": "MAIN"
+            },
+            {
+              "order": [
+                2,
+                1,
+                3
+              ],
+              "betClass": "COVER"
+            }
+          ],
+          "canonicalPurchasePlan": {
+            "standardTickets": [
+              {
+                "order": [
+                  1,
+                  2,
+                  3
+                ],
+                "betClass": "MAIN",
+                "thickQualified": true
+              },
+              {
+                "order": [
+                  1,
+                  3,
+                  2
+                ],
+                "betClass": "MAIN"
+              },
+              {
+                "order": [
+                  2,
+                  1,
+                  3
+                ],
+                "betClass": "COVER"
+              }
+            ]
+          },
+          "terminals": [
+            {
+              "order": [
+                7,
+                6,
+                5
+              ],
+              "probability": 0.2
+            }
+          ],
+          "branches": [],
+          "scored": [],
+          "scenarioProvenanceStatus": "UNAVAILABLE_LEGACY"
+        },
+        "odds": null,
+        "dataQuality": null,
+        "warnings": [
+          "自動取得済み予想"
+        ],
+        "checkedAt": "2026-09-12T09:00:00+09:00",
+        "predictionSealedAt": "2026-09-12T09:00:00+09:00"
+      }
+    },
+    "20260911-12-1": {
+      "ok": true,
+      "raceKey": "20260911-12-1",
+      "predictionSealedAt": "2026-09-11T09:00:00+09:00",
+      "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+      "inputHash": null,
+      "predictionVersion": "KEIRIN-0.5.20-girls-evidence-gate",
+      "integrityStatus": "VALID",
+      "temporalStatus": "VALID",
+      "immutable": true,
+      "scenarioProvenanceStatus": "UNAVAILABLE_LEGACY",
+      "source": "AUTO_LIFECYCLE_SEALED",
+      "predictionPayload": {
+        "ok": true,
+        "race": {
+          "date": "20260911",
+          "venueName": "青森",
+          "startTime": "10:00",
+          "deadline": "09:57",
+          "venueCode": "12",
+          "raceNo": 1,
+          "venue": "青森",
+          "participants": [],
+          "lineMode": "official_line"
+        },
+        "prediction": {
+          "engineVersion": "KEIRIN-0.5.20-girls-evidence-gate",
+          "performanceSchemaVersion": "PURCHASE_PERFORMANCE_V2",
+          "purchaseSchemaVersion": "PURCHASE_SCHEMA_V2",
+          "purchaseEligibility": {
+            "canPurchase": true
+          },
+          "noBet": false,
+          "standardPurchasePlan": [
+            {
+              "order": [
+                1,
+                2,
+                3
+              ],
+              "betClass": "MAIN",
+              "thickQualified": true
+            },
+            {
+              "order": [
+                1,
+                3,
+                2
+              ],
+              "betClass": "MAIN"
+            },
+            {
+              "order": [
+                2,
+                1,
+                3
+              ],
+              "betClass": "COVER"
+            }
+          ],
+          "canonicalPurchasePlan": {
+            "standardTickets": [
+              {
+                "order": [
+                  1,
+                  2,
+                  3
+                ],
+                "betClass": "MAIN",
+                "thickQualified": true
+              },
+              {
+                "order": [
+                  1,
+                  3,
+                  2
+                ],
+                "betClass": "MAIN"
+              },
+              {
+                "order": [
+                  2,
+                  1,
+                  3
+                ],
+                "betClass": "COVER"
+              }
+            ]
+          },
+          "terminals": [
+            {
+              "order": [
+                7,
+                6,
+                5
+              ],
+              "probability": 0.2
+            }
+          ],
+          "branches": [],
+          "scored": [],
+          "scenarioProvenanceStatus": "UNAVAILABLE_LEGACY"
+        },
+        "odds": null,
+        "dataQuality": null,
+        "warnings": [
+          "自動取得済み予想"
+        ],
+        "checkedAt": "2026-09-11T09:00:00+09:00",
+        "predictionSealedAt": "2026-09-11T09:00:00+09:00"
+      }
+    },
+    "20260906-12-1": {
+      "ok": true,
+      "raceKey": "20260906-12-1",
+      "predictionSealedAt": "2026-09-06T09:00:00+09:00",
+      "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+      "inputHash": null,
+      "predictionVersion": "KEIRIN-0.5.20-girls-evidence-gate",
+      "integrityStatus": "VALID",
+      "temporalStatus": "VALID",
+      "immutable": true,
+      "scenarioProvenanceStatus": "UNAVAILABLE_LEGACY",
+      "source": "AUTO_LIFECYCLE_SEALED",
+      "predictionPayload": {
+        "ok": true,
+        "race": {
+          "date": "20260906",
+          "venueName": "青森",
+          "startTime": "10:00",
+          "deadline": "09:57",
+          "venueCode": "12",
+          "raceNo": 1,
+          "venue": "青森",
+          "participants": [],
+          "lineMode": "official_line"
+        },
+        "prediction": {
+          "engineVersion": "KEIRIN-0.5.20-girls-evidence-gate",
+          "performanceSchemaVersion": "PURCHASE_PERFORMANCE_V2",
+          "purchaseSchemaVersion": "PURCHASE_SCHEMA_V2",
+          "purchaseEligibility": {
+            "canPurchase": true
+          },
+          "noBet": false,
+          "standardPurchasePlan": [
+            {
+              "order": [
+                1,
+                2,
+                3
+              ],
+              "betClass": "MAIN",
+              "thickQualified": true
+            },
+            {
+              "order": [
+                1,
+                3,
+                2
+              ],
+              "betClass": "MAIN"
+            },
+            {
+              "order": [
+                2,
+                1,
+                3
+              ],
+              "betClass": "COVER"
+            }
+          ],
+          "canonicalPurchasePlan": {
+            "standardTickets": [
+              {
+                "order": [
+                  1,
+                  2,
+                  3
+                ],
+                "betClass": "MAIN",
+                "thickQualified": true
+              },
+              {
+                "order": [
+                  1,
+                  3,
+                  2
+                ],
+                "betClass": "MAIN"
+              },
+              {
+                "order": [
+                  2,
+                  1,
+                  3
+                ],
+                "betClass": "COVER"
+              }
+            ]
+          },
+          "terminals": [
+            {
+              "order": [
+                7,
+                6,
+                5
+              ],
+              "probability": 0.2
+            }
+          ],
+          "branches": [],
+          "scored": [],
+          "scenarioProvenanceStatus": "UNAVAILABLE_LEGACY"
+        },
+        "odds": null,
+        "dataQuality": null,
+        "warnings": [
+          "自動取得済み予想"
+        ],
+        "checkedAt": "2026-09-06T09:00:00+09:00",
+        "predictionSealedAt": "2026-09-06T09:00:00+09:00"
+      }
+    },
+    "20260814-12-1": {
+      "ok": true,
+      "raceKey": "20260814-12-1",
+      "predictionSealedAt": "2026-08-14T09:00:00+09:00",
+      "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+      "inputHash": null,
+      "predictionVersion": "KEIRIN-0.5.20-girls-evidence-gate",
+      "integrityStatus": "VALID",
+      "temporalStatus": "VALID",
+      "immutable": true,
+      "scenarioProvenanceStatus": "UNAVAILABLE_LEGACY",
+      "source": "AUTO_LIFECYCLE_SEALED",
+      "predictionPayload": {
+        "ok": true,
+        "race": {
+          "date": "20260814",
+          "venueName": "青森",
+          "startTime": "10:00",
+          "deadline": "09:57",
+          "venueCode": "12",
+          "raceNo": 1,
+          "venue": "青森",
+          "participants": [],
+          "lineMode": "official_line"
+        },
+        "prediction": {
+          "engineVersion": "KEIRIN-0.5.20-girls-evidence-gate",
+          "performanceSchemaVersion": "PURCHASE_PERFORMANCE_V2",
+          "purchaseSchemaVersion": "PURCHASE_SCHEMA_V2",
+          "purchaseEligibility": {
+            "canPurchase": true
+          },
+          "noBet": false,
+          "standardPurchasePlan": [
+            {
+              "order": [
+                1,
+                2,
+                3
+              ],
+              "betClass": "MAIN",
+              "thickQualified": true
+            },
+            {
+              "order": [
+                1,
+                3,
+                2
+              ],
+              "betClass": "MAIN"
+            },
+            {
+              "order": [
+                2,
+                1,
+                3
+              ],
+              "betClass": "COVER"
+            }
+          ],
+          "canonicalPurchasePlan": {
+            "standardTickets": [
+              {
+                "order": [
+                  1,
+                  2,
+                  3
+                ],
+                "betClass": "MAIN",
+                "thickQualified": true
+              },
+              {
+                "order": [
+                  1,
+                  3,
+                  2
+                ],
+                "betClass": "MAIN"
+              },
+              {
+                "order": [
+                  2,
+                  1,
+                  3
+                ],
+                "betClass": "COVER"
+              }
+            ]
+          },
+          "terminals": [
+            {
+              "order": [
+                7,
+                6,
+                5
+              ],
+              "probability": 0.2
+            }
+          ],
+          "branches": [],
+          "scored": [],
+          "scenarioProvenanceStatus": "UNAVAILABLE_LEGACY"
+        },
+        "odds": null,
+        "dataQuality": null,
+        "warnings": [
+          "自動取得済み予想"
+        ],
+        "checkedAt": "2026-08-14T09:00:00+09:00",
+        "predictionSealedAt": "2026-08-14T09:00:00+09:00"
+      }
+    },
+    "20260801-12-1": {
+      "ok": true,
+      "raceKey": "20260801-12-1",
+      "predictionSealedAt": "2026-08-01T09:00:00+09:00",
+      "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+      "inputHash": null,
+      "predictionVersion": "KEIRIN-0.5.20-girls-evidence-gate",
+      "integrityStatus": "VALID",
+      "temporalStatus": "VALID",
+      "immutable": true,
+      "scenarioProvenanceStatus": "UNAVAILABLE_LEGACY",
+      "source": "AUTO_LIFECYCLE_SEALED",
+      "predictionPayload": {
+        "ok": true,
+        "race": {
+          "date": "20260801",
+          "venueName": "青森",
+          "startTime": "10:00",
+          "deadline": "09:57",
+          "venueCode": "12",
+          "raceNo": 1,
+          "venue": "青森",
+          "participants": [],
+          "lineMode": "official_line"
+        },
+        "prediction": {
+          "engineVersion": "KEIRIN-0.5.20-girls-evidence-gate",
+          "performanceSchemaVersion": "PURCHASE_PERFORMANCE_V2",
+          "purchaseSchemaVersion": "PURCHASE_SCHEMA_V2",
+          "purchaseEligibility": {
+            "canPurchase": true
+          },
+          "noBet": false,
+          "standardPurchasePlan": [
+            {
+              "order": [
+                1,
+                2,
+                3
+              ],
+              "betClass": "MAIN",
+              "thickQualified": true
+            },
+            {
+              "order": [
+                1,
+                3,
+                2
+              ],
+              "betClass": "MAIN"
+            },
+            {
+              "order": [
+                2,
+                1,
+                3
+              ],
+              "betClass": "COVER"
+            }
+          ],
+          "canonicalPurchasePlan": {
+            "standardTickets": [
+              {
+                "order": [
+                  1,
+                  2,
+                  3
+                ],
+                "betClass": "MAIN",
+                "thickQualified": true
+              },
+              {
+                "order": [
+                  1,
+                  3,
+                  2
+                ],
+                "betClass": "MAIN"
+              },
+              {
+                "order": [
+                  2,
+                  1,
+                  3
+                ],
+                "betClass": "COVER"
+              }
+            ]
+          },
+          "terminals": [
+            {
+              "order": [
+                7,
+                6,
+                5
+              ],
+              "probability": 0.2
+            }
+          ],
+          "branches": [],
+          "scored": [],
+          "scenarioProvenanceStatus": "UNAVAILABLE_LEGACY"
+        },
+        "odds": null,
+        "dataQuality": null,
+        "warnings": [
+          "自動取得済み予想"
+        ],
+        "checkedAt": "2026-08-01T09:00:00+09:00",
+        "predictionSealedAt": "2026-08-01T09:00:00+09:00"
+      }
+    },
+    "20260912-12-6": {
+      "ok": true,
+      "raceKey": "20260912-12-6",
+      "predictionSealedAt": "2026-09-12T09:00:00+09:00",
+      "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+      "inputHash": null,
+      "predictionVersion": "KEIRIN-0.5.20-girls-evidence-gate",
+      "integrityStatus": "VALID",
+      "temporalStatus": "VALID",
+      "immutable": true,
+      "scenarioProvenanceStatus": "UNAVAILABLE_LEGACY",
+      "source": "AUTO_LIFECYCLE_SEALED",
+      "predictionPayload": {
+        "ok": true,
+        "race": {
+          "date": "20260912",
+          "venueName": "青森",
+          "startTime": "10:00",
+          "deadline": "09:57",
+          "venueCode": "12",
+          "raceNo": 6,
+          "venue": "青森",
+          "participants": [],
+          "lineMode": "official_line"
+        },
+        "prediction": {
+          "engineVersion": "KEIRIN-0.5.20-girls-evidence-gate",
+          "performanceSchemaVersion": "PURCHASE_PERFORMANCE_V2",
+          "purchaseSchemaVersion": "PURCHASE_SCHEMA_V2",
+          "purchaseEligibility": {
+            "canPurchase": true
+          },
+          "noBet": false,
+          "standardPurchasePlan": [
+            {
+              "order": [
+                1,
+                2,
+                3
+              ],
+              "betClass": "MAIN",
+              "thickQualified": true
+            },
+            {
+              "order": [
+                1,
+                3,
+                2
+              ],
+              "betClass": "MAIN"
+            },
+            {
+              "order": [
+                2,
+                1,
+                3
+              ],
+              "betClass": "COVER"
+            }
+          ],
+          "canonicalPurchasePlan": {
+            "standardTickets": [
+              {
+                "order": [
+                  1,
+                  2,
+                  3
+                ],
+                "betClass": "MAIN",
+                "thickQualified": true
+              },
+              {
+                "order": [
+                  1,
+                  3,
+                  2
+                ],
+                "betClass": "MAIN"
+              },
+              {
+                "order": [
+                  2,
+                  1,
+                  3
+                ],
+                "betClass": "COVER"
+              }
+            ]
+          },
+          "terminals": [
+            {
+              "order": [
+                7,
+                6,
+                5
+              ],
+              "probability": 0.2
+            }
+          ],
+          "branches": [],
+          "scored": [],
+          "scenarioProvenanceStatus": "UNAVAILABLE_LEGACY"
+        },
+        "odds": null,
+        "dataQuality": null,
+        "warnings": [
+          "自動取得済み予想"
+        ],
+        "checkedAt": "2026-09-12T09:00:00+09:00",
+        "predictionSealedAt": "2026-09-12T09:00:00+09:00"
+      }
+    },
+    "20260912-12-7": {
+      "ok": true,
+      "raceKey": "20260912-12-7",
+      "predictionSealedAt": "2026-09-12T09:00:00+09:00",
+      "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+      "inputHash": null,
+      "predictionVersion": "KEIRIN-0.5.20-girls-evidence-gate",
+      "integrityStatus": "VALID",
+      "temporalStatus": "VALID",
+      "immutable": true,
+      "scenarioProvenanceStatus": "UNAVAILABLE_LEGACY",
+      "source": "AUTO_LIFECYCLE_SEALED",
+      "predictionPayload": {
+        "ok": true,
+        "race": {
+          "date": "20260912",
+          "venueName": "青森",
+          "startTime": "10:00",
+          "deadline": "09:57",
+          "venueCode": "12",
+          "raceNo": 7,
+          "venue": "青森",
+          "participants": [],
+          "lineMode": "official_line"
+        },
+        "prediction": {
+          "engineVersion": "KEIRIN-0.5.20-girls-evidence-gate",
+          "performanceSchemaVersion": "PURCHASE_PERFORMANCE_V2",
+          "purchaseSchemaVersion": "PURCHASE_SCHEMA_V2",
+          "purchaseEligibility": {
+            "canPurchase": true
+          },
+          "noBet": false,
+          "standardPurchasePlan": [
+            {
+              "order": [
+                1,
+                2,
+                3
+              ],
+              "betClass": "MAIN",
+              "thickQualified": true
+            },
+            {
+              "order": [
+                1,
+                3,
+                2
+              ],
+              "betClass": "MAIN"
+            },
+            {
+              "order": [
+                2,
+                1,
+                3
+              ],
+              "betClass": "COVER"
+            }
+          ],
+          "canonicalPurchasePlan": {
+            "standardTickets": [
+              {
+                "order": [
+                  1,
+                  2,
+                  3
+                ],
+                "betClass": "MAIN",
+                "thickQualified": true
+              },
+              {
+                "order": [
+                  1,
+                  3,
+                  2
+                ],
+                "betClass": "MAIN"
+              },
+              {
+                "order": [
+                  2,
+                  1,
+                  3
+                ],
+                "betClass": "COVER"
+              }
+            ]
+          },
+          "terminals": [
+            {
+              "order": [
+                7,
+                6,
+                5
+              ],
+              "probability": 0.2
+            }
+          ],
+          "branches": [],
+          "scored": [],
+          "scenarioProvenanceStatus": "UNAVAILABLE_LEGACY"
+        },
+        "odds": null,
+        "dataQuality": null,
+        "warnings": [
+          "自動取得済み予想"
+        ],
+        "checkedAt": "2026-09-12T09:00:00+09:00",
+        "predictionSealedAt": "2026-09-12T09:00:00+09:00"
+      }
+    },
+    "20260912-12-8": {
+      "ok": true,
+      "raceKey": "20260912-12-8",
+      "predictionSealedAt": "2026-09-12T09:00:00+09:00",
+      "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+      "inputHash": null,
+      "predictionVersion": "KEIRIN-0.5.20-girls-evidence-gate",
+      "integrityStatus": "VALID",
+      "temporalStatus": "VALID",
+      "immutable": true,
+      "scenarioProvenanceStatus": "UNAVAILABLE_LEGACY",
+      "source": "AUTO_LIFECYCLE_SEALED",
+      "predictionPayload": {
+        "ok": true,
+        "race": {
+          "date": "20260912",
+          "venueName": "青森",
+          "startTime": "10:00",
+          "deadline": "09:57",
+          "venueCode": "12",
+          "raceNo": 8,
+          "venue": "青森",
+          "participants": [],
+          "lineMode": "official_line"
+        },
+        "prediction": {
+          "engineVersion": "KEIRIN-0.5.20-girls-evidence-gate",
+          "performanceSchemaVersion": "PURCHASE_PERFORMANCE_V2",
+          "purchaseSchemaVersion": "PURCHASE_SCHEMA_V2",
+          "purchaseEligibility": {
+            "canPurchase": true
+          },
+          "noBet": false,
+          "standardPurchasePlan": [
+            {
+              "order": [
+                1,
+                2,
+                3
+              ],
+              "betClass": "MAIN",
+              "thickQualified": true
+            },
+            {
+              "order": [
+                1,
+                3,
+                2
+              ],
+              "betClass": "MAIN"
+            },
+            {
+              "order": [
+                2,
+                1,
+                3
+              ],
+              "betClass": "COVER"
+            }
+          ],
+          "canonicalPurchasePlan": {
+            "standardTickets": [
+              {
+                "order": [
+                  1,
+                  2,
+                  3
+                ],
+                "betClass": "MAIN",
+                "thickQualified": true
+              },
+              {
+                "order": [
+                  1,
+                  3,
+                  2
+                ],
+                "betClass": "MAIN"
+              },
+              {
+                "order": [
+                  2,
+                  1,
+                  3
+                ],
+                "betClass": "COVER"
+              }
+            ]
+          },
+          "terminals": [
+            {
+              "order": [
+                7,
+                6,
+                5
+              ],
+              "probability": 0.2
+            }
+          ],
+          "branches": [],
+          "scored": [],
+          "scenarioProvenanceStatus": "UNAVAILABLE_LEGACY"
+        },
+        "odds": null,
+        "dataQuality": null,
+        "warnings": [
+          "自動取得済み予想"
+        ],
+        "checkedAt": "2026-09-12T09:00:00+09:00",
+        "predictionSealedAt": "2026-09-12T09:00:00+09:00"
+      }
+    },
+    "20260912-12-9": {
+      "ok": true,
+      "raceKey": "20260912-12-9",
+      "predictionSealedAt": "2026-09-12T09:00:00+09:00",
+      "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+      "inputHash": null,
+      "predictionVersion": "KEIRIN-0.5.20-girls-evidence-gate",
+      "integrityStatus": "VALID",
+      "temporalStatus": "VALID",
+      "immutable": true,
+      "scenarioProvenanceStatus": "UNAVAILABLE_LEGACY",
+      "source": "AUTO_LIFECYCLE_SEALED",
+      "predictionPayload": {
+        "ok": true,
+        "race": {
+          "date": "20260912",
+          "venueName": "青森",
+          "startTime": "10:00",
+          "deadline": "09:57",
+          "venueCode": "12",
+          "raceNo": 9,
+          "venue": "青森",
+          "participants": [],
+          "lineMode": "official_line"
+        },
+        "prediction": {
+          "engineVersion": "KEIRIN-0.5.20-girls-evidence-gate",
+          "performanceSchemaVersion": "PURCHASE_PERFORMANCE_V2",
+          "purchaseSchemaVersion": "PURCHASE_SCHEMA_V2",
+          "purchaseEligibility": {
+            "canPurchase": true
+          },
+          "noBet": false,
+          "standardPurchasePlan": [
+            {
+              "order": [
+                1,
+                2,
+                3
+              ],
+              "betClass": "MAIN",
+              "thickQualified": true
+            },
+            {
+              "order": [
+                1,
+                3,
+                2
+              ],
+              "betClass": "MAIN"
+            },
+            {
+              "order": [
+                2,
+                1,
+                3
+              ],
+              "betClass": "COVER"
+            }
+          ],
+          "canonicalPurchasePlan": {
+            "standardTickets": [
+              {
+                "order": [
+                  1,
+                  2,
+                  3
+                ],
+                "betClass": "MAIN",
+                "thickQualified": true
+              },
+              {
+                "order": [
+                  1,
+                  3,
+                  2
+                ],
+                "betClass": "MAIN"
+              },
+              {
+                "order": [
+                  2,
+                  1,
+                  3
+                ],
+                "betClass": "COVER"
+              }
+            ]
+          },
+          "terminals": [
+            {
+              "order": [
+                7,
+                6,
+                5
+              ],
+              "probability": 0.2
+            }
+          ],
+          "branches": [],
+          "scored": [],
+          "scenarioProvenanceStatus": "UNAVAILABLE_LEGACY"
+        },
+        "odds": null,
+        "dataQuality": null,
+        "warnings": [
+          "自動取得済み予想"
+        ],
+        "checkedAt": "2026-09-12T09:00:00+09:00",
+        "predictionSealedAt": "2026-09-12T09:00:00+09:00"
+      }
+    }
+  },
+  "results": {
+    "20260912-12-1": {
+      "ok": true,
+      "raceKey": "20260912-12-1",
+      "lifecycleStatus": "VERIFIED",
+      "predictionSealedAt": "2026-09-12T09:00:00+09:00",
+      "resultObservedAt": "2026-09-12T10:10:00+09:00",
+      "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+      "resultHash": null,
+      "officialResult": {
+        "status": "confirmed",
+        "finishOrder": [
+          1,
+          2,
+          3
+        ],
+        "payout": 1250,
+        "source": null
+      },
+      "purchaseEvaluation": {
+        "purchaseEligibility": "PURCHASE_ALLOWED",
+        "standardHit": true,
+        "investment": 300,
+        "return": 1250,
+        "roi": 4.166666666666667,
+        "exclusionReason": null
+      },
+      "referencePredictionHit": false,
+      "verification": {
+        "state": "VERIFIED",
+        "verifiedAt": "2026-09-12T13:36:43.854Z",
+        "mutationDetected": false,
+        "confirmedOrder": "1-2-3",
+        "terminalCaptured": false,
+        "terminalProbability": null,
+        "terminalRank": null,
+        "standardPurchaseHit": true,
+        "referencePurchaseHit": false,
+        "noBet": false,
+        "classification": "PREDICTION_TERMINAL_NOT_CAPTURED",
+        "purchaseDropAudit": null
+      },
+      "researchComparison": null,
+      "observations": {
+        "status": "NOT_SAVED",
+        "confirmedCount": 0,
+        "unverifiedCount": 0,
+        "requiresMediaCount": 0
+      },
+      "integrityValid": true,
+      "temporalValid": true,
+      "immutable": true,
+      "readOnly": true
+    },
+    "20260912-12-2": {
+      "ok": true,
+      "raceKey": "20260912-12-2",
+      "lifecycleStatus": "VERIFIED",
+      "predictionSealedAt": "2026-09-12T09:00:00+09:00",
+      "resultObservedAt": "2026-09-12T10:10:00+09:00",
+      "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+      "resultHash": null,
+      "officialResult": {
+        "status": "confirmed",
+        "finishOrder": [
+          2,
+          1,
+          3
+        ],
+        "payout": 89490,
+        "source": null
+      },
+      "purchaseEvaluation": {
+        "purchaseEligibility": "PURCHASE_ALLOWED",
+        "standardHit": true,
+        "investment": 300,
+        "return": 89490,
+        "roi": 298.3,
+        "exclusionReason": null
+      },
+      "referencePredictionHit": false,
+      "verification": {
+        "state": "VERIFIED",
+        "verifiedAt": "2026-09-12T13:36:43.854Z",
+        "mutationDetected": false,
+        "confirmedOrder": "2-1-3",
+        "terminalCaptured": false,
+        "terminalProbability": null,
+        "terminalRank": null,
+        "standardPurchaseHit": true,
+        "referencePurchaseHit": false,
+        "noBet": false,
+        "classification": "PREDICTION_TERMINAL_NOT_CAPTURED",
+        "purchaseDropAudit": null
+      },
+      "researchComparison": null,
+      "observations": {
+        "status": "NOT_SAVED",
+        "confirmedCount": 0,
+        "unverifiedCount": 0,
+        "requiresMediaCount": 0
+      },
+      "integrityValid": true,
+      "temporalValid": true,
+      "immutable": true,
+      "readOnly": true
+    },
+    "20260912-12-3": {
+      "ok": true,
+      "raceKey": "20260912-12-3",
+      "lifecycleStatus": "VERIFIED",
+      "predictionSealedAt": "2026-09-12T09:00:00+09:00",
+      "resultObservedAt": "2026-09-12T10:10:00+09:00",
+      "predictionHash": "a9c95b8aab8b407da986c1ff8a695dd04070d11df1cc58a6844090dacaefdc4f",
+      "resultHash": null,
+      "officialResult": {
+        "status": "confirmed",
+        "finishOrder": [
+          1,
+          2,
+          3
+        ],
+        "payout": 1250,
+        "source": null
+      },
+      "purchaseEvaluation": {
+        "purchaseEligibility": "PURCHASE_BLOCKED",
+        "standardHit": false,
+        "investment": 0,
+        "return": 0,
+        "roi": null,
+        "exclusionReason": "PURCHASE_INELIGIBLE"
+      },
+      "referencePredictionHit": false,
+      "verification": {
+        "state": "VERIFIED",
+        "verifiedAt": "2026-09-12T13:36:43.854Z",
+        "mutationDetected": false,
+        "confirmedOrder": "1-2-3",
+        "terminalCaptured": false,
+        "terminalProbability": null,
+        "terminalRank": null,
+        "standardPurchaseHit": null,
+        "referencePurchaseHit": false,
+        "noBet": true,
+        "classification": "PURCHASE_NOT_EVALUATED",
+        "purchaseDropAudit": null
+      },
+      "researchComparison": null,
+      "observations": {
+        "status": "NOT_SAVED",
+        "confirmedCount": 0,
+        "unverifiedCount": 0,
+        "requiresMediaCount": 0
+      },
+      "integrityValid": true,
+      "temporalValid": true,
+      "immutable": true,
+      "readOnly": true
+    },
+    "20260912-12-4": {
+      "ok": true,
+      "raceKey": "20260912-12-4",
+      "lifecycleStatus": "VERIFIED",
+      "predictionSealedAt": "2026-09-12T09:00:00+09:00",
+      "resultObservedAt": "2026-09-12T10:10:00+09:00",
+      "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+      "resultHash": null,
+      "officialResult": {
+        "status": "confirmed",
+        "finishOrder": [
+          7,
+          6,
+          5
+        ],
+        "payout": 1250,
+        "source": null
+      },
+      "purchaseEvaluation": {
+        "purchaseEligibility": "PURCHASE_ALLOWED",
+        "standardHit": false,
+        "investment": 300,
+        "return": 0,
+        "roi": 0,
+        "exclusionReason": null
+      },
+      "referencePredictionHit": true,
+      "verification": {
+        "state": "VERIFIED",
+        "verifiedAt": "2026-09-12T13:36:43.854Z",
+        "mutationDetected": false,
+        "confirmedOrder": "7-6-5",
+        "terminalCaptured": true,
+        "terminalProbability": 0.2,
+        "terminalRank": 1,
+        "standardPurchaseHit": false,
+        "referencePurchaseHit": false,
+        "noBet": false,
+        "classification": "PREDICTION_CAPTURED_PURCHASE_DROPPED",
+        "purchaseDropAudit": null
+      },
+      "researchComparison": null,
+      "observations": {
+        "status": "NOT_SAVED",
+        "confirmedCount": 0,
+        "unverifiedCount": 0,
+        "requiresMediaCount": 0
+      },
+      "integrityValid": true,
+      "temporalValid": true,
+      "immutable": true,
+      "readOnly": true
+    },
+    "20260912-12-5": {
+      "ok": true,
+      "raceKey": "20260912-12-5",
+      "lifecycleStatus": "VERIFIED",
+      "predictionSealedAt": "2026-09-12T09:00:00+09:00",
+      "resultObservedAt": "2026-09-12T10:10:00+09:00",
+      "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+      "resultHash": null,
+      "officialResult": {
+        "status": "confirmed",
+        "finishOrder": [
+          1,
+          2,
+          3
+        ],
+        "payout": 1250,
+        "source": null
+      },
+      "purchaseEvaluation": {
+        "purchaseEligibility": "PURCHASE_BLOCKED",
+        "standardHit": false,
+        "investment": 0,
+        "return": 0,
+        "roi": null,
+        "exclusionReason": "LEGACY_UNKNOWN"
+      },
+      "referencePredictionHit": false,
+      "verification": {
+        "state": "VERIFIED",
+        "verifiedAt": "2026-09-12T13:36:43.854Z",
+        "mutationDetected": false,
+        "confirmedOrder": "1-2-3",
+        "terminalCaptured": false,
+        "terminalProbability": null,
+        "terminalRank": null,
+        "standardPurchaseHit": true,
+        "referencePurchaseHit": false,
+        "noBet": false,
+        "classification": "PREDICTION_TERMINAL_NOT_CAPTURED",
+        "purchaseDropAudit": null
+      },
+      "researchComparison": null,
+      "observations": {
+        "status": "NOT_SAVED",
+        "confirmedCount": 0,
+        "unverifiedCount": 0,
+        "requiresMediaCount": 0
+      },
+      "integrityValid": true,
+      "temporalValid": true,
+      "immutable": true,
+      "readOnly": true
+    },
+    "20260911-12-1": {
+      "ok": true,
+      "raceKey": "20260911-12-1",
+      "lifecycleStatus": "VERIFIED",
+      "predictionSealedAt": "2026-09-11T09:00:00+09:00",
+      "resultObservedAt": "2026-09-11T10:10:00+09:00",
+      "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+      "resultHash": null,
+      "officialResult": {
+        "status": "confirmed",
+        "finishOrder": [
+          1,
+          2,
+          3
+        ],
+        "payout": 1250,
+        "source": null
+      },
+      "purchaseEvaluation": {
+        "purchaseEligibility": "PURCHASE_ALLOWED",
+        "standardHit": true,
+        "investment": 300,
+        "return": 1250,
+        "roi": 4.166666666666667,
+        "exclusionReason": null
+      },
+      "referencePredictionHit": false,
+      "verification": {
+        "state": "VERIFIED",
+        "verifiedAt": "2026-09-12T13:36:43.855Z",
+        "mutationDetected": false,
+        "confirmedOrder": "1-2-3",
+        "terminalCaptured": false,
+        "terminalProbability": null,
+        "terminalRank": null,
+        "standardPurchaseHit": true,
+        "referencePurchaseHit": false,
+        "noBet": false,
+        "classification": "PREDICTION_TERMINAL_NOT_CAPTURED",
+        "purchaseDropAudit": null
+      },
+      "researchComparison": null,
+      "observations": {
+        "status": "NOT_SAVED",
+        "confirmedCount": 0,
+        "unverifiedCount": 0,
+        "requiresMediaCount": 0
+      },
+      "integrityValid": true,
+      "temporalValid": true,
+      "immutable": true,
+      "readOnly": true
+    },
+    "20260906-12-1": {
+      "ok": true,
+      "raceKey": "20260906-12-1",
+      "lifecycleStatus": "VERIFIED",
+      "predictionSealedAt": "2026-09-06T09:00:00+09:00",
+      "resultObservedAt": "2026-09-06T10:10:00+09:00",
+      "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+      "resultHash": null,
+      "officialResult": {
+        "status": "confirmed",
+        "finishOrder": [
+          7,
+          6,
+          5
+        ],
+        "payout": 1250,
+        "source": null
+      },
+      "purchaseEvaluation": {
+        "purchaseEligibility": "PURCHASE_ALLOWED",
+        "standardHit": false,
+        "investment": 300,
+        "return": 0,
+        "roi": 0,
+        "exclusionReason": null
+      },
+      "referencePredictionHit": true,
+      "verification": {
+        "state": "VERIFIED",
+        "verifiedAt": "2026-09-12T13:36:43.855Z",
+        "mutationDetected": false,
+        "confirmedOrder": "7-6-5",
+        "terminalCaptured": true,
+        "terminalProbability": 0.2,
+        "terminalRank": 1,
+        "standardPurchaseHit": false,
+        "referencePurchaseHit": false,
+        "noBet": false,
+        "classification": "PREDICTION_CAPTURED_PURCHASE_DROPPED",
+        "purchaseDropAudit": null
+      },
+      "researchComparison": null,
+      "observations": {
+        "status": "NOT_SAVED",
+        "confirmedCount": 0,
+        "unverifiedCount": 0,
+        "requiresMediaCount": 0
+      },
+      "integrityValid": true,
+      "temporalValid": true,
+      "immutable": true,
+      "readOnly": true
+    },
+    "20260814-12-1": {
+      "ok": true,
+      "raceKey": "20260814-12-1",
+      "lifecycleStatus": "VERIFIED",
+      "predictionSealedAt": "2026-08-14T09:00:00+09:00",
+      "resultObservedAt": "2026-08-14T10:10:00+09:00",
+      "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+      "resultHash": null,
+      "officialResult": {
+        "status": "confirmed",
+        "finishOrder": [
+          1,
+          2,
+          3
+        ],
+        "payout": 1250,
+        "source": null
+      },
+      "purchaseEvaluation": {
+        "purchaseEligibility": "PURCHASE_ALLOWED",
+        "standardHit": true,
+        "investment": 300,
+        "return": 1250,
+        "roi": 4.166666666666667,
+        "exclusionReason": null
+      },
+      "referencePredictionHit": false,
+      "verification": {
+        "state": "VERIFIED",
+        "verifiedAt": "2026-09-12T13:36:43.855Z",
+        "mutationDetected": false,
+        "confirmedOrder": "1-2-3",
+        "terminalCaptured": false,
+        "terminalProbability": null,
+        "terminalRank": null,
+        "standardPurchaseHit": true,
+        "referencePurchaseHit": false,
+        "noBet": false,
+        "classification": "PREDICTION_TERMINAL_NOT_CAPTURED",
+        "purchaseDropAudit": null
+      },
+      "researchComparison": null,
+      "observations": {
+        "status": "NOT_SAVED",
+        "confirmedCount": 0,
+        "unverifiedCount": 0,
+        "requiresMediaCount": 0
+      },
+      "integrityValid": true,
+      "temporalValid": true,
+      "immutable": true,
+      "readOnly": true
+    },
+    "20260801-12-1": {
+      "ok": true,
+      "raceKey": "20260801-12-1",
+      "lifecycleStatus": "VERIFIED",
+      "predictionSealedAt": "2026-08-01T09:00:00+09:00",
+      "resultObservedAt": "2026-08-01T10:10:00+09:00",
+      "predictionHash": "cf690907d48a8f4b843159c42536e6cb59d2f854b81748bee03f1e499a1b6b83",
+      "resultHash": null,
+      "officialResult": {
+        "status": "confirmed",
+        "finishOrder": [
+          1,
+          2,
+          3
+        ],
+        "payout": 1250,
+        "source": null
+      },
+      "purchaseEvaluation": {
+        "purchaseEligibility": "PURCHASE_ALLOWED",
+        "standardHit": true,
+        "investment": 300,
+        "return": 1250,
+        "roi": 4.166666666666667,
+        "exclusionReason": null
+      },
+      "referencePredictionHit": false,
+      "verification": {
+        "state": "VERIFIED",
+        "verifiedAt": "2026-09-12T13:36:43.855Z",
+        "mutationDetected": false,
+        "confirmedOrder": "1-2-3",
+        "terminalCaptured": false,
+        "terminalProbability": null,
+        "terminalRank": null,
+        "standardPurchaseHit": true,
+        "referencePurchaseHit": false,
+        "noBet": false,
+        "classification": "PREDICTION_TERMINAL_NOT_CAPTURED",
+        "purchaseDropAudit": null
+      },
+      "researchComparison": null,
+      "observations": {
+        "status": "NOT_SAVED",
+        "confirmedCount": 0,
+        "unverifiedCount": 0,
+        "requiresMediaCount": 0
+      },
+      "integrityValid": true,
+      "temporalValid": true,
+      "immutable": true,
+      "readOnly": true
+    }
+  }
+}

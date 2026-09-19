@@ -1,0 +1,1225 @@
+Keirin integrated tests passed.
+Prediction save/reload/result matching tests passed.
+Keirin five-race purchase flow passed: display=16,27,1,24,27 standard=16,27,0,24,27 noBet=false,false,true,false,false
+Keirin function response metrics: [{"label":"13-11","milliseconds":310.33,"bytes":2665615},{"label":"24-9","milliseconds":143.54,"bytes":4077913},{"label":"28-12","milliseconds":52.43,"bytes":1034898},{"label":"55-1","milliseconds":166.17,"bytes":4061378},{"label":"85-12","milliseconds":136.9,"bytes":4079060}]
+Keirin scenario provenance metrics: [{"label":"13-11","scenarioCount":37,"unknownRate":0.10135135135135136,"before":2642230,"after":2665615,"increase":23385},{"label":"24-9","scenarioCount":37,"unknownRate":0.10135135135135136,"before":4054465,"after":4077913,"increase":23448},{"label":"28-12","scenarioCount":42,"unknownRate":0.625,"before":1009809,"after":1034898,"increase":25089},{"label":"55-1","scenarioCount":44,"unknownRate":0.23863636363636365,"before":4027178,"after":4061378,"increase":34200},{"label":"85-12","scenarioCount":37,"unknownRate":0.10135135135135136,"before":4055612,"after":4079060,"increase":23448}]
+Keirin fixture evidence audit: [{"label":"13-11","evidence":[{"number":1,"role":"自力","roleScores":{"first":8.5,"second":5.8,"third":5,"outside":1.5},"available":[],"fallback":["recentForm","startPower","sprintPower","finishPower","trackingSkill"],"traces":{"first":[{"key":"role","value":8.5,"weight":0.15,"available":true,"contribution":1.275},{"key":"finishPower","value":null,"weight":0.15,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.28,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.2,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.08,"available":false,"contribution":0}],"second":[{"key":"role","value":5.8,"weight":0.16,"available":true,"contribution":0.9279999999999999},{"key":"finishPower","value":null,"weight":0.18,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.24,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.22,"available":false,"contribution":0}],"third":[{"key":"role","value":5,"weight":0.2,"available":true,"contribution":1},{"key":"finishPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.2,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.3,"available":false,"contribution":0}]}},{"number":2,"role":"番手","roleScores":{"first":7.2,"second":8.6,"third":7.4,"outside":1.4000000000000004},"available":[],"fallback":["recentForm","startPower","sprintPower","finishPower","trackingSkill"],"traces":{"first":[{"key":"role","value":7.2,"weight":0.15,"available":true,"contribution":1.08},{"key":"finishPower","value":null,"weight":0.15,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.28,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.2,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.08,"available":false,"contribution":0}],"second":[{"key":"role","value":8.6,"weight":0.16,"available":true,"contribution":1.376},{"key":"finishPower","value":null,"weight":0.18,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.24,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.22,"available":false,"contribution":0}],"third":[{"key":"role","value":7.4,"weight":0.2,"available":true,"contribution":1.4800000000000002},{"key":"finishPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.2,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.3,"available":false,"contribution":0}]}},{"number":3,"role":"三番手","roleScores":{"first":4.6,"second":6.4,"third":8.4,"outside":1.5999999999999996},"available":[],"fallback":["recentForm","startPower","sprintPower","finishPower","trackingSkill"],"traces":{"first":[{"key":"role","value":4.6,"weight":0.15,"available":true,"contribution":0.69},{"key":"finishPower","value":null,"weight":0.15,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.28,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.2,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.08,"available":false,"contribution":0}],"second":[{"key":"role","value":6.4,"weight":0.16,"available":true,"contribution":1.024},{"key":"finishPower","value":null,"weight":0.18,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.24,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.22,"available":false,"contribution":0}],"third":[{"key":"role","value":8.4,"weight":0.2,"available":true,"contribution":1.6800000000000002},{"key":"finishPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.2,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.3,"available":false,"contribution":0}]}},{"number":4,"role":"自力","roleScores":{"first":8.5,"second":5.8,"third":5,"outside":1.5},"available":[],"fallback":["recentForm","startPower","sprintPower","finishPower","trackingSkill"],"traces":{"first":[{"key":"role","value":8.5,"weight":0.15,"available":true,"contribution":1.275},{"key":"finishPower","value":null,"weight":0.15,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.28,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.2,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.08,"available":false,"contribution":0}],"second":[{"key":"role","value":5.8,"weight":0.16,"available":true,"contribution":0.9279999999999999},{"key":"finishPower","value":null,"weight":0.18,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.24,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.22,"available":false,"contribution":0}],"third":[{"key":"role","value":5,"weight":0.2,"available":true,"contribution":1},{"key":"finishPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.2,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.3,"available":false,"contribution":0}]}},{"number":5,"role":"番手","roleScores":{"first":7.2,"second":8.6,"third":7.4,"outside":1.4000000000000004},"available":[],"fallback":["recentForm","startPower","sprintPower","finishPower","trackingSkill"],"traces":{"first":[{"key":"role","value":7.2,"weight":0.15,"available":true,"contribution":1.08},{"key":"finishPower","value":null,"weight":0.15,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.28,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.2,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.08,"available":false,"contribution":0}],"second":[{"key":"role","value":8.6,"weight":0.16,"available":true,"contribution":1.376},{"key":"finishPower","value":null,"weight":0.18,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.24,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.22,"available":false,"contribution":0}],"third":[{"key":"role","value":7.4,"weight":0.2,"available":true,"contribution":1.4800000000000002},{"key":"finishPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.2,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.3,"available":false,"contribution":0}]}},{"number":6,"role":"自力","roleScores":{"first":8.5,"second":5.8,"third":5,"outside":1.5},"available":[],"fallback":["recentForm","startPower","sprintPower","finishPower","trackingSkill"],"traces":{"first":[{"key":"role","value":8.5,"weight":0.15,"available":true,"contribution":1.275},{"key":"finishPower","value":null,"weight":0.15,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.28,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.2,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.08,"available":false,"contribution":0}],"second":[{"key":"role","value":5.8,"weight":0.16,"available":true,"contribution":0.9279999999999999},{"key":"finishPower","value":null,"weight":0.18,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.24,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.22,"available":false,"contribution":0}],"third":[{"key":"role","value":5,"weight":0.2,"available":true,"contribution":1},{"key":"finishPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.2,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.3,"available":false,"contribution":0}]}},{"number":7,"role":"自力","roleScores":{"first":8.5,"second":5.8,"third":5,"outside":1.5},"available":[],"fallback":["recentForm","startPower","sprintPower","finishPower","trackingSkill"],"traces":{"first":[{"key":"role","value":8.5,"weight":0.15,"available":true,"contribution":1.275},{"key":"finishPower","value":null,"weight":0.15,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.28,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.2,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.08,"available":false,"contribution":0}],"second":[{"key":"role","value":5.8,"weight":0.16,"available":true,"contribution":0.9279999999999999},{"key":"finishPower","value":null,"weight":0.18,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.24,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.22,"available":false,"contribution":0}],"third":[{"key":"role","value":5,"weight":0.2,"available":true,"contribution":1},{"key":"finishPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.2,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.3,"available":false,"contribution":0}]}}],"initiative":[{"number":7,"score":4.457142857142857,"probability":0.319993856202586,"trace":[{"key":"backFrequency","value":null,"weight":0.55,"available":false,"effectiveWeight":0,"contribution":0},{"key":"homeFrequency","value":null,"weight":0.1,"available":false,"effectiveWeight":0,"contribution":0},{"key":"finalControlBalance","value":null,"weight":0.1,"available":false,"effectiveWeight":0,"contribution":0},{"key":"sampleReliability","value":0,"weight":0.05,"available":true,"effectiveWeight":0.2,"contribution":0},{"key":"largeAbilityGap","value":6.428571428571429,"weight":0.15,"available":true,"effectiveWeight":0.6,"contribution":3.857142857142857},{"key":"lineSupport","value":3,"weight":0.05,"available":true,"effectiveWeight":0.2,"contribution":0.6000000000000001}]},{"number":1,"score":4.4,"probability":0.3087671739510747,"trace":[{"key":"backFrequency","value":null,"weight":0.55,"available":false,"effectiveWeight":0,"contribution":0},{"key":"homeFrequency","value":null,"weight":0.1,"available":false,"effectiveWeight":0,"contribution":0},{"key":"finalControlBalance","value":null,"weight":0.1,"available":false,"effectiveWeight":0,"contribution":0},{"key":"sampleReliability","value":0,"weight":0.05,"available":true,"effectiveWeight":0.2,"contribution":0},{"key":"largeAbilityGap","value":5,"weight":0.15,"available":true,"effectiveWeight":0.6,"contribution":3},{"key":"lineSupport","value":7,"weight":0.05,"available":true,"effectiveWeight":0.2,"contribution":1.4000000000000001}]},{"number":6,"score":3.6,"probability":0.18727675771415075,"trace":[{"key":"backFrequency","value":null,"weight":0.55,"available":false,"effectiveWeight":0,"contribution":0},{"key":"homeFrequency","value":null,"weight":0.1,"available":false,"effectiveWeight":0,"contribution":0},{"key":"finalControlBalance","value":null,"weight":0.1,"available":false,"effectiveWeight":0,"contribution":0},{"key":"sampleReliability","value":0,"weight":0.05,"available":true,"effectiveWeight":0.2,"contribution":0},{"key":"largeAbilityGap","value":5,"weight":0.15,"available":true,"effectiveWeight":0.6,"contribution":3},{"key":"lineSupport","value":3,"weight":0.05,"available":true,"effectiveWeight":0.2,"contribution":0.6000000000000001}]},{"number":4,"score":3.571428571428571,"probability":0.18396221213218847,"trace":[{"key":"backFrequency","value":null,"weight":0.55,"available":false,"effectiveWeight":0,"contribution":0},{"key":"homeFrequency","value":null,"weight":0.1,"available":false,"effectiveWeight":0,"contribution":0},{"key":"finalControlBalance","value":null,"weight":0.1,"available":false,"effectiveWeight":0,"contribution":0},{"key":"sampleReliability","value":0,"weight":0.05,"available":true,"effectiveWeight":0.2,"contribution":0},{"key":"largeAbilityGap","value":4.285714285714286,"weight":0.15,"available":true,"effectiveWeight":0.6,"contribution":2.571428571428571},{"key":"lineSupport","value":5,"weight":0.05,"available":true,"effectiveWeight":0.2,"contribution":1}]}]},{"label":"24-9","evidence":[{"number":1,"role":"自力","roleScores":{"first":8.5,"second":5.8,"third":5,"outside":1.5},"available":[],"fallback":["recentForm","startPower","sprintPower","finishPower","trackingSkill"],"traces":{"first":[{"key":"role","value":8.5,"weight":0.15,"available":true,"contribution":1.275},{"key":"finishPower","value":null,"weight":0.15,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.28,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.2,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.08,"available":false,"contribution":0}],"second":[{"key":"role","value":5.8,"weight":0.16,"available":true,"contribution":0.9279999999999999},{"key":"finishPower","value":null,"weight":0.18,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.24,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.22,"available":false,"contribution":0}],"third":[{"key":"role","value":5,"weight":0.2,"available":true,"contribution":1},{"key":"finishPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.2,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.3,"available":false,"contribution":0}]}},{"number":2,"role":"番手","roleScores":{"first":7.2,"second":8.6,"third":7.4,"outside":1.4000000000000004},"available":[],"fallback":["recentForm","startPower","sprintPower","finishPower","trackingSkill"],"traces":{"first":[{"key":"role","value":7.2,"weight":0.15,"available":true,"contribution":1.08},{"key":"finishPower","value":null,"weight":0.15,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.28,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.2,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.08,"available":false,"contribution":0}],"second":[{"key":"role","value":8.6,"weight":0.16,"available":true,"contribution":1.376},{"key":"finishPower","value":null,"weight":0.18,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.24,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.22,"available":false,"contribution":0}],"third":[{"key":"role","value":7.4,"weight":0.2,"available":true,"contribution":1.4800000000000002},{"key":"finishPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.2,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.3,"available":false,"contribution":0}]}},{"number":3,"role":"自力","roleScores":{"first":8.5,"second":5.8,"third":5,"outside":1.5},"available":[],"fallback":["recentForm","startPower","sprintPower","finishPower","trackingSkill"],"traces":{"first":[{"key":"role","value":8.5,"weight":0.15,"available":true,"contribution":1.275},{"key":"finishPower","value":null,"weight":0.15,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.28,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.2,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.08,"available":false,"contribution":0}],"second":[{"key":"role","value":5.8,"weight":0.16,"available":true,"contribution":0.9279999999999999},{"key":"finishPower","value":null,"weight":0.18,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.24,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.22,"available":false,"contribution":0}],"third":[{"key":"role","value":5,"weight":0.2,"available":true,"contribution":1},{"key":"finishPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.2,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.3,"available":false,"contribution":0}]}},{"number":4,"role":"番手","roleScores":{"first":7.2,"second":8.6,"third":7.4,"outside":1.4000000000000004},"available":[],"fallback":["recentForm","startPower","sprintPower","finishPower","trackingSkill"],"traces":{"first":[{"key":"role","value":7.2,"weight":0.15,"available":true,"contribution":1.08},{"key":"finishPower","value":null,"weight":0.15,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.28,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.2,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.08,"available":false,"contribution":0}],"second":[{"key":"role","value":8.6,"weight":0.16,"available":true,"contribution":1.376},{"key":"finishPower","value":null,"weight":0.18,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.24,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.22,"available":false,"contribution":0}],"third":[{"key":"role","value":7.4,"weight":0.2,"available":true,"contribution":1.4800000000000002},{"key":"finishPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.2,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.3,"available":false,"contribution":0}]}},{"number":5,"role":"三番手","roleScores":{"first":4.6,"second":6.4,"third":8.4,"outside":1.5999999999999996},"available":[],"fallback":["recentForm","startPower","sprintPower","finishPower","trackingSkill"],"traces":{"first":[{"key":"role","value":4.6,"weight":0.15,"available":true,"contribution":0.69},{"key":"finishPower","value":null,"weight":0.15,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.28,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.2,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.08,"available":false,"contribution":0}],"second":[{"key":"role","value":6.4,"weight":0.16,"available":true,"contribution":1.024},{"key":"finishPower","value":null,"weight":0.18,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.24,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.22,"available":false,"contribution":0}],"third":[{"key":"role","value":8.4,"weight":0.2,"available":true,"contribution":1.6800000000000002},{"key":"finishPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.2,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.3,"available":false,"contribution":0}]}},{"number":6,"role":"自力","roleScores":{"first":8.5,"second":5.8,"third":5,"outside":1.5},"available":[],"fallback":["recentForm","startPower","sprintPower","finishPower","trackingSkill"],"traces":{"first":[{"key":"role","value":8.5,"weight":0.15,"available":true,"contribution":1.275},{"key":"finishPower","value":null,"weight":0.15,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.28,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.2,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.08,"available":false,"contribution":0}],"second":[{"key":"role","value":5.8,"weight":0.16,"available":true,"contribution":0.9279999999999999},{"key":"finishPower","value":null,"weight":0.18,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.24,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.22,"available":false,"contribution":0}],"third":[{"key":"role","value":5,"weight":0.2,"available":true,"contribution":1},{"key":"finishPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.2,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.3,"available":false,"contribution":0}]}},{"number":7,"role":"番手","roleScores":{"first":7.2,"second":8.6,"third":7.4,"outside":1.4000000000000004},"available":[],"fallback":["recentForm","startPower","sprintPower","finishPower","trackingSkill"],"traces":{"first":[{"key":"role","value":7.2,"weight":0.15,"available":true,"contribution":1.08},{"key":"finishPower","value":null,"weight":0.15,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.28,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.2,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.08,"available":false,"contribution":0}],"second":[{"key":"role","value":8.6,"weight":0.16,"available":true,"contribution":1.376},{"key":"finishPower","value":null,"weight":0.18,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.24,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.22,"available":false,"contribution":0}],"third":[{"key":"role","value":7.4,"weight":0.2,"available":true,"contribution":1.4800000000000002},{"key":"finishPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.2,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.3,"available":false,"contribution":0}]}}],"initiative":[{"number":3,"score":4.4,"probability":0.42112414828427835,"trace":[{"key":"backFrequency","value":null,"weight":0.55,"available":false,"effectiveWeight":0,"contribution":0},{"key":"homeFrequency","value":null,"weight":0.1,"available":false,"effectiveWeight":0,"contribution":0},{"key":"finalControlBalance","value":null,"weight":0.1,"available":false,"effectiveWeight":0,"contribution":0},{"key":"sampleReliability","value":0,"weight":0.05,"available":true,"effectiveWeight":0.2,"contribution":0},{"key":"largeAbilityGap","value":5,"weight":0.15,"available":true,"effectiveWeight":0.6,"contribution":3},{"key":"lineSupport","value":7,"weight":0.05,"available":true,"effectiveWeight":0.2,"contribution":1.4000000000000001}]},{"number":6,"score":4,"probability":0.32797181645407436,"trace":[{"key":"backFrequency","value":null,"weight":0.55,"available":false,"effectiveWeight":0,"contribution":0},{"key":"homeFrequency","value":null,"weight":0.1,"available":false,"effectiveWeight":0,"contribution":0},{"key":"finalControlBalance","value":null,"weight":0.1,"available":false,"effectiveWeight":0,"contribution":0},{"key":"sampleReliability","value":0,"weight":0.05,"available":true,"effectiveWeight":0.2,"contribution":0},{"key":"largeAbilityGap","value":5,"weight":0.15,"available":true,"effectiveWeight":0.6,"contribution":3},{"key":"lineSupport","value":5,"weight":0.05,"available":true,"effectiveWeight":0.2,"contribution":1}]},{"number":1,"score":3.571428571428571,"probability":0.25090403526164723,"trace":[{"key":"backFrequency","value":null,"weight":0.55,"available":false,"effectiveWeight":0,"contribution":0},{"key":"homeFrequency","value":null,"weight":0.1,"available":false,"effectiveWeight":0,"contribution":0},{"key":"finalControlBalance","value":null,"weight":0.1,"available":false,"effectiveWeight":0,"contribution":0},{"key":"sampleReliability","value":0,"weight":0.05,"available":true,"effectiveWeight":0.2,"contribution":0},{"key":"largeAbilityGap","value":4.285714285714286,"weight":0.15,"available":true,"effectiveWeight":0.6,"contribution":2.571428571428571},{"key":"lineSupport","value":5,"weight":0.05,"available":true,"effectiveWeight":0.2,"contribution":1}]}]},{"label":"28-12","evidence":[{"number":1,"role":"判定保留","roleScores":{"first":5,"second":5,"third":5,"outside":5},"available":[],"fallback":["recentForm","startPower","sprintPower","finishPower","trackingSkill"],"traces":{"first":[{"key":"role","value":5,"weight":0.15,"available":true,"contribution":0.75},{"key":"finishPower","value":null,"weight":0.15,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.28,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.2,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.08,"available":false,"contribution":0}],"second":[{"key":"role","value":5,"weight":0.16,"available":true,"contribution":0.8},{"key":"finishPower","value":null,"weight":0.18,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.24,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.22,"available":false,"contribution":0}],"third":[{"key":"role","value":5,"weight":0.2,"available":true,"contribution":1},{"key":"finishPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.2,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.3,"available":false,"contribution":0}]}},{"number":2,"role":"判定保留","roleScores":{"first":5,"second":5,"third":5,"outside":5},"available":[],"fallback":["recentForm","startPower","sprintPower","finishPower","trackingSkill"],"traces":{"first":[{"key":"role","value":5,"weight":0.15,"available":true,"contribution":0.75},{"key":"finishPower","value":null,"weight":0.15,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.28,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.2,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.08,"available":false,"contribution":0}],"second":[{"key":"role","value":5,"weight":0.16,"available":true,"contribution":0.8},{"key":"finishPower","value":null,"weight":0.18,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.24,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.22,"available":false,"contribution":0}],"third":[{"key":"role","value":5,"weight":0.2,"available":true,"contribution":1},{"key":"finishPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.2,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.3,"available":false,"contribution":0}]}},{"number":3,"role":"判定保留","roleScores":{"first":5,"second":5,"third":5,"outside":5},"available":[],"fallback":["recentForm","startPower","sprintPower","finishPower","trackingSkill"],"traces":{"first":[{"key":"role","value":5,"weight":0.15,"available":true,"contribution":0.75},{"key":"finishPower","value":null,"weight":0.15,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.28,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.2,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.08,"available":false,"contribution":0}],"second":[{"key":"role","value":5,"weight":0.16,"available":true,"contribution":0.8},{"key":"finishPower","value":null,"weight":0.18,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.24,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.22,"available":false,"contribution":0}],"third":[{"key":"role","value":5,"weight":0.2,"available":true,"contribution":1},{"key":"finishPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.2,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.3,"available":false,"contribution":0}]}},{"number":4,"role":"判定保留","roleScores":{"first":5,"second":5,"third":5,"outside":5},"available":[],"fallback":["recentForm","startPower","sprintPower","finishPower","trackingSkill"],"traces":{"first":[{"key":"role","value":5,"weight":0.15,"available":true,"contribution":0.75},{"key":"finishPower","value":null,"weight":0.15,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.28,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.2,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.08,"available":false,"contribution":0}],"second":[{"key":"role","value":5,"weight":0.16,"available":true,"contribution":0.8},{"key":"finishPower","value":null,"weight":0.18,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.24,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.22,"available":false,"contribution":0}],"third":[{"key":"role","value":5,"weight":0.2,"available":true,"contribution":1},{"key":"finishPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.2,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.3,"available":false,"contribution":0}]}},{"number":5,"role":"判定保留","roleScores":{"first":5,"second":5,"third":5,"outside":5},"available":[],"fallback":["recentForm","startPower","sprintPower","finishPower","trackingSkill"],"traces":{"first":[{"key":"role","value":5,"weight":0.15,"available":true,"contribution":0.75},{"key":"finishPower","value":null,"weight":0.15,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.28,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.2,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.08,"available":false,"contribution":0}],"second":[{"key":"role","value":5,"weight":0.16,"available":true,"contribution":0.8},{"key":"finishPower","value":null,"weight":0.18,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.24,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.22,"available":false,"contribution":0}],"third":[{"key":"role","value":5,"weight":0.2,"available":true,"contribution":1},{"key":"finishPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.2,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.3,"available":false,"contribution":0}]}},{"number":6,"role":"判定保留","roleScores":{"first":5,"second":5,"third":5,"outside":5},"available":[],"fallback":["recentForm","startPower","sprintPower","finishPower","trackingSkill"],"traces":{"first":[{"key":"role","value":5,"weight":0.15,"available":true,"contribution":0.75},{"key":"finishPower","value":null,"weight":0.15,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.28,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.2,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.08,"available":false,"contribution":0}],"second":[{"key":"role","value":5,"weight":0.16,"available":true,"contribution":0.8},{"key":"finishPower","value":null,"weight":0.18,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.24,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.22,"available":false,"contribution":0}],"third":[{"key":"role","value":5,"weight":0.2,"available":true,"contribution":1},{"key":"finishPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.2,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.3,"available":false,"contribution":0}]}},{"number":7,"role":"判定保留","roleScores":{"first":5,"second":5,"third":5,"outside":5},"available":[],"fallback":["recentForm","startPower","sprintPower","finishPower","trackingSkill"],"traces":{"first":[{"key":"role","value":5,"weight":0.15,"available":true,"contribution":0.75},{"key":"finishPower","value":null,"weight":0.15,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.28,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.2,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.08,"available":false,"contribution":0}],"second":[{"key":"role","value":5,"weight":0.16,"available":true,"contribution":0.8},{"key":"finishPower","value":null,"weight":0.18,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.24,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.22,"available":false,"contribution":0}],"third":[{"key":"role","value":5,"weight":0.2,"available":true,"contribution":1},{"key":"finishPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.2,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.3,"available":false,"contribution":0}]}}],"initiative":[]},{"label":"55-1","evidence":[{"number":1,"role":"自力","roleScores":{"first":8.5,"second":5.8,"third":5,"outside":1.5},"available":[],"fallback":["recentForm","startPower","sprintPower","finishPower","trackingSkill"],"traces":{"first":[{"key":"role","value":8.5,"weight":0.15,"available":true,"contribution":1.275},{"key":"finishPower","value":null,"weight":0.15,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.28,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.2,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.08,"available":false,"contribution":0}],"second":[{"key":"role","value":5.8,"weight":0.16,"available":true,"contribution":0.9279999999999999},{"key":"finishPower","value":null,"weight":0.18,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.24,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.22,"available":false,"contribution":0}],"third":[{"key":"role","value":5,"weight":0.2,"available":true,"contribution":1},{"key":"finishPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.2,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.3,"available":false,"contribution":0}]}},{"number":2,"role":"番手","roleScores":{"first":7.2,"second":8.6,"third":7.4,"outside":1.4000000000000004},"available":[],"fallback":["recentForm","startPower","sprintPower","finishPower","trackingSkill"],"traces":{"first":[{"key":"role","value":7.2,"weight":0.15,"available":true,"contribution":1.08},{"key":"finishPower","value":null,"weight":0.15,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.28,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.2,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.08,"available":false,"contribution":0}],"second":[{"key":"role","value":8.6,"weight":0.16,"available":true,"contribution":1.376},{"key":"finishPower","value":null,"weight":0.18,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.24,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.22,"available":false,"contribution":0}],"third":[{"key":"role","value":7.4,"weight":0.2,"available":true,"contribution":1.4800000000000002},{"key":"finishPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.2,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.3,"available":false,"contribution":0}]}},{"number":3,"role":"三番手","roleScores":{"first":4.6,"second":6.4,"third":8.4,"outside":1.5999999999999996},"available":[],"fallback":["recentForm","startPower","sprintPower","finishPower","trackingSkill"],"traces":{"first":[{"key":"role","value":4.6,"weight":0.15,"available":true,"contribution":0.69},{"key":"finishPower","value":null,"weight":0.15,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.28,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.2,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.08,"available":false,"contribution":0}],"second":[{"key":"role","value":6.4,"weight":0.16,"available":true,"contribution":1.024},{"key":"finishPower","value":null,"weight":0.18,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.24,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.22,"available":false,"contribution":0}],"third":[{"key":"role","value":8.4,"weight":0.2,"available":true,"contribution":1.6800000000000002},{"key":"finishPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.2,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.3,"available":false,"contribution":0}]}},{"number":4,"role":"自力","roleScores":{"first":8.5,"second":5.8,"third":5,"outside":1.5},"available":[],"fallback":["recentForm","startPower","sprintPower","finishPower","trackingSkill"],"traces":{"first":[{"key":"role","value":8.5,"weight":0.15,"available":true,"contribution":1.275},{"key":"finishPower","value":null,"weight":0.15,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.28,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.2,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.08,"available":false,"contribution":0}],"second":[{"key":"role","value":5.8,"weight":0.16,"available":true,"contribution":0.9279999999999999},{"key":"finishPower","value":null,"weight":0.18,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.24,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.22,"available":false,"contribution":0}],"third":[{"key":"role","value":5,"weight":0.2,"available":true,"contribution":1},{"key":"finishPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.2,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.3,"available":false,"contribution":0}]}},{"number":5,"role":"番手","roleScores":{"first":7.2,"second":8.6,"third":7.4,"outside":1.4000000000000004},"available":[],"fallback":["recentForm","startPower","sprintPower","finishPower","trackingSkill"],"traces":{"first":[{"key":"role","value":7.2,"weight":0.15,"available":true,"contribution":1.08},{"key":"finishPower","value":null,"weight":0.15,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.28,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.2,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.08,"available":false,"contribution":0}],"second":[{"key":"role","value":8.6,"weight":0.16,"available":true,"contribution":1.376},{"key":"finishPower","value":null,"weight":0.18,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.24,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.22,"available":false,"contribution":0}],"third":[{"key":"role","value":7.4,"weight":0.2,"available":true,"contribution":1.4800000000000002},{"key":"finishPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.2,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.3,"available":false,"contribution":0}]}},{"number":6,"role":"三番手","roleScores":{"first":4.6,"second":6.4,"third":8.4,"outside":1.5999999999999996},"available":[],"fallback":["recentForm","startPower","sprintPower","finishPower","trackingSkill"],"traces":{"first":[{"key":"role","value":4.6,"weight":0.15,"available":true,"contribution":0.69},{"key":"finishPower","value":null,"weight":0.15,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.28,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.2,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.08,"available":false,"contribution":0}],"second":[{"key":"role","value":6.4,"weight":0.16,"available":true,"contribution":1.024},{"key":"finishPower","value":null,"weight":0.18,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.24,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.22,"available":false,"contribution":0}],"third":[{"key":"role","value":8.4,"weight":0.2,"available":true,"contribution":1.6800000000000002},{"key":"finishPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.2,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.3,"available":false,"contribution":0}]}},{"number":7,"role":"自力","roleScores":{"first":8.5,"second":5.8,"third":5,"outside":1.5},"available":[],"fallback":["recentForm","startPower","sprintPower","finishPower","trackingSkill"],"traces":{"first":[{"key":"role","value":8.5,"weight":0.15,"available":true,"contribution":1.275},{"key":"finishPower","value":null,"weight":0.15,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.28,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.2,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.08,"available":false,"contribution":0}],"second":[{"key":"role","value":5.8,"weight":0.16,"available":true,"contribution":0.9279999999999999},{"key":"finishPower","value":null,"weight":0.18,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.24,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.22,"available":false,"contribution":0}],"third":[{"key":"role","value":5,"weight":0.2,"available":true,"contribution":1},{"key":"finishPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.2,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.3,"available":false,"contribution":0}]}},{"number":8,"role":"自力","roleScores":{"first":8.5,"second":5.8,"third":5,"outside":1.5},"available":[],"fallback":["recentForm","startPower","sprintPower","finishPower","trackingSkill"],"traces":{"first":[{"key":"role","value":8.5,"weight":0.15,"available":true,"contribution":1.275},{"key":"finishPower","value":null,"weight":0.15,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.28,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.2,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.08,"available":false,"contribution":0}],"second":[{"key":"role","value":5.8,"weight":0.16,"available":true,"contribution":0.9279999999999999},{"key":"finishPower","value":null,"weight":0.18,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.24,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.22,"available":false,"contribution":0}],"third":[{"key":"role","value":5,"weight":0.2,"available":true,"contribution":1},{"key":"finishPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.2,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.3,"available":false,"contribution":0}]}}],"initiative":[{"number":4,"score":4.4,"probability":0.4040250449770156,"trace":[{"key":"backFrequency","value":null,"weight":0.55,"available":false,"effectiveWeight":0,"contribution":0},{"key":"homeFrequency","value":null,"weight":0.1,"available":false,"effectiveWeight":0,"contribution":0},{"key":"finalControlBalance","value":null,"weight":0.1,"available":false,"effectiveWeight":0,"contribution":0},{"key":"sampleReliability","value":0,"weight":0.05,"available":true,"effectiveWeight":0.2,"contribution":0},{"key":"largeAbilityGap","value":5,"weight":0.15,"available":true,"effectiveWeight":0.6,"contribution":3},{"key":"lineSupport","value":7,"weight":0.05,"available":true,"effectiveWeight":0.2,"contribution":1.4000000000000001}]},{"number":7,"score":3.6,"probability":0.24505357707033565,"trace":[{"key":"backFrequency","value":null,"weight":0.55,"available":false,"effectiveWeight":0,"contribution":0},{"key":"homeFrequency","value":null,"weight":0.1,"available":false,"effectiveWeight":0,"contribution":0},{"key":"finalControlBalance","value":null,"weight":0.1,"available":false,"effectiveWeight":0,"contribution":0},{"key":"sampleReliability","value":0,"weight":0.05,"available":true,"effectiveWeight":0.2,"contribution":0},{"key":"largeAbilityGap","value":5,"weight":0.15,"available":true,"effectiveWeight":0.6,"contribution":3},{"key":"lineSupport","value":3,"weight":0.05,"available":true,"effectiveWeight":0.2,"contribution":0.6000000000000001}]},{"number":8,"score":3.6,"probability":0.24505357707033565,"trace":[{"key":"backFrequency","value":null,"weight":0.55,"available":false,"effectiveWeight":0,"contribution":0},{"key":"homeFrequency","value":null,"weight":0.1,"available":false,"effectiveWeight":0,"contribution":0},{"key":"finalControlBalance","value":null,"weight":0.1,"available":false,"effectiveWeight":0,"contribution":0},{"key":"sampleReliability","value":0,"weight":0.05,"available":true,"effectiveWeight":0.2,"contribution":0},{"key":"largeAbilityGap","value":5,"weight":0.15,"available":true,"effectiveWeight":0.6,"contribution":3},{"key":"lineSupport","value":3,"weight":0.05,"available":true,"effectiveWeight":0.2,"contribution":0.6000000000000001}]},{"number":1,"score":2.257142857142857,"probability":0.10586780088231305,"trace":[{"key":"backFrequency","value":null,"weight":0.55,"available":false,"effectiveWeight":0,"contribution":0},{"key":"homeFrequency","value":null,"weight":0.1,"available":false,"effectiveWeight":0,"contribution":0},{"key":"finalControlBalance","value":null,"weight":0.1,"available":false,"effectiveWeight":0,"contribution":0},{"key":"sampleReliability","value":0,"weight":0.05,"available":true,"effectiveWeight":0.2,"contribution":0},{"key":"largeAbilityGap","value":1.4285714285714284,"weight":0.15,"available":true,"effectiveWeight":0.6,"contribution":0.857142857142857},{"key":"lineSupport","value":7,"weight":0.05,"available":true,"effectiveWeight":0.2,"contribution":1.4000000000000001}]}]},{"label":"85-12","evidence":[{"number":1,"role":"自力","roleScores":{"first":8.5,"second":5.8,"third":5,"outside":1.5},"available":[],"fallback":["recentForm","startPower","sprintPower","finishPower","trackingSkill"],"traces":{"first":[{"key":"role","value":8.5,"weight":0.15,"available":true,"contribution":1.275},{"key":"finishPower","value":null,"weight":0.15,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.28,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.2,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.08,"available":false,"contribution":0}],"second":[{"key":"role","value":5.8,"weight":0.16,"available":true,"contribution":0.9279999999999999},{"key":"finishPower","value":null,"weight":0.18,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.24,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.22,"available":false,"contribution":0}],"third":[{"key":"role","value":5,"weight":0.2,"available":true,"contribution":1},{"key":"finishPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.2,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.3,"available":false,"contribution":0}]}},{"number":2,"role":"番手","roleScores":{"first":7.2,"second":8.6,"third":7.4,"outside":1.4000000000000004},"available":[],"fallback":["recentForm","startPower","sprintPower","finishPower","trackingSkill"],"traces":{"first":[{"key":"role","value":7.2,"weight":0.15,"available":true,"contribution":1.08},{"key":"finishPower","value":null,"weight":0.15,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.28,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.2,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.08,"available":false,"contribution":0}],"second":[{"key":"role","value":8.6,"weight":0.16,"available":true,"contribution":1.376},{"key":"finishPower","value":null,"weight":0.18,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.24,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.22,"available":false,"contribution":0}],"third":[{"key":"role","value":7.4,"weight":0.2,"available":true,"contribution":1.4800000000000002},{"key":"finishPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.2,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.3,"available":false,"contribution":0}]}},{"number":3,"role":"三番手","roleScores":{"first":4.6,"second":6.4,"third":8.4,"outside":1.5999999999999996},"available":[],"fallback":["recentForm","startPower","sprintPower","finishPower","trackingSkill"],"traces":{"first":[{"key":"role","value":4.6,"weight":0.15,"available":true,"contribution":0.69},{"key":"finishPower","value":null,"weight":0.15,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.28,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.2,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.08,"available":false,"contribution":0}],"second":[{"key":"role","value":6.4,"weight":0.16,"available":true,"contribution":1.024},{"key":"finishPower","value":null,"weight":0.18,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.24,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.22,"available":false,"contribution":0}],"third":[{"key":"role","value":8.4,"weight":0.2,"available":true,"contribution":1.6800000000000002},{"key":"finishPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.2,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.3,"available":false,"contribution":0}]}},{"number":4,"role":"自力","roleScores":{"first":8.5,"second":5.8,"third":5,"outside":1.5},"available":[],"fallback":["recentForm","startPower","sprintPower","finishPower","trackingSkill"],"traces":{"first":[{"key":"role","value":8.5,"weight":0.15,"available":true,"contribution":1.275},{"key":"finishPower","value":null,"weight":0.15,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.28,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.2,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.08,"available":false,"contribution":0}],"second":[{"key":"role","value":5.8,"weight":0.16,"available":true,"contribution":0.9279999999999999},{"key":"finishPower","value":null,"weight":0.18,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.24,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.22,"available":false,"contribution":0}],"third":[{"key":"role","value":5,"weight":0.2,"available":true,"contribution":1},{"key":"finishPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.2,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.3,"available":false,"contribution":0}]}},{"number":5,"role":"番手","roleScores":{"first":7.2,"second":8.6,"third":7.4,"outside":1.4000000000000004},"available":[],"fallback":["recentForm","startPower","sprintPower","finishPower","trackingSkill"],"traces":{"first":[{"key":"role","value":7.2,"weight":0.15,"available":true,"contribution":1.08},{"key":"finishPower","value":null,"weight":0.15,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.28,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.2,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.08,"available":false,"contribution":0}],"second":[{"key":"role","value":8.6,"weight":0.16,"available":true,"contribution":1.376},{"key":"finishPower","value":null,"weight":0.18,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.24,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.22,"available":false,"contribution":0}],"third":[{"key":"role","value":7.4,"weight":0.2,"available":true,"contribution":1.4800000000000002},{"key":"finishPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.2,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.3,"available":false,"contribution":0}]}},{"number":6,"role":"自力","roleScores":{"first":8.5,"second":5.8,"third":5,"outside":1.5},"available":[],"fallback":["recentForm","startPower","sprintPower","finishPower","trackingSkill"],"traces":{"first":[{"key":"role","value":8.5,"weight":0.15,"available":true,"contribution":1.275},{"key":"finishPower","value":null,"weight":0.15,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.28,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.2,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.08,"available":false,"contribution":0}],"second":[{"key":"role","value":5.8,"weight":0.16,"available":true,"contribution":0.9279999999999999},{"key":"finishPower","value":null,"weight":0.18,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.24,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.22,"available":false,"contribution":0}],"third":[{"key":"role","value":5,"weight":0.2,"available":true,"contribution":1},{"key":"finishPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.2,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.3,"available":false,"contribution":0}]}},{"number":7,"role":"番手","roleScores":{"first":7.2,"second":8.6,"third":7.4,"outside":1.4000000000000004},"available":[],"fallback":["recentForm","startPower","sprintPower","finishPower","trackingSkill"],"traces":{"first":[{"key":"role","value":7.2,"weight":0.15,"available":true,"contribution":1.08},{"key":"finishPower","value":null,"weight":0.15,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.28,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.2,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.08,"available":false,"contribution":0}],"second":[{"key":"role","value":8.6,"weight":0.16,"available":true,"contribution":1.376},{"key":"finishPower","value":null,"weight":0.18,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.24,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.1,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.22,"available":false,"contribution":0}],"third":[{"key":"role","value":7.4,"weight":0.2,"available":true,"contribution":1.4800000000000002},{"key":"finishPower","value":null,"weight":0.14,"available":false,"contribution":0},{"key":"recentForm","value":5,"weight":0.2,"available":false,"contribution":0},{"key":"sprintPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"startPower","value":null,"weight":0.08,"available":false,"contribution":0},{"key":"trackingSkill","value":null,"weight":0.3,"available":false,"contribution":0}]}}],"initiative":[{"number":1,"score":4.4,"probability":0.4475084249608685,"trace":[{"key":"backFrequency","value":null,"weight":0.55,"available":false,"effectiveWeight":0,"contribution":0},{"key":"homeFrequency","value":null,"weight":0.1,"available":false,"effectiveWeight":0,"contribution":0},{"key":"finalControlBalance","value":null,"weight":0.1,"available":false,"effectiveWeight":0,"contribution":0},{"key":"sampleReliability","value":0,"weight":0.05,"available":true,"effectiveWeight":0.2,"contribution":0},{"key":"largeAbilityGap","value":5,"weight":0.15,"available":true,"effectiveWeight":0.6,"contribution":3},{"key":"lineSupport","value":7,"weight":0.05,"available":true,"effectiveWeight":0.2,"contribution":1.4000000000000001}]},{"number":4,"score":4,"probability":0.34851991179057534,"trace":[{"key":"backFrequency","value":null,"weight":0.55,"available":false,"effectiveWeight":0,"contribution":0},{"key":"homeFrequency","value":null,"weight":0.1,"available":false,"effectiveWeight":0,"contribution":0},{"key":"finalControlBalance","value":null,"weight":0.1,"available":false,"effectiveWeight":0,"contribution":0},{"key":"sampleReliability","value":0,"weight":0.05,"available":true,"effectiveWeight":0.2,"contribution":0},{"key":"largeAbilityGap","value":5,"weight":0.15,"available":true,"effectiveWeight":0.6,"contribution":3},{"key":"lineSupport","value":5,"weight":0.05,"available":true,"effectiveWeight":0.2,"contribution":1}]},{"number":6,"score":3.142857142857143,"probability":0.2039716632485562,"trace":[{"key":"backFrequency","value":null,"weight":0.55,"available":false,"effectiveWeight":0,"contribution":0},{"key":"homeFrequency","value":null,"weight":0.1,"available":false,"effectiveWeight":0,"contribution":0},{"key":"finalControlBalance","value":null,"weight":0.1,"available":false,"effectiveWeight":0,"contribution":0},{"key":"sampleReliability","value":0,"weight":0.05,"available":true,"effectiveWeight":0.2,"contribution":0},{"key":"largeAbilityGap","value":3.571428571428571,"weight":0.15,"available":true,"effectiveWeight":0.6,"contribution":2.142857142857143},{"key":"lineSupport","value":5,"weight":0.05,"available":true,"effectiveWeight":0.2,"contribution":1}]}]}]
+[
+  {
+    "label": "13-11",
+    "terminalCount": 210,
+    "rawMass": {
+      "1": 0.01139432,
+      "3": 0.03418297,
+      "5": 0.05697162,
+      "10": 0.1112303,
+      "20": 0.20234027,
+      "50": 0.4137242,
+      "100": 0.71610323
+    },
+    "finalMass": {
+      "1": 0.01139432,
+      "3": 0.03418297,
+      "5": 0.05697162,
+      "10": 0.1112303,
+      "20": 0.20234027,
+      "50": 0.4137242,
+      "100": 0.71610323
+    },
+    "rawMax": 0.01139432,
+    "finalMax": 0.01139432,
+    "boundaryRank": 16,
+    "top": [
+      {
+        "order": "6-2-3",
+        "probability": 0.01139432,
+        "terminalScore": 0.90221851,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 8.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-C:0.00498502|MAKURI-C:0.00498502|BATTLE:0.00071215|SEPARATION:0.00071215"
+      },
+      {
+        "order": "7-2-3",
+        "probability": 0.01139432,
+        "terminalScore": 0.90221851,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 8.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-D:0.00498502|MAKURI-D:0.00498502|BATTLE:0.00071215|SEPARATION:0.00071215"
+      },
+      {
+        "order": "1-2-3",
+        "probability": 0.01139432,
+        "terminalScore": 0.90221851,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 8.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-A:0.00498502|MAKURI-A:0.00498502|BATTLE:0.00071215|SEPARATION:0.00071215"
+      },
+      {
+        "order": "1-5-3",
+        "probability": 0.01139432,
+        "terminalScore": 0.90221851,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 8.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-A:0.00498502|MAKURI-A:0.00498502|BATTLE:0.00071215|SEPARATION:0.00071215"
+      },
+      {
+        "order": "4-2-3",
+        "probability": 0.01139432,
+        "terminalScore": 0.90221851,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 8.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-B:0.00498502|MAKURI-B:0.00498502|BATTLE:0.00071215|SEPARATION:0.00071215"
+      },
+      {
+        "order": "4-5-3",
+        "probability": 0.01139432,
+        "terminalScore": 0.90221851,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 8.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-B:0.00498502|MAKURI-B:0.00498502|BATTLE:0.00071215|SEPARATION:0.00071215"
+      },
+      {
+        "order": "6-5-3",
+        "probability": 0.01139432,
+        "terminalScore": 0.90221851,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 8.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-C:0.00498502|MAKURI-C:0.00498502|BATTLE:0.00071215|SEPARATION:0.00071215"
+      },
+      {
+        "order": "7-5-3",
+        "probability": 0.01139432,
+        "terminalScore": 0.90221851,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 8.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-D:0.00498502|MAKURI-D:0.00498502|BATTLE:0.00071215|SEPARATION:0.00071215"
+      },
+      {
+        "order": "6-2-5",
+        "probability": 0.01003786,
+        "terminalScore": 0.80909221,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 7.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-C:0.00439156|MAKURI-C:0.00439156|BATTLE:0.00062737|SEPARATION:0.00062737"
+      },
+      {
+        "order": "7-2-5",
+        "probability": 0.01003786,
+        "terminalScore": 0.80909221,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 7.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-D:0.00439156|MAKURI-D:0.00439156|BATTLE:0.00062737|SEPARATION:0.00062737"
+      }
+    ],
+    "permutations": [
+      {
+        "order": "6-2-3",
+        "rawProbability": 0.01139432,
+        "finalProbability": 0.01139432,
+        "positionScores": null
+      },
+      {
+        "order": "6-3-2",
+        "rawProbability": 0.00772071,
+        "finalProbability": 0.00772071,
+        "positionScores": null
+      },
+      {
+        "order": "2-6-3",
+        "rawProbability": 0.00392984,
+        "finalProbability": 0.00392984,
+        "positionScores": null
+      },
+      {
+        "order": "2-3-6",
+        "rawProbability": 0.00290147,
+        "finalProbability": 0.00290147,
+        "positionScores": null
+      },
+      {
+        "order": "3-6-2",
+        "rawProbability": 0.00048035,
+        "finalProbability": 0.00048035,
+        "positionScores": null
+      },
+      {
+        "order": "3-2-6",
+        "rawProbability": 0.0005234,
+        "finalProbability": 0.0005234,
+        "positionScores": null
+      }
+    ]
+  },
+  {
+    "label": "24-9",
+    "terminalCount": 210,
+    "rawMass": {
+      "1": 0.01104681,
+      "3": 0.03314044,
+      "5": 0.05523406,
+      "10": 0.10915303,
+      "20": 0.20647018,
+      "50": 0.43608764,
+      "100": 0.72723508
+    },
+    "finalMass": {
+      "1": 0.01104681,
+      "3": 0.03314044,
+      "5": 0.05523406,
+      "10": 0.10915303,
+      "20": 0.20647018,
+      "50": 0.43608764,
+      "100": 0.72723508
+    },
+    "rawMax": 0.01104681,
+    "finalMax": 0.01104681,
+    "boundaryRank": 27,
+    "top": [
+      {
+        "order": "6-2-5",
+        "probability": 0.01104681,
+        "terminalScore": 0.90128912,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 8.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-C:0.00483298|MAKURI-C:0.00483298|BATTLE:0.00069043|SEPARATION:0.00069043"
+      },
+      {
+        "order": "6-4-5",
+        "probability": 0.01104681,
+        "terminalScore": 0.90128912,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 8.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-C:0.00483298|MAKURI-C:0.00483298|BATTLE:0.00069043|SEPARATION:0.00069043"
+      },
+      {
+        "order": "6-7-5",
+        "probability": 0.01104681,
+        "terminalScore": 0.90128912,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 8.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-C:0.00483298|MAKURI-C:0.00483298|BATTLE:0.00069043|SEPARATION:0.00069043"
+      },
+      {
+        "order": "1-2-5",
+        "probability": 0.01104681,
+        "terminalScore": 0.90128912,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 8.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-A:0.00483298|MAKURI-A:0.00483298|BATTLE:0.00069043|SEPARATION:0.00069043"
+      },
+      {
+        "order": "1-4-5",
+        "probability": 0.01104681,
+        "terminalScore": 0.90128912,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 8.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-A:0.00483298|MAKURI-A:0.00483298|BATTLE:0.00069043|SEPARATION:0.00069043"
+      },
+      {
+        "order": "1-7-5",
+        "probability": 0.01104681,
+        "terminalScore": 0.90128912,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 8.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-A:0.00483298|MAKURI-A:0.00483298|BATTLE:0.00069043|SEPARATION:0.00069043"
+      },
+      {
+        "order": "3-2-5",
+        "probability": 0.01104681,
+        "terminalScore": 0.90128912,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 8.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-B:0.00483298|MAKURI-B:0.00483298|BATTLE:0.00069043|SEPARATION:0.00069043"
+      },
+      {
+        "order": "3-4-5",
+        "probability": 0.01104681,
+        "terminalScore": 0.90128912,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 8.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-B:0.00483298|MAKURI-B:0.00483298|BATTLE:0.00069043|SEPARATION:0.00069043"
+      },
+      {
+        "order": "3-7-5",
+        "probability": 0.01104681,
+        "terminalScore": 0.90128912,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 8.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-B:0.00483298|MAKURI-B:0.00483298|BATTLE:0.00069043|SEPARATION:0.00069043"
+      },
+      {
+        "order": "6-2-4",
+        "probability": 0.00973172,
+        "terminalScore": 0.80820127,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 7.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-C:0.00425763|MAKURI-C:0.00425763|BATTLE:0.00060823|SEPARATION:0.00060823"
+      }
+    ],
+    "permutations": [
+      {
+        "order": "6-2-5",
+        "rawProbability": 0.01104681,
+        "finalProbability": 0.01104681,
+        "positionScores": null
+      },
+      {
+        "order": "6-5-2",
+        "rawProbability": 0.00746712,
+        "finalProbability": 0.00746712,
+        "positionScores": null
+      },
+      {
+        "order": "2-6-5",
+        "rawProbability": 0.00379221,
+        "finalProbability": 0.00379221,
+        "positionScores": null
+      },
+      {
+        "order": "2-5-6",
+        "rawProbability": 0.00277496,
+        "finalProbability": 0.00277496,
+        "positionScores": null
+      },
+      {
+        "order": "5-6-2",
+        "rawProbability": 0.00046413,
+        "finalProbability": 0.00046413,
+        "positionScores": null
+      },
+      {
+        "order": "5-2-6",
+        "rawProbability": 0.00050245,
+        "finalProbability": 0.00050245,
+        "positionScores": null
+      }
+    ]
+  },
+  {
+    "label": "28-12",
+    "terminalCount": 210,
+    "rawMass": {
+      "1": 0.0047619,
+      "3": 0.01428571,
+      "5": 0.02380952,
+      "10": 0.04761905,
+      "20": 0.0952381,
+      "50": 0.23809524,
+      "100": 0.47619048
+    },
+    "finalMass": {
+      "1": 0.0047619,
+      "3": 0.01428571,
+      "5": 0.02380952,
+      "10": 0.04761905,
+      "20": 0.0952381,
+      "50": 0.23809524,
+      "100": 0.47619048
+    },
+    "rawMax": 0.0047619,
+    "finalMax": 0.0047619,
+    "boundaryRank": null,
+    "top": [
+      {
+        "order": "1-2-3",
+        "probability": 0.0047619,
+        "terminalScore": 0.82508255,
+        "positionScores": {
+          "first": 5,
+          "second": 5,
+          "third": 5
+        },
+        "supportCount": 1,
+        "supportSignature": "BATTLE:0.0047619"
+      },
+      {
+        "order": "1-2-4",
+        "probability": 0.0047619,
+        "terminalScore": 0.82508255,
+        "positionScores": {
+          "first": 5,
+          "second": 5,
+          "third": 5
+        },
+        "supportCount": 1,
+        "supportSignature": "BATTLE:0.0047619"
+      },
+      {
+        "order": "1-2-5",
+        "probability": 0.0047619,
+        "terminalScore": 0.82508255,
+        "positionScores": {
+          "first": 5,
+          "second": 5,
+          "third": 5
+        },
+        "supportCount": 1,
+        "supportSignature": "BATTLE:0.0047619"
+      },
+      {
+        "order": "1-2-6",
+        "probability": 0.0047619,
+        "terminalScore": 0.82508255,
+        "positionScores": {
+          "first": 5,
+          "second": 5,
+          "third": 5
+        },
+        "supportCount": 1,
+        "supportSignature": "BATTLE:0.0047619"
+      },
+      {
+        "order": "1-2-7",
+        "probability": 0.0047619,
+        "terminalScore": 0.82508255,
+        "positionScores": {
+          "first": 5,
+          "second": 5,
+          "third": 5
+        },
+        "supportCount": 1,
+        "supportSignature": "BATTLE:0.0047619"
+      },
+      {
+        "order": "1-3-2",
+        "probability": 0.0047619,
+        "terminalScore": 0.82508255,
+        "positionScores": {
+          "first": 5,
+          "second": 5,
+          "third": 5
+        },
+        "supportCount": 1,
+        "supportSignature": "BATTLE:0.0047619"
+      },
+      {
+        "order": "1-3-4",
+        "probability": 0.0047619,
+        "terminalScore": 0.82508255,
+        "positionScores": {
+          "first": 5,
+          "second": 5,
+          "third": 5
+        },
+        "supportCount": 1,
+        "supportSignature": "BATTLE:0.0047619"
+      },
+      {
+        "order": "1-3-5",
+        "probability": 0.0047619,
+        "terminalScore": 0.82508255,
+        "positionScores": {
+          "first": 5,
+          "second": 5,
+          "third": 5
+        },
+        "supportCount": 1,
+        "supportSignature": "BATTLE:0.0047619"
+      },
+      {
+        "order": "1-3-6",
+        "probability": 0.0047619,
+        "terminalScore": 0.82508255,
+        "positionScores": {
+          "first": 5,
+          "second": 5,
+          "third": 5
+        },
+        "supportCount": 1,
+        "supportSignature": "BATTLE:0.0047619"
+      },
+      {
+        "order": "1-3-7",
+        "probability": 0.0047619,
+        "terminalScore": 0.82508255,
+        "positionScores": {
+          "first": 5,
+          "second": 5,
+          "third": 5
+        },
+        "supportCount": 1,
+        "supportSignature": "BATTLE:0.0047619"
+      }
+    ],
+    "permutations": [
+      {
+        "order": "1-2-3",
+        "rawProbability": 0.0047619,
+        "finalProbability": 0.0047619,
+        "positionScores": null
+      },
+      {
+        "order": "1-3-2",
+        "rawProbability": 0.0047619,
+        "finalProbability": 0.0047619,
+        "positionScores": null
+      },
+      {
+        "order": "2-1-3",
+        "rawProbability": 0.0047619,
+        "finalProbability": 0.0047619,
+        "positionScores": null
+      },
+      {
+        "order": "2-3-1",
+        "rawProbability": 0.0047619,
+        "finalProbability": 0.0047619,
+        "positionScores": null
+      },
+      {
+        "order": "3-1-2",
+        "rawProbability": 0.0047619,
+        "finalProbability": 0.0047619,
+        "positionScores": null
+      },
+      {
+        "order": "3-2-1",
+        "rawProbability": 0.0047619,
+        "finalProbability": 0.0047619,
+        "positionScores": null
+      }
+    ]
+  },
+  {
+    "label": "55-1",
+    "terminalCount": 336,
+    "rawMass": {
+      "1": 0.00768138,
+      "3": 0.02304415,
+      "5": 0.03840691,
+      "10": 0.07681383,
+      "20": 0.14996986,
+      "50": 0.31641192,
+      "100": 0.55074284
+    },
+    "finalMass": {
+      "1": 0.00768138,
+      "3": 0.02304415,
+      "5": 0.03840691,
+      "10": 0.07681383,
+      "20": 0.14996986,
+      "50": 0.31641192,
+      "100": 0.55074284
+    },
+    "rawMax": 0.00768138,
+    "finalMax": 0.00768138,
+    "boundaryRank": 24,
+    "top": [
+      {
+        "order": "1-2-3",
+        "probability": 0.00768138,
+        "terminalScore": 0.89977495,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 8.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-A:0.00341395|MAKURI-A:0.00341395|BATTLE:0.00042674|SEPARATION:0.00042674"
+      },
+      {
+        "order": "1-2-6",
+        "probability": 0.00768138,
+        "terminalScore": 0.89977495,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 8.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-A:0.00341395|MAKURI-A:0.00341395|BATTLE:0.00042674|SEPARATION:0.00042674"
+      },
+      {
+        "order": "1-5-3",
+        "probability": 0.00768138,
+        "terminalScore": 0.89977495,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 8.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-A:0.00341395|MAKURI-A:0.00341395|BATTLE:0.00042674|SEPARATION:0.00042674"
+      },
+      {
+        "order": "1-5-6",
+        "probability": 0.00768138,
+        "terminalScore": 0.89977495,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 8.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-A:0.00341395|MAKURI-A:0.00341395|BATTLE:0.00042674|SEPARATION:0.00042674"
+      },
+      {
+        "order": "4-2-3",
+        "probability": 0.00768138,
+        "terminalScore": 0.89977495,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 8.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-B:0.00341395|MAKURI-B:0.00341395|BATTLE:0.00042674|SEPARATION:0.00042674"
+      },
+      {
+        "order": "4-2-6",
+        "probability": 0.00768138,
+        "terminalScore": 0.89977495,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 8.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-B:0.00341395|MAKURI-B:0.00341395|BATTLE:0.00042674|SEPARATION:0.00042674"
+      },
+      {
+        "order": "4-5-3",
+        "probability": 0.00768138,
+        "terminalScore": 0.89977495,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 8.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-B:0.00341395|MAKURI-B:0.00341395|BATTLE:0.00042674|SEPARATION:0.00042674"
+      },
+      {
+        "order": "4-5-6",
+        "probability": 0.00768138,
+        "terminalScore": 0.89977495,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 8.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-B:0.00341395|MAKURI-B:0.00341395|BATTLE:0.00042674|SEPARATION:0.00042674"
+      },
+      {
+        "order": "7-2-3",
+        "probability": 0.00768138,
+        "terminalScore": 0.89977495,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 8.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-C:0.00341395|MAKURI-C:0.00341395|BATTLE:0.00042674|SEPARATION:0.00042674"
+      },
+      {
+        "order": "7-2-6",
+        "probability": 0.00768138,
+        "terminalScore": 0.89977495,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 8.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-C:0.00341395|MAKURI-C:0.00341395|BATTLE:0.00042674|SEPARATION:0.00042674"
+      }
+    ],
+    "permutations": [
+      {
+        "order": "1-2-3",
+        "rawProbability": 0.00768138,
+        "finalProbability": 0.00768138,
+        "positionScores": null
+      },
+      {
+        "order": "1-3-2",
+        "rawProbability": 0.00516769,
+        "finalProbability": 0.00516769,
+        "positionScores": null
+      },
+      {
+        "order": "2-1-3",
+        "rawProbability": 0.00259092,
+        "finalProbability": 0.00259092,
+        "positionScores": null
+      },
+      {
+        "order": "2-3-1",
+        "rawProbability": 0.00186337,
+        "finalProbability": 0.00186337,
+        "positionScores": null
+      },
+      {
+        "order": "3-1-2",
+        "rawProbability": 0.00028522,
+        "finalProbability": 0.00028522,
+        "positionScores": null
+      },
+      {
+        "order": "3-2-1",
+        "rawProbability": 0.0003049,
+        "finalProbability": 0.0003049,
+        "positionScores": null
+      }
+    ]
+  },
+  {
+    "label": "85-12",
+    "terminalCount": 210,
+    "rawMass": {
+      "1": 0.01104681,
+      "3": 0.03314044,
+      "5": 0.05523406,
+      "10": 0.10915303,
+      "20": 0.20647018,
+      "50": 0.43608764,
+      "100": 0.72723508
+    },
+    "finalMass": {
+      "1": 0.01104681,
+      "3": 0.03314044,
+      "5": 0.05523406,
+      "10": 0.10915303,
+      "20": 0.20647018,
+      "50": 0.43608764,
+      "100": 0.72723508
+    },
+    "rawMax": 0.01104681,
+    "finalMax": 0.01104681,
+    "boundaryRank": 27,
+    "top": [
+      {
+        "order": "6-2-3",
+        "probability": 0.01104681,
+        "terminalScore": 0.90128912,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 8.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-C:0.00483298|MAKURI-C:0.00483298|BATTLE:0.00069043|SEPARATION:0.00069043"
+      },
+      {
+        "order": "1-2-3",
+        "probability": 0.01104681,
+        "terminalScore": 0.90128912,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 8.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-A:0.00483298|MAKURI-A:0.00483298|BATTLE:0.00069043|SEPARATION:0.00069043"
+      },
+      {
+        "order": "1-5-3",
+        "probability": 0.01104681,
+        "terminalScore": 0.90128912,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 8.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-A:0.00483298|MAKURI-A:0.00483298|BATTLE:0.00069043|SEPARATION:0.00069043"
+      },
+      {
+        "order": "1-7-3",
+        "probability": 0.01104681,
+        "terminalScore": 0.90128912,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 8.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-A:0.00483298|MAKURI-A:0.00483298|BATTLE:0.00069043|SEPARATION:0.00069043"
+      },
+      {
+        "order": "4-2-3",
+        "probability": 0.01104681,
+        "terminalScore": 0.90128912,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 8.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-B:0.00483298|MAKURI-B:0.00483298|BATTLE:0.00069043|SEPARATION:0.00069043"
+      },
+      {
+        "order": "4-5-3",
+        "probability": 0.01104681,
+        "terminalScore": 0.90128912,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 8.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-B:0.00483298|MAKURI-B:0.00483298|BATTLE:0.00069043|SEPARATION:0.00069043"
+      },
+      {
+        "order": "4-7-3",
+        "probability": 0.01104681,
+        "terminalScore": 0.90128912,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 8.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-B:0.00483298|MAKURI-B:0.00483298|BATTLE:0.00069043|SEPARATION:0.00069043"
+      },
+      {
+        "order": "6-5-3",
+        "probability": 0.01104681,
+        "terminalScore": 0.90128912,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 8.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-C:0.00483298|MAKURI-C:0.00483298|BATTLE:0.00069043|SEPARATION:0.00069043"
+      },
+      {
+        "order": "6-7-3",
+        "probability": 0.01104681,
+        "terminalScore": 0.90128912,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 8.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-C:0.00483298|MAKURI-C:0.00483298|BATTLE:0.00069043|SEPARATION:0.00069043"
+      },
+      {
+        "order": "6-2-5",
+        "probability": 0.00973172,
+        "terminalScore": 0.80820127,
+        "positionScores": {
+          "first": 8.5,
+          "second": 8.6,
+          "third": 7.4
+        },
+        "supportCount": 4,
+        "supportSignature": "LEAD-C:0.00425763|MAKURI-C:0.00425763|BATTLE:0.00060823|SEPARATION:0.00060823"
+      }
+    ],
+    "permutations": [
+      {
+        "order": "6-2-3",
+        "rawProbability": 0.01104681,
+        "finalProbability": 0.01104681,
+        "positionScores": null
+      },
+      {
+        "order": "6-3-2",
+        "rawProbability": 0.00746712,
+        "finalProbability": 0.00746712,
+        "positionScores": null
+      },
+      {
+        "order": "2-6-3",
+        "rawProbability": 0.00379221,
+        "finalProbability": 0.00379221,
+        "positionScores": null
+      },
+      {
+        "order": "2-3-6",
+        "rawProbability": 0.00277496,
+        "finalProbability": 0.00277496,
+        "positionScores": null
+      },
+      {
+        "order": "3-6-2",
+        "rawProbability": 0.00046413,
+        "finalProbability": 0.00046413,
+        "positionScores": null
+      },
+      {
+        "order": "3-2-6",
+        "rawProbability": 0.00050245,
+        "finalProbability": 0.00050245,
+        "positionScores": null
+      }
+    ]
+  }
+]
+Keirin natural distribution selection passed: A=1, B=3, C=5, D=0, E=5, G=1
+Keirin purchase funnel audit passed: {"PURCHASE_CUTOFF":2}
+Keirin no probability cutoff passed: 購入不採用 PURCHASE_CUTOFF
+Official evidence + branch-conditioned purchase tests passed.
+Branch role semantic integrity tests passed.
+Branch provenance consistency tests passed.
+Keirin supporting branch detail audit passed: LEAD-A,ALT-A,MAKURI-A
+Keirin weighted branch support passed: 2 0.334 購入不採用
+Keirin branch prior audit passed: A主導権  11
+Keirin global hypothesis pool passed: C仕掛け成功 7.130 A番手優位 7.250
+Keirin deterministic hypothesis pool passed: LEAD-A,MAKURI-A,BANTE-A,LEAD-B,MAKURI-B,BANTE-B,BATTLE,SEPARATION
+keirin startPower current-calibration test passed { zero18: 2.649, active18: 7.858, front22: 9.064 }
+keirin start-power input audit PASS
+Keirin adaptive third-variant purchase gate passed: adopted 3, rejected 2
+Keirin pair-local third-variant gate passed: A=3 B=2 C=1 D=0 E=4
+Keirin high-payout annotation gate passed
+Keirin tier-consistent payout classification passed
+prediction-ratings: ok {
+  diffuse: {
+    ratingAlgorithmVersion: 'DISPLAY-RATING-0.4-STRUCTURAL-SKIP-BOUNDARY',
+    confidence: 2,
+    concentration: 1,
+    rollover: 1,
+    verdict: '注意',
+    verdictTone: 'caution',
+    purchaseEligibility: { state: 'PURCHASE_ALLOWED', canPurchase: true },
+    reason: '展開1位 7.8% ・ 採用 47 / 210終端 ・ ライン順序監査 高 ・ 判定根拠 購入停止ではないが、予想の集中または信頼が低い',
+    calibrationStatus: 'UNVALIDATED',
+    calibrationLabel: '未校正・検証対象',
+    auditFlags: [ '展開1位の占有率が10%未満', '評価整合性の上限補正あり' ],
+    consistencyAudit: {
+      status: 'ADJUSTED',
+      label: '整合補正あり',
+      adjustments: [Array],
+      invariantChecks: [Array]
+    },
+    diagnostics: {
+      topShare: 0.078,
+      top3Share: 0.23299999999999998,
+      topGapRatio: 0.0018194541637508608,
+      cutGapRatio: 0.13128061581525544,
+      betCount: 47,
+      dataQuality: 0.8875000000000001,
+      purchaseQuality: 0.65,
+      branchConcentrationRaw: 0.13600758317959155,
+      terminalConcentrationRaw: 0.13600758317959155,
+      concentrationRaw: 0.13600758317959155,
+      rawConcentration: 1,
+      terminalTop3Share: 0,
+      terminalTop5Share: 0,
+      topFamilyShare: 0,
+      top2FamilyShare: 0,
+      topFamilyCoverage: null,
+      familyConcentration: [Object],
+      confidenceRaw: 0.539375,
+      rawConfidence: 3,
+      effectiveConfidence: 0.47,
+      rolloverRaw: 0.374,
+      rawEvaluationIndex: 35.685265411285705,
+      confidenceAdjustedEvaluationIndex: 32.9102654112857,
+      verdictCappedEvaluationIndex: 32.9102654112857,
+      evaluationIndex: 32.9102654112857,
+      maxExpectedValue: null,
+      allOddsEvaluated: false,
+      eligibleCoverage: null,
+      weightedCoverageTarget: null,
+      massEfficiency: null,
+      massStatus: ''
+    }
+  },
+  focused: {
+    ratingAlgorithmVersion: 'DISPLAY-RATING-0.4-STRUCTURAL-SKIP-BOUNDARY',
+    confidence: 4,
+    concentration: 4,
+    rollover: 4,
+    verdict: '購入可',
+    verdictTone: 'go',
+    purchaseEligibility: { state: 'PURCHASE_ALLOWED', canPurchase: true },
+    reason: '展開1位 15.9% ・ 採用 6 / 504終端 ・ ライン順序監査 高 ・ 判定根拠 評価整合条件を満たす',
+    calibrationStatus: 'UNVALIDATED',
+    calibrationLabel: '未校正・検証対象',
+    auditFlags: [],
+    consistencyAudit: {
+      status: 'OK',
+      label: '整合',
+      adjustments: [],
+      invariantChecks: [Array]
+    },
+    diagnostics: {
+      topShare: 0.159,
+      top3Share: 0.435,
+      topGapRatio: 0.10615324573956027,
+      cutGapRatio: 0.3042799531676857,
+      betCount: 6,
+      dataQuality: 0.8875000000000001,
+      purchaseQuality: 0.65,
+      branchConcentrationRaw: 0.6903108214971361,
+      terminalConcentrationRaw: 0.6903108214971361,
+      concentrationRaw: 0.6903108214971361,
+      rawConcentration: 4,
+      terminalTop3Share: 0,
+      terminalTop5Share: 0,
+      topFamilyShare: 0,
+      top2FamilyShare: 0,
+      topFamilyCoverage: null,
+      familyConcentration: [Object],
+      confidenceRaw: 0.791375,
+      rawConfidence: 4,
+      effectiveConfidence: 0.79,
+      rolloverRaw: 0.7700000000000001,
+      rawEvaluationIndex: 75.06587875239977,
+      confidenceAdjustedEvaluationIndex: 75.01087875239976,
+      verdictCappedEvaluationIndex: 75.01087875239976,
+      evaluationIndex: 75.01087875239976,
+      maxExpectedValue: null,
+      allOddsEvaluated: false,
+      eligibleCoverage: null,
+      weightedCoverageTarget: null,
+      massEfficiency: null,
+      massStatus: ''
+    }
+  },
+  blocked: {
+    ratingAlgorithmVersion: 'DISPLAY-RATING-0.4-STRUCTURAL-SKIP-BOUNDARY',
+    confidence: 2,
+    concentration: 4,
+    rollover: 2,
+    verdict: '注意',
+    verdictTone: 'caution',
+    purchaseEligibility: { state: 'PURCHASE_ALLOWED', canPurchase: true },
+    reason: '展開1位 20.0% ・ 採用 4 / 210終端 ・ ライン順序監査 低 ・ 判定根拠 購入停止ではないが、予想集中または入力信頼が低い',
+    calibrationStatus: 'UNVALIDATED',
+    calibrationLabel: '未校正・検証対象',
+    auditFlags: [ '入力証拠の品質が十分でない', '評価整合性の上限補正あり' ],
+    consistencyAudit: {
+      status: 'ADJUSTED',
+      label: '整合補正あり',
+      adjustments: [Array],
+      invariantChecks: [Array]
+    },
+    diagnostics: {
+      topShare: 0.2,
+      top3Share: 0.44999999999999996,
+      topGapRatio: 0.25,
+      cutGapRatio: 0,
+      betCount: 4,
+      dataQuality: 0.53,
+      purchaseQuality: 0.65,
+      branchConcentrationRaw: 0.6698181818181819,
+      terminalConcentrationRaw: 0.6698181818181819,
+      concentrationRaw: 0.6698181818181819,
+      rawConcentration: 4,
+      terminalTop3Share: 0,
+      terminalTop5Share: 0,
+      topFamilyShare: 0,
+      top2FamilyShare: 0,
+      topFamilyCoverage: null,
+      familyConcentration: [Object],
+      confidenceRaw: 0.6734,
+      rawConfidence: 4,
+      effectiveConfidence: 0.47,
+      rolloverRaw: 0.6020000000000001,
+      rawEvaluationIndex: 65.42963636363636,
+      confidenceAdjustedEvaluationIndex: 57.29363636363636,
+      verdictCappedEvaluationIndex: 57.29363636363636,
+      evaluationIndex: 57.29363636363636,
+      maxExpectedValue: null,
+      allOddsEvaluated: false,
+      eligibleCoverage: null,
+      weightedCoverageTarget: null,
+      massEfficiency: null,
+      massStatus: ''
+    }
+  },
+  broadButRawStrong: {
+    ratingAlgorithmVersion: 'DISPLAY-RATING-0.4-STRUCTURAL-SKIP-BOUNDARY',
+    confidence: 5,
+    concentration: 5,
+    rollover: 5,
+    verdict: '購入可',
+    verdictTone: 'go',
+    purchaseEligibility: { state: 'PURCHASE_ALLOWED', canPurchase: true },
+    reason: '展開1位 20.0% ・ 採用 12 / 210終端 ・ ライン順序監査 高 ・ 判定根拠 評価整合条件を満たす',
+    calibrationStatus: 'UNVALIDATED',
+    calibrationLabel: '未校正・検証対象',
+    auditFlags: [],
+    consistencyAudit: {
+      status: 'OK',
+      label: '整合',
+      adjustments: [],
+      invariantChecks: [Array]
+    },
+    diagnostics: {
+      topShare: 0.2,
+      top3Share: 0.52,
+      topGapRatio: 0.1111111111111111,
+      cutGapRatio: 0.2777777777777778,
+      betCount: 12,
+      dataQuality: 0.8875000000000001,
+      purchaseQuality: 0.98,
+      branchConcentrationRaw: 0.8603232323232324,
+      terminalConcentrationRaw: 0.8603232323232324,
+      concentrationRaw: 0.8603232323232324,
+      rawConcentration: 5,
+      terminalTop3Share: 0,
+      terminalTop5Share: 0,
+      topFamilyShare: 0,
+      top2FamilyShare: 0,
+      topFamilyCoverage: null,
+      familyConcentration: [Object],
+      confidenceRaw: 0.957875,
+      rawConfidence: 5,
+      effectiveConfidence: 0.957875,
+      rolloverRaw: 0.996,
+      rawEvaluationIndex: 93.32631313131313,
+      confidenceAdjustedEvaluationIndex: 93.32631313131313,
+      verdictCappedEvaluationIndex: 93.32631313131313,
+      evaluationIndex: 93.32631313131313,
+      maxExpectedValue: null,
+      allOddsEvaluated: false,
+      eligibleCoverage: 0.82,
+      weightedCoverageTarget: 0.75,
+      massEfficiency: 0.96,
+      massStatus: 'BALANCED'
+    }
+  },
+  lowHeadCoverage: {
+    ratingAlgorithmVersion: 'DISPLAY-RATING-0.4-STRUCTURAL-SKIP-BOUNDARY',
+    confidence: 3,
+    concentration: 2,
+    rollover: 2,
+    verdict: '注意',
+    verdictTone: 'caution',
+    purchaseEligibility: { state: 'PURCHASE_ALLOWED', canPurchase: true },
+    reason: '展開1位 18.0% ・ 1着集中 25.0% ・ 最上位頭カバー 40.0% ・ 採用 4 / 210終端 ・ ライン順序監査 高 ・ 判定根拠 購入停止ではないが、予想集中または入力信頼が低い',
+    calibrationStatus: 'UNVALIDATED',
+    calibrationLabel: '未校正・検証対象',
+    auditFlags: [ '信頼度より展開集中度が低い', '1着最上位ファミリーの購入カバー率が低い（40.0%）' ],
+    consistencyAudit: {
+      status: 'OK',
+      label: '整合',
+      adjustments: [],
+      invariantChecks: [Array]
+    },
+    diagnostics: {
+      topShare: 0.18,
+      top3Share: 0.44999999999999996,
+      topGapRatio: 0.125,
+      cutGapRatio: 0.15,
+      betCount: 4,
+      dataQuality: 0.8875000000000001,
+      purchaseQuality: 0.65,
+      branchConcentrationRaw: 0.6894848484848484,
+      terminalConcentrationRaw: 0.078,
+      concentrationRaw: 0.35928303030303027,
+      rawConcentration: 2,
+      terminalTop3Share: 0,
+      terminalTop5Share: 0,
+      topFamilyShare: 0.25,
+      top2FamilyShare: 0.45,
+      topFamilyCoverage: 0.4,
+      familyConcentration: [Object],
+      confidenceRaw: 0.623375,
+      rawConfidence: 3,
+      effectiveConfidence: 0.623375,
+      rolloverRaw: 0.534,
+      rawEvaluationIndex: 50.859906060606065,
+      confidenceAdjustedEvaluationIndex: 50.859906060606065,
+      verdictCappedEvaluationIndex: 50.859906060606065,
+      evaluationIndex: 50.859906060606065,
+      maxExpectedValue: null,
+      allOddsEvaluated: false,
+      eligibleCoverage: null,
+      weightedCoverageTarget: null,
+      massEfficiency: null,
+      massStatus: ''
+    }
+  }
+}
+PASS official line front-to-back regression
+PASS girls evidence-safe hypothesis branching
+PASS girls profile-rate fallback and missing lead-evidence purchase gate
+PASS primary screening preview
+app-version-consistency: ok KEIRIN-0.5.24-performance-page
+PASS v250 engine-pair gate {
+  predictionEngineVersion: 'KEIRIN-0.5.20-girls-evidence-gate',
+  purchaseEngineVersion: 'v250',
+  enginePairId: 'KEIRIN-0.5.20-girls-evidence-gate__v250',
+  pairFixed: true,
+  passed: true
+}
+PASS performance periods, canonical projection/categories, hit exclusions, lifecycle, last-known/stale, null/zero, removed controls

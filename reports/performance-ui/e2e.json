@@ -1,0 +1,499 @@
+{
+  "verdict": "PASS",
+  "data": "Priority 1 generated production-equivalent sealed records",
+  "sourceHashes": {
+    "purchase-performance.mjs": "1b9911fb509629c1c0fa2cf0faa56f72af24341504bf31e13780a077acbe7f10",
+    "canonical-purchase-eligibility.mjs": "f3775b1f9853774437468f1960a6a6a45391b8edc0c3b9fa0106c7dd7bd486c9",
+    "sealed-result-read.mjs": "40258690675f857e2bb89adf96f368585eb635effd3b71ce54a1a8e114729f73"
+  },
+  "checks": [
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "periods": "PASS",
+      "categories": "PASS",
+      "history": "PASS",
+      "lifecycle": "PASS",
+      "fallback": "PASS",
+      "removedControls": "PASS",
+      "navigation": "PASS",
+      "horizontalOverflow": 0
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "periods": "PASS",
+      "categories": "PASS",
+      "history": "PASS",
+      "lifecycle": "PASS",
+      "fallback": "PASS",
+      "removedControls": "PASS",
+      "navigation": "PASS",
+      "horizontalOverflow": 0
+    },
+    {
+      "emptyCacheOffline": "PASS",
+      "width320": "PASS"
+    }
+  ],
+  "jsErrors": [],
+  "brokenNavigation": 0,
+  "blockedHits": 0,
+  "referenceHits": 0,
+  "endedInUpcoming": 0,
+  "performanceReadOnlyRequests": [
+    {
+      "path": "/.netlify/functions/keirin-saved-prediction-summary",
+      "query": "?date=20260912",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-collector-status",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-prediction-history",
+      "query": "?from=20260912&to=20260912",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-saved-prediction-detail",
+      "query": "?raceKey=20260912-12-1",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-sealed-result",
+      "query": "?raceKey=20260912-12-1",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-prediction-history",
+      "query": "?from=20260801&to=20260801",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-collector-status",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-prediction-history",
+      "query": "?from=20260912&to=20260912",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-saved-prediction-summary",
+      "query": "?date=20260912",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-collector-status",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-prediction-history",
+      "query": "?from=20260912&to=20260912",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-saved-prediction-summary",
+      "query": "?date=20260912",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-collector-status",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-prediction-history",
+      "query": "?from=20260912&to=20260912",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-saved-prediction-detail",
+      "query": "?raceKey=20260912-12-1",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-sealed-result",
+      "query": "?raceKey=20260912-12-1",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-prediction-history",
+      "query": "?from=20260801&to=20260801",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-collector-status",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-prediction-history",
+      "query": "?from=20260912&to=20260912",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-saved-prediction-summary",
+      "query": "?date=20260912",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-collector-status",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-prediction-history",
+      "query": "?from=20260912&to=20260912",
+      "method": "GET"
+    }
+  ],
+  "existingMeetingHooks": [
+    {
+      "path": "/.netlify/functions/keirin-result",
+      "query": "?date=20260912&venueCode=12&venueName=%E9%9D%92%E6%A3%AE&raceNo=2",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-result",
+      "query": "?date=20260912&venueCode=12&venueName=%E9%9D%92%E6%A3%AE&raceNo=3",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-result",
+      "query": "?date=20260912&venueCode=12&venueName=%E9%9D%92%E6%A3%AE&raceNo=4",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-result",
+      "query": "?date=20260912&venueCode=12&venueName=%E9%9D%92%E6%A3%AE&raceNo=5",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-result",
+      "query": "?date=20260912&venueCode=12&venueName=%E9%9D%92%E6%A3%AE&raceNo=2",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-result",
+      "query": "?date=20260912&venueCode=12&venueName=%E9%9D%92%E6%A3%AE&raceNo=3",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-result",
+      "query": "?date=20260912&venueCode=12&venueName=%E9%9D%92%E6%A3%AE&raceNo=4",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-result",
+      "query": "?date=20260912&venueCode=12&venueName=%E9%9D%92%E6%A3%AE&raceNo=5",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-result",
+      "query": "?date=20260912&venueCode=12&venueName=%E9%9D%92%E6%A3%AE&raceNo=2",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-result",
+      "query": "?date=20260912&venueCode=12&venueName=%E9%9D%92%E6%A3%AE&raceNo=3",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-result",
+      "query": "?date=20260912&venueCode=12&venueName=%E9%9D%92%E6%A3%AE&raceNo=4",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-result",
+      "query": "?date=20260912&venueCode=12&venueName=%E9%9D%92%E6%A3%AE&raceNo=5",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-result",
+      "query": "?date=20260912&venueCode=12&venueName=%E9%9D%92%E6%A3%AE&raceNo=2",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-result",
+      "query": "?date=20260912&venueCode=12&venueName=%E9%9D%92%E6%A3%AE&raceNo=3",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-result",
+      "query": "?date=20260912&venueCode=12&venueName=%E9%9D%92%E6%A3%AE&raceNo=4",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-result",
+      "query": "?date=20260912&venueCode=12&venueName=%E9%9D%92%E6%A3%AE&raceNo=5",
+      "method": "GET"
+    }
+  ],
+  "requests": [
+    {
+      "path": "/.netlify/functions/keirin-saved-prediction-summary",
+      "query": "?date=20260912",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-collector-status",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-prediction-history",
+      "query": "?from=20260912&to=20260912",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-saved-prediction-detail",
+      "query": "?raceKey=20260912-12-1",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-sealed-result",
+      "query": "?raceKey=20260912-12-1",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-prediction-history",
+      "query": "?from=20260801&to=20260801",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-collector-status",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-prediction-history",
+      "query": "?from=20260912&to=20260912",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-saved-prediction-summary",
+      "query": "?date=20260912",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-collector-status",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-prediction-history",
+      "query": "?from=20260912&to=20260912",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-discover",
+      "query": "?date=20260912",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-result",
+      "query": "?date=20260912&venueCode=12&venueName=%E9%9D%92%E6%A3%AE&raceNo=2",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-result",
+      "query": "?date=20260912&venueCode=12&venueName=%E9%9D%92%E6%A3%AE&raceNo=3",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-result",
+      "query": "?date=20260912&venueCode=12&venueName=%E9%9D%92%E6%A3%AE&raceNo=4",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-collector-status",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-result",
+      "query": "?date=20260912&venueCode=12&venueName=%E9%9D%92%E6%A3%AE&raceNo=5",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-discover",
+      "query": "?date=20260912",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-result",
+      "query": "?date=20260912&venueCode=12&venueName=%E9%9D%92%E6%A3%AE&raceNo=2",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-result",
+      "query": "?date=20260912&venueCode=12&venueName=%E9%9D%92%E6%A3%AE&raceNo=3",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-result",
+      "query": "?date=20260912&venueCode=12&venueName=%E9%9D%92%E6%A3%AE&raceNo=4",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-collector-status",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-result",
+      "query": "?date=20260912&venueCode=12&venueName=%E9%9D%92%E6%A3%AE&raceNo=5",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-prediction-history",
+      "query": "?from=20260912&to=20260912",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-saved-prediction-summary",
+      "query": "?date=20260912",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-collector-status",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-prediction-history",
+      "query": "?from=20260912&to=20260912",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-saved-prediction-detail",
+      "query": "?raceKey=20260912-12-1",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-sealed-result",
+      "query": "?raceKey=20260912-12-1",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-prediction-history",
+      "query": "?from=20260801&to=20260801",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-collector-status",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-prediction-history",
+      "query": "?from=20260912&to=20260912",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-saved-prediction-summary",
+      "query": "?date=20260912",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-collector-status",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-prediction-history",
+      "query": "?from=20260912&to=20260912",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-discover",
+      "query": "?date=20260912",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-result",
+      "query": "?date=20260912&venueCode=12&venueName=%E9%9D%92%E6%A3%AE&raceNo=2",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-result",
+      "query": "?date=20260912&venueCode=12&venueName=%E9%9D%92%E6%A3%AE&raceNo=3",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-result",
+      "query": "?date=20260912&venueCode=12&venueName=%E9%9D%92%E6%A3%AE&raceNo=4",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-collector-status",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-result",
+      "query": "?date=20260912&venueCode=12&venueName=%E9%9D%92%E6%A3%AE&raceNo=5",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-discover",
+      "query": "?date=20260912",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-result",
+      "query": "?date=20260912&venueCode=12&venueName=%E9%9D%92%E6%A3%AE&raceNo=2",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-result",
+      "query": "?date=20260912&venueCode=12&venueName=%E9%9D%92%E6%A3%AE&raceNo=3",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-result",
+      "query": "?date=20260912&venueCode=12&venueName=%E9%9D%92%E6%A3%AE&raceNo=4",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-collector-status",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-result",
+      "query": "?date=20260912&venueCode=12&venueName=%E9%9D%92%E6%A3%AE&raceNo=5",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-prediction-history",
+      "query": "?from=20260912&to=20260912",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-saved-prediction-summary",
+      "query": "?date=20260912",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-collector-status",
+      "query": "",
+      "method": "GET"
+    },
+    {
+      "path": "/.netlify/functions/keirin-prediction-history",
+      "query": "?from=20260912&to=20260912",
+      "method": "GET"
+    }
+  ]
+}
