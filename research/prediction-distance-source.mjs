@@ -52,7 +52,13 @@ function compact(predictionResponse, resultResponse) {
       purchaseReason: terminal.purchaseReason ?? life.purchaseReason ?? null,
       betClass: terminal.betClass ?? life.betClass ?? null,
       thick: terminal.thickQualified === true || terminal.qualification === 'THICK_PREDICTION_QUALIFIED',
-      dominantBranchId: terminal.dominantBranchId ?? life.dominantBranchId ?? null
+      dominantBranchId: terminal.dominantBranchId ?? life.dominantBranchId ?? null,
+      terminalScore: Number.isFinite(Number(terminal.terminalScore)) ? Number(terminal.terminalScore) : null,
+      relativeProbability: Number.isFinite(Number(terminal.relativeProbability)) ? Number(terminal.relativeProbability) : null,
+      evidenceScore: Number.isFinite(Number(terminal.evidenceScore)) ? Number(terminal.evidenceScore) : null,
+      scenarioFamilySupport: Number.isFinite(Number(terminal.scenarioFamilySupport)) ? Number(terminal.scenarioFamilySupport) : null,
+      scenarioFamilyProbability: Number.isFinite(Number(terminal.scenarioFamilyProbability)) ? Number(terminal.scenarioFamilyProbability) : null,
+      relativeConditionPenalty: Number.isFinite(Number(terminal.relativeConditionPenalty)) ? Number(terminal.relativeConditionPenalty) : null
     };
   });
   const plan = prediction.canonicalPurchasePlan?.standardTickets || prediction.standardPurchasePlan || prediction.purchasePlan || [];
@@ -74,7 +80,7 @@ function compact(predictionResponse, resultResponse) {
         reason: race.lineDataReason || prediction.lineDataReason || null,
         lines: (prediction.lines || []).map(line => ({ type: line.type || null, members: (line.members || []).map(member => Number(member.number || member.id)).filter(Number.isFinite) })) },
       riderScores: (prediction.scored || []).map(row => ({ riderId: row.registration || row.riderId || row.id || null, number: Number(row.number), name: row.name || null,
-        score: Number(row.roleScores?.first), scoreSource: 'prediction.scored[].roleScores.first' })).filter(row => Number.isFinite(row.number) && Number.isFinite(row.score)), terminals }
+        score: Number(row.roleScores?.first), scoreSource: 'prediction.scored[].roleScores.first', scoreTrace: row.scoreTrace || null })).filter(row => Number.isFinite(row.number) && Number.isFinite(row.score)), terminals }
   };
 }
 

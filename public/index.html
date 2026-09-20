@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#08111f">
   <title>チャリ猫</title>
   <link rel="manifest" href="manifest.json?v=50">
-  <link rel="stylesheet" href="styles.css?v=52">
+  <link rel="stylesheet" href="styles.css?v=53">
 </head>
 <body>
 <header class="appHeader">
@@ -42,6 +42,7 @@
     <section id="validationOverview" class="card compact validationHero"><p class="muted">日次検証の状態を読み取っています。</p></section>
     <section id="validationDaily" class="card compact"><div class="sectionHead"><h2>最新日次</h2><span class="pill">要約</span></div></section>
     <details id="validationTerminalSurvival" class="card compact validationDetails"><summary>正解terminalの生存・脱落</summary><div id="validationTerminalSurvivalBody"></div></details>
+    <details id="validationShadowLab" class="card compact validationDetails"><summary>SHADOW補正研究</summary><div id="validationShadowLabBody"><p class="muted">次回の日次検証から観測します。</p></div></details>
     <section id="validationMilestones" class="card compact"><div class="sectionHead"><h2>節目</h2><span class="pill">観測のみ</span></div></section>
     <details id="validationDetails" class="card compact validationDetails"><summary>詳細を見る</summary><div id="validationDetailBody"></div></details>
     <details id="validationStructure" class="card compact validationDetails"><summary>構造別傾向</summary><div id="validationStructureBody"></div></details>
@@ -100,5 +101,5 @@
   <section id="loading" class="screen"><section class="card loadingCard"><div class="spinner"></div><h1 id="loadingTitle">取得中</h1><p id="loadingMessage">公式データを確認しています。</p></section></section>
   <section id="error" class="screen"><section class="card errorCard"><div class="errorIcon">!</div><h1 id="errorTitle">取得失敗</h1><p id="errorMessage"></p><button id="retryBtn" class="primary">再試行</button><button id="errorHome" class="secondary">ホームへ</button></section></section>
 </main>
-<script type="module" src="app.mjs?v=66"></script>
+<script type="module" src="app.mjs?v=67"></script>
 </body></html>

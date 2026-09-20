@@ -1,0 +1,1278 @@
+{
+  "schemaVersion": "SHADOW_PARAMETER_LAB_INITIAL_EVALUATION_V1",
+  "generatedAt": "2026-09-20T12:31:21.118Z",
+  "sourceCohortHash": "eae2637c34416d9ebab9a7dfdcebdb92a85b85e7f97d106b54bab85dd56d667b",
+  "markTopN": {
+    "schemaVersion": "MARK_TOP_N_EVALUATION_V1",
+    "evaluatedRaces": 100,
+    "unknownRaces": 0,
+    "unknown": [],
+    "cumulative": {
+      "◎": {
+        "n": 1,
+        "evaluatedRaces": 100,
+        "winnerCapture": 36,
+        "winnerCaptureRate": 0.36,
+        "actualTop3Coverage": {
+          "0": 29,
+          "1": 71,
+          "2": 0,
+          "3": 0
+        },
+        "exactTop3AllCovered": 0,
+        "exactTop3AllCoveredRate": 0
+      },
+      "◎○": {
+        "n": 2,
+        "evaluatedRaces": 100,
+        "winnerCapture": 53,
+        "winnerCaptureRate": 0.53,
+        "actualTop3Coverage": {
+          "0": 10,
+          "1": 55,
+          "2": 35,
+          "3": 0
+        },
+        "exactTop3AllCovered": 0,
+        "exactTop3AllCoveredRate": 0
+      },
+      "◎○▲": {
+        "n": 3,
+        "evaluatedRaces": 100,
+        "winnerCapture": 71,
+        "winnerCaptureRate": 0.71,
+        "actualTop3Coverage": {
+          "0": 4,
+          "1": 28,
+          "2": 56,
+          "3": 12
+        },
+        "exactTop3AllCovered": 12,
+        "exactTop3AllCoveredRate": 0.12
+      },
+      "◎○▲△": {
+        "n": 4,
+        "evaluatedRaces": 100,
+        "winnerCapture": 88,
+        "winnerCaptureRate": 0.88,
+        "actualTop3Coverage": {
+          "0": 0,
+          "1": 12,
+          "2": 55,
+          "3": 33
+        },
+        "exactTop3AllCovered": 33,
+        "exactTop3AllCoveredRate": 0.33
+      },
+      "◎○▲△☆": {
+        "n": 5,
+        "evaluatedRaces": 100,
+        "winnerCapture": 91,
+        "winnerCaptureRate": 0.91,
+        "actualTop3Coverage": {
+          "0": 0,
+          "1": 4,
+          "2": 42,
+          "3": 54
+        },
+        "exactTop3AllCovered": 54,
+        "exactTop3AllCoveredRate": 0.54
+      }
+    },
+    "finishPositionDistribution": {
+      "1": {
+        "◎": 36,
+        "○": 17,
+        "▲": 18,
+        "△": 17,
+        "☆": 3,
+        "圏外": 9
+      },
+      "2": {
+        "◎": 21,
+        "○": 23,
+        "▲": 22,
+        "△": 18,
+        "☆": 6,
+        "圏外": 10
+      },
+      "3": {
+        "◎": 14,
+        "○": 14,
+        "▲": 11,
+        "△": 10,
+        "☆": 20,
+        "圏外": 31
+      }
+    },
+    "special": {
+      "firstMarkWinnerRate": 0.36,
+      "firstMarkTop3Rate": 0.71,
+      "top2WinnerCaptureRate": 0.53,
+      "top3WinnerCaptureRate": 0.71,
+      "top3AllCoveredRate": 0.12,
+      "top5AllCoveredRate": 0.54
+    }
+  },
+  "shadow": {
+    "schemaVersion": "SHADOW_PARAMETER_LAB_V1",
+    "generatedAt": "2026-09-20T12:31:21.117Z",
+    "parameterAudit": [
+      {
+        "name": "RIDER_FIRST_RECENT_WEIGHT",
+        "classification": "SHADOW_READY",
+        "producer": "keirin-scoring roleScore(first)",
+        "consumer": "rider first-place ranking",
+        "reason": "saved scoreTrace contains prediction-time values, availability and weights"
+      },
+      {
+        "name": "TERMINAL_EVIDENCE_WEIGHT",
+        "classification": "SHADOW_READY",
+        "producer": "purchase classify terminalScore",
+        "consumer": "terminal ranking",
+        "reason": "saved relativeProbability and evidenceScore independently replay the current 0.65/0.35 formula"
+      },
+      {
+        "name": "RIDER_RELATIVE_SCORE_CORRECTION",
+        "classification": "NOT_IMPLEMENTED",
+        "reason": "no independent production correction with this name exists"
+      },
+      {
+        "name": "RACE_POINT_DIFF_CORRECTION",
+        "classification": "NOT_IMPLEMENTED",
+        "reason": "no independent production correction with this name exists"
+      },
+      {
+        "name": "SAME_LINE_ROLE_CORRECTION",
+        "classification": "NOT_IMPLEMENTED",
+        "reason": "current conditional compatibility is neutral unless logically contradictory"
+      },
+      {
+        "name": "PAIR_DIRECTION_CORRECTION",
+        "classification": "NEEDS_TRACE",
+        "reason": "pair rank is saved but the complete pre-merge branch contribution trace is not"
+      },
+      {
+        "name": "SECOND_PLACE_COMPATIBILITY",
+        "classification": "NEEDS_TRACE",
+        "reason": "saved terminal snapshot cannot independently replay every merged branch path"
+      },
+      {
+        "name": "THIRD_CONDITIONAL_CORRECTION",
+        "classification": "NEEDS_TRACE",
+        "reason": "dominant trace alone is insufficient for merged terminal probability replay"
+      },
+      {
+        "name": "SCENARIO_SUPPORT_CORRECTION",
+        "classification": "NOT_INDEPENDENT",
+        "reason": "scenario support is coupled to branch generation and family classification"
+      },
+      {
+        "name": "SCENARIO_COUNTER_EVIDENCE",
+        "classification": "NOT_IMPLEMENTED",
+        "reason": "no independent production correction found"
+      },
+      {
+        "name": "TERMINAL_RELATIVE_CONDITION",
+        "classification": "NEEDS_TRACE",
+        "reason": "per-contribution relative-condition trace is not retained in the saved response"
+      },
+      {
+        "name": "RECOMMENDATION_SCORE",
+        "classification": "UNSAFE_TO_REPLAY",
+        "reason": "depends on final purchase and odds gates"
+      },
+      {
+        "name": "THICK_SCORE",
+        "classification": "UNSAFE_TO_REPLAY",
+        "reason": "depends on final purchase qualification and cannot be varied independently"
+      }
+    ],
+    "activeVariants": {
+      "RIDER_FIRST_RECENT_WEIGHT": [
+        0.2,
+        0.24,
+        0.28,
+        0.32,
+        0.36
+      ],
+      "TERMINAL_EVIDENCE_WEIGHT": [
+        0.25,
+        0.3,
+        0.35,
+        0.4,
+        0.45
+      ]
+    },
+    "cohorts": {
+      "exploration": [
+        "20260912-53-2",
+        "20260912-46-2",
+        "20260912-53-3",
+        "20260912-46-3",
+        "20260912-53-4",
+        "20260912-46-4",
+        "20260912-53-5",
+        "20260912-53-6",
+        "20260912-53-7",
+        "20260912-46-7",
+        "20260912-53-9",
+        "20260912-46-10",
+        "20260912-53-11",
+        "20260912-85-1",
+        "20260912-85-2",
+        "20260912-34-2",
+        "20260912-53-12",
+        "20260912-85-3",
+        "20260912-34-3",
+        "20260912-85-4",
+        "20260912-34-4",
+        "20260912-85-5",
+        "20260912-34-5",
+        "20260912-85-6",
+        "20260912-34-6",
+        "20260912-85-7",
+        "20260912-34-7",
+        "20260912-85-8",
+        "20260912-85-9",
+        "20260912-34-9",
+        "20260916-13-6",
+        "20260916-86-7",
+        "20260916-13-7",
+        "20260916-86-8",
+        "20260916-13-8",
+        "20260916-86-9",
+        "20260916-86-10",
+        "20260916-13-10",
+        "20260916-86-11",
+        "20260916-13-11",
+        "20260916-86-12",
+        "20260916-12-1",
+        "20260916-37-1",
+        "20260916-37-2",
+        "20260916-37-3",
+        "20260916-37-4",
+        "20260916-12-5",
+        "20260916-37-5",
+        "20260916-37-6",
+        "20260916-37-7",
+        "20260916-37-8",
+        "20260916-12-9",
+        "20260916-37-9",
+        "20260917-84-1",
+        "20260917-73-1",
+        "20260917-84-2",
+        "20260917-84-3",
+        "20260917-84-4",
+        "20260917-84-5",
+        "20260917-73-5"
+      ],
+      "confirmation": [
+        "20260917-84-6",
+        "20260917-73-6",
+        "20260917-84-7",
+        "20260917-63-1",
+        "20260917-28-1",
+        "20260917-63-2",
+        "20260917-63-3",
+        "20260917-63-5",
+        "20260917-28-5",
+        "20260917-28-6",
+        "20260917-28-9",
+        "20260917-63-10",
+        "20260917-28-10",
+        "20260917-63-11",
+        "20260917-86-1",
+        "20260917-63-12",
+        "20260917-86-3",
+        "20260917-13-3",
+        "20260917-86-4",
+        "20260917-13-4"
+      ],
+      "finalHoldout": [
+        "20260917-86-5",
+        "20260917-86-6",
+        "20260917-13-6",
+        "20260917-86-7",
+        "20260917-13-7",
+        "20260917-86-8",
+        "20260917-13-8",
+        "20260917-86-9",
+        "20260917-13-9",
+        "20260917-86-10",
+        "20260917-13-10",
+        "20260917-86-11",
+        "20260917-13-11",
+        "20260917-86-12",
+        "20260917-83-1",
+        "20260917-34-2",
+        "20260917-83-3",
+        "20260917-34-5",
+        "20260917-83-7",
+        "20260917-83-9"
+      ],
+      "protectedFinalUsed": 0,
+      "evaluatedRaces": 80
+    },
+    "results": [
+      {
+        "parameterName": "RIDER_FIRST_RECENT_WEIGHT",
+        "variantId": "MINUS_0.08",
+        "baselineValue": 0.28,
+        "shadowValue": 0.2,
+        "state": "DATA_NOT_ENOUGH",
+        "metrics": {
+          "races": 80,
+          "winnerTop1": 26,
+          "winnerTop2": 46,
+          "winnerTop3": 57,
+          "winnerTop5": 75,
+          "top3AllCovered": 6,
+          "marks": {
+            "schemaVersion": "MARK_TOP_N_EVALUATION_V1",
+            "evaluatedRaces": 80,
+            "unknownRaces": 0,
+            "unknown": [],
+            "cumulative": {
+              "◎": {
+                "n": 1,
+                "evaluatedRaces": 80,
+                "winnerCapture": 26,
+                "winnerCaptureRate": 0.325,
+                "actualTop3Coverage": {
+                  "0": 26,
+                  "1": 54,
+                  "2": 0,
+                  "3": 0
+                },
+                "exactTop3AllCovered": 0,
+                "exactTop3AllCoveredRate": 0
+              },
+              "◎○": {
+                "n": 2,
+                "evaluatedRaces": 80,
+                "winnerCapture": 46,
+                "winnerCaptureRate": 0.575,
+                "actualTop3Coverage": {
+                  "0": 9,
+                  "1": 44,
+                  "2": 27,
+                  "3": 0
+                },
+                "exactTop3AllCovered": 0,
+                "exactTop3AllCoveredRate": 0
+              },
+              "◎○▲": {
+                "n": 3,
+                "evaluatedRaces": 80,
+                "winnerCapture": 57,
+                "winnerCaptureRate": 0.7125,
+                "actualTop3Coverage": {
+                  "0": 6,
+                  "1": 21,
+                  "2": 47,
+                  "3": 6
+                },
+                "exactTop3AllCovered": 6,
+                "exactTop3AllCoveredRate": 0.075
+              },
+              "◎○▲△": {
+                "n": 4,
+                "evaluatedRaces": 80,
+                "winnerCapture": 71,
+                "winnerCaptureRate": 0.8875,
+                "actualTop3Coverage": {
+                  "0": 0,
+                  "1": 13,
+                  "2": 40,
+                  "3": 27
+                },
+                "exactTop3AllCovered": 27,
+                "exactTop3AllCoveredRate": 0.3375
+              },
+              "◎○▲△☆": {
+                "n": 5,
+                "evaluatedRaces": 80,
+                "winnerCapture": 75,
+                "winnerCaptureRate": 0.9375,
+                "actualTop3Coverage": {
+                  "0": 0,
+                  "1": 6,
+                  "2": 32,
+                  "3": 42
+                },
+                "exactTop3AllCovered": 42,
+                "exactTop3AllCoveredRate": 0.525
+              }
+            },
+            "finishPositionDistribution": {
+              "1": {
+                "◎": 26,
+                "○": 20,
+                "▲": 11,
+                "△": 14,
+                "☆": 4,
+                "圏外": 5
+              },
+              "2": {
+                "◎": 14,
+                "○": 13,
+                "▲": 19,
+                "△": 18,
+                "☆": 7,
+                "圏外": 9
+              },
+              "3": {
+                "◎": 14,
+                "○": 11,
+                "▲": 5,
+                "△": 9,
+                "☆": 11,
+                "圏外": 30
+              }
+            },
+            "special": {
+              "firstMarkWinnerRate": 0.325,
+              "firstMarkTop3Rate": 0.675,
+              "top2WinnerCaptureRate": 0.575,
+              "top3WinnerCaptureRate": 0.7125,
+              "top3AllCoveredRate": 0.075,
+              "top5AllCoveredRate": 0.525
+            }
+          }
+        },
+        "cohortMetrics": {
+          "EXPLORATION": {
+            "races": 60,
+            "winnerTop1": 18,
+            "winnerTop3": 45
+          },
+          "CONFIRMATION": {
+            "races": 20,
+            "winnerTop1": 8,
+            "winnerTop3": 12
+          }
+        }
+      },
+      {
+        "parameterName": "RIDER_FIRST_RECENT_WEIGHT",
+        "variantId": "MINUS_0.04",
+        "baselineValue": 0.28,
+        "shadowValue": 0.24,
+        "state": "DATA_NOT_ENOUGH",
+        "metrics": {
+          "races": 80,
+          "winnerTop1": 27,
+          "winnerTop2": 43,
+          "winnerTop3": 55,
+          "winnerTop5": 75,
+          "top3AllCovered": 8,
+          "marks": {
+            "schemaVersion": "MARK_TOP_N_EVALUATION_V1",
+            "evaluatedRaces": 80,
+            "unknownRaces": 0,
+            "unknown": [],
+            "cumulative": {
+              "◎": {
+                "n": 1,
+                "evaluatedRaces": 80,
+                "winnerCapture": 27,
+                "winnerCaptureRate": 0.3375,
+                "actualTop3Coverage": {
+                  "0": 26,
+                  "1": 54,
+                  "2": 0,
+                  "3": 0
+                },
+                "exactTop3AllCovered": 0,
+                "exactTop3AllCoveredRate": 0
+              },
+              "◎○": {
+                "n": 2,
+                "evaluatedRaces": 80,
+                "winnerCapture": 43,
+                "winnerCaptureRate": 0.5375,
+                "actualTop3Coverage": {
+                  "0": 11,
+                  "1": 42,
+                  "2": 27,
+                  "3": 0
+                },
+                "exactTop3AllCovered": 0,
+                "exactTop3AllCoveredRate": 0
+              },
+              "◎○▲": {
+                "n": 3,
+                "evaluatedRaces": 80,
+                "winnerCapture": 55,
+                "winnerCaptureRate": 0.6875,
+                "actualTop3Coverage": {
+                  "0": 5,
+                  "1": 21,
+                  "2": 46,
+                  "3": 8
+                },
+                "exactTop3AllCovered": 8,
+                "exactTop3AllCoveredRate": 0.1
+              },
+              "◎○▲△": {
+                "n": 4,
+                "evaluatedRaces": 80,
+                "winnerCapture": 72,
+                "winnerCaptureRate": 0.9,
+                "actualTop3Coverage": {
+                  "0": 0,
+                  "1": 12,
+                  "2": 43,
+                  "3": 25
+                },
+                "exactTop3AllCovered": 25,
+                "exactTop3AllCoveredRate": 0.3125
+              },
+              "◎○▲△☆": {
+                "n": 5,
+                "evaluatedRaces": 80,
+                "winnerCapture": 75,
+                "winnerCaptureRate": 0.9375,
+                "actualTop3Coverage": {
+                  "0": 0,
+                  "1": 3,
+                  "2": 37,
+                  "3": 40
+                },
+                "exactTop3AllCovered": 40,
+                "exactTop3AllCoveredRate": 0.5
+              }
+            },
+            "finishPositionDistribution": {
+              "1": {
+                "◎": 27,
+                "○": 16,
+                "▲": 12,
+                "△": 17,
+                "☆": 3,
+                "圏外": 5
+              },
+              "2": {
+                "◎": 14,
+                "○": 15,
+                "▲": 21,
+                "△": 14,
+                "☆": 7,
+                "圏外": 9
+              },
+              "3": {
+                "◎": 13,
+                "○": 11,
+                "▲": 8,
+                "△": 5,
+                "☆": 14,
+                "圏外": 29
+              }
+            },
+            "special": {
+              "firstMarkWinnerRate": 0.3375,
+              "firstMarkTop3Rate": 0.675,
+              "top2WinnerCaptureRate": 0.5375,
+              "top3WinnerCaptureRate": 0.6875,
+              "top3AllCoveredRate": 0.1,
+              "top5AllCoveredRate": 0.5
+            }
+          }
+        },
+        "cohortMetrics": {
+          "EXPLORATION": {
+            "races": 60,
+            "winnerTop1": 18,
+            "winnerTop3": 42
+          },
+          "CONFIRMATION": {
+            "races": 20,
+            "winnerTop1": 9,
+            "winnerTop3": 13
+          }
+        }
+      },
+      {
+        "parameterName": "RIDER_FIRST_RECENT_WEIGHT",
+        "variantId": "BASELINE",
+        "baselineValue": 0.28,
+        "shadowValue": 0.28,
+        "state": "ACTIVE",
+        "metrics": {
+          "races": 80,
+          "winnerTop1": 26,
+          "winnerTop2": 41,
+          "winnerTop3": 55,
+          "winnerTop5": 74,
+          "top3AllCovered": 7,
+          "marks": {
+            "schemaVersion": "MARK_TOP_N_EVALUATION_V1",
+            "evaluatedRaces": 80,
+            "unknownRaces": 0,
+            "unknown": [],
+            "cumulative": {
+              "◎": {
+                "n": 1,
+                "evaluatedRaces": 80,
+                "winnerCapture": 26,
+                "winnerCaptureRate": 0.325,
+                "actualTop3Coverage": {
+                  "0": 28,
+                  "1": 52,
+                  "2": 0,
+                  "3": 0
+                },
+                "exactTop3AllCovered": 0,
+                "exactTop3AllCoveredRate": 0
+              },
+              "◎○": {
+                "n": 2,
+                "evaluatedRaces": 80,
+                "winnerCapture": 41,
+                "winnerCaptureRate": 0.5125,
+                "actualTop3Coverage": {
+                  "0": 10,
+                  "1": 45,
+                  "2": 25,
+                  "3": 0
+                },
+                "exactTop3AllCovered": 0,
+                "exactTop3AllCoveredRate": 0
+              },
+              "◎○▲": {
+                "n": 3,
+                "evaluatedRaces": 80,
+                "winnerCapture": 55,
+                "winnerCaptureRate": 0.6875,
+                "actualTop3Coverage": {
+                  "0": 4,
+                  "1": 23,
+                  "2": 46,
+                  "3": 7
+                },
+                "exactTop3AllCovered": 7,
+                "exactTop3AllCoveredRate": 0.0875
+              },
+              "◎○▲△": {
+                "n": 4,
+                "evaluatedRaces": 80,
+                "winnerCapture": 71,
+                "winnerCaptureRate": 0.8875,
+                "actualTop3Coverage": {
+                  "0": 0,
+                  "1": 12,
+                  "2": 45,
+                  "3": 23
+                },
+                "exactTop3AllCovered": 23,
+                "exactTop3AllCoveredRate": 0.2875
+              },
+              "◎○▲△☆": {
+                "n": 5,
+                "evaluatedRaces": 80,
+                "winnerCapture": 74,
+                "winnerCaptureRate": 0.925,
+                "actualTop3Coverage": {
+                  "0": 0,
+                  "1": 4,
+                  "2": 36,
+                  "3": 40
+                },
+                "exactTop3AllCovered": 40,
+                "exactTop3AllCoveredRate": 0.5
+              }
+            },
+            "finishPositionDistribution": {
+              "1": {
+                "◎": 26,
+                "○": 15,
+                "▲": 14,
+                "△": 16,
+                "☆": 3,
+                "圏外": 6
+              },
+              "2": {
+                "◎": 14,
+                "○": 17,
+                "▲": 18,
+                "△": 15,
+                "☆": 6,
+                "圏外": 10
+              },
+              "3": {
+                "◎": 12,
+                "○": 11,
+                "▲": 9,
+                "△": 4,
+                "☆": 16,
+                "圏外": 28
+              }
+            },
+            "special": {
+              "firstMarkWinnerRate": 0.325,
+              "firstMarkTop3Rate": 0.65,
+              "top2WinnerCaptureRate": 0.5125,
+              "top3WinnerCaptureRate": 0.6875,
+              "top3AllCoveredRate": 0.0875,
+              "top5AllCoveredRate": 0.5
+            }
+          }
+        },
+        "cohortMetrics": {
+          "EXPLORATION": {
+            "races": 60,
+            "winnerTop1": 17,
+            "winnerTop3": 42
+          },
+          "CONFIRMATION": {
+            "races": 20,
+            "winnerTop1": 9,
+            "winnerTop3": 13
+          }
+        }
+      },
+      {
+        "parameterName": "RIDER_FIRST_RECENT_WEIGHT",
+        "variantId": "PLUS_0.04",
+        "baselineValue": 0.28,
+        "shadowValue": 0.32,
+        "state": "DATA_NOT_ENOUGH",
+        "metrics": {
+          "races": 80,
+          "winnerTop1": 26,
+          "winnerTop2": 43,
+          "winnerTop3": 58,
+          "winnerTop5": 74,
+          "top3AllCovered": 7,
+          "marks": {
+            "schemaVersion": "MARK_TOP_N_EVALUATION_V1",
+            "evaluatedRaces": 80,
+            "unknownRaces": 0,
+            "unknown": [],
+            "cumulative": {
+              "◎": {
+                "n": 1,
+                "evaluatedRaces": 80,
+                "winnerCapture": 26,
+                "winnerCaptureRate": 0.325,
+                "actualTop3Coverage": {
+                  "0": 26,
+                  "1": 54,
+                  "2": 0,
+                  "3": 0
+                },
+                "exactTop3AllCovered": 0,
+                "exactTop3AllCoveredRate": 0
+              },
+              "◎○": {
+                "n": 2,
+                "evaluatedRaces": 80,
+                "winnerCapture": 43,
+                "winnerCaptureRate": 0.5375,
+                "actualTop3Coverage": {
+                  "0": 10,
+                  "1": 43,
+                  "2": 27,
+                  "3": 0
+                },
+                "exactTop3AllCovered": 0,
+                "exactTop3AllCoveredRate": 0
+              },
+              "◎○▲": {
+                "n": 3,
+                "evaluatedRaces": 80,
+                "winnerCapture": 58,
+                "winnerCaptureRate": 0.725,
+                "actualTop3Coverage": {
+                  "0": 2,
+                  "1": 25,
+                  "2": 46,
+                  "3": 7
+                },
+                "exactTop3AllCovered": 7,
+                "exactTop3AllCoveredRate": 0.0875
+              },
+              "◎○▲△": {
+                "n": 4,
+                "evaluatedRaces": 80,
+                "winnerCapture": 71,
+                "winnerCaptureRate": 0.8875,
+                "actualTop3Coverage": {
+                  "0": 0,
+                  "1": 12,
+                  "2": 45,
+                  "3": 23
+                },
+                "exactTop3AllCovered": 23,
+                "exactTop3AllCoveredRate": 0.2875
+              },
+              "◎○▲△☆": {
+                "n": 5,
+                "evaluatedRaces": 80,
+                "winnerCapture": 74,
+                "winnerCaptureRate": 0.925,
+                "actualTop3Coverage": {
+                  "0": 0,
+                  "1": 4,
+                  "2": 36,
+                  "3": 40
+                },
+                "exactTop3AllCovered": 40,
+                "exactTop3AllCoveredRate": 0.5
+              }
+            },
+            "finishPositionDistribution": {
+              "1": {
+                "◎": 26,
+                "○": 17,
+                "▲": 15,
+                "△": 13,
+                "☆": 3,
+                "圏外": 6
+              },
+              "2": {
+                "◎": 14,
+                "○": 17,
+                "▲": 17,
+                "△": 16,
+                "☆": 6,
+                "圏外": 10
+              },
+              "3": {
+                "◎": 14,
+                "○": 9,
+                "▲": 9,
+                "△": 4,
+                "☆": 16,
+                "圏外": 28
+              }
+            },
+            "special": {
+              "firstMarkWinnerRate": 0.325,
+              "firstMarkTop3Rate": 0.675,
+              "top2WinnerCaptureRate": 0.5375,
+              "top3WinnerCaptureRate": 0.725,
+              "top3AllCoveredRate": 0.0875,
+              "top5AllCoveredRate": 0.5
+            }
+          }
+        },
+        "cohortMetrics": {
+          "EXPLORATION": {
+            "races": 60,
+            "winnerTop1": 17,
+            "winnerTop3": 45
+          },
+          "CONFIRMATION": {
+            "races": 20,
+            "winnerTop1": 9,
+            "winnerTop3": 13
+          }
+        }
+      },
+      {
+        "parameterName": "RIDER_FIRST_RECENT_WEIGHT",
+        "variantId": "PLUS_0.08",
+        "baselineValue": 0.28,
+        "shadowValue": 0.36,
+        "state": "DATA_NOT_ENOUGH",
+        "metrics": {
+          "races": 80,
+          "winnerTop1": 25,
+          "winnerTop2": 44,
+          "winnerTop3": 58,
+          "winnerTop5": 73,
+          "top3AllCovered": 8,
+          "marks": {
+            "schemaVersion": "MARK_TOP_N_EVALUATION_V1",
+            "evaluatedRaces": 80,
+            "unknownRaces": 0,
+            "unknown": [],
+            "cumulative": {
+              "◎": {
+                "n": 1,
+                "evaluatedRaces": 80,
+                "winnerCapture": 25,
+                "winnerCaptureRate": 0.3125,
+                "actualTop3Coverage": {
+                  "0": 27,
+                  "1": 53,
+                  "2": 0,
+                  "3": 0
+                },
+                "exactTop3AllCovered": 0,
+                "exactTop3AllCoveredRate": 0
+              },
+              "◎○": {
+                "n": 2,
+                "evaluatedRaces": 80,
+                "winnerCapture": 44,
+                "winnerCaptureRate": 0.55,
+                "actualTop3Coverage": {
+                  "0": 9,
+                  "1": 42,
+                  "2": 29,
+                  "3": 0
+                },
+                "exactTop3AllCovered": 0,
+                "exactTop3AllCoveredRate": 0
+              },
+              "◎○▲": {
+                "n": 3,
+                "evaluatedRaces": 80,
+                "winnerCapture": 58,
+                "winnerCaptureRate": 0.725,
+                "actualTop3Coverage": {
+                  "0": 2,
+                  "1": 25,
+                  "2": 45,
+                  "3": 8
+                },
+                "exactTop3AllCovered": 8,
+                "exactTop3AllCoveredRate": 0.1
+              },
+              "◎○▲△": {
+                "n": 4,
+                "evaluatedRaces": 80,
+                "winnerCapture": 70,
+                "winnerCaptureRate": 0.875,
+                "actualTop3Coverage": {
+                  "0": 0,
+                  "1": 12,
+                  "2": 43,
+                  "3": 25
+                },
+                "exactTop3AllCovered": 25,
+                "exactTop3AllCoveredRate": 0.3125
+              },
+              "◎○▲△☆": {
+                "n": 5,
+                "evaluatedRaces": 80,
+                "winnerCapture": 73,
+                "winnerCaptureRate": 0.9125,
+                "actualTop3Coverage": {
+                  "0": 0,
+                  "1": 4,
+                  "2": 36,
+                  "3": 40
+                },
+                "exactTop3AllCovered": 40,
+                "exactTop3AllCoveredRate": 0.5
+              }
+            },
+            "finishPositionDistribution": {
+              "1": {
+                "◎": 25,
+                "○": 19,
+                "▲": 14,
+                "△": 12,
+                "☆": 3,
+                "圏外": 7
+              },
+              "2": {
+                "◎": 15,
+                "○": 18,
+                "▲": 16,
+                "△": 16,
+                "☆": 6,
+                "圏外": 9
+              },
+              "3": {
+                "◎": 13,
+                "○": 10,
+                "▲": 9,
+                "△": 6,
+                "☆": 14,
+                "圏外": 28
+              }
+            },
+            "special": {
+              "firstMarkWinnerRate": 0.3125,
+              "firstMarkTop3Rate": 0.6625,
+              "top2WinnerCaptureRate": 0.55,
+              "top3WinnerCaptureRate": 0.725,
+              "top3AllCoveredRate": 0.1,
+              "top5AllCoveredRate": 0.5
+            }
+          }
+        },
+        "cohortMetrics": {
+          "EXPLORATION": {
+            "races": 60,
+            "winnerTop1": 17,
+            "winnerTop3": 45
+          },
+          "CONFIRMATION": {
+            "races": 20,
+            "winnerTop1": 8,
+            "winnerTop3": 13
+          }
+        }
+      },
+      {
+        "parameterName": "TERMINAL_EVIDENCE_WEIGHT",
+        "variantId": "MINUS_0.10",
+        "baselineValue": 0.35,
+        "shadowValue": 0.25,
+        "state": "DATA_NOT_ENOUGH",
+        "metrics": {
+          "races": 80,
+          "exactMeaningfulSurvival": 5,
+          "exactCandidateSurvival": 18,
+          "exactFinalSurvival": 12,
+          "hitRate": 0.15,
+          "investment": 40500,
+          "return": 33540,
+          "roi": 0.8281481481481482,
+          "avgTickets": 5.0625,
+          "medianTickets": 2,
+          "p90Tickets": 14
+        },
+        "cohortMetrics": {
+          "EXPLORATION": {
+            "races": 60,
+            "exactMeaningfulSurvival": 4,
+            "exactCandidateSurvival": 12,
+            "exactFinalSurvival": 7,
+            "hitRate": 0.11666666666666667,
+            "investment": 28200,
+            "return": 24010,
+            "roi": 0.851418439716312,
+            "avgTickets": 4.7,
+            "medianTickets": 2,
+            "p90Tickets": 12
+          },
+          "CONFIRMATION": {
+            "races": 20,
+            "exactMeaningfulSurvival": 1,
+            "exactCandidateSurvival": 6,
+            "exactFinalSurvival": 5,
+            "hitRate": 0.25,
+            "investment": 12300,
+            "return": 9530,
+            "roi": 0.7747967479674797,
+            "avgTickets": 6.15,
+            "medianTickets": 2,
+            "p90Tickets": 24
+          }
+        }
+      },
+      {
+        "parameterName": "TERMINAL_EVIDENCE_WEIGHT",
+        "variantId": "MINUS_0.05",
+        "baselineValue": 0.35,
+        "shadowValue": 0.3,
+        "state": "DATA_NOT_ENOUGH",
+        "metrics": {
+          "races": 80,
+          "exactMeaningfulSurvival": 5,
+          "exactCandidateSurvival": 18,
+          "exactFinalSurvival": 12,
+          "hitRate": 0.15,
+          "investment": 40500,
+          "return": 33540,
+          "roi": 0.8281481481481482,
+          "avgTickets": 5.0625,
+          "medianTickets": 2,
+          "p90Tickets": 14
+        },
+        "cohortMetrics": {
+          "EXPLORATION": {
+            "races": 60,
+            "exactMeaningfulSurvival": 4,
+            "exactCandidateSurvival": 12,
+            "exactFinalSurvival": 7,
+            "hitRate": 0.11666666666666667,
+            "investment": 28200,
+            "return": 24010,
+            "roi": 0.851418439716312,
+            "avgTickets": 4.7,
+            "medianTickets": 2,
+            "p90Tickets": 12
+          },
+          "CONFIRMATION": {
+            "races": 20,
+            "exactMeaningfulSurvival": 1,
+            "exactCandidateSurvival": 6,
+            "exactFinalSurvival": 5,
+            "hitRate": 0.25,
+            "investment": 12300,
+            "return": 9530,
+            "roi": 0.7747967479674797,
+            "avgTickets": 6.15,
+            "medianTickets": 2,
+            "p90Tickets": 24
+          }
+        }
+      },
+      {
+        "parameterName": "TERMINAL_EVIDENCE_WEIGHT",
+        "variantId": "BASELINE",
+        "baselineValue": 0.35,
+        "shadowValue": 0.35,
+        "state": "ACTIVE",
+        "metrics": {
+          "races": 80,
+          "exactMeaningfulSurvival": 5,
+          "exactCandidateSurvival": 18,
+          "exactFinalSurvival": 12,
+          "hitRate": 0.15,
+          "investment": 40500,
+          "return": 33540,
+          "roi": 0.8281481481481482,
+          "avgTickets": 5.0625,
+          "medianTickets": 2,
+          "p90Tickets": 14
+        },
+        "cohortMetrics": {
+          "EXPLORATION": {
+            "races": 60,
+            "exactMeaningfulSurvival": 4,
+            "exactCandidateSurvival": 12,
+            "exactFinalSurvival": 7,
+            "hitRate": 0.11666666666666667,
+            "investment": 28200,
+            "return": 24010,
+            "roi": 0.851418439716312,
+            "avgTickets": 4.7,
+            "medianTickets": 2,
+            "p90Tickets": 12
+          },
+          "CONFIRMATION": {
+            "races": 20,
+            "exactMeaningfulSurvival": 1,
+            "exactCandidateSurvival": 6,
+            "exactFinalSurvival": 5,
+            "hitRate": 0.25,
+            "investment": 12300,
+            "return": 9530,
+            "roi": 0.7747967479674797,
+            "avgTickets": 6.15,
+            "medianTickets": 2,
+            "p90Tickets": 24
+          }
+        }
+      },
+      {
+        "parameterName": "TERMINAL_EVIDENCE_WEIGHT",
+        "variantId": "PLUS_0.05",
+        "baselineValue": 0.35,
+        "shadowValue": 0.4,
+        "state": "DATA_NOT_ENOUGH",
+        "metrics": {
+          "races": 80,
+          "exactMeaningfulSurvival": 5,
+          "exactCandidateSurvival": 18,
+          "exactFinalSurvival": 12,
+          "hitRate": 0.15,
+          "investment": 40500,
+          "return": 33540,
+          "roi": 0.8281481481481482,
+          "avgTickets": 5.0625,
+          "medianTickets": 2,
+          "p90Tickets": 14
+        },
+        "cohortMetrics": {
+          "EXPLORATION": {
+            "races": 60,
+            "exactMeaningfulSurvival": 4,
+            "exactCandidateSurvival": 12,
+            "exactFinalSurvival": 7,
+            "hitRate": 0.11666666666666667,
+            "investment": 28200,
+            "return": 24010,
+            "roi": 0.851418439716312,
+            "avgTickets": 4.7,
+            "medianTickets": 2,
+            "p90Tickets": 12
+          },
+          "CONFIRMATION": {
+            "races": 20,
+            "exactMeaningfulSurvival": 1,
+            "exactCandidateSurvival": 6,
+            "exactFinalSurvival": 5,
+            "hitRate": 0.25,
+            "investment": 12300,
+            "return": 9530,
+            "roi": 0.7747967479674797,
+            "avgTickets": 6.15,
+            "medianTickets": 2,
+            "p90Tickets": 24
+          }
+        }
+      },
+      {
+        "parameterName": "TERMINAL_EVIDENCE_WEIGHT",
+        "variantId": "PLUS_0.10",
+        "baselineValue": 0.35,
+        "shadowValue": 0.45,
+        "state": "DATA_NOT_ENOUGH",
+        "metrics": {
+          "races": 80,
+          "exactMeaningfulSurvival": 5,
+          "exactCandidateSurvival": 18,
+          "exactFinalSurvival": 12,
+          "hitRate": 0.15,
+          "investment": 40500,
+          "return": 33540,
+          "roi": 0.8281481481481482,
+          "avgTickets": 5.0625,
+          "medianTickets": 2,
+          "p90Tickets": 14
+        },
+        "cohortMetrics": {
+          "EXPLORATION": {
+            "races": 60,
+            "exactMeaningfulSurvival": 4,
+            "exactCandidateSurvival": 12,
+            "exactFinalSurvival": 7,
+            "hitRate": 0.11666666666666667,
+            "investment": 28200,
+            "return": 24010,
+            "roi": 0.851418439716312,
+            "avgTickets": 4.7,
+            "medianTickets": 2,
+            "p90Tickets": 12
+          },
+          "CONFIRMATION": {
+            "races": 20,
+            "exactMeaningfulSurvival": 1,
+            "exactCandidateSurvival": 6,
+            "exactFinalSurvival": 5,
+            "hitRate": 0.25,
+            "investment": 12300,
+            "return": 9530,
+            "roi": 0.7747967479674797,
+            "avgTickets": 6.15,
+            "medianTickets": 2,
+            "p90Tickets": 24
+          }
+        }
+      }
+    ],
+    "safety": {
+      "predictionHashBefore": "414a562c7dea7cfbc7ab5a65db65faaf0bb29c95a0a159cd9134bbefbbcb5700",
+      "predictionHashAfter": "414a562c7dea7cfbc7ab5a65db65faaf0bb29c95a0a159cd9134bbefbbcb5700",
+      "productionHashMismatch": 0,
+      "resultUsedForShadowGeneration": false,
+      "resultUsedForEvaluationOnly": true,
+      "historicalMutation": 0,
+      "productionPredictionChanged": false,
+      "productionPurchaseChanged": false,
+      "recommendationChanged": false,
+      "thickChanged": false,
+      "autoTuning": false,
+      "cliffMethodImplemented": false
+    }
+  },
+  "integrity": {
+    "predictionHashMismatch": 0,
+    "purchaseHashMismatch": 0,
+    "sealedResultMismatch": 0,
+    "historicalMutation": 0,
+    "protectedFinalUsed": 0,
+    "resultLeakage": 0,
+    "productionChanged": false
+  }
+}
