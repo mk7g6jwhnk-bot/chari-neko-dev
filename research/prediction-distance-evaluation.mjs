@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import crypto from 'node:crypto';
 import { pathToFileURL } from 'node:url';
+import { auditTerminalSurvival, summarizeTerminalSurvival } from './terminal-survival-audit.mjs';
 
 const CANDIDATE_CODES = new Set(['ADOPTED', 'THIRD_VARIANT_AMBIGUITY', 'THIRD_VARIANT_BOUNDARY']);
 const order = value => (Array.isArray(value) ? value : String(value || '').match(/\d+/g) || []).map(Number).join('-');
@@ -48,6 +49,8 @@ function diagnoseRace(row) {
   const sameRidersPurchased = purchased.some(ticket => parts(ticket.order).slice().sort().join('-') === actual.slice().sort().join('-'));
   const pairGenerated = terminals.some(terminal => { const p = parts(terminal.order); return p[0] === first && p[1] === second; });
   const pairMeaningful = meaningfulTerminals.some(terminal => { const p = parts(terminal.order); return p[0] === first && p[1] === second; });
+  const pairCandidate = candidateTerminals.some(terminal => { const p = parts(terminal.order); return p[0] === first && p[1] === second; });
+  const pairPurchased = purchased.some(ticket => { const p = parts(ticket.order); return p[0] === first && p[1] === second; });
   const reversePairMeaningful = meaningfulTerminals.some(terminal => { const p = parts(terminal.order); return p[0] === second && p[1] === first; });
   const thirdConditional = exactPairTerminals.some(terminal => parts(terminal.order)[2] === third);
   let category, distance;
@@ -75,7 +78,7 @@ function diagnoseRace(row) {
       : (pairMeaningful || meaningfulRiders.has(first)) ? 'SCENARIO_PARTIALLY_CLOSE' : 'SCENARIO_MISS';
   return { raceKey: row.raceKey, actualOrder, meaningfulRiderCount: p, broadRiderCount: broadP,
     winner: { generated: firstRanks.has(String(first)), meaningful: meaningfulRiders.has(first), rank: winnerRank },
-    pair: { generated: pairGenerated, meaningful: pairMeaningful, reverseMeaningful: reversePairMeaningful, rank: pairRank },
+    pair: { generated: pairGenerated, meaningful: pairMeaningful, purchaseCandidate: pairCandidate, finalPurchase: pairPurchased, reverseMeaningful: reversePairMeaningful, rank: pairRank },
     third: { generated: thirdConditional, rank: thirdRank },
     terminal: { generated: Boolean(exact), meaningful: exactMeaningful, purchaseCandidate: exactCandidate, purchased: exactPurchased,
       globalRank: exact?.terminalGlobalRank ?? null, scenarioFamilyRank: exact?.scenarioFamilyRank ?? null,
@@ -138,6 +141,8 @@ export function evaluatePredictionDistance(source, { lowTicketRaceKeys = [] } = 
   const temporalViolations = source.rows.filter(row => row.integrity.temporalValid !== true).length;
   const integrityIssues = duplicate + temporalViolations + source.exclusions.length + Object.values(source.hashes).reduce((sum, value) => sum + value, 0);
   const races = source.rows.map(diagnoseRace), lowSet = new Set(lowTicketRaceKeys), lowRows = races.filter(row => lowSet.has(row.raceKey));
+  const terminalSurvivalRaces=source.rows.map((row,index)=>auditTerminalSurvival(row,races[index]));
+  const terminalSurvival={schemaVersion:'TERMINAL_SURVIVAL_AUDIT_V1',summary:summarizeTerminalSurvival(terminalSurvivalRaces),races:terminalSurvivalRaces};
   const summary = summarize(races), lowTicket = summarize(lowRows);
   const causes = Object.entries(summary.primaryCauses).filter(([cause]) => cause !== 'NONE_EXACT_HIT').sort((a, b) => b[1] - a[1]);
   return { schemaVersion: 'PREDICTION_DISTANCE_DIAGNOSIS_V1', definition: { candidateCodes: [...CANDIDATE_CODES],
@@ -147,7 +152,7 @@ export function evaluatePredictionDistance(source, { lowTicketRaceKeys = [] } = 
       rows: source.rows.length, duplicate, resultAvailable: source.rows.filter(row => row.result.status === 'confirmed').length, protectedFinal: source.cohort.protectedFinalIncluded || 0 },
     integrity: { ...source.hashes, exclusions: source.exclusions.length, temporalViolations, resultAwareLeakage: 0, postHocModification: 0,
       historicalMutation: source.safety.historicalMutation, issues: integrityIssues },
-    summary, lowTicket, thick: thickSummary(source.rows), largestBottlenecks: causes.slice(0, 3).map(([cause, count]) => ({ cause, count })), races,
+    summary, terminalSurvival, lowTicket, thick: thickSummary(source.rows), largestBottlenecks: causes.slice(0, 3).map(([cause, count]) => ({ cause, count })), races,
     safety: { productionPredictionChanged: false, productionPurchaseChanged: false, tuningPerformed: false, historicalMutationCount: 0 } };
 }
 
