@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "SHADOW_CONFIRMATION_CONFIG_V1",
+  "frozenAt": "2026-09-22T00:00:00+09:00",
+  "freezeUntilEvaluableRaces": 300,
+  "exploration": {
+    "name": "EXPLORATION_HYPOTHESIS_FORMATION",
+    "raceCount": 233
+  },
+  "confirmation": {
+    "name": "CONFIRMATION_FROM_234",
+    "startOrdinal": 234,
+    "ordering": "resultObservedAt,raceKey",
+    "allowedExclusions": ["ACCIDENT", "REFUND", "OFFICIAL_INCOMPLETE"]
+  },
+  "variants": {
+    "PAIR_DIRECTION": [
+      { "id": "BASELINE", "blendWeight": 0 },
+      { "id": "PAIR_WEAK", "blendWeight": 0.1 },
+      { "id": "PAIR_MEDIUM", "blendWeight": 0.2 },
+      { "id": "PAIR_STRONG", "blendWeight": 0.3 }
+    ],
+    "ELIGIBILITY": [
+      { "id": "BASELINE", "budgetRatio": 1 },
+      { "id": "ELIGIBILITY_RELAX_WEAK", "budgetRatio": 1.1 },
+      { "id": "ELIGIBILITY_RELAX_MEDIUM", "budgetRatio": 1.2 }
+    ],
+    "CLIFF": [
+      { "id": "BASELINE", "method": "PRODUCTION_SAVED" },
+      { "id": "CLIFF_MAX_GAP", "method": "MAX_ADJACENT_GAP" },
+      { "id": "CLIFF_GAP_SEPARATION", "method": "GAP_PLUS_LOWER_GROUP_SEPARATION" },
+      { "id": "CLIFF_PLATEAU_SLOPE", "method": "PLATEAU_END_PLUS_SLOPE_CHANGE" }
+    ],
+    "THIRD_CONDITIONAL": [
+      { "id": "BASELINE", "blendWeight": 0 },
+      { "id": "THIRD_WEAK", "blendWeight": 0.1 },
+      { "id": "THIRD_MEDIUM", "blendWeight": 0.2 },
+      { "id": "THIRD_STRONG", "blendWeight": 0.3 }
+    ]
+  },
+  "protectedFinal": [],
+  "autoTuning": false,
+  "autoPromotion": false
+}

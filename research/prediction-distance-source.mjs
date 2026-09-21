@@ -58,10 +58,25 @@ function compact(predictionResponse, resultResponse) {
       evidenceScore: Number.isFinite(Number(terminal.evidenceScore)) ? Number(terminal.evidenceScore) : null,
       scenarioFamilySupport: Number.isFinite(Number(terminal.scenarioFamilySupport)) ? Number(terminal.scenarioFamilySupport) : null,
       scenarioFamilyProbability: Number.isFinite(Number(terminal.scenarioFamilyProbability)) ? Number(terminal.scenarioFamilyProbability) : null,
-      relativeConditionPenalty: Number.isFinite(Number(terminal.relativeConditionPenalty)) ? Number(terminal.relativeConditionPenalty) : null
+      relativeConditionPenalty: Number.isFinite(Number(terminal.relativeConditionPenalty)) ? Number(terminal.relativeConditionPenalty) : null,
+      branchContributions: terminal.branchContributions || [],
+      decisionRatios: terminal.decisionRatios || null,
+      conditionalScores: terminal.conditionalScores || null,
+      relativeConditionTrace: terminal.relativeConditionTrace || null,
+      pairNaturalConvergenceScore: Number.isFinite(Number(terminal.pairNaturalConvergenceScore)) ? Number(terminal.pairNaturalConvergenceScore) : null,
+      pairScenarioCoherence: Number.isFinite(Number(terminal.pairScenarioCoherence)) ? Number(terminal.pairScenarioCoherence) : null,
+      secondFamilyRelativeToBest: Number.isFinite(Number(terminal.secondFamilyRelativeToBest)) ? Number(terminal.secondFamilyRelativeToBest) : null,
+      thirdFamilyRelativeToBest: Number.isFinite(Number(terminal.thirdFamilyRelativeToBest)) ? Number(terminal.thirdFamilyRelativeToBest) : null,
+      naturalConvergenceScore: Number.isFinite(Number(terminal.naturalConvergenceScore)) ? Number(terminal.naturalConvergenceScore) : null,
+      pairNaturalPositionEligible: terminal.pairNaturalPositionEligible === true,
+      familyNaturalPositionEligible: terminal.familyNaturalPositionEligible === true,
+      purchaseRank: Number.isFinite(Number(terminal.purchaseRank)) ? Number(terminal.purchaseRank) : null
     };
   });
   const plan = prediction.canonicalPurchasePlan?.standardTickets || prediction.standardPurchasePlan || prediction.purchasePlan || [];
+  const referencePlan = prediction.referencePurchasePlan || [];
+  const purchaseEligibility = prediction.purchaseEligibility || prediction.purchase?.purchaseEligibility || {};
+  const purchaseAudit = prediction.purchase?.audit || prediction.audit?.purchaseAudit || {};
   return {
     raceKey: predictionResponse.raceKey,
     predictionSealedAt: predictionResponse.predictionSealedAt,
@@ -71,9 +86,15 @@ function compact(predictionResponse, resultResponse) {
     integrity: { predictionStatus: predictionResponse.integrityStatus, resultValid: resultResponse.integrityValid,
       temporalValid: Date.parse(predictionResponse.predictionSealedAt) < Date.parse(resultResponse.resultObservedAt) },
     result: { status: resultResponse.officialResult?.status, finishOrder: resultResponse.officialResult?.finishOrder || [], payout: resultResponse.officialResult?.payout ?? null },
-    purchase: { eligibility: resultResponse.purchaseEvaluation?.purchaseEligibility || prediction.purchaseEligibility?.state || null,
+    purchase: { eligibility: resultResponse.purchaseEvaluation?.purchaseEligibility || purchaseEligibility.state || null,
+      reasonCode: purchaseEligibility.reasonCode || prediction.noBetReason || prediction.purchase?.noBetReason || resultResponse.purchaseEvaluation?.exclusionReason || null,
+      canPurchase: purchaseEligibility.canPurchase === true,
+      budget: Number.isFinite(Number(purchaseEligibility.budget ?? purchaseAudit.budget)) ? Number(purchaseEligibility.budget ?? purchaseAudit.budget) : null,
+      naturalCandidateCount: Number.isFinite(Number(purchaseAudit.purchaseCandidateCountBeforeCompression ?? purchaseAudit.adoptedTerminalCount)) ? Number(purchaseAudit.purchaseCandidateCountBeforeCompression ?? purchaseAudit.adoptedTerminalCount) : null,
+      requiredNaturalClusterBudget: Number.isFinite(Number(purchaseAudit.requiredNaturalClusterBudget)) ? Number(purchaseAudit.requiredNaturalClusterBudget) : null,
       tickets: plan.map(ticket => ({ order: order(ticket.order || ticket.combination), class: cls(ticket),
-        thick: ticket.thickQualified === true || ticket.qualification === 'THICK_PREDICTION_QUALIFIED' })) },
+        thick: ticket.thickQualified === true || ticket.qualification === 'THICK_PREDICTION_QUALIFIED' })),
+      referenceTickets: referencePlan.map(ticket => ({ order: order(ticket.order || ticket.combination), class: cls(ticket), thick: false })) },
     prediction: { participantNumbers: (prediction.scored || []).map(row => Number(row.number)).filter(Number.isFinite),
       structureInput: { raceType: String(race.raceCategory || prediction.raceCategory || 'standard').toUpperCase(), fieldSize: (prediction.scored || race.participants || []).length,
         lineDataAvailable: race.lineDataAvailable === true || prediction.lineDataAvailable === true || (prediction.lines || []).some(line => (line.members || []).length > 1),
