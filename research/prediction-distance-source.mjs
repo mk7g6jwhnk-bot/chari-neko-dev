@@ -6,6 +6,7 @@ import { pathToFileURL } from 'node:url';
 const DEFAULT_BASE = 'https://chari-neko-dev.netlify.app/.netlify/functions';
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 const hash = value => crypto.createHash('sha256').update(JSON.stringify(value)).digest('hex');
+const sealedResultHash = value => value?.resultHash || hash(value?.officialResult ?? null);
 const order = value => (Array.isArray(value) ? value : String(value || '').match(/\d+/g) || []).map(Number).join('-');
 const cls = ticket => ticket?.betClass || ticket?.category || null;
 
@@ -81,7 +82,7 @@ function compact(predictionResponse, resultResponse) {
     raceKey: predictionResponse.raceKey,
     predictionSealedAt: predictionResponse.predictionSealedAt,
     resultObservedAt: resultResponse.resultObservedAt,
-    hashes: { predictionHash: predictionResponse.predictionHash, inputHash: predictionResponse.inputHash, resultHash: resultResponse.resultHash,
+    hashes: { predictionHash: predictionResponse.predictionHash, inputHash: predictionResponse.inputHash, resultHash: sealedResultHash(resultResponse),
       purchaseHash: hash(resultResponse.purchaseEvaluation) },
     integrity: { predictionStatus: predictionResponse.integrityStatus, resultValid: resultResponse.integrityValid,
       temporalValid: Date.parse(predictionResponse.predictionSealedAt) < Date.parse(resultResponse.resultObservedAt) },
@@ -126,7 +127,7 @@ export async function fetchPredictionDistanceSource({ cohort, baseUrl = DEFAULT_
         if (hash(result.purchaseEvaluation) !== hash(resultAgain.purchaseEvaluation)) {
           hashes.purchaseMismatch++; exclusions.push({ raceKey, reason: 'PURCHASE_HASH_MISMATCH' }); continue;
         }
-        if (result.resultHash !== resultAgain.resultHash) {
+        if (sealedResultHash(result) !== sealedResultHash(resultAgain)) {
           hashes.sealedResultMismatch++; exclusions.push({ raceKey, reason: 'SEALED_RESULT_MISMATCH' }); continue;
         }
         rows[index] = compact(prediction, result);

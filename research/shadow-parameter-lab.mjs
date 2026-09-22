@@ -27,7 +27,7 @@ const order=value=>(Array.isArray(value)?value:String(value||'').match(/\d+/g)||
 const deep=value=>structuredClone(value);
 const sorted=(rows,score='score')=>[...rows].sort((a,b)=>Number(b[score])-Number(a[score])||String(a.id||a.order).localeCompare(String(b.id||b.order),'en'));
 
-function shape(values){
+export function scoreShape(values){
   const xs=[...values].map(Number).filter(Number.isFinite).sort((a,b)=>b-a),gaps=xs.slice(0,-1).map((x,i)=>x-xs[i+1]);
   if(!xs.length)return{status:'UNKNOWN'};
   const top=xs[0],median=gaps.length?[...gaps].sort((a,b)=>a-b)[Math.floor(gaps.length/2)]:0,plateauStart=1;
@@ -63,9 +63,9 @@ function evaluateTerminalVariant(rows,value,baseline){const races=[];for(const r
       meaningfulSet:[...meaningful],simulatedPurchaseCandidateSet:[...candidate],simulatedFinalCandidateSet:[...final],recommendationState:'UNKNOWN',thickState:'UNKNOWN',
       meaningfulSurvival:meaningful.has(actual),candidateSurvival:candidate.has(actual),finalSurvival:final.has(actual),payout:row.result.payout,
       exactPairRank:pair.findIndex(x=>x.id===actualPair)+1||null,exactThirdConditionalRank:third.findIndex(x=>x.order===actual)+1||null,
-      scoreShapes:{rider:'UNKNOWN',scenario:shape(scenario.map(x=>x.score)),pair:shape(pair.map(x=>x.score)),terminal:shape(terminals.map(x=>x.shadowScore))}});}
+      scoreShapes:{rider:'UNKNOWN',scenario:scoreShape(scenario.map(x=>x.score)),pair:scoreShape(pair.map(x=>x.score)),terminal:scoreShape(terminals.map(x=>x.shadowScore))}});}
   return{races,metrics:purchaseMetrics(races)};}
-function evaluateRiderVariant(rows,value){const scoreByRace=new Map(),races=[];for(const row of rows){const riders=scoreRiders(row,value);scoreByRace.set(row.raceKey,riders);const ranking=rankRiderMarks(row,{scoreOverride:riders}),actual=(row.result.finishOrder||[]).map(Number);races.push({raceKey:row.raceKey,snapshotHash:row.hashes.predictionHash,riderRanking:ranking.map(r=>({number:r.number,rank:r.rank,mark:r.mark,score:r.score})),pairRanking:'UNKNOWN',thirdRanking:'UNKNOWN',terminalRanking:'UNKNOWN',meaningfulSet:'UNKNOWN',simulatedPurchaseCandidateSet:'UNKNOWN',simulatedFinalCandidateSet:'UNKNOWN',recommendationState:'UNKNOWN',thickState:'UNKNOWN',scoreShapes:{rider:shape(ranking.map(r=>r.score)),scenario:'UNKNOWN',pair:'UNKNOWN',terminal:'UNKNOWN'},winnerRank:ranking.findIndex(r=>r.number===actual[0])+1||null});}
+function evaluateRiderVariant(rows,value){const scoreByRace=new Map(),races=[];for(const row of rows){const riders=scoreRiders(row,value);scoreByRace.set(row.raceKey,riders);const ranking=rankRiderMarks(row,{scoreOverride:riders}),actual=(row.result.finishOrder||[]).map(Number);races.push({raceKey:row.raceKey,snapshotHash:row.hashes.predictionHash,riderRanking:ranking.map(r=>({number:r.number,rank:r.rank,mark:r.mark,score:r.score})),pairRanking:'UNKNOWN',thirdRanking:'UNKNOWN',terminalRanking:'UNKNOWN',meaningfulSet:'UNKNOWN',simulatedPurchaseCandidateSet:'UNKNOWN',simulatedFinalCandidateSet:'UNKNOWN',recommendationState:'UNKNOWN',thickState:'UNKNOWN',scoreShapes:{rider:scoreShape(ranking.map(r=>r.score)),scenario:'UNKNOWN',pair:'UNKNOWN',terminal:'UNKNOWN'},winnerRank:ranking.findIndex(r=>r.number===actual[0])+1||null});}
   const marks=evaluateMarkTopN(rows,{scoreByRace});return{races,metrics:{races:rows.length,winnerTop1:marks.cumulative['◎'].winnerCapture,winnerTop2:marks.cumulative['◎○'].winnerCapture,winnerTop3:marks.cumulative['◎○▲'].winnerCapture,winnerTop5:marks.cumulative['◎○▲△☆'].winnerCapture,top3AllCovered:marks.cumulative['◎○▲'].exactTop3AllCovered,marks}};}
 
 export function evaluateShadowParameterLab(source,{cohorts=null,includeRaceDetails=true,variants=ACTIVE_VARIANTS}={}){

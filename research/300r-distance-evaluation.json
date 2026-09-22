@@ -1,0 +1,1903 @@
+{
+  "schemaVersion": "300R_DISTANCE_REVIEW_V1",
+  "generatedAt": "2026-09-22T15:50:42.034Z",
+  "verdict": "300R_REVIEW_COMPLETE_NO_CLEAR_CLIFF",
+  "cohort": {
+    "schemaVersion": "300R_REVIEW_COHORT_V1",
+    "name": "300R_REVIEW_COHORT",
+    "ordering": "raceKey date/venue/race numeric ascending",
+    "fixedAt": "2026-09-22T15:09:42.761Z",
+    "checkpointBefore": {
+      "date": "2026-09-22",
+      "processedRaces": 277
+    },
+    "availableConfirmedRaces": 321,
+    "excludedProtectedFinal": [
+      "20260917-13-6",
+      "20260917-13-7",
+      "20260917-13-8",
+      "20260917-13-9",
+      "20260917-13-10",
+      "20260917-13-11",
+      "20260917-34-2",
+      "20260917-34-5",
+      "20260917-83-1",
+      "20260917-83-3",
+      "20260917-83-7",
+      "20260917-83-9",
+      "20260917-86-5",
+      "20260917-86-6",
+      "20260917-86-7",
+      "20260917-86-8",
+      "20260917-86-9",
+      "20260917-86-10",
+      "20260917-86-11",
+      "20260917-86-12"
+    ],
+    "protectedFinalIncluded": 0,
+    "raceKeys": [
+      "20260912-34-2",
+      "20260912-34-3",
+      "20260912-34-4",
+      "20260912-34-5",
+      "20260912-34-6",
+      "20260912-34-7",
+      "20260912-34-9",
+      "20260912-46-2",
+      "20260912-46-3",
+      "20260912-46-4",
+      "20260912-46-7",
+      "20260912-46-10",
+      "20260912-53-2",
+      "20260912-53-3",
+      "20260912-53-4",
+      "20260912-53-5",
+      "20260912-53-6",
+      "20260912-53-7",
+      "20260912-53-9",
+      "20260912-53-11",
+      "20260912-53-12",
+      "20260912-85-1",
+      "20260912-85-2",
+      "20260912-85-3",
+      "20260912-85-4",
+      "20260912-85-5",
+      "20260912-85-6",
+      "20260912-85-7",
+      "20260912-85-8",
+      "20260912-85-9",
+      "20260916-12-1",
+      "20260916-12-5",
+      "20260916-12-9",
+      "20260916-13-6",
+      "20260916-13-7",
+      "20260916-13-8",
+      "20260916-13-10",
+      "20260916-13-11",
+      "20260916-37-1",
+      "20260916-37-2",
+      "20260916-37-3",
+      "20260916-37-4",
+      "20260916-37-5",
+      "20260916-37-6",
+      "20260916-37-7",
+      "20260916-37-8",
+      "20260916-37-9",
+      "20260916-86-7",
+      "20260916-86-8",
+      "20260916-86-9",
+      "20260916-86-10",
+      "20260916-86-11",
+      "20260916-86-12",
+      "20260917-13-3",
+      "20260917-13-4",
+      "20260917-28-1",
+      "20260917-28-5",
+      "20260917-28-6",
+      "20260917-28-9",
+      "20260917-28-10",
+      "20260917-63-1",
+      "20260917-63-2",
+      "20260917-63-3",
+      "20260917-63-5",
+      "20260917-63-10",
+      "20260917-63-11",
+      "20260917-63-12",
+      "20260917-73-1",
+      "20260917-73-5",
+      "20260917-73-6",
+      "20260917-84-1",
+      "20260917-84-2",
+      "20260917-84-3",
+      "20260917-84-4",
+      "20260917-84-5",
+      "20260917-84-6",
+      "20260917-84-7",
+      "20260917-86-1",
+      "20260917-86-3",
+      "20260917-86-4",
+      "20260918-28-1",
+      "20260918-28-3",
+      "20260918-28-4",
+      "20260918-28-7",
+      "20260918-28-8",
+      "20260918-28-10",
+      "20260918-34-4",
+      "20260918-34-7",
+      "20260918-34-9",
+      "20260918-38-1",
+      "20260918-38-2",
+      "20260918-38-3",
+      "20260918-38-4",
+      "20260918-38-8",
+      "20260918-38-9",
+      "20260918-46-1",
+      "20260918-46-2",
+      "20260918-46-3",
+      "20260918-46-4",
+      "20260918-46-6",
+      "20260918-46-8",
+      "20260918-46-9",
+      "20260918-46-10",
+      "20260918-46-11",
+      "20260918-73-1",
+      "20260918-73-4",
+      "20260918-73-5",
+      "20260918-73-6",
+      "20260918-83-2",
+      "20260918-83-6",
+      "20260918-83-7",
+      "20260918-83-9",
+      "20260918-84-1",
+      "20260918-84-2",
+      "20260918-84-3",
+      "20260918-84-4",
+      "20260918-84-5",
+      "20260918-84-6",
+      "20260918-84-7",
+      "20260918-86-1",
+      "20260918-86-3",
+      "20260918-86-4",
+      "20260918-86-5",
+      "20260918-86-6",
+      "20260918-86-7",
+      "20260918-86-8",
+      "20260918-86-9",
+      "20260918-86-10",
+      "20260918-86-11",
+      "20260918-86-12",
+      "20260919-21-3",
+      "20260919-21-4",
+      "20260919-21-6",
+      "20260919-21-7",
+      "20260919-21-8",
+      "20260919-34-2",
+      "20260919-34-7",
+      "20260919-34-8",
+      "20260919-34-9",
+      "20260919-38-1",
+      "20260919-38-2",
+      "20260919-46-1",
+      "20260919-46-3",
+      "20260919-46-4",
+      "20260919-46-5",
+      "20260919-46-6",
+      "20260919-46-8",
+      "20260919-46-9",
+      "20260919-46-11",
+      "20260919-46-12",
+      "20260919-73-1",
+      "20260919-73-5",
+      "20260919-73-6",
+      "20260919-73-7",
+      "20260919-75-1",
+      "20260919-75-3",
+      "20260919-75-4",
+      "20260919-75-5",
+      "20260919-75-7",
+      "20260919-75-8",
+      "20260919-75-9",
+      "20260919-75-10",
+      "20260919-75-11",
+      "20260919-83-4",
+      "20260919-83-5",
+      "20260919-83-8",
+      "20260919-83-9",
+      "20260920-21-3",
+      "20260920-21-5",
+      "20260920-21-8",
+      "20260920-21-9",
+      "20260920-38-1",
+      "20260920-38-2",
+      "20260920-38-3",
+      "20260920-38-6",
+      "20260920-38-8",
+      "20260920-46-2",
+      "20260920-46-3",
+      "20260920-46-4",
+      "20260920-46-5",
+      "20260920-46-6",
+      "20260920-46-7",
+      "20260920-46-9",
+      "20260920-46-10",
+      "20260920-46-11",
+      "20260920-62-1",
+      "20260920-62-2",
+      "20260920-62-3",
+      "20260920-62-4",
+      "20260920-62-5",
+      "20260920-62-6",
+      "20260920-62-7",
+      "20260920-74-1",
+      "20260920-74-2",
+      "20260920-74-5",
+      "20260920-74-8",
+      "20260920-75-1",
+      "20260920-75-2",
+      "20260920-75-3",
+      "20260920-75-6",
+      "20260920-75-7",
+      "20260920-75-8",
+      "20260920-75-9",
+      "20260920-75-10",
+      "20260920-75-11",
+      "20260920-85-1",
+      "20260920-85-2",
+      "20260920-85-3",
+      "20260920-85-4",
+      "20260920-85-5",
+      "20260920-85-6",
+      "20260920-85-7",
+      "20260920-85-8",
+      "20260921-12-3",
+      "20260921-12-5",
+      "20260921-12-6",
+      "20260921-12-8",
+      "20260921-21-2",
+      "20260921-21-4",
+      "20260921-21-7",
+      "20260921-21-10",
+      "20260921-25-4",
+      "20260921-46-1",
+      "20260921-46-2",
+      "20260921-46-3",
+      "20260921-46-5",
+      "20260921-46-6",
+      "20260921-46-7",
+      "20260921-46-8",
+      "20260921-46-10",
+      "20260921-46-11",
+      "20260921-62-1",
+      "20260921-62-2",
+      "20260921-62-3",
+      "20260921-62-4",
+      "20260921-62-5",
+      "20260921-62-6",
+      "20260921-62-7",
+      "20260921-74-1",
+      "20260921-74-2",
+      "20260921-74-5",
+      "20260921-75-1",
+      "20260921-75-2",
+      "20260921-75-4",
+      "20260921-75-5",
+      "20260921-75-6",
+      "20260921-75-7",
+      "20260921-75-9",
+      "20260921-75-11",
+      "20260921-85-1",
+      "20260921-85-2",
+      "20260921-85-3",
+      "20260921-85-4",
+      "20260921-85-5",
+      "20260921-85-6",
+      "20260921-85-7",
+      "20260921-85-8",
+      "20260922-12-3",
+      "20260922-12-4",
+      "20260922-12-11",
+      "20260922-12-12",
+      "20260922-25-1",
+      "20260922-25-4",
+      "20260922-25-6",
+      "20260922-28-1",
+      "20260922-28-2",
+      "20260922-28-3",
+      "20260922-28-4",
+      "20260922-28-5",
+      "20260922-28-6",
+      "20260922-28-7",
+      "20260922-28-8",
+      "20260922-28-10",
+      "20260922-28-11",
+      "20260922-28-12",
+      "20260922-44-3",
+      "20260922-44-4",
+      "20260922-44-5",
+      "20260922-44-6",
+      "20260922-44-7",
+      "20260922-44-9",
+      "20260922-44-10",
+      "20260922-44-11",
+      "20260922-62-1",
+      "20260922-62-2",
+      "20260922-62-3",
+      "20260922-62-4",
+      "20260922-62-5",
+      "20260922-62-6",
+      "20260922-62-7",
+      "20260922-74-1",
+      "20260922-74-8",
+      "20260922-85-1",
+      "20260922-85-2",
+      "20260922-85-3",
+      "20260922-85-4",
+      "20260922-85-5",
+      "20260922-85-6",
+      "20260922-85-7",
+      "20260922-85-8"
+    ],
+    "overflowRaceKeys": [
+      "20260922-85-9"
+    ],
+    "cohortKeyHash": "51c386191aaac9a554a0d910df0a6e8fa4a4f7c64105850e791e677592f11ee6",
+    "safety": {
+      "historicalMutation": 0,
+      "productionWrite": 0,
+      "resultAwareSelection": false
+    }
+  },
+  "existing": {
+    "basic": {
+      "collected": 300,
+      "evaluable": 300,
+      "excluded": 0,
+      "purchaseable": 214,
+      "ineligible": 86,
+      "all": {
+        "tickets": 1170,
+        "hits": 18,
+        "investment": 117000,
+        "return": 54740,
+        "roi": 0.46786324786324784
+      },
+      "main": {
+        "tickets": 630,
+        "hits": 13,
+        "investment": 63000,
+        "return": 34460,
+        "roi": 0.546984126984127
+      },
+      "cover": {
+        "tickets": 540,
+        "hits": 5,
+        "investment": 54000,
+        "return": 20280,
+        "roi": 0.37555555555555553
+      },
+      "thick": {
+        "tickets": 146,
+        "hits": 4,
+        "investment": 14600,
+        "return": 9410,
+        "roi": 0.6445205479452055
+      },
+      "groups": {
+        "lowTicket": {
+          "tickets": 0,
+          "hits": 0,
+          "investment": 0,
+          "return": 0,
+          "roi": null
+        },
+        "warning": {
+          "tickets": 0,
+          "hits": 0,
+          "investment": 0,
+          "return": 0,
+          "roi": null
+        },
+        "confidence": {
+          "HIGH": {
+            "tickets": 0,
+            "hits": 0,
+            "investment": 0,
+            "return": 0,
+            "roi": null
+          },
+          "MEDIUM": {
+            "tickets": 0,
+            "hits": 0,
+            "investment": 0,
+            "return": 0,
+            "roi": null
+          },
+          "LOW": {
+            "tickets": 1170,
+            "hits": 18,
+            "investment": 117000,
+            "return": 54740,
+            "roi": 0.46786324786324784
+          }
+        },
+        "concentration": {
+          "HIGH": {
+            "tickets": 0,
+            "hits": 0,
+            "investment": 0,
+            "return": 0,
+            "roi": null
+          },
+          "MEDIUM": {
+            "tickets": 0,
+            "hits": 0,
+            "investment": 0,
+            "return": 0,
+            "roi": null
+          },
+          "LOW": {
+            "tickets": 0,
+            "hits": 0,
+            "investment": 0,
+            "return": 0,
+            "roi": null
+          }
+        }
+      }
+    },
+    "predictionDistance": {
+      "races": 300,
+      "exactHits": 18,
+      "riderSelection": {
+        "P3": 171,
+        "P2": 89,
+        "P1": 37,
+        "P0": 3,
+        "successRate": 0.8666666666666667,
+        "broadGeneratedP3": 300
+      },
+      "winner": {
+        "generated": 300,
+        "generatedRate": 1,
+        "meaningful": 262,
+        "top1": 105,
+        "top2": 147,
+        "top3": 177,
+        "outsideTop3": 123,
+        "notGenerated": 0
+      },
+      "pair": {
+        "generated": 300,
+        "generatedRate": 1,
+        "meaningful": 159,
+        "reverseMeaningful": 141,
+        "top1": 45,
+        "top3": 84,
+        "top5": 107,
+        "outsideTop5": 193
+      },
+      "reverse": {
+        "exact12SameThird": 14,
+        "reverse12ThirdDifferent": 32,
+        "candidatePresentNotPurchased": 127
+      },
+      "third": {
+        "generated": 300,
+        "generatedRate": 1,
+        "top1": 78,
+        "top3": 213,
+        "outsideTop3": 87,
+        "missing": 0
+      },
+      "terminal": {
+        "generated": 300,
+        "generatedRate": 1,
+        "meaningful": 127,
+        "meaningfulRate": 0.42333333333333334,
+        "purchaseCandidate": 127,
+        "purchased": 18,
+        "correctInternalNotPurchased": 109
+      },
+      "categories": {
+        "A_EXACT_HIT": 18,
+        "B_NEAR_MISS_ORDER": 35,
+        "C_CORRECT_INTERNAL_NOT_PURCHASED": 109,
+        "D_RIDERS_RIGHT_RANKING_WRONG": 98,
+        "E_UPSTREAM_MISS": 40,
+        "F_UNCLASSIFIABLE": 0
+      },
+      "distance": {
+        "distribution": {
+          "0": 18,
+          "1": 144,
+          "2": 98,
+          "3": 37,
+          "4": 3
+        },
+        "mean": 1.5433333333333332,
+        "median": 1,
+        "p90": 3
+      },
+      "separation": {
+        "riderSelectionGood": 260,
+        "orderingGood": 76,
+        "purchaseSelectionGood": 127
+      },
+      "scenario": {
+        "SCENARIO_CLOSE": 45,
+        "SCENARIO_PARTIALLY_CLOSE": 40,
+        "SCENARIO_MISS": 2,
+        "INSUFFICIENT_EVIDENCE": 213
+      },
+      "primaryCauses": {
+        "NONE_EXACT_HIT": 18,
+        "PAIR_ORDER_MISS": 68,
+        "PURCHASE_INELIGIBLE": 71,
+        "PURCHASE_SELECTION_MISS": 38,
+        "REVERSE_12": 35,
+        "SCENARIO_RANKING_MISS": 15,
+        "THIRD_CONDITIONAL_MISS": 17,
+        "UPSTREAM_RIDER_MISS": 22,
+        "WINNER_SELECTION_MISS": 16
+      }
+    },
+    "terminalSurvival": {
+      "schemaVersion": "TERMINAL_SURVIVAL_SUMMARY_V1",
+      "races": 300,
+      "reconstructed": 300,
+      "partiallyReconstructed": 0,
+      "unreconstructable": 0,
+      "stages": {
+        "GENERATED": 300,
+        "MEANINGFUL": 127,
+        "PURCHASE_CANDIDATE": 127,
+        "FINAL_PURCHASE": 18,
+        "FINAL_CLASS": 18
+      },
+      "stageRates": {
+        "GENERATED": 1,
+        "MEANINGFUL": 0.42333333333333334,
+        "PURCHASE_CANDIDATE": 0.42333333333333334,
+        "FINAL_PURCHASE": 0.06,
+        "FINAL_CLASS": 0.06
+      },
+      "drops": {
+        "DROP_AT_MEANINGFUL": 158,
+        "DROP_AT_PURCHASE_CANDIDATE": 0,
+        "DROP_AT_FINAL_PURCHASE": 38,
+        "PURCHASE_INELIGIBLE": 86,
+        "EXACT_PURCHASE_HIT": 18,
+        "UNKNOWN": 0
+      },
+      "reasons": {
+        "PAIR_DIRECTION_OR_RANK": 130,
+        "THIRD_CONDITIONAL": 28,
+        "TERMINAL_RELATIVE_RANK": 0,
+        "CLIFF_BOUNDARY": 0,
+        "PURCHASE_COMPRESSION": 38,
+        "PURCHASE_INELIGIBLE": 86,
+        "CLASSIFICATION_ONLY": 0,
+        "UNKNOWN": 0
+      },
+      "finalRiderCoverage": {
+        "P3": 79,
+        "P2": 93,
+        "P1": 39,
+        "P0": 89,
+        "UNKNOWN": 0
+      },
+      "pair": {
+        "exactFinal": 44,
+        "reverseFinal": 41,
+        "reverseOnly": 28,
+        "purchaseSelectionMiss": 38
+      },
+      "thirdConditionalMiss": 32,
+      "trio": {
+        "exactMeaningful": 155,
+        "purchaseDerivedHit": 49,
+        "trifectaMissTrioHit": 31
+      }
+    },
+    "marks": {
+      "races": 300,
+      "unknown": 0,
+      "winnerTop1": 113,
+      "winnerTop2": 168,
+      "winnerTop3": 218,
+      "winnerTop5": 278,
+      "topN": {
+        "◎": {
+          "n": 1,
+          "evaluatedRaces": 300,
+          "winnerCapture": 113,
+          "winnerCaptureRate": 0.37666666666666665,
+          "actualTop3Coverage": {
+            "0": 89,
+            "1": 211,
+            "2": 0,
+            "3": 0
+          },
+          "exactTop3AllCovered": 0,
+          "exactTop3AllCoveredRate": 0
+        },
+        "◎○": {
+          "n": 2,
+          "evaluatedRaces": 300,
+          "winnerCapture": 168,
+          "winnerCaptureRate": 0.56,
+          "actualTop3Coverage": {
+            "0": 31,
+            "1": 154,
+            "2": 115,
+            "3": 0
+          },
+          "exactTop3AllCovered": 0,
+          "exactTop3AllCoveredRate": 0
+        },
+        "◎○▲": {
+          "n": 3,
+          "evaluatedRaces": 300,
+          "winnerCapture": 218,
+          "winnerCaptureRate": 0.7266666666666667,
+          "actualTop3Coverage": {
+            "0": 7,
+            "1": 87,
+            "2": 161,
+            "3": 45
+          },
+          "exactTop3AllCovered": 45,
+          "exactTop3AllCoveredRate": 0.15
+        },
+        "◎○▲△": {
+          "n": 4,
+          "evaluatedRaces": 300,
+          "winnerCapture": 258,
+          "winnerCaptureRate": 0.86,
+          "actualTop3Coverage": {
+            "0": 0,
+            "1": 35,
+            "2": 168,
+            "3": 97
+          },
+          "exactTop3AllCovered": 97,
+          "exactTop3AllCoveredRate": 0.3233333333333333
+        },
+        "◎○▲△☆": {
+          "n": 5,
+          "evaluatedRaces": 300,
+          "winnerCapture": 278,
+          "winnerCaptureRate": 0.9266666666666666,
+          "actualTop3Coverage": {
+            "0": 0,
+            "1": 12,
+            "2": 118,
+            "3": 170
+          },
+          "exactTop3AllCovered": 170,
+          "exactTop3AllCoveredRate": 0.5666666666666667
+        }
+      }
+    },
+    "trio": {
+      "races": 300,
+      "trifectaHits": 18,
+      "exactTrioGenerated": 300,
+      "exactTrioGeneratedRate": 1,
+      "meaningfulExactTrio": 155,
+      "meaningfulExactTrioRate": 0.5166666666666667,
+      "top1": 37,
+      "top3": 91,
+      "top5": 132,
+      "top10": 190,
+      "outsideTop10": 110,
+      "missing": 0,
+      "purchaseDerivedTrioHitRaces": 49,
+      "trifectaMissTrioHit": 31,
+      "internalTrioOnly": 106,
+      "twoOfThreeOnly": 103,
+      "upstreamTrioMiss": 42,
+      "categories": {
+        "A_TRIFECTA_HIT": 18,
+        "B_TRIO_WOULD_HIT": 31,
+        "C_INTERNAL_TRIO_ONLY": 106,
+        "D_TWO_OF_THREE_ONLY": 103,
+        "E_TRIO_UPSTREAM_MISS": 42,
+        "F_UNCLASSIFIABLE": 0
+      },
+      "ordering": {
+        "sameThreeWrongOrder": 31,
+        "reverse12SameThird": 9,
+        "otherPermutation": 22,
+        "meaningfulButOutsidePurchase": 106
+      },
+      "trioCandidates": {
+        "average": 17.62,
+        "median": 3,
+        "p90": 35
+      }
+    }
+  },
+  "exactDistance": {
+    "summary": {
+      "schemaVersion": "EXACT_TERMINAL_DISTANCE_SUMMARY_V1",
+      "races": 300,
+      "fullyEvaluable": 300,
+      "partiallyEvaluable": 0,
+      "unknown": 0,
+      "boundaryKnown": 300,
+      "purchaseable": 214,
+      "purchaseIneligible": 86,
+      "rank": {
+        "count": 300,
+        "mean": 74.11333333333333,
+        "median": 47,
+        "p90": 171,
+        "min": 1,
+        "max": 434
+      },
+      "meaningfulBoundaryDistance": {
+        "count": 300,
+        "mean": -5.963333333333333,
+        "median": 8,
+        "p90": 138,
+        "min": -443,
+        "max": 410
+      },
+      "scoreDistance": {
+        "count": 300,
+        "mean": 0.06090014724863542,
+        "median": 0.12165623814492232,
+        "p90": 0.4725618641888262,
+        "min": -0.616142689344207,
+        "max": 0.649340519040476
+      },
+      "normalizedScoreDistance": {
+        "count": 300,
+        "mean": 0.09683157477438148,
+        "median": 0.17291402662384436,
+        "p90": 0.6828243007986597,
+        "min": -0.889521814731088,
+        "max": 0.9415001005371002
+      },
+      "additionalTicketsNeeded": {
+        "count": 300,
+        "mean": 70.31333333333333,
+        "median": 42,
+        "p90": 170,
+        "min": 0,
+        "max": 434
+      },
+      "distanceBins": {
+        "INSIDE": 130,
+        "+1": 3,
+        "+2": 3,
+        "+3": 1,
+        "+4_TO_5": 6,
+        "+6_TO_10": 16,
+        "+11_TO_20": 20,
+        "+21_PLUS": 121,
+        "UNKNOWN": 0
+      },
+      "additionalTicketBins": {
+        "+0": 34,
+        "+1": 5,
+        "+2": 4,
+        "+3": 7,
+        "+4_TO_5": 8,
+        "+6_TO_10": 28,
+        "+11_PLUS": 214,
+        "UNKNOWN": 0
+      },
+      "mechanicalBands": {
+        "HIT_OR_INSIDE": 130,
+        "NEAR_MISS": 3,
+        "MODERATE_MISS": 10,
+        "FAR_MISS": 36,
+        "VERY_FAR_MISS": 121,
+        "UNKNOWN": 0
+      },
+      "rankCapture": {
+        "1": {
+          "captured": 11,
+          "rate": 0.03666666666666667
+        },
+        "2": {
+          "captured": 17,
+          "rate": 0.056666666666666664
+        },
+        "3": {
+          "captured": 31,
+          "rate": 0.10333333333333333
+        },
+        "5": {
+          "captured": 40,
+          "rate": 0.13333333333333333
+        },
+        "8": {
+          "captured": 58,
+          "rate": 0.19333333333333333
+        },
+        "10": {
+          "captured": 69,
+          "rate": 0.23
+        },
+        "15": {
+          "captured": 87,
+          "rate": 0.29
+        },
+        "20": {
+          "captured": 103,
+          "rate": 0.3433333333333333
+        }
+      },
+      "boundaryCapture": {
+        "0": {
+          "captured": 130,
+          "rate": 0.43333333333333335
+        },
+        "1": {
+          "captured": 133,
+          "rate": 0.44333333333333336
+        },
+        "2": {
+          "captured": 136,
+          "rate": 0.4533333333333333
+        },
+        "3": {
+          "captured": 137,
+          "rate": 0.45666666666666667
+        },
+        "5": {
+          "captured": 143,
+          "rate": 0.4766666666666667
+        },
+        "10": {
+          "captured": 159,
+          "rate": 0.53
+        }
+      },
+      "tradeoffs": {
+        "0": {
+          "captureRate": 0.43333333333333335,
+          "additionalTickets": 0,
+          "avgTickets": 0,
+          "median": 0,
+          "p90": 0,
+          "max": 0,
+          "additionalHitsRescued": 0,
+          "wastedAdditionalTickets": 0
+        },
+        "1": {
+          "captureRate": 0.44333333333333336,
+          "additionalTickets": 300,
+          "avgTickets": 1,
+          "median": 1,
+          "p90": 1,
+          "max": 1,
+          "additionalHitsRescued": 3,
+          "wastedAdditionalTickets": 297
+        },
+        "2": {
+          "captureRate": 0.4533333333333333,
+          "additionalTickets": 599,
+          "avgTickets": 1.9966666666666666,
+          "median": 2,
+          "p90": 2,
+          "max": 2,
+          "additionalHitsRescued": 6,
+          "wastedAdditionalTickets": 593
+        },
+        "3": {
+          "captureRate": 0.45666666666666667,
+          "additionalTickets": 898,
+          "avgTickets": 2.993333333333333,
+          "median": 3,
+          "p90": 3,
+          "max": 3,
+          "additionalHitsRescued": 7,
+          "wastedAdditionalTickets": 891
+        },
+        "5": {
+          "captureRate": 0.4766666666666667,
+          "additionalTickets": 1496,
+          "avgTickets": 4.986666666666666,
+          "median": 5,
+          "p90": 5,
+          "max": 5,
+          "additionalHitsRescued": 13,
+          "wastedAdditionalTickets": 1483
+        },
+        "10": {
+          "captureRate": 0.53,
+          "additionalTickets": 2986,
+          "avgTickets": 9.953333333333333,
+          "median": 10,
+          "p90": 10,
+          "max": 10,
+          "additionalHitsRescued": 29,
+          "wastedAdditionalTickets": 2957
+        }
+      },
+      "naturalCliffObservation": {
+        "status": "NO_CLEAR_NATURAL_CLIFF",
+        "bestObservedExtension": 10,
+        "bestObservedEfficiency": 0.010738255033557046,
+        "productionThreshold": false
+      },
+      "byDropReason": [
+        {
+          "key": "PAIR_DIRECTION_OR_RANK",
+          "races": 130,
+          "known": 130,
+          "inside": 0,
+          "meanRank": 96.93846153846154,
+          "meanBoundaryDistance": 91.3076923076923,
+          "meanAdditionalTickets": 94.03076923076924
+        },
+        {
+          "key": "PURCHASE_COMPRESSION",
+          "races": 38,
+          "known": 38,
+          "inside": 38,
+          "meanRank": 42.05263157894737,
+          "meanBoundaryDistance": -84.23684210526316,
+          "meanAdditionalTickets": 33.26315789473684
+        },
+        {
+          "key": "PURCHASE_INELIGIBLE",
+          "races": 86,
+          "known": 86,
+          "inside": 74,
+          "meanRank": 80.18604651162791,
+          "meanBoundaryDistance": -123.73255813953489,
+          "meanAdditionalTickets": 80.18604651162791
+        },
+        {
+          "key": "THIRD_CONDITIONAL",
+          "races": 28,
+          "known": 28,
+          "inside": 0,
+          "meanRank": 30.071428571428573,
+          "meanBoundaryDistance": 23.142857142857142,
+          "meanAdditionalTickets": 25.357142857142858
+        },
+        {
+          "key": "UNKNOWN",
+          "races": 18,
+          "known": 18,
+          "inside": 18,
+          "meanRank": 16.444444444444443,
+          "meanBoundaryDistance": -25.833333333333332,
+          "meanAdditionalTickets": 0
+        }
+      ],
+      "byPrimaryCause": [
+        {
+          "key": "NONE_EXACT_HIT",
+          "races": 18,
+          "known": 18,
+          "inside": 18,
+          "meanRank": 16.444444444444443,
+          "meanBoundaryDistance": -25.833333333333332,
+          "meanAdditionalTickets": 0
+        },
+        {
+          "key": "PAIR_ORDER_MISS",
+          "races": 68,
+          "known": 68,
+          "inside": 0,
+          "meanRank": 82.88235294117646,
+          "meanBoundaryDistance": 75.29411764705883,
+          "meanAdditionalTickets": 80.04411764705883
+        },
+        {
+          "key": "PURCHASE_INELIGIBLE",
+          "races": 71,
+          "known": 71,
+          "inside": 71,
+          "meanRank": 75.35211267605634,
+          "meanBoundaryDistance": -147.11267605633802,
+          "meanAdditionalTickets": 75.35211267605634
+        },
+        {
+          "key": "PURCHASE_SELECTION_MISS",
+          "races": 38,
+          "known": 38,
+          "inside": 38,
+          "meanRank": 42.05263157894737,
+          "meanBoundaryDistance": -84.23684210526316,
+          "meanAdditionalTickets": 33.26315789473684
+        },
+        {
+          "key": "REVERSE_12",
+          "races": 35,
+          "known": 35,
+          "inside": 0,
+          "meanRank": 125.14285714285714,
+          "meanBoundaryDistance": 95,
+          "meanAdditionalTickets": 121.91428571428571
+        },
+        {
+          "key": "SCENARIO_RANKING_MISS",
+          "races": 15,
+          "known": 15,
+          "inside": 3,
+          "meanRank": 25.866666666666667,
+          "meanBoundaryDistance": -30.466666666666665,
+          "meanAdditionalTickets": 22.066666666666666
+        },
+        {
+          "key": "THIRD_CONDITIONAL_MISS",
+          "races": 17,
+          "known": 17,
+          "inside": 0,
+          "meanRank": 39.8235294117647,
+          "meanBoundaryDistance": 31.705882352941178,
+          "meanAdditionalTickets": 35.411764705882355
+        },
+        {
+          "key": "UPSTREAM_RIDER_MISS",
+          "races": 22,
+          "known": 22,
+          "inside": 0,
+          "meanRank": 115.5,
+          "meanBoundaryDistance": 113.36363636363636,
+          "meanAdditionalTickets": 114
+        },
+        {
+          "key": "WINNER_SELECTION_MISS",
+          "races": 16,
+          "known": 16,
+          "inside": 0,
+          "meanRank": 85.5,
+          "meanBoundaryDistance": 81.3125,
+          "meanAdditionalTickets": 83.0625
+        }
+      ],
+      "byMarkCoverage": [
+        {
+          "key": "P0",
+          "races": 3,
+          "known": 3,
+          "inside": 0,
+          "meanRank": 187.33333333333334,
+          "meanBoundaryDistance": 185.66666666666666,
+          "meanAdditionalTickets": 185.66666666666666
+        },
+        {
+          "key": "P1",
+          "races": 37,
+          "known": 37,
+          "inside": 0,
+          "meanRank": 107.32432432432432,
+          "meanBoundaryDistance": 104.89189189189189,
+          "meanAdditionalTickets": 105.43243243243244
+        },
+        {
+          "key": "P2",
+          "races": 89,
+          "known": 89,
+          "inside": 0,
+          "meanRank": 71.31460674157303,
+          "meanBoundaryDistance": 66.62921348314607,
+          "meanAdditionalTickets": 68.31460674157303
+        },
+        {
+          "key": "P3",
+          "races": 171,
+          "known": 171,
+          "inside": 130,
+          "meanRank": 66.39766081871345,
+          "meanBoundaryDistance": -71.09356725146199,
+          "meanAdditionalTickets": 61.73099415204678
+        }
+      ],
+      "byFieldSize": [
+        {
+          "key": "6",
+          "races": 14,
+          "known": 14,
+          "inside": 3,
+          "meanRank": 45.214285714285715,
+          "meanBoundaryDistance": 29.857142857142858,
+          "meanAdditionalTickets": 39.357142857142854
+        },
+        {
+          "key": "7",
+          "races": 241,
+          "known": 241,
+          "inside": 105,
+          "meanRank": 53.50622406639004,
+          "meanBoundaryDistance": -6.153526970954357,
+          "meanAdditionalTickets": 49.66804979253112
+        },
+        {
+          "key": "8",
+          "races": 2,
+          "known": 2,
+          "inside": 0,
+          "meanRank": 153.5,
+          "meanBoundaryDistance": 67.5,
+          "meanAdditionalTickets": 146.5
+        },
+        {
+          "key": "9",
+          "races": 43,
+          "known": 43,
+          "inside": 22,
+          "meanRank": 195.32558139534885,
+          "meanBoundaryDistance": -19.976744186046513,
+          "meanAdditionalTickets": 192.5581395348837
+        }
+      ],
+      "byLineCount": [
+        {
+          "key": "2",
+          "races": 14,
+          "known": 14,
+          "inside": 8,
+          "meanRank": 32.5,
+          "meanBoundaryDistance": -20.714285714285715,
+          "meanAdditionalTickets": 28.5
+        },
+        {
+          "key": "3",
+          "races": 141,
+          "known": 141,
+          "inside": 72,
+          "meanRank": 57.673758865248224,
+          "meanBoundaryDistance": -20.617021276595743,
+          "meanAdditionalTickets": 54.212765957446805
+        },
+        {
+          "key": "4",
+          "races": 69,
+          "known": 69,
+          "inside": 28,
+          "meanRank": 99.68115942028986,
+          "meanBoundaryDistance": -12.217391304347826,
+          "meanAdditionalTickets": 95.6376811594203
+        },
+        {
+          "key": "5",
+          "races": 24,
+          "known": 24,
+          "inside": 11,
+          "meanRank": 178.79166666666666,
+          "meanBoundaryDistance": 46.791666666666664,
+          "meanAdditionalTickets": 173.29166666666666
+        },
+        {
+          "key": "6",
+          "races": 3,
+          "known": 3,
+          "inside": 1,
+          "meanRank": 77,
+          "meanBoundaryDistance": -73.66666666666667,
+          "meanAdditionalTickets": 75.66666666666667
+        },
+        {
+          "key": "7",
+          "races": 49,
+          "known": 49,
+          "inside": 10,
+          "meanRank": 45.857142857142854,
+          "meanBoundaryDistance": 27.53061224489796,
+          "meanAdditionalTickets": 42.16326530612245
+        }
+      ],
+      "bySoloCount": [
+        {
+          "key": "0",
+          "races": 300,
+          "known": 300,
+          "inside": 130,
+          "meanRank": 74.11333333333333,
+          "meanBoundaryDistance": -5.963333333333333,
+          "meanAdditionalTickets": 70.31333333333333
+        }
+      ],
+      "byLineSizePattern": [
+        {
+          "key": "1-1-1-1-1-1",
+          "races": 1,
+          "known": 1,
+          "inside": 0,
+          "meanRank": 5,
+          "meanBoundaryDistance": 3,
+          "meanAdditionalTickets": 3
+        },
+        {
+          "key": "1-1-1-1-1-1-1",
+          "races": 49,
+          "known": 49,
+          "inside": 10,
+          "meanRank": 45.857142857142854,
+          "meanBoundaryDistance": 27.53061224489796,
+          "meanAdditionalTickets": 42.16326530612245
+        },
+        {
+          "key": "2-2-1-1",
+          "races": 1,
+          "known": 1,
+          "inside": 0,
+          "meanRank": 79,
+          "meanBoundaryDistance": 74,
+          "meanAdditionalTickets": 74
+        },
+        {
+          "key": "2-2-1-1-1",
+          "races": 3,
+          "known": 3,
+          "inside": 2,
+          "meanRank": 61.333333333333336,
+          "meanBoundaryDistance": -57.666666666666664,
+          "meanAdditionalTickets": 60.666666666666664
+        },
+        {
+          "key": "2-2-2",
+          "races": 2,
+          "known": 2,
+          "inside": 0,
+          "meanRank": 24,
+          "meanBoundaryDistance": 22.5,
+          "meanAdditionalTickets": 22.5
+        },
+        {
+          "key": "2-2-2-1",
+          "races": 25,
+          "known": 25,
+          "inside": 5,
+          "meanRank": 62.68,
+          "meanBoundaryDistance": 49,
+          "meanAdditionalTickets": 58.92
+        },
+        {
+          "key": "2-2-2-1-1",
+          "races": 1,
+          "known": 1,
+          "inside": 0,
+          "meanRank": 113,
+          "meanBoundaryDistance": 111,
+          "meanAdditionalTickets": 111
+        },
+        {
+          "key": "2-2-2-1-1-1",
+          "races": 1,
+          "known": 1,
+          "inside": 0,
+          "meanRank": 53,
+          "meanBoundaryDistance": 51,
+          "meanAdditionalTickets": 51
+        },
+        {
+          "key": "2-2-2-2",
+          "races": 1,
+          "known": 1,
+          "inside": 0,
+          "meanRank": 194,
+          "meanBoundaryDistance": 24,
+          "meanAdditionalTickets": 182
+        },
+        {
+          "key": "2-2-2-2-1",
+          "races": 12,
+          "known": 12,
+          "inside": 3,
+          "meanRank": 197.75,
+          "meanBoundaryDistance": 126.41666666666667,
+          "meanAdditionalTickets": 193.16666666666666
+        },
+        {
+          "key": "3-1-1-1-1",
+          "races": 2,
+          "known": 2,
+          "inside": 2,
+          "meanRank": 44.5,
+          "meanBoundaryDistance": -127,
+          "meanAdditionalTickets": 10.5
+        },
+        {
+          "key": "3-2-1",
+          "races": 4,
+          "known": 4,
+          "inside": 2,
+          "meanRank": 50,
+          "meanBoundaryDistance": 23.25,
+          "meanAdditionalTickets": 43.25
+        },
+        {
+          "key": "3-2-1-1",
+          "races": 21,
+          "known": 21,
+          "inside": 11,
+          "meanRank": 67.80952380952381,
+          "meanBoundaryDistance": -21.142857142857142,
+          "meanAdditionalTickets": 62.61904761904762
+        },
+        {
+          "key": "3-2-1-1-1-1",
+          "races": 1,
+          "known": 1,
+          "inside": 1,
+          "meanRank": 173,
+          "meanBoundaryDistance": -275,
+          "meanAdditionalTickets": 173
+        },
+        {
+          "key": "3-2-2",
+          "races": 83,
+          "known": 83,
+          "inside": 42,
+          "meanRank": 55.144578313253014,
+          "meanBoundaryDistance": -29.46987951807229,
+          "meanAdditionalTickets": 51.33734939759036
+        },
+        {
+          "key": "3-2-2-1-1",
+          "races": 6,
+          "known": 6,
+          "inside": 4,
+          "meanRank": 255.33333333333334,
+          "meanBoundaryDistance": -13,
+          "meanAdditionalTickets": 254.5
+        },
+        {
+          "key": "3-2-2-2",
+          "races": 13,
+          "known": 13,
+          "inside": 10,
+          "meanRank": 133.6153846153846,
+          "meanBoundaryDistance": -185.3846153846154,
+          "meanAdditionalTickets": 132.3846153846154
+        },
+        {
+          "key": "3-3",
+          "races": 4,
+          "known": 4,
+          "inside": 1,
+          "meanRank": 60.25,
+          "meanBoundaryDistance": 39,
+          "meanAdditionalTickets": 51.25
+        },
+        {
+          "key": "3-3-1",
+          "races": 43,
+          "known": 43,
+          "inside": 23,
+          "meanRank": 51.25581395348837,
+          "meanBoundaryDistance": -12.232558139534884,
+          "meanAdditionalTickets": 48.372093023255815
+        },
+        {
+          "key": "3-3-2-1",
+          "races": 7,
+          "known": 7,
+          "inside": 2,
+          "meanRank": 258.14285714285717,
+          "meanBoundaryDistance": 88.57142857142857,
+          "meanAdditionalTickets": 252.28571428571428
+        },
+        {
+          "key": "3-3-3",
+          "races": 3,
+          "known": 3,
+          "inside": 2,
+          "meanRank": 241.33333333333334,
+          "meanBoundaryDistance": -94.66666666666667,
+          "meanAdditionalTickets": 241.33333333333334
+        },
+        {
+          "key": "4-1-1-1",
+          "races": 1,
+          "known": 1,
+          "inside": 0,
+          "meanRank": 70,
+          "meanBoundaryDistance": 68,
+          "meanAdditionalTickets": 68
+        },
+        {
+          "key": "4-2",
+          "races": 2,
+          "known": 2,
+          "inside": 0,
+          "meanRank": 30,
+          "meanBoundaryDistance": 23.5,
+          "meanAdditionalTickets": 25.5
+        },
+        {
+          "key": "4-2-1",
+          "races": 6,
+          "known": 6,
+          "inside": 3,
+          "meanRank": 63.166666666666664,
+          "meanBoundaryDistance": 35.166666666666664,
+          "meanAdditionalTickets": 60.166666666666664
+        },
+        {
+          "key": "4-3",
+          "races": 7,
+          "known": 7,
+          "inside": 6,
+          "meanRank": 21.571428571428573,
+          "meanBoundaryDistance": -53.714285714285715,
+          "meanAdditionalTickets": 20.428571428571427
+        },
+        {
+          "key": "5-2",
+          "races": 1,
+          "known": 1,
+          "inside": 1,
+          "meanRank": 3,
+          "meanBoundaryDistance": -117,
+          "meanAdditionalTickets": 0
+        }
+      ],
+      "byRaceType": [
+        {
+          "key": "STANDARD",
+          "races": 300,
+          "known": 300,
+          "inside": 130,
+          "meanRank": 74.11333333333333,
+          "meanBoundaryDistance": -5.963333333333333,
+          "meanAdditionalTickets": 70.31333333333333
+        }
+      ],
+      "byPayoutBand": [
+        {
+          "key": "10K_TO_49999",
+          "races": 54,
+          "known": 54,
+          "inside": 20,
+          "meanRank": 114.01851851851852,
+          "meanBoundaryDistance": 20.666666666666668,
+          "meanAdditionalTickets": 109.31481481481481
+        },
+        {
+          "key": "50K_PLUS",
+          "races": 11,
+          "known": 11,
+          "inside": 2,
+          "meanRank": 182.45454545454547,
+          "meanBoundaryDistance": 94.36363636363636,
+          "meanAdditionalTickets": 179.63636363636363
+        },
+        {
+          "key": "5K_TO_9999",
+          "races": 47,
+          "known": 47,
+          "inside": 16,
+          "meanRank": 82.8936170212766,
+          "meanBoundaryDistance": 0.9361702127659575,
+          "meanAdditionalTickets": 78.82978723404256
+        },
+        {
+          "key": "UNDER_5K",
+          "races": 188,
+          "known": 188,
+          "inside": 92,
+          "meanRank": 54.11702127659574,
+          "meanBoundaryDistance": -21.20744680851064,
+          "meanAdditionalTickets": 50.58510638297872
+        }
+      ]
+    }
+  },
+  "shadowDistance": [
+    {
+      "theme": "PAIR_DIRECTION",
+      "variantId": "BASELINE",
+      "evaluatedRaces": 67,
+      "exactHits": 4,
+      "roi": 0.2585657370517928,
+      "exactTerminalRankAvg": 54.38805970149254,
+      "boundaryDistanceAvg": 53.38805970149254,
+      "additionalTicketsNeededAvg": 50.71641791044776,
+      "scoreDistanceAvg": 0.2972707313529124,
+      "normalizedScoreDistanceAvg": 0.44274301785755327,
+      "delta": {
+        "exactTerminalRank": 0,
+        "boundaryDistance": 0,
+        "additionalTicketsNeeded": 0,
+        "scoreDistance": 0,
+        "normalizedScoreDistance": 0
+      },
+      "state": "BASELINE"
+    },
+    {
+      "theme": "PAIR_DIRECTION",
+      "variantId": "PAIR_WEAK",
+      "evaluatedRaces": 67,
+      "exactHits": 5,
+      "roi": 0.26294820717131473,
+      "exactTerminalRankAvg": 54.16417910447761,
+      "boundaryDistanceAvg": 53.16417910447761,
+      "additionalTicketsNeededAvg": 50.8955223880597,
+      "scoreDistanceAvg": 0.3003402687672347,
+      "normalizedScoreDistanceAvg": 0.46309952132353516,
+      "delta": {
+        "exactTerminalRank": -0.2238805970149258,
+        "boundaryDistance": -0.2238805970149258,
+        "additionalTicketsNeeded": 0.17910447761194348,
+        "scoreDistance": 0.0030695374143223098,
+        "normalizedScoreDistance": 0.02035650346598189
+      },
+      "state": "NEUTRAL"
+    },
+    {
+      "theme": "PAIR_DIRECTION",
+      "variantId": "PAIR_MEDIUM",
+      "evaluatedRaces": 67,
+      "exactHits": 6,
+      "roi": 0.3705179282868526,
+      "exactTerminalRankAvg": 54.02985074626866,
+      "boundaryDistanceAvg": 53.02985074626866,
+      "additionalTicketsNeededAvg": 50.74626865671642,
+      "scoreDistanceAvg": 0.3076392383613511,
+      "normalizedScoreDistanceAvg": 0.48775217006456334,
+      "delta": {
+        "exactTerminalRank": -0.35820895522387985,
+        "boundaryDistance": -0.35820895522387985,
+        "additionalTicketsNeeded": 0.029850746268657247,
+        "scoreDistance": 0.010368507008438721,
+        "normalizedScoreDistance": 0.04500915220701007
+      },
+      "state": "PROMISING"
+    },
+    {
+      "theme": "PAIR_DIRECTION",
+      "variantId": "PAIR_STRONG",
+      "evaluatedRaces": 67,
+      "exactHits": 7,
+      "roi": 0.38725099601593627,
+      "exactTerminalRankAvg": 53.91044776119403,
+      "boundaryDistanceAvg": 52.91044776119403,
+      "additionalTicketsNeededAvg": 50.76119402985075,
+      "scoreDistanceAvg": 0.3183434998258143,
+      "normalizedScoreDistanceAvg": 0.5167005613297758,
+      "delta": {
+        "exactTerminalRank": -0.47761194029850884,
+        "boundaryDistance": -0.47761194029850884,
+        "additionalTicketsNeeded": 0.04477611940298942,
+        "scoreDistance": 0.021072768472901904,
+        "normalizedScoreDistance": 0.07395754347222255
+      },
+      "state": "PROMISING"
+    },
+    {
+      "theme": "ELIGIBILITY",
+      "variantId": "BASELINE",
+      "evaluatedRaces": 67,
+      "exactHits": 4,
+      "roi": 0.2585657370517928,
+      "exactTerminalRankAvg": 54.38805970149254,
+      "boundaryDistanceAvg": 53.38805970149254,
+      "additionalTicketsNeededAvg": 50.71641791044776,
+      "scoreDistanceAvg": 0.2972707313529124,
+      "normalizedScoreDistanceAvg": 0.44274301785755327,
+      "delta": {
+        "exactTerminalRank": 0,
+        "boundaryDistance": 0,
+        "additionalTicketsNeeded": 0,
+        "scoreDistance": 0,
+        "normalizedScoreDistance": 0
+      },
+      "state": "BASELINE"
+    },
+    {
+      "theme": "ELIGIBILITY",
+      "variantId": "ELIGIBILITY_RELAX_WEAK",
+      "evaluatedRaces": 67,
+      "exactHits": 4,
+      "roi": 0.2585657370517928,
+      "exactTerminalRankAvg": 54.38805970149254,
+      "boundaryDistanceAvg": 53.38805970149254,
+      "additionalTicketsNeededAvg": 50.71641791044776,
+      "scoreDistanceAvg": 0.2972707313529124,
+      "normalizedScoreDistanceAvg": 0.44274301785755327,
+      "delta": {
+        "exactTerminalRank": 0,
+        "boundaryDistance": 0,
+        "additionalTicketsNeeded": 0,
+        "scoreDistance": 0,
+        "normalizedScoreDistance": 0
+      },
+      "state": "NEUTRAL"
+    },
+    {
+      "theme": "ELIGIBILITY",
+      "variantId": "ELIGIBILITY_RELAX_MEDIUM",
+      "evaluatedRaces": 67,
+      "exactHits": 5,
+      "roi": 0.3059233449477352,
+      "exactTerminalRankAvg": 54.38805970149254,
+      "boundaryDistanceAvg": 53.38805970149254,
+      "additionalTicketsNeededAvg": 50.61194029850746,
+      "scoreDistanceAvg": 0.2972707313529124,
+      "normalizedScoreDistanceAvg": 0.44274301785755327,
+      "delta": {
+        "exactTerminalRank": 0,
+        "boundaryDistance": 0,
+        "additionalTicketsNeeded": -0.10447761194029681,
+        "scoreDistance": 0,
+        "normalizedScoreDistance": 0
+      },
+      "state": "WEAK"
+    },
+    {
+      "theme": "CLIFF",
+      "variantId": "BASELINE",
+      "evaluatedRaces": 67,
+      "exactHits": 4,
+      "roi": 0.2585657370517928,
+      "exactTerminalRankAvg": 54.38805970149254,
+      "boundaryDistanceAvg": 53.38805970149254,
+      "additionalTicketsNeededAvg": 50.71641791044776,
+      "scoreDistanceAvg": 0.2972707313529124,
+      "normalizedScoreDistanceAvg": 0.44274301785755327,
+      "delta": {
+        "exactTerminalRank": 0,
+        "boundaryDistance": 0,
+        "additionalTicketsNeeded": 0,
+        "scoreDistance": 0,
+        "normalizedScoreDistance": 0
+      },
+      "state": "BASELINE"
+    },
+    {
+      "theme": "CLIFF",
+      "variantId": "CLIFF_MAX_GAP",
+      "evaluatedRaces": 67,
+      "exactHits": 4,
+      "roi": 0.17535545023696683,
+      "exactTerminalRankAvg": 54.38805970149254,
+      "boundaryDistanceAvg": 53.38805970149254,
+      "additionalTicketsNeededAvg": 51.417910447761194,
+      "scoreDistanceAvg": 0.2972707313529124,
+      "normalizedScoreDistanceAvg": 0.44274301785755327,
+      "delta": {
+        "exactTerminalRank": 0,
+        "boundaryDistance": 0,
+        "additionalTicketsNeeded": 0.7014925373134346,
+        "scoreDistance": 0,
+        "normalizedScoreDistance": 0
+      },
+      "state": "NEUTRAL"
+    },
+    {
+      "theme": "CLIFF",
+      "variantId": "CLIFF_GAP_SEPARATION",
+      "evaluatedRaces": 67,
+      "exactHits": 4,
+      "roi": 0.1712962962962963,
+      "exactTerminalRankAvg": 54.38805970149254,
+      "boundaryDistanceAvg": 53.38805970149254,
+      "additionalTicketsNeededAvg": 51.343283582089555,
+      "scoreDistanceAvg": 0.2972707313529124,
+      "normalizedScoreDistanceAvg": 0.44274301785755327,
+      "delta": {
+        "exactTerminalRank": 0,
+        "boundaryDistance": 0,
+        "additionalTicketsNeeded": 0.6268656716417951,
+        "scoreDistance": 0,
+        "normalizedScoreDistance": 0
+      },
+      "state": "NEUTRAL"
+    },
+    {
+      "theme": "CLIFF",
+      "variantId": "CLIFF_PLATEAU_SLOPE",
+      "evaluatedRaces": 67,
+      "exactHits": 4,
+      "roi": 0.31451612903225806,
+      "exactTerminalRankAvg": 54.38805970149254,
+      "boundaryDistanceAvg": 53.38805970149254,
+      "additionalTicketsNeededAvg": 52.61194029850746,
+      "scoreDistanceAvg": 0.2972707313529124,
+      "normalizedScoreDistanceAvg": 0.44274301785755327,
+      "delta": {
+        "exactTerminalRank": 0,
+        "boundaryDistance": 0,
+        "additionalTicketsNeeded": 1.8955223880597032,
+        "scoreDistance": 0,
+        "normalizedScoreDistance": 0
+      },
+      "state": "NEUTRAL"
+    },
+    {
+      "theme": "THIRD_CONDITIONAL",
+      "variantId": "BASELINE",
+      "evaluatedRaces": 67,
+      "exactHits": 4,
+      "roi": 0.2585657370517928,
+      "exactTerminalRankAvg": 54.38805970149254,
+      "boundaryDistanceAvg": 53.38805970149254,
+      "additionalTicketsNeededAvg": 50.71641791044776,
+      "scoreDistanceAvg": 0.2972707313529124,
+      "normalizedScoreDistanceAvg": 0.44274301785755327,
+      "delta": {
+        "exactTerminalRank": 0,
+        "boundaryDistance": 0,
+        "additionalTicketsNeeded": 0,
+        "scoreDistance": 0,
+        "normalizedScoreDistance": 0
+      },
+      "state": "BASELINE"
+    },
+    {
+      "theme": "THIRD_CONDITIONAL",
+      "variantId": "THIRD_WEAK",
+      "evaluatedRaces": 67,
+      "exactHits": 5,
+      "roi": 0.26294820717131473,
+      "exactTerminalRankAvg": 54.343283582089555,
+      "boundaryDistanceAvg": 53.343283582089555,
+      "additionalTicketsNeededAvg": 51.08955223880597,
+      "scoreDistanceAvg": 0.2868085042682224,
+      "normalizedScoreDistanceAvg": 0.45542235988415763,
+      "delta": {
+        "exactTerminalRank": -0.04477611940298232,
+        "boundaryDistance": -0.04477611940298232,
+        "additionalTicketsNeeded": 0.37313432835821203,
+        "scoreDistance": -0.010462227084689968,
+        "normalizedScoreDistance": 0.012679342026604368
+      },
+      "state": "NEUTRAL"
+    },
+    {
+      "theme": "THIRD_CONDITIONAL",
+      "variantId": "THIRD_MEDIUM",
+      "evaluatedRaces": 67,
+      "exactHits": 5,
+      "roi": 0.26294820717131473,
+      "exactTerminalRankAvg": 54.28358208955224,
+      "boundaryDistanceAvg": 53.28358208955224,
+      "additionalTicketsNeededAvg": 51.014925373134325,
+      "scoreDistanceAvg": 0.27640250706842134,
+      "normalizedScoreDistanceAvg": 0.4699012390190613,
+      "delta": {
+        "exactTerminalRank": -0.10447761194029681,
+        "boundaryDistance": -0.10447761194029681,
+        "additionalTicketsNeeded": 0.29850746268656536,
+        "scoreDistance": -0.020868224284491033,
+        "normalizedScoreDistance": 0.02715822116150801
+      },
+      "state": "NEUTRAL"
+    },
+    {
+      "theme": "THIRD_CONDITIONAL",
+      "variantId": "THIRD_STRONG",
+      "evaluatedRaces": 67,
+      "exactHits": 5,
+      "roi": 0.26294820717131473,
+      "exactTerminalRankAvg": 54.26865671641791,
+      "boundaryDistanceAvg": 53.26865671641791,
+      "additionalTicketsNeededAvg": 50.985074626865675,
+      "scoreDistanceAvg": 0.2660796403914758,
+      "normalizedScoreDistanceAvg": 0.4865802868840896,
+      "delta": {
+        "exactTerminalRank": -0.11940298507462899,
+        "boundaryDistance": -0.11940298507462899,
+        "additionalTicketsNeeded": 0.2686567164179152,
+        "scoreDistance": -0.031191090961436574,
+        "normalizedScoreDistance": 0.04383726902653634
+      },
+      "state": "NEUTRAL"
+    }
+  ],
+  "shadow": {
+    "schemaVersion": "SHADOW_CONFIRMATION_FROM_234_V1",
+    "cohort": {
+      "name": "CONFIRMATION_FROM_234",
+      "startOrdinal": 234,
+      "evaluatedRaces": 67,
+      "raceKeys": [
+        "20260921-62-3",
+        "20260921-62-4",
+        "20260921-62-5",
+        "20260921-62-6",
+        "20260921-62-7",
+        "20260921-74-1",
+        "20260921-74-2",
+        "20260921-74-5",
+        "20260921-75-1",
+        "20260921-75-2",
+        "20260921-75-4",
+        "20260921-75-5",
+        "20260921-75-6",
+        "20260921-75-7",
+        "20260921-75-9",
+        "20260921-75-11",
+        "20260921-85-1",
+        "20260921-85-2",
+        "20260921-85-3",
+        "20260921-85-4",
+        "20260921-85-5",
+        "20260921-85-6",
+        "20260921-85-7",
+        "20260921-85-8",
+        "20260922-12-3",
+        "20260922-12-4",
+        "20260922-12-11",
+        "20260922-12-12",
+        "20260922-25-1",
+        "20260922-25-4",
+        "20260922-25-6",
+        "20260922-28-1",
+        "20260922-28-2",
+        "20260922-28-3",
+        "20260922-28-4",
+        "20260922-28-5",
+        "20260922-28-6",
+        "20260922-28-7",
+        "20260922-28-8",
+        "20260922-28-10",
+        "20260922-28-11",
+        "20260922-28-12",
+        "20260922-44-3",
+        "20260922-44-4",
+        "20260922-44-5",
+        "20260922-44-6",
+        "20260922-44-7",
+        "20260922-44-9",
+        "20260922-44-10",
+        "20260922-44-11",
+        "20260922-62-1",
+        "20260922-62-2",
+        "20260922-62-3",
+        "20260922-62-4",
+        "20260922-62-5",
+        "20260922-62-6",
+        "20260922-62-7",
+        "20260922-74-1",
+        "20260922-74-8",
+        "20260922-85-1",
+        "20260922-85-2",
+        "20260922-85-3",
+        "20260922-85-4",
+        "20260922-85-5",
+        "20260922-85-6",
+        "20260922-85-7",
+        "20260922-85-8"
+      ],
+      "protectedFinalUsed": 0
+    },
+    "readiness": {
+      "PAIR_DIRECTION": true,
+      "ELIGIBILITY": true,
+      "CLIFF": true,
+      "THIRD_CONDITIONAL": true
+    },
+    "variantsTotal": 15,
+    "safety": {
+      "inputHashBefore": "0c5e1ae0c796859a76ae8ec6b7d0d203e02e13bf1bba8e62069c6840f9907be3",
+      "inputHashAfter": "0c5e1ae0c796859a76ae8ec6b7d0d203e02e13bf1bba8e62069c6840f9907be3",
+      "productionHashMismatch": 0,
+      "productionPredictionChanged": false,
+      "productionPurchaseChanged": false,
+      "recommendationChanged": false,
+      "thickChanged": false,
+      "cliffProductionImplemented": false,
+      "historicalMutation": 0,
+      "protectedFinalUsed": 0,
+      "resultLeakage": 0,
+      "variantCrossContamination": 0,
+      "autoTuning": false
+    }
+  },
+  "integrity": {
+    "predictionHashMismatch": 0,
+    "purchaseHashMismatch": 0,
+    "sealedResultMismatch": 0,
+    "historicalMutation": 0,
+    "protectedFinalUsed": 0,
+    "resultLeakage": 0,
+    "productionPredictionChanged": false,
+    "productionPurchaseChanged": false,
+    "recommendationChanged": false,
+    "thickChanged": false,
+    "cliffProductionImplemented": false
+  }
+}
