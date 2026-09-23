@@ -7,6 +7,8 @@ import { applyStartPowerEvidence } from "../../keirin/start-power/start-power.mj
 import { applyKimariteAbilities } from "../../keirin/kimarite/kimarite-abilities.mjs";
 import { attachRiderDbEvidence, loadRiderDB, summarizeRiderDbUsage } from "../../keirin/sports/rider-db-provider.mjs";
 import { jsonResponse } from "../../keirin/parser/utils.mjs";
+import { gzipSync } from "node:zlib";
+import { deriveRiderMarks } from "../../public/rider-marks.mjs";
 
 const VENUE_CODE_BY_NAME = {
   函館: "11", 青森: "12", いわき平: "13", 弥彦: "21", 前橋: "22",
@@ -186,8 +188,13 @@ export default async function handler(req) {
       race,
       venueProfile,
       oddsByOrder: odds.complete ? odds.odds : {},
-      budget
+      budget,
+      captureResearchTrace:autoResearch
     });
+    const researchTerminalTrace=prediction.researchTerminalTrace||null;
+    delete prediction.researchTerminalTrace;
+    if(researchTerminalTrace)researchTerminalTrace.marks=deriveRiderMarks({abilitiesUsed:(prediction.scored||[]).map(row=>({number:row.number,recentForm:row.recentForm??null,startPower:row.startPower??null,sprintPower:row.sprintPower??null,finishPower:row.finishPower??null,trackingSkill:row.trackingSkill??null,roleScores:row.roleScores||null,riderEvaluationV2:row.riderEvaluationV2||null,scoreTrace:row.scoreTrace||null})),branches:prediction.branches||[],terminalLedger:(prediction.terminals||[]).map(row=>({order:row.order,probability:row.probability,terminalGlobalRank:row.terminalGlobalRank,dominantBranchId:row.dominantBranchId||row.branchId})),betSelections:(prediction.standardPurchasePlan||[]).map(row=>({order:row.order,category:row.betClass}))});
+    const researchTerminalTraceGzip=researchTerminalTrace?gzipSync(Buffer.from(JSON.stringify(researchTerminalTrace),"utf8"),{level:6}).toString("base64"):null;
     attachThickQualification(prediction);
     timing.engineTotalMs=roundMs(performance.now()-engineStarted);
     timing.riderScoringMs=Number(prediction.audit?.durationBreakdown?.riderScoringMs??null);
@@ -224,6 +231,7 @@ export default async function handler(req) {
       race,
       odds,
       prediction,
+      ...(autoResearch?{researchTerminalTraceGzip,researchTerminalTraceEncoding:researchTerminalTraceGzip?"gzip-json-v1":null,traceStatus:researchTerminalTraceGzip?"TRACE_READY":"TRACE_PARTIAL"}:{}),
       predictionRequestedAt,
       predictionSealedAt,
       preSeal,

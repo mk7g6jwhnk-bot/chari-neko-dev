@@ -2,13 +2,14 @@ import{runKeirinPredictionEngine}from"./prediction-engine.mjs";
 import{runKeirinPurchaseEngine}from"./purchase-engine.mjs";
 import{PREDICTION_ENGINE_VERSION,PURCHASE_ENGINE_VERSION,ENGINE_PAIR_ID,buildEnginePairAudit}from"./engine-version.mjs";
 import{attachScenarioProvenanceId,buildScenarioProvenance}from"./scenario-provenance.mjs";
+import{buildTerminalDetailTrace}from"./terminal-trace.mjs";
 
-export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000}){
+export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000,captureResearchTrace=false}){
   const prediction=runKeirinPredictionEngine({race,venueProfile});
   const purchase=runKeirinPurchaseEngine({prediction,oddsByOrder,budget});
   const provenance=buildScenarioProvenance({terminals:purchase.terminals,branches:prediction.branches,lines:prediction.lines,scored:prediction.scored});
   const apiTerminals=purchase.terminals.map(item=>attachScenarioProvenanceId(item,provenance.terminalScenarioIds));
-  return{
+  const output={
     engineVersion:PREDICTION_ENGINE_VERSION,
     raceId:race.id,
     lineConfidence:race.lineConfidence,
@@ -56,6 +57,8 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
     purchaseEligibility:purchase.purchaseEligibility,
     generatedAt:new Date().toISOString()
   };
+  if(captureResearchTrace)output.researchTerminalTrace=buildTerminalDetailTrace({race,prediction,purchase,provenance,generatedAt:output.generatedAt});
+  return output;
 }
 
 function compactPredictionTerminal(item){

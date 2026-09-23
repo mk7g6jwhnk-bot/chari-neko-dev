@@ -27,7 +27,7 @@ async function getJson(base, name, raceKey, fetchImpl) {
   throw last;
 }
 
-function compact(predictionResponse, resultResponse) {
+function compact(predictionResponse, resultResponse, traceResponse=null) {
   const prediction = predictionResponse.predictionPayload?.prediction || {};
   const race = predictionResponse.predictionPayload?.race || predictionResponse.predictionPayload?.targetRace || {};
   const lifecycle = prediction.purchase?.audit?.terminalLifecycleAudit || prediction.audit?.purchaseAudit?.terminalLifecycleAudit;
@@ -102,11 +102,12 @@ function compact(predictionResponse, resultResponse) {
         reason: race.lineDataReason || prediction.lineDataReason || null,
         lines: (prediction.lines || []).map(line => ({ type: line.type || null, members: (line.members || []).map(member => Number(member.number || member.id)).filter(Number.isFinite) })) },
       riderScores: (prediction.scored || []).map(row => ({ riderId: row.registration || row.riderId || row.id || null, number: Number(row.number), name: row.name || null,
-        score: Number(row.roleScores?.first), scoreSource: 'prediction.scored[].roleScores.first', scoreTrace: row.scoreTrace || null })).filter(row => Number.isFinite(row.number) && Number.isFinite(row.score)), terminals }
+        score: Number(row.roleScores?.first), scoreSource: 'prediction.scored[].roleScores.first', scoreTrace: row.scoreTrace || null })).filter(row => Number.isFinite(row.number) && Number.isFinite(row.score)), terminals,
+      terminalTrace:traceResponse?.trace&&traceResponse.trace.predictionHash===predictionResponse.predictionHash?traceResponse.trace:null }
   };
 }
 
-export async function fetchPredictionDistanceSource({ cohort, baseUrl = DEFAULT_BASE, fetchImpl = fetch, concurrency = 4 } = {}) {
+export async function fetchPredictionDistanceSource({ cohort, baseUrl = DEFAULT_BASE, fetchImpl = fetch, concurrency = 4, traceBaseUrl=process.env.KEIRIN_BROWSER_SERVICE_URL, traceSecret=process.env.VALIDATION_STATUS_SYNC_SECRET||process.env.AUTO_RESEARCH_CALLBACK_SECRET } = {}) {
   if (!Array.isArray(cohort?.raceKeys) || !cohort.raceKeys.length) throw Error('COHORT_REQUIRED');
   if (new Set(cohort.raceKeys).size !== cohort.raceKeys.length) throw Error('DUPLICATE_COHORT_KEY');
   const rows = new Array(cohort.raceKeys.length), exclusions = [], hashes = { predictionMismatch: 0, purchaseMismatch: 0, sealedResultMismatch: 0 };
@@ -130,7 +131,8 @@ export async function fetchPredictionDistanceSource({ cohort, baseUrl = DEFAULT_
         if (sealedResultHash(result) !== sealedResultHash(resultAgain)) {
           hashes.sealedResultMismatch++; exclusions.push({ raceKey, reason: 'SEALED_RESULT_MISMATCH' }); continue;
         }
-        rows[index] = compact(prediction, result);
+        let trace=null;if(traceBaseUrl&&traceSecret)try{const response=await fetchImpl(`${String(traceBaseUrl).replace(/\/$/,"")}/keirin/internal/terminal-trace/${encodeURIComponent(raceKey)}`,{headers:{accept:'application/json','x-auto-research-secret':traceSecret},signal:AbortSignal.timeout(60000)});if(response.ok)trace=await response.json();}catch{}
+        rows[index] = compact(prediction, result, trace);
       } catch (error) {
         exclusions.push({ raceKey, reason: String(error?.message || error) });
       }
