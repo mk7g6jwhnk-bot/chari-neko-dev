@@ -1,0 +1,671 @@
+{
+  "schemaVersion": "TERMINAL_RANK_CONTRIBUTION_DIAGNOSIS_V1",
+  "definition": {
+    "source": "saved prediction/result snapshots only",
+    "scoreLevelReconstruction": "0.65*relativeProbability + 0.35*evidenceScore",
+    "detailedScoreReconstruction": "0.65*relativeProbability + 0.35*(0.55*positionFit + 0.20*positionBalance + 0.15*ratioFit + 0.10*evidenceCoverage)",
+    "comparison": "up to ten higher-ranked saved terminals; positive feature deficits normalized by the within-race observed feature range",
+    "scoreImpact": "observed terminal score gap allocated descriptively in proportion to positive normalized feature deficits; not a counterfactual replay",
+    "dominantRule": "single category must hold at least 50% of positive normalized category deficit; otherwise MULTI_FACTOR",
+    "traceLimitation": "historical terminal rows without saved position/conditional/scenario trace remain UNKNOWN; no regeneration or result-derived imputation",
+    "thresholdSearch": false,
+    "resultAwareRegeneration": false
+  },
+  "cohort": {
+    "raceCount": 300,
+    "keyHash": "51c386191aaac9a554a0d910df0a6e8fa4a4f7c64105850e791e677592f11ee6",
+    "protectedFinal": 0
+  },
+  "summary": {
+    "evaluated": 300,
+    "scoreLevelFullyEvaluable": 87,
+    "fullyEvaluable": 85,
+    "unknown": 215,
+    "exactTraceAvailable": 87,
+    "exactRank": {
+      "count": 300,
+      "mean": 74.11333333333333,
+      "median": 47,
+      "min": 1,
+      "max": 434
+    },
+    "detailedExactRank": {
+      "count": 85,
+      "mean": 22.211764705882352,
+      "median": 6,
+      "min": 1,
+      "max": 311
+    },
+    "scoreLevelReconstructionError": {
+      "count": 87,
+      "mean": 0,
+      "median": 0,
+      "min": 0,
+      "max": 0
+    },
+    "detailedScoreReconstructionError": {
+      "count": 85,
+      "mean": 0,
+      "median": 0,
+      "min": 0,
+      "max": 0
+    }
+  },
+  "categoryRanking": [
+    {
+      "category": "D_THIRD_DOMINANT",
+      "races": 33,
+      "meanExactRank": 7.393939393939394,
+      "meanRankImpact": 6.393939393939394,
+      "meanScoreImpact": 0.06290496706478223
+    },
+    {
+      "category": "G_MULTI_FACTOR",
+      "races": 24,
+      "meanExactRank": 50.583333333333336,
+      "meanRankImpact": 49.583333333333336,
+      "meanScoreImpact": 0.1681771787089109
+    },
+    {
+      "category": "C_PAIR_COMPATIBILITY_DOMINANT",
+      "races": 11,
+      "meanExactRank": 4,
+      "meanRankImpact": 3,
+      "meanScoreImpact": 0.04761292897959896
+    },
+    {
+      "category": "I_UNKNOWN",
+      "races": 11,
+      "meanExactRank": 1,
+      "meanRankImpact": 0,
+      "meanScoreImpact": null
+    },
+    {
+      "category": "B_PAIR_DIRECTION_DOMINANT",
+      "races": 2,
+      "meanExactRank": 176.5,
+      "meanRankImpact": 175.5,
+      "meanScoreImpact": 0.3225859407663645
+    },
+    {
+      "category": "E_SCENARIO_DOMINANT",
+      "races": 2,
+      "meanExactRank": 6,
+      "meanRankImpact": 5,
+      "meanScoreImpact": 0.03095834867308113
+    },
+    {
+      "category": "A_FIRST_SCORE_DOMINANT",
+      "races": 2,
+      "meanExactRank": 5,
+      "meanRankImpact": 4,
+      "meanScoreImpact": 0.03836284956320736
+    }
+  ],
+  "elementRanking": [
+    {
+      "element": "SCENARIO_SCORE",
+      "races": 25,
+      "meanRankImpact": 6.12,
+      "meanScoreImpact": 0.01856379988673839,
+      "meanNormalizedDeficit": 0.36308366020604604
+    },
+    {
+      "element": "SCENARIO_SUPPORT",
+      "races": 25,
+      "meanRankImpact": 6.12,
+      "meanScoreImpact": 0.01797237176500176,
+      "meanNormalizedDeficit": 0.35819738636650184
+    },
+    {
+      "element": "THIRD_CONDITIONAL",
+      "races": 66,
+      "meanRankImpact": 4.893939393939394,
+      "meanScoreImpact": 0.017961182786896863,
+      "meanNormalizedDeficit": 0.34011264584156353
+    },
+    {
+      "element": "PAIR_DIRECTION",
+      "races": 48,
+      "meanRankImpact": 5.854166666666667,
+      "meanScoreImpact": 0.017244152543609368,
+      "meanNormalizedDeficit": 0.18672958901143707
+    },
+    {
+      "element": "FIRST_RIDER_SCORE",
+      "races": 30,
+      "meanRankImpact": 5.966666666666667,
+      "meanScoreImpact": 0.01703135584606026,
+      "meanNormalizedDeficit": 0.36717031440549974
+    },
+    {
+      "element": "SECOND_CONDITIONAL",
+      "races": 46,
+      "meanRankImpact": 4.673913043478261,
+      "meanScoreImpact": 0.016204145182326157,
+      "meanNormalizedDeficit": 0.30485984556290296
+    },
+    {
+      "element": "POSITION_FOURTH_CORNER",
+      "races": 71,
+      "meanRankImpact": 5.549295774647887,
+      "meanScoreImpact": 0.014199453013247444,
+      "meanNormalizedDeficit": 0.2669282757781183
+    },
+    {
+      "element": "TERMINAL_RELATIVE_SCORE",
+      "races": 74,
+      "meanRankImpact": 5.851351351351352,
+      "meanScoreImpact": 0.01296395419926407,
+      "meanNormalizedDeficit": 0.14809803849519243
+    },
+    {
+      "element": "LINE_ROLE",
+      "races": 72,
+      "meanRankImpact": 5.166666666666667,
+      "meanScoreImpact": 0.012076311847997007,
+      "meanNormalizedDeficit": 0.23425857789244844
+    },
+    {
+      "element": "WINNER_SELECTION",
+      "races": 2,
+      "meanRankImpact": 6,
+      "meanScoreImpact": 0.009053000454047383,
+      "meanNormalizedDeficit": 0.4576223347892437
+    },
+    {
+      "element": "PAIR_COMPATIBILITY",
+      "races": 45,
+      "meanRankImpact": 3.6444444444444444,
+      "meanScoreImpact": 0.008481898648707194,
+      "meanNormalizedDeficit": 0.2762749746517573
+    },
+    {
+      "element": "COUNTER_EVIDENCE",
+      "races": 0,
+      "meanRankImpact": null,
+      "meanScoreImpact": null,
+      "meanNormalizedDeficit": null
+    }
+  ],
+  "byRankBand": [
+    {
+      "key": "TOP_1_TO_5",
+      "races": 40,
+      "fullyEvaluable": 40,
+      "meanExactRank": 2.65,
+      "medianExactRank": 3,
+      "categories": {
+        "A_FIRST_SCORE_DOMINANT": 1,
+        "C_PAIR_COMPATIBILITY_DOMINANT": 9,
+        "D_THIRD_DOMINANT": 16,
+        "E_SCENARIO_DOMINANT": 1,
+        "G_MULTI_FACTOR": 2,
+        "I_UNKNOWN": 11
+      }
+    },
+    {
+      "key": "RANK_6_TO_10",
+      "races": 29,
+      "fullyEvaluable": 26,
+      "meanExactRank": 7.8076923076923075,
+      "medianExactRank": 8,
+      "categories": {
+        "A_FIRST_SCORE_DOMINANT": 1,
+        "C_PAIR_COMPATIBILITY_DOMINANT": 2,
+        "D_THIRD_DOMINANT": 14,
+        "E_SCENARIO_DOMINANT": 1,
+        "G_MULTI_FACTOR": 8,
+        "I_UNKNOWN": 3
+      }
+    },
+    {
+      "key": "RANK_11_TO_20",
+      "races": 34,
+      "fullyEvaluable": 2,
+      "meanExactRank": 17.5,
+      "medianExactRank": 20,
+      "categories": {
+        "G_MULTI_FACTOR": 2,
+        "I_UNKNOWN": 32
+      }
+    },
+    {
+      "key": "RANK_21_TO_50",
+      "races": 51,
+      "fullyEvaluable": 8,
+      "meanExactRank": 28.875,
+      "medianExactRank": 28,
+      "categories": {
+        "B_PAIR_DIRECTION_DOMINANT": 1,
+        "D_THIRD_DOMINANT": 3,
+        "G_MULTI_FACTOR": 4,
+        "I_UNKNOWN": 43
+      }
+    },
+    {
+      "key": "RANK_51_TO_100",
+      "races": 67,
+      "fullyEvaluable": 2,
+      "meanExactRank": 68.5,
+      "medianExactRank": 78,
+      "categories": {
+        "G_MULTI_FACTOR": 2,
+        "I_UNKNOWN": 65
+      }
+    },
+    {
+      "key": "RANK_101_TO_200",
+      "races": 60,
+      "fullyEvaluable": 5,
+      "meanExactRank": 130.4,
+      "medianExactRank": 120,
+      "categories": {
+        "G_MULTI_FACTOR": 5,
+        "I_UNKNOWN": 55
+      }
+    },
+    {
+      "key": "RANK_201_PLUS",
+      "races": 19,
+      "fullyEvaluable": 2,
+      "meanExactRank": 262,
+      "medianExactRank": 311,
+      "categories": {
+        "B_PAIR_DIRECTION_DOMINANT": 1,
+        "G_MULTI_FACTOR": 1,
+        "I_UNKNOWN": 17
+      }
+    }
+  ],
+  "dropReasonComparison": [
+    {
+      "key": "NONE_EXACT_HIT",
+      "races": 18,
+      "fullyEvaluable": 17,
+      "unknown": 1,
+      "categories": {
+        "A_FIRST_SCORE_DOMINANT": 1,
+        "C_PAIR_COMPATIBILITY_DOMINANT": 5,
+        "D_THIRD_DOMINANT": 1,
+        "G_MULTI_FACTOR": 5,
+        "I_UNKNOWN": 5
+      },
+      "aligned": null,
+      "misaligned": null,
+      "mismatches": []
+    },
+    {
+      "key": "PAIR_ORDER_MISS",
+      "races": 68,
+      "fullyEvaluable": 4,
+      "unknown": 64,
+      "categories": {
+        "C_PAIR_COMPATIBILITY_DOMINANT": 3,
+        "D_THIRD_DOMINANT": 1
+      },
+      "aligned": 3,
+      "misaligned": 1,
+      "mismatches": [
+        "20260921-85-2"
+      ]
+    },
+    {
+      "key": "PURCHASE_INELIGIBLE",
+      "races": 71,
+      "fullyEvaluable": 35,
+      "unknown": 36,
+      "categories": {
+        "B_PAIR_DIRECTION_DOMINANT": 2,
+        "C_PAIR_COMPATIBILITY_DOMINANT": 2,
+        "D_THIRD_DOMINANT": 13,
+        "E_SCENARIO_DOMINANT": 1,
+        "G_MULTI_FACTOR": 15,
+        "I_UNKNOWN": 2
+      },
+      "aligned": null,
+      "misaligned": null,
+      "mismatches": []
+    },
+    {
+      "key": "PURCHASE_SELECTION_MISS",
+      "races": 38,
+      "fullyEvaluable": 18,
+      "unknown": 20,
+      "categories": {
+        "C_PAIR_COMPATIBILITY_DOMINANT": 1,
+        "D_THIRD_DOMINANT": 10,
+        "G_MULTI_FACTOR": 3,
+        "I_UNKNOWN": 4
+      },
+      "aligned": null,
+      "misaligned": null,
+      "mismatches": []
+    },
+    {
+      "key": "REVERSE_12",
+      "races": 35,
+      "fullyEvaluable": 2,
+      "unknown": 33,
+      "categories": {
+        "A_FIRST_SCORE_DOMINANT": 1,
+        "E_SCENARIO_DOMINANT": 1
+      },
+      "aligned": 0,
+      "misaligned": 2,
+      "mismatches": [
+        "20260920-21-5",
+        "20260922-85-2"
+      ]
+    },
+    {
+      "key": "SCENARIO_RANKING_MISS",
+      "races": 15,
+      "fullyEvaluable": 5,
+      "unknown": 10,
+      "categories": {
+        "D_THIRD_DOMINANT": 5
+      },
+      "aligned": null,
+      "misaligned": null,
+      "mismatches": []
+    },
+    {
+      "key": "THIRD_CONDITIONAL_MISS",
+      "races": 17,
+      "fullyEvaluable": 3,
+      "unknown": 14,
+      "categories": {
+        "D_THIRD_DOMINANT": 3
+      },
+      "aligned": 3,
+      "misaligned": 0,
+      "mismatches": []
+    },
+    {
+      "key": "UPSTREAM_RIDER_MISS",
+      "races": 22,
+      "fullyEvaluable": 0,
+      "unknown": 22,
+      "categories": {},
+      "aligned": 0,
+      "misaligned": 0,
+      "mismatches": []
+    },
+    {
+      "key": "WINNER_SELECTION_MISS",
+      "races": 16,
+      "fullyEvaluable": 1,
+      "unknown": 15,
+      "categories": {
+        "G_MULTI_FACTOR": 1
+      },
+      "aligned": 1,
+      "misaligned": 0,
+      "mismatches": []
+    }
+  ],
+  "markGoodFar": {
+    "races": 36,
+    "fullyEvaluable": 1,
+    "unknown": 35,
+    "categories": {
+      "G_MULTI_FACTOR": 1
+    },
+    "meanExactRank": 99.19444444444444,
+    "raceKeys": [
+      "20260912-34-6",
+      "20260916-37-4",
+      "20260916-37-7",
+      "20260916-37-9",
+      "20260916-86-9",
+      "20260917-28-9",
+      "20260917-63-11",
+      "20260917-84-2",
+      "20260918-28-3",
+      "20260918-28-8",
+      "20260918-38-9",
+      "20260918-46-4",
+      "20260918-73-6",
+      "20260918-84-5",
+      "20260918-84-7",
+      "20260918-86-5",
+      "20260918-86-10",
+      "20260919-34-9",
+      "20260919-38-1",
+      "20260919-46-6",
+      "20260919-75-7",
+      "20260920-21-8",
+      "20260920-46-4",
+      "20260920-75-1",
+      "20260921-12-8",
+      "20260921-46-6",
+      "20260921-62-4",
+      "20260921-62-5",
+      "20260921-62-6",
+      "20260921-75-1",
+      "20260921-75-2",
+      "20260921-75-7",
+      "20260922-28-3",
+      "20260922-62-2",
+      "20260922-62-3",
+      "20260922-74-8"
+    ]
+  },
+  "redesignCandidates": [
+    {
+      "priority": 1,
+      "candidate": "THIRD_DEDICATED_DIAGNOSTIC",
+      "basis": {
+        "third": {
+          "element": "THIRD_CONDITIONAL",
+          "races": 66,
+          "meanRankImpact": 4.893939393939394,
+          "meanScoreImpact": 0.017961182786896863,
+          "meanNormalizedDeficit": 0.34011264584156353
+        },
+        "thirdCategory": {
+          "category": "D_THIRD_DOMINANT",
+          "races": 33,
+          "meanExactRank": 7.393939393939394,
+          "meanRankImpact": 6.393939393939394,
+          "meanScoreImpact": 0.06290496706478223
+        },
+        "thirdDrop": {
+          "key": "THIRD_CONDITIONAL_MISS",
+          "races": 17,
+          "fullyEvaluable": 3,
+          "unknown": 14,
+          "categories": {
+            "D_THIRD_DOMINANT": 3
+          },
+          "aligned": 3,
+          "misaligned": 0,
+          "mismatches": []
+        }
+      },
+      "scope": "research-only structural comparison"
+    },
+    {
+      "priority": 2,
+      "candidate": "SCENARIO_SCORE_SUPPORT_SEPARATION",
+      "basis": {
+        "scenarioScore": {
+          "element": "SCENARIO_SCORE",
+          "races": 25,
+          "meanRankImpact": 6.12,
+          "meanScoreImpact": 0.01856379988673839,
+          "meanNormalizedDeficit": 0.36308366020604604
+        },
+        "scenarioSupport": {
+          "element": "SCENARIO_SUPPORT",
+          "races": 25,
+          "meanRankImpact": 6.12,
+          "meanScoreImpact": 0.01797237176500176,
+          "meanNormalizedDeficit": 0.35819738636650184
+        },
+        "markGoodFarRaces": 1
+      },
+      "scope": "research-only structural comparison"
+    },
+    {
+      "priority": 3,
+      "candidate": "PAIR_DIRECTION_COMPATIBILITY_SEPARATION",
+      "basis": {
+        "pairDirection": {
+          "element": "PAIR_DIRECTION",
+          "races": 48,
+          "meanRankImpact": 5.854166666666667,
+          "meanScoreImpact": 0.017244152543609368,
+          "meanNormalizedDeficit": 0.18672958901143707
+        },
+        "pairCompatibility": {
+          "element": "PAIR_COMPATIBILITY",
+          "races": 45,
+          "meanRankImpact": 3.6444444444444444,
+          "meanScoreImpact": 0.008481898648707194,
+          "meanNormalizedDeficit": 0.2762749746517573
+        },
+        "pairOrderDrop": {
+          "key": "PAIR_ORDER_MISS",
+          "races": 68,
+          "fullyEvaluable": 4,
+          "unknown": 64,
+          "categories": {
+            "C_PAIR_COMPATIBILITY_DOMINANT": 3,
+            "D_THIRD_DOMINANT": 1
+          },
+          "aligned": 3,
+          "misaligned": 1,
+          "mismatches": [
+            "20260921-85-2"
+          ]
+        },
+        "reverseDrop": {
+          "key": "REVERSE_12",
+          "races": 35,
+          "fullyEvaluable": 2,
+          "unknown": 33,
+          "categories": {
+            "A_FIRST_SCORE_DOMINANT": 1,
+            "E_SCENARIO_DOMINANT": 1
+          },
+          "aligned": 0,
+          "misaligned": 2,
+          "mismatches": [
+            "20260920-21-5",
+            "20260922-85-2"
+          ]
+        }
+      },
+      "scope": "research-only structural comparison"
+    }
+  ],
+  "shadowCandidates": [
+    {
+      "id": "THIRD_MODEL_V1",
+      "structuralDifference": "compare third conditional ordering after the exact first-second pair is fixed",
+      "basis": [
+        {
+          "element": "THIRD_CONDITIONAL",
+          "races": 66,
+          "meanRankImpact": 4.893939393939394,
+          "meanScoreImpact": 0.017961182786896863,
+          "meanNormalizedDeficit": 0.34011264584156353
+        },
+        {
+          "category": "D_THIRD_DOMINANT",
+          "races": 33,
+          "meanExactRank": 7.393939393939394,
+          "meanRankImpact": 6.393939393939394,
+          "meanScoreImpact": 0.06290496706478223
+        }
+      ]
+    },
+    {
+      "id": "SCENARIO_SUPPORT_SEPARATION_V1",
+      "structuralDifference": "compare scenario score and independent support as separate structural layers",
+      "basis": [
+        {
+          "element": "SCENARIO_SCORE",
+          "races": 25,
+          "meanRankImpact": 6.12,
+          "meanScoreImpact": 0.01856379988673839,
+          "meanNormalizedDeficit": 0.36308366020604604
+        },
+        {
+          "element": "SCENARIO_SUPPORT",
+          "races": 25,
+          "meanRankImpact": 6.12,
+          "meanScoreImpact": 0.01797237176500176,
+          "meanNormalizedDeficit": 0.35819738636650184
+        },
+        {
+          "category": "E_SCENARIO_DOMINANT",
+          "races": 2,
+          "meanExactRank": 6,
+          "meanRankImpact": 5,
+          "meanScoreImpact": 0.03095834867308113
+        }
+      ]
+    },
+    {
+      "id": "NEW_PAIR_MODEL_V1",
+      "structuralDifference": "compare direction and compatibility as separate saved-trace layers",
+      "basis": [
+        {
+          "element": "PAIR_DIRECTION",
+          "races": 48,
+          "meanRankImpact": 5.854166666666667,
+          "meanScoreImpact": 0.017244152543609368,
+          "meanNormalizedDeficit": 0.18672958901143707
+        },
+        {
+          "element": "PAIR_COMPATIBILITY",
+          "races": 45,
+          "meanRankImpact": 3.6444444444444444,
+          "meanScoreImpact": 0.008481898648707194,
+          "meanNormalizedDeficit": 0.2762749746517573
+        },
+        {
+          "category": "B_PAIR_DIRECTION_DOMINANT",
+          "races": 2,
+          "meanExactRank": 176.5,
+          "meanRankImpact": 175.5,
+          "meanScoreImpact": 0.3225859407663645
+        },
+        {
+          "category": "C_PAIR_COMPATIBILITY_DOMINANT",
+          "races": 11,
+          "meanExactRank": 4,
+          "meanRankImpact": 3,
+          "meanScoreImpact": 0.04761292897959896
+        }
+      ]
+    }
+  ],
+  "integrity": {
+    "predictionHashMismatch": 0,
+    "purchaseHashMismatch": 0,
+    "sealedResultMismatch": 0,
+    "historicalMutation": 0,
+    "protectedFinalUsed": 0,
+    "resultLeakage": 0,
+    "productionPredictionChanged": false,
+    "productionPurchaseChanged": false
+  },
+  "safety": {
+    "readOnly": true,
+    "productionWrite": 0,
+    "tuning": false,
+    "weightsChanged": false,
+    "thresholdsChanged": false,
+    "shadowVariantsChanged": false,
+    "cliffImplemented": false,
+    "historicalMutation": 0,
+    "protectedFinalUsed": 0,
+    "resultLeakage": 0
+  },
+  "generatedAt": "2026-09-23T00:17:56.934Z",
+  "verdict": "CONTRIBUTION_DIAGNOSIS_PARTIAL_TRACE_LIMITED"
+}
