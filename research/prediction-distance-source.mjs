@@ -103,7 +103,7 @@ function compact(predictionResponse, resultResponse, traceResponse=null) {
         lines: (prediction.lines || []).map(line => ({ type: line.type || null, members: (line.members || []).map(member => Number(member.number || member.id)).filter(Number.isFinite) })) },
       riderScores: (prediction.scored || []).map(row => ({ riderId: row.registration || row.riderId || row.id || null, number: Number(row.number), name: row.name || null,
         score: Number(row.roleScores?.first), scoreSource: 'prediction.scored[].roleScores.first', scoreTrace: row.scoreTrace || null })).filter(row => Number.isFinite(row.number) && Number.isFinite(row.score)), terminals,
-      terminalTrace:traceResponse?.trace&&traceResponse.trace.predictionHash===predictionResponse.predictionHash?traceResponse.trace:null }
+      terminalTrace:traceResponse?.trace||null }
   };
 }
 
