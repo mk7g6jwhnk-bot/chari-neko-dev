@@ -1,5 +1,7 @@
 import { jsonResponse } from "../../keirin/parser/utils.mjs";
 
+export const SEALED_RESULT_UPSTREAM_TIMEOUT_MS=30000;
+
 export default async function handler(req) {
   if(req.method!=="GET")return jsonResponse(405,{ok:false,code:"METHOD_NOT_ALLOWED"});
   const url=new URL(req.url),raceKey=String(url.searchParams.get("raceKey")||""),date=String(url.searchParams.get("date")||"");
@@ -8,7 +10,7 @@ export default async function handler(req) {
   if(!base||!secret)return jsonResponse(500,{ok:false,code:"SEALED_RESULT_PROXY_NOT_CONFIGURED"});
   const upstream=raceKey?`${base}/keirin/predictions/sealed/${encodeURIComponent(raceKey)}/result`:`${base}/keirin/predictions/sealed?date=${encodeURIComponent(date)}`;
   try{
-    const response=await fetch(upstream,{headers:{accept:"application/json","x-auto-research-secret":secret},signal:AbortSignal.timeout(12000)});
+    const response=await fetch(upstream,{headers:{accept:"application/json","x-auto-research-secret":secret},signal:AbortSignal.timeout(SEALED_RESULT_UPSTREAM_TIMEOUT_MS)});
     const contentType=String(response.headers.get("content-type")||""),text=await response.text();
     if(!contentType.toLowerCase().includes("application/json"))return jsonResponse(502,{ok:false,code:"UPSTREAM_NON_JSON",upstreamStatus:response.status,contentType,bodyPrefix:text.slice(0,160)});
     let data;try{data=JSON.parse(text)}catch{return jsonResponse(502,{ok:false,code:"UPSTREAM_INVALID_JSON",upstreamStatus:response.status,bodyPrefix:text.slice(0,160)})}

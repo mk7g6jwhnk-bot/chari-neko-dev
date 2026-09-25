@@ -116,9 +116,11 @@ export async function fetchPredictionDistanceSource({ cohort, baseUrl = DEFAULT_
     while (cursor < cohort.raceKeys.length) {
       const index = cursor++, raceKey = cohort.raceKeys[index];
       try {
-        const [prediction, result, predictionAgain, resultAgain] = await Promise.all([
+        const [prediction, result] = await Promise.all([
           getJson(baseUrl, 'keirin-saved-prediction-detail', raceKey, fetchImpl),
-          getJson(baseUrl, 'keirin-sealed-result', raceKey, fetchImpl),
+          getJson(baseUrl, 'keirin-sealed-result', raceKey, fetchImpl)
+        ]);
+        const [predictionAgain, resultAgain] = await Promise.all([
           getJson(baseUrl, 'keirin-saved-prediction-detail', raceKey, fetchImpl),
           getJson(baseUrl, 'keirin-sealed-result', raceKey, fetchImpl)
         ]);

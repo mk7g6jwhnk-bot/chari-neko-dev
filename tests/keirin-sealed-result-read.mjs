@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
-import handler from "../netlify/functions/keirin-sealed-result.mjs";
+import handler,{SEALED_RESULT_UPSTREAM_TIMEOUT_MS} from "../netlify/functions/keirin-sealed-result.mjs";
 import { createSealedResultController, sealedResultSummary, validateSealedResult } from "../public/sealed-result-client.mjs";
 import fs from "node:fs";
 
 const snapshot={targetRace:{date:"20260828",venueCode:"61",raceNo:7},sealedPrediction:{predictionHash:"hash",predictionSealedAt:"2026-08-28T01:00:00.000Z"}};
+assert.equal(SEALED_RESULT_UPSTREAM_TIMEOUT_MS,30000);
 const payload={ok:true,raceKey:"20260828-61-7",predictionHash:"hash",predictionSealedAt:"2026-08-28T01:00:00.000Z",integrityValid:true,temporalValid:true,immutable:true,readOnly:true,officialResult:{finishOrder:[1,2,3],payout:1000},verification:{terminalRank:4,standardPurchaseHit:false},researchComparison:{calibrationStatus:"UNCALIBRATED",comparison:{research:{exactTerminalRank:2,firstMarginalRank:1,exactPairRank:2,thirdWithinPairRank:1}}},observations:{confirmedCount:3}};
 assert.equal(validateSealedResult(payload,snapshot).passed,true);
 for(const [field,value,reason] of [["raceKey","wrong","race_key_mismatch"],["predictionHash","wrong","prediction_hash_mismatch"],["temporalValid",false,"temporal_invalid"]]){const changed=structuredClone(payload);changed[field]=value;assert.ok(validateSealedResult(changed,snapshot).reasons.includes(reason))}

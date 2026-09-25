@@ -25,9 +25,11 @@ async function getJson(base, name, raceKey, fetchImpl = fetch) {
 }
 
 async function fetchRace(baseUrl, raceKey, fetchImpl) {
-  const [prediction, result, predictionAfter, resultAfter] = await Promise.all([
+  const [prediction, result] = await Promise.all([
     getJson(baseUrl, 'keirin-saved-prediction-detail', raceKey, fetchImpl),
-    getJson(baseUrl, 'keirin-sealed-result', raceKey, fetchImpl),
+    getJson(baseUrl, 'keirin-sealed-result', raceKey, fetchImpl)
+  ]);
+  const [predictionAfter, resultAfter] = await Promise.all([
     getJson(baseUrl, 'keirin-saved-prediction-detail', raceKey, fetchImpl),
     getJson(baseUrl, 'keirin-sealed-result', raceKey, fetchImpl)
   ]);
