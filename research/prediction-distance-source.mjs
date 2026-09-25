@@ -27,7 +27,7 @@ async function getJson(base, name, raceKey, fetchImpl) {
   throw last;
 }
 
-function compact(predictionResponse, resultResponse, traceResponse=null) {
+export function compact(predictionResponse, resultResponse, traceResponse=null) {
   const prediction = predictionResponse.predictionPayload?.prediction || {};
   const race = predictionResponse.predictionPayload?.race || predictionResponse.predictionPayload?.targetRace || {};
   const lifecycle = prediction.purchase?.audit?.terminalLifecycleAudit || prediction.audit?.purchaseAudit?.terminalLifecycleAudit;

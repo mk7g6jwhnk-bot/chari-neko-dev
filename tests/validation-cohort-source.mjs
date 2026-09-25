@@ -1,0 +1,3 @@
+import assert from 'node:assert/strict';import {parseValidationCohortNdjson} from '../research/validation-cohort-source.mjs';
+const good=[{type:'manifest',expected:1},{type:'record',raceKey:'20990101-01-1'},{type:'footer',expected:1,returned:1,missing:[],integrityFailures:[],complete:true}].map(JSON.stringify).join('\n')+'\n';assert.equal(parseValidationCohortNdjson(good).records.length,1);
+assert.throws(()=>parseValidationCohortNdjson(good.split('\n').slice(0,2).join('\n')),/TRUNCATED/);assert.throws(()=>parseValidationCohortNdjson('{bad}\n'),/MALFORMED/);console.log('validation cohort source: PASS');

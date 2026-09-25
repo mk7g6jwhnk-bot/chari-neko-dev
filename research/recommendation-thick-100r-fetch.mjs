@@ -72,7 +72,11 @@ export async function fetchMilestoneSource({ cohort, expectedRaces = cohort?.rac
     }
   }
   await Promise.all(Array.from({ length: Math.max(1, Math.min(8, concurrency)) }, worker));
-  const audit = auditThick(records.filter(Boolean), { sourceTotalV2: cohort.raceKeys.length });
+  return buildMilestoneSourceFromRecords({cohort,records:records.filter(Boolean),exclusions,hashes});
+}
+
+export function buildMilestoneSourceFromRecords({cohort,records,exclusions=[],hashes={predictionMismatch:0,purchaseMismatch:0,sealedResultMismatch:0}}){
+  const expectedRaces=cohort.raceKeys.length,audit = auditThick(records, { sourceTotalV2: expectedRaces });
   const snapshotHashes = Object.fromEntries(records.filter(Boolean).map(record => [record.raceKey, record.sourceHashes]));
   const eligible = new Set(audit.races.filter(r => r.confirmed && r.temporalValid && r.verificationValid && /^\d+-\d+-\d+$/.test(r.finish) && r.payout !== null).map(r => r.raceKey));
   for (const row of audit.races) if (!eligible.has(row.raceKey)) exclusions.push({ raceKey: row.raceKey, reason: !row.confirmed ? 'RESULT_NOT_CONFIRMED' : !row.temporalValid ? 'TEMPORAL_INVALID' : !row.verificationValid ? 'INTEGRITY_INVALID' : row.payout === null ? 'PAYOUT_UNKNOWN' : 'FINISH_ORDER_INVALID' });
