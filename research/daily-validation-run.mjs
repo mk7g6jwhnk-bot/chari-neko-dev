@@ -4,7 +4,7 @@ import crypto from 'node:crypto';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { fetchPredictionDistanceSource } from './prediction-distance-source.mjs';
 import { fetchMilestoneSource } from './recommendation-thick-100r-fetch.mjs';
-import { evaluateDailySource } from './daily-validation-core.mjs';
+import { evaluateDailySourceWithMilestone500 as evaluateDailySource } from './daily-validation-core.mjs';
 import { mergeStructureSummaries } from './daily-validation-structure.mjs';
 import { mergeTerminalSurvivalSummaries } from './terminal-survival-audit.mjs';
 import { pushPublicValidationStatus, writePublicValidationStatus } from './validation-status-public.mjs';

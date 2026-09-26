@@ -1,0 +1,797 @@
+{
+  "schemaVersion": "MILESTONE_500_SHADOW_REVIEW_V1",
+  "generatedAt": "2026-09-26T02:31:39.184Z",
+  "verdict": "SHADOW_ONLY_UNTIL_500R",
+  "cohort": {
+    "checkpointRaces": 466,
+    "evaluableRaces": 446,
+    "protectedExcluded": 20,
+    "protectedFinalUsed": 0,
+    "extraFetched": 146,
+    "confirmationStartOrdinal": 467,
+    "remainingTo500": 34
+  },
+  "milestones": {
+    "300": {
+      "races": 300,
+      "exactRank": {
+        "avg": 72.76,
+        "median": 45,
+        "p90": 178,
+        "max": 436
+      },
+      "capture": {
+        "top5": 39,
+        "top10": 66,
+        "top15": 85,
+        "top20": 100,
+        "winner": 210,
+        "pair": 41,
+        "trio": 39
+      },
+      "failures": {
+        "pairDirection": 123,
+        "riderSelection": 90,
+        "thirdConditional": 30,
+        "lowPayoutDeep": 85,
+        "veryLowPayoutDeep": 49,
+        "reverseOnly": 28,
+        "compression": 4,
+        "classificationFalseNegative": 2
+      },
+      "purchase": {
+        "purchaseable": 214,
+        "ineligible": 86,
+        "hits": 18,
+        "roi": 0.46786324786324784,
+        "avgTickets": 3.9,
+        "oneToThreePointRaces": 126,
+        "top20NotPurchased": 86,
+        "ineligibleReasons": {
+          "DIFFUSE_CLUSTER_EXCEEDS_BUDGET": 55,
+          "NO_VALID_TERMINAL": 23,
+          "THIRD_VARIANT_AMBIGUITY": 8
+        }
+      },
+      "trace": {
+        "complete": 0,
+        "partial": 0,
+        "invalid": 0,
+        "unknown": 300
+      },
+      "P": {
+        "P3": 39,
+        "P2": 160,
+        "P1": 95,
+        "P0": 6
+      },
+      "scenarioFailure": 169,
+      "terminalCompositionFailure": 30
+    },
+    "400": {
+      "races": 400,
+      "exactRank": {
+        "avg": 68.4325,
+        "median": 45,
+        "p90": 163,
+        "max": 436
+      },
+      "capture": {
+        "top5": 54,
+        "top10": 89,
+        "top15": 111,
+        "top20": 137,
+        "winner": 283,
+        "pair": 52,
+        "trio": 53
+      },
+      "failures": {
+        "pairDirection": 163,
+        "riderSelection": 117,
+        "thirdConditional": 36,
+        "lowPayoutDeep": 115,
+        "veryLowPayoutDeep": 69,
+        "reverseOnly": 48,
+        "compression": 4,
+        "classificationFalseNegative": 4
+      },
+      "purchase": {
+        "purchaseable": 286,
+        "ineligible": 114,
+        "hits": 26,
+        "roi": 0.44955128205128203,
+        "avgTickets": 3.9,
+        "oneToThreePointRaces": 173,
+        "top20NotPurchased": 116,
+        "ineligibleReasons": {
+          "DIFFUSE_CLUSTER_EXCEEDS_BUDGET": 72,
+          "NO_VALID_TERMINAL": 30,
+          "THIRD_VARIANT_AMBIGUITY": 12
+        }
+      },
+      "trace": {
+        "complete": 0,
+        "partial": 0,
+        "invalid": 0,
+        "unknown": 400
+      },
+      "P": {
+        "P3": 53,
+        "P2": 218,
+        "P1": 123,
+        "P0": 6
+      },
+      "scenarioFailure": 231,
+      "terminalCompositionFailure": 36
+    },
+    "466": {
+      "races": 446,
+      "exactRank": {
+        "avg": 67.00224215246637,
+        "median": 44,
+        "p90": 162,
+        "max": 436
+      },
+      "capture": {
+        "top5": 63,
+        "top10": 101,
+        "top15": 127,
+        "top20": 155,
+        "winner": 312,
+        "pair": 58,
+        "trio": 62
+      },
+      "failures": {
+        "pairDirection": 177,
+        "riderSelection": 134,
+        "thirdConditional": 39,
+        "lowPayoutDeep": 128,
+        "veryLowPayoutDeep": 78,
+        "reverseOnly": 50,
+        "compression": 5,
+        "classificationFalseNegative": 5
+      },
+      "purchase": {
+        "purchaseable": 323,
+        "ineligible": 123,
+        "hits": 30,
+        "roi": 0.5412599318955732,
+        "avgTickets": 3.9506726457399104,
+        "oneToThreePointRaces": 194,
+        "top20NotPurchased": 131,
+        "ineligibleReasons": {
+          "DIFFUSE_CLUSTER_EXCEEDS_BUDGET": 75,
+          "NO_VALID_TERMINAL": 35,
+          "THIRD_VARIANT_AMBIGUITY": 13
+        }
+      },
+      "trace": {
+        "complete": 0,
+        "partial": 0,
+        "invalid": 0,
+        "unknown": 446
+      },
+      "P": {
+        "P3": 62,
+        "P2": 237,
+        "P1": 139,
+        "P0": 8
+      },
+      "scenarioFailure": 254,
+      "terminalCompositionFailure": 39
+    }
+  },
+  "trends": {
+    "rankMedian": "改善",
+    "top20": "改善",
+    "pairDirectionFailure": "改善",
+    "riderSelectionFailure": "横ばい",
+    "roi": "改善"
+  },
+  "comparison": {
+    "300": {
+      "races": 300,
+      "exactRank": {
+        "avg": 72.76,
+        "median": 45,
+        "p90": 178,
+        "max": 436
+      },
+      "Top5": 39,
+      "Top10": 66,
+      "Top15": 85,
+      "Top20": 100,
+      "winnerCapture": 210,
+      "exactPairCapture": 41,
+      "exactTrioCapture": 39,
+      "lowPayoutDeepRank": 85,
+      "veryLowPayoutDeepRank": 49,
+      "pairDirectionFailure": 123,
+      "riderSelectionFailure": 90,
+      "thirdConditionalFailure": 30,
+      "purchase": {
+        "purchaseable": 214,
+        "ineligible": 86,
+        "hits": 18,
+        "roi": 0.46786324786324784,
+        "avgTickets": 3.9,
+        "oneToThreePointRaces": 126,
+        "top20NotPurchased": 86,
+        "ineligibleReasons": {
+          "DIFFUSE_CLUSTER_EXCEEDS_BUDGET": 55,
+          "NO_VALID_TERMINAL": 23,
+          "THIRD_VARIANT_AMBIGUITY": 8
+        }
+      },
+      "trace": {
+        "complete": 0,
+        "partial": 0,
+        "invalid": 0,
+        "unknown": 300
+      },
+      "P": {
+        "P3": 39,
+        "P2": 160,
+        "P1": 95,
+        "P0": 6
+      },
+      "scenarioFailure": 169,
+      "terminalCompositionFailure": 30
+    },
+    "400": {
+      "races": 400,
+      "exactRank": {
+        "avg": 68.4325,
+        "median": 45,
+        "p90": 163,
+        "max": 436
+      },
+      "Top5": 54,
+      "Top10": 89,
+      "Top15": 111,
+      "Top20": 137,
+      "winnerCapture": 283,
+      "exactPairCapture": 52,
+      "exactTrioCapture": 53,
+      "lowPayoutDeepRank": 115,
+      "veryLowPayoutDeepRank": 69,
+      "pairDirectionFailure": 163,
+      "riderSelectionFailure": 117,
+      "thirdConditionalFailure": 36,
+      "purchase": {
+        "purchaseable": 286,
+        "ineligible": 114,
+        "hits": 26,
+        "roi": 0.44955128205128203,
+        "avgTickets": 3.9,
+        "oneToThreePointRaces": 173,
+        "top20NotPurchased": 116,
+        "ineligibleReasons": {
+          "DIFFUSE_CLUSTER_EXCEEDS_BUDGET": 72,
+          "NO_VALID_TERMINAL": 30,
+          "THIRD_VARIANT_AMBIGUITY": 12
+        }
+      },
+      "trace": {
+        "complete": 0,
+        "partial": 0,
+        "invalid": 0,
+        "unknown": 400
+      },
+      "P": {
+        "P3": 53,
+        "P2": 218,
+        "P1": 123,
+        "P0": 6
+      },
+      "scenarioFailure": 231,
+      "terminalCompositionFailure": 36
+    },
+    "466": {
+      "races": 446,
+      "exactRank": {
+        "avg": 67.00224215246637,
+        "median": 44,
+        "p90": 162,
+        "max": 436
+      },
+      "Top5": 63,
+      "Top10": 101,
+      "Top15": 127,
+      "Top20": 155,
+      "winnerCapture": 312,
+      "exactPairCapture": 58,
+      "exactTrioCapture": 62,
+      "lowPayoutDeepRank": 128,
+      "veryLowPayoutDeepRank": 78,
+      "pairDirectionFailure": 177,
+      "riderSelectionFailure": 134,
+      "thirdConditionalFailure": 39,
+      "purchase": {
+        "purchaseable": 323,
+        "ineligible": 123,
+        "hits": 30,
+        "roi": 0.5412599318955732,
+        "avgTickets": 3.9506726457399104,
+        "oneToThreePointRaces": 194,
+        "top20NotPurchased": 131,
+        "ineligibleReasons": {
+          "DIFFUSE_CLUSTER_EXCEEDS_BUDGET": 75,
+          "NO_VALID_TERMINAL": 35,
+          "THIRD_VARIANT_AMBIGUITY": 13
+        }
+      },
+      "trace": {
+        "complete": 0,
+        "partial": 0,
+        "invalid": 0,
+        "unknown": 446
+      },
+      "P": {
+        "P3": 62,
+        "P2": 237,
+        "P1": 139,
+        "P0": 8
+      },
+      "scenarioFailure": 254,
+      "terminalCompositionFailure": 39
+    }
+  },
+  "shadow": {
+    "schemaVersion": "MILESTONE_500_SHADOW_V1",
+    "version": "1.0.0",
+    "generatedAt": "2026-09-26T02:31:35.858Z",
+    "cohort": {
+      "historicalDiagnostic": {
+        "startOrdinal": 1,
+        "endOrdinal": 466,
+        "races": 446
+      },
+      "confirmation": {
+        "startOrdinal": 467,
+        "endOrdinal": 500,
+        "races": 0,
+        "parameterFrozen": true
+      },
+      "protectedFinalUsed": 0
+    },
+    "results": [
+      {
+        "theme": "PAIR_DIRECTION_ORDER_V1",
+        "variantId": "WEAK",
+        "frozenParameter": {
+          "id": "WEAK",
+          "blendWeight": 0.1
+        },
+        "metrics": {
+          "races": 446,
+          "exactRank": {
+            "avg": 66.55156950672645,
+            "median": 43,
+            "p90": 157,
+            "max": 436
+          },
+          "capture": {
+            "top5": 65,
+            "top10": 102,
+            "top15": 129,
+            "top20": 157,
+            "winner": 307,
+            "pair": 65,
+            "trio": 60
+          },
+          "failures": {
+            "pairDirection": 175,
+            "riderSelection": 139,
+            "thirdConditional": 48,
+            "lowPayoutDeep": 126,
+            "veryLowPayoutDeep": 77,
+            "reverseOnly": 56,
+            "compression": 4,
+            "classificationFalseNegative": 5
+          },
+          "purchase": {
+            "purchaseable": 323,
+            "ineligible": 123,
+            "hits": 30,
+            "roi": 0.5412599318955732,
+            "avgTickets": 3.9506726457399104,
+            "oneToThreePointRaces": 194,
+            "top20NotPurchased": 131,
+            "ineligibleReasons": {
+              "DIFFUSE_CLUSTER_EXCEEDS_BUDGET": 75,
+              "NO_VALID_TERMINAL": 35,
+              "THIRD_VARIANT_AMBIGUITY": 13
+            }
+          },
+          "trace": {
+            "complete": 446,
+            "partial": 0,
+            "invalid": 0,
+            "unknown": 0
+          }
+        },
+        "deltaVsBaseline": {
+          "rankMedian": -1,
+          "top20": 2,
+          "targetPair": -2,
+          "targetRider": 5,
+          "reverseOnly": 6,
+          "winner": -5,
+          "lowPayoutDeep": -2
+        },
+        "verdict": "WEAK_SIGNAL"
+      },
+      {
+        "theme": "PAIR_DIRECTION_ORDER_V1",
+        "variantId": "BASELINE",
+        "frozenParameter": {
+          "id": "BASELINE",
+          "blendWeight": 0
+        },
+        "metrics": {
+          "races": 446,
+          "exactRank": {
+            "avg": 67.00224215246637,
+            "median": 44,
+            "p90": 162,
+            "max": 436
+          },
+          "capture": {
+            "top5": 63,
+            "top10": 101,
+            "top15": 127,
+            "top20": 155,
+            "winner": 312,
+            "pair": 58,
+            "trio": 62
+          },
+          "failures": {
+            "pairDirection": 177,
+            "riderSelection": 134,
+            "thirdConditional": 39,
+            "lowPayoutDeep": 128,
+            "veryLowPayoutDeep": 78,
+            "reverseOnly": 50,
+            "compression": 5,
+            "classificationFalseNegative": 5
+          },
+          "purchase": {
+            "purchaseable": 323,
+            "ineligible": 123,
+            "hits": 30,
+            "roi": 0.5412599318955732,
+            "avgTickets": 3.9506726457399104,
+            "oneToThreePointRaces": 194,
+            "top20NotPurchased": 131,
+            "ineligibleReasons": {
+              "DIFFUSE_CLUSTER_EXCEEDS_BUDGET": 75,
+              "NO_VALID_TERMINAL": 35,
+              "THIRD_VARIANT_AMBIGUITY": 13
+            }
+          },
+          "trace": {
+            "complete": 446,
+            "partial": 0,
+            "invalid": 0,
+            "unknown": 0
+          }
+        },
+        "deltaVsBaseline": {
+          "rankMedian": 0,
+          "top20": 0,
+          "targetPair": 0,
+          "targetRider": 0,
+          "reverseOnly": 0,
+          "winner": 0,
+          "lowPayoutDeep": 0
+        },
+        "verdict": "BASELINE"
+      },
+      {
+        "theme": "PAIR_DIRECTION_ORDER_V1",
+        "variantId": "STRONG",
+        "frozenParameter": {
+          "id": "STRONG",
+          "blendWeight": 0.3
+        },
+        "metrics": {
+          "races": 446,
+          "exactRank": {
+            "avg": 66.36322869955157,
+            "median": 44,
+            "p90": 162,
+            "max": 436
+          },
+          "capture": {
+            "top5": 69,
+            "top10": 105,
+            "top15": 128,
+            "top20": 155,
+            "winner": 303,
+            "pair": 68,
+            "trio": 63
+          },
+          "failures": {
+            "pairDirection": 175,
+            "riderSelection": 143,
+            "thirdConditional": 50,
+            "lowPayoutDeep": 126,
+            "veryLowPayoutDeep": 77,
+            "reverseOnly": 57,
+            "compression": 5,
+            "classificationFalseNegative": 5
+          },
+          "purchase": {
+            "purchaseable": 323,
+            "ineligible": 123,
+            "hits": 30,
+            "roi": 0.5412599318955732,
+            "avgTickets": 3.9506726457399104,
+            "oneToThreePointRaces": 194,
+            "top20NotPurchased": 128,
+            "ineligibleReasons": {
+              "DIFFUSE_CLUSTER_EXCEEDS_BUDGET": 75,
+              "NO_VALID_TERMINAL": 35,
+              "THIRD_VARIANT_AMBIGUITY": 13
+            }
+          },
+          "trace": {
+            "complete": 446,
+            "partial": 0,
+            "invalid": 0,
+            "unknown": 0
+          }
+        },
+        "deltaVsBaseline": {
+          "rankMedian": 0,
+          "top20": 0,
+          "targetPair": -2,
+          "targetRider": 9,
+          "reverseOnly": 7,
+          "winner": -9,
+          "lowPayoutDeep": -2
+        },
+        "verdict": "WEAK_SIGNAL"
+      },
+      {
+        "theme": "RIDER_SELECTION_SENSITIVITY_V1",
+        "variantId": "WEAK",
+        "frozenParameter": {
+          "id": "WEAK",
+          "blendWeight": 0.1
+        },
+        "metrics": {
+          "races": 446,
+          "exactRank": {
+            "avg": 66.75336322869956,
+            "median": 43,
+            "p90": 162,
+            "max": 436
+          },
+          "capture": {
+            "top5": 63,
+            "top10": 100,
+            "top15": 128,
+            "top20": 156,
+            "winner": 313,
+            "pair": 58,
+            "trio": 62
+          },
+          "failures": {
+            "pairDirection": 177,
+            "riderSelection": 133,
+            "thirdConditional": 39,
+            "lowPayoutDeep": 127,
+            "veryLowPayoutDeep": 78,
+            "reverseOnly": 50,
+            "compression": 5,
+            "classificationFalseNegative": 5
+          },
+          "purchase": {
+            "purchaseable": 323,
+            "ineligible": 123,
+            "hits": 30,
+            "roi": 0.5412599318955732,
+            "avgTickets": 3.9506726457399104,
+            "oneToThreePointRaces": 194,
+            "top20NotPurchased": 130,
+            "ineligibleReasons": {
+              "DIFFUSE_CLUSTER_EXCEEDS_BUDGET": 75,
+              "NO_VALID_TERMINAL": 35,
+              "THIRD_VARIANT_AMBIGUITY": 13
+            }
+          },
+          "trace": {
+            "complete": 446,
+            "partial": 0,
+            "invalid": 0,
+            "unknown": 0
+          }
+        },
+        "deltaVsBaseline": {
+          "rankMedian": -1,
+          "top20": 1,
+          "targetPair": 0,
+          "targetRider": -1,
+          "reverseOnly": 0,
+          "winner": 1,
+          "lowPayoutDeep": -1
+        },
+        "verdict": "PROMISING"
+      },
+      {
+        "theme": "RIDER_SELECTION_SENSITIVITY_V1",
+        "variantId": "BASELINE",
+        "frozenParameter": {
+          "id": "BASELINE",
+          "blendWeight": 0
+        },
+        "metrics": {
+          "races": 446,
+          "exactRank": {
+            "avg": 67.00224215246637,
+            "median": 44,
+            "p90": 162,
+            "max": 436
+          },
+          "capture": {
+            "top5": 63,
+            "top10": 101,
+            "top15": 127,
+            "top20": 155,
+            "winner": 312,
+            "pair": 58,
+            "trio": 62
+          },
+          "failures": {
+            "pairDirection": 177,
+            "riderSelection": 134,
+            "thirdConditional": 39,
+            "lowPayoutDeep": 128,
+            "veryLowPayoutDeep": 78,
+            "reverseOnly": 50,
+            "compression": 5,
+            "classificationFalseNegative": 5
+          },
+          "purchase": {
+            "purchaseable": 323,
+            "ineligible": 123,
+            "hits": 30,
+            "roi": 0.5412599318955732,
+            "avgTickets": 3.9506726457399104,
+            "oneToThreePointRaces": 194,
+            "top20NotPurchased": 131,
+            "ineligibleReasons": {
+              "DIFFUSE_CLUSTER_EXCEEDS_BUDGET": 75,
+              "NO_VALID_TERMINAL": 35,
+              "THIRD_VARIANT_AMBIGUITY": 13
+            }
+          },
+          "trace": {
+            "complete": 446,
+            "partial": 0,
+            "invalid": 0,
+            "unknown": 0
+          }
+        },
+        "deltaVsBaseline": {
+          "rankMedian": 0,
+          "top20": 0,
+          "targetPair": 0,
+          "targetRider": 0,
+          "reverseOnly": 0,
+          "winner": 0,
+          "lowPayoutDeep": 0
+        },
+        "verdict": "BASELINE"
+      },
+      {
+        "theme": "RIDER_SELECTION_SENSITIVITY_V1",
+        "variantId": "STRONG",
+        "frozenParameter": {
+          "id": "STRONG",
+          "blendWeight": 0.3
+        },
+        "metrics": {
+          "races": 446,
+          "exactRank": {
+            "avg": 66.90807174887892,
+            "median": 44,
+            "p90": 162,
+            "max": 436
+          },
+          "capture": {
+            "top5": 63,
+            "top10": 100,
+            "top15": 127,
+            "top20": 151,
+            "winner": 314,
+            "pair": 56,
+            "trio": 61
+          },
+          "failures": {
+            "pairDirection": 176,
+            "riderSelection": 132,
+            "thirdConditional": 37,
+            "lowPayoutDeep": 129,
+            "veryLowPayoutDeep": 78,
+            "reverseOnly": 50,
+            "compression": 5,
+            "classificationFalseNegative": 5
+          },
+          "purchase": {
+            "purchaseable": 323,
+            "ineligible": 123,
+            "hits": 30,
+            "roi": 0.5412599318955732,
+            "avgTickets": 3.9506726457399104,
+            "oneToThreePointRaces": 194,
+            "top20NotPurchased": 125,
+            "ineligibleReasons": {
+              "DIFFUSE_CLUSTER_EXCEEDS_BUDGET": 75,
+              "NO_VALID_TERMINAL": 35,
+              "THIRD_VARIANT_AMBIGUITY": 13
+            }
+          },
+          "trace": {
+            "complete": 446,
+            "partial": 0,
+            "invalid": 0,
+            "unknown": 0
+          }
+        },
+        "deltaVsBaseline": {
+          "rankMedian": 0,
+          "top20": -4,
+          "targetPair": -1,
+          "targetRider": -2,
+          "reverseOnly": 0,
+          "winner": 2,
+          "lowPayoutDeep": 1
+        },
+        "verdict": "WEAK_SIGNAL"
+      }
+    ],
+    "safety": {
+      "inputHashBefore": "c2f54c1bc45370aa0149bc54c3ce173878463818a75b1acaf3b6cec3d47f67b9",
+      "inputHashAfter": "c2f54c1bc45370aa0149bc54c3ce173878463818a75b1acaf3b6cec3d47f67b9",
+      "productionPredictionChanged": false,
+      "productionPurchaseChanged": false,
+      "recommendationChanged": false,
+      "thickChanged": false,
+      "shadowChanged": false,
+      "resultUsedForGeneration": false,
+      "resultUsedForEvaluationOnly": true,
+      "resultLeakage": 0,
+      "historicalMutation": 0,
+      "productionConnection": false,
+      "variantIsolation": true
+    }
+  },
+  "strongest": {
+    "pair": {
+      "variant": "WEAK",
+      "verdict": "WEAK_SIGNAL"
+    },
+    "rider": {
+      "variant": "STRONG",
+      "verdict": "WEAK_SIGNAL"
+    }
+  },
+  "safety": {
+    "inputHashBefore": "c2f54c1bc45370aa0149bc54c3ce173878463818a75b1acaf3b6cec3d47f67b9",
+    "inputHashAfter": "c2f54c1bc45370aa0149bc54c3ce173878463818a75b1acaf3b6cec3d47f67b9",
+    "productionPredictionChanged": false,
+    "productionPurchaseChanged": false,
+    "recommendationChanged": false,
+    "thickChanged": false,
+    "shadowChanged": false,
+    "resultUsedForGeneration": false,
+    "resultUsedForEvaluationOnly": true,
+    "resultLeakage": 0,
+    "historicalMutation": 0,
+    "productionConnection": false,
+    "variantIsolation": true
+  }
+}

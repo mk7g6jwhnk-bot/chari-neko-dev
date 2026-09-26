@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "MILESTONE_500_SHADOW_CONFIG_V1",
+  "version": "1.0.0",
+  "frozenAtCumulativeRaces": 466,
+  "confirmationStartOrdinal": 467,
+  "decisionOrdinal": 500,
+  "ordering": "resultObservedAt,raceKey",
+  "autoTuning": false,
+  "autoPromotion": false,
+  "productionConnected": false,
+  "variants": {
+    "PAIR_DIRECTION_ORDER_V1": [
+      { "id": "WEAK", "blendWeight": 0.10 },
+      { "id": "BASELINE", "blendWeight": 0.00 },
+      { "id": "STRONG", "blendWeight": 0.30 }
+    ],
+    "RIDER_SELECTION_SENSITIVITY_V1": [
+      { "id": "WEAK", "blendWeight": 0.10 },
+      { "id": "BASELINE", "blendWeight": 0.00 },
+      { "id": "STRONG", "blendWeight": 0.30 }
+    ]
+  }
+}
