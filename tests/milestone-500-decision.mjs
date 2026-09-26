@@ -1,0 +1,52 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import { computeFreezeHash, generateMilestone500Decision, renderDecisionReport } from '../research/shadow/generate-milestone-500-report.mjs';
+
+const read=p=>JSON.parse(fs.readFileSync(p,'utf8'));
+const policy=read('research/shadow/milestone-500-decision-policy.json');
+const freeze=read('research/shadow/milestone-500-freeze.json');
+const historical=read('research/shadow/milestone-500-shadow-results.json');
+const checkpoint=read('research/daily-validation/checkpoint.json');
+assert.equal(computeFreezeHash(policy,freeze),freeze.freezeHash,'deterministic freeze hash');
+assert.equal(policy.freezeHash,freeze.freezeHash,'policy/freeze immutable pair');
+
+const waiting=generateMilestone500Decision({policy,freeze,historical,checkpoint,dailySummaries:[],protectedRaceKeys:[]});
+assert.equal(waiting.verdict,'WAIT_FOR_500R');
+assert.equal(waiting.currentCumulative,466);
+assert.equal(waiting.confirmation.collected,0);
+assert.equal(waiting.confirmation.remaining,34);
+assert.equal(waiting.integrity.freezeIntact,true);
+assert.equal(waiting.safety.productionChanged,false);
+assert.equal(waiting.safety.purchaseChanged,false);
+assert.equal(waiting.integrity.resultLeakage,0);
+assert.ok(waiting.confirmationResults.every(x=>x.verdict==='NOT_EVALUATED'));
+
+const keys=Array.from({length:40},(_,i)=>`confirm-${i+1}`),window=keys.slice(0,34);
+const race=(raceKey,theme,variantId)=>({raceKey,theme,variantId,rank:variantId==='WEAK'?10:11,top5:false,top10:variantId==='WEAK',top15:true,top20:true,winnerCaptured:true,pairCaptured:true,trioCaptured:true,pairDirectionFailure:false,riderSelectionFailure:false,thirdConditionalFailure:false,reverseOnly:false,lowPayoutDeep:false,veryLowPayoutDeep:false,traceAvailable:true,purchaseable:true,tickets:1,hit:false,return:0,classificationFalseNegative:false,compressionFailure:false,ineligibleReason:'NONE'});
+const results=[];for(const [theme,variants] of Object.entries(freeze.variants))for(const variant of variants)results.push({theme,variantId:variant.id,frozenParameter:variant,races:window.map(k=>race(k,theme,variant.id))});
+const summary={generatedAt:'2026-09-27T00:00:00Z',daily:{milestone500Shadow:{logicVersion:freeze.logicVersion,freezeHash:freeze.freezeHash,results}}};
+const checkpoint500={processedRaceKeys:[...Array.from({length:466},(_,i)=>`hist-${i+1}`),...window]};
+const ready=generateMilestone500Decision({policy,freeze,historical,checkpoint:checkpoint500,dailySummaries:[summary],protectedRaceKeys:[]});
+assert.equal(ready.verdict,'MILESTONE_500_DECISION_READY');
+assert.equal(ready.confirmation.collected,34);
+assert.equal(ready.integrity.missing.length,0);
+assert.equal(ready.integrity.duplicates.length,0);
+assert.equal(renderDecisionReport(ready),renderDecisionReport(ready),'deterministic report');
+
+const over=generateMilestone500Decision({policy,freeze,historical,checkpoint:{processedRaceKeys:[...checkpoint500.processedRaceKeys,...keys.slice(34)]},dailySummaries:[summary],protectedRaceKeys:[]});
+assert.equal(over.confirmation.collected,34,'>500 keeps fixed window');
+const duplicate=generateMilestone500Decision({policy,freeze,historical,checkpoint:checkpoint500,dailySummaries:[summary,summary],protectedRaceKeys:[]});
+assert.equal(duplicate.verdict,'CONFIRMATION_INVALID');
+assert.ok(duplicate.integrity.duplicates.length>0);
+const protectedUse=generateMilestone500Decision({policy,freeze,historical,checkpoint:checkpoint500,dailySummaries:[summary],protectedRaceKeys:[window[0]]});
+assert.equal(protectedUse.verdict,'CONFIRMATION_INVALID');
+assert.equal(protectedUse.integrity.protectedFinalUsed,1);
+const drift=structuredClone(summary);drift.daily.milestone500Shadow.results[0].frozenParameter.blendWeight=.2;
+const drifted=generateMilestone500Decision({policy,freeze,historical,checkpoint:checkpoint500,dailySummaries:[drift],protectedRaceKeys:[]});
+assert.equal(drifted.verdict,'CONFIRMATION_INVALID');
+assert.ok(drifted.integrity.parameterDrift.length>0);
+const changed=structuredClone(policy);changed.adoptionRules.top20MustNotWorsen=false;
+assert.notEqual(computeFreezeHash(changed,freeze),freeze.freezeHash,'policy drift detected');
+assert.equal(freeze.productionConnection,false);
+assert.equal(policy.safetyRules.autoDeploy,false);
+console.log('milestone-500-decision: PASS');

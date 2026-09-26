@@ -1,0 +1,79 @@
+{
+  "policyVersion": "MILESTONE_500_DECISION_POLICY_V1",
+  "createdAt": "2026-09-26T12:00:00+09:00",
+  "historicalCohortEnd": 466,
+  "historicalSafeEvaluableRaces": 446,
+  "confirmationStart": 467,
+  "confirmationEnd": 500,
+  "protectedFinalExcluded": true,
+  "primaryCandidate": "RIDER_SELECTION_SENSITIVITY_V1/WEAK",
+  "variants": [
+    "PAIR_DIRECTION_ORDER_V1/WEAK",
+    "PAIR_DIRECTION_ORDER_V1/BASELINE",
+    "PAIR_DIRECTION_ORDER_V1/STRONG",
+    "RIDER_SELECTION_SENSITIVITY_V1/WEAK",
+    "RIDER_SELECTION_SENSITIVITY_V1/BASELINE",
+    "RIDER_SELECTION_SENSITIVITY_V1/STRONG"
+  ],
+  "metrics": [
+    "exactRank.avg", "exactRank.median", "exactRank.p90",
+    "capture.top5", "capture.top10", "capture.top15", "capture.top20",
+    "failures.pairDirection", "failures.riderSelection",
+    "capture.winner", "capture.trio", "failures.lowPayoutDeep",
+    "failures.veryLowPayoutDeep", "failures.reverseOnly"
+  ],
+  "adoptionRules": {
+    "targetFailureMustDecrease": true,
+    "exactRankMedianMustNotWorsen": true,
+    "top20MustNotWorsen": true,
+    "winnerCaptureMustNotWorsen": true,
+    "lowPayoutDeepMustNotWorsen": true,
+    "pairDirectionMustNotWorsen": true,
+    "reverseOnlyMustNotIncrease": true,
+    "trioCaptureMustNotClearlyWorsen": true,
+    "mechanismMustAlign": true,
+    "confirmationDirectionMustMatchHistorical": true,
+    "humanApprovalRequired": true
+  },
+  "rejectionRules": {
+    "targetFailureNoImprovement": true,
+    "winnerCaptureWorsens": true,
+    "top20Worsens": true,
+    "reverseOnlyIncreases": true,
+    "unrelatedFailureIncreases": true,
+    "lowPayoutDeepWorsens": true,
+    "mechanismMismatch": true,
+    "resultLeakage": true,
+    "parameterDrift": true,
+    "confirmationContamination": true,
+    "protectedFinalIncluded": true
+  },
+  "pairCandidateRules": {
+    "targetPairDirectionMustDecrease": true,
+    "reverseOnlyMustNotIncrease": true,
+    "winnerCaptureMustNotWorsen": true,
+    "riderSelectionMustNotWorsen": true,
+    "historicalSideEffects": {
+      "WEAK": { "targetFailure": -2, "median": -1, "top20": 2, "reverseOnly": 6, "winner": -5, "riderFailure": 5, "trio": -2 },
+      "STRONG": { "targetFailure": -2, "reverseOnly": 7, "winner": -9 }
+    }
+  },
+  "safetyRules": {
+    "productionConnection": false,
+    "autoDeploy": false,
+    "autoAdoption": false,
+    "autoTuning": false,
+    "protectedFinalUsed": 0,
+    "resultUsedForGeneration": false,
+    "checkpointWrite": false
+  },
+  "postAdoptionPlan": {
+    "requiresHumanApproval": true,
+    "singleChangeOnly": true,
+    "postDeployCohortMin": 50,
+    "postDeployCohortMax": 100,
+    "audit": ["predictionRanking", "targetFailure", "top20", "winner", "lowPayoutDeep", "purchaseSideEffect"],
+    "nextChangeBlockedUntilAuditComplete": true
+  },
+  "freezeHash": "2e2046e29dc1ddbf115c7b6eecd91b368432bacb75542ab929380b6f448b1514"
+}

@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "MILESTONE_500_FREEZE_V1",
+  "logicVersion": "MILESTONE_500_SHADOW_V1@1.0.0",
+  "frozenAtCumulativeRaces": 466,
+  "cohortBoundary": { "historicalEnd": 466, "confirmationStart": 467, "confirmationEnd": 500 },
+  "inputFields": {
+    "PAIR_DIRECTION_ORDER_V1": ["prediction.terminals.terminalScore", "prediction.terminals.pairNaturalConvergenceScore"],
+    "RIDER_SELECTION_SENSITIVITY_V1": ["prediction.terminals.terminalScore", "prediction.terminals.branchContributions.weightedScore", "prediction.terminals.branchContributions.positionScores"]
+  },
+  "variants": {
+    "PAIR_DIRECTION_ORDER_V1": [
+      { "id": "WEAK", "blendWeight": 0.1 },
+      { "id": "BASELINE", "blendWeight": 0 },
+      { "id": "STRONG", "blendWeight": 0.3 }
+    ],
+    "RIDER_SELECTION_SENSITIVITY_V1": [
+      { "id": "WEAK", "blendWeight": 0.1 },
+      { "id": "BASELINE", "blendWeight": 0 },
+      { "id": "STRONG", "blendWeight": 0.3 }
+    ]
+  },
+  "protectedFinalExcluded": true,
+  "productionConnection": false,
+  "freezeHash": "2e2046e29dc1ddbf115c7b6eecd91b368432bacb75542ab929380b6f448b1514"
+}
