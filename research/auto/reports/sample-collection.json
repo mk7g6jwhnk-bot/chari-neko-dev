@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "AUTO_RESEARCH_COLLECTION_V1",
+  "date": "2026-06-04",
+  "venue": "kawaguchi",
+  "requested": 3,
+  "fetchedRaces": 3,
+  "snapshots": 6,
+  "errors": [],
+  "audit": {
+    "snapshotCount": 6,
+    "raceCount": 3,
+    "duplicateCount": 0,
+    "duplicates": [],
+    "preResultJoined": 3,
+    "issueCount": 0,
+    "issues": [],
+    "resultLeakageCount": 0
+  },
+  "fetchTimeMs": 2281,
+  "source": "autorace.jp official public race_info",
+  "predictionImplemented": false,
+  "purchaseImplemented": false
+}

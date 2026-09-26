@@ -1,0 +1,287 @@
+{
+  "schemaVersion": "AUTO_RACE_SNAPSHOT_V1",
+  "raceKey": "20260604-AUTO-KAWAGUCHI-2",
+  "capturedAt": "2026-09-26T07:16:20.098Z",
+  "sourceObservedAt": null,
+  "historicalReadback": true,
+  "source": "https://autorace.jp",
+  "sourceVersion": "AUTO_OFFICIAL_JSON_V1",
+  "race": {
+    "raceKey": "20260604-AUTO-KAWAGUCHI-2",
+    "date": "2026-06-04",
+    "venue": "川口",
+    "venueCode": 2,
+    "raceNo": 2,
+    "scheduledStart": "2026-06-04T19:15:00+09:00",
+    "raceClass": "予選",
+    "raceTitle": "予選",
+    "grade": "普通開催",
+    "distance": 3100,
+    "laps": null,
+    "entryCount": 7,
+    "weather": "曇",
+    "temperature": 21,
+    "humidity": 63,
+    "windDirection": null,
+    "windSpeed": null,
+    "trackConditionCode": 0,
+    "trackCondition": "良走路",
+    "trackTemperature": 24,
+    "trackMoisture": null,
+    "observedAt": null,
+    "source": "autorace.jp official public race_info",
+    "sourceVersion": "AUTO_OFFICIAL_JSON_V1"
+  },
+  "participants": [],
+  "missing": [
+    {
+      "field": "race.laps",
+      "reason": "OFFICIAL_SOURCE_NOT_EXPOSED"
+    },
+    {
+      "field": "race.windDirection",
+      "reason": "OFFICIAL_SOURCE_NOT_EXPOSED"
+    },
+    {
+      "field": "race.trackMoisture",
+      "reason": "OFFICIAL_SOURCE_NOT_EXPOSED"
+    }
+  ],
+  "rawReferences": {
+    "raceResult": "https://autorace.jp/race_info/RaceResult",
+    "otherRaceInfo": "https://autorace.jp/race_info/OtherRaceInfo"
+  },
+  "stage": "RESULT_CONFIRMED",
+  "result": {
+    "status": "normal",
+    "finishOrder": [
+      7,
+      5,
+      4,
+      6,
+      2,
+      3,
+      1
+    ],
+    "participants": [
+      {
+        "finishOrder": 1,
+        "carNo": 7,
+        "riderId": "3302",
+        "riderName": "泉田　修佑",
+        "machineName": "ウーチャン",
+        "handicap": 60,
+        "trialTime": 3.3,
+        "finishTime": 3.399,
+        "startTiming": 0.19,
+        "accidentCode": null,
+        "accidentName": null,
+        "violationCode": null
+      },
+      {
+        "finishOrder": 2,
+        "carNo": 5,
+        "riderId": "2530",
+        "riderName": "谷島　俊行",
+        "machineName": "ウンテブレカー",
+        "handicap": 50,
+        "trialTime": 3.34,
+        "finishTime": 3.413,
+        "startTiming": 0.11,
+        "accidentCode": null,
+        "accidentName": null,
+        "violationCode": null
+      },
+      {
+        "finishOrder": 3,
+        "carNo": 4,
+        "riderId": "2820",
+        "riderName": "平川　博康",
+        "machineName": "ヤワラ",
+        "handicap": 40,
+        "trialTime": 3.35,
+        "finishTime": 3.446,
+        "startTiming": 0.08,
+        "accidentCode": null,
+        "accidentName": null,
+        "violationCode": null
+      },
+      {
+        "finishOrder": 4,
+        "carNo": 6,
+        "riderId": "3107",
+        "riderName": "小原　　望",
+        "machineName": "ストーム",
+        "handicap": 50,
+        "trialTime": 3.33,
+        "finishTime": 3.441,
+        "startTiming": 0.16,
+        "accidentCode": null,
+        "accidentName": null,
+        "violationCode": null
+      },
+      {
+        "finishOrder": 5,
+        "carNo": 2,
+        "riderId": "1607",
+        "riderName": "岡崎　秀二",
+        "machineName": "テキサス",
+        "handicap": 20,
+        "trialTime": 3.41,
+        "finishTime": 3.503,
+        "startTiming": 0.13,
+        "accidentCode": null,
+        "accidentName": null,
+        "violationCode": null
+      },
+      {
+        "finishOrder": 6,
+        "carNo": 3,
+        "riderId": "2123",
+        "riderName": "吉田　幸司",
+        "machineName": "スウィート",
+        "handicap": 40,
+        "trialTime": 3.39,
+        "finishTime": 3.484,
+        "startTiming": 0.19,
+        "accidentCode": null,
+        "accidentName": null,
+        "violationCode": null
+      },
+      {
+        "finishOrder": 7,
+        "carNo": 1,
+        "riderId": "9037",
+        "riderName": "九門　結衣",
+        "machineName": "ジョイナー",
+        "handicap": 0,
+        "trialTime": 3.49,
+        "finishTime": 3.561,
+        "startTiming": 0.08,
+        "accidentCode": null,
+        "accidentName": null,
+        "violationCode": null
+      }
+    ],
+    "payout": {
+      "rtw": {
+        "typeCode": 0,
+        "typeName": "通常",
+        "list": [
+          {
+            "1thCarNo": 7,
+            "2thCarNo": 5,
+            "refund": 320,
+            "pop": 1,
+            "refundVotes": "807"
+          }
+        ]
+      },
+      "rfw": {
+        "typeCode": 0,
+        "typeName": "通常",
+        "list": [
+          {
+            "1thCarNo": 5,
+            "2thCarNo": 7,
+            "refund": 240,
+            "pop": 1,
+            "refundVotes": "447"
+          }
+        ]
+      },
+      "rt3": {
+        "typeCode": 0,
+        "typeName": "通常",
+        "list": [
+          {
+            "1thCarNo": 7,
+            "2thCarNo": 5,
+            "3thCarNo": 4,
+            "refund": 700,
+            "pop": 1,
+            "refundVotes": "7048"
+          }
+        ]
+      },
+      "rf3": {
+        "typeCode": 0,
+        "typeName": "通常",
+        "list": [
+          {
+            "1thCarNo": 4,
+            "2thCarNo": 5,
+            "3thCarNo": 7,
+            "refund": 300,
+            "pop": 1,
+            "refundVotes": "1520"
+          }
+        ]
+      },
+      "wid": {
+        "typeCode": 0,
+        "typeName": "通常",
+        "list": [
+          {
+            "1thCarNo": 5,
+            "2thCarNo": 7,
+            "refund": 100,
+            "pop": 1,
+            "refundVotes": "386"
+          },
+          {
+            "1thCarNo": 4,
+            "2thCarNo": 7,
+            "refund": 100,
+            "pop": 2,
+            "refundVotes": "292"
+          },
+          {
+            "1thCarNo": 4,
+            "2thCarNo": 5,
+            "refund": 150,
+            "pop": 3,
+            "refundVotes": "121"
+          }
+        ]
+      },
+      "tns": {
+        "typeCode": 0,
+        "typeName": "通常",
+        "list": [
+          {
+            "carNo": 7,
+            "refund": 180,
+            "pop": 1,
+            "refundVotes": "415"
+          }
+        ]
+      },
+      "fns": {
+        "typeCode": 0,
+        "typeName": "通常",
+        "list": [
+          {
+            "carNo": 7,
+            "order": 1,
+            "refund": 120,
+            "pop": 1,
+            "refundVotes": "4"
+          },
+          {
+            "carNo": 5,
+            "order": 2,
+            "refund": 140,
+            "pop": 2,
+            "refundVotes": "3"
+          }
+        ]
+      },
+      "absent": []
+    },
+    "refund": [],
+    "resultObservedAt": null,
+    "officialConfirmedAt": null
+  },
+  "hash": "40004969a9af9a96be4c01067ee278297b9a4b473237e10359039e82ddeca874"
+}

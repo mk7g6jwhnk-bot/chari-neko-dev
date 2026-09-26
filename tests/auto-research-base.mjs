@@ -1,0 +1,25 @@
+import assert from 'node:assert/strict';
+import { autoRaceKey,buildSnapshots,sealSnapshot,validateSnapshot,verifySnapshotHash } from '../research/auto/snapshot.mjs';
+import { auditAutoSnapshots } from '../research/auto/quality-audit.mjs';
+import { collectOfficialAutoDay } from '../research/auto/collect-official-day.mjs';
+
+assert.equal(autoRaceKey({date:'2026-06-04',venueKey:'KAWAGUCHI',raceNo:1}),'20260604-AUTO-KAWAGUCHI-1');
+assert.equal(autoRaceKey({date:'20260604',venueKey:'kawaguchi',raceNo:1}),'20260604-AUTO-KAWAGUCHI-1');
+assert.throws(()=>autoRaceKey({date:'bad',venueKey:'kawaguchi',raceNo:1}));
+const fetched={date:'2026-06-04',raceNo:1,venue:{code:2,key:'KAWAGUCHI',name:'川口'},session:{},program:{endpoint:'official/Program',body:{playerList:[{carNo:1,playerCode:'0001',playerName:'選手 一',bikeClass:1,bikeName:'マシン',rank:'A-1',handicap:0,trialRunTime:'3.41',raceDev:'0.08'}]}},info:{endpoint:'official/OtherRaceInfo',body:{raceStartTime:'12:00',raceName:'予選',gradeName:'普通開催',distance:3100,weather:'晴',temp:'25.0',humid:'40.0',roadtemp:'35.0',situationCode:0,raceWeather:'晴',raceTemp:'26.0',raceHumid:'39.0',raceRoadtemp:'36.0',raceSituationCode:0}},result:{endpoint:'official/RaceResult',body:{raceResult:[{order:1,carNo:1,playerCode:'0001',playerName:'選手 一',motorcycleName:'マシン',handicap:0,traialTime:'3.41',raceTime:'3.50',st:'0.12'}],refundInfo:{rt3:{typeCode:0,list:[]},absent:[]}}}};
+const built=buildSnapshots(fetched,{capturedAt:'2026-06-05T00:00:00.000Z',historicalReadback:true});
+assert.equal(built.pre.stage,'TRIAL_AVAILABLE');
+assert.equal(built.pre.result,null,'pre has no result');
+assert.equal(Object.hasOwn(built.pre,'result'),true);
+assert.equal(built.result.stage,'RESULT_CONFIRMED');
+assert.deepEqual(built.result.result.finishOrder,[1]);
+assert.equal(validateSnapshot(built.pre).valid,true);
+assert.equal(validateSnapshot(built.result).valid,true);
+assert.equal(verifySnapshotHash(built.pre),true);
+const leaked=sealSnapshot({...built.pre,result:{finishOrder:[1]}});assert.ok(validateSnapshot(leaked).errors.includes('RESULT_LEAKAGE'));
+const audit=auditAutoSnapshots([built.pre,built.result]);
+assert.equal(audit.raceCount,1);assert.equal(audit.preResultJoined,1);assert.equal(audit.resultLeakageCount,0);assert.equal(audit.duplicateCount,0);
+assert.equal(auditAutoSnapshots([built.pre,built.pre]).duplicateCount,1);
+const missing=buildSnapshots({...fetched,program:{...fetched.program,body:{playerList:[]}},result:{...fetched.result,body:{raceResult:[],refundInfo:{absent:[]}}}},{capturedAt:'2026-06-05T00:00:00.000Z'});assert.ok(missing.result.missing.some(x=>x.field==='result.finishOrder'));
+const fakeClient={fetchRace:async()=>fetched};const run=await collectOfficialAutoDay({date:'2026-06-04',venue:'kawaguchi',raceNos:[1],write:false,client:fakeClient});assert.equal(run.summary.fetchedRaces,1);assert.equal(run.summary.predictionImplemented,false);assert.equal(run.summary.purchaseImplemented,false);
+console.log('auto-research-base: PASS');

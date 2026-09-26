@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "AUTO_RACE_SNAPSHOT_V1",
+  "title": "Official Auto Race point-in-time research snapshot",
+  "type": "object",
+  "required": ["schemaVersion", "raceKey", "stage", "capturedAt", "sourceObservedAt", "source", "sourceVersion", "hash", "race", "participants", "missing"],
+  "properties": {
+    "schemaVersion": {"const": "AUTO_RACE_SNAPSHOT_V1"},
+    "raceKey": {"pattern": "^[0-9]{8}-AUTO-[A-Z]+-(?:[1-9]|1[0-2])$"},
+    "stage": {"enum": ["PRE", "TRIAL_AVAILABLE", "FINAL_PRE_RACE", "RESULT_CONFIRMED"]},
+    "capturedAt": {"type": "string", "format": "date-time"},
+    "sourceObservedAt": {"type": ["string", "null"], "format": "date-time"},
+    "hash": {"pattern": "^[a-f0-9]{64}$"},
+    "historicalReadback": {"type": "boolean"},
+    "race": {"type": "object"},
+    "participants": {"type": "array"},
+    "result": {"type": ["object", "null"]},
+    "missing": {"type": "array", "items": {"type": "object", "required": ["field", "reason"]}}
+  },
+  "additionalProperties": true
+}

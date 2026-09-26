@@ -1,0 +1,244 @@
+{
+  "schemaVersion": "AUTO_RACE_SNAPSHOT_V1",
+  "raceKey": "20260604-AUTO-KAWAGUCHI-2",
+  "capturedAt": "2026-09-26T07:16:20.098Z",
+  "sourceObservedAt": null,
+  "historicalReadback": true,
+  "source": "https://autorace.jp",
+  "sourceVersion": "AUTO_OFFICIAL_JSON_V1",
+  "race": {
+    "raceKey": "20260604-AUTO-KAWAGUCHI-2",
+    "date": "2026-06-04",
+    "venue": "川口",
+    "venueCode": 2,
+    "raceNo": 2,
+    "scheduledStart": "2026-06-04T19:15:00+09:00",
+    "raceClass": "予選",
+    "raceTitle": "予選",
+    "grade": "普通開催",
+    "distance": 3100,
+    "laps": null,
+    "entryCount": 7,
+    "weather": "曇",
+    "temperature": 19,
+    "humidity": 69,
+    "windDirection": null,
+    "windSpeed": null,
+    "trackConditionCode": 0,
+    "trackCondition": "良走路",
+    "trackTemperature": 22,
+    "trackMoisture": null,
+    "observedAt": null,
+    "source": "autorace.jp official public race_info",
+    "sourceVersion": "AUTO_OFFICIAL_JSON_V1"
+  },
+  "participants": [
+    {
+      "riderId": "9037",
+      "registrationNo": "9037",
+      "riderName": "九門　結衣",
+      "lane": 1,
+      "carNo": 1,
+      "handicap": 0,
+      "class": "2",
+      "age": 18,
+      "rank": "B-135",
+      "graduationCode": "39",
+      "machineName": "ジョイナー",
+      "machineNo": null,
+      "trialTime": 3.49,
+      "trialRetry": false,
+      "trialOrder": null,
+      "trialDeviationRaw": 82,
+      "publishedStartData": null,
+      "absence": null,
+      "replacement": null,
+      "observedAt": null
+    },
+    {
+      "riderId": "1607",
+      "registrationNo": "1607",
+      "riderName": "岡崎　秀二",
+      "lane": 2,
+      "carNo": 2,
+      "handicap": 20,
+      "class": "1",
+      "age": 68,
+      "rank": "B-62",
+      "graduationCode": "16",
+      "machineName": "テキサス",
+      "machineNo": null,
+      "trialTime": 3.41,
+      "trialRetry": false,
+      "trialOrder": null,
+      "trialDeviationRaw": 69,
+      "publishedStartData": null,
+      "absence": null,
+      "replacement": null,
+      "observedAt": null
+    },
+    {
+      "riderId": "2123",
+      "registrationNo": "2123",
+      "riderName": "吉田　幸司",
+      "lane": 3,
+      "carNo": 3,
+      "handicap": 40,
+      "class": "1",
+      "age": 57,
+      "rank": "A-143",
+      "graduationCode": "21",
+      "machineName": "スウィート",
+      "machineNo": null,
+      "trialTime": 3.39,
+      "trialRetry": false,
+      "trialOrder": null,
+      "trialDeviationRaw": 75,
+      "publishedStartData": null,
+      "absence": null,
+      "replacement": null,
+      "observedAt": null
+    },
+    {
+      "riderId": "2820",
+      "registrationNo": "2820",
+      "riderName": "平川　博康",
+      "lane": 4,
+      "carNo": 4,
+      "handicap": 40,
+      "class": "1",
+      "age": 46,
+      "rank": "A-115",
+      "graduationCode": "28",
+      "machineName": "ヤワラ",
+      "machineNo": null,
+      "trialTime": 3.35,
+      "trialRetry": false,
+      "trialOrder": null,
+      "trialDeviationRaw": 94,
+      "publishedStartData": null,
+      "absence": null,
+      "replacement": null,
+      "observedAt": null
+    },
+    {
+      "riderId": "2530",
+      "registrationNo": "2530",
+      "riderName": "谷島　俊行",
+      "lane": 5,
+      "carNo": 5,
+      "handicap": 50,
+      "class": "1",
+      "age": 50,
+      "rank": "A-100",
+      "graduationCode": "25",
+      "machineName": "ウンテブレカー",
+      "machineNo": null,
+      "trialTime": 3.34,
+      "trialRetry": false,
+      "trialOrder": null,
+      "trialDeviationRaw": 75,
+      "publishedStartData": null,
+      "absence": null,
+      "replacement": null,
+      "observedAt": null
+    },
+    {
+      "riderId": "3107",
+      "registrationNo": "3107",
+      "riderName": "小原　　望",
+      "lane": 6,
+      "carNo": 6,
+      "handicap": 50,
+      "class": "1",
+      "age": 45,
+      "rank": "A-139",
+      "graduationCode": "31",
+      "machineName": "ストーム",
+      "machineNo": null,
+      "trialTime": 3.33,
+      "trialRetry": false,
+      "trialOrder": null,
+      "trialDeviationRaw": 111,
+      "publishedStartData": null,
+      "absence": null,
+      "replacement": null,
+      "observedAt": null
+    },
+    {
+      "riderId": "3302",
+      "registrationNo": "3302",
+      "riderName": "泉田　修佑",
+      "lane": 7,
+      "carNo": 7,
+      "handicap": 60,
+      "class": "1",
+      "age": 29,
+      "rank": "A-27",
+      "graduationCode": "33",
+      "machineName": "ウーチャン",
+      "machineNo": null,
+      "trialTime": 3.3,
+      "trialRetry": false,
+      "trialOrder": null,
+      "trialDeviationRaw": 92,
+      "publishedStartData": null,
+      "absence": null,
+      "replacement": null,
+      "observedAt": null
+    }
+  ],
+  "missing": [
+    {
+      "field": "race.laps",
+      "reason": "OFFICIAL_SOURCE_NOT_EXPOSED"
+    },
+    {
+      "field": "race.windDirection",
+      "reason": "OFFICIAL_SOURCE_NOT_EXPOSED"
+    },
+    {
+      "field": "race.trackMoisture",
+      "reason": "OFFICIAL_SOURCE_NOT_EXPOSED"
+    }
+  ],
+  "rawReferences": {
+    "program": "https://autorace.jp/race_info/Program",
+    "otherRaceInfo": "https://autorace.jp/race_info/OtherRaceInfo"
+  },
+  "stage": "TRIAL_AVAILABLE",
+  "derived": {
+    "trialOrder": [
+      {
+        "carNo": 7,
+        "order": 1
+      },
+      {
+        "carNo": 6,
+        "order": 2
+      },
+      {
+        "carNo": 5,
+        "order": 3
+      },
+      {
+        "carNo": 4,
+        "order": 4
+      },
+      {
+        "carNo": 3,
+        "order": 5
+      },
+      {
+        "carNo": 2,
+        "order": 6
+      },
+      {
+        "carNo": 1,
+        "order": 7
+      }
+    ]
+  },
+  "result": null,
+  "hash": "716ac2f6af69ffcec45768253f8780c24a6e8e3bba1536391266704047ff74f7"
+}
