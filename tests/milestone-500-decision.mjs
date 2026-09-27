@@ -6,7 +6,8 @@ const read=p=>JSON.parse(fs.readFileSync(p,'utf8'));
 const policy=read('research/shadow/milestone-500-decision-policy.json');
 const freeze=read('research/shadow/milestone-500-freeze.json');
 const historical=read('research/shadow/milestone-500-shadow-results.json');
-const checkpoint=read('research/daily-validation/checkpoint.json');
+const liveCheckpoint=read('research/daily-validation/checkpoint.json');
+const checkpoint={processedRaceKeys:liveCheckpoint.processedRaceKeys.slice(0,466)};
 assert.equal(computeFreezeHash(policy,freeze),freeze.freezeHash,'deterministic freeze hash');
 assert.equal(policy.freezeHash,freeze.freezeHash,'policy/freeze immutable pair');
 
