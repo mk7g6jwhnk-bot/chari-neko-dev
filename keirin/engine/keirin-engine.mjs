@@ -3,10 +3,15 @@ import{runKeirinPurchaseEngine}from"./purchase-engine.mjs";
 import{PREDICTION_ENGINE_VERSION,PURCHASE_ENGINE_VERSION,ENGINE_PAIR_ID,buildEnginePairAudit}from"./engine-version.mjs";
 import{attachScenarioProvenanceId,buildScenarioProvenance}from"./scenario-provenance.mjs";
 import{buildTerminalDetailTrace}from"./terminal-trace.mjs";
+import{buildBaselineControl,buildRiderSelectionCandidatePrediction}from"./rider-selection-weak.mjs";
 
 export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000,captureResearchTrace=false}){
-  const prediction=runKeirinPredictionEngine({race,venueProfile});
-  const purchase=runKeirinPurchaseEngine({prediction,oddsByOrder,budget});
+  const baselinePrediction=runKeirinPredictionEngine({race,venueProfile});
+  const adoptionEnabled=process.env.KEIRIN_RIDER_SELECTION_WEAK!=="0";
+  const baselinePurchase=runKeirinPurchaseEngine({prediction:baselinePrediction,oddsByOrder,budget});
+  const candidate=adoptionEnabled?buildRiderSelectionCandidatePrediction(baselinePrediction,baselinePurchase.terminals):null;
+  const prediction=candidate?.prediction||baselinePrediction;
+  const purchase=candidate?runKeirinPurchaseEngine({prediction,oddsByOrder,budget}):baselinePurchase;
   const provenance=buildScenarioProvenance({terminals:purchase.terminals,branches:prediction.branches,lines:prediction.lines,scored:prediction.scored});
   const apiTerminals=purchase.terminals.map(item=>attachScenarioProvenanceId(item,provenance.terminalScenarioIds));
   const output={
@@ -57,6 +62,7 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
     purchaseEligibility:purchase.purchaseEligibility,
     generatedAt:new Date().toISOString()
   };
+  output.riderSelectionAdoption=candidate?buildBaselineControl({baselinePurchase,candidatePurchase:purchase,ranked:candidate.ranked,inputHash:candidate.inputHash,generatedAt:output.generatedAt}):{schemaVersion:"RIDER_SELECTION_WEAK_ADOPTION_CONTROL_V1",productionVersion:baselinePrediction.predictionVersion,baselineControlVersion:"KEIRIN-0.5.20-girls-evidence-gate",enabled:false,rollbackFlag:"KEIRIN_RIDER_SELECTION_WEAK=0",resultDataUsed:false,temporalStage:"PREDICTION_TIME"};
   if(captureResearchTrace)output.researchTerminalTrace=buildTerminalDetailTrace({race,prediction,purchase,provenance,generatedAt:output.generatedAt});
   return output;
 }

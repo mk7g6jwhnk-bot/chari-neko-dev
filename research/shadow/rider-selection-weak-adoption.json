@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "RIDER_SELECTION_WEAK_PRODUCTION_ADOPTION_V1",
+  "policyVersion": "MILESTONE_500_DECISION_POLICY_V1",
+  "decisionFreezeHash": "2e2046e29dc1ddbf115c7b6eecd91b368432bacb75542ab929380b6f448b1514",
+  "adoptedVariant": "RIDER_SELECTION_SENSITIVITY_V1/WEAK@1.0.0",
+  "weight": 0.1,
+  "productionVersion": "KEIRIN-0.6.0-rider-selection-weak",
+  "previousProductionVersion": "KEIRIN-0.5.20-girls-evidence-gate",
+  "rollback": "KEIRIN_RIDER_SELECTION_WEAK=0",
+  "adoptionCheckpoint": 510,
+  "firstEligibleRaceKey": null,
+  "firstPredictionSealedAt": null,
+  "postDeployCohortStart": null,
+  "interimReviewRaces": 50,
+  "finalReviewRaces": 100,
+  "parameterFrozen": true,
+  "productionAutoTuning": false,
+  "pairDirectionActive": false,
+  "riderStrongActive": false
+}

@@ -1,4 +1,4 @@
-export const PREDICTION_ENGINE_VERSION="KEIRIN-0.5.20-girls-evidence-gate";
+export const PREDICTION_ENGINE_VERSION="KEIRIN-0.6.0-rider-selection-weak";
 export const PURCHASE_ENGINE_VERSION="v250";
 export const ENGINE_PAIR_ID=`${PREDICTION_ENGINE_VERSION}__${PURCHASE_ENGINE_VERSION}`;
 

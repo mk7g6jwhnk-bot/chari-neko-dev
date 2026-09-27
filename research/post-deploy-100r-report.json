@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "RIDER_SELECTION_WEAK_POST_DEPLOY_V1",
+  "milestone": 100,
+  "verdict": "WAIT_FOR_MILESTONE",
+  "N": 0,
+  "remaining": 100,
+  "productionVersion": "KEIRIN-0.6.0-rider-selection-weak",
+  "baselineControlVersion": "KEIRIN-0.5.20-girls-evidence-gate",
+  "parameterHash": "04ffb799525a84fb71f08ed42be961b16b32aa1b441968cc63ce7820ae0d2585",
+  "production": {
+    "N": 0,
+    "exactRank": {
+      "avg": null,
+      "median": null,
+      "p90": null
+    },
+    "top5": 0,
+    "top10": 0,
+    "top15": 0,
+    "top20": 0,
+    "winner": 0,
+    "purchase": {
+      "tickets": 0,
+      "avgTickets": null
+    }
+  },
+  "baseline": {
+    "N": 0,
+    "exactRank": {
+      "avg": null,
+      "median": null,
+      "p90": null
+    },
+    "top5": 0,
+    "top10": 0,
+    "top15": 0,
+    "top20": 0,
+    "winner": 0,
+    "purchase": {
+      "tickets": 0,
+      "avgTickets": null
+    }
+  },
+  "delta": {
+    "median": 0,
+    "top20": 0,
+    "winner": 0,
+    "avgTickets": 0
+  },
+  "integrity": {
+    "failures": 0,
+    "resultLeakage": 0,
+    "protectedFinalUsed": 0,
+    "parameterDrift": 0,
+    "inputHashMissing": 0
+  },
+  "races": [],
+  "deterministicHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+}
