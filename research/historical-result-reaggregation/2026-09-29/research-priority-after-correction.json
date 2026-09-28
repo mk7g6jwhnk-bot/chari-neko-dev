@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "RESEARCH_PRIORITY_AFTER_CORRECTION_V1",
+  "sourceHash": "a6abe3c0a032bffc950eacbccf5e05cff1e623843f87f71e1380949be15e6eb0",
+  "interpretation": {
+    "correctionDriven": [
+      "purchase performance and exact-rank metrics must use matched cohort delta only"
+    ],
+    "coverageDriven": [
+      "full635 count changes relative to matched505"
+    ],
+    "reproducedInMatchedAndExpansion": [
+      "PAIR_DIRECTION_FAILURE",
+      "LOW_PAYOUT_DEEP_RANK",
+      "PURCHASE_COMPRESSION",
+      "RIDER_SELECTION_FAILURE"
+    ]
+  },
+  "priorities": [
+    {
+      "rank": 1,
+      "id": "PAIR_DIRECTION_DIAGNOSTIC_REVIEW",
+      "layer": "ranking/order",
+      "reason": "present in matched505 and expansion130; distinct from RIDER WEAK",
+      "implementationApproved": false
+    },
+    {
+      "rank": 2,
+      "id": "LOW_PAYOUT_DEEP_RANK_DIAGNOSTIC",
+      "layer": "ranking/calibration",
+      "reason": "present in both cohorts and large in full635",
+      "implementationApproved": false
+    },
+    {
+      "rank": 3,
+      "id": "PURCHASE_COMPRESSION_DIAGNOSTIC",
+      "layer": "purchase selection",
+      "reason": "separable from prediction ranking; purchase engine remains frozen",
+      "implementationApproved": false
+    }
+  ],
+  "safety": {
+    "newHypothesisImplemented": false,
+    "parameterTuning": false
+  },
+  "hash": "4eb041cec7079eb863a6adde8278da8087346c09be3a2acf9efd70206c046ffd"
+}

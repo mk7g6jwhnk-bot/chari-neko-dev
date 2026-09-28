@@ -1,0 +1,111 @@
+{
+  "schemaVersion": "MATCHED_505_CORRECTED_V1",
+  "cohortHash": "691a563e79b26456b0b19e0c953c9ed6aacf4f96e46282a2cde4443027b2bf35",
+  "metrics": {
+    "races": 505,
+    "included": 505,
+    "VOID": 0,
+    "hits": 42,
+    "tickets": 1937,
+    "investment": 193700,
+    "payout": 108100,
+    "roi": 0.5580795043882292,
+    "exactRank": {
+      "avg": 65.25940594059406,
+      "median": 42,
+      "p90": 155,
+      "max": 434
+    },
+    "Top5": 77,
+    "Top10": 129,
+    "Top15": 164,
+    "Top20": 192,
+    "P": {
+      "P3": 287,
+      "P2": 162,
+      "P1": 55,
+      "P0": 1
+    },
+    "riderFailure": 58,
+    "pairFailure": 181,
+    "winnerFailure": 25,
+    "trioFailure": 24,
+    "reverseOnly": 74,
+    "lowPayoutDeep": 225,
+    "veryLowPayoutDeep": 176,
+    "purchaseCompression": 59,
+    "classificationFalseNegative": 59,
+    "purchaseIneligible": 136
+  },
+  "oldPublishedMetrics": {
+    "races": 505,
+    "included": 505,
+    "VOID": 0,
+    "hits": 36,
+    "tickets": 1730,
+    "investment": 173000,
+    "payout": 95790,
+    "roi": 0.553699421965318,
+    "exactRank": {
+      "avg": 61.24850299401198,
+      "median": 41,
+      "p90": 149,
+      "max": 397
+    },
+    "Top5": 53,
+    "Top10": 85,
+    "Top15": 109,
+    "Top20": 128,
+    "P": {
+      "P3": 249,
+      "P2": 148,
+      "P1": 45,
+      "P0": 63
+    },
+    "riderFailure": 115,
+    "pairFailure": 157,
+    "winnerFailure": 25,
+    "trioFailure": 22,
+    "reverseOnly": 63,
+    "lowPayoutDeep": 146,
+    "veryLowPayoutDeep": 119,
+    "purchaseCompression": 35,
+    "classificationFalseNegative": 52,
+    "purchaseIneligible": 136
+  },
+  "trueCorrectionDelta": {
+    "included": 0,
+    "VOID": 0,
+    "hits": 6,
+    "investment": 20700,
+    "payout": 12310,
+    "roi": 0.004380082422911213,
+    "Top5": 24,
+    "Top10": 44,
+    "Top15": 55,
+    "Top20": 64,
+    "riderFailure": -57,
+    "pairFailure": 24,
+    "winnerFailure": 0,
+    "trioFailure": 2,
+    "reverseOnly": 11,
+    "lowPayoutDeep": 79,
+    "veryLowPayoutDeep": 57,
+    "purchaseCompression": 24,
+    "classificationFalseNegative": 7,
+    "purchaseIneligible": 0
+  },
+  "exactRankDelta": {
+    "avg": 4.010902946582085,
+    "median": 1,
+    "p90": 6
+  },
+  "safety": {
+    "predictionRegenerated": false,
+    "purchaseEvaluationRerun": false,
+    "resultWrite": false,
+    "protectedFinalUsed": 0,
+    "resultLeakage": 0
+  },
+  "hash": "ec9cf6a418f8bc6ebbf91f3d432080620338bfbe28c1bd28a4459582a92b139c"
+}
