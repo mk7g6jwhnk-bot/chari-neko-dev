@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "CORRECTED_RESULT_HYPOTHESIS_REVIEW_V1",
+  "sourceArtifact": "cumulative.json",
+  "policyVersion": "MILESTONE_500_DECISION_POLICY_V1",
+  "freezeHash": "2e2046e29dc1ddbf115c7b6eecd91b368432bacb75542ab929380b6f448b1514",
+  "hypotheses": [
+    {
+      "id": "RIDER_SELECTION_SENSITIVITY_V1/WEAK",
+      "classification": "CONFIRMED_PRODUCTION_ADOPTED",
+      "reReview": "POST_DEPLOY_50R_AND_100R_ONLY",
+      "parameterChangeAllowed": false
+    },
+    {
+      "id": "PAIR_DIRECTION_ORDER_V1/WEAK",
+      "classification": "REJECT",
+      "reReview": "NO",
+      "parameterChangeAllowed": false
+    },
+    {
+      "id": "PAIR_DIRECTION_ORDER_V1/STRONG",
+      "classification": "REJECT",
+      "reReview": "NO",
+      "parameterChangeAllowed": false
+    },
+    {
+      "id": "LOW_PAYOUT_DEEP_RANK_DIAGNOSTIC",
+      "classification": "PROMISING_DIAGNOSTIC",
+      "reReview": "YES_AFTER_POST_DEPLOY_REVIEW",
+      "parameterChangeAllowed": false
+    },
+    {
+      "id": "PURCHASE_COMPRESSION_DIAGNOSTIC",
+      "classification": "WEAK_SIGNAL",
+      "reReview": "YES_AFTER_POST_DEPLOY_REVIEW",
+      "parameterChangeAllowed": false
+    }
+  ],
+  "safety": {
+    "productionChange": false,
+    "resultLeakage": 0,
+    "protectedFinalUsed": 0,
+    "checkpointWrite": false
+  }
+}

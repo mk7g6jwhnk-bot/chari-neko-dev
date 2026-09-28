@@ -1,0 +1,652 @@
+{
+  "schemaVersion": "CORRECTED_RESULT_REAGGREGATION_V1",
+  "generatedAt": "2026-09-28T22:26:36.025Z",
+  "verdict": "CORRECTED_RESULT_AGGREGATION_READY",
+  "source": {
+    "checkpointHash": "b96c410dfeff63085a9a8b686db3cd7ad537515d553ad8529f030c67ab656319",
+    "processed": 655,
+    "selected": 635,
+    "unknownExcluded": [
+      "20260919-38-3"
+    ],
+    "protectedFinalExcluded": [
+      "20260917-13-6",
+      "20260917-13-7",
+      "20260917-13-8",
+      "20260917-13-9",
+      "20260917-13-10",
+      "20260917-13-11",
+      "20260917-34-2",
+      "20260917-34-5",
+      "20260917-83-1",
+      "20260917-83-3",
+      "20260917-83-7",
+      "20260917-83-9",
+      "20260917-86-5",
+      "20260917-86-6",
+      "20260917-86-7",
+      "20260917-86-8",
+      "20260917-86-9",
+      "20260917-86-10",
+      "20260917-86-11",
+      "20260917-86-12"
+    ],
+    "requests": 15,
+    "bytes": 1983510881
+  },
+  "integrity": {
+    "predictionMismatch": 0,
+    "purchaseMismatch": 0,
+    "resultMismatch": 0,
+    "temporalViolation": 0,
+    "resultLeakage": 0,
+    "protectedFinalUsed": 0,
+    "checkpointChanged": false
+  },
+  "inventory": {
+    "affectedKinds": [
+      "daily validation summary",
+      "cumulative validation summary",
+      "purchase diagnostics",
+      "exact-rank metrics",
+      "P distribution",
+      "Top5/10/15/20",
+      "failure classification",
+      "low-payout deep",
+      "rider-selection diagnostics",
+      "pair-direction diagnostics",
+      "ROI/investment/payout",
+      "VOID counts"
+    ],
+    "affectedCount": 12,
+    "recomputedCount": 15,
+    "republishedCount": 15,
+    "failedCount": 0,
+    "beforeArtifacts": [
+      {
+        "date": "2026-09-20",
+        "path": "daily-validation/2026-09-20/summary.json",
+        "hash": "66b5ef56193c7bd2dc927f59e1b2b53ce906a4139042a4af260cf858b21ff8d1"
+      },
+      {
+        "date": "2026-09-21",
+        "path": "daily-validation/2026-09-21/summary.json",
+        "hash": "e213fde418049a672848dacb76f51e7f956f28ea80fd71b1b1bea24ea1c87169"
+      },
+      {
+        "date": "2026-09-22",
+        "path": "daily-validation/2026-09-22/summary.json",
+        "hash": "45fd2f66940f2d03a5b1128bd4148783ec1b8156334a2abc608d347929220a2a"
+      },
+      {
+        "date": "2026-09-23",
+        "path": "daily-validation/2026-09-23/summary.json",
+        "hash": "43af393d2554a8f3829e07359906cde3bc84a848b5c4a9226d1a09d9585f04ad"
+      },
+      {
+        "date": "2026-09-24",
+        "path": "daily-validation/2026-09-24/summary.json",
+        "hash": "6c2b63ccb8047a410eb1f7a095c35c8bfe8fc21ecaac791383228262aa689ebb"
+      },
+      {
+        "date": "2026-09-25",
+        "path": "daily-validation/2026-09-25/summary.json",
+        "hash": "d6f2af2d528812556cb04e9059b5072a6ee38480c6c3b47566f826558a0f5e51"
+      },
+      {
+        "date": "2026-09-26",
+        "path": "daily-validation/2026-09-26/summary.json",
+        "hash": "841952343a87c3cd47aad2d6b529f6e83f82d36185b452bf09e2db44572e6a53"
+      },
+      {
+        "date": "2026-09-27",
+        "path": "daily-validation/2026-09-27/summary.json",
+        "hash": "eae13814641bd4dc07db4f12cc49aba50aff4c8335f02744e9d7d8bb1ac71b4e"
+      },
+      {
+        "date": "2026-09-28",
+        "path": "daily-validation/2026-09-28/summary.json",
+        "hash": "81136999c08425fcc951cda8eba6d44b81d7d4a29da127700958139fc7e0bc8c"
+      },
+      {
+        "date": "2026-09-29",
+        "path": "daily-validation/2026-09-29/summary.json",
+        "hash": "3ce6d382a0c04d95536683fe4d4f4c2087f0d84bede97e111f7301bd6bfa08e2"
+      }
+    ]
+  },
+  "before": {
+    "coverage": "PUBLISHED_DAILY_ARTIFACTS_ONLY",
+    "races": 505,
+    "VOID": 0,
+    "included": 505,
+    "hits": 36,
+    "investment": 173000,
+    "payout": 95790,
+    "roi": 0.553699421965318,
+    "exactRank": {
+      "avg": 61.24850299401198,
+      "median": 41,
+      "p90": 149,
+      "max": 397
+    },
+    "Top5": 53,
+    "Top10": 85,
+    "Top15": 109,
+    "Top20": 128,
+    "P": {
+      "P3": 249,
+      "P2": 148,
+      "P1": 45,
+      "P0": 63
+    },
+    "riderFailure": 115,
+    "pairFailure": 157,
+    "lowPayoutDeep": 146
+  },
+  "after": {
+    "races": 635,
+    "VOID": 0,
+    "included": 635,
+    "hits": 49,
+    "investment": 253100,
+    "payout": 122000,
+    "Top5": 93,
+    "Top10": 154,
+    "Top15": 197,
+    "Top20": 232,
+    "riderFailure": 77,
+    "pairFailure": 222,
+    "lowPayoutDeep": 288,
+    "P": {
+      "P3": 361,
+      "P2": 200,
+      "P1": 71,
+      "P0": 3
+    },
+    "roi": 0.4820229158435401,
+    "exactRank": {
+      "avg": 67.2503937007874,
+      "median": 44,
+      "p90": 163,
+      "max": 434
+    }
+  },
+  "dailyArtifacts": [
+    {
+      "date": "2026-09-12",
+      "races": 30,
+      "hash": "03c989e7492479cfbf790368a72517b2427e441d92afbb76e10006d673c46be8",
+      "metrics": {
+        "races": 30,
+        "VOID": 0,
+        "included": 30,
+        "hits": 1,
+        "investment": 13700,
+        "payout": 5850,
+        "roi": 0.42700729927007297,
+        "exactRank": {
+          "avg": 99.63333333333334,
+          "median": 62,
+          "p90": 222,
+          "max": 370
+        },
+        "Top5": 4,
+        "Top10": 4,
+        "Top15": 6,
+        "Top20": 9,
+        "P": {
+          "P3": 17,
+          "P2": 7,
+          "P1": 5,
+          "P0": 1
+        },
+        "riderFailure": 6,
+        "pairFailure": 10,
+        "lowPayoutDeep": 13
+      }
+    },
+    {
+      "date": "2026-09-16",
+      "races": 23,
+      "hash": "214c783ccce449eeed51f511fded3fbe5a71a2b31ddbc994206f42649488578a",
+      "metrics": {
+        "races": 23,
+        "VOID": 0,
+        "included": 23,
+        "hits": 0,
+        "investment": 7600,
+        "payout": 0,
+        "roi": 0,
+        "exactRank": {
+          "avg": 50.82608695652174,
+          "median": 34,
+          "p90": 130,
+          "max": 154
+        },
+        "Top5": 3,
+        "Top10": 6,
+        "Top15": 9,
+        "Top20": 9,
+        "P": {
+          "P3": 12,
+          "P2": 10,
+          "P1": 1,
+          "P0": 0
+        },
+        "riderFailure": 3,
+        "pairFailure": 7,
+        "lowPayoutDeep": 9
+      }
+    },
+    {
+      "date": "2026-09-17",
+      "races": 27,
+      "hash": "a697f03563e4af55241cc3b50f51b0133f5fbb79862931289d3529a7a5adb305",
+      "metrics": {
+        "races": 27,
+        "VOID": 0,
+        "included": 27,
+        "hits": 4,
+        "investment": 19200,
+        "payout": 4390,
+        "roi": 0.22864583333333333,
+        "exactRank": {
+          "avg": 52.7037037037037,
+          "median": 30,
+          "p90": 155,
+          "max": 178
+        },
+        "Top5": 5,
+        "Top10": 7,
+        "Top15": 8,
+        "Top20": 10,
+        "P": {
+          "P3": 16,
+          "P2": 7,
+          "P1": 4,
+          "P0": 0
+        },
+        "riderFailure": 4,
+        "pairFailure": 5,
+        "lowPayoutDeep": 14
+      }
+    },
+    {
+      "date": "2026-09-18",
+      "races": 50,
+      "hash": "5d2a9bfff7eebd5c19e4ba28c4a351cccf83d3621573a961fe5a2493d174d782",
+      "metrics": {
+        "races": 50,
+        "VOID": 0,
+        "included": 50,
+        "hits": 2,
+        "investment": 18900,
+        "payout": 3660,
+        "roi": 0.19365079365079366,
+        "exactRank": {
+          "avg": 83.34,
+          "median": 63,
+          "p90": 173,
+          "max": 315
+        },
+        "Top5": 4,
+        "Top10": 8,
+        "Top15": 10,
+        "Top20": 12,
+        "P": {
+          "P3": 29,
+          "P2": 14,
+          "P1": 6,
+          "P0": 1
+        },
+        "riderFailure": 6,
+        "pairFailure": 19,
+        "lowPayoutDeep": 27
+      }
+    },
+    {
+      "date": "2026-09-19",
+      "races": 37,
+      "hash": "048424167024a98ced237f25617d6e8371fdb9abba249d0959121e7bb17ab964",
+      "metrics": {
+        "races": 37,
+        "VOID": 0,
+        "included": 37,
+        "hits": 3,
+        "investment": 12900,
+        "payout": 13920,
+        "roi": 1.0790697674418606,
+        "exactRank": {
+          "avg": 92.67567567567568,
+          "median": 47,
+          "p90": 335,
+          "max": 412
+        },
+        "Top5": 5,
+        "Top10": 6,
+        "Top15": 7,
+        "Top20": 11,
+        "P": {
+          "P3": 22,
+          "P2": 13,
+          "P1": 2,
+          "P0": 0
+        },
+        "riderFailure": 4,
+        "pairFailure": 16,
+        "lowPayoutDeep": 19
+      }
+    },
+    {
+      "date": "2026-09-20",
+      "races": 46,
+      "hash": "53f4466660ca07789360174b90e14155b1b00c78745355c73d494edfff85afc3",
+      "metrics": {
+        "races": 46,
+        "VOID": 0,
+        "included": 46,
+        "hits": 4,
+        "investment": 14300,
+        "payout": 20430,
+        "roi": 1.4286713286713286,
+        "exactRank": {
+          "avg": 54.82608695652174,
+          "median": 19,
+          "p90": 139,
+          "max": 290
+        },
+        "Top5": 9,
+        "Top10": 17,
+        "Top15": 21,
+        "Top20": 23,
+        "P": {
+          "P3": 31,
+          "P2": 11,
+          "P1": 4,
+          "P0": 0
+        },
+        "riderFailure": 2,
+        "pairFailure": 15,
+        "lowPayoutDeep": 16
+      }
+    },
+    {
+      "date": "2026-09-21",
+      "races": 44,
+      "hash": "5b169cc548709a391b5966a6a367f635f566f0eb48ba4b2b590aa8619226adbf",
+      "metrics": {
+        "races": 44,
+        "VOID": 0,
+        "included": 44,
+        "hits": 3,
+        "investment": 16100,
+        "payout": 3790,
+        "roi": 0.23540372670807452,
+        "exactRank": {
+          "avg": 96.36363636363636,
+          "median": 63,
+          "p90": 231,
+          "max": 434
+        },
+        "Top5": 6,
+        "Top10": 11,
+        "Top15": 11,
+        "Top20": 12,
+        "P": {
+          "P3": 23,
+          "P2": 13,
+          "P1": 7,
+          "P0": 1
+        },
+        "riderFailure": 7,
+        "pairFailure": 17,
+        "lowPayoutDeep": 24
+      }
+    },
+    {
+      "date": "2026-09-22",
+      "races": 44,
+      "hash": "9c201e3f4124f6a69c6f9661809db43c1e8ea8dcf68876c18c95c332bdce47dc",
+      "metrics": {
+        "races": 44,
+        "VOID": 0,
+        "included": 44,
+        "hits": 1,
+        "investment": 14500,
+        "payout": 2700,
+        "roi": 0.18620689655172415,
+        "exactRank": {
+          "avg": 52.45454545454545,
+          "median": 26,
+          "p90": 137,
+          "max": 164
+        },
+        "Top5": 4,
+        "Top10": 10,
+        "Top15": 16,
+        "Top20": 18,
+        "P": {
+          "P3": 21,
+          "P2": 15,
+          "P1": 8,
+          "P0": 0
+        },
+        "riderFailure": 6,
+        "pairFailure": 15,
+        "lowPayoutDeep": 20
+      }
+    },
+    {
+      "date": "2026-09-23",
+      "races": 38,
+      "hash": "2f3f1b4defb2fa6e26c73a6276976ca9dde4e8e348f1a52bf391c8581754752d",
+      "metrics": {
+        "races": 38,
+        "VOID": 0,
+        "included": 38,
+        "hits": 2,
+        "investment": 18300,
+        "payout": 3080,
+        "roi": 0.16830601092896175,
+        "exactRank": {
+          "avg": 60.8421052631579,
+          "median": 40,
+          "p90": 144,
+          "max": 197
+        },
+        "Top5": 5,
+        "Top10": 9,
+        "Top15": 10,
+        "Top20": 14,
+        "P": {
+          "P3": 19,
+          "P2": 15,
+          "P1": 4,
+          "P0": 0
+        },
+        "riderFailure": 5,
+        "pairFailure": 16,
+        "lowPayoutDeep": 17
+      }
+    },
+    {
+      "date": "2026-09-24",
+      "races": 62,
+      "hash": "3408e1ad0dd01ce06952160f7dc06baaa43e28b1008aa9d4c701a9f98297a20b",
+      "metrics": {
+        "races": 62,
+        "VOID": 0,
+        "included": 62,
+        "hits": 6,
+        "investment": 20700,
+        "payout": 12310,
+        "roi": 0.5946859903381643,
+        "exactRank": {
+          "avg": 54.564516129032256,
+          "median": 45,
+          "p90": 143,
+          "max": 168
+        },
+        "Top5": 11,
+        "Top10": 15,
+        "Top15": 18,
+        "Top20": 22,
+        "P": {
+          "P3": 38,
+          "P2": 14,
+          "P1": 10,
+          "P0": 0
+        },
+        "riderFailure": 5,
+        "pairFailure": 24,
+        "lowPayoutDeep": 34
+      }
+    },
+    {
+      "date": "2026-09-25",
+      "races": 45,
+      "hash": "4e44115c3a7a59ee37569adc9a76e22450794c1690c378fdde9e86652f850071",
+      "metrics": {
+        "races": 45,
+        "VOID": 0,
+        "included": 45,
+        "hits": 4,
+        "investment": 20000,
+        "payout": 25240,
+        "roi": 1.262,
+        "exactRank": {
+          "avg": 56.46666666666667,
+          "median": 42,
+          "p90": 145,
+          "max": 180
+        },
+        "Top5": 8,
+        "Top10": 11,
+        "Top15": 15,
+        "Top20": 17,
+        "P": {
+          "P3": 25,
+          "P2": 12,
+          "P1": 8,
+          "P0": 0
+        },
+        "riderFailure": 6,
+        "pairFailure": 14,
+        "lowPayoutDeep": 20
+      }
+    },
+    {
+      "date": "2026-09-26",
+      "races": 44,
+      "hash": "d6026893128e0a64ba921cd9cb188a3e14b028ee35759b5543469b96ff522773",
+      "metrics": {
+        "races": 44,
+        "VOID": 0,
+        "included": 44,
+        "hits": 3,
+        "investment": 17900,
+        "payout": 4460,
+        "roi": 0.24916201117318434,
+        "exactRank": {
+          "avg": 69.1590909090909,
+          "median": 39,
+          "p90": 190,
+          "max": 228
+        },
+        "Top5": 6,
+        "Top10": 10,
+        "Top15": 16,
+        "Top20": 19,
+        "P": {
+          "P3": 28,
+          "P2": 14,
+          "P1": 2,
+          "P0": 0
+        },
+        "riderFailure": 5,
+        "pairFailure": 13,
+        "lowPayoutDeep": 15
+      }
+    },
+    {
+      "date": "2026-09-27",
+      "races": 61,
+      "hash": "85e4e14e86e8ecb0147c424ea46414d4a4e783e45a12da5ac0bae6e81ec1255a",
+      "metrics": {
+        "races": 61,
+        "VOID": 0,
+        "included": 61,
+        "hits": 7,
+        "investment": 25300,
+        "payout": 5540,
+        "roi": 0.2189723320158103,
+        "exactRank": {
+          "avg": 67.08196721311475,
+          "median": 35,
+          "p90": 161,
+          "max": 397
+        },
+        "Top5": 10,
+        "Top10": 14,
+        "Top15": 20,
+        "Top20": 25,
+        "P": {
+          "P3": 41,
+          "P2": 20,
+          "P1": 0,
+          "P0": 0
+        },
+        "riderFailure": 4,
+        "pairFailure": 19,
+        "lowPayoutDeep": 25
+      }
+    },
+    {
+      "date": "2026-09-28",
+      "races": 84,
+      "hash": "9c239f637f647b002d112fe77700449da211180837fe3ce19ddfc2603035eb0c",
+      "metrics": {
+        "races": 84,
+        "VOID": 0,
+        "included": 84,
+        "hits": 9,
+        "investment": 33700,
+        "payout": 16630,
+        "roi": 0.49347181008902075,
+        "exactRank": {
+          "avg": 60.54761904761905,
+          "median": 43,
+          "p90": 132,
+          "max": 309
+        },
+        "Top5": 13,
+        "Top10": 26,
+        "Top15": 30,
+        "Top20": 31,
+        "P": {
+          "P3": 39,
+          "P2": 35,
+          "P1": 10,
+          "P0": 0
+        },
+        "riderFailure": 14,
+        "pairFailure": 32,
+        "lowPayoutDeep": 35
+      }
+    }
+  ],
+  "diff": {
+    "VOID": 0,
+    "included": 130,
+    "hits": 13,
+    "roi": -0.07167650612177784,
+    "exactRankAvg": 6.00189070677542,
+    "exactRankMedian": 3,
+    "exactRankP90": 14,
+    "Top20": 104,
+    "riderFailure": -38,
+    "pairFailure": 65
+  },
+  "artifactHash": "4136885f3095d7f59b5b606ddde0c83d20688426855e44fb5df80b0c89effa72"
+}
