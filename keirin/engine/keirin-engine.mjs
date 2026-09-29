@@ -4,14 +4,17 @@ import{PREDICTION_ENGINE_VERSION,PURCHASE_ENGINE_VERSION,ENGINE_PAIR_ID,buildEng
 import{attachScenarioProvenanceId,buildScenarioProvenance}from"./scenario-provenance.mjs";
 import{buildTerminalDetailTrace}from"./terminal-trace.mjs";
 import{buildBaselineControl,buildRiderSelectionCandidatePrediction}from"./rider-selection-weak.mjs";
+import{attachMultiWorldMetadata,buildMultiWorldScenarioStructure}from"./multi-world-scenario.mjs";
 
 export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000,captureResearchTrace=false}){
   const baselinePrediction=runKeirinPredictionEngine({race,venueProfile});
   const adoptionEnabled=process.env.KEIRIN_RIDER_SELECTION_WEAK!=="0";
   const baselinePurchase=runKeirinPurchaseEngine({prediction:baselinePrediction,oddsByOrder,budget});
   const candidate=adoptionEnabled?buildRiderSelectionCandidatePrediction(baselinePrediction,baselinePurchase.terminals):null;
-  const prediction=candidate?.prediction||baselinePrediction;
-  const purchase=candidate?runKeirinPurchaseEngine({prediction,oddsByOrder,budget}):baselinePurchase;
+  const selectedPrediction=candidate?.prediction||baselinePrediction;
+  const multiWorldStructure=buildMultiWorldScenarioStructure({branches:selectedPrediction.branches,terminals:selectedPrediction.terminals,lines:selectedPrediction.lines});
+  const prediction={...selectedPrediction,terminals:attachMultiWorldMetadata(selectedPrediction.terminals,multiWorldStructure)};
+  const purchase=runKeirinPurchaseEngine({prediction,oddsByOrder,budget});
   const provenance=buildScenarioProvenance({terminals:purchase.terminals,branches:prediction.branches,lines:prediction.lines,scored:prediction.scored});
   const apiTerminals=purchase.terminals.map(item=>attachScenarioProvenanceId(item,provenance.terminalScenarioIds));
   const output={
@@ -27,6 +30,7 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
     scenarioProvenanceStatus:provenance.scenarioProvenanceStatus,
     scenarioProvenances:provenance.scenarioProvenances,
     scenarioProvenanceAudit:provenance.audit,
+    multiWorldScenario:{schemaVersion:multiWorldStructure.schemaVersion,scenarios:multiWorldStructure.scenarios,audit:multiWorldStructure.audit,purchase:purchase.audit?.multiWorldPurchase||null},
     prediction:{
       predictionVersion:prediction.predictionVersion,
       // The classified ledger above is the canonical API terminal list. Keep
@@ -76,6 +80,7 @@ function compactPredictionTerminal(item){
     branchLabel:item.branchLabel||null,
     branchType:item.branchType||null,
     scenarioProvenanceId:item.scenarioProvenanceId||null
+    ,macroScenarioId:item.macroScenarioId||null,eventId:item.eventId||null,terminalId:item.terminalId||null,scenarioRelativeScore:item.scenarioRelativeScore??null,eventRelativeScore:item.eventRelativeScore??null,terminalRelativeScore:item.terminalRelativeScore??null,rankWithinEvent:item.rankWithinEvent??null,rankWithinScenario:item.rankWithinScenario??null,globalRank:item.globalRank??null
   };
 }
 
@@ -111,5 +116,6 @@ function compactApiTerminal(item){
     naturalConvergenceLevel:item.naturalConvergenceLevel||null,
     lifecycle:item.lifecycle||null,
     scenarioProvenanceId:item.scenarioProvenanceId||null
+    ,macroScenarioId:item.macroScenarioId||null,eventId:item.eventId||null,terminalId:item.terminalId||null,scenarioRelativeScore:item.scenarioRelativeScore??null,eventRelativeScore:item.eventRelativeScore??null,terminalRelativeScore:item.terminalRelativeScore??null,rankWithinEvent:item.rankWithinEvent??null,rankWithinScenario:item.rankWithinScenario??null,globalRank:item.globalRank??null,scenarioPurchaseClass:item.scenarioPurchaseClass||null,scenarioTicketRank:item.scenarioTicketRank??null,dropReason:item.dropReason||null
   };
 }

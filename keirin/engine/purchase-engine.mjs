@@ -6,6 +6,7 @@ import{
 }from"./engine-support.mjs";
 import{PREDICTION_ENGINE_VERSION,PURCHASE_ENGINE_VERSION,ENGINE_PAIR_ID,buildEnginePairAudit}from"./engine-version.mjs";
 import{attachPurchaseScenarioExplanations}from"./purchase-scenario-explanation.mjs";
+import{applyMultiWorldPurchaseSelection,DEFAULT_MULTI_WORLD_PURCHASE_CONFIG}from"./multi-world-scenario.mjs";
 
 export function resolvePurchaseBlock({lineBlocked=false,lineAndStartEvidenceBlocked=false,lineFallbackEvidenceBlocked=false,girlsEvidenceBlocked=false,mainInvariantFailed=false}={}){
   const blocked=Boolean(lineBlocked||lineAndStartEvidenceBlocked||lineFallbackEvidenceBlocked||girlsEvidenceBlocked);
@@ -38,7 +39,9 @@ export function runKeirinPurchaseEngine({prediction,oddsByOrder={},budget=3000})
   const postClassificationMainAudit=generationPassed
     ?enforcePostClassificationMainInvariant(initiallyClassified)
     :{terminals:initiallyClassified,passed:true,orphanCoverRejectedCount:0,parentLinkedCoverCount:0};
-  const rawClassified=postClassificationMainAudit.terminals;
+  const multiWorldEnabled=process.env.KEIRIN_MULTI_WORLD_SCENARIO_PURCHASE_V1==="1";
+  const multiWorldSelection=applyMultiWorldPurchaseSelection(postClassificationMainAudit.terminals,{enabled:multiWorldEnabled,config:DEFAULT_MULTI_WORLD_PURCHASE_CONFIG});
+  const rawClassified=multiWorldSelection.terminals;
 
   const lineIndependentMainAvailable=(prediction.branches||[]).some(branch=>branch.lineIndependentFallback===true&&branch.priority==="main");
   const lineFallbackDiscriminationAudit=buildLineFallbackDiscriminationAudit({
@@ -182,6 +185,7 @@ export function runKeirinPurchaseEngine({prediction,oddsByOrder={},budget=3000})
       terminalLifecycleAudit,
       predictionPurchaseBoundaryAudit:boundaryAudit,
       enginePairAudit,
+      multiWorldPurchase:multiWorldSelection.multiWorldPurchase,
       selectionBoundaryAudit:{version:"STANDARD-REFERENCE-SELECTION-1.0",standardBetCount:standardPurchasePlan.length,referenceBetCount:referencePurchasePlan.length,referenceExcludedFromFunding:true,referenceExcludedFromStandardPurchase:true,passed:standardPurchasePlan.every(x=>x.betClass!=="REFERENCE")&&referencePurchasePlan.every(x=>x.betClass==="REFERENCE")}
     }
   };

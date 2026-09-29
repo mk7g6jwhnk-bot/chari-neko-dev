@@ -1,5 +1,5 @@
 export const PREDICTION_ENGINE_VERSION="KEIRIN-0.6.0-rider-selection-weak";
-export const PURCHASE_ENGINE_VERSION="v250";
+export const PURCHASE_ENGINE_VERSION="v251-multi-world-scenario";
 export const ENGINE_PAIR_ID=`${PREDICTION_ENGINE_VERSION}__${PURCHASE_ENGINE_VERSION}`;
 
 export function buildEnginePairAudit(){
