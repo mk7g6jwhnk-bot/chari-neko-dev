@@ -8,7 +8,7 @@ const a1=branch("A1","LEAD_BATTLE",["L1","L2"],"L1",.3),a2=branch("A2","LEAD_BAT
 assert.equal(sameMacroWorld(a1,a2,lines),true,"same lead contest must be one macro world");
 assert.equal(sameMacroWorld(a1,b1,lines),false,"structurally separate leader must be another macro world");
 
-const orders=[];for(let a=1;a<=7;a++)for(let b=1;b<=7;b++)for(let c=1;c<=7;c++)if(a!==b&&b!==c&&a!==c&&orders.length<14)orders.push([a,b,c]);
+const orders=[[1,2,3],[1,3,2],[1,2,4],[1,4,2],[2,1,3],[2,3,1],[2,1,4],[3,1,2],[3,2,1],[3,1,4],[3,4,1],[4,1,2],[4,2,1],[4,1,3]];
 const terminals=[];
 for(let i=0;i<14;i++){const id=i<7?"A1":i<11?"B1":"C1";terminals.push({order:orders[i],branchId:id,dominantBranchId:id,probability:.1-i*.002,score:1-i*.02,terminalScore:1-i*.02,purchaseStatus:"購入採用",purchaseRejectCode:"ADOPTED",betClass:i===0?"MAIN":"COVER"});}
 const c1=branch("C1","MAKURI_WORLD",[],"L2",.1);
@@ -20,8 +20,12 @@ const on=applyMultiWorldPurchaseSelection(enriched,{enabled:true});
 assert.equal(on.multiWorldPurchase.totalTickets,13,"6+4+3 is permitted");
 assert.equal(on.multiWorldPurchase.scenarioCountSelected,3);
 assert.equal(on.multiWorldPurchase.multipleAxisAllowed,true,"multiple axes are permitted and never a rejection reason");
+assert.ok(new Set(on.terminals.filter(x=>x.purchaseStatus==="購入採用").map(x=>x.order[0])).size>1,"different worlds may use different axes");
 assert.equal(on.terminals.filter(x=>x.macroScenarioId===structure.scenarios[0].macroScenarioId&&x.purchaseStatus==="購入採用").length,6,"one scenario cannot consume 13 tickets");
 assert.ok(on.terminals.some(x=>x.scenarioPurchaseClass==="SCENARIO_BREAK"));
+const oneWorldOrders=[];for(let b=2;b<=7;b++)for(let c=2;c<=7;c++)if(b!==c&&oneWorldOrders.length<13)oneWorldOrders.push([1,b,c]);
+const oneWorld=applyMultiWorldPurchaseSelection(oneWorldOrders.map((order,i)=>({...enriched[0],order,terminalRelativeScore:13-i,purchaseStatus:"購入採用",purchaseRejectCode:"ADOPTED"})),{enabled:true});
+assert.equal(oneWorld.terminals.filter(x=>x.purchaseStatus==="購入採用").length,6,"a single world cannot consume thirteen tickets");
 
 const off=applyMultiWorldPurchaseSelection(enriched,{enabled:false});
 assert.deepEqual(off.terminals,enriched,"feature flag OFF must preserve legacy selection exactly");
