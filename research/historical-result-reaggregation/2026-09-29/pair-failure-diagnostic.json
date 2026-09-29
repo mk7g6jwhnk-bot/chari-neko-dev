@@ -1,0 +1,316 @@
+{
+  "schemaVersion": "PAIR_FAILURE_DIAGNOSTIC_635_V1",
+  "generatedAt": "2026-09-29T00:28:06.777Z",
+  "verdict": "PAIR_FAILURE_LAYER_DECOMPOSITION_READY",
+  "cohort": {
+    "full": 222,
+    "matched": 181,
+    "expansion": 41,
+    "overlap": 0,
+    "missing": 0,
+    "protectedFinalUsed": 0,
+    "unknownUsed": 0
+  },
+  "definition": {
+    "current": "PAIR_ORDER_MISS + REVERSE_12",
+    "finding": "composite label; not equivalent to pure direction reversal"
+  },
+  "subtypes": {
+    "full": {
+      "CONDITIONAL_PAIR_SCORING_FAILURE": {
+        "count": 71,
+        "rate": 0.31981981981981983
+      },
+      "SCENARIO_SELECTION_FAILURE": {
+        "count": 30,
+        "rate": 0.13513513513513514
+      },
+      "TERMINAL_RANKING_FAILURE": {
+        "count": 36,
+        "rate": 0.16216216216216217
+      },
+      "TRUE_PAIR_ORDER_FAILURE": {
+        "count": 85,
+        "rate": 0.38288288288288286
+      }
+    },
+    "matched": {
+      "CONDITIONAL_PAIR_SCORING_FAILURE": {
+        "count": 59,
+        "rate": 0.3259668508287293
+      },
+      "SCENARIO_SELECTION_FAILURE": {
+        "count": 23,
+        "rate": 0.1270718232044199
+      },
+      "TERMINAL_RANKING_FAILURE": {
+        "count": 25,
+        "rate": 0.13812154696132597
+      },
+      "TRUE_PAIR_ORDER_FAILURE": {
+        "count": 74,
+        "rate": 0.4088397790055249
+      }
+    },
+    "expansion": {
+      "CONDITIONAL_PAIR_SCORING_FAILURE": {
+        "count": 12,
+        "rate": 0.2926829268292683
+      },
+      "SCENARIO_SELECTION_FAILURE": {
+        "count": 7,
+        "rate": 0.17073170731707318
+      },
+      "TERMINAL_RANKING_FAILURE": {
+        "count": 11,
+        "rate": 0.2682926829268293
+      },
+      "TRUE_PAIR_ORDER_FAILURE": {
+        "count": 11,
+        "rate": 0.2682926829268293
+      }
+    }
+  },
+  "reverseOnly": {
+    "count": 85,
+    "matched": 74,
+    "expansion": 11,
+    "margin": {
+      "N": 85,
+      "avg": 0.2971765922808833,
+      "median": 0.339387148285368,
+      "p90": 0.4005933534784265,
+      "tertileThresholds": {
+        "nearTieMax": 0.2954212784996565,
+        "moderateGapMax": 0.36564614042773513
+      },
+      "buckets": {
+        "NEAR_TIE": 29,
+        "MODERATE_GAP": 28,
+        "LARGE_GAP": 28
+      }
+    },
+    "mechanism": "reverse candidate can outrank correct direction, but 137/222 failures are not pure reversal; unconditional reversal boost therefore changes unrelated layers"
+  },
+  "scenario": {
+    "INSUFFICIENT_EVIDENCE": 179,
+    "LEADER_HOLD": 8,
+    "LEAD_BATTLE": 17,
+    "MAKURI_SUCCESS": 18
+  },
+  "scenarioBySubtype": {
+    "INSUFFICIENT_EVIDENCE": {
+      "CONDITIONAL_PAIR_SCORING_FAILURE": {
+        "count": 46,
+        "rate": 0.2569832402234637
+      },
+      "SCENARIO_SELECTION_FAILURE": {
+        "count": 24,
+        "rate": 0.1340782122905028
+      },
+      "TERMINAL_RANKING_FAILURE": {
+        "count": 36,
+        "rate": 0.2011173184357542
+      },
+      "TRUE_PAIR_ORDER_FAILURE": {
+        "count": 73,
+        "rate": 0.40782122905027934
+      }
+    },
+    "LEADER_HOLD": {
+      "CONDITIONAL_PAIR_SCORING_FAILURE": {
+        "count": 4,
+        "rate": 0.5
+      },
+      "SCENARIO_SELECTION_FAILURE": {
+        "count": 2,
+        "rate": 0.25
+      },
+      "TRUE_PAIR_ORDER_FAILURE": {
+        "count": 2,
+        "rate": 0.25
+      }
+    },
+    "LEAD_BATTLE": {
+      "CONDITIONAL_PAIR_SCORING_FAILURE": {
+        "count": 7,
+        "rate": 0.4117647058823529
+      },
+      "SCENARIO_SELECTION_FAILURE": {
+        "count": 1,
+        "rate": 0.058823529411764705
+      },
+      "TRUE_PAIR_ORDER_FAILURE": {
+        "count": 9,
+        "rate": 0.5294117647058824
+      }
+    },
+    "MAKURI_SUCCESS": {
+      "CONDITIONAL_PAIR_SCORING_FAILURE": {
+        "count": 14,
+        "rate": 0.7777777777777778
+      },
+      "SCENARIO_SELECTION_FAILURE": {
+        "count": 3,
+        "rate": 0.16666666666666666
+      },
+      "TRUE_PAIR_ORDER_FAILURE": {
+        "count": 1,
+        "rate": 0.05555555555555555
+      }
+    }
+  },
+  "payout": {
+    "LOW": 115,
+    "MEDIUM": 53,
+    "HIGH": 54
+  },
+  "payoutBySubtype": {
+    "HIGH": {
+      "CONDITIONAL_PAIR_SCORING_FAILURE": {
+        "count": 17,
+        "rate": 0.3148148148148148
+      },
+      "SCENARIO_SELECTION_FAILURE": {
+        "count": 11,
+        "rate": 0.2037037037037037
+      },
+      "TERMINAL_RANKING_FAILURE": {
+        "count": 16,
+        "rate": 0.2962962962962963
+      },
+      "TRUE_PAIR_ORDER_FAILURE": {
+        "count": 10,
+        "rate": 0.18518518518518517
+      }
+    },
+    "LOW": {
+      "CONDITIONAL_PAIR_SCORING_FAILURE": {
+        "count": 32,
+        "rate": 0.2782608695652174
+      },
+      "SCENARIO_SELECTION_FAILURE": {
+        "count": 10,
+        "rate": 0.08695652173913043
+      },
+      "TERMINAL_RANKING_FAILURE": {
+        "count": 14,
+        "rate": 0.12173913043478261
+      },
+      "TRUE_PAIR_ORDER_FAILURE": {
+        "count": 59,
+        "rate": 0.5130434782608696
+      }
+    },
+    "MEDIUM": {
+      "CONDITIONAL_PAIR_SCORING_FAILURE": {
+        "count": 22,
+        "rate": 0.41509433962264153
+      },
+      "SCENARIO_SELECTION_FAILURE": {
+        "count": 9,
+        "rate": 0.16981132075471697
+      },
+      "TERMINAL_RANKING_FAILURE": {
+        "count": 6,
+        "rate": 0.11320754716981132
+      },
+      "TRUE_PAIR_ORDER_FAILURE": {
+        "count": 16,
+        "rate": 0.3018867924528302
+      }
+    }
+  },
+  "roles": {
+    "first": {
+      "UNKNOWN": 179,
+      "自力": 26,
+      "単騎": 9,
+      "判定保留": 8
+    },
+    "second": {
+      "UNKNOWN": 179,
+      "番手": 10,
+      "単騎": 9,
+      "自力": 15,
+      "三番手": 1,
+      "判定保留": 8
+    },
+    "sameLine": 26,
+    "unknown": 179
+  },
+  "existingPairHypothesis": {
+    "signal": "pairNaturalConvergenceScore blended into every terminal score",
+    "WEAK": "REJECT",
+    "STRONG": "REJECT",
+    "diagnosis": "target too broad: global blend touches true-order, rider-selection, scenario and unrelated races; stronger weight improves some pair ranks while increasing reverse-only/winner/rider side effects"
+  },
+  "candidates": [
+    {
+      "rank": 1,
+      "id": "CONDITIONAL_SECOND_RIDER_COMPATIBILITY_DIAGNOSTIC",
+      "target": [
+        "CONDITIONAL_PAIR_SCORING_FAILURE"
+      ],
+      "inputs": [
+        "positionEvidence",
+        "decisionRatios.second",
+        "branchType",
+        "line role"
+      ],
+      "expected": "isolate second-place compatibility after winner/scenario gate",
+      "sideEffects": [
+        "may overfit line-role cases"
+      ],
+      "shadowDesign": "single-factor diagnostic only; no global terminal blend"
+    },
+    {
+      "rank": 2,
+      "id": "PAIR_MARGIN_ABSTENTION_DIAGNOSTIC",
+      "target": [
+        "TRUE_PAIR_ORDER_FAILURE"
+      ],
+      "inputs": [
+        "AB/BA terminalScore margin",
+        "scenario support",
+        "first/second role evidence"
+      ],
+      "expected": "separate near ties from structural wrong direction",
+      "sideEffects": [
+        "coverage reduction",
+        "no guaranteed rank gain"
+      ],
+      "shadowDesign": "three frozen margin buckets; report only, no reversal boost"
+    },
+    {
+      "rank": 3,
+      "id": "SCENARIO_CONDITIONED_PAIR_DIAGNOSTIC",
+      "target": [
+        "SCENARIO_SELECTION_FAILURE",
+        "TERMINAL_RANKING_FAILURE"
+      ],
+      "inputs": [
+        "branchType",
+        "scenarioFamilySupport",
+        "dominantBranchId",
+        "line structure"
+      ],
+      "expected": "locate scenario-specific pair failures without changing rider selection",
+      "sideEffects": [
+        "scenario sparsity"
+      ],
+      "shadowDesign": "stratified evaluation by existing branch type"
+    }
+  ],
+  "safety": {
+    "productionChanged": false,
+    "predictionRegenerated": false,
+    "purchaseChanged": false,
+    "riderWeakChanged": false,
+    "resultChanged": false,
+    "checkpointChanged": false,
+    "protectedFinalUsed": 0,
+    "resultLeakage": 0
+  },
+  "hash": "54c8258c31a82a5aa5c86cdec49e4f7c544a90de38148246709de19a3867ac77"
+}
