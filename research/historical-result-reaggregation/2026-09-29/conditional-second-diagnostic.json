@@ -1,0 +1,837 @@
+{
+  "schemaVersion": "CONDITIONAL_SECOND_DIAGNOSTIC_71_V1",
+  "generatedAt": "2026-09-29T00:55:27.022Z",
+  "verdict": "CONDITIONAL_SECOND_CAUSE_DIAGNOSIS_READY",
+  "cohort": {
+    "total": 71,
+    "matched505": 59,
+    "expansion130": 12,
+    "invalid": 0,
+    "overlap": 0,
+    "missing": 0,
+    "protectedFinalUsed": 0,
+    "unknownUsed": 0
+  },
+  "preconditions": {
+    "winnerMeaningful": 71,
+    "winnerFailure": 0,
+    "correctPairGenerated": 71,
+    "scenarioPrimaryFailure": 0
+  },
+  "components": {
+    "additiveScoreFormula": [
+      "RELATIVE_PROBABILITY:0.65",
+      "EVIDENCE_SCORE:0.35"
+    ],
+    "diagnosticOnly": [
+      "SECOND_CONDITIONAL",
+      "PAIR_DIRECTION",
+      "PAIR_COHERENCE",
+      "SECOND_RELATIVE",
+      "PAIR_COMPATIBILITY",
+      "POSITION_SECOND",
+      "DECISION_SECOND",
+      "SCENARIO_SUPPORT",
+      "SCENARIO_PROBABILITY",
+      "CONDITION_PENALTY",
+      "NATURAL_CONVERGENCE"
+    ],
+    "attributionNormalizationStdDev": {
+      "SECOND_CONDITIONAL": 0.6079542678266694,
+      "PAIR_DIRECTION": 0.11534229574480512,
+      "PAIR_COHERENCE": 0.15746728773526014,
+      "SECOND_RELATIVE": 0.023246215831665595,
+      "PAIR_COMPATIBILITY": null,
+      "POSITION_SECOND": 0.6079542678266694,
+      "DECISION_SECOND": 0.023246215831665595,
+      "SCENARIO_SUPPORT": 0.41440411513608744,
+      "SCENARIO_PROBABILITY": 0.35655884092446694,
+      "CONDITION_PENALTY": 0,
+      "NATURAL_CONVERGENCE": 0.1014514552317511,
+      "RELATIVE_PROBABILITY": 0.09050574327734512,
+      "EVIDENCE_SCORE": 0.034018295034596614
+    }
+  },
+  "scoreGap": {
+    "thresholds": {
+      "nearTieMax": 0.04355323968818903,
+      "moderateGapMax": 0.17190032685799184
+    },
+    "buckets": {
+      "LARGE_GAP": {
+        "count": 23,
+        "rate": 0.323943661971831
+      },
+      "MODERATE_GAP": {
+        "count": 24,
+        "rate": 0.3380281690140845
+      },
+      "NEAR_TIE": {
+        "count": 24,
+        "rate": 0.3380281690140845
+      }
+    },
+    "avg": 0.1134953417419403,
+    "median": 0.09955143507117015,
+    "p90": 0.2434054980320387
+  },
+  "attribution": {
+    "full": {
+      "DECISION_SECOND": {
+        "count": 1,
+        "rate": 0.014084507042253521
+      },
+      "NATURAL_CONVERGENCE": {
+        "count": 29,
+        "rate": 0.4084507042253521
+      },
+      "PAIR_COHERENCE": {
+        "count": 4,
+        "rate": 0.056338028169014086
+      },
+      "POSITION_SECOND": {
+        "count": 5,
+        "rate": 0.07042253521126761
+      },
+      "RELATIVE_PROBABILITY": {
+        "count": 12,
+        "rate": 0.16901408450704225
+      },
+      "UNKNOWN_CAUSE": {
+        "count": 20,
+        "rate": 0.28169014084507044
+      }
+    },
+    "matched505": {
+      "DECISION_SECOND": {
+        "count": 1,
+        "rate": 0.01694915254237288
+      },
+      "NATURAL_CONVERGENCE": {
+        "count": 22,
+        "rate": 0.3728813559322034
+      },
+      "PAIR_COHERENCE": {
+        "count": 3,
+        "rate": 0.05084745762711865
+      },
+      "POSITION_SECOND": {
+        "count": 5,
+        "rate": 0.0847457627118644
+      },
+      "RELATIVE_PROBABILITY": {
+        "count": 11,
+        "rate": 0.1864406779661017
+      },
+      "UNKNOWN_CAUSE": {
+        "count": 17,
+        "rate": 0.288135593220339
+      }
+    },
+    "expansion130": {
+      "NATURAL_CONVERGENCE": {
+        "count": 7,
+        "rate": 0.5833333333333334
+      },
+      "PAIR_COHERENCE": {
+        "count": 1,
+        "rate": 0.08333333333333333
+      },
+      "RELATIVE_PROBABILITY": {
+        "count": 1,
+        "rate": 0.08333333333333333
+      },
+      "UNKNOWN_CAUSE": {
+        "count": 3,
+        "rate": 0.25
+      }
+    },
+    "unknown": 20
+  },
+  "roleLine": {
+    "evidence": {
+      "KNOWN": {
+        "count": 25,
+        "rate": 0.352112676056338
+      },
+      "UNKNOWN": {
+        "count": 46,
+        "rate": 0.647887323943662
+      }
+    },
+    "correctSecond": {
+      "CROSS_LINE": {
+        "count": 39,
+        "rate": 0.5492957746478874
+      },
+      "SAME_LINE": {
+        "count": 13,
+        "rate": 0.18309859154929578
+      },
+      "UNKNOWN": {
+        "count": 19,
+        "rate": 0.2676056338028169
+      }
+    },
+    "selectedSecond": {
+      "CROSS_LINE": {
+        "count": 36,
+        "rate": 0.5070422535211268
+      },
+      "SAME_LINE": {
+        "count": 16,
+        "rate": 0.22535211267605634
+      },
+      "UNKNOWN": {
+        "count": 19,
+        "rate": 0.2676056338028169
+      }
+    }
+  },
+  "scenario": {
+    "INSUFFICIENT_EVIDENCE": {
+      "count": 46,
+      "rate": 0.647887323943662
+    },
+    "LEADER_HOLD": {
+      "count": 4,
+      "rate": 0.056338028169014086
+    },
+    "LEAD_BATTLE": {
+      "count": 7,
+      "rate": 0.09859154929577464
+    },
+    "MAKURI_SUCCESS": {
+      "count": 14,
+      "rate": 0.19718309859154928
+    }
+  },
+  "scenarioDetail": {
+    "INSUFFICIENT_EVIDENCE": {
+      "count": 46,
+      "scoreGap": {
+        "avg": 0.11829444818914593,
+        "median": 0.07003774705911858
+      },
+      "primaryContributor": {
+        "NATURAL_CONVERGENCE": {
+          "count": 28,
+          "rate": 0.6086956521739131
+        },
+        "UNKNOWN_CAUSE": {
+          "count": 18,
+          "rate": 0.391304347826087
+        }
+      },
+      "evidenceAvailability": {
+        "UNKNOWN": {
+          "count": 46,
+          "rate": 1
+        }
+      },
+      "correctLineRelation": {
+        "CROSS_LINE": {
+          "count": 23,
+          "rate": 0.5
+        },
+        "SAME_LINE": {
+          "count": 11,
+          "rate": 0.2391304347826087
+        },
+        "UNKNOWN": {
+          "count": 12,
+          "rate": 0.2608695652173913
+        }
+      },
+      "selectedLineRelation": {
+        "CROSS_LINE": {
+          "count": 26,
+          "rate": 0.5652173913043478
+        },
+        "SAME_LINE": {
+          "count": 8,
+          "rate": 0.17391304347826086
+        },
+        "UNKNOWN": {
+          "count": 12,
+          "rate": 0.2608695652173913
+        }
+      },
+      "scenario": {
+        "INSUFFICIENT_EVIDENCE": {
+          "count": 46,
+          "rate": 1
+        }
+      },
+      "payout": {
+        "HIGH": {
+          "count": 7,
+          "rate": 0.15217391304347827
+        },
+        "LOW": {
+          "count": 23,
+          "rate": 0.5
+        },
+        "MEDIUM": {
+          "count": 16,
+          "rate": 0.34782608695652173
+        }
+      }
+    },
+    "LEADER_HOLD": {
+      "count": 4,
+      "scoreGap": {
+        "avg": 0.0800466602805828,
+        "median": 0.05534644666215571
+      },
+      "primaryContributor": {
+        "POSITION_SECOND": {
+          "count": 1,
+          "rate": 0.25
+        },
+        "RELATIVE_PROBABILITY": {
+          "count": 2,
+          "rate": 0.5
+        },
+        "UNKNOWN_CAUSE": {
+          "count": 1,
+          "rate": 0.25
+        }
+      },
+      "evidenceAvailability": {
+        "KNOWN": {
+          "count": 4,
+          "rate": 1
+        }
+      },
+      "correctLineRelation": {
+        "CROSS_LINE": {
+          "count": 4,
+          "rate": 1
+        }
+      },
+      "selectedLineRelation": {
+        "CROSS_LINE": {
+          "count": 4,
+          "rate": 1
+        }
+      },
+      "scenario": {
+        "LEADER_HOLD": {
+          "count": 4,
+          "rate": 1
+        }
+      },
+      "payout": {
+        "HIGH": {
+          "count": 1,
+          "rate": 0.25
+        },
+        "LOW": {
+          "count": 1,
+          "rate": 0.25
+        },
+        "MEDIUM": {
+          "count": 2,
+          "rate": 0.5
+        }
+      }
+    },
+    "LEAD_BATTLE": {
+      "count": 7,
+      "scoreGap": {
+        "avg": 0.08543790118208235,
+        "median": 0.06411635457994835
+      },
+      "primaryContributor": {
+        "DECISION_SECOND": {
+          "count": 1,
+          "rate": 0.14285714285714285
+        },
+        "POSITION_SECOND": {
+          "count": 1,
+          "rate": 0.14285714285714285
+        },
+        "RELATIVE_PROBABILITY": {
+          "count": 4,
+          "rate": 0.5714285714285714
+        },
+        "UNKNOWN_CAUSE": {
+          "count": 1,
+          "rate": 0.14285714285714285
+        }
+      },
+      "evidenceAvailability": {
+        "KNOWN": {
+          "count": 7,
+          "rate": 1
+        }
+      },
+      "correctLineRelation": {
+        "UNKNOWN": {
+          "count": 7,
+          "rate": 1
+        }
+      },
+      "selectedLineRelation": {
+        "UNKNOWN": {
+          "count": 7,
+          "rate": 1
+        }
+      },
+      "scenario": {
+        "LEAD_BATTLE": {
+          "count": 7,
+          "rate": 1
+        }
+      },
+      "payout": {
+        "HIGH": {
+          "count": 2,
+          "rate": 0.2857142857142857
+        },
+        "LOW": {
+          "count": 4,
+          "rate": 0.5714285714285714
+        },
+        "MEDIUM": {
+          "count": 1,
+          "rate": 0.14285714285714285
+        }
+      }
+    },
+    "MAKURI_SUCCESS": {
+      "count": 14,
+      "scoreGap": {
+        "avg": 0.12131233554143887,
+        "median": 0.10867672828513375
+      },
+      "primaryContributor": {
+        "NATURAL_CONVERGENCE": {
+          "count": 1,
+          "rate": 0.07142857142857142
+        },
+        "PAIR_COHERENCE": {
+          "count": 4,
+          "rate": 0.2857142857142857
+        },
+        "POSITION_SECOND": {
+          "count": 3,
+          "rate": 0.21428571428571427
+        },
+        "RELATIVE_PROBABILITY": {
+          "count": 6,
+          "rate": 0.42857142857142855
+        }
+      },
+      "evidenceAvailability": {
+        "KNOWN": {
+          "count": 14,
+          "rate": 1
+        }
+      },
+      "correctLineRelation": {
+        "CROSS_LINE": {
+          "count": 12,
+          "rate": 0.8571428571428571
+        },
+        "SAME_LINE": {
+          "count": 2,
+          "rate": 0.14285714285714285
+        }
+      },
+      "selectedLineRelation": {
+        "CROSS_LINE": {
+          "count": 6,
+          "rate": 0.42857142857142855
+        },
+        "SAME_LINE": {
+          "count": 8,
+          "rate": 0.5714285714285714
+        }
+      },
+      "scenario": {
+        "MAKURI_SUCCESS": {
+          "count": 14,
+          "rate": 1
+        }
+      },
+      "payout": {
+        "HIGH": {
+          "count": 7,
+          "rate": 0.5
+        },
+        "LOW": {
+          "count": 4,
+          "rate": 0.2857142857142857
+        },
+        "MEDIUM": {
+          "count": 3,
+          "rate": 0.21428571428571427
+        }
+      }
+    }
+  },
+  "payout": {
+    "HIGH": {
+      "count": 17,
+      "rate": 0.23943661971830985
+    },
+    "LOW": {
+      "count": 32,
+      "rate": 0.4507042253521127
+    },
+    "MEDIUM": {
+      "count": 22,
+      "rate": 0.30985915492957744
+    }
+  },
+  "reproducibility": {
+    "matched505": {
+      "count": 59,
+      "scoreGap": {
+        "avg": 0.11071529487396035,
+        "median": 0.0780743672077312
+      },
+      "primaryContributor": {
+        "DECISION_SECOND": {
+          "count": 1,
+          "rate": 0.01694915254237288
+        },
+        "NATURAL_CONVERGENCE": {
+          "count": 22,
+          "rate": 0.3728813559322034
+        },
+        "PAIR_COHERENCE": {
+          "count": 3,
+          "rate": 0.05084745762711865
+        },
+        "POSITION_SECOND": {
+          "count": 5,
+          "rate": 0.0847457627118644
+        },
+        "RELATIVE_PROBABILITY": {
+          "count": 11,
+          "rate": 0.1864406779661017
+        },
+        "UNKNOWN_CAUSE": {
+          "count": 17,
+          "rate": 0.288135593220339
+        }
+      },
+      "evidenceAvailability": {
+        "KNOWN": {
+          "count": 21,
+          "rate": 0.3559322033898305
+        },
+        "UNKNOWN": {
+          "count": 38,
+          "rate": 0.6440677966101694
+        }
+      },
+      "correctLineRelation": {
+        "CROSS_LINE": {
+          "count": 33,
+          "rate": 0.559322033898305
+        },
+        "SAME_LINE": {
+          "count": 10,
+          "rate": 0.1694915254237288
+        },
+        "UNKNOWN": {
+          "count": 16,
+          "rate": 0.2711864406779661
+        }
+      },
+      "selectedLineRelation": {
+        "CROSS_LINE": {
+          "count": 30,
+          "rate": 0.5084745762711864
+        },
+        "SAME_LINE": {
+          "count": 13,
+          "rate": 0.22033898305084745
+        },
+        "UNKNOWN": {
+          "count": 16,
+          "rate": 0.2711864406779661
+        }
+      },
+      "scenario": {
+        "INSUFFICIENT_EVIDENCE": {
+          "count": 38,
+          "rate": 0.6440677966101694
+        },
+        "LEADER_HOLD": {
+          "count": 3,
+          "rate": 0.05084745762711865
+        },
+        "LEAD_BATTLE": {
+          "count": 6,
+          "rate": 0.1016949152542373
+        },
+        "MAKURI_SUCCESS": {
+          "count": 12,
+          "rate": 0.2033898305084746
+        }
+      },
+      "payout": {
+        "HIGH": {
+          "count": 14,
+          "rate": 0.23728813559322035
+        },
+        "LOW": {
+          "count": 27,
+          "rate": 0.4576271186440678
+        },
+        "MEDIUM": {
+          "count": 18,
+          "rate": 0.3050847457627119
+        }
+      }
+    },
+    "expansion130": {
+      "count": 12,
+      "scoreGap": {
+        "avg": 0.12716390550950862,
+        "median": 0.12263946658085256
+      },
+      "primaryContributor": {
+        "NATURAL_CONVERGENCE": {
+          "count": 7,
+          "rate": 0.5833333333333334
+        },
+        "PAIR_COHERENCE": {
+          "count": 1,
+          "rate": 0.08333333333333333
+        },
+        "RELATIVE_PROBABILITY": {
+          "count": 1,
+          "rate": 0.08333333333333333
+        },
+        "UNKNOWN_CAUSE": {
+          "count": 3,
+          "rate": 0.25
+        }
+      },
+      "evidenceAvailability": {
+        "KNOWN": {
+          "count": 4,
+          "rate": 0.3333333333333333
+        },
+        "UNKNOWN": {
+          "count": 8,
+          "rate": 0.6666666666666666
+        }
+      },
+      "correctLineRelation": {
+        "CROSS_LINE": {
+          "count": 6,
+          "rate": 0.5
+        },
+        "SAME_LINE": {
+          "count": 3,
+          "rate": 0.25
+        },
+        "UNKNOWN": {
+          "count": 3,
+          "rate": 0.25
+        }
+      },
+      "selectedLineRelation": {
+        "CROSS_LINE": {
+          "count": 6,
+          "rate": 0.5
+        },
+        "SAME_LINE": {
+          "count": 3,
+          "rate": 0.25
+        },
+        "UNKNOWN": {
+          "count": 3,
+          "rate": 0.25
+        }
+      },
+      "scenario": {
+        "INSUFFICIENT_EVIDENCE": {
+          "count": 8,
+          "rate": 0.6666666666666666
+        },
+        "LEADER_HOLD": {
+          "count": 1,
+          "rate": 0.08333333333333333
+        },
+        "LEAD_BATTLE": {
+          "count": 1,
+          "rate": 0.08333333333333333
+        },
+        "MAKURI_SUCCESS": {
+          "count": 2,
+          "rate": 0.16666666666666666
+        }
+      },
+      "payout": {
+        "HIGH": {
+          "count": 3,
+          "rate": 0.25
+        },
+        "LOW": {
+          "count": 5,
+          "rate": 0.4166666666666667
+        },
+        "MEDIUM": {
+          "count": 4,
+          "rate": 0.3333333333333333
+        }
+      }
+    }
+  },
+  "counterfactual": {
+    "formula": "terminalScore = relativeProbability*0.65 + evidenceScore*0.35",
+    "evaluable": 25,
+    "REMOVE_RELATIVE_PROBABILITY": {
+      "correctedOrder": 2
+    },
+    "REMOVE_EVIDENCE_SCORE": {
+      "correctedOrder": 2
+    },
+    "otherComponents": "DIAGNOSTIC_ONLY_NOT_ADDITIVE_NO_COUNTERFACTUAL_WEIGHT_SEARCH"
+  },
+  "control": {
+    "selection": "TEMPORAL_SAFE_PAIR_MEANINGFUL_DETERMINISTIC_59_12",
+    "total": 71,
+    "valid": 71,
+    "invalid": 0,
+    "falsePositiveByContributor": {
+      "DECISION_SECOND": {
+        "count": 0,
+        "denominator": 71,
+        "rate": 0
+      },
+      "NATURAL_CONVERGENCE": {
+        "count": 7,
+        "denominator": 71,
+        "rate": 0.09859154929577464
+      },
+      "PAIR_COHERENCE": {
+        "count": 0,
+        "denominator": 71,
+        "rate": 0
+      },
+      "POSITION_SECOND": {
+        "count": 17,
+        "denominator": 71,
+        "rate": 0.23943661971830985
+      },
+      "RELATIVE_PROBABILITY": {
+        "count": 4,
+        "denominator": 71,
+        "rate": 0.056338028169014086
+      },
+      "UNKNOWN_CAUSE": {
+        "count": 14,
+        "denominator": 71,
+        "rate": 0.19718309859154928
+      }
+    }
+  },
+  "candidates": [
+    {
+      "rank": 1,
+      "id": "NATURAL_CONVERGENCE_CONDITIONAL_SECOND_DIAGNOSTIC",
+      "targetSubtype": "NATURAL_CONVERGENCE",
+      "targetCount": 29,
+      "mechanism": "selected second exceeds correct second on the saved prediction-time component after winner/scenario are fixed",
+      "requiredInputs": [
+        "NATURAL_CONVERGENCE",
+        "winner-fixed pair candidates",
+        "saved scenario/line evidence"
+      ],
+      "evidenceAvailability": {
+        "KNOWN": {
+          "count": 25,
+          "rate": 0.352112676056338
+        },
+        "UNKNOWN": {
+          "count": 46,
+          "rate": 0.647887323943662
+        }
+      },
+      "matched505": 22,
+      "expansion130": 7,
+      "controlFalsePositiveRate": 0.09859154929577464,
+      "expectedBenefit": "isolate conditional second ordering without global terminal changes",
+      "likelySideEffect": "may disturb correct pair ordering if signal is not selective",
+      "shadowTestDesign": "future single-component frozen diagnostic; no parameter search and no production connection"
+    },
+    {
+      "rank": 2,
+      "id": "RELATIVE_PROBABILITY_CONDITIONAL_SECOND_DIAGNOSTIC",
+      "targetSubtype": "RELATIVE_PROBABILITY",
+      "targetCount": 12,
+      "mechanism": "selected second exceeds correct second on the saved prediction-time component after winner/scenario are fixed",
+      "requiredInputs": [
+        "RELATIVE_PROBABILITY",
+        "winner-fixed pair candidates",
+        "saved scenario/line evidence"
+      ],
+      "evidenceAvailability": {
+        "KNOWN": {
+          "count": 25,
+          "rate": 0.352112676056338
+        },
+        "UNKNOWN": {
+          "count": 46,
+          "rate": 0.647887323943662
+        }
+      },
+      "matched505": 11,
+      "expansion130": 1,
+      "controlFalsePositiveRate": 0.056338028169014086,
+      "expectedBenefit": "isolate conditional second ordering without global terminal changes",
+      "likelySideEffect": "may disturb correct pair ordering if signal is not selective",
+      "shadowTestDesign": "future single-component frozen diagnostic; no parameter search and no production connection"
+    },
+    {
+      "rank": 3,
+      "id": "PAIR_COHERENCE_CONDITIONAL_SECOND_DIAGNOSTIC",
+      "targetSubtype": "PAIR_COHERENCE",
+      "targetCount": 4,
+      "mechanism": "selected second exceeds correct second on the saved prediction-time component after winner/scenario are fixed",
+      "requiredInputs": [
+        "PAIR_COHERENCE",
+        "winner-fixed pair candidates",
+        "saved scenario/line evidence"
+      ],
+      "evidenceAvailability": {
+        "KNOWN": {
+          "count": 25,
+          "rate": 0.352112676056338
+        },
+        "UNKNOWN": {
+          "count": 46,
+          "rate": 0.647887323943662
+        }
+      },
+      "matched505": 3,
+      "expansion130": 1,
+      "controlFalsePositiveRate": 0,
+      "expectedBenefit": "isolate conditional second ordering without global terminal changes",
+      "likelySideEffect": "may disturb correct pair ordering if signal is not selective",
+      "shadowTestDesign": "future single-component frozen diagnostic; no parameter search and no production connection"
+    }
+  ],
+  "safety": {
+    "productionChanged": false,
+    "predictionRegenerated": false,
+    "purchaseChanged": false,
+    "riderWeakChanged": false,
+    "resultChanged": false,
+    "checkpointChanged": false,
+    "shadowImplemented": false,
+    "parameterTuned": false,
+    "protectedFinalUsed": 0,
+    "resultLeakage": 0
+  },
+  "hash": "e5a9e94634acfdb013708217ad260ffdf830b2d5605620587cf4c2236f53105c"
+}

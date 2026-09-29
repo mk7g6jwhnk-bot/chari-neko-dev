@@ -1,0 +1,22 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { run } from '../research/diagnose-conditional-second-71.mjs';
+
+assert.equal(typeof run, 'function');
+const here = path.dirname(fileURLToPath(import.meta.url));
+const result = JSON.parse(await fs.readFile(path.join(here, '..', 'research', 'historical-result-reaggregation', '2026-09-29', 'conditional-second-diagnostic.json'), 'utf8'));
+assert.equal(result.cohort.total, 71);
+assert.equal(result.cohort.matched505, 59);
+assert.equal(result.cohort.expansion130, 12);
+assert.equal(result.cohort.overlap, 0);
+assert.equal(result.cohort.missing, 0);
+assert.equal(result.cohort.protectedFinalUsed, 0);
+assert.equal(result.preconditions.winnerMeaningful, 71);
+assert.equal(result.preconditions.correctPairGenerated, 71);
+assert.equal(result.safety.productionChanged, false);
+assert.equal(result.safety.shadowImplemented, false);
+assert.equal(result.safety.parameterTuned, false);
+assert.equal(result.safety.resultLeakage, 0);
+console.log('conditional second diagnostic 71: PASS');
