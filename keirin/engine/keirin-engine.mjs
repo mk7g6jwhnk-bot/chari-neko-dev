@@ -5,6 +5,7 @@ import{attachScenarioProvenanceId,buildScenarioProvenance}from"./scenario-proven
 import{buildTerminalDetailTrace}from"./terminal-trace.mjs";
 import{buildBaselineControl,buildRiderSelectionCandidatePrediction}from"./rider-selection-weak.mjs";
 import{attachMultiWorldMetadata,buildMultiWorldScenarioStructure}from"./multi-world-scenario.mjs";
+import{buildRecommendationTrace,buildWinnerConditionedSecondRankTrace}from"./research-diagnostics-v1.mjs";
 
 export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000,captureResearchTrace=false}){
   const baselinePrediction=runKeirinPredictionEngine({race,venueProfile});
@@ -67,7 +68,13 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
     generatedAt:new Date().toISOString()
   };
   output.riderSelectionAdoption=candidate?buildBaselineControl({baselinePurchase,candidatePurchase:purchase,ranked:candidate.ranked,inputHash:candidate.inputHash,generatedAt:output.generatedAt}):{schemaVersion:"RIDER_SELECTION_WEAK_ADOPTION_CONTROL_V1",productionVersion:baselinePrediction.predictionVersion,baselineControlVersion:"KEIRIN-0.5.20-girls-evidence-gate",enabled:false,rollbackFlag:"KEIRIN_RIDER_SELECTION_WEAK=0",resultDataUsed:false,temporalStage:"PREDICTION_TIME"};
-  if(captureResearchTrace)output.researchTerminalTrace=buildTerminalDetailTrace({race,prediction,purchase,provenance,generatedAt:output.generatedAt});
+  const recommendationEnabled=process.env.KEIRIN_RECOMMENDATION_FILTER_V1==="1";
+  if(recommendationEnabled)output.recommendationFilter=buildRecommendationTrace({race,prediction,purchase,multiWorldScenario:output.multiWorldScenario,generatedAt:output.generatedAt,enabled:true});
+  if(captureResearchTrace){
+    output.researchTerminalTrace=buildTerminalDetailTrace({race,prediction,purchase,provenance,generatedAt:output.generatedAt});
+    if(process.env.KEIRIN_SECOND_RANK_TRACE_V1==="1")output.researchTerminalTrace.winnerConditionedSecondRankTrace=buildWinnerConditionedSecondRankTrace({race,prediction,purchase,parameterHash:output.riderSelectionAdoption?.parameterHash||null,generatedAt:output.generatedAt});
+    if(recommendationEnabled)output.researchTerminalTrace.recommendationTrace=output.recommendationFilter;
+  }
   return output;
 }
 
