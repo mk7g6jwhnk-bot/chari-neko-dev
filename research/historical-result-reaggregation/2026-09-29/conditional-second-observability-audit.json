@@ -1,0 +1,286 @@
+{
+  "schemaVersion": "CONDITIONAL_SECOND_OBSERVABILITY_AUDIT_V1",
+  "generatedAt": "2026-09-29T01:14:35.218Z",
+  "verdict": "OBSERVABILITY_INSUFFICIENT",
+  "cohort": {
+    "failure": 71,
+    "failureMatched505": 59,
+    "failureExpansion130": 12,
+    "control": 71,
+    "protectedFinalUsed": 0
+  },
+  "actualRankingPath": {
+    "prediction": [
+      "positionScore = roleScore*0.72 + available ability geometric mean*0.28",
+      "conditionalScore = positionScore*compatibility.factor",
+      "FIRST/SECOND/THIRD ratios normalized inside branch",
+      "pathScore = firstRatio*secondRatio*thirdRatio",
+      "raw terminal score = sum(branchScore*pathScore)",
+      "probability = raw terminal score/sum(all terminal scores)"
+    ],
+    "purchase": [
+      "relativeProbability = probability/maxProbability",
+      "positionFit = geometric mean(positionScores/10)",
+      "positionBalance = min(positionScores)/max(positionScores)",
+      "ratioFit = geometric mean(decisionRatios)",
+      "evidenceScore = 0.55*positionFit + 0.20*positionBalance + 0.15*ratioFit + 0.10*evidenceCount/3",
+      "terminalScore = 0.65*relativeProbability + 0.35*evidenceScore"
+    ],
+    "sortKey": [
+      "terminalScore DESC",
+      "probability DESC",
+      "order lexicographic ASC"
+    ],
+    "fallback": [
+      "missing evidence axes fall back to role score in positionScore",
+      "conditional compatibility is currently 1 unless logical contradiction",
+      "missing ratio contributes 0 in purchase evidence ratioFit through Number(value)||0",
+      "no result-time fallback"
+    ],
+    "tieBreak": "probability DESC, then terminal order string ASC",
+    "normalization": [
+      "within-branch conditional ratios",
+      "all-terminal probability normalization",
+      "max-terminal relativeProbability normalization"
+    ],
+    "excludedFromScoreSort": [
+      "naturalConvergenceScore",
+      "pairNaturalConvergenceScore",
+      "pairScenarioCoherence",
+      "scenarioFamilySupport",
+      "relativeConditionPenalty",
+      "odds"
+    ]
+  },
+  "componentLifecycle": [
+    {
+      "component": "raw terminal weighted score",
+      "computedAtPrediction": true,
+      "usedForRanking": true,
+      "sealed": "PARTIAL(score/probability)",
+      "trace": "NO_RAW_SUM",
+      "reconstructable": false,
+      "reason": "branch score and all historical weighted contributions are not uniformly persisted"
+    },
+    {
+      "component": "normalized probability",
+      "computedAtPrediction": true,
+      "usedForRanking": true,
+      "sealed": "YES",
+      "trace": "YES",
+      "reconstructable": true,
+      "reason": null
+    },
+    {
+      "component": "relativeProbability",
+      "computedAtPrediction": true,
+      "usedForRanking": true,
+      "sealed": "PARTIAL",
+      "trace": "PARTIAL",
+      "reconstructable": "ONLY_IF_MAX_PROBABILITY_AND_CANDIDATE_PROBABILITY_PERSIST",
+      "reason": "tail terminal compaction"
+    },
+    {
+      "component": "positionFit",
+      "computedAtPurchase": true,
+      "usedForRanking": "via evidenceScore",
+      "sealed": "PARTIAL",
+      "trace": "INDIRECT",
+      "reconstructable": "ONLY_WITH_ALL_POSITION_SCORES",
+      "reason": "tail terminal compaction"
+    },
+    {
+      "component": "positionBalance",
+      "computedAtPurchase": true,
+      "usedForRanking": "via evidenceScore",
+      "sealed": "PARTIAL",
+      "trace": "INDIRECT",
+      "reconstructable": "ONLY_WITH_ALL_POSITION_SCORES",
+      "reason": "tail terminal compaction"
+    },
+    {
+      "component": "decision ratio fit",
+      "computedAtPurchase": true,
+      "usedForRanking": "via evidenceScore",
+      "sealed": "PARTIAL",
+      "trace": "INDIRECT",
+      "reconstructable": "ONLY_WITH_ALL_DECISION_RATIOS",
+      "reason": "tail terminal compaction"
+    },
+    {
+      "component": "position evidence count",
+      "computedAtPurchase": true,
+      "usedForRanking": "via evidenceScore",
+      "sealed": "PARTIAL",
+      "trace": "INDIRECT",
+      "reconstructable": "ONLY_WITH_POSITION_EVIDENCE",
+      "reason": "tail terminal compaction"
+    },
+    {
+      "component": "evidenceScore",
+      "computedAtPurchase": true,
+      "usedForRanking": true,
+      "sealed": "PARTIAL",
+      "trace": "PARTIAL",
+      "reconstructable": "ONLY_IF_ALL_FOUR_INPUTS_PERSIST",
+      "reason": "tail terminal compaction"
+    },
+    {
+      "component": "terminalScore",
+      "computedAtPurchase": true,
+      "usedForRanking": true,
+      "sealed": "YES",
+      "trace": "YES_WHEN_TRACE_AVAILABLE",
+      "reconstructable": true,
+      "reason": null
+    },
+    {
+      "component": "NC/pair coherence/scenario/penalty",
+      "computedAtPurchase": true,
+      "usedForRanking": false,
+      "sealed": "PARTIAL",
+      "trace": "PARTIAL",
+      "reconstructable": false,
+      "reason": "downstream gate/audit fields, not terminalScore sort inputs"
+    }
+  ],
+  "observability": {
+    "failure": {
+      "PARTIALLY_OBSERVABLE": {
+        "count": 71,
+        "rate": 1
+      }
+    },
+    "control": {
+      "PARTIALLY_OBSERVABLE": {
+        "count": 71,
+        "rate": 1
+      }
+    }
+  },
+  "missingReasons": {
+    "failure": {
+      "relativeProbability:COMPUTED_NOT_PERSISTED": 71,
+      "evidenceScore:COMPUTED_NOT_PERSISTED": 71,
+      "positionScores:COMPUTED_NOT_PERSISTED": 71,
+      "decisionRatios:COMPUTED_NOT_PERSISTED": 71,
+      "branchProbability:COMPUTED_NOT_PERSISTED": 71,
+      "branchWeightedScore:COMPUTED_NOT_PERSISTED": 71,
+      "conditionalSecond:COMPUTED_NOT_PERSISTED": 71,
+      "penalty:PERSISTED_ELSEWHERE_OR_NOT_COMPUTED": 71
+    },
+    "control": {
+      "relativeProbability:COMPUTED_NOT_PERSISTED": 71,
+      "evidenceScore:COMPUTED_NOT_PERSISTED": 71,
+      "positionScores:COMPUTED_NOT_PERSISTED": 71,
+      "decisionRatios:COMPUTED_NOT_PERSISTED": 71,
+      "branchProbability:COMPUTED_NOT_PERSISTED": 71,
+      "branchWeightedScore:COMPUTED_NOT_PERSISTED": 71,
+      "conditionalSecond:COMPUTED_NOT_PERSISTED": 71,
+      "penalty:PERSISTED_ELSEWHERE_OR_NOT_COMPUTED": 71
+    }
+  },
+  "reconstruction": {
+    "safeRaceCount": 0,
+    "failureSafe": 0,
+    "controlSafe": 0,
+    "unsafeRaceCount": 142,
+    "policy": "sealed prediction-time fields only; no result-derived component reconstruction; no current-formula replay when version metadata is insufficient"
+  },
+  "versionIntegrity": {
+    "versions": {
+      "KEIRIN-0.6.0-rider-selection-weak": 16,
+      "UNKNOWN": 126
+    },
+    "sufficientForReplay": 0,
+    "insufficientForReplay": 142,
+    "limitation": "productionVersion/parameterHash are not uniformly sealed; current code is not treated as historical code where metadata is absent"
+  },
+  "causeDiagnosis": {
+    "observableFailureN": 0,
+    "observableControlN": 0,
+    "failurePrimary": {
+      "RELATIVE_PROBABILITY": 0,
+      "EVIDENCE_SCORE": 0
+    },
+    "controlPrimary": {
+      "RELATIVE_PROBABILITY": 0,
+      "EVIDENCE_SCORE": 0
+    },
+    "generalization": "FULLY_OBSERVABLE subset only; do not extrapolate if version/scenario/cohort distributions differ"
+  },
+  "bias": {
+    "failureByCohort": {},
+    "controlByCohort": {},
+    "failureByScenario": {},
+    "controlByScenario": {},
+    "failureByPayout": {},
+    "controlByPayout": {},
+    "versions": {
+      "KEIRIN-0.6.0-rider-selection-weak": 16,
+      "UNKNOWN": 126
+    }
+  },
+  "futureTrace": {
+    "schema": "WINNER_CONDITIONED_SECOND_RANK_TRACE_V1",
+    "diagnosticOnly": true,
+    "raceHeader": [
+      "raceKey",
+      "predictionHash",
+      "predictionVersion",
+      "purchaseVersion",
+      "parameterHash",
+      "sealedAt",
+      "traceSchemaVersion"
+    ],
+    "perCandidate": [
+      "winner rider number",
+      "second rider number",
+      "representative terminal id",
+      "raw terminal weighted score",
+      "normalized probability",
+      "max probability denominator",
+      "relativeProbability",
+      "positionFit",
+      "positionBalance",
+      "decisionRatioFit",
+      "positionEvidenceCount",
+      "evidenceScore",
+      "terminalScore",
+      "sort tuple",
+      "fallback reason",
+      "dominant scenario/branch id"
+    ],
+    "audit": [
+      "candidate count",
+      "ranked second rider ids",
+      "tie-break reason",
+      "input hash",
+      "reconstruction hash",
+      "resultDataUsed=false"
+    ],
+    "estimatedOverhead": {
+      "jsonBytesPerRace": "2000-4000",
+      "gzipBytesPerRace": "800-1500",
+      "cpu": "<2ms expected; benchmark required",
+      "latency": "negligible expected; benchmark required",
+      "storagePer1000R": "0.8-1.5MB gzip"
+    },
+    "productionLogicImpact": "NONE"
+  },
+  "nextAction": "IMPLEMENT_DIAGNOSTIC_ONLY_WINNER_CONDITIONED_SECOND_TRACE_THEN_COLLECT_NEW_TEMPORAL_COHORT",
+  "safety": {
+    "productionChanged": false,
+    "predictionChanged": false,
+    "purchaseChanged": false,
+    "riderWeakChanged": false,
+    "resultChanged": false,
+    "checkpointChanged": false,
+    "sealedPredictionMutation": 0,
+    "shadowImplemented": false,
+    "parameterTuned": false,
+    "protectedFinalUsed": 0,
+    "resultLeakage": 0
+  },
+  "hash": "7a006959cc6d659ec3263982275457da381c84a72ecd59ee9cbe818579310ad6"
+}
