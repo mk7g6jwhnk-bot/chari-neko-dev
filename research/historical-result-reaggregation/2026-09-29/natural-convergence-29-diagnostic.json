@@ -1,0 +1,859 @@
+{
+  "schemaVersion": "NATURAL_CONVERGENCE_MISDIRECTION_29_V1",
+  "generatedAt": "2026-09-29T01:00:14.388Z",
+  "verdict": "NATURAL_CONVERGENCE_ASSOCIATION_NOT_CONDITIONAL_SCORE_CAUSE",
+  "cohort": {
+    "failureNc": 29,
+    "matched505": 22,
+    "expansion130": 7,
+    "controlFalsePositive": 7,
+    "controlNegative": 64,
+    "invalid": 0,
+    "overlap": 0,
+    "missing": 0,
+    "protectedFinalUsed": 0,
+    "unknownUsed": 0
+  },
+  "implementationAudit": {
+    "source": "keirin/engine/chat-spec-v1-policy.mjs::deriveNaturalConvergence",
+    "executionOrder": "normalizeProbabilities/addRanks -> deriveNaturalConvergence -> downstream natural/purchase gates",
+    "inputs": [
+      "best matching branch contribution",
+      "decisionRatios first/second/third",
+      "line relation for first/second/third",
+      "branch lineIndependentFallback",
+      "FIRST/SECOND/THIRD node conditional probabilities",
+      "newRequiredConditions"
+    ],
+    "normalization": "clamp((scenarioCoherence*0.40 + geometricDecisionRatio*0.22 + geometricNodeProbability*0.38) * conditionPenalty, 0, 1)",
+    "legacyFallback": "clamp((scenarioCoherence*0.55 + geometricDecisionRatio*0.45) * penalty, 0, 1)",
+    "dependencies": {
+      "winner": true,
+      "secondRider": true,
+      "pair": true,
+      "thirdRider": true,
+      "scenarioBranch": true,
+      "terminal": true
+    },
+    "missingEvidence": "decision ratios default to 1; no line context retains scenarioCoherence=0.50, or 0.62 only for explicit lineIndependentFallback",
+    "directInputToTerminalScore": false,
+    "causalBoundary": "Natural convergence can affect downstream natural/purchase eligibility, but does not enter the saved terminalScore additive reconstruction."
+  },
+  "ncDelta": {
+    "avg": 0.07279910381429479,
+    "median": 0.01340564192324012,
+    "p90": 0.2427015532221852,
+    "thresholds": {
+      "nearMax": 0.009948515323321638,
+      "moderateMax": 0.12422662019619651
+    },
+    "buckets": {
+      "LARGE": {
+        "count": 9,
+        "rate": 0.3103448275862069
+      },
+      "MODERATE": {
+        "count": 10,
+        "rate": 0.3448275862068966
+      },
+      "NEAR": {
+        "count": 10,
+        "rate": 0.3448275862068966
+      }
+    }
+  },
+  "interaction": {
+    "ADDITIVE_COMPONENTS_UNKNOWN": {
+      "count": 28,
+      "rate": 0.9655172413793104
+    },
+    "NC_PLUS_ADDITIVE_ADVANTAGE": {
+      "count": 1,
+      "rate": 0.034482758620689655
+    }
+  },
+  "counterfactual": {
+    "formallyAdditiveNcContribution": false,
+    "neutralizeNcDifference": {
+      "flip": 0,
+      "tie": 0,
+      "unchanged": 29,
+      "wrongSideEffect": 0
+    },
+    "reason": "NC is not an additive terminalScore component; changing it would simulate a new policy/weight and is prohibited."
+  },
+  "scenario": {
+    "INSUFFICIENT_EVIDENCE": {
+      "count": 28,
+      "ncDeltaAvg": 0.06456376928333321,
+      "ncDeltaMedian": 0.011508989876738152,
+      "formalFlipCount": 0,
+      "controlFalsePositiveCount": 4
+    },
+    "MAKURI_SUCCESS": {
+      "count": 1,
+      "ncDeltaAvg": 0.30338847068121927,
+      "ncDeltaMedian": 0.30338847068121927,
+      "formalFlipCount": 0,
+      "controlFalsePositiveCount": 2
+    }
+  },
+  "roleLine": {
+    "failure": {
+      "evidence": {
+        "KNOWN": {
+          "count": 1,
+          "rate": 0.034482758620689655
+        },
+        "UNKNOWN": {
+          "count": 28,
+          "rate": 0.9655172413793104
+        }
+      },
+      "correctLine": {
+        "CROSS_LINE": {
+          "count": 18,
+          "rate": 0.6206896551724138
+        },
+        "SAME_LINE": {
+          "count": 1,
+          "rate": 0.034482758620689655
+        },
+        "UNKNOWN": {
+          "count": 10,
+          "rate": 0.3448275862068966
+        }
+      },
+      "selectedLine": {
+        "CROSS_LINE": {
+          "count": 11,
+          "rate": 0.3793103448275862
+        },
+        "SAME_LINE": {
+          "count": 8,
+          "rate": 0.27586206896551724
+        },
+        "UNKNOWN": {
+          "count": 10,
+          "rate": 0.3448275862068966
+        }
+      }
+    },
+    "controlFalsePositive": {
+      "evidence": {
+        "KNOWN": {
+          "count": 3,
+          "rate": 0.42857142857142855
+        },
+        "UNKNOWN": {
+          "count": 4,
+          "rate": 0.5714285714285714
+        }
+      },
+      "correctLine": {
+        "CROSS_LINE": {
+          "count": 7,
+          "rate": 1
+        }
+      },
+      "selectedLine": {
+        "CROSS_LINE": {
+          "count": 5,
+          "rate": 0.7142857142857143
+        },
+        "SAME_LINE": {
+          "count": 2,
+          "rate": 0.2857142857142857
+        }
+      }
+    }
+  },
+  "conditionalScoreGap": {
+    "LARGE_GAP": {
+      "count": 15,
+      "rate": 0.5172413793103449
+    },
+    "MODERATE_GAP": {
+      "count": 6,
+      "rate": 0.20689655172413793
+    },
+    "NEAR_TIE": {
+      "count": 8,
+      "rate": 0.27586206896551724
+    }
+  },
+  "payout": {
+    "HIGH": {
+      "count": 6,
+      "rate": 0.20689655172413793
+    },
+    "LOW": {
+      "count": 12,
+      "rate": 0.41379310344827586
+    },
+    "MEDIUM": {
+      "count": 11,
+      "rate": 0.3793103448275862
+    }
+  },
+  "temporalReproducibility": {
+    "matched505": {
+      "count": 22,
+      "ncDelta": {
+        "avg": 0.07318502433282627,
+        "median": 0.011508989876738152,
+        "p90": 0.1691184598661195
+      },
+      "deltaBucket": {
+        "LARGE": {
+          "count": 7,
+          "rate": 0.3181818181818182
+        },
+        "MODERATE": {
+          "count": 8,
+          "rate": 0.36363636363636365
+        },
+        "NEAR": {
+          "count": 7,
+          "rate": 0.3181818181818182
+        }
+      },
+      "interaction": {
+        "ADDITIVE_COMPONENTS_UNKNOWN": {
+          "count": 22,
+          "rate": 1
+        }
+      },
+      "evidence": {
+        "UNKNOWN": {
+          "count": 22,
+          "rate": 1
+        }
+      },
+      "correctLine": {
+        "CROSS_LINE": {
+          "count": 14,
+          "rate": 0.6363636363636364
+        },
+        "UNKNOWN": {
+          "count": 8,
+          "rate": 0.36363636363636365
+        }
+      },
+      "selectedLine": {
+        "CROSS_LINE": {
+          "count": 8,
+          "rate": 0.36363636363636365
+        },
+        "SAME_LINE": {
+          "count": 6,
+          "rate": 0.2727272727272727
+        },
+        "UNKNOWN": {
+          "count": 8,
+          "rate": 0.36363636363636365
+        }
+      },
+      "scoreGap": {
+        "LARGE_GAP": {
+          "count": 12,
+          "rate": 0.5454545454545454
+        },
+        "MODERATE_GAP": {
+          "count": 4,
+          "rate": 0.18181818181818182
+        },
+        "NEAR_TIE": {
+          "count": 6,
+          "rate": 0.2727272727272727
+        }
+      },
+      "payout": {
+        "HIGH": {
+          "count": 3,
+          "rate": 0.13636363636363635
+        },
+        "LOW": {
+          "count": 10,
+          "rate": 0.45454545454545453
+        },
+        "MEDIUM": {
+          "count": 9,
+          "rate": 0.4090909090909091
+        }
+      }
+    },
+    "expansion130": {
+      "count": 7,
+      "ncDelta": {
+        "avg": 0.07158621075605301,
+        "median": 0.016663358736283718,
+        "p90": 0.30338847068121927
+      },
+      "deltaBucket": {
+        "LARGE": {
+          "count": 2,
+          "rate": 0.2857142857142857
+        },
+        "MODERATE": {
+          "count": 2,
+          "rate": 0.2857142857142857
+        },
+        "NEAR": {
+          "count": 3,
+          "rate": 0.42857142857142855
+        }
+      },
+      "interaction": {
+        "ADDITIVE_COMPONENTS_UNKNOWN": {
+          "count": 6,
+          "rate": 0.8571428571428571
+        },
+        "NC_PLUS_ADDITIVE_ADVANTAGE": {
+          "count": 1,
+          "rate": 0.14285714285714285
+        }
+      },
+      "evidence": {
+        "KNOWN": {
+          "count": 1,
+          "rate": 0.14285714285714285
+        },
+        "UNKNOWN": {
+          "count": 6,
+          "rate": 0.8571428571428571
+        }
+      },
+      "correctLine": {
+        "CROSS_LINE": {
+          "count": 4,
+          "rate": 0.5714285714285714
+        },
+        "SAME_LINE": {
+          "count": 1,
+          "rate": 0.14285714285714285
+        },
+        "UNKNOWN": {
+          "count": 2,
+          "rate": 0.2857142857142857
+        }
+      },
+      "selectedLine": {
+        "CROSS_LINE": {
+          "count": 3,
+          "rate": 0.42857142857142855
+        },
+        "SAME_LINE": {
+          "count": 2,
+          "rate": 0.2857142857142857
+        },
+        "UNKNOWN": {
+          "count": 2,
+          "rate": 0.2857142857142857
+        }
+      },
+      "scoreGap": {
+        "LARGE_GAP": {
+          "count": 3,
+          "rate": 0.42857142857142855
+        },
+        "MODERATE_GAP": {
+          "count": 2,
+          "rate": 0.2857142857142857
+        },
+        "NEAR_TIE": {
+          "count": 2,
+          "rate": 0.2857142857142857
+        }
+      },
+      "payout": {
+        "HIGH": {
+          "count": 3,
+          "rate": 0.42857142857142855
+        },
+        "LOW": {
+          "count": 2,
+          "rate": 0.2857142857142857
+        },
+        "MEDIUM": {
+          "count": 2,
+          "rate": 0.2857142857142857
+        }
+      }
+    }
+  },
+  "controlComparison": {
+    "failure": {
+      "count": 29,
+      "ncDelta": {
+        "avg": 0.07279910381429479,
+        "median": 0.01340564192324012,
+        "p90": 0.2427015532221852
+      },
+      "deltaBucket": {
+        "LARGE": {
+          "count": 9,
+          "rate": 0.3103448275862069
+        },
+        "MODERATE": {
+          "count": 10,
+          "rate": 0.3448275862068966
+        },
+        "NEAR": {
+          "count": 10,
+          "rate": 0.3448275862068966
+        }
+      },
+      "interaction": {
+        "ADDITIVE_COMPONENTS_UNKNOWN": {
+          "count": 28,
+          "rate": 0.9655172413793104
+        },
+        "NC_PLUS_ADDITIVE_ADVANTAGE": {
+          "count": 1,
+          "rate": 0.034482758620689655
+        }
+      },
+      "evidence": {
+        "KNOWN": {
+          "count": 1,
+          "rate": 0.034482758620689655
+        },
+        "UNKNOWN": {
+          "count": 28,
+          "rate": 0.9655172413793104
+        }
+      },
+      "correctLine": {
+        "CROSS_LINE": {
+          "count": 18,
+          "rate": 0.6206896551724138
+        },
+        "SAME_LINE": {
+          "count": 1,
+          "rate": 0.034482758620689655
+        },
+        "UNKNOWN": {
+          "count": 10,
+          "rate": 0.3448275862068966
+        }
+      },
+      "selectedLine": {
+        "CROSS_LINE": {
+          "count": 11,
+          "rate": 0.3793103448275862
+        },
+        "SAME_LINE": {
+          "count": 8,
+          "rate": 0.27586206896551724
+        },
+        "UNKNOWN": {
+          "count": 10,
+          "rate": 0.3448275862068966
+        }
+      },
+      "scoreGap": {
+        "LARGE_GAP": {
+          "count": 15,
+          "rate": 0.5172413793103449
+        },
+        "MODERATE_GAP": {
+          "count": 6,
+          "rate": 0.20689655172413793
+        },
+        "NEAR_TIE": {
+          "count": 8,
+          "rate": 0.27586206896551724
+        }
+      },
+      "payout": {
+        "HIGH": {
+          "count": 6,
+          "rate": 0.20689655172413793
+        },
+        "LOW": {
+          "count": 12,
+          "rate": 0.41379310344827586
+        },
+        "MEDIUM": {
+          "count": 11,
+          "rate": 0.3793103448275862
+        }
+      }
+    },
+    "falsePositive": {
+      "count": 7,
+      "ncDelta": {
+        "avg": 0.11289978821017173,
+        "median": 0.10761265141612672,
+        "p90": 0.29423112116685396
+      },
+      "deltaBucket": {
+        "LARGE": {
+          "count": 2,
+          "rate": 0.2857142857142857
+        },
+        "MODERATE": {
+          "count": 3,
+          "rate": 0.42857142857142855
+        },
+        "NEAR": {
+          "count": 2,
+          "rate": 0.2857142857142857
+        }
+      },
+      "interaction": {
+        "ADDITIVE_COMPONENTS_UNKNOWN": {
+          "count": 5,
+          "rate": 0.7142857142857143
+        },
+        "NC_PLUS_ADDITIVE_ADVANTAGE": {
+          "count": 2,
+          "rate": 0.2857142857142857
+        }
+      },
+      "evidence": {
+        "KNOWN": {
+          "count": 3,
+          "rate": 0.42857142857142855
+        },
+        "UNKNOWN": {
+          "count": 4,
+          "rate": 0.5714285714285714
+        }
+      },
+      "correctLine": {
+        "CROSS_LINE": {
+          "count": 7,
+          "rate": 1
+        }
+      },
+      "selectedLine": {
+        "CROSS_LINE": {
+          "count": 5,
+          "rate": 0.7142857142857143
+        },
+        "SAME_LINE": {
+          "count": 2,
+          "rate": 0.2857142857142857
+        }
+      },
+      "scoreGap": {
+        "null": {
+          "count": 7,
+          "rate": 1
+        }
+      },
+      "payout": {
+        "HIGH": {
+          "count": 4,
+          "rate": 0.5714285714285714
+        },
+        "LOW": {
+          "count": 1,
+          "rate": 0.14285714285714285
+        },
+        "MEDIUM": {
+          "count": 2,
+          "rate": 0.2857142857142857
+        }
+      }
+    },
+    "negative": {
+      "count": 64,
+      "ncDelta": {
+        "avg": -0.06623643713856467,
+        "median": 0,
+        "p90": 0.0031076123667493905
+      },
+      "deltaBucket": {
+        "LARGE": {
+          "count": 1,
+          "rate": 0.015625
+        },
+        "MODERATE": {
+          "count": 4,
+          "rate": 0.0625
+        },
+        "NEAR": {
+          "count": 59,
+          "rate": 0.921875
+        }
+      },
+      "interaction": {
+        "ADDITIVE_COMPONENTS_UNKNOWN": {
+          "count": 17,
+          "rate": 0.265625
+        },
+        "NC_ASSOCIATION_ADDITIVE_TIE": {
+          "count": 23,
+          "rate": 0.359375
+        },
+        "NC_PLUS_ADDITIVE_ADVANTAGE": {
+          "count": 24,
+          "rate": 0.375
+        }
+      },
+      "evidence": {
+        "KNOWN": {
+          "count": 49,
+          "rate": 0.765625
+        },
+        "UNKNOWN": {
+          "count": 15,
+          "rate": 0.234375
+        }
+      },
+      "correctLine": {
+        "CROSS_LINE": {
+          "count": 18,
+          "rate": 0.28125
+        },
+        "SAME_LINE": {
+          "count": 37,
+          "rate": 0.578125
+        },
+        "UNKNOWN": {
+          "count": 9,
+          "rate": 0.140625
+        }
+      },
+      "selectedLine": {
+        "CROSS_LINE": {
+          "count": 40,
+          "rate": 0.625
+        },
+        "SAME_LINE": {
+          "count": 15,
+          "rate": 0.234375
+        },
+        "UNKNOWN": {
+          "count": 9,
+          "rate": 0.140625
+        }
+      },
+      "scoreGap": {
+        "null": {
+          "count": 64,
+          "rate": 1
+        }
+      },
+      "payout": {
+        "HIGH": {
+          "count": 7,
+          "rate": 0.109375
+        },
+        "LOW": {
+          "count": 45,
+          "rate": 0.703125
+        },
+        "MEDIUM": {
+          "count": 12,
+          "rate": 0.1875
+        }
+      }
+    },
+    "distinguishingConditions": {
+      "INSUFFICIENT_EVIDENCE_AND_LARGE_NC": {
+        "failure": {
+          "count": 8,
+          "denominator": 29,
+          "rate": 0.27586206896551724
+        },
+        "controlFalsePositive": {
+          "count": 1,
+          "denominator": 7,
+          "rate": 0.14285714285714285
+        },
+        "controlNegative": {
+          "count": 0,
+          "denominator": 64,
+          "rate": 0
+        },
+        "precisionLike": 0.8888888888888888,
+        "matched505": 7,
+        "expansion130": 1
+      },
+      "ADDITIVE_EVIDENCE_UNAVAILABLE_AND_NC_ADVANTAGE": {
+        "failure": {
+          "count": 28,
+          "denominator": 29,
+          "rate": 0.9655172413793104
+        },
+        "controlFalsePositive": {
+          "count": 5,
+          "denominator": 7,
+          "rate": 0.7142857142857143
+        },
+        "controlNegative": {
+          "count": 0,
+          "denominator": 64,
+          "rate": 0
+        },
+        "precisionLike": 0.8484848484848485,
+        "matched505": 22,
+        "expansion130": 6
+      },
+      "SELECTED_SAME_LINE_CORRECT_CROSS_LINE": {
+        "failure": {
+          "count": 7,
+          "denominator": 29,
+          "rate": 0.2413793103448276
+        },
+        "controlFalsePositive": {
+          "count": 2,
+          "denominator": 7,
+          "rate": 0.2857142857142857
+        },
+        "controlNegative": {
+          "count": 1,
+          "denominator": 64,
+          "rate": 0.015625
+        },
+        "precisionLike": 0.7777777777777778,
+        "matched505": 6,
+        "expansion130": 1
+      }
+    }
+  },
+  "candidates": [
+    {
+      "rank": 1,
+      "id": "NC_OBSERVABILITY_GATE_DIAGNOSTIC",
+      "targetSubset": "NC primary with additive evidence unavailable",
+      "mechanism": "separate missing score evidence from apparent NC misdirection before any correction hypothesis",
+      "requiredPredictionTimeInputs": [
+        "NC score",
+        "relativeProbability",
+        "evidenceScore",
+        "trace availability"
+      ],
+      "evidence": {
+        "failure": {
+          "count": 28,
+          "denominator": 29,
+          "rate": 0.9655172413793104
+        },
+        "controlFalsePositive": {
+          "count": 5,
+          "denominator": 7,
+          "rate": 0.7142857142857143
+        },
+        "controlNegative": {
+          "count": 0,
+          "denominator": 64,
+          "rate": 0
+        },
+        "precisionLike": 0.8484848484848485,
+        "matched505": 22,
+        "expansion130": 6
+      },
+      "expectedBenefit": "reduce false causal attribution",
+      "expectedSideEffect": "diagnostic coverage reduction",
+      "shadowDesign": "observation-only conditional-second flag; no ranking change",
+      "promotionGate": [
+        "direction agreement in MATCHED and EXPANSION",
+        "acceptable control FP",
+        "winner/scenario/rider unchanged",
+        "global ranking unchanged",
+        "prediction-time only"
+      ]
+    },
+    {
+      "rank": 2,
+      "id": "NC_SCENARIO_EVIDENCE_DIAGNOSTIC",
+      "targetSubset": "INSUFFICIENT_EVIDENCE plus large NC delta",
+      "mechanism": "test whether default/fallback convergence creates non-discriminating second-candidate separation",
+      "requiredPredictionTimeInputs": [
+        "NC delta",
+        "scenario evidence state",
+        "node trace completeness"
+      ],
+      "evidence": {
+        "failure": {
+          "count": 8,
+          "denominator": 29,
+          "rate": 0.27586206896551724
+        },
+        "controlFalsePositive": {
+          "count": 1,
+          "denominator": 7,
+          "rate": 0.14285714285714285
+        },
+        "controlNegative": {
+          "count": 0,
+          "denominator": 64,
+          "rate": 0
+        },
+        "precisionLike": 0.8888888888888888,
+        "matched505": 7,
+        "expansion130": 1
+      },
+      "expectedBenefit": "isolate fallback/default behavior",
+      "expectedSideEffect": "small subset and missing-evidence bias",
+      "shadowDesign": "stratified observation only; do not alter NC",
+      "promotionGate": [
+        "direction agreement in MATCHED and EXPANSION",
+        "acceptable control FP",
+        "winner/scenario/rider unchanged",
+        "global ranking unchanged",
+        "prediction-time only"
+      ]
+    },
+    {
+      "rank": 3,
+      "id": "NC_LINE_RELATION_DIAGNOSTIC",
+      "targetSubset": "selected same-line while correct second is cross-line",
+      "mechanism": "test same-line convergence over-preference only where line identity is known",
+      "requiredPredictionTimeInputs": [
+        "line membership",
+        "winner",
+        "second candidate",
+        "NC reasons"
+      ],
+      "evidence": {
+        "failure": {
+          "count": 7,
+          "denominator": 29,
+          "rate": 0.2413793103448276
+        },
+        "controlFalsePositive": {
+          "count": 2,
+          "denominator": 7,
+          "rate": 0.2857142857142857
+        },
+        "controlNegative": {
+          "count": 1,
+          "denominator": 64,
+          "rate": 0.015625
+        },
+        "precisionLike": 0.7777777777777778,
+        "matched505": 6,
+        "expansion130": 1
+      },
+      "expectedBenefit": "isolate line-specific cases without global NC changes",
+      "expectedSideEffect": "low evidence availability",
+      "shadowDesign": "known-line subset observation only",
+      "promotionGate": [
+        "direction agreement in MATCHED and EXPANSION",
+        "acceptable control FP",
+        "winner/scenario/rider unchanged",
+        "global ranking unchanged",
+        "prediction-time only"
+      ]
+    }
+  ],
+  "safety": {
+    "productionChanged": false,
+    "predictionChanged": false,
+    "purchaseChanged": false,
+    "riderWeakChanged": false,
+    "resultChanged": false,
+    "checkpointChanged": false,
+    "shadowImplemented": false,
+    "parameterTuned": false,
+    "protectedFinalUsed": 0,
+    "resultLeakage": 0
+  },
+  "hash": "d379c8f164ad7935d1289ee501baa5d2b7f4bc3d10deaa08df8b1e305e9c5657"
+}
