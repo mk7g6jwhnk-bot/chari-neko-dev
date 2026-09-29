@@ -1,0 +1,43 @@
+import assert from "node:assert/strict";
+import {gzipSync} from "node:zlib";
+import {performance} from "node:perf_hooks";
+import {buildRecommendationTrace,buildWinnerConditionedSecondRankTrace} from "../keirin/engine/research-diagnostics-v1.mjs";
+import {runKeirinEngine} from "../keirin/engine/keirin-engine.mjs";
+
+const contribution={branchId:"B1",probability:.4,decisionRatios:{first:.8,second:.7,third:.6},positionScores:{first:8,second:7,third:6},positionEvidence:{first:{},second:{},third:{}}};
+const terminal=(order,terminalScore,probability,scenario="MS-A",extra={})=>({order,terminalScore,probability,relativeProbability:probability/.5,evidenceScore:.6,positionFit:.7,positionBalance:.75,evidenceCount:3,branchContributions:[contribution],dominantBranchId:"B1",macroScenarioId:scenario,eventId:`${scenario}:E01`,terminalId:`${scenario}:${order.join("-")}`,purchaseStatus:"購入採用",purchaseRejectCode:"ADOPTED",...extra});
+const terminals=[terminal([1,2,3],.9,.5),terminal([1,3,2],.8,.4,"MS-B"),terminal([1,4,2],.8,.4,"MS-B"),terminal([2,1,3],.7,.3)];
+const prediction={predictionVersion:"P1",branches:[{id:"B1",branchType:"LEAD_BATTLE"}]};
+const purchase={purchaseVersion:"BUY1",terminals,standardPurchasePlan:[terminals[0],terminals[1],terminals[3]],purchaseEligibility:{canPurchase:true},noBet:false};
+const race={raceKey:"20260930-35-1"};
+
+const started=performance.now(),trace=buildWinnerConditionedSecondRankTrace({race,prediction,purchase,generatedAt:"2026-09-30T00:00:00.000Z"}),elapsed=performance.now()-started;
+assert.equal(trace.schemaVersion,"WINNER_CONDITIONED_SECOND_RANK_TRACE_V1");
+assert.equal(trace.resultDataUsed,false);
+assert.equal(trace.winners.find(x=>x.winnerRiderId===1).candidates.length,3);
+assert.deepEqual(trace.winners.find(x=>x.winnerRiderId===1).rankedSecondCandidateIds,[2,3,4]);
+assert.equal(trace.winners[0].candidates[0].relativeProbability,1);
+assert.equal(trace.winners.find(x=>x.winnerRiderId===1).candidates[1].tieBreakReason,"ORDER_LEXICOGRAPHIC");
+assert.ok(trace.winners.flatMap(x=>x.candidates).every(x=>x.finalSortTuple.length===3));
+
+const scenarios=[{macroScenarioId:"MS-A",relativeScenarioScore:.55,events:[{eventId:"A1"}]},{macroScenarioId:"MS-B",relativeScenarioScore:.45,events:[{eventId:"B1"}]}];
+const multi={scenarios,purchase:{config:{totalCap:15}}};
+const recommended=buildRecommendationTrace({race,prediction,purchase,multiWorldScenario:multi});
+assert.notEqual(recommended.recommendationClass,"SKIP_RECOMMENDED","two scenarios and multiple axes alone must not skip");
+assert.equal(recommended.axisCount,2);
+const plan13=Array.from({length:13},(_,i)=>terminal([i%7+1,(i+1)%7+1,(i+2)%7+1],.8-i/100,.4,i<6?"MS-A":i<10?"MS-B":"MS-C"));
+const rec13=buildRecommendationTrace({race,prediction,purchase:{...purchase,standardPurchasePlan:plan13,terminals:plan13},multiWorldScenario:{scenarios:[...scenarios,{macroScenarioId:"MS-C",relativeScenarioScore:.2,events:[{}]}],purchase:{config:{totalCap:15}}}});
+assert.notEqual(rec13.recommendationClass,"PURCHASE_INELIGIBLE");
+const weak=buildRecommendationTrace({race,prediction:{...prediction,branches:Array.from({length:5},(_,i)=>({branchType:i<3?"UNKNOWN":"LEAD"}))},purchase,multiWorldScenario:multi});
+assert.equal(weak.recommendationClass,"SKIP_RECOMMENDED");
+const exploded=buildRecommendationTrace({race,prediction,purchase:{...purchase,standardPurchasePlan:Array.from({length:16},(_,i)=>terminal([1,2,i+3],.5,.3))},multiWorldScenario:multi});
+assert.equal(exploded.recommendationClass,"SKIP_RECOMMENDED");
+const off=buildRecommendationTrace({enabled:false});
+assert.deepEqual({enabled:off.enabled,legacyParity:off.legacyParity},{enabled:false,legacyParity:true});
+delete process.env.KEIRIN_SECOND_RANK_TRACE_V1;delete process.env.KEIRIN_RECOMMENDATION_FILTER_V1;
+const participants=Array.from({length:7},(_,i)=>({id:String(i+1),number:i+1,name:`R${i+1}`,lineId:`L${Math.floor(i/2)+1}`,lineOrder:i%2+1,recentForm:7,startPower:7,sprintPower:7,finishPower:7,trackingSkill:7}));
+const legacy=runKeirinEngine({race:{id:"legacy",participants,lineConfidence:"高"},captureResearchTrace:true});
+assert.equal("recommendationFilter" in legacy,false);
+assert.equal("winnerConditionedSecondRankTrace" in legacy.researchTerminalTrace,false);
+const bytes=Buffer.byteLength(JSON.stringify(trace)),gzip=gzipSync(JSON.stringify(trace)).length;
+console.log(JSON.stringify({ok:true,cases:10,bytesPerRace:bytes,gzipBytesPerRace:gzip,cpuMsPerRace:Number(elapsed.toFixed(3))}));
