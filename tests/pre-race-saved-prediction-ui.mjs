@@ -28,9 +28,11 @@ assert.equal(legacy.canOpenSaved,false,"legacy artifact must not be guessed by r
 
 const app=await fs.readFile(new URL("../public/app.mjs",import.meta.url),"utf8");
 const css=await fs.readFile(new URL("../public/styles.css",import.meta.url),"utf8");
+const summaryProxy=await fs.readFile(new URL("../netlify/functions/keirin-saved-prediction-summary.mjs",import.meta.url),"utf8");
 assert.match(app,/reuseSealedPrediction\(race,savedState\.predictionHash\)/,"saved list opens by predictionHash");
 assert.doesNotMatch(app,/if\(!state\.snapshot\)void reuseSealedPrediction\(race\)/,"list open must not fall back to raceKey inference");
 assert.match(app,/savedState\.label/);
 assert.match(app,/savedState\.action/);
 assert.match(css,/@media\(max-width:360px\)\{\.predictionSaveState/,"mobile state badge remains compact");
+assert.match(summaryProxy,/AbortSignal\.timeout\(30000\)/,"saved prediction summary proxy tolerates the measured production read latency");
 console.log("OK pre-race saved prediction UI tests");

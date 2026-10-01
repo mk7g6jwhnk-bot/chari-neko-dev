@@ -11,7 +11,7 @@ export default async function handler(req) {
 
 async function proxy(url){
   try{
-    const response=await fetch(url,{headers:{accept:"application/json"},signal:AbortSignal.timeout(12000)}),text=await response.text();
+    const response=await fetch(url,{headers:{accept:"application/json"},signal:AbortSignal.timeout(30000)}),text=await response.text();
     let data;try{data=JSON.parse(text)}catch{return jsonResponse(502,{ok:false,code:"UPSTREAM_INVALID_JSON"})}
     const result=jsonResponse(response.status,data);
     for(const name of ["server-timing","x-response-bytes"])if(response.headers.get(name))result.headers.set(name,response.headers.get(name));
