@@ -3,6 +3,7 @@ import fs from "node:fs/promises";
 const app=await fs.readFile(new URL("../public/app.mjs",import.meta.url),"utf8");
 assert.match(app,/openDetail\(race\).*reuseSealedPrediction\(race,savedState\.predictionHash\)/s,"detail open must perform identity-bound server seal lookup");
 assert.match(app,/if\(!state\.snapshot&&savedState\.predictionHash\)void reuseSealedPrediction\(race,savedState\.predictionHash\)/,"saved races must reuse only the selected immutable identity");
+assert.match(app,/validateReusableSeal\(data,race,expectedHash\?data\.predictionVersion:SNAPSHOT_COMPATIBLE_VERSION\)/,"identity-bound immutable seals must validate against their recorded prediction version before result confirmation");
 assert.match(app,/function handleDetailPrimary\(\).*state\.sealedLookupBusy/s,"normal action must not predict while seal lookup is pending");
 assert.match(app,/function handleDetailSecondary\(\).*if\(state\.snapshot\|\|timeUnknown\)predict\(\)/s,"explicit secondary action remains the repredict path");
 assert.doesNotMatch(app,/reuseSealedPrediction\([^)]*\)[\s\S]{0,500}predict\(\)/,"seal reuse must not trigger automatic reprediction");
