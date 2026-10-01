@@ -6,5 +6,5 @@ assert.match(app,/if\(!state\.snapshot&&savedState\.predictionHash\)void reuseSe
 assert.match(app,/validateReusableSeal\(data,race,expectedHash\?data\.predictionVersion:SNAPSHOT_COMPATIBLE_VERSION\)/,"identity-bound immutable seals must validate against their recorded prediction version before result confirmation");
 assert.match(app,/function handleDetailPrimary\(\).*state\.sealedLookupBusy/s,"normal action must not predict while seal lookup is pending");
 assert.match(app,/function handleDetailSecondary\(\).*if\(state\.snapshot\|\|timeUnknown\)predict\(\)/s,"explicit secondary action remains the repredict path");
-assert.doesNotMatch(app,/reuseSealedPrediction\([^)]*\)[\s\S]{0,500}predict\(\)/,"seal reuse must not trigger automatic reprediction");
+assert.match(app,/if\(savedHash\)\{void reuseSealedPrediction\(state\.race,savedHash\);return\}/,"seal reuse returns before the prediction generation path");
 console.log("OK sealed prediction explicit repredict control test");

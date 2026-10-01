@@ -33,6 +33,9 @@ assert.match(app,/reuseSealedPrediction\(race,savedState\.predictionHash\)/,"sav
 assert.doesNotMatch(app,/if\(!state\.snapshot\)void reuseSealedPrediction\(race\)/,"list open must not fall back to raceKey inference");
 assert.match(app,/savedState\.label/);
 assert.match(app,/savedState\.action/);
+assert.match(app,/else if\(savedHash\)\{\$\("predictBtn"\)\.textContent="予想を見る"/s,"detail action uses the saved prediction hash before payload restoration completes");
+assert.match(app,/if\(savedHash\)\{void reuseSealedPrediction\(state\.race,savedHash\);return\}/s,"detail primary action reads the sealed prediction instead of generating a new one");
+assert.match(app,/function selectedPredictionHash\(r\).*r\?\.selectedPredictionHash.*preRacePredictionState\(r\)\.predictionHash/s,"detail and list share the explicit saved prediction identity");
 assert.match(css,/@media\(max-width:360px\)\{\.predictionSaveState/,"mobile state badge remains compact");
 assert.match(summaryProxy,/AbortSignal\.timeout\(30000\)/,"saved prediction summary proxy tolerates the measured production read latency");
 console.log("OK pre-race saved prediction UI tests");
