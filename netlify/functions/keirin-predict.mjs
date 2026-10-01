@@ -60,6 +60,21 @@ export default async function handler(req) {
   }
 
   try {
+    if (displayOnly && !autoResearch) {
+      const savedStarted = performance.now();
+      const saved = await readSavedPrediction(serviceBase, { date, venueCode, raceNo });
+      timing.savedPredictionReadMs = roundMs(performance.now() - savedStarted);
+      if (saved) {
+        timing.totalResponseMs = roundMs(performance.now() - totalStarted);
+        return jsonResponse(200, {
+          ...saved,
+          reusedSealedPrediction: true,
+          generationPerformed: false,
+          timing
+        });
+      }
+    }
+
     const officialStarted=performance.now(),browserResult = await requestBrowserService(serviceBase, {
       date,
       venueCode,
@@ -318,6 +333,24 @@ export function buildDisplayPredictionPayload(payload={}){
   const compactAudit={passed:prediction.audit?.passed!==false,probabilitySum:prediction.audit?.probabilitySum??null,terminalCount:prediction.audit?.terminalCount??null,lineFallbackAudit:prediction.audit?.lineFallbackAudit||null,predictionBoundaryAudit:prediction.audit?.predictionBoundaryAudit||null,predictionPurchaseBoundaryAudit:prediction.audit?.predictionPurchaseBoundaryAudit||null,selectionBoundaryAudit:prediction.audit?.selectionBoundaryAudit||null,purchaseDistributionAudit:prediction.audit?.purchaseDistributionAudit||null,purchaseRegime:prediction.audit?.purchaseRegime||null};
   const compactRace={...(payload.race||{}),participants:(payload.race?.participants||[]).map(compactParticipant)};
   return {ok:payload.ok,race:compactRace,odds:payload.odds,prediction:{engineVersion:prediction.engineVersion,lineConfidence:prediction.lineConfidence,scored:(prediction.scored||[]).map(compactScoredRider),predictionExplanation:prediction.predictionExplanation||prediction.prediction?.explanation||null,terminals:compactTerminals,purchasePlan:selected,standardPurchasePlan:(prediction.standardPurchasePlan||[]).map(compactPurchaseRow),referencePurchasePlan:(prediction.referencePurchasePlan||[]).map(compactPurchaseRow),recommendationLabel:prediction.recommendationLabel||"",...(prediction.recommendationFilter?{recommendationFilter:prediction.recommendationFilter}:{}),noBet:Boolean(prediction.noBet),noBetReason:prediction.noBetReason||null,purchaseEligibility:prediction.purchaseEligibility||prediction.audit?.purchaseEligibility||null,displayRatingInputs,audit:compactAudit,lineSnapshotAudit:prediction.lineSnapshotAudit||null,riderSelectionAdoption:prediction.riderSelectionAdoption||null,multiWorldScenario:prediction.multiWorldScenario||null},predictionRequestedAt:payload.predictionRequestedAt,predictionSealedAt:payload.predictionSealedAt,preSeal:payload.preSeal||null,riderDbUsageAudit:payload.riderDbUsageAudit||null,lineSnapshotAudit:payload.lineSnapshotAudit||null,dataQuality:payload.dataQuality||null,warnings:payload.warnings||[],checkedAt:payload.checkedAt,durationBreakdown:payload.durationBreakdown,timing:payload.timing||null,prefetch:payload.prefetch||null};
+}
+
+export async function readSavedPrediction(base, { date, venueCode, raceNo }, fetchImpl = fetch) {
+  const raceKey = `${date}-${String(venueCode).padStart(2, "0")}-${Number(raceNo)}`;
+  try {
+    const response = await fetchImpl(`${base}/keirin/read/predictions/${encodeURIComponent(raceKey)}`, {
+      headers: { accept: "application/json" },
+      signal: AbortSignal.timeout(8000)
+    });
+    if (response.status === 404) return null;
+    const data = await response.json();
+    if (!response.ok || !data?.ok || data.raceKey !== raceKey || !data.predictionHash || !data.predictionPayload) return null;
+    if (data.integrityStatus !== "VALID" || data.temporalStatus !== "VALID") return null;
+    return data;
+  } catch {
+    // Saved-read failure must not block a genuinely new prediction request.
+    return null;
+  }
 }
 
 function buildDisplayRatingInputs(payload={}){
