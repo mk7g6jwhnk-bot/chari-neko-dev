@@ -1,16 +1,17 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
-import {runDailyValidation} from './daily-validation-run.mjs';
+import {runDailyValidationResilient} from './daily-validation-resilient-run.mjs';
+import {isTransientFailure} from './daily-pipeline-run.mjs';
 
 const root=path.dirname(fileURLToPath(import.meta.url));
 const defaultAuditFile=path.join(root,'daily-validation','scheduler-latest.json');
 const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 const statusOf=result=>String(result?.status||result?.daily?.status||'DAILY_VALIDATION_FAILED');
-const successful=status=>['DAILY_VALIDATION_OK','DAILY_VALIDATION_WARNING','ALREADY_VALIDATED'].includes(status);
+const successful=status=>['DAILY_VALIDATION_OK','DAILY_VALIDATION_WARNING','ALREADY_VALIDATED','COMPLETE','COMPLETE_WITH_QUARANTINE'].includes(status);
 async function save(file,value){if(!file)return;await fs.mkdir(path.dirname(file),{recursive:true});const tmp=`${file}.${process.pid}.tmp`;await fs.writeFile(tmp,`${JSON.stringify(value,null,2)}\n`);await fs.rename(tmp,file);}
 
-export async function runScheduledValidation({maxRetries=2,retryIntervalMs=600000,run=runDailyValidation,sleep=wait,now=()=>new Date(),auditFile=defaultAuditFile}={}){
+export async function runScheduledValidation({maxRetries=2,retryIntervalMs=600000,run=runDailyValidationResilient,sleep=wait,now=()=>new Date(),auditFile=defaultAuditFile}={}){
   const attempts=[];
   for(let retry=0;retry<=maxRetries;retry++){
     const startedAt=now().toISOString();let result;
@@ -18,7 +19,8 @@ export async function runScheduledValidation({maxRetries=2,retryIntervalMs=60000
     const status=statusOf(result),ok=successful(status),incomplete=String(result?.error||'').match(/INCOMPLETE_DAILY_SOURCE:(\d+)\/(\d+)/),entry={attempt:retry+1,retryNumber:retry,startedAt,completedAt:now().toISOString(),status,exitCode:ok?0:1,targetDate:result?.targetDate??null,targetRaces:result?.targetRaceKeys?.length??(incomplete?Number(incomplete[2]):result?.newRaces??null),fetchedRaces:incomplete?Number(incomplete[1]):result?.targetRaceKeys?.length??result?.newRaces??null,error:result?.error??null,syncStatus:result?.sync?.status??null};attempts.push(entry);
     const audit={schemaVersion:'DAILY_VALIDATION_SCHEDULER_AUDIT_V1',policy:{retryIntervalMinutes:retryIntervalMs/60000,maxRetries},finalStatus:status,finalExitCode:ok?0:1,retryTriggered:attempts.length>1,retryCount:attempts.length-1,attempts,updatedAt:entry.completedAt};
     if(ok){await save(auditFile,audit);return{...result,schedulerRetry:audit};}
-    if(retry<maxRetries){entry.nextRetryAt=new Date(now().getTime()+retryIntervalMs).toISOString();audit.nextRetryAt=entry.nextRetryAt;await save(auditFile,audit);await sleep(retryIntervalMs);}
+    const retryable=result?.status==='RETRYING'||isTransientFailure(result?.error);
+    if(retry<maxRetries&&retryable){const delayMs=retryIntervalMs*(2**retry);entry.nextRetryAt=new Date(now().getTime()+delayMs).toISOString();entry.retryDelayMs=delayMs;audit.nextRetryAt=entry.nextRetryAt;await save(auditFile,audit);await sleep(delayMs);}
     else{await save(auditFile,audit);return{...result,schedulerRetry:audit};}
   }
 }
