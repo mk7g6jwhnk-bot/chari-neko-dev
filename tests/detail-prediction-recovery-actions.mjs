@@ -3,7 +3,7 @@ import fs from"node:fs/promises";
 import{detailPredictionActionModel,DETAIL_PREDICTION_ACTIONS as A}from"../public/detail-prediction-actions.mjs";
 import{canonicalPurchaseIdentity}from"../public/canonical-prediction-cache.mjs";
 
-const app=await fs.readFile(new URL("../public/app.mjs",import.meta.url),"utf8"),css=await fs.readFile(new URL("../public/styles.css",import.meta.url),"utf8");
+const app=await fs.readFile(new URL("../public/app.mjs",import.meta.url),"utf8"),css=await fs.readFile(new URL("../public/styles.css",import.meta.url),"utf8"),index=await fs.readFile(new URL("../public/index.html",import.meta.url),"utf8"),netlify=await fs.readFile(new URL("../netlify.toml",import.meta.url),"utf8");
 const cases=[];
 const check=(name,fn)=>{fn();cases.push(name)};
 
@@ -14,6 +14,7 @@ check("checking disabled",()=>assert.equal(detailPredictionActionModel({hasSaved
 check("unsealed predict",()=>assert.equal(detailPredictionActionModel({timeKnown:true}).primary.action,A.CREATE_PREDICTION));
 check("saved update explicit",()=>assert.equal(detailPredictionActionModel({hasSnapshot:true}).secondary.action,A.UPDATE_PREDICTION));
 check("ended update hidden",()=>assert.equal(detailPredictionActionModel({hasSnapshot:true,ended:true}).secondary.visible,false));
+check("ended stale update visible but disabled",()=>{const model=detailPredictionActionModel({hasSavedHash:true,canonicalStatus:"UNAVAILABLE",ended:true});assert.equal(model.secondary.visible,true);assert.equal(model.secondary.disabled,true)});
 check("result only",()=>assert.equal(detailPredictionActionModel({ended:true,hasResult:true}).primary.label,"公式結果を更新"));
 check("reload bypasses local body cache",()=>assert.match(app,/if\(!forceNetwork\)try\{const cached=await getSealedPredictionCache/));
 check("reload never predicts",()=>{const body=app.match(/async function reloadSavedPrediction[\s\S]+?(?=function openSealedSummary)/u)?.[0]||"";assert.doesNotMatch(body,/\bpredict\(/)});
@@ -24,5 +25,8 @@ check("stale local is not promoted",()=>assert.match(app,/state\.snapshot=null;s
 check("mobile actions",()=>{assert.match(css,/\.savedRecoveryActions\{display:grid/);assert.match(css,/@media\(max-width:390px\)\{\.savedRecoveryActions\{grid-template-columns:1fr\}\}/)});
 check("unambiguous V2 legacy world class",()=>{const identity=canonicalPurchaseIdentity({tickets:[{order:[1,4,2],macroScenarioId:"MS-A",eventId:"MS-A:E1",terminalId:"MS-A:E1:T1",ticketClass:"MAIN",scenarioPurchaseClass:null}]});assert.equal(identity.tickets[0].scenarioPurchaseClass,"MAIN")});
 check("ambiguous cover world class stays unknown",()=>{const identity=canonicalPurchaseIdentity({tickets:[{order:[1,4,3],macroScenarioId:"MS-A",eventId:"MS-A:E1",terminalId:"MS-A:E1:T2",ticketClass:"COVER",scenarioPurchaseClass:null}]});assert.equal(identity.tickets[0].scenarioPurchaseClass,null)});
+check("stale card and actions share model state",()=>assert.match(app,/savedReadFailed=actionModel\.state==="SAVED_STALE"/));
+check("foreground PWA polls release",()=>{assert.match(app,/setInterval\(\(\)=>\{if\(document\.visibilityState!=="visible"\)return;checkForAppUpdate\(\)/);assert.match(app,/appReload/)});
+check("module cache busting",()=>{assert.match(index,/app\.mjs\?v=69/);assert.match(netlify,/for = "\/\*\.mjs"[\s\S]+no-cache, no-store, must-revalidate/)});
 
 console.log(JSON.stringify({ok:true,cases:cases.length,names:cases}));

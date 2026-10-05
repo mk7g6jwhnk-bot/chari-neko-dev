@@ -21,6 +21,11 @@
     Cache-Control = "no-cache, no-store, must-revalidate"
 
 [[headers]]
+  for = "/*.mjs"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
   for = "/prediction-store.mjs"
   [headers.values]
     Cache-Control = "no-cache, no-store, must-revalidate"
