@@ -1,10 +1,16 @@
 function text(value){return value==null?null:String(value)}
 function orderOf(row){return Array.isArray(row?.order)?row.order.map(Number).join("-"):String(row?.order||"")}
 function standardPlan(prediction){return prediction?.canonicalPurchasePlan?.standardTickets||prediction?.standardPurchasePlan||prediction?.purchasePlan||[]}
+function scenarioPurchaseClassOf(row){
+  const explicit=text(row?.scenarioPurchaseClass);
+  if(explicit)return explicit;
+  const ticketClass=text(row?.ticketClass||row?.betClass);
+  return ticketClass==="MAIN"||ticketClass==="SCENARIO_BREAK"?ticketClass:null;
+}
 
 export function canonicalPurchaseIdentity(response){
   const prediction=response?.predictionPayload?.prediction||response?.prediction||{};
-  const tickets=(Array.isArray(response?.tickets)?response.tickets:standardPlan(prediction)).map(row=>({order:orderOf(row),macroScenarioId:text(row?.macroScenarioId),eventId:text(row?.eventId),terminalId:text(row?.terminalId),ticketClass:text(row?.ticketClass||row?.betClass),scenarioPurchaseClass:text(row?.scenarioPurchaseClass)}));
+  const tickets=(Array.isArray(response?.tickets)?response.tickets:standardPlan(prediction)).map(row=>({order:orderOf(row),macroScenarioId:text(row?.macroScenarioId),eventId:text(row?.eventId),terminalId:text(row?.terminalId),ticketClass:text(row?.ticketClass||row?.betClass),scenarioPurchaseClass:scenarioPurchaseClassOf(row)}));
   return{predictionHash:text(response?.predictionHash||response?.predictionIdentity?.predictionHash),predictionVersion:text(response?.predictionVersion||prediction?.engineVersion),purchaseVersion:text(response?.purchaseVersion||prediction?.purchase?.purchaseVersion),predictionHashVersion:text(response?.predictionHashVersion||response?.predictionIdentity?.predictionHashVersion),purchasePlanHash:JSON.stringify(tickets),ticketCount:tickets.length,tickets,worldCount:new Set(tickets.map(row=>row.macroScenarioId).filter(Boolean)).size};
 }
 

@@ -1,6 +1,7 @@
 import assert from"node:assert/strict";
 import fs from"node:fs/promises";
 import{detailPredictionActionModel,DETAIL_PREDICTION_ACTIONS as A}from"../public/detail-prediction-actions.mjs";
+import{canonicalPurchaseIdentity}from"../public/canonical-prediction-cache.mjs";
 
 const app=await fs.readFile(new URL("../public/app.mjs",import.meta.url),"utf8"),css=await fs.readFile(new URL("../public/styles.css",import.meta.url),"utf8");
 const cases=[];
@@ -21,5 +22,7 @@ check("manual update uses refresh flow",()=>assert.match(app,/UPDATE_PREDICTION\
 check("double tap guards",()=>assert.match(app,/handleDetailPrimary\(\).*state\.sealedLookupBusy\|\|state\.busy/s));
 check("stale local is not promoted",()=>assert.match(app,/state\.snapshot=null;state\.legacySnapshot=local\|\|legacySnapshotForRace/));
 check("mobile actions",()=>{assert.match(css,/\.savedRecoveryActions\{display:grid/);assert.match(css,/@media\(max-width:390px\)\{\.savedRecoveryActions\{grid-template-columns:1fr\}\}/)});
+check("unambiguous V2 legacy world class",()=>{const identity=canonicalPurchaseIdentity({tickets:[{order:[1,4,2],macroScenarioId:"MS-A",eventId:"MS-A:E1",terminalId:"MS-A:E1:T1",ticketClass:"MAIN",scenarioPurchaseClass:null}]});assert.equal(identity.tickets[0].scenarioPurchaseClass,"MAIN")});
+check("ambiguous cover world class stays unknown",()=>{const identity=canonicalPurchaseIdentity({tickets:[{order:[1,4,3],macroScenarioId:"MS-A",eventId:"MS-A:E1",terminalId:"MS-A:E1:T2",ticketClass:"COVER",scenarioPurchaseClass:null}]});assert.equal(identity.tickets[0].scenarioPurchaseClass,null)});
 
 console.log(JSON.stringify({ok:true,cases:cases.length,names:cases}));
