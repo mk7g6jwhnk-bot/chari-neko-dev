@@ -1,0 +1,3543 @@
+{
+  "schemaVersion": "NUMERIC_FORMULA_FROZEN_STAGE2_V1",
+  "freezeStatus": "FORMULA_FROZEN_BEFORE_VALIDATION",
+  "frozenAt": "2026-10-05T04:34:51.153Z",
+  "sourceMatrixHash": "4214e0eb7a3c3aa439acc13507d3df51a6d02a2b9108887db6a8f0f473d8988f",
+  "validationAccessedBeforeFreeze": false,
+  "selectionPolicy": {
+    "target": 40,
+    "correlationGuard": 0.98,
+    "discoveryOnly": true,
+    "diversityFamilies": [
+      "BOUNDARY",
+      "SLOPE",
+      "DENSITY",
+      "ENTROPY",
+      "WORLD",
+      "WORLD_WITHIN",
+      "CROSS"
+    ]
+  },
+  "formulaCount": 40,
+  "formulas": [
+    {
+      "formulaId": "F0617",
+      "expression": "(outside_top10_mean)-0.25*(boundary_selected_min_minus_outside1)",
+      "seedFeatureNames": [
+        "outside_top10_mean",
+        "boundary_selected_min_minus_outside1"
+      ],
+      "coefficients": {
+        "secondary": 0.25
+      },
+      "transform": "WEIGHTED_DIFFERENCE",
+      "operation": "weighted_difference",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "BOUNDARY",
+      "discovery": {
+        "valid": true,
+        "n": 116,
+        "coverage": 1,
+        "missingRate": 0,
+        "hit": {
+          "n": 28,
+          "mean": 0.7730473795476526,
+          "median": 0.7721135620531752,
+          "sd": 0.05326530893858275,
+          "q25": 0.7291122401490933,
+          "q75": 0.7977276449119628
+        },
+        "miss": {
+          "n": 88,
+          "mean": 0.8100663165148121,
+          "median": 0.8172930312511217,
+          "sd": 0.07758469484971617,
+          "q25": 0.7544266944289247,
+          "q75": 0.8743859238901981
+        },
+        "effect": {
+          "cohensD": -0.5101472642069366,
+          "medianDifference": -0.045179469197946576,
+          "rankBiserial": -0.3189935064935065
+        },
+        "direction": -1,
+        "directionLabel": "LOWER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          0.7476458096541735,
+          0.7998509269842344,
+          0.8720225116920794
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": 0.7476458096541735,
+            "n": 29,
+            "hits": 11,
+            "hitRate": 0.3793103448275862,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q2",
+            "lower": 0.7476458096541735,
+            "upper": 0.7998509269842344,
+            "n": 29,
+            "hits": 10,
+            "hitRate": 0.3448275862068966,
+            "high10k": 1
+          },
+          {
+            "bucket": "Q3",
+            "lower": 0.7998509269842344,
+            "upper": 0.8720225116920794,
+            "n": 29,
+            "hits": 5,
+            "hitRate": 0.1724137931034483,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q4",
+            "lower": 0.8720225116920794,
+            "upper": null,
+            "n": 29,
+            "hits": 2,
+            "hitRate": 0.06896551724137931,
+            "high10k": 0
+          }
+        ],
+        "monotonicity": 0.9737289911202951,
+        "discoveryScore": 0.556388720605236
+      }
+    },
+    {
+      "formulaId": "F0003",
+      "expression": "(outside_top10_mean)^2",
+      "seedFeatureNames": [
+        "outside_top10_mean"
+      ],
+      "coefficients": {},
+      "transform": "SQUARE",
+      "operation": "square",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "BOUNDARY",
+      "discovery": {
+        "valid": true,
+        "n": 116,
+        "coverage": 1,
+        "missingRate": 0,
+        "hit": {
+          "n": 28,
+          "mean": 0.5193571182656553,
+          "median": 0.5102486896192255,
+          "sd": 0.04731233264373365,
+          "q25": 0.488730258697661,
+          "q75": 0.5312930606790313
+        },
+        "miss": {
+          "n": 88,
+          "mean": 0.5552845353278436,
+          "median": 0.5604001808160992,
+          "sd": 0.06782771159226504,
+          "q25": 0.4992809718329251,
+          "q75": 0.6171249641010634
+        },
+        "effect": {
+          "cohensD": -0.5651631537022249,
+          "medianDifference": -0.050151491196873677,
+          "rankBiserial": -0.33116883116883117
+        },
+        "direction": -1,
+        "directionLabel": "LOWER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          0.4916143601811553,
+          0.5402704581411097,
+          0.6098823148576887
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": 0.4916143601811553,
+            "n": 29,
+            "hits": 8,
+            "hitRate": 0.27586206896551724,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q2",
+            "lower": 0.4916143601811553,
+            "upper": 0.5402704581411097,
+            "n": 29,
+            "hits": 14,
+            "hitRate": 0.4827586206896552,
+            "high10k": 1
+          },
+          {
+            "bucket": "Q3",
+            "lower": 0.5402704581411097,
+            "upper": 0.6098823148576887,
+            "n": 29,
+            "hits": 3,
+            "hitRate": 0.10344827586206896,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q4",
+            "lower": 0.6098823148576887,
+            "upper": null,
+            "n": 29,
+            "hits": 3,
+            "hitRate": 0.10344827586206896,
+            "high10k": 0
+          }
+        ],
+        "monotonicity": 0.6420242378222332,
+        "discoveryScore": 0.5399355780017665
+      }
+    },
+    {
+      "formulaId": "F0619",
+      "expression": "(outside_top10_mean)-0.5*(boundary_selected_min_minus_outside1)",
+      "seedFeatureNames": [
+        "outside_top10_mean",
+        "boundary_selected_min_minus_outside1"
+      ],
+      "coefficients": {
+        "secondary": 0.5
+      },
+      "transform": "WEIGHTED_DIFFERENCE",
+      "operation": "weighted_difference",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "BOUNDARY",
+      "discovery": {
+        "valid": true,
+        "n": 116,
+        "coverage": 1,
+        "missingRate": 0,
+        "hit": {
+          "n": 28,
+          "mean": 0.8261569613351573,
+          "median": 0.8453082391724123,
+          "sd": 0.09129389582162276,
+          "q25": 0.7308577413609021,
+          "q75": 0.8819100890552993
+        },
+        "miss": {
+          "n": 88,
+          "mean": 0.8763798543215265,
+          "median": 0.8957848598185845,
+          "sd": 0.11804687541131574,
+          "q25": 0.7985640222740731,
+          "q75": 0.9691933400504553
+        },
+        "effect": {
+          "cohensD": -0.4472678914608067,
+          "medianDifference": -0.0504766206461722,
+          "rankBiserial": -0.26785714285714285
+        },
+        "direction": -1,
+        "directionLabel": "LOWER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          0.7748486017515797,
+          0.8762631718088572,
+          0.9568630543977203
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": 0.7748486017515797,
+            "n": 29,
+            "hits": 10,
+            "hitRate": 0.3448275862068966,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q2",
+            "lower": 0.7748486017515797,
+            "upper": 0.8762631718088572,
+            "n": 29,
+            "hits": 8,
+            "hitRate": 0.27586206896551724,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q3",
+            "lower": 0.8762631718088572,
+            "upper": 0.9568630543977203,
+            "n": 29,
+            "hits": 7,
+            "hitRate": 0.2413793103448276,
+            "high10k": 1
+          },
+          {
+            "bucket": "Q4",
+            "lower": 0.9568630543977203,
+            "upper": null,
+            "n": 29,
+            "hits": 3,
+            "hitRate": 0.10344827586206896,
+            "high10k": 0
+          }
+        ],
+        "monotonicity": 0.964763821237732,
+        "discoveryScore": 0.5076761992033892
+      }
+    },
+    {
+      "formulaId": "F0098",
+      "expression": "(outside_top10_mean)*(outside_top3_mean)",
+      "seedFeatureNames": [
+        "outside_top10_mean",
+        "outside_top3_mean"
+      ],
+      "coefficients": {},
+      "transform": "BINARY_PRODUCT",
+      "operation": "product",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "BOUNDARY",
+      "discovery": {
+        "valid": true,
+        "n": 116,
+        "coverage": 1,
+        "missingRate": 0,
+        "hit": {
+          "n": 28,
+          "mean": 0.550048204721115,
+          "median": 0.5403443416200742,
+          "sd": 0.04932967879627638,
+          "q25": 0.5218704015291539,
+          "q75": 0.5757882153556516
+        },
+        "miss": {
+          "n": 88,
+          "mean": 0.5843352772428743,
+          "median": 0.6003662043196314,
+          "sd": 0.07045044264510718,
+          "q25": 0.525737898698374,
+          "q75": 0.6448096862836066
+        },
+        "effect": {
+          "cohensD": -0.5190193336374055,
+          "medianDifference": -0.06002186269955723,
+          "rankBiserial": -0.31493506493506496
+        },
+        "direction": -1,
+        "directionLabel": "LOWER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          0.525737898698374,
+          0.5766024123744714,
+          0.6388166132750505
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": 0.525737898698374,
+            "n": 29,
+            "hits": 7,
+            "hitRate": 0.2413793103448276,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q2",
+            "lower": 0.525737898698374,
+            "upper": 0.5766024123744714,
+            "n": 29,
+            "hits": 14,
+            "hitRate": 0.4827586206896552,
+            "high10k": 1
+          },
+          {
+            "bucket": "Q3",
+            "lower": 0.5766024123744714,
+            "upper": 0.6388166132750505,
+            "n": 29,
+            "hits": 5,
+            "hitRate": 0.1724137931034483,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q4",
+            "lower": 0.6388166132750505,
+            "upper": null,
+            "n": 29,
+            "hits": 2,
+            "hitRate": 0.06896551724137931,
+            "high10k": 0
+          }
+        ],
+        "monotonicity": 0.6076436202502,
+        "discoveryScore": 0.5053409427718694
+      }
+    },
+    {
+      "formulaId": "F0396",
+      "expression": "(gap_rank1_rank5)+(gap_top5_vs_rank6_10)",
+      "seedFeatureNames": [
+        "gap_rank1_rank5",
+        "gap_top5_vs_rank6_10"
+      ],
+      "coefficients": {},
+      "transform": "BINARY_SUM",
+      "operation": "sum",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "SLOPE",
+      "discovery": {
+        "valid": true,
+        "n": 116,
+        "coverage": 1,
+        "missingRate": 0,
+        "hit": {
+          "n": 28,
+          "mean": 0.1638050714606048,
+          "median": 0.14803197678367835,
+          "sd": 0.055935296460381714,
+          "q25": 0.11981389153137292,
+          "q75": 0.20700764916130646
+        },
+        "miss": {
+          "n": 88,
+          "mean": 0.1376600732400545,
+          "median": 0.1246255735652686,
+          "sd": 0.05825434309992211,
+          "q25": 0.09700009275019181,
+          "q75": 0.16939380602770124
+        },
+        "effect": {
+          "cohensD": 0.45301342689265384,
+          "medianDifference": 0.023406403218409755,
+          "rankBiserial": 0.2702922077922078
+        },
+        "direction": 1,
+        "directionLabel": "HIGHER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          0.10218838446724149,
+          0.13581078141401637,
+          0.1822717351282161
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": 0.10218838446724149,
+            "n": 29,
+            "hits": 3,
+            "hitRate": 0.10344827586206896,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q2",
+            "lower": 0.10218838446724149,
+            "upper": 0.13581078141401637,
+            "n": 29,
+            "hits": 6,
+            "hitRate": 0.20689655172413793,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q3",
+            "lower": 0.13581078141401637,
+            "upper": 0.1822717351282161,
+            "n": 29,
+            "hits": 8,
+            "hitRate": 0.27586206896551724,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q4",
+            "lower": 0.1822717351282161,
+            "upper": null,
+            "n": 29,
+            "hits": 11,
+            "hitRate": 0.3793103448275862,
+            "high10k": 1
+          }
+        ],
+        "monotonicity": 0.9970544855015815,
+        "discoveryScore": 0.5162886095642488
+      }
+    },
+    {
+      "formulaId": "F0352",
+      "expression": "(gap_rank1_rank10)-(gap_top5_vs_rank6_10)",
+      "seedFeatureNames": [
+        "gap_rank1_rank10",
+        "gap_top5_vs_rank6_10"
+      ],
+      "coefficients": {},
+      "transform": "BINARY_DIFFERENCE",
+      "operation": "difference",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "SLOPE",
+      "discovery": {
+        "valid": true,
+        "n": 116,
+        "coverage": 1,
+        "missingRate": 0,
+        "hit": {
+          "n": 28,
+          "mean": 0.06606473984608567,
+          "median": 0.059353904710191474,
+          "sd": 0.022549087211407463,
+          "q25": 0.05071250692045817,
+          "q75": 0.08272858064206703
+        },
+        "miss": {
+          "n": 88,
+          "mean": 0.054805456980761114,
+          "median": 0.05043654225564548,
+          "sd": 0.022003711483307296,
+          "q25": 0.03777223640180946,
+          "q75": 0.0685667164522118
+        },
+        "effect": {
+          "cohensD": 0.5086850595395707,
+          "medianDifference": 0.008917362454545996,
+          "rankBiserial": 0.288961038961039
+        },
+        "direction": 1,
+        "directionLabel": "HIGHER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          0.04148599255790511,
+          0.05579603737788169,
+          0.06939746057752408
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": 0.04148599255790511,
+            "n": 29,
+            "hits": 1,
+            "hitRate": 0.034482758620689655,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q2",
+            "lower": 0.04148599255790511,
+            "upper": 0.05579603737788169,
+            "n": 29,
+            "hits": 10,
+            "hitRate": 0.3448275862068966,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q3",
+            "lower": 0.05579603737788169,
+            "upper": 0.06939746057752408,
+            "n": 29,
+            "hits": 7,
+            "hitRate": 0.2413793103448276,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q4",
+            "lower": 0.06939746057752408,
+            "upper": null,
+            "n": 29,
+            "hits": 10,
+            "hitRate": 0.3448275862068966,
+            "high10k": 1
+          }
+        ],
+        "monotonicity": 0.7302967433402215,
+        "discoveryScore": 0.5115615539880568
+      }
+    },
+    {
+      "formulaId": "F0034",
+      "expression": "sqrt(abs(gap_rank1_rank5))",
+      "seedFeatureNames": [
+        "gap_rank1_rank5"
+      ],
+      "coefficients": {},
+      "transform": "SQRT_ABS",
+      "operation": "sqrt_abs",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "SLOPE",
+      "discovery": {
+        "valid": true,
+        "n": 116,
+        "coverage": 1,
+        "missingRate": 0,
+        "hit": {
+          "n": 28,
+          "mean": 0.29428378643112785,
+          "median": 0.28832021928861623,
+          "sd": 0.06064000871702417,
+          "q25": 0.2673766369513389,
+          "q75": 0.3339903848487852
+        },
+        "miss": {
+          "n": 88,
+          "mean": 0.263310534364456,
+          "median": 0.25908403023568427,
+          "sd": 0.07014691648046205,
+          "q25": 0.22062709556492976,
+          "q75": 0.31754417004612046
+        },
+        "effect": {
+          "cohensD": 0.45538534287816085,
+          "medianDifference": 0.02923618905293196,
+          "rankBiserial": 0.2784090909090909
+        },
+        "direction": 1,
+        "directionLabel": "HIGHER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          0.22465604406586964,
+          0.27209205720155716,
+          0.32223210625562015
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": 0.22465604406586964,
+            "n": 29,
+            "hits": 3,
+            "hitRate": 0.10344827586206896,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q2",
+            "lower": 0.22465604406586964,
+            "upper": 0.27209205720155716,
+            "n": 29,
+            "hits": 7,
+            "hitRate": 0.2413793103448276,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q3",
+            "lower": 0.27209205720155716,
+            "upper": 0.32223210625562015,
+            "n": 29,
+            "hits": 9,
+            "hitRate": 0.3103448275862069,
+            "high10k": 1
+          },
+          {
+            "bucket": "Q4",
+            "lower": 0.32223210625562015,
+            "upper": null,
+            "n": 29,
+            "hits": 9,
+            "hitRate": 0.3103448275862069,
+            "high10k": 0
+          }
+        ],
+        "monotonicity": 0.9128709291752768,
+        "discoveryScore": 0.5069948506865527
+      }
+    },
+    {
+      "formulaId": "F0674",
+      "expression": "(gap_rank1_rank10)+2*(slope_rank1_10)",
+      "seedFeatureNames": [
+        "gap_rank1_rank10",
+        "slope_rank1_10"
+      ],
+      "coefficients": {
+        "secondary": 2
+      },
+      "transform": "WEIGHTED_SUM",
+      "operation": "weighted_sum",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "SLOPE",
+      "discovery": {
+        "valid": true,
+        "n": 116,
+        "coverage": 1,
+        "missingRate": 0,
+        "hit": {
+          "n": 28,
+          "mean": 0.10963514007007168,
+          "median": 0.10393036664482486,
+          "sd": 0.03359599701034263,
+          "q25": 0.08403987128617021,
+          "q75": 0.13784472950529678
+        },
+        "miss": {
+          "n": 88,
+          "mean": 0.09249128584597247,
+          "median": 0.08958014944027777,
+          "sd": 0.03300752576948955,
+          "q25": 0.06706238063304786,
+          "q75": 0.11095431830830413
+        },
+        "effect": {
+          "cohensD": 0.5171936330036729,
+          "medianDifference": 0.014350217204547086,
+          "rankBiserial": 0.29383116883116883
+        },
+        "direction": 1,
+        "directionLabel": "HIGHER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          0.07125612758876784,
+          0.09171965021947197,
+          0.12159114746298193
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": 0.07125612758876784,
+            "n": 29,
+            "hits": 1,
+            "hitRate": 0.034482758620689655,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q2",
+            "lower": 0.07125612758876784,
+            "upper": 0.09171965021947197,
+            "n": 29,
+            "hits": 11,
+            "hitRate": 0.3793103448275862,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q3",
+            "lower": 0.09171965021947197,
+            "upper": 0.12159114746298193,
+            "n": 29,
+            "hits": 5,
+            "hitRate": 0.1724137931034483,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q4",
+            "lower": 0.12159114746298193,
+            "upper": null,
+            "n": 29,
+            "hits": 11,
+            "hitRate": 0.3793103448275862,
+            "high10k": 1
+          }
+        ],
+        "monotonicity": 0.632455532033676,
+        "discoveryScore": 0.5027826201648637
+      }
+    },
+    {
+      "formulaId": "F0053",
+      "expression": "sign(density_within_85pct_top)*log1p(abs(density_within_85pct_top))",
+      "seedFeatureNames": [
+        "density_within_85pct_top"
+      ],
+      "coefficients": {},
+      "transform": "SIGNED_LOG1P",
+      "operation": "signed_log1p",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "DENSITY",
+      "discovery": {
+        "valid": true,
+        "n": 116,
+        "coverage": 1,
+        "missingRate": 0,
+        "hit": {
+          "n": 28,
+          "mean": 2.257226371115005,
+          "median": 2.302585092994046,
+          "sd": 0.5420307521736423,
+          "q25": 1.9459101490553132,
+          "q75": 2.5649493574615367
+        },
+        "miss": {
+          "n": 88,
+          "mean": 2.495212257146795,
+          "median": 2.4849066497880004,
+          "sd": 0.6006271195221627,
+          "q25": 2.0794415416798357,
+          "q75": 2.8475029475162037
+        },
+        "effect": {
+          "cohensD": -0.40523573201300683,
+          "medianDifference": -0.18232155679395445,
+          "rankBiserial": -0.25608766233766234
+        },
+        "direction": -1,
+        "directionLabel": "LOWER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          1.9459101490553132,
+          2.3978952727983707,
+          2.833213344056216
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": 1.9459101490553132,
+            "n": 32,
+            "hits": 12,
+            "hitRate": 0.375,
+            "high10k": 1
+          },
+          {
+            "bucket": "Q2",
+            "lower": 1.9459101490553132,
+            "upper": 2.3978952727983707,
+            "n": 28,
+            "hits": 5,
+            "hitRate": 0.17857142857142858,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q3",
+            "lower": 2.3978952727983707,
+            "upper": 2.833213344056216,
+            "n": 32,
+            "hits": 9,
+            "hitRate": 0.28125,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q4",
+            "lower": 2.833213344056216,
+            "upper": null,
+            "n": 24,
+            "hits": 2,
+            "hitRate": 0.08333333333333333,
+            "high10k": 0
+          }
+        ],
+        "monotonicity": 0.7898390677830215,
+        "discoveryScore": 0.45537742835902256
+      }
+    },
+    {
+      "formulaId": "F0050",
+      "expression": "-(density_within_85pct_top)",
+      "seedFeatureNames": [
+        "density_within_85pct_top"
+      ],
+      "coefficients": {},
+      "transform": "NEGATE",
+      "operation": "negate",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "DENSITY",
+      "discovery": {
+        "valid": true,
+        "n": 116,
+        "coverage": 1,
+        "missingRate": 0,
+        "hit": {
+          "n": 28,
+          "mean": -10.321428571428571,
+          "median": -9,
+          "sd": 8.61913805530034,
+          "q25": -12,
+          "q75": -6
+        },
+        "miss": {
+          "n": 88,
+          "mean": -13.568181818181818,
+          "median": -11,
+          "sd": 9.838231842415786,
+          "q25": -16.25,
+          "q75": -7
+        },
+        "effect": {
+          "cohensD": 0.3394923433728959,
+          "medianDifference": 2,
+          "rankBiserial": 0.25608766233766234
+        },
+        "direction": 1,
+        "directionLabel": "HIGHER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          -16,
+          -10,
+          -6
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": -16,
+            "n": 30,
+            "hits": 3,
+            "hitRate": 0.1,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q2",
+            "lower": -16,
+            "upper": -10,
+            "n": 36,
+            "hits": 10,
+            "hitRate": 0.2777777777777778,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q3",
+            "lower": -10,
+            "upper": -6,
+            "n": 32,
+            "hits": 9,
+            "hitRate": 0.28125,
+            "high10k": 1
+          },
+          {
+            "bucket": "Q4",
+            "lower": -6,
+            "upper": null,
+            "n": 18,
+            "hits": 6,
+            "hitRate": 0.3333333333333333,
+            "high10k": 0
+          }
+        ],
+        "monotonicity": 0.8908563168557426,
+        "discoveryScore": 0.43437115196786974
+      }
+    },
+    {
+      "formulaId": "F0054",
+      "expression": "1/(abs(density_within_85pct_top)+eps)",
+      "seedFeatureNames": [
+        "density_within_85pct_top"
+      ],
+      "coefficients": {},
+      "transform": "RECIPROCAL_ABS",
+      "operation": "reciprocal_abs",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "DENSITY",
+      "discovery": {
+        "valid": true,
+        "n": 116,
+        "coverage": 1,
+        "missingRate": 0,
+        "hit": {
+          "n": 28,
+          "mean": 0.1424627653804131,
+          "median": 0.11111111109876542,
+          "sd": 0.09211525916755049,
+          "q25": 0.08333333332638888,
+          "q75": 0.16666666663888888
+        },
+        "miss": {
+          "n": 88,
+          "mean": 0.11526607472772019,
+          "median": 0.09090909090082644,
+          "sd": 0.08864615926625433,
+          "q25": 0.06158088234914644,
+          "q75": 0.1428571428367347
+        },
+        "effect": {
+          "cohensD": 0.3039417489982562,
+          "medianDifference": 0.020202020197938986,
+          "rankBiserial": 0.25608766233766234
+        },
+        "direction": 1,
+        "directionLabel": "HIGHER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          0.06249999999609375,
+          0.09999999999,
+          0.16666666663888888
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": 0.06249999999609375,
+            "n": 30,
+            "hits": 3,
+            "hitRate": 0.1,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q2",
+            "lower": 0.06249999999609375,
+            "upper": 0.09999999999,
+            "n": 36,
+            "hits": 10,
+            "hitRate": 0.2777777777777778,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q3",
+            "lower": 0.09999999999,
+            "upper": 0.16666666663888888,
+            "n": 32,
+            "hits": 9,
+            "hitRate": 0.28125,
+            "high10k": 1
+          },
+          {
+            "bucket": "Q4",
+            "lower": 0.16666666663888888,
+            "upper": null,
+            "n": 18,
+            "hits": 6,
+            "hitRate": 0.3333333333333333,
+            "high10k": 0
+          }
+        ],
+        "monotonicity": 0.8908563168557426,
+        "discoveryScore": 0.41481832506181787
+      }
+    },
+    {
+      "formulaId": "F0051",
+      "expression": "(density_within_85pct_top)^2",
+      "seedFeatureNames": [
+        "density_within_85pct_top"
+      ],
+      "coefficients": {},
+      "transform": "SQUARE",
+      "operation": "square",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "DENSITY",
+      "discovery": {
+        "valid": true,
+        "n": 116,
+        "coverage": 1,
+        "missingRate": 0,
+        "hit": {
+          "n": 28,
+          "mean": 180.82142857142858,
+          "median": 81,
+          "sd": 453.2692398856674,
+          "q25": 36,
+          "q75": 144
+        },
+        "miss": {
+          "n": 88,
+          "mean": 280.8863636363636,
+          "median": 121,
+          "sd": 503.7199896727028,
+          "q25": 49,
+          "q75": 264.25
+        },
+        "effect": {
+          "cohensD": -0.20328540543596782,
+          "medianDifference": -40,
+          "rankBiserial": -0.25608766233766234
+        },
+        "direction": -1,
+        "directionLabel": "LOWER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          36,
+          100,
+          256
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": 36,
+            "n": 32,
+            "hits": 12,
+            "hitRate": 0.375,
+            "high10k": 1
+          },
+          {
+            "bucket": "Q2",
+            "lower": 36,
+            "upper": 100,
+            "n": 28,
+            "hits": 5,
+            "hitRate": 0.17857142857142858,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q3",
+            "lower": 100,
+            "upper": 256,
+            "n": 32,
+            "hits": 9,
+            "hitRate": 0.28125,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q4",
+            "lower": 256,
+            "upper": null,
+            "n": 24,
+            "hits": 2,
+            "hitRate": 0.08333333333333333,
+            "high10k": 0
+          }
+        ],
+        "monotonicity": 0.7898390677830215,
+        "discoveryScore": 0.3443047487416511
+      }
+    },
+    {
+      "formulaId": "F0066",
+      "expression": "1/(abs(score_top3_share)+eps)",
+      "seedFeatureNames": [
+        "score_top3_share"
+      ],
+      "coefficients": {},
+      "transform": "RECIPROCAL_ABS",
+      "operation": "reciprocal_abs",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "ENTROPY",
+      "discovery": {
+        "valid": true,
+        "n": 116,
+        "coverage": 1,
+        "missingRate": 0,
+        "hit": {
+          "n": 28,
+          "mean": 49.225339353969176,
+          "median": 49.38936773341079,
+          "sd": 4.707689179826919,
+          "q25": 47.98996058638808,
+          "q75": 51.473827964306125
+        },
+        "miss": {
+          "n": 88,
+          "mean": 58.58833606603423,
+          "median": 50.83758677090386,
+          "sd": 23.74966419403803,
+          "q25": 49.56104734381602,
+          "q75": 52.52043311540811
+        },
+        "effect": {
+          "cohensD": -0.44855770801971967,
+          "medianDifference": -1.4482190374930681,
+          "rankBiserial": -0.30113636363636365
+        },
+        "direction": -1,
+        "directionLabel": "LOWER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          49.1330531005036,
+          50.52233890619731,
+          52.24160651921158
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": 49.1330531005036,
+            "n": 29,
+            "hits": 12,
+            "hitRate": 0.41379310344827586,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q2",
+            "lower": 49.1330531005036,
+            "upper": 50.52233890619731,
+            "n": 29,
+            "hits": 6,
+            "hitRate": 0.20689655172413793,
+            "high10k": 1
+          },
+          {
+            "bucket": "Q3",
+            "lower": 50.52233890619731,
+            "upper": 52.24160651921158,
+            "n": 29,
+            "hits": 5,
+            "hitRate": 0.1724137931034483,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q4",
+            "lower": 52.24160651921158,
+            "upper": null,
+            "n": 29,
+            "hits": 5,
+            "hitRate": 0.1724137931034483,
+            "high10k": 0
+          }
+        ],
+        "monotonicity": 0.8436614877321074,
+        "discoveryScore": 0.49854005347975283
+      }
+    },
+    {
+      "formulaId": "F0544",
+      "expression": "(score_top1_share)/(abs(score_top3_share)+eps)",
+      "seedFeatureNames": [
+        "score_top1_share",
+        "score_top3_share"
+      ],
+      "coefficients": {},
+      "transform": "SAFE_RATIO",
+      "operation": "ratio_abs",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "ENTROPY",
+      "discovery": {
+        "valid": true,
+        "n": 116,
+        "coverage": 1,
+        "missingRate": 0,
+        "hit": {
+          "n": 28,
+          "mean": 0.3423897843319438,
+          "median": 0.34189749137952885,
+          "sd": 0.004827740950037621,
+          "q25": 0.33835575018281344,
+          "q75": 0.3462208794787238
+        },
+        "miss": {
+          "n": 88,
+          "mean": 0.340763644867956,
+          "median": 0.33956464717912044,
+          "sd": 0.0045242106293659065,
+          "q25": 0.33716240188273233,
+          "q75": 0.3436436313445373
+        },
+        "effect": {
+          "cohensD": 0.35366922068991924,
+          "medianDifference": 0.0023328442004084127,
+          "rankBiserial": 0.19237012987012986
+        },
+        "direction": 1,
+        "directionLabel": "HIGHER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          0.33766184288119305,
+          0.33990954531853174,
+          0.34504648680512284
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": 0.33766184288119305,
+            "n": 29,
+            "hits": 4,
+            "hitRate": 0.13793103448275862,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q2",
+            "lower": 0.33766184288119305,
+            "upper": 0.33990954531853174,
+            "n": 29,
+            "hits": 7,
+            "hitRate": 0.2413793103448276,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q3",
+            "lower": 0.33990954531853174,
+            "upper": 0.34504648680512284,
+            "n": 29,
+            "hits": 7,
+            "hitRate": 0.2413793103448276,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q4",
+            "lower": 0.34504648680512284,
+            "upper": null,
+            "n": 29,
+            "hits": 10,
+            "hitRate": 0.3448275862068966,
+            "high10k": 1
+          }
+        ],
+        "monotonicity": 0.9486832980505138,
+        "discoveryScore": 0.4349130985545651
+      }
+    },
+    {
+      "formulaId": "F0064",
+      "expression": "sqrt(abs(score_top3_share))",
+      "seedFeatureNames": [
+        "score_top3_share"
+      ],
+      "coefficients": {},
+      "transform": "SQRT_ABS",
+      "operation": "sqrt_abs",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "ENTROPY",
+      "discovery": {
+        "valid": true,
+        "n": 116,
+        "coverage": 1,
+        "missingRate": 0,
+        "hit": {
+          "n": 28,
+          "mean": 0.14317591827668183,
+          "median": 0.1422930660108816,
+          "sd": 0.008890512471626734,
+          "q25": 0.13938341594683673,
+          "q75": 0.14435568638037577
+        },
+        "miss": {
+          "n": 88,
+          "mean": 0.13672879069724028,
+          "median": 0.14025150389272556,
+          "sd": 0.022645338657017993,
+          "q25": 0.1379865843069623,
+          "q75": 0.14204627427704597
+        },
+        "effect": {
+          "cohensD": 0.3183713029537485,
+          "medianDifference": 0.0020415621181560373,
+          "rankBiserial": 0.30113636363636365
+        },
+        "direction": 1,
+        "directionLabel": "HIGHER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          0.13835419004399727,
+          0.14068847404040857,
+          0.14266358844028143
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": 0.13835419004399727,
+            "n": 29,
+            "hits": 5,
+            "hitRate": 0.1724137931034483,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q2",
+            "lower": 0.13835419004399727,
+            "upper": 0.14068847404040857,
+            "n": 29,
+            "hits": 5,
+            "hitRate": 0.1724137931034483,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q3",
+            "lower": 0.14068847404040857,
+            "upper": 0.14266358844028143,
+            "n": 29,
+            "hits": 6,
+            "hitRate": 0.20689655172413793,
+            "high10k": 1
+          },
+          {
+            "bucket": "Q4",
+            "lower": 0.14266358844028143,
+            "upper": null,
+            "n": 29,
+            "hits": 12,
+            "hitRate": 0.41379310344827586,
+            "high10k": 0
+          }
+        ],
+        "monotonicity": 0.8436614877321075,
+        "discoveryScore": 0.4269375306934687
+      }
+    },
+    {
+      "formulaId": "F0541",
+      "expression": "(score_top1_share)+(score_top3_share)",
+      "seedFeatureNames": [
+        "score_top1_share",
+        "score_top3_share"
+      ],
+      "coefficients": {},
+      "transform": "BINARY_SUM",
+      "operation": "sum",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "ENTROPY",
+      "discovery": {
+        "valid": true,
+        "n": 116,
+        "coverage": 1,
+        "missingRate": 0,
+        "hit": {
+          "n": 28,
+          "mean": 0.027630707093831,
+          "median": 0.02722150200676588,
+          "sd": 0.0038842008251199676,
+          "q25": 0.026050476403636946,
+          "q75": 0.028040756114164872
+        },
+        "miss": {
+          "n": 88,
+          "mean": 0.025762907333982222,
+          "median": 0.026343695411634133,
+          "sd": 0.009142826988945595,
+          "q25": 0.025430948372413914,
+          "q75": 0.02717679677814439
+        },
+        "effect": {
+          "cohensD": 0.2275663443367985,
+          "medianDifference": 0.0008778065951317478,
+          "rankBiserial": 0.30844155844155846
+        },
+        "direction": 1,
+        "directionLabel": "HIGHER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          0.025642989796008965,
+          0.02650015617386726,
+          0.027376100819163363
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": 0.025642989796008965,
+            "n": 29,
+            "hits": 4,
+            "hitRate": 0.13793103448275862,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q2",
+            "lower": 0.025642989796008965,
+            "upper": 0.02650015617386726,
+            "n": 29,
+            "hits": 6,
+            "hitRate": 0.20689655172413793,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q3",
+            "lower": 0.02650015617386726,
+            "upper": 0.027376100819163363,
+            "n": 29,
+            "hits": 6,
+            "hitRate": 0.20689655172413793,
+            "high10k": 1
+          },
+          {
+            "bucket": "Q4",
+            "lower": 0.027376100819163363,
+            "upper": null,
+            "n": 29,
+            "hits": 12,
+            "hitRate": 0.41379310344827586,
+            "high10k": 0
+          }
+        ],
+        "monotonicity": 0.8944271909999157,
+        "discoveryScore": 0.38643595764561617
+      }
+    },
+    {
+      "formulaId": "F0586",
+      "expression": "(world_gap_rank1_rank2)+(world_gap_rank1_rank3)",
+      "seedFeatureNames": [
+        "world_gap_rank1_rank2",
+        "world_gap_rank1_rank3"
+      ],
+      "coefficients": {},
+      "transform": "BINARY_SUM",
+      "operation": "sum",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "WORLD",
+      "discovery": {
+        "valid": true,
+        "n": 77,
+        "coverage": 0.6637931034482759,
+        "missingRate": 0.3362068965517241,
+        "hit": {
+          "n": 16,
+          "mean": 0.1049865906227447,
+          "median": 0.10191407183090076,
+          "sd": 0.05212204349559675,
+          "q25": 0.07254706968290195,
+          "q75": 0.11786872234510898
+        },
+        "miss": {
+          "n": 61,
+          "mean": 0.06085091127141247,
+          "median": 0.04992820656230587,
+          "sd": 0.03332809569946452,
+          "q25": 0.040114533238979566,
+          "q75": 0.07428308822175617
+        },
+        "effect": {
+          "cohensD": 1.1663415009958975,
+          "medianDifference": 0.05198586526859489,
+          "rankBiserial": 0.5389344262295082
+        },
+        "direction": 1,
+        "directionLabel": "HIGHER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          0.04203145878463732,
+          0.05963100258267551,
+          0.0961426929265227
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": 0.04203145878463732,
+            "n": 20,
+            "hits": 1,
+            "hitRate": 0.05,
+            "high10k": 1
+          },
+          {
+            "bucket": "Q2",
+            "lower": 0.04203145878463732,
+            "upper": 0.05963100258267551,
+            "n": 19,
+            "hits": 2,
+            "hitRate": 0.10526315789473684,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q3",
+            "lower": 0.05963100258267551,
+            "upper": 0.0961426929265227,
+            "n": 19,
+            "hits": 4,
+            "hitRate": 0.21052631578947367,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q4",
+            "lower": 0.0961426929265227,
+            "upper": null,
+            "n": 19,
+            "hits": 9,
+            "hitRate": 0.47368421052631576,
+            "high10k": 0
+          }
+        ],
+        "monotonicity": 0.9448147791798022,
+        "discoveryScore": 0.9511333041545047
+      }
+    },
+    {
+      "formulaId": "F0075",
+      "expression": "(world_gap_rank1_rank3)^2",
+      "seedFeatureNames": [
+        "world_gap_rank1_rank3"
+      ],
+      "coefficients": {},
+      "transform": "SQUARE",
+      "operation": "square",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "WORLD",
+      "discovery": {
+        "valid": true,
+        "n": 77,
+        "coverage": 0.6637931034482759,
+        "missingRate": 0.3362068965517241,
+        "hit": {
+          "n": 16,
+          "mean": 0.006400590635299722,
+          "median": 0.004363111818371022,
+          "sd": 0.004888228636031548,
+          "q25": 0.0022643922347787542,
+          "q75": 0.009427065863302024
+        },
+        "miss": {
+          "n": 61,
+          "mean": 0.0026698900909550346,
+          "median": 0.0014718143940414003,
+          "sd": 0.0028067040496532296,
+          "q25": 0.0007399883863435156,
+          "q75": 0.0031785760083505666
+        },
+        "effect": {
+          "cohensD": 1.1207284707450968,
+          "medianDifference": 0.002891297424329622,
+          "rankBiserial": 0.5122950819672131
+        },
+        "direction": 1,
+        "directionLabel": "HIGHER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          0.0009169947693675014,
+          0.001859758599270049,
+          0.005034510758421669
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": 0.0009169947693675014,
+            "n": 20,
+            "hits": 1,
+            "hitRate": 0.05,
+            "high10k": 1
+          },
+          {
+            "bucket": "Q2",
+            "lower": 0.0009169947693675014,
+            "upper": 0.001859758599270049,
+            "n": 19,
+            "hits": 3,
+            "hitRate": 0.15789473684210525,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q3",
+            "lower": 0.001859758599270049,
+            "upper": 0.005034510758421669,
+            "n": 19,
+            "hits": 5,
+            "hitRate": 0.2631578947368421,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q4",
+            "lower": 0.005034510758421669,
+            "upper": null,
+            "n": 19,
+            "hits": 7,
+            "hitRate": 0.3684210526315789,
+            "high10k": 0
+          }
+        ],
+        "monotonicity": 0.999981528629084,
+        "discoveryScore": 0.9276613138683829
+      }
+    },
+    {
+      "formulaId": "F0073",
+      "expression": "world_gap_rank1_rank3",
+      "seedFeatureNames": [
+        "world_gap_rank1_rank3"
+      ],
+      "coefficients": {},
+      "transform": "IDENTITY",
+      "operation": "identity",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "WORLD",
+      "discovery": {
+        "valid": true,
+        "n": 77,
+        "coverage": 0.6637931034482759,
+        "missingRate": 0.3362068965517241,
+        "hit": {
+          "n": 16,
+          "mean": 0.07310021954285484,
+          "median": 0.06605305980140985,
+          "sd": 0.03251074496356774,
+          "q25": 0.047517988321104265,
+          "q75": 0.09698318984589097
+        },
+        "miss": {
+          "n": 61,
+          "mean": 0.04479872951007492,
+          "median": 0.03836423326539187,
+          "sd": 0.025748085855810253,
+          "q25": 0.027202727553381767,
+          "q75": 0.056378861360890986
+        },
+        "effect": {
+          "cohensD": 1.039147860886957,
+          "medianDifference": 0.02768882653601798,
+          "rankBiserial": 0.5122950819672131
+        },
+        "direction": 1,
+        "directionLabel": "HIGHER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          0.030281921493978903,
+          0.043124918542184504,
+          0.07095428639921389
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": 0.030281921493978903,
+            "n": 20,
+            "hits": 1,
+            "hitRate": 0.05,
+            "high10k": 1
+          },
+          {
+            "bucket": "Q2",
+            "lower": 0.030281921493978903,
+            "upper": 0.043124918542184504,
+            "n": 19,
+            "hits": 3,
+            "hitRate": 0.15789473684210525,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q3",
+            "lower": 0.043124918542184504,
+            "upper": 0.07095428639921389,
+            "n": 19,
+            "hits": 5,
+            "hitRate": 0.2631578947368421,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q4",
+            "lower": 0.07095428639921389,
+            "upper": null,
+            "n": 19,
+            "hits": 7,
+            "hitRate": 0.3684210526315789,
+            "high10k": 0
+          }
+        ],
+        "monotonicity": 0.999981528629084,
+        "discoveryScore": 0.882791978446406
+      }
+    },
+    {
+      "formulaId": "F0588",
+      "expression": "(world_gap_rank1_rank2)*(world_gap_rank1_rank3)",
+      "seedFeatureNames": [
+        "world_gap_rank1_rank2",
+        "world_gap_rank1_rank3"
+      ],
+      "coefficients": {},
+      "transform": "BINARY_PRODUCT",
+      "operation": "product",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "WORLD",
+      "discovery": {
+        "valid": true,
+        "n": 77,
+        "coverage": 0.6637931034482759,
+        "missingRate": 0.3362068965517241,
+        "hit": {
+          "n": 16,
+          "mean": 0.0028057783395805834,
+          "median": 0.0016157928973688173,
+          "sd": 0.003533455521969144,
+          "q25": 0.0008177385860624008,
+          "q75": 0.0026614141237480743
+        },
+        "miss": {
+          "n": 61,
+          "mean": 0.0008664360279466972,
+          "median": 0.0004706610559678101,
+          "sd": 0.001020203690962393,
+          "q25": 0.00022471881585642693,
+          "q75": 0.0010587018210909144
+        },
+        "effect": {
+          "cohensD": 1.0627986742186828,
+          "medianDifference": 0.0011451318414010072,
+          "rankBiserial": 0.4979508196721312
+        },
+        "direction": 1,
+        "directionLabel": "HIGHER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          0.00030058511873526746,
+          0.0005563952522786719,
+          0.001495902647449703
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": 0.00030058511873526746,
+            "n": 20,
+            "hits": 2,
+            "hitRate": 0.1,
+            "high10k": 1
+          },
+          {
+            "bucket": "Q2",
+            "lower": 0.00030058511873526746,
+            "upper": 0.0005563952522786719,
+            "n": 19,
+            "hits": 1,
+            "hitRate": 0.05263157894736842,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q3",
+            "lower": 0.0005563952522786719,
+            "upper": 0.001495902647449703,
+            "n": 19,
+            "hits": 4,
+            "hitRate": 0.21052631578947367,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q4",
+            "lower": 0.001495902647449703,
+            "upper": null,
+            "n": 19,
+            "hits": 9,
+            "hitRate": 0.47368421052631576,
+            "high10k": 0
+          }
+        ],
+        "monotonicity": 0.8767651039198979,
+        "discoveryScore": 0.8737313964987068
+      }
+    },
+    {
+      "formulaId": "F0087",
+      "expression": "(secondary_boundary_selected_min_minus_outside1)^2",
+      "seedFeatureNames": [
+        "secondary_boundary_selected_min_minus_outside1"
+      ],
+      "coefficients": {},
+      "transform": "SQUARE",
+      "operation": "square",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "WORLD_WITHIN",
+      "discovery": {
+        "valid": true,
+        "n": 116,
+        "coverage": 1,
+        "missingRate": 0,
+        "hit": {
+          "n": 28,
+          "mean": 0.045939726488282484,
+          "median": 0.04661474764874275,
+          "sd": 0.04390630385597329,
+          "q25": 0.0001422869254160457,
+          "q75": 0.09253507270039404
+        },
+        "miss": {
+          "n": 88,
+          "mean": 0.06839152181607122,
+          "median": 0.06687039553060697,
+          "sd": 0.07237251458065325,
+          "q25": 0.004112113499994606,
+          "q75": 0.10397777458239592
+        },
+        "effect": {
+          "cohensD": -0.3364219208399029,
+          "medianDifference": -0.020255647881864222,
+          "rankBiserial": -0.18425324675324675
+        },
+        "direction": -1,
+        "directionLabel": "LOWER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          0.0016124853129634983,
+          0.058749180458052344,
+          0.10144353437861561
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": 0.0016124853129634983,
+            "n": 29,
+            "hits": 10,
+            "hitRate": 0.3448275862068966,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q2",
+            "lower": 0.0016124853129634983,
+            "upper": 0.058749180458052344,
+            "n": 29,
+            "hits": 7,
+            "hitRate": 0.2413793103448276,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q3",
+            "lower": 0.058749180458052344,
+            "upper": 0.10144353437861561,
+            "n": 29,
+            "hits": 6,
+            "hitRate": 0.20689655172413793,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q4",
+            "lower": 0.10144353437861561,
+            "upper": null,
+            "n": 29,
+            "hits": 5,
+            "hitRate": 0.1724137931034483,
+            "high10k": 1
+          }
+        ],
+        "monotonicity": 0.9561828874675149,
+        "discoveryScore": 0.4245228012703855
+      }
+    },
+    {
+      "formulaId": "F0088",
+      "expression": "sqrt(abs(secondary_boundary_selected_min_minus_outside1))",
+      "seedFeatureNames": [
+        "secondary_boundary_selected_min_minus_outside1"
+      ],
+      "coefficients": {},
+      "transform": "SQRT_ABS",
+      "operation": "sqrt_abs",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "WORLD_WITHIN",
+      "discovery": {
+        "valid": true,
+        "n": 116,
+        "coverage": 1,
+        "missingRate": 0,
+        "hit": {
+          "n": 28,
+          "mean": 0.3540289706015269,
+          "median": 0.4646551291973458,
+          "sd": 0.20760554077536203,
+          "q25": 0.1090363405899669,
+          "q75": 0.5515255186844589
+        },
+        "miss": {
+          "n": 88,
+          "mean": 0.41134906513241254,
+          "median": 0.5085202661106756,
+          "sd": 0.20483056054164644,
+          "q25": 0.2522221257510307,
+          "q75": 0.5678470609147772
+        },
+        "effect": {
+          "cohensD": -0.27894187334288273,
+          "medianDifference": -0.04386513691332977,
+          "rankBiserial": -0.18425324675324675
+        },
+        "direction": -1,
+        "directionLabel": "LOWER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          0.20026062420438137,
+          0.49232337160365014,
+          0.5643582485107077
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": 0.20026062420438137,
+            "n": 29,
+            "hits": 10,
+            "hitRate": 0.3448275862068966,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q2",
+            "lower": 0.20026062420438137,
+            "upper": 0.49232337160365014,
+            "n": 29,
+            "hits": 7,
+            "hitRate": 0.2413793103448276,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q3",
+            "lower": 0.49232337160365014,
+            "upper": 0.5643582485107077,
+            "n": 29,
+            "hits": 6,
+            "hitRate": 0.20689655172413793,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q4",
+            "lower": 0.5643582485107077,
+            "upper": null,
+            "n": 29,
+            "hits": 5,
+            "hitRate": 0.1724137931034483,
+            "high10k": 1
+          }
+        ],
+        "monotonicity": 0.9561828874675149,
+        "discoveryScore": 0.39290877514702444
+      }
+    },
+    {
+      "formulaId": "F0085",
+      "expression": "secondary_boundary_selected_min_minus_outside1",
+      "seedFeatureNames": [
+        "secondary_boundary_selected_min_minus_outside1"
+      ],
+      "coefficients": {},
+      "transform": "IDENTITY",
+      "operation": "identity",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "WORLD_WITHIN",
+      "discovery": {
+        "valid": true,
+        "n": 116,
+        "coverage": 1,
+        "missingRate": 0,
+        "hit": {
+          "n": 28,
+          "mean": -0.16239358583729757,
+          "median": -0.21590442183589847,
+          "sd": 0.13988584548547697,
+          "q25": -0.3041855092114394,
+          "q75": 0.0015116209525149749
+        },
+        "miss": {
+          "n": 88,
+          "mean": -0.2066242207345068,
+          "median": -0.2585929433799896,
+          "sd": 0.16030581156629667,
+          "q25": -0.32245213600432887,
+          "q75": -0.06379363523636228
+        },
+        "effect": {
+          "cohensD": 0.2840546630239306,
+          "medianDifference": 0.04268852154409114,
+          "rankBiserial": 0.1680194805194805
+        },
+        "direction": 1,
+        "directionLabel": "HIGHER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          -0.3185008265804803,
+          -0.24238230224444607,
+          -0.033441848044598654
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": -0.3185008265804803,
+            "n": 29,
+            "hits": 5,
+            "hitRate": 0.1724137931034483,
+            "high10k": 1
+          },
+          {
+            "bucket": "Q2",
+            "lower": -0.3185008265804803,
+            "upper": -0.24238230224444607,
+            "n": 29,
+            "hits": 6,
+            "hitRate": 0.20689655172413793,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q3",
+            "lower": -0.24238230224444607,
+            "upper": -0.033441848044598654,
+            "n": 29,
+            "hits": 7,
+            "hitRate": 0.2413793103448276,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q4",
+            "lower": -0.033441848044598654,
+            "upper": null,
+            "n": 29,
+            "hits": 10,
+            "hitRate": 0.3448275862068966,
+            "high10k": 0
+          }
+        ],
+        "monotonicity": 0.9561828874675149,
+        "discoveryScore": 0.3916623679131592
+      }
+    },
+    {
+      "formulaId": "F0090",
+      "expression": "1/(abs(secondary_boundary_selected_min_minus_outside1)+eps)",
+      "seedFeatureNames": [
+        "secondary_boundary_selected_min_minus_outside1"
+      ],
+      "coefficients": {},
+      "transform": "RECIPROCAL_ABS",
+      "operation": "reciprocal_abs",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "WORLD_WITHIN",
+      "discovery": {
+        "valid": true,
+        "n": 116,
+        "coverage": 1,
+        "missingRate": 0,
+        "hit": {
+          "n": 28,
+          "mean": 82.01207377779954,
+          "median": 4.631681896787212,
+          "sd": 165.98421904694953,
+          "q25": 3.287687507871925,
+          "q75": 84.41531222902279
+        },
+        "miss": {
+          "n": 88,
+          "mean": 59.79858183498746,
+          "median": 3.867086458909794,
+          "sd": 208.92340580295414,
+          "q25": 3.101306485513995,
+          "q75": 15.86330468495406
+        },
+        "effect": {
+          "cohensD": 0.11129549970040058,
+          "medianDifference": 0.7645954378774178,
+          "rankBiserial": 0.18425324675324675
+        },
+        "direction": 1,
+        "directionLabel": "HIGHER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          3.1397326494396003,
+          4.125713746008632,
+          24.968595377832195
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": 3.1397326494396003,
+            "n": 29,
+            "hits": 5,
+            "hitRate": 0.1724137931034483,
+            "high10k": 1
+          },
+          {
+            "bucket": "Q2",
+            "lower": 3.1397326494396003,
+            "upper": 4.125713746008632,
+            "n": 29,
+            "hits": 6,
+            "hitRate": 0.20689655172413793,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q3",
+            "lower": 4.125713746008632,
+            "upper": 24.968595377832195,
+            "n": 29,
+            "hits": 7,
+            "hitRate": 0.2413793103448276,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q4",
+            "lower": 24.968595377832195,
+            "upper": null,
+            "n": 29,
+            "hits": 10,
+            "hitRate": 0.3448275862068966,
+            "high10k": 0
+          }
+        ],
+        "monotonicity": 0.9561828874675149,
+        "discoveryScore": 0.30070326964365923
+      }
+    },
+    {
+      "formulaId": "F0378",
+      "expression": "(gap_rank1_rank10)*(world_gap_rank1_rank3)",
+      "seedFeatureNames": [
+        "gap_rank1_rank10",
+        "world_gap_rank1_rank3"
+      ],
+      "coefficients": {},
+      "transform": "BINARY_PRODUCT",
+      "operation": "product",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "CROSS",
+      "discovery": {
+        "valid": true,
+        "n": 77,
+        "coverage": 0.6637931034482759,
+        "missingRate": 0.3362068965517241,
+        "hit": {
+          "n": 16,
+          "mean": 0.01169406852587886,
+          "median": 0.011310981356885652,
+          "sd": 0.006464466675458518,
+          "q25": 0.0065486376058831505,
+          "q75": 0.016059756099222337
+        },
+        "miss": {
+          "n": 61,
+          "mean": 0.005556466208603588,
+          "median": 0.004307857295458825,
+          "sd": 0.004215579999453225,
+          "q25": 0.002366785456694829,
+          "q75": 0.007677207397499394
+        },
+        "effect": {
+          "cohensD": 1.2917759558364112,
+          "medianDifference": 0.0070031240614268275,
+          "rankBiserial": 0.5676229508196722
+        },
+        "direction": 1,
+        "directionLabel": "HIGHER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          0.002635321453011533,
+          0.005524885744918711,
+          0.009907100154954544
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": 0.002635321453011533,
+            "n": 20,
+            "hits": 1,
+            "hitRate": 0.05,
+            "high10k": 1
+          },
+          {
+            "bucket": "Q2",
+            "lower": 0.002635321453011533,
+            "upper": 0.005524885744918711,
+            "n": 19,
+            "hits": 2,
+            "hitRate": 0.10526315789473684,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q3",
+            "lower": 0.005524885744918711,
+            "upper": 0.009907100154954544,
+            "n": 19,
+            "hits": 3,
+            "hitRate": 0.15789473684210525,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q4",
+            "lower": 0.009907100154954544,
+            "upper": null,
+            "n": 19,
+            "hits": 10,
+            "hitRate": 0.5263157894736842,
+            "high10k": 0
+          }
+        ],
+        "monotonicity": 0.8875060341905429,
+        "discoveryScore": 1.0186980737159395
+      }
+    },
+    {
+      "formulaId": "F0376",
+      "expression": "(gap_rank1_rank10)+(world_gap_rank1_rank3)",
+      "seedFeatureNames": [
+        "gap_rank1_rank10",
+        "world_gap_rank1_rank3"
+      ],
+      "coefficients": {},
+      "transform": "BINARY_SUM",
+      "operation": "sum",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "CROSS",
+      "discovery": {
+        "valid": true,
+        "n": 77,
+        "coverage": 0.6637931034482759,
+        "missingRate": 0.3362068965517241,
+        "hit": {
+          "n": 16,
+          "mean": 0.23095913486113487,
+          "median": 0.2447115725247885,
+          "sd": 0.05774951447169715,
+          "q25": 0.18012441650221284,
+          "q75": 0.2726726966214742
+        },
+        "miss": {
+          "n": 61,
+          "mean": 0.16360559668916902,
+          "median": 0.15437455711559855,
+          "sd": 0.05511849662630002,
+          "q25": 0.11615516791083916,
+          "q75": 0.1913577923177947
+        },
+        "effect": {
+          "cohensD": 1.2102050142738479,
+          "medianDifference": 0.09033701540918995,
+          "rankBiserial": 0.5860655737704918
+        },
+        "direction": 1,
+        "directionLabel": "HIGHER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          0.13295080761294267,
+          0.16844129577401262,
+          0.2253451545163982
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": 0.13295080761294267,
+            "n": 20,
+            "hits": 0,
+            "hitRate": 0,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q2",
+            "lower": 0.13295080761294267,
+            "upper": 0.16844129577401262,
+            "n": 19,
+            "hits": 4,
+            "hitRate": 0.21052631578947367,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q3",
+            "lower": 0.16844129577401262,
+            "upper": 0.2253451545163982,
+            "n": 19,
+            "hits": 3,
+            "hitRate": 0.15789473684210525,
+            "high10k": 1
+          },
+          {
+            "bucket": "Q4",
+            "lower": 0.2253451545163982,
+            "upper": null,
+            "n": 19,
+            "hits": 9,
+            "hitRate": 0.47368421052631576,
+            "high10k": 0
+          }
+        ],
+        "monotonicity": 0.8970852271450607,
+        "discoveryScore": 0.9798815905374123
+      }
+    },
+    {
+      "formulaId": "F0498",
+      "expression": "(gap_top5_vs_rank6_10)*(world_gap_rank1_rank3)",
+      "seedFeatureNames": [
+        "gap_top5_vs_rank6_10",
+        "world_gap_rank1_rank3"
+      ],
+      "coefficients": {},
+      "transform": "BINARY_PRODUCT",
+      "operation": "product",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "CROSS",
+      "discovery": {
+        "valid": true,
+        "n": 77,
+        "coverage": 0.6637931034482759,
+        "missingRate": 0.3362068965517241,
+        "hit": {
+          "n": 16,
+          "mean": 0.006087703140676002,
+          "median": 0.0061501099265935805,
+          "sd": 0.0030078585063223365,
+          "q25": 0.003624260440572362,
+          "q75": 0.00856192033659943
+        },
+        "miss": {
+          "n": 61,
+          "mean": 0.0030065547060914694,
+          "median": 0.002300423768602136,
+          "sd": 0.0024093754271033254,
+          "q25": 0.0012560226747307033,
+          "q75": 0.00416887208299604
+        },
+        "effect": {
+          "cohensD": 1.2128706179514972,
+          "medianDifference": 0.0038496861579914443,
+          "rankBiserial": 0.5614754098360656
+        },
+        "direction": 1,
+        "directionLabel": "HIGHER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          0.0014222864978226492,
+          0.002650218426350494,
+          0.005155119168335865
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": 0.0014222864978226492,
+            "n": 20,
+            "hits": 1,
+            "hitRate": 0.05,
+            "high10k": 1
+          },
+          {
+            "bucket": "Q2",
+            "lower": 0.0014222864978226492,
+            "upper": 0.002650218426350494,
+            "n": 19,
+            "hits": 2,
+            "hitRate": 0.10526315789473684,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q3",
+            "lower": 0.002650218426350494,
+            "upper": 0.005155119168335865,
+            "n": 19,
+            "hits": 3,
+            "hitRate": 0.15789473684210525,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q4",
+            "lower": 0.005155119168335865,
+            "upper": null,
+            "n": 19,
+            "hits": 10,
+            "hitRate": 0.5263157894736842,
+            "high10k": 0
+          }
+        ],
+        "monotonicity": 0.8875060341905429,
+        "discoveryScore": 0.9737632526333351
+      }
+    },
+    {
+      "formulaId": "F0496",
+      "expression": "(gap_top5_vs_rank6_10)+(world_gap_rank1_rank3)",
+      "seedFeatureNames": [
+        "gap_top5_vs_rank6_10",
+        "world_gap_rank1_rank3"
+      ],
+      "coefficients": {},
+      "transform": "BINARY_SUM",
+      "operation": "sum",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "CROSS",
+      "discovery": {
+        "valid": true,
+        "n": 77,
+        "coverage": 0.6637931034482759,
+        "missingRate": 0.3362068965517241,
+        "hit": {
+          "n": 16,
+          "mean": 0.15758764361589994,
+          "median": 0.16653023434016756,
+          "sd": 0.04182207119570971,
+          "q25": 0.1209081349310279,
+          "q75": 0.19373855318706096
+        },
+        "miss": {
+          "n": 61,
+          "mean": 0.10851203499845562,
+          "median": 0.10190779493433524,
+          "sd": 0.04137455350106044,
+          "q25": 0.07495102402859238,
+          "q75": 0.1335703819174093
+        },
+        "effect": {
+          "cohensD": 1.1835588409385291,
+          "medianDifference": 0.06462243940583232,
+          "rankBiserial": 0.5819672131147541
+        },
+        "direction": 1,
+        "directionLabel": "HIGHER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          0.08320589826276717,
+          0.10887615724402605,
+          0.15799023736439777
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": 0.08320589826276717,
+            "n": 20,
+            "hits": 1,
+            "hitRate": 0.05,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q2",
+            "lower": 0.08320589826276717,
+            "upper": 0.10887615724402605,
+            "n": 19,
+            "hits": 2,
+            "hitRate": 0.10526315789473684,
+            "high10k": 1
+          },
+          {
+            "bucket": "Q3",
+            "lower": 0.10887615724402605,
+            "upper": 0.15799023736439777,
+            "n": 19,
+            "hits": 3,
+            "hitRate": 0.15789473684210525,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q4",
+            "lower": 0.15799023736439777,
+            "upper": null,
+            "n": 19,
+            "hits": 10,
+            "hitRate": 0.5263157894736842,
+            "high10k": 0
+          }
+        ],
+        "monotonicity": 0.8875060341905429,
+        "discoveryScore": 0.9627647260958747
+      }
+    },
+    {
+      "formulaId": "F0686",
+      "expression": "(gap_rank1_rank10)+2*(world_gap_rank1_rank2)",
+      "seedFeatureNames": [
+        "gap_rank1_rank10",
+        "world_gap_rank1_rank2"
+      ],
+      "coefficients": {
+        "secondary": 2
+      },
+      "transform": "WEIGHTED_SUM",
+      "operation": "weighted_sum",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "CROSS",
+      "discovery": {
+        "valid": true,
+        "n": 77,
+        "coverage": 0.6637931034482759,
+        "missingRate": 0.3362068965517241,
+        "hit": {
+          "n": 16,
+          "mean": 0.2216316574780598,
+          "median": 0.2066213220373251,
+          "sd": 0.07699559362994882,
+          "q25": 0.16854223744492441,
+          "q75": 0.26532362100568296
+        },
+        "miss": {
+          "n": 61,
+          "mean": 0.1509112307017691,
+          "median": 0.14596800378276842,
+          "sd": 0.05589343032862692,
+          "q25": 0.1157889719226663,
+          "q75": 0.17618429401469798
+        },
+        "effect": {
+          "cohensD": 1.1650124384627565,
+          "medianDifference": 0.06065331825455669,
+          "rankBiserial": 0.555327868852459
+        },
+        "direction": 1,
+        "directionLabel": "HIGHER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          0.12399689485897547,
+          0.15114587622250902,
+          0.18680085181711764
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": 0.12399689485897547,
+            "n": 20,
+            "hits": 1,
+            "hitRate": 0.05,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q2",
+            "lower": 0.12399689485897547,
+            "upper": 0.15114587622250902,
+            "n": 19,
+            "hits": 2,
+            "hitRate": 0.10526315789473684,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q3",
+            "lower": 0.15114587622250902,
+            "upper": 0.18680085181711764,
+            "n": 19,
+            "hits": 5,
+            "hitRate": 0.2631578947368421,
+            "high10k": 1
+          },
+          {
+            "bucket": "Q4",
+            "lower": 0.18680085181711764,
+            "upper": null,
+            "n": 19,
+            "hits": 8,
+            "hitRate": 0.42105263157894735,
+            "high10k": 0
+          }
+        ],
+        "monotonicity": 0.9809963377807213,
+        "discoveryScore": 0.9599279142071528
+      }
+    },
+    {
+      "formulaId": "F0697",
+      "expression": "(slope_rank1_10)-0.5*(world_gap_rank1_rank2)",
+      "seedFeatureNames": [
+        "slope_rank1_10",
+        "world_gap_rank1_rank2"
+      ],
+      "coefficients": {
+        "secondary": 0.5
+      },
+      "transform": "WEIGHTED_DIFFERENCE",
+      "operation": "weighted_difference",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "CROSS",
+      "discovery": {
+        "valid": true,
+        "n": 77,
+        "coverage": 0.6637931034482759,
+        "missingRate": 0.3362068965517241,
+        "hit": {
+          "n": 16,
+          "mean": -0.03312478065798608,
+          "median": -0.029562447068460108,
+          "sd": 0.014583509288775493,
+          "q25": -0.03987020645782767,
+          "q75": -0.02218867805941097
+        },
+        "miss": {
+          "n": 61,
+          "mean": -0.020964148297860405,
+          "median": -0.020231211177528543,
+          "sd": 0.009098942571116965,
+          "q25": -0.02496635795483275,
+          "q75": -0.014806109665100068
+        },
+        "effect": {
+          "cohensD": -1.166016999709814,
+          "medianDifference": -0.009331235890931565,
+          "rankBiserial": -0.5430327868852459
+        },
+        "direction": -1,
+        "directionLabel": "LOWER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          -0.026812464500750893,
+          -0.022245431396568642,
+          -0.015451687792305052
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": -0.026812464500750893,
+            "n": 20,
+            "hits": 10,
+            "hitRate": 0.5,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q2",
+            "lower": -0.026812464500750893,
+            "upper": -0.022245431396568642,
+            "n": 19,
+            "hits": 2,
+            "hitRate": 0.10526315789473684,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q3",
+            "lower": -0.022245431396568642,
+            "upper": -0.015451687792305052,
+            "n": 19,
+            "hits": 3,
+            "hitRate": 0.15789473684210525,
+            "high10k": 1
+          },
+          {
+            "bucket": "Q4",
+            "lower": -0.015451687792305052,
+            "upper": null,
+            "n": 19,
+            "hits": 1,
+            "hitRate": 0.05263157894736842,
+            "high10k": 0
+          }
+        ],
+        "monotonicity": 0.8241407166206991,
+        "discoveryScore": 0.9338783092272279
+      }
+    },
+    {
+      "formulaId": "F0645",
+      "expression": "(outside_top10_mean)-2*(world_gap_rank1_rank2)",
+      "seedFeatureNames": [
+        "outside_top10_mean",
+        "world_gap_rank1_rank2"
+      ],
+      "coefficients": {
+        "secondary": 2
+      },
+      "transform": "WEIGHTED_DIFFERENCE",
+      "operation": "weighted_difference",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "CROSS",
+      "discovery": {
+        "valid": true,
+        "n": 77,
+        "coverage": 0.6637931034482759,
+        "missingRate": 0.3362068965517241,
+        "hit": {
+          "n": 16,
+          "mean": 0.6557183165453037,
+          "median": 0.6681010239856346,
+          "sd": 0.07007041510848432,
+          "q25": 0.6193848273818016,
+          "q75": 0.6930808338356522
+        },
+        "miss": {
+          "n": 61,
+          "mean": 0.7212241067145466,
+          "median": 0.7381585879326096,
+          "sd": 0.05576911876367579,
+          "q25": 0.6870009358793983,
+          "q75": 0.7590675105801175
+        },
+        "effect": {
+          "cohensD": -1.1120054701141413,
+          "medianDifference": -0.07005756394697493,
+          "rankBiserial": -0.5594262295081968
+        },
+        "direction": -1,
+        "directionLabel": "LOWER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          0.671029545966889,
+          0.7214628449341294,
+          0.7541595008810957
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": 0.671029545966889,
+            "n": 20,
+            "hits": 9,
+            "hitRate": 0.45,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q2",
+            "lower": 0.671029545966889,
+            "upper": 0.7214628449341294,
+            "n": 19,
+            "hits": 5,
+            "hitRate": 0.2631578947368421,
+            "high10k": 1
+          },
+          {
+            "bucket": "Q3",
+            "lower": 0.7214628449341294,
+            "upper": 0.7541595008810957,
+            "n": 19,
+            "hits": 1,
+            "hitRate": 0.05263157894736842,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q4",
+            "lower": 0.7541595008810957,
+            "upper": null,
+            "n": 19,
+            "hits": 1,
+            "hitRate": 0.05263157894736842,
+            "high10k": 0
+          }
+        ],
+        "monotonicity": 0.9463468727558952,
+        "discoveryScore": 0.9266012520256249
+      }
+    },
+    {
+      "formulaId": "F0491",
+      "expression": "(gap_top5_vs_rank6_10)+(world_gap_rank1_rank2)",
+      "seedFeatureNames": [
+        "gap_top5_vs_rank6_10",
+        "world_gap_rank1_rank2"
+      ],
+      "coefficients": {},
+      "transform": "BINARY_SUM",
+      "operation": "sum",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "CROSS",
+      "discovery": {
+        "valid": true,
+        "n": 77,
+        "coverage": 0.6637931034482759,
+        "missingRate": 0.3362068965517241,
+        "hit": {
+          "n": 16,
+          "mean": 0.11637379515293496,
+          "median": 0.11474185836974277,
+          "sd": 0.03917082596706848,
+          "q25": 0.08866698423400565,
+          "q75": 0.13726186113415675
+        },
+        "miss": {
+          "n": 61,
+          "mean": 0.07976548724971821,
+          "median": 0.07639483486453946,
+          "sd": 0.0324639266846735,
+          "q25": 0.0567259862008157,
+          "q75": 0.0888913174180827
+        },
+        "effect": {
+          "cohensD": 1.0795220066445272,
+          "medianDifference": 0.038347023505203304,
+          "rankBiserial": 0.5471311475409836
+        },
+        "direction": 1,
+        "directionLabel": "HIGHER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          0.060579983674654087,
+          0.08134057867827466,
+          0.11240178500558246
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": 0.060579983674654087,
+            "n": 20,
+            "hits": 1,
+            "hitRate": 0.05,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q2",
+            "lower": 0.060579983674654087,
+            "upper": 0.08134057867827466,
+            "n": 19,
+            "hits": 2,
+            "hitRate": 0.10526315789473684,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q3",
+            "lower": 0.08134057867827466,
+            "upper": 0.11240178500558246,
+            "n": 19,
+            "hits": 5,
+            "hitRate": 0.2631578947368421,
+            "high10k": 1
+          },
+          {
+            "bucket": "Q4",
+            "lower": 0.11240178500558246,
+            "upper": null,
+            "n": 19,
+            "hits": 8,
+            "hitRate": 0.42105263157894735,
+            "high10k": 0
+          }
+        ],
+        "monotonicity": 0.9809963377807213,
+        "discoveryScore": 0.9108589963792579
+      }
+    },
+    {
+      "formulaId": "F0457",
+      "expression": "(slope_rank1_10)-(world_gap_rank1_rank2)",
+      "seedFeatureNames": [
+        "slope_rank1_10",
+        "world_gap_rank1_rank2"
+      ],
+      "coefficients": {},
+      "transform": "BINARY_DIFFERENCE",
+      "operation": "difference",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "CROSS",
+      "discovery": {
+        "valid": true,
+        "n": 77,
+        "coverage": 0.6637931034482759,
+        "missingRate": 0.3362068965517241,
+        "hit": {
+          "n": 16,
+          "mean": -0.049067966197931016,
+          "median": -0.042919567373583406,
+          "sd": 0.027395652626855223,
+          "q25": -0.06005439287169695,
+          "q75": -0.030315175033960955
+        },
+        "miss": {
+          "n": 61,
+          "mean": -0.028990239178529175,
+          "median": -0.026406487957806514,
+          "sd": 0.014654635740875168,
+          "q25": -0.03760533209946182,
+          "q75": -0.018091018190016253
+        },
+        "effect": {
+          "cohensD": -1.119042581832897,
+          "medianDifference": -0.016513079415776892,
+          "rankBiserial": -0.48565573770491804
+        },
+        "direction": -1,
+        "directionLabel": "LOWER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          -0.03909273687457596,
+          -0.030332693159897145,
+          -0.021642727412971262
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": -0.03909273687457596,
+            "n": 20,
+            "hits": 9,
+            "hitRate": 0.45,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q2",
+            "lower": -0.03909273687457596,
+            "upper": -0.030332693159897145,
+            "n": 19,
+            "hits": 3,
+            "hitRate": 0.15789473684210525,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q3",
+            "lower": -0.030332693159897145,
+            "upper": -0.021642727412971262,
+            "n": 19,
+            "hits": 3,
+            "hitRate": 0.15789473684210525,
+            "high10k": 1
+          },
+          {
+            "bucket": "Q4",
+            "lower": -0.021642727412971262,
+            "upper": null,
+            "n": 19,
+            "hits": 1,
+            "hitRate": 0.05263157894736842,
+            "high10k": 0
+          }
+        ],
+        "monotonicity": 0.9002300122721731,
+        "discoveryScore": 0.9051115114475627
+      }
+    },
+    {
+      "formulaId": "F0423",
+      "expression": "(gap_rank1_rank5)*(world_gap_rank1_rank3)",
+      "seedFeatureNames": [
+        "gap_rank1_rank5",
+        "world_gap_rank1_rank3"
+      ],
+      "coefficients": {},
+      "transform": "BINARY_PRODUCT",
+      "operation": "product",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "CROSS",
+      "discovery": {
+        "valid": true,
+        "n": 77,
+        "coverage": 0.6637931034482759,
+        "missingRate": 0.3362068965517241,
+        "hit": {
+          "n": 16,
+          "mean": 0.007643181190451283,
+          "median": 0.006703870120606611,
+          "sd": 0.005223639919045453,
+          "q25": 0.0031548975886922645,
+          "q75": 0.013047863132132903
+        },
+        "miss": {
+          "n": 61,
+          "mean": 0.003579429980881605,
+          "median": 0.0026413115511447196,
+          "sd": 0.003176822736699184,
+          "q25": 0.0012864375796220798,
+          "q75": 0.004621562100187545
+        },
+        "effect": {
+          "cohensD": 1.104743470070931,
+          "medianDifference": 0.004062558569461892,
+          "rankBiserial": 0.5040983606557377
+        },
+        "direction": 1,
+        "directionLabel": "HIGHER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          0.0014916010192110927,
+          0.0029394165380452345,
+          0.006105425693314537
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": 0.0014916010192110927,
+            "n": 20,
+            "hits": 1,
+            "hitRate": 0.05,
+            "high10k": 1
+          },
+          {
+            "bucket": "Q2",
+            "lower": 0.0014916010192110927,
+            "upper": 0.0029394165380452345,
+            "n": 19,
+            "hits": 3,
+            "hitRate": 0.15789473684210525,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q3",
+            "lower": 0.0029394165380452345,
+            "upper": 0.006105425693314537,
+            "n": 19,
+            "hits": 3,
+            "hitRate": 0.15789473684210525,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q4",
+            "lower": 0.006105425693314537,
+            "upper": null,
+            "n": 19,
+            "hits": 9,
+            "hitRate": 0.47368421052631576,
+            "high10k": 0
+          }
+        ],
+        "monotonicity": 0.8962674178695145,
+        "discoveryScore": 0.9012632665557876
+      }
+    },
+    {
+      "formulaId": "F0147",
+      "expression": "(outside_top10_mean)-(world_gap_rank1_rank3)",
+      "seedFeatureNames": [
+        "outside_top10_mean",
+        "world_gap_rank1_rank3"
+      ],
+      "coefficients": {},
+      "transform": "BINARY_DIFFERENCE",
+      "operation": "difference",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "CROSS",
+      "discovery": {
+        "valid": true,
+        "n": 77,
+        "coverage": 0.6637931034482759,
+        "missingRate": 0.3362068965517241,
+        "hit": {
+          "n": 16,
+          "mean": 0.6463908391622286,
+          "median": 0.6502108058496969,
+          "sd": 0.058125728986089344,
+          "q25": 0.5905435815698792,
+          "q75": 0.7030164448187015
+        },
+        "miss": {
+          "n": 61,
+          "mean": 0.7085297407271469,
+          "median": 0.7178911153902564,
+          "sd": 0.057370820004288926,
+          "q25": 0.664339707878846,
+          "q75": 0.7556945205684921
+        },
+        "effect": {
+          "cohensD": -1.0802520684751966,
+          "medianDifference": -0.06768030954055948,
+          "rankBiserial": -0.5491803278688525
+        },
+        "direction": -1,
+        "directionLabel": "LOWER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          0.6543164483182249,
+          0.7057694555007111,
+          0.7456271108066986
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": 0.6543164483182249,
+            "n": 20,
+            "hits": 9,
+            "hitRate": 0.45,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q2",
+            "lower": 0.6543164483182249,
+            "upper": 0.7057694555007111,
+            "n": 19,
+            "hits": 3,
+            "hitRate": 0.15789473684210525,
+            "high10k": 1
+          },
+          {
+            "bucket": "Q3",
+            "lower": 0.7057694555007111,
+            "upper": 0.7456271108066986,
+            "n": 19,
+            "hits": 4,
+            "hitRate": 0.21052631578947367,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q4",
+            "lower": 0.7456271108066986,
+            "upper": null,
+            "n": 19,
+            "hits": 0,
+            "hitRate": 0,
+            "high10k": 0
+          }
+        ],
+        "monotonicity": 0.8982735702085672,
+        "discoveryScore": 0.8993644103322702
+      }
+    },
+    {
+      "formulaId": "F0371",
+      "expression": "(gap_rank1_rank10)+(world_gap_rank1_rank2)",
+      "seedFeatureNames": [
+        "gap_rank1_rank10",
+        "world_gap_rank1_rank2"
+      ],
+      "coefficients": {},
+      "transform": "BINARY_SUM",
+      "operation": "sum",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "CROSS",
+      "discovery": {
+        "valid": true,
+        "n": 77,
+        "coverage": 0.6637931034482759,
+        "missingRate": 0.3362068965517241,
+        "hit": {
+          "n": 16,
+          "mean": 0.1897452863981699,
+          "median": 0.19331395339635998,
+          "sd": 0.0569090401261031,
+          "q25": 0.13559097652421917,
+          "q75": 0.21992681864375052
+        },
+        "miss": {
+          "n": 61,
+          "mean": 0.13485904894043155,
+          "median": 0.12742540558549362,
+          "sd": 0.048604011853227554,
+          "q25": 0.09912096155094213,
+          "q75": 0.15685921270457112
+        },
+        "effect": {
+          "cohensD": 1.0895601597636102,
+          "medianDifference": 0.06588854781086637,
+          "rankBiserial": 0.5163934426229508
+        },
+        "direction": 1,
+        "directionLabel": "HIGHER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          0.10988212689024834,
+          0.13571805708333043,
+          0.17620377934479867
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": 0.10988212689024834,
+            "n": 20,
+            "hits": 1,
+            "hitRate": 0.05,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q2",
+            "lower": 0.10988212689024834,
+            "upper": 0.13571805708333043,
+            "n": 19,
+            "hits": 4,
+            "hitRate": 0.21052631578947367,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q3",
+            "lower": 0.13571805708333043,
+            "upper": 0.17620377934479867,
+            "n": 19,
+            "hits": 3,
+            "hitRate": 0.15789473684210525,
+            "high10k": 1
+          },
+          {
+            "bucket": "Q4",
+            "lower": 0.17620377934479867,
+            "upper": null,
+            "n": 19,
+            "hits": 8,
+            "hitRate": 0.42105263157894735,
+            "high10k": 0
+          }
+        ],
+        "monotonicity": 0.8785504346054781,
+        "discoveryScore": 0.893328668888959
+      }
+    },
+    {
+      "formulaId": "F0373",
+      "expression": "(gap_rank1_rank10)*(world_gap_rank1_rank2)",
+      "seedFeatureNames": [
+        "gap_rank1_rank10",
+        "world_gap_rank1_rank2"
+      ],
+      "coefficients": {},
+      "transform": "BINARY_PRODUCT",
+      "operation": "product",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "CROSS",
+      "discovery": {
+        "valid": true,
+        "n": 77,
+        "coverage": 0.6637931034482759,
+        "missingRate": 0.3362068965517241,
+        "hit": {
+          "n": 16,
+          "mean": 0.005313383766825474,
+          "median": 0.003812193406006037,
+          "sd": 0.00501332898141396,
+          "q25": 0.0018667696784983863,
+          "q75": 0.007659089665914564
+        },
+        "miss": {
+          "n": 61,
+          "mean": 0.0020582312002403002,
+          "median": 0.0015050431744200337,
+          "sd": 0.002116083374266124,
+          "q25": 0.0005247507041957398,
+          "q75": 0.002714358696679518
+        },
+        "effect": {
+          "cohensD": 1.1094212840632858,
+          "medianDifference": 0.0023071502315860034,
+          "rankBiserial": 0.48155737704918034
+        },
+        "direction": 1,
+        "directionLabel": "HIGHER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          0.0007777172411134004,
+          0.0018962008196083183,
+          0.0029518815416257824
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": 0.0007777172411134004,
+            "n": 20,
+            "hits": 2,
+            "hitRate": 0.1,
+            "high10k": 1
+          },
+          {
+            "bucket": "Q2",
+            "lower": 0.0007777172411134004,
+            "upper": 0.0018962008196083183,
+            "n": 19,
+            "hits": 2,
+            "hitRate": 0.10526315789473684,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q3",
+            "lower": 0.0018962008196083183,
+            "upper": 0.0029518815416257824,
+            "n": 19,
+            "hits": 3,
+            "hitRate": 0.15789473684210525,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q4",
+            "lower": 0.0029518815416257824,
+            "upper": null,
+            "n": 19,
+            "hits": 9,
+            "hitRate": 0.47368421052631576,
+            "high10k": 0
+          }
+        ],
+        "monotonicity": 0.8500868653016902,
+        "discoveryScore": 0.8912737354647697
+      }
+    },
+    {
+      "formulaId": "F0493",
+      "expression": "(gap_top5_vs_rank6_10)*(world_gap_rank1_rank2)",
+      "seedFeatureNames": [
+        "gap_top5_vs_rank6_10",
+        "world_gap_rank1_rank2"
+      ],
+      "coefficients": {},
+      "transform": "BINARY_PRODUCT",
+      "operation": "product",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "CROSS",
+      "discovery": {
+        "valid": true,
+        "n": 77,
+        "coverage": 0.6637931034482759,
+        "missingRate": 0.3362068965517241,
+        "hit": {
+          "n": 16,
+          "mean": 0.002671757674048341,
+          "median": 0.0017992991787590426,
+          "sd": 0.002332526583393813,
+          "q25": 0.001156136506164936,
+          "q75": 0.0036381931191859637
+        },
+        "miss": {
+          "n": 61,
+          "mean": 0.0011009451797635366,
+          "median": 0.000818655803522239,
+          "sd": 0.0011046493372350483,
+          "q25": 0.00023610309971588015,
+          "q75": 0.001426419745773319
+        },
+        "effect": {
+          "cohensD": 1.0932868765650388,
+          "medianDifference": 0.0009806433752368037,
+          "rankBiserial": 0.48155737704918034
+        },
+        "direction": 1,
+        "directionLabel": "HIGHER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          0.00037510847868899017,
+          0.0010763278125641956,
+          0.0015626412417292094
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": 0.00037510847868899017,
+            "n": 20,
+            "hits": 2,
+            "hitRate": 0.1,
+            "high10k": 1
+          },
+          {
+            "bucket": "Q2",
+            "lower": 0.00037510847868899017,
+            "upper": 0.0010763278125641956,
+            "n": 19,
+            "hits": 1,
+            "hitRate": 0.05263157894736842,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q3",
+            "lower": 0.0010763278125641956,
+            "upper": 0.0015626412417292094,
+            "n": 19,
+            "hits": 5,
+            "hitRate": 0.2631578947368421,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q4",
+            "lower": 0.0015626412417292094,
+            "upper": null,
+            "n": 19,
+            "hits": 8,
+            "hitRate": 0.42105263157894735,
+            "high10k": 0
+          }
+        ],
+        "monotonicity": 0.904272882863664,
+        "discoveryScore": 0.8905277139750298
+      }
+    },
+    {
+      "formulaId": "F0572",
+      "expression": "(score_top3_share)-(world_gap_rank1_rank3)",
+      "seedFeatureNames": [
+        "score_top3_share",
+        "world_gap_rank1_rank3"
+      ],
+      "coefficients": {},
+      "transform": "BINARY_DIFFERENCE",
+      "operation": "difference",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "CROSS",
+      "discovery": {
+        "valid": true,
+        "n": 77,
+        "coverage": 0.6637931034482759,
+        "missingRate": 0.3362068965517241,
+        "hit": {
+          "n": 16,
+          "mean": -0.051529435756307224,
+          "median": -0.045553353327474705,
+          "sd": 0.03155722696647309,
+          "q25": -0.07297088417832331,
+          "q75": -0.026401336772603236
+        },
+        "miss": {
+          "n": 61,
+          "mean": -0.025658036204411958,
+          "median": -0.022968680686587396,
+          "sd": 0.022628385754542082,
+          "q25": -0.034634919502308174,
+          "q75": -0.010680678404220205
+        },
+        "effect": {
+          "cohensD": -1.0485283564822412,
+          "medianDifference": -0.02258467264088731,
+          "rankBiserial": -0.48975409836065575
+        },
+        "direction": -1,
+        "directionLabel": "LOWER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          -0.045879045496408984,
+          -0.02571387864350775,
+          -0.011737206898488527
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": -0.045879045496408984,
+            "n": 20,
+            "hits": 8,
+            "hitRate": 0.4,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q2",
+            "lower": -0.045879045496408984,
+            "upper": -0.02571387864350775,
+            "n": 19,
+            "hits": 4,
+            "hitRate": 0.21052631578947367,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q3",
+            "lower": -0.02571387864350775,
+            "upper": -0.011737206898488527,
+            "n": 19,
+            "hits": 3,
+            "hitRate": 0.15789473684210525,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q4",
+            "lower": -0.011737206898488527,
+            "upper": null,
+            "n": 19,
+            "hits": 1,
+            "hitRate": 0.05263157894736842,
+            "high10k": 1
+          }
+        ],
+        "monotonicity": 0.9714960306258666,
+        "discoveryScore": 0.8780431804216904
+      }
+    },
+    {
+      "formulaId": "F0142",
+      "expression": "(outside_top10_mean)-(world_gap_rank1_rank2)",
+      "seedFeatureNames": [
+        "outside_top10_mean",
+        "world_gap_rank1_rank2"
+      ],
+      "coefficients": {},
+      "transform": "BINARY_DIFFERENCE",
+      "operation": "difference",
+      "missingRule": "ALL_INPUTS_REQUIRED",
+      "epsilon": 1e-9,
+      "formulaFamily": "CROSS",
+      "discovery": {
+        "valid": true,
+        "n": 77,
+        "coverage": 0.6637931034482759,
+        "missingRate": 0.3362068965517241,
+        "hit": {
+          "n": 16,
+          "mean": 0.6876046876251936,
+          "median": 0.6802302203459815,
+          "sd": 0.04961814970844536,
+          "q25": 0.6542104332328358,
+          "q75": 0.7236434123706947
+        },
+        "miss": {
+          "n": 61,
+          "mean": 0.7372762884758846,
+          "median": 0.749661935845384,
+          "sd": 0.0485461728868325,
+          "q25": 0.7020337727424502,
+          "q75": 0.7712948229156674
+        },
+        "effect": {
+          "cohensD": -1.018644412234672,
+          "medianDifference": -0.06943171549940252,
+          "rankBiserial": -0.5368852459016393
+        },
+        "direction": -1,
+        "directionLabel": "LOWER_IS_HIT_ASSOCIATED",
+        "quantileBoundaries": [
+          0.6874042972973948,
+          0.7361194374392273,
+          0.7696537905770292
+        ],
+        "quantiles": [
+          {
+            "bucket": "Q1",
+            "lower": null,
+            "upper": 0.6874042972973948,
+            "n": 20,
+            "hits": 9,
+            "hitRate": 0.45,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q2",
+            "lower": 0.6874042972973948,
+            "upper": 0.7361194374392273,
+            "n": 19,
+            "hits": 5,
+            "hitRate": 0.2631578947368421,
+            "high10k": 1
+          },
+          {
+            "bucket": "Q3",
+            "lower": 0.7361194374392273,
+            "upper": 0.7696537905770292,
+            "n": 19,
+            "hits": 1,
+            "hitRate": 0.05263157894736842,
+            "high10k": 0
+          },
+          {
+            "bucket": "Q4",
+            "lower": 0.7696537905770292,
+            "upper": null,
+            "n": 19,
+            "hits": 1,
+            "hitRate": 0.05263157894736842,
+            "high10k": 0
+          }
+        ],
+        "monotonicity": 0.9463468727558952,
+        "discoveryScore": 0.8696174242902776
+      }
+    }
+  ],
+  "freezeHash": "a5aaaffd7c15b706eb530b015c6b63f1bad5c84da64e4f250c6567b454e2b1b3"
+}
