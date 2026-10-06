@@ -3,6 +3,25 @@ import crypto from 'node:crypto';
 export const MARK_TICKET_SHADOW_VERSION='MARK_TICKET_SHADOW_V1';
 export const CANDIDATE_CODES=new Set(['ADOPTED','THIRD_VARIANT_AMBIGUITY','THIRD_VARIANT_BOUNDARY']);
 export const MARKS=['◎','○','▲','△','☆','×'];
+export const HYBRID_B_RESEARCH_DEFINITION=Object.freeze({
+  sourceVersion:MARK_TICKET_SHADOW_VERSION,
+  method:'HYBRID_B',
+  candidateCodes:Object.freeze([...CANDIDATE_CODES]),
+  markLabels:Object.freeze([...MARKS]),
+  markStrengths:Object.freeze([1,.78,.56,.34,.16,0]),
+  markScoreVariant:'MARK_SCORE_C',
+  markScoreWeights:Object.freeze({firstPosition:.45,secondPosition:.25,thirdPosition:.15,overallMean:.15}),
+  canonicalScoreWeight:.8,
+  markScoreWeight:.2,
+  canonicalProtectedFraction:Object.freeze({numerator:4,denominator:5,rounding:'FLOOR'}),
+  maximumTicketCount:'SAVED_CANONICAL_TICKET_COUNT',
+  candidateScope:'SAVED_EXISTING_CANDIDATES_ONLY',
+  duplicateRule:'ORDER_KEY_FIRST_OCCURRENCE_WINS',
+  adjustedTieBreak:Object.freeze(['ADJUSTED_SCORE_DESC','ORIGINAL_RANK_ASC','ORDER_KEY_ASC']),
+  originalTieBreak:Object.freeze(['TERMINAL_GLOBAL_RANK_ASC','TERMINAL_SCORE_DESC','ORDER_KEY_ASC']),
+  scoreNormalization:'CANDIDATE_MIN_MAX_OR_ORIGINAL_INDEX_FALLBACK',
+  missingRule:'SAFE_CANONICAL_PARITY_NO_MARK_REORDER'
+});
 
 const finite=value=>value!==null&&value!==undefined&&value!==''&&Number.isFinite(Number(value));
 const ratio=(n,d)=>d?n/d:null;
@@ -25,7 +44,7 @@ export function deriveSavedMarks(row){
   return {complete:riders.length>=5&&['overall','first','second','third'].every(key=>maps[key].size===riders.length),riders,maps};
 }
 
-function markStrength(entry){if(!entry)return 0;return [1,.78,.56,.34,.16,0][Math.min(5,Math.max(0,entry.rank-1))]}
+function markStrength(entry){if(!entry)return 0;return HYBRID_B_RESEARCH_DEFINITION.markStrengths[Math.min(5,Math.max(0,entry.rank-1))]}
 
 export function markFeaturesForOrder(order,marks){
   const numbers=orderKey(order).split('-').map(Number),[first,second,third]=numbers;
@@ -43,7 +62,7 @@ export function markScore(features,variant='MARK_SCORE_C'){
   if(variant==='MARK_SCORE_A')return features.firstOverall;
   if(variant==='MARK_SCORE_B')return (features.firstOverall+features.secondOverall+features.thirdOverall)/3;
   if(variant==='MARK_SCORE_D')return features.topThreeCount/3;
-  return .45*features.firstPosition+.25*features.secondPosition+.15*features.thirdPosition+.15*((features.firstOverall+features.secondOverall+features.thirdOverall)/3);
+  const w=HYBRID_B_RESEARCH_DEFINITION.markScoreWeights;return w.firstPosition*features.firstPosition+w.secondPosition*features.secondPosition+w.thirdPosition*features.thirdPosition+w.overallMean*((features.firstOverall+features.secondOverall+features.thirdOverall)/3);
 }
 
 function canonicalCandidateRows(row){
@@ -66,7 +85,7 @@ function normalizeScores(candidates){
   for(const [index,candidate] of candidates.entries())candidate.originalNormalized=max>min&&finite(candidate.terminal?.terminalScore)?(Number(candidate.terminal.terminalScore)-min)/(max-min):1-index/Math.max(1,candidates.length-1);
 }
 
-export function rankShadowCandidates(row,{variant='MARK_SCORE_C',blendWeight=.2}={}){
+export function rankShadowCandidates(row,{variant=HYBRID_B_RESEARCH_DEFINITION.markScoreVariant,blendWeight=HYBRID_B_RESEARCH_DEFINITION.markScoreWeight}={}){
   const marks=deriveSavedMarks(row),candidates=canonicalCandidateRows(row).sort((a,b)=>Number(a.terminal.terminalGlobalRank??Infinity)-Number(b.terminal.terminalGlobalRank??Infinity)||Number(b.terminal.terminalScore||0)-Number(a.terminal.terminalScore||0)||a.key.localeCompare(b.key,'en'));
   normalizeScores(candidates);
   candidates.forEach((candidate,index)=>{
@@ -84,7 +103,7 @@ function uniqueFill(primary,secondary,cap){if(cap<=0)return[];const seen=new Set
 
 export function selectShadowSets(row,ranked){
   const baseline=canonicalSelection(row),cap=baseline.length,adjusted=ranked.map(x=>({key:x.key,source:'MARK_ADJUSTED_SHADOW'}));
-  const takeA=Math.floor(cap*2/3),takeB=Math.floor(cap*4/5),takeC=Math.max(0,cap-1);
+  const takeA=Math.floor(cap*2/3),takeB=Math.floor(cap*HYBRID_B_RESEARCH_DEFINITION.canonicalProtectedFraction.numerator/HYBRID_B_RESEARCH_DEFINITION.canonicalProtectedFraction.denominator),takeC=Math.max(0,cap-1);
   return {
     CURRENT_CANONICAL:baseline,
     MARK_ADJUSTED_SHADOW:uniqueFill(adjusted,baseline,cap),

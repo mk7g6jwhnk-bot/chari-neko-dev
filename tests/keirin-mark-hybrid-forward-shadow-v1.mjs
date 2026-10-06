@@ -1,0 +1,34 @@
+import assert from "node:assert/strict";
+import {runKeirinEngine} from "../keirin/engine/keirin-engine.mjs";
+import {HYBRID_B_RESEARCH_DEFINITION,rankShadowCandidates,selectShadowSets} from "../research/mark-ticket-shadow.mjs";
+import {HYBRID_B_CONFIG_HASH,HYBRID_B_FORMULA_HASH,HYBRID_B_FORWARD_CONFIG,MARK_HYBRID_FORWARD_RESULT_SCHEMA,MARK_HYBRID_FORWARD_SHADOW_SCHEMA,bindMarkHybridForwardShadow,buildMarkHybridForwardResult,buildMarkHybridForwardShadow} from "../keirin/engine/mark-hybrid-forward-shadow-v1.mjs";
+import {evaluateMarkHybridForward} from "../research/daily-validation-core.mjs";
+
+const riders=Array.from({length:7},(_,i)=>({number:i+1,roleScores:{first:10-i,second:7-Math.abs(i-1),third:6-Math.abs(i-2)},scoreTrace:{second:[{contribution:7-Math.abs(i-1)}],third:[{contribution:6-Math.abs(i-2)}]}}));
+const orders=[[1,2,3],[1,3,2],[2,1,3],[2,3,1],[3,1,2],[3,2,1],[4,1,2],[4,2,1],[5,1,2],[5,2,1],[6,1,2],[6,2,1]],terminals=orders.map((order,index)=>({order,terminalScore:12-index,terminalGlobalRank:index+1,purchaseRejectCode:index<10?"ADOPTED":"THIRD_VARIANT_BOUNDARY",macroScenarioId:index<4?"MS1":index<8?"MS2":"MS3",scenarioPurchaseClass:index<4?"MAIN":index<8?"COVER":"SCENARIO_BREAK",scenarioTicketRank:index%4+1,terminalId:`T${index+1}`}));
+const plan=terminals.slice(0,5).map((row,index)=>({...row,betClass:index<2?"MAIN":"COVER",thickQualified:index===0})),prediction={scored:riders,terminals},purchase={terminals,standardPurchasePlan:plan},multiWorldScenario={scenarios:[{macroScenarioId:"MS1",scenarioRank:1},{macroScenarioId:"MS2",scenarioRank:2},{macroScenarioId:"MS3",scenarioRank:3}]};
+const shadow=buildMarkHybridForwardShadow({race:{raceKey:"20990101-01-1"},prediction,purchase,multiWorldScenario,generatedAt:"2099-01-01T00:00:00.000Z"});
+assert.deepEqual(HYBRID_B_FORWARD_CONFIG,HYBRID_B_RESEARCH_DEFINITION);
+assert.match(HYBRID_B_CONFIG_HASH,/^[a-f0-9]{64}$/);assert.match(HYBRID_B_FORMULA_HASH,/^[a-f0-9]{64}$/);
+assert.equal(shadow.schemaVersion,MARK_HYBRID_FORWARD_SHADOW_SCHEMA);assert.equal(shadow.resultDataUsed,false);assert.equal(shadow.historicalBackfillAllowed,false);
+const researchRow={prediction:{riderScores:riders.map(x=>({number:x.number,score:x.roleScores.first,scoreTrace:x.scoreTrace})),terminals},purchase:{tickets:plan.map(x=>({order:x.order,class:x.betClass,thick:x.thickQualified}))}},ranked=rankShadowCandidates(researchRow).candidates,expected=selectShadowSets(researchRow,ranked).HYBRID_B.map(x=>x.key);
+assert.deepEqual(shadow.hybridB.tickets.map(x=>x.order),expected);
+assert.equal(shadow.canonicalTicketCount,plan.length);assert.equal(shadow.hybridTicketCount,plan.length);assert.equal(shadow.canonicalProtectedCount,4);
+assert.deepEqual(shadow.hybridB.tickets.slice(0,4).map(x=>x.order),plan.slice(0,4).map(x=>x.order.join("-")));
+assert.equal(new Set(shadow.hybridB.tickets.map(x=>x.order)).size,shadow.hybridTicketCount);
+assert.ok(shadow.markAdjusted.tickets.every(x=>terminals.some(t=>t.order.join("-")===x.order)));
+assert.equal(shadow.baseline.tickets.find(x=>x.order==="1-2-3").worldClass,"MAIN");assert.equal(shadow.markAdjusted.tickets.find(x=>x.order==="4-1-2").worldClass,"SECONDARY");assert.equal(shadow.markAdjusted.tickets.find(x=>x.order==="5-1-2").worldClass,"SCENARIO_BREAK");
+assert.ok(!JSON.stringify(shadow).match(/NaN|Infinity/));
+const bound=bindMarkHybridForwardShadow(shadow,{predictionHash:"a".repeat(64),sealedAt:"2099-01-01T00:01:00.000Z"});assert.equal(bound.predictionHash,"a".repeat(64));assert.equal(bound.predictionHashLinkStatus,"BOUND_BY_IMMUTABLE_SEAL");
+const before=structuredClone(bound),result=buildMarkHybridForwardResult({shadow:bound,finishOrder:orders[4],payout:23000,resultObservedAt:"2099-01-01T01:00:00.000Z"});assert.deepEqual(bound,before);assert.equal(result.schemaVersion,MARK_HYBRID_FORWARD_RESULT_SCHEMA);assert.equal(result.resultDataUsedOnlyForEvaluation,true);assert.ok(["NEW_HIT","LOST_HIT","SHARED_HIT","SHARED_MISS"].includes(result.comparison));assert.equal(result.payoutBands.over20k,true);
+const daily=evaluateMarkHybridForward([{prediction:{terminalTrace:{markHybridForwardShadow:bound}},result:{finishOrder:orders[4],payout:23000},resultObservedAt:"2099-01-01T01:00:00.000Z"}]);assert.equal(daily.records.length,1);assert.equal(daily.summary.evaluatedRaces,1);assert.equal(daily.historicalBackfill,0);
+const missing=buildMarkHybridForwardShadow({race:{raceKey:"20990101-01-2"},prediction:{scored:riders.slice(0,4),terminals},purchase,multiWorldScenario});assert.equal(missing.missingMarks,true);assert.deepEqual(missing.hybridB.tickets.map(x=>x.order),missing.baseline.tickets.map(x=>x.order));
+
+const participants=Array.from({length:7},(_,index)=>({id:String(index+1),number:index+1,name:`R${index+1}`,lineId:`L${Math.floor(index/2)+1}`,lineOrder:index%2+1,recentForm:7,startPower:7,sprintPower:7,finishPower:7,trackingSkill:7}));
+process.env.KEIRIN_RECOMMENDATION_FILTER_V1="1";process.env.KEIRIN_RECOMMENDATION_DUAL_SHADOW_V1="1";process.env.KEIRIN_NUMERIC_FORMULA_FORWARD_SHADOW_V1="1";process.env.KEIRIN_MARK_HYBRID_FORWARD_SHADOW_V1="0";
+const control=runKeirinEngine({race:{id:"parity",raceKey:"20990101-01-3",participants,lineConfidence:"高"},captureResearchTrace:true});
+process.env.KEIRIN_MARK_HYBRID_FORWARD_SHADOW_V1="1";const candidate=runKeirinEngine({race:{id:"parity",raceKey:"20990101-01-3",participants,lineConfidence:"高"},captureResearchTrace:true});
+for(const key of["KEIRIN_RECOMMENDATION_FILTER_V1","KEIRIN_RECOMMENDATION_DUAL_SHADOW_V1","KEIRIN_NUMERIC_FORMULA_FORWARD_SHADOW_V1","KEIRIN_MARK_HYBRID_FORWARD_SHADOW_V1"])delete process.env[key];
+const timeless=value=>{const copy=structuredClone(value);for(const key of["capturedAt","featureTimestamp","generatedAt","traceHash","inputHash"])delete copy[key];return copy};
+assert.deepEqual(candidate.standardPurchasePlan,control.standardPurchasePlan);assert.deepEqual(candidate.terminals,control.terminals);assert.deepEqual(candidate.scored,control.scored);assert.deepEqual(timeless(candidate.recommendationFilter),timeless(control.recommendationFilter));assert.deepEqual(timeless(candidate.dualRecommendationShadow),timeless(control.dualRecommendationShadow));assert.deepEqual(timeless(candidate.numericFormulaForwardShadow),timeless(control.numericFormulaForwardShadow));assert.equal(candidate.researchTerminalTrace.markHybridForwardShadow.resultDataUsed,false);
+console.log(JSON.stringify({ok:true,cases:20,configHash:HYBRID_B_CONFIG_HASH,formulaHash:HYBRID_B_FORMULA_HASH,predictionChanged:false,canonicalPurchaseChanged:false,recommendationChanged:false,dualShadowChanged:false,formulaShadowChanged:false,historicalMutation:0,resultLeakage:0},null,2));

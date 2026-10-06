@@ -7,6 +7,7 @@ import{buildBaselineControl,buildRiderSelectionCandidatePrediction}from"./rider-
 import{attachMultiWorldMetadata,buildMultiWorldScenarioStructure}from"./multi-world-scenario.mjs";
 import{buildDualRecommendationShadow,buildRecommendationTrace,buildWinnerConditionedSecondRankTrace}from"./research-diagnostics-v1.mjs";
 import{buildNumericFormulaForwardShadow}from"./numeric-formula-forward-shadow-v1.mjs";
+import{buildMarkHybridForwardShadow}from"./mark-hybrid-forward-shadow-v1.mjs";
 
 export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000,captureResearchTrace=false}){
   const baselinePrediction=runKeirinPredictionEngine({race,venueProfile});
@@ -72,15 +73,18 @@ export function runKeirinEngine({race,venueProfile={},oddsByOrder={},budget=3000
   const recommendationEnabled=process.env.KEIRIN_RECOMMENDATION_FILTER_V1==="1";
   const dualShadowEnabled=process.env.KEIRIN_RECOMMENDATION_DUAL_SHADOW_V1==="1";
   const numericFormulaForwardEnabled=captureResearchTrace&&process.env.KEIRIN_NUMERIC_FORMULA_FORWARD_SHADOW_V1!=="0";
+  const markHybridForwardEnabled=captureResearchTrace&&process.env.KEIRIN_MARK_HYBRID_FORWARD_SHADOW_V1!=="0";
   if(recommendationEnabled)output.recommendationFilter=buildRecommendationTrace({race,prediction,purchase,multiWorldScenario:output.multiWorldScenario,generatedAt:output.generatedAt,enabled:true});
   if(dualShadowEnabled)output.dualRecommendationShadow=buildDualRecommendationShadow({race,prediction,purchase,multiWorldScenario:output.multiWorldScenario,generatedAt:output.generatedAt,enabled:true});
   if(numericFormulaForwardEnabled)output.numericFormulaForwardShadow=buildNumericFormulaForwardShadow({race,prediction,purchase,multiWorldScenario:output.multiWorldScenario,generatedAt:output.generatedAt});
+  if(markHybridForwardEnabled)output.markHybridForwardShadow=buildMarkHybridForwardShadow({race,prediction,purchase,multiWorldScenario:output.multiWorldScenario,generatedAt:output.generatedAt});
   if(captureResearchTrace){
     output.researchTerminalTrace=buildTerminalDetailTrace({race,prediction,purchase,provenance,generatedAt:output.generatedAt});
     if(process.env.KEIRIN_SECOND_RANK_TRACE_V1==="1")output.researchTerminalTrace.winnerConditionedSecondRankTrace=buildWinnerConditionedSecondRankTrace({race,prediction,purchase,parameterHash:output.riderSelectionAdoption?.parameterHash||null,generatedAt:output.generatedAt});
     if(recommendationEnabled)output.researchTerminalTrace.recommendationTrace=output.recommendationFilter;
     if(dualShadowEnabled)output.researchTerminalTrace.dualRecommendationShadow=output.dualRecommendationShadow;
     if(numericFormulaForwardEnabled)output.researchTerminalTrace.numericFormulaForwardShadow=output.numericFormulaForwardShadow;
+    if(markHybridForwardEnabled)output.researchTerminalTrace.markHybridForwardShadow=output.markHybridForwardShadow;
   }
   return output;
 }
