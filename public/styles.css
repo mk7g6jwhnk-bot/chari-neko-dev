@@ -139,6 +139,9 @@
 .ratingVerdict.rating-stop{color:#fca5a5;border-color:rgba(239,68,68,.42);background:rgba(239,68,68,.11)}
 @media(max-width:390px){.ratingItem strong{font-size:.9rem}.ratingGrid{gap:6px}.ratingItem{padding:9px}}
 
+/* v70: canonical ticket overview before funding and per-ticket details */
+.ticketOverviewGroups{display:grid;gap:12px;margin-top:12px}.ticketOverviewGroup{min-width:0}.ticketOverviewGroup h3{display:flex;align-items:baseline;gap:7px;margin:0 0 7px;font-size:.92rem}.ticketOverviewGroup h3 span{color:var(--muted);font-size:.72rem}.ticketChipList{display:flex;flex-wrap:wrap;gap:7px}.ticketChip{display:inline-flex;align-items:center;gap:4px;max-width:100%;border:1px solid var(--line);border-radius:9px;background:var(--inset);padding:7px 9px;font-weight:850;font-size:.9rem;font-variant-numeric:tabular-nums;white-space:nowrap}.ticketChip b{font-size:.72rem}.predictionAccordion#betDetails{margin-bottom:14px}.predictionAccordion#betDetails>.accordionBody{padding-top:2px}.predictionAccordion#betDetails .betCard{background:transparent;border:0;padding:12px 0 0}.predictionAccordion#betDetails .betCard+.betCard{border-top:1px solid var(--line)}@media(max-width:390px){.ticketOverviewGroups{gap:10px}.ticketChipList{gap:6px}.ticketChip{padding:6px 8px;font-size:.84rem}.predictionAccordion#betDetails>summary{padding:12px}}
+
 /* v42: line-order audit + primary screening */
 .raceTabs{grid-template-columns:repeat(4,1fr)}
 .meetingToolButtons{grid-template-columns:repeat(3,1fr)}

@@ -93,8 +93,9 @@
     <div class="pageTitle"><div><small>保存済み予想</small><h1 id="predictionTitle">予想結果</h1></div><span id="savedBadge" class="pill success">保存済み</span></div>
     <section class="card"><div class="sectionHead"><h2 id="recommendation">-</h2><span id="predictionUpdated" class="muted"></span></div><div id="predictionSummary" class="metaGrid"></div></section>
     <section id="predictionRatings" class="card compact hidden"></section>
+    <section id="ticketOverview" class="card compact hidden"></section>
     <section id="purchaseControls" class="card compact hidden"></section>
-    <section id="betGroups" class="stack"></section>
+    <details id="betDetails" class="card compact predictionAccordion hidden"><summary>個別買い目詳細を開く</summary><section id="betGroups" class="stack accordionBody"></section></details>
     <section id="resultPanel" class="card hidden"></section>
     <section id="predictionSealedVerificationPanel" class="card compact hidden"></section>
     <div class="actionBar"><button id="checkResult" class="primary">公式結果を確認</button><button id="backToDetail" class="secondary">レース詳細へ</button></div>
@@ -103,5 +104,5 @@
   <section id="loading" class="screen"><section class="card loadingCard"><div class="spinner"></div><h1 id="loadingTitle">取得中</h1><p id="loadingMessage">公式データを確認しています。</p></section></section>
   <section id="error" class="screen"><section class="card errorCard"><div class="errorIcon">!</div><h1 id="errorTitle">取得失敗</h1><p id="errorMessage"></p><button id="retryBtn" class="primary">再試行</button><button id="errorHome" class="secondary">ホームへ</button></section></section>
 </main>
-<script type="module" src="app.mjs?v=69"></script>
+<script type="module" src="app.mjs?v=70"></script>
 </body></html>
