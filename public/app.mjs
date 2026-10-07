@@ -26,7 +26,7 @@ const ODDS_CACHE_KEY="chari-neko:keirin-odds-cache:v1";
 const RACE_META_CACHE_KEY="chari-neko:keirin-race-meta-cache:v1";
 const RESULT_CACHE_KEY="chari-neko:keirin-result-cache:v1";
 const MEETING_CACHE_KEY="chari-neko:keirin-meeting-cache:v1";
-const APP_RELEASE="KEIRIN-0.5.34-ticket-overview-ui";
+const APP_RELEASE="KEIRIN-0.5.35-saved-identity-compat";
 // A display release must not invalidate existing prediction snapshots.
 const SNAPSHOT_COMPATIBLE_VERSION="KEIRIN-0.5.23-performance-lifecycle-display";
 const APP_UPDATE_CHECK_INTERVAL_MS=60*1000;
@@ -332,8 +332,8 @@ async function reuseSealedPrediction(race,expectedHash=null,localSnapshot=null,{
     if(!forceNetwork)try{const cached=await getSealedPredictionCache(key,metadata.predictionHash);if(cached?.payload?.predictionHash===metadata.predictionHash&&validateCanonicalSnapshot(attachCanonicalIdentity(createSnapshot(cached.payload.predictionPayload),cached.payload),canonicalIdentity).passed){data=cached.payload;cacheHit=true}}catch{}
     if(!data){const networkStarted=performance.now(),response=await fetch(`/.netlify/functions/keirin-saved-prediction-detail?raceKey=${encodeURIComponent(canonicalKey)}&predictionHash=${encodeURIComponent(metadata.predictionHash)}`,{cache:"no-store",headers:{accept:"application/json"}}),text=await response.text();networkMs=performance.now()-networkStarted;responseBytes=new TextEncoder().encode(text).byteLength;serverReadMs=Number(response.headers.get("server-timing")?.match(/dur=([\d.]+)/)?.[1])||null;const parseStarted=performance.now();try{data=JSON.parse(text)}catch{}parseMs=performance.now()-parseStarted;if(!response.ok||!data)return;try{await putSealedPredictionCache(key,data.predictionHash,data)}catch{}}
     const sealAudit=validateReusableSeal(data,race,data.predictionVersion);if(!sealAudit.passed||data.predictionHash!==metadata.predictionHash)return;
-    const snapshot=attachCanonicalIdentity(createSnapshot(data.predictionPayload),data);
-    if(!validateCanonicalSnapshot(snapshot,canonicalIdentity).passed)return;
+    const snapshot=attachCanonicalIdentity(createSnapshot(data.predictionPayload),data),snapshotAudit=validateCanonicalSnapshot(snapshot,canonicalIdentity);
+    if(!snapshotAudit.passed)return;snapshot.canonicalCompatibilityStatus=snapshotAudit.compatibilityStatus;
     state.payload=data.predictionPayload;state.snapshot=saveCanonicalSnapshot(localStorage,snapshot);state.legacySnapshot=null;state.canonicalSnapshotStatus="VALID";state.race={...state.race,...snapshot.targetRace};
     const renderStarted=performance.now();renderOfficial(state.payload);renderDetail();recordReadMetric({type:"prediction-detail",raceKey:key,predictionHash:data.predictionHash,cache:cacheHit?"hit":"miss",staleReasons:cacheAudit.reasons,responseBytes,serverReadMs,networkMs:Math.round(networkMs*100)/100,jsonParseMs:Math.round(parseMs*100)/100,renderMs:Math.round((performance.now()-renderStarted)*100)/100,totalMs:Math.round((performance.now()-lookupStarted)*100)/100});renderHomeRecommendations();void loadSealedResult(state.snapshot)
   }catch{}finally{if(state.sealedLookupRaceKey===key){if(!state.snapshot)state.canonicalSnapshotStatus="UNAVAILABLE";state.sealedLookupBusy=false;renderDetail()}}
