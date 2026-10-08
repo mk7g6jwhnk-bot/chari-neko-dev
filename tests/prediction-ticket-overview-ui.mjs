@@ -34,6 +34,7 @@ check("display order",()=>assert.ok(html.indexOf('id="predictionRatings"')<html.
 check("details folded",()=>assert.match(html,/<details id="betDetails"[^>]*><summary>個別買い目詳細を開く<\/summary>/));
 check("compact inline markup",()=>{assert.match(app,/class="ticketInlineList"/);assert.match(app,/class="ticketInline"/);assert.doesNotMatch(app,/class="ticketChip"/)});
 check("slash separators",()=>assert.match(css,/ticketInline\+\.ticketInline::before\{content:" \/ "/));
+check("inline tickets have wrap opportunities",()=>assert.match(app,/class="ticketInline"[\s\S]+?\.join\(" "\)/));
 check("no per-ticket cards",()=>{assert.doesNotMatch(css,/\.ticketInline\{[^}]*border:/);assert.doesNotMatch(css,/\.ticketInline\{[^}]*background:/);assert.doesNotMatch(css,/\.ticketInline\{[^}]*padding:/)});
 check("390px wrapping styles",()=>{assert.match(css,/@media\(max-width:390px\)/);assert.match(css,/ticketInlineList\{font-size:/);assert.match(css,/ticketInline\{display:inline;white-space:nowrap/)});
 check("funding and detail render unchanged",()=>{assert.match(app,/allocatePreviewStakes\(bets,budget,mode\)/);assert.match(app,/betStoryHtml\(snapshot,b/);assert.match(app,/buildBetStory\(snapshot,bet\)/)});

@@ -27,7 +27,8 @@ check("unambiguous V2 legacy world class",()=>{const identity=canonicalPurchaseI
 check("ambiguous cover world class stays unknown",()=>{const identity=canonicalPurchaseIdentity({tickets:[{order:[1,4,3],macroScenarioId:"MS-A",eventId:"MS-A:E1",terminalId:"MS-A:E1:T2",ticketClass:"COVER",scenarioPurchaseClass:null}]});assert.equal(identity.tickets[0].scenarioPurchaseClass,null)});
 check("stale card and actions share model state",()=>assert.match(app,/savedReadFailed=actionModel\.state==="SAVED_STALE"/));
 check("foreground PWA polls release",()=>{assert.match(app,/setInterval\(\(\)=>\{if\(document\.visibilityState!=="visible"\)return;checkForAppUpdate\(\)/);assert.match(app,/appReload/)});
-check("module cache busting",()=>{assert.match(index,/app\.mjs\?v=73/);assert.match(netlify,/for = "\/\*\.mjs"[\s\S]+no-cache, no-store, must-revalidate/)});
+check("module cache busting",()=>{assert.match(index,/app\.mjs\?v=74/);assert.match(netlify,/for = "\/\*\.mjs"[\s\S]+no-cache, no-store, must-revalidate/)});
 check("canonical saved response boundary",()=>{assert.match(app,/resolvePredictionResponse\(response,fixed\)/);assert.match(app,/resolved\.canonicalEnvelope\?saveCanonicalSnapshot/)});
+check("direct saved detail opens purchase layout after canonical read",()=>{const body=app.match(/async function reloadSavedPrediction[\s\S]+?(?=function openSealedSummary)/u)?.[0]||"";assert.match(body,/canonicalSnapshotStatus==="VALID"&&Boolean\(state\.snapshot\)/);assert.match(body,/if\(valid\)renderPrediction\(state\.snapshot\)/)});
 
 console.log(JSON.stringify({ok:true,cases:cases.length,names:cases}));
