@@ -32,6 +32,9 @@ check("duplicate suppressed",()=>{assert.equal(duplicate.total,15);assert.equal(
 const html=fs.readFileSync(new URL("../public/index.html",import.meta.url),"utf8"),app=fs.readFileSync(new URL("../public/app.mjs",import.meta.url),"utf8"),css=fs.readFileSync(new URL("../public/styles.css",import.meta.url),"utf8");
 check("display order",()=>assert.ok(html.indexOf('id="predictionRatings"')<html.indexOf('id="ticketOverview"')&&html.indexOf('id="ticketOverview"')<html.indexOf('id="purchaseControls"')&&html.indexOf('id="purchaseControls"')<html.indexOf('id="betDetails"')));
 check("details folded",()=>assert.match(html,/<details id="betDetails"[^>]*><summary>個別買い目詳細を開く<\/summary>/));
-check("390px styles",()=>{assert.match(css,/@media\(max-width:390px\)/);assert.match(css,/ticketChipList\{display:flex;flex-wrap:wrap/)});
+check("compact inline markup",()=>{assert.match(app,/class="ticketInlineList"/);assert.match(app,/class="ticketInline"/);assert.doesNotMatch(app,/class="ticketChip"/)});
+check("slash separators",()=>assert.match(css,/ticketInline\+\.ticketInline::before\{content:" \/ "/));
+check("no per-ticket cards",()=>{assert.doesNotMatch(css,/\.ticketInline\{[^}]*border:/);assert.doesNotMatch(css,/\.ticketInline\{[^}]*background:/);assert.doesNotMatch(css,/\.ticketInline\{[^}]*padding:/)});
+check("390px wrapping styles",()=>{assert.match(css,/@media\(max-width:390px\)/);assert.match(css,/ticketInlineList\{font-size:/);assert.match(css,/ticketInline\{display:inline;white-space:nowrap/)});
 check("funding and detail render unchanged",()=>{assert.match(app,/allocatePreviewStakes\(bets,budget,mode\)/);assert.match(app,/betStoryHtml\(snapshot,b/);assert.match(app,/buildBetStory\(snapshot,bet\)/)});
 console.log(JSON.stringify({passed:true,cases:passed,total:overview.total,groups:Object.fromEntries(overview.groups.map(x=>[x.key,x.tickets.length]))}));
