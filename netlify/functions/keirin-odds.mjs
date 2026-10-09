@@ -18,6 +18,7 @@ export default async function handler(req){
     const basic=payload?.officialData?.basic||{},returnedDate=String(basic.date||"").replace(/\D/g,"").slice(0,8),returnedRace=Number(basic.raceNo||0),returnedVenue=String(basic.venueName||"");
     if(returnedDate!==date||returnedRace!==raceNo||(venueName&&returnedVenue&&returnedVenue!==venueName))return jsonResponse(409,{ok:false,error:"取得したレースが選択内容と一致しません",requested:{date,venueCode,venueName,raceNo},returned:{date:returnedDate,venueName:returnedVenue,raceNo:returnedRace}});
     const odds=normalizeOdds(payload?.officialData?.odds),startTime=String(basic.startTime||basic.deadline||""),deadline=String(basic.deadline||basic.startTime||"");
+    if(odds.duplicateCount)return jsonResponse(409,{ok:false,error:"公式オッズ応答に重複ticketがあります",race:{date,venueCode,venueName:returnedVenue||venueName,raceNo},duplicateTickets:odds.duplicateTickets});
     const screening=buildScreeningPreview(payload?.officialData||{},odds);
     return jsonResponse(200,{ok:true,race:{date,venueCode,venueName:returnedVenue||venueName,raceNo,startTime,deadline},odds,screening,checkedAt:new Date().toISOString(),diagnostics:{attempts}});
   }catch(error){
@@ -28,14 +29,14 @@ export default async function handler(req){
 }
 
 
-function normalizeOdds(raw){
-  const source=raw&&typeof raw==="object"?(raw.odds&&typeof raw.odds==="object"?raw.odds:raw.oddsByOrder&&typeof raw.oddsByOrder==="object"?raw.oddsByOrder:raw):{},odds={};
+export function normalizeOdds(raw){
+  const source=raw&&typeof raw==="object"?(raw.odds&&typeof raw.odds==="object"?raw.odds:raw.oddsByOrder&&typeof raw.oddsByOrder==="object"?raw.oddsByOrder:raw):{},odds={},duplicateTickets=[];
   for(const [key,value] of Object.entries(source||{})){
     const normalized=String(key).replace(/^OZZ/i,"").replace(/[^1-9]/g,"").split("").slice(0,3).join("-");
     const n=Number(value);
-    if(/^[1-9]-[1-9]-[1-9]$/.test(normalized)&&Number.isFinite(n)&&n>1)odds[normalized]=n;
+    if(/^[1-9]-[1-9]-[1-9]$/.test(normalized)&&Number.isFinite(n)&&n>1){if(Object.prototype.hasOwnProperty.call(odds,normalized))duplicateTickets.push(normalized);else odds[normalized]=n}
   }
-  return{available:Object.keys(odds).length>0,count:Object.keys(odds).length,odds};
+  return{available:Object.keys(odds).length>0,count:Object.keys(odds).length,odds,duplicateCount:duplicateTickets.length,duplicateTickets};
 }
 
 
