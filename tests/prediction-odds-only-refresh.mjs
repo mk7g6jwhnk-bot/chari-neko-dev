@@ -37,6 +37,7 @@ const html=fs.readFileSync(new URL("../public/index.html",import.meta.url),"utf8
 check("button on prediction detail",()=>assert.match(app,/id="refreshPredictionOdds"/));
 check("exact placement",()=>assert.ok(html.indexOf('id="ticketOverview"')<html.indexOf('id="oddsOnlyRefresh"')&&html.indexOf('id="oddsOnlyRefresh"')<html.indexOf('id="purchaseControls"')&&html.indexOf('id="purchaseControls"')<html.indexOf('id="betDetails"')));
 check("odds-only endpoint",()=>{assert.match(app,/\.netlify\/functions\/keirin-odds/);assert.doesNotMatch(endpoint,/keirin\/predict|keirin-predict|saveCanonical|reseal/i)});
+check("dedicated upstream odds path",()=>assert.match(endpoint,/\/keirin\/odds\?/));
 check("request guard",()=>{assert.match(app,/if\(state\.oddsRefreshBusyKey\)return/);assert.match(app,/disabled/)});
 check("response identity validation",()=>assert.match(app,/validateOddsOnlyResponse\(payload,identity,standardSelections\(snapshot\)\)/));
 check("funding uses canonical bets",()=>{assert.match(app,/stakes=allocatePreviewStakes\(bets,budget,mode\)/);assert.doesNotMatch(app,/allocatePreviewStakes\(display/)});

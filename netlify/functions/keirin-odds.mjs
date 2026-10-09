@@ -7,7 +7,7 @@ export default async function handler(req){
   if(!base)return jsonResponse(500,{ok:false,error:"KEIRIN_BROWSER_SERVICE_URLが設定されていません"});
   const q=new URLSearchParams({date,venueCode,venueName,raceNo:String(raceNo)}),attempts=[];
   try{
-    const response=await fetch(`${base}/keirin/preview?${q}`,{headers:{accept:"application/json"},signal:AbortSignal.timeout(58000)});
+    const response=await fetch(`${base}/keirin/odds?${q}`,{headers:{accept:"application/json"},signal:AbortSignal.timeout(58000)});
     let payload;try{payload=await response.json()}catch{payload=null}
     attempts.push({attempt:1,status:response.status,error:payload?.error||null});
     if(!response.ok||payload?.ok===false){
