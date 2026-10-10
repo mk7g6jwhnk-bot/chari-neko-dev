@@ -28,7 +28,7 @@ const ODDS_CACHE_KEY="chari-neko:keirin-odds-cache:v1";
 const RACE_META_CACHE_KEY="chari-neko:keirin-race-meta-cache:v1";
 const RESULT_CACHE_KEY="chari-neko:keirin-result-cache:v1";
 const MEETING_CACHE_KEY="chari-neko:keirin-meeting-cache:v1";
-const APP_RELEASE="KEIRIN-0.5.39-odds-only-refresh";
+const APP_RELEASE="KEIRIN-0.5.40-world-class-odds-identity";
 // A display release must not invalidate existing prediction snapshots.
 const SNAPSHOT_COMPATIBLE_VERSION="KEIRIN-0.5.23-performance-lifecycle-display";
 const APP_UPDATE_CHECK_INTERVAL_MS=60*1000;
@@ -380,7 +380,7 @@ function renderPrediction(snapshot){state.snapshot=snapshot;const r=snapshot?.ta
 
 function renderTicketOverview(snapshot){const panel=$("ticketOverview"),bets=standardSelections(snapshot);if(!panel||snapshot.noBet||!bets.length){if(panel){panel.classList.add("hidden");panel.innerHTML=""}return}const overview=buildCanonicalTicketOverview(bets),groupHtml=overview.groups.map(group=>`<section class="ticketOverviewGroup" data-ticket-group="${group.key}"><h3>${esc(group.label)} <span>${group.tickets.length}点</span></h3><div class="ticketInlineList">${group.tickets.map(ticket=>`<span class="ticketInline" data-world-class="${esc(ticket.worldClass||"")}" data-ticket-class="${esc(ticket.ticketClass||"")}">${esc(ticket.order)}${ticket.thick?'<b aria-label="厚め">🔥</b>':""}</span>`).join(" ")}</div></section>`).join("");panel.innerHTML=`<div class="sectionHead"><div><small>canonical最終買い目</small><h2>買い目一覧</h2></div><span class="pill success">合計 ${overview.total}点</span></div><div class="ticketOverviewGroups">${groupHtml}</div>`;panel.classList.remove("hidden")}
 
-function currentOddsRefresh(snapshot){try{const identity=oddsRefreshIdentity(snapshot);return state.oddsRefresh?.raceKey===identity.raceKey&&state.oddsRefresh?.predictionHash===identity.predictionHash?state.oddsRefresh:null}catch{return null}}
+function currentOddsRefresh(snapshot){try{const identity=oddsRefreshIdentity(snapshot);return state.oddsRefresh?.raceKey===identity.raceKey&&state.oddsRefresh?.predictionIdentity===identity.predictionIdentity?state.oddsRefresh:null}catch{return null}}
 function displayOddsSelections(snapshot){return overlayOddsForDisplay(standardSelections(snapshot),currentOddsRefresh(snapshot))}
 function renderOddsOnlyRefresh(snapshot){
   const panel=$("oddsOnlyRefresh"),bets=standardSelections(snapshot);if(!panel||snapshot.noBet||!bets.length){if(panel){panel.classList.add("hidden");panel.innerHTML=""}return}

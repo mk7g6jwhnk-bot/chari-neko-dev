@@ -12,8 +12,12 @@ const bets=[
 const snapshot={targetRace:{date:"2026-10-10",venueCode:"34",venueName:"川崎",raceNo:9},sealedPrediction:{predictionHash:"a".repeat(64)},betSelections:bets};
 const identity=oddsRefreshIdentity(snapshot),payload={ok:true,race:{date:"20261010",venueCode:"34",venueName:"川崎",raceNo:9},odds:{available:true,count:3,odds:{"1-2-3":9.1,"1-3-2":13.5,"4-1-2":51.2}},checkedAt:"2026-10-10T06:42:00.000Z"};
 const before=structuredClone(snapshot),refresh=validateOddsOnlyResponse(payload,identity,bets),display=overlayOddsForDisplay(bets,refresh);
-check("canonical identity",()=>assert.deepEqual(identity,{raceKey:"20261010-34-9",date:"20261010",venueCode:"34",raceNo:9,venueName:"川崎",predictionHash:"a".repeat(64)}));
+check("canonical identity",()=>assert.deepEqual(identity,{raceKey:"20261010-34-9",date:"20261010",venueCode:"34",raceNo:9,venueName:"川崎",predictionHash:"a".repeat(64),predictionSnapshotId:null,predictionIdentity:"a".repeat(64),predictionIdentityType:"PREDICTION_HASH"}));
 check("prediction hash linkage",()=>assert.equal(refresh.predictionHash,identity.predictionHash));
+check("canonical purchase identity fallback",()=>{const x=structuredClone(snapshot);delete x.sealedPrediction;x.canonicalPurchaseIdentity={raceKey:"20261010-34-9",predictionHash:"a".repeat(64)};assert.equal(oddsRefreshIdentity(x).predictionIdentityType,"PREDICTION_HASH")});
+check("local snapshot identity",()=>{const x={...structuredClone(snapshot),predictionSnapshotId:"20261010:34:9:2026-10-10T06:40:00.000Z"};delete x.sealedPrediction;const local=oddsRefreshIdentity(x);assert.equal(local.predictionHash,null);assert.equal(local.predictionIdentityType,"LOCAL_SNAPSHOT_ID");assert.equal(local.predictionIdentity,x.predictionSnapshotId)});
+check("identity sources must agree",()=>{const x=structuredClone(snapshot);x.canonicalPurchaseIdentity={raceKey:"20261010-34-9",predictionHash:"b".repeat(64)};assert.throws(()=>oddsRefreshIdentity(x),/prediction identityが一致/)});
+check("canonical race identity must agree",()=>{const x=structuredClone(snapshot);x.canonicalPurchaseIdentity={raceKey:"20261010-34-8",predictionHash:"a".repeat(64)};assert.throws(()=>oddsRefreshIdentity(x),/レースidentityが一致/)});
 check("fetchedAt update",()=>assert.equal(refresh.oddsFetchedAt,payload.checkedAt));
 check("odds only update",()=>assert.deepEqual(display.map(x=>x.odds),[9.1,13.5,51.2]));
 check("expected payout update",()=>assert.equal(expectedPayout(display[0].odds,bets[0].stake),9100));
@@ -31,6 +35,7 @@ check("upstream duplicate rejected before response",()=>{const rows=normalizeOdd
 const partial=validateOddsOnlyResponse({...payload,odds:{odds:{"1-2-3":9.1}}},identity,bets),partialDisplay=overlayOddsForDisplay(bets,partial);
 check("missing odds explicit",()=>{assert.deepEqual(partial.missingTickets,["1-3-2","4-1-2"]);assert.equal(partialDisplay[1].odds,null);assert.equal(partialDisplay[1].oddsRefreshStatus,"MISSING_LATEST")});
 check("invalid identity rejected",()=>assert.throws(()=>oddsRefreshIdentity({...snapshot,targetRace:{...snapshot.targetRace,venueCode:""}}),/identity/));
+check("missing prediction linkage rejected",()=>{const x=structuredClone(snapshot);delete x.sealedPrediction;assert.throws(()=>oddsRefreshIdentity(x),/prediction identity/)});
 check("baseline display clone",()=>{const rows=overlayOddsForDisplay(bets,null);assert.deepEqual(rows,bets);assert.notEqual(rows[0],bets[0])});
 
 const html=fs.readFileSync(new URL("../public/index.html",import.meta.url),"utf8"),app=fs.readFileSync(new URL("../public/app.mjs",import.meta.url),"utf8"),css=fs.readFileSync(new URL("../public/styles.css",import.meta.url),"utf8"),endpoint=fs.readFileSync(new URL("../netlify/functions/keirin-odds.mjs",import.meta.url),"utf8");
@@ -39,7 +44,7 @@ check("exact placement",()=>assert.ok(html.indexOf('id="ticketOverview"')<html.i
 check("odds-only endpoint",()=>{assert.match(app,/\.netlify\/functions\/keirin-odds/);assert.doesNotMatch(endpoint,/keirin\/predict|keirin-predict|saveCanonical|reseal/i)});
 check("dedicated upstream odds path",()=>assert.match(endpoint,/\/keirin\/odds\?/));
 check("request guard",()=>{assert.match(app,/if\(state\.oddsRefreshBusyKey\)return/);assert.match(app,/disabled/)});
-check("response identity validation",()=>assert.match(app,/validateOddsOnlyResponse\(payload,identity,standardSelections\(snapshot\)\)/));
+check("response identity validation",()=>{assert.match(app,/validateOddsOnlyResponse\(payload,identity,standardSelections\(snapshot\)\)/);assert.match(app,/predictionIdentity===identity\.predictionIdentity/)});
 check("funding uses canonical bets",()=>{assert.match(app,/stakes=allocatePreviewStakes\(bets,budget,mode\)/);assert.doesNotMatch(app,/allocatePreviewStakes\(display/)});
 check("odds display uses overlay",()=>{assert.match(app,/displayBets=displayOddsSelections\(snapshot\)/);assert.match(app,/calcCompositeOdds\(displayBets\)/)});
 check("expected payout uses sealed stake",()=>assert.match(app,/expectedPayout\(bet\.odds,bet\.stake\)/));
